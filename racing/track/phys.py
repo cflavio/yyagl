@@ -90,6 +90,7 @@ class TrackPhys(Phys):
 
     def __set_weapons(self):
         weap_root = self.model.find('**/Weaponboxs')
+        if not weap_root: return
         _weapons = weap_root.findAllMatches('**/EmptyWeaponboxAnim*')
         self.bonuses = []
         for weap in _weapons:

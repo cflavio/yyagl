@@ -93,13 +93,13 @@ class ShaderMgr(Colleague):
         final_tex = Texture()
         final_quad = self.filter_mgr.renderSceneInto(colortex=col_tex)
         inter_quad = self.filter_mgr.renderQuadInto(colortex=final_tex)
-        with open('racing/game/assets/shaders/filter.vert') as f:
+        with open('yyagl/assets/shaders/filter.vert') as f:
             vert = f.read()
-        with open('racing/game/assets/shaders/filter.frag') as f:
+        with open('yyagl/assets/shaders/filter.frag') as f:
             frag = f.read()
         inter_quad.setShader(Shader.make(Shader.SLGLSL, vert, frag))
         inter_quad.setShaderInput('input_tex', col_tex)
-        with open('racing/game/assets/shaders/pass.frag') as f:
+        with open('yyagl/assets/shaders/pass.frag') as f:
             frag = f.read()
         final_quad.setShader(Shader.make(Shader.SLGLSL, vert, frag))
         gamma_val = game.options['development']['gamma']
@@ -135,14 +135,14 @@ class ShaderMgr(Colleague):
         render.setShaderInput('ambient', .15, .15, .15, 1.0)
 
         lci = NodePath(PandaNode('light camera initializer'))
-        with open('racing/game/assets/shaders/caster.vert') as f: vert = f.read()
-        with open('racing/game/assets/shaders/caster.frag') as f: frag = f.read()
+        with open('yyagl/assets/shaders/caster.vert') as f: vert = f.read()
+        with open('yyagl/assets/shaders/caster.frag') as f: frag = f.read()
         lci.setShader(Shader.make(Shader.SLGLSL, vert, frag))
         self.lcam.node().setInitialState(lci.getState())
 
         mci = NodePath(PandaNode('main camera initializer'))
-        with open('racing/game/assets/shaders/main.vert') as f: vert = f.read()
-        with open('racing/game/assets/shaders/main.frag') as f: frag = f.read()
+        with open('yyagl/assets/shaders/main.vert') as f: vert = f.read()
+        with open('yyagl/assets/shaders/main.frag') as f: frag = f.read()
         frag = frag.replace('<LIGHTS>', str(len(self.lights)))
         render.setShader(Shader.make(Shader.SLGLSL, vert, frag))
         render.setShaderInput('num_lights', len(self.lights))
