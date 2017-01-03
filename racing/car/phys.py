@@ -21,8 +21,8 @@ class CarPhys(Phys):
 
     def _load_phys(self, name):
         with open('assets/models/%s/phys.yml' % name) as phys_file:
-            conf = yaml.load(phys_file)
-        map(lambda field: setattr(self, field, conf[field]), conf.keys())
+            self.conf = yaml.load(phys_file)
+        map(lambda field: setattr(self, field, self.conf[field]), self.conf.keys())
 
     def __set_collision(self, name):
         self.capsule = loader.loadModel('%s/capsule' % name)
@@ -148,15 +148,29 @@ class CarPhys(Phys):
         ground = result.get_node()
         return ground.get_name() if ground else ''
 
-    def apply_damage(self):
-        self.max_speed *= .95
-        self.friction_slip *= .95
-        self.roll_influence *= .95
+    def apply_damage(self, reset=False):
+        if reset:
+            self.max_speed = self.get_speed()
+            self.friction_slip = self.get_friction()
+            self.roll_influence = self.get_roll_influence()
+        else:
+            self.max_speed *= .95
+            self.friction_slip *= .95
+            self.roll_influence *= .95
         map(lambda whl: whl.setFrictionSlip(self.friction_slip), self.vehicle.get_wheels())
         map(lambda whl: whl.setRollInfluence(self.roll_influence), self.vehicle.get_wheels())
         eng.log_mgr.log('speed: ' + str(round(self.max_speed, 2)))
         eng.log_mgr.log('friction: ' + str(round(self.friction_slip, 2)))
         eng.log_mgr.log('roll: ' + str(round(self.roll_influence, 2)))
+
+    def get_speed(self):
+        return self.conf['max_speed']
+
+    def get_friction(self):
+        return self.conf['friction_slip']
+
+    def get_roll_influence(self):
+        return self.conf['roll_influence']
 
     def destroy(self):
         eng.phys.world_phys.remove_vehicle(self.vehicle)
@@ -169,14 +183,20 @@ class CarPlayerPhys(CarPhys):
 
     def _load_phys(self, name):
         with open('assets/models/%s/phys.yml' % name) as phys_file:
-            conf = yaml.load(phys_file)
-        new_speed = conf['max_speed'] * (1 + .1 * game.logic.season.logic.tuning.logic.tuning['engine'])
-        conf['max_speed'] = new_speed
-        new_fric = conf['friction_slip'] * (1 + .1 * game.logic.season.logic.tuning.logic.tuning['tires'])
-        conf['friction_slip'] = new_fric
-        new_roll = conf['roll_influence'] * (1 + .1 * game.logic.season.logic.tuning.logic.tuning['suspensions'])
-        conf['roll_influence'] = new_roll
-        eng.log_mgr.log('speed: ' + str(round(new_speed, 2)))
-        eng.log_mgr.log('friction: ' + str(round(new_fric, 2)))
-        eng.log_mgr.log('roll: ' + str(round(new_roll, 2)))
-        map(lambda field: setattr(self, field, conf[field]), conf.keys())
+            self.conf = yaml.load(phys_file)
+        self.conf['max_speed'] = self.get_speed()
+        self.conf['friction_slip'] = self.get_friction()
+        self.conf['roll_influence'] = self.get_roll_influence()
+        eng.log_mgr.log('speed: ' + str(round(self.conf['max_speed'], 2)))
+        eng.log_mgr.log('friction: ' + str(round(self.conf['friction_slip'], 2)))
+        eng.log_mgr.log('roll: ' + str(round(self.conf['roll_influence'], 2)))
+        map(lambda field: setattr(self, field, self.conf[field]), self.conf.keys())
+
+    def get_speed(self):
+        return self.conf['max_speed'] * (1 + .1 * game.logic.season.logic.tuning.logic.tuning['engine'])
+
+    def get_friction(self):
+        return self.conf['friction_slip'] * (1 + .1 * game.logic.season.logic.tuning.logic.tuning['tires'])
+
+    def get_roll_influence(self):
+        return self.conf['roll_influence'] * (1 + .1 * game.logic.season.logic.tuning.logic.tuning['suspensions'])

@@ -57,15 +57,17 @@ class CarGfx(Gfx):
         speed, speed_ratio = self.mdt.phys.speed, self.mdt.phys.speed_ratio
         if speed_ratio < .5:
             return
-        self.__apply_damage()
+        self.apply_damage()
         self.mdt.audio.crash_high_speed_sfx.play()
         part_path = 'assets/particles/sparks.ptf'
         node = self.mdt.gfx.nodepath
         eng.gfx.particle(part_path, node, eng.base.render, (0, 1.2, .75), .8)
 
-    def __apply_damage(self):
+    def apply_damage(self, reset=False):
         curr_chassis = self.nodepath.get_children()[0]
-        if 'car_low' in curr_chassis.get_name():
+        if reset:
+            next_chassis = self.chassis_np
+        elif 'car_low' in curr_chassis.get_name():
             next_chassis = self.chassis_np_mid
         elif 'car_mid' in curr_chassis.get_name():
             next_chassis = self.chassis_np_hi

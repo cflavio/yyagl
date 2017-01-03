@@ -17,9 +17,10 @@ class TrackPhys(Phys):
         self.model = loader.loadModel(self.mdt.path + '/collision')
         self.__load(['Road', 'Offroad'], False, False)
         self.__load(['Wall'], True, False)
-        self.__load(['Goal', 'Slow', 'Respawn'], True, True)
+        self.__load(['Goal', 'Slow', 'Respawn', 'PitStop'], True, True)
         self.__set_corners()
         self.__set_waypoints()
+        self.__set_weapons()
         self.__hide_models()
 
     def __load(self, names, merged, ghost):
@@ -81,13 +82,18 @@ class TrackPhys(Phys):
         wp_root = self.model.find('**/Waypoints')
         _waypoints = wp_root.findAllMatches('**/Waypoint*')
         self.waypoints = {}
-        self.bonuses = []
         for w_p in _waypoints:
             wpstr = '**/Waypoint'
             prevs = w_p.getTag('prev').split(',')
             lst_wp = [wp_root.find(wpstr + idx) for idx in prevs]
             self.waypoints[w_p] = lst_wp
-            self.bonuses += [Bonus(w_p.get_pos())]
+
+    def __set_weapons(self):
+        weap_root = self.model.find('**/Weaponboxs')
+        _weapons = weap_root.findAllMatches('**/EmptyWeaponboxAnim*')
+        self.bonuses = []
+        for weap in _weapons:
+            self.bonuses += [Bonus(weap.get_pos())]
 
     def __hide_models(self):
         for mod in ['Road', 'Offroad', 'Wall', 'Respawn', 'Slow', 'Goal']:

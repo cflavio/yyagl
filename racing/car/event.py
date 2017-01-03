@@ -24,6 +24,9 @@ class CarEvent(Event):
         is_for_me = obj == self.mdt.gfx.nodepath.node()
         if is_for_me and obj_name.startswith('Respawn'):
             self.__process_respawn()
+        if is_for_me and obj_name.startswith('PitStop'):
+            self.mdt.phys.apply_damage(True)
+            self.mdt.gfx.apply_damage(True)
 
     def __process_respawn(self):
         last_pos = self.mdt.logic.last_contact_pos
