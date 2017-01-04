@@ -12,7 +12,7 @@ def build_p3d(target, source, env):
     curr_path = dirname(realpath(file_path))
     eng_path = curr_path[len(start_dir):].replace('/', '\/')
     sed_tmpl = "sed -e 's/<version>/{version}/' -e 's/<Name>/{Name}/' " + \
-        "-e 's/<name>/{name}/' -e 's/<enginepath>/{eng_path}/' " + \
+        "-e 's/<name>/{name}/' -e 's/<enginepath>/{eng_path}/g' " + \
         "{curr_path}template.pdef > {name}.pdef"
     sed_cmd = sed_tmpl.format(
         version=ver, Name=name.capitalize(), name=name,

@@ -18,7 +18,7 @@ class <Name>(p3d):
         dir(_dir, newDir=_dir)
     file('license.txt')
     exclude = ['options.yml']
-    for extension in ['mo', 'dds', 'yml']:
+    for extension in ['mo', 'dds', 'yml', 'vert', 'frag']:
         for root, dirnames, filenames in walk('.'):
             files = [
                 filename for filename in filenames
