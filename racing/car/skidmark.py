@@ -1,6 +1,9 @@
 from panda3d.core import GeomVertexData, GeomVertexWriter, GeomVertexFormat,\
     Geom, GeomTriangles, GeomNode, GeomVertexReader, Mat4, Material,\
     OmniBoundingVolume
+from direct.interval.MetaInterval import Sequence
+from direct.interval.FunctionInterval import Wait, Func
+from direct.interval.LerpInterval import LerpFunc
 
 
 class Skidmark:
@@ -20,6 +23,7 @@ class Skidmark:
         node = GeomNode('gnode')
         node.addGeom(geom)
         nodePath = render.attachNewNode(node)
+        nodePath.setTransparency(True)
         mat = Material()
         mat.setAmbient((.35, .35, .35, .5))
         mat.setDiffuse((.35, .35, .35, .5))
@@ -28,6 +32,12 @@ class Skidmark:
         nodePath.set_material(mat, 1)
         nodePath.node().setBounds(OmniBoundingVolume())
         self.add_vertices()
+        self.add_vertices()
+        self.remove_seq = Sequence(
+            Wait(8),
+            LerpFunc(nodePath.setAlphaScale, 8, 1, 0, 'easeInOut'),
+            Func(nodePath.remove_node))
+        self.remove_seq.start()
 
     def add_vertices(self):
         base_pos = self.last_pos + (0, 0, -self.car.phys.vehicle.getWheels()[0].getWheelRadius() + .05)
@@ -36,8 +46,8 @@ class Skidmark:
         self.vertex.addData3f(base_pos + rot_mat.xformVec((-self.width, 0, 0)))
         self.vertex.addData3f(base_pos + rot_mat.xformVec((self.width, 0, 0)))
         if self.cnt >= 3:
-            self.prim.addVertices(self.cnt - 3, self.cnt, self.cnt - 1)
-            self.prim.addVertices(self.cnt - 3, self.cnt -2, self.cnt)
+            self.prim.addVertices(self.cnt - 3, self.cnt - 2, self.cnt - 1)
+            self.prim.addVertices(self.cnt - 2, self.cnt, self.cnt - 1)
         self.cnt += 2
 
     def update(self):
@@ -51,3 +61,4 @@ class Skidmark:
 
     def destroy(self):
         self.car = None
+        self.remove_seq = self.remove_seq.finish()
