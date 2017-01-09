@@ -14,7 +14,9 @@ class TrackEvent(Event):
         if not game.options['development']['shaders']:
             self.mdt.gfx.spot_lgt.setPos(cam_pos + (60, -60, 100))
             self.mdt.gfx.spot_lgt.lookAt(cam_pos + (-40, 60, -50))
-        self.mdt.gui.minimap.update(game.player_car.gfx.nodepath.get_pos())
+        cars = [game.player_car] + game.cars
+        positions = [(car.gfx.nodepath.get_pos(), car.gfx.nodepath.getH()) for car in cars]
+        self.mdt.gui.minimap.update(positions)
 
     def destroy(self):
         Event.destroy(self)
