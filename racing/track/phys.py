@@ -88,13 +88,16 @@ class TrackPhys(Phys):
             lst_wp = [wp_root.find(wpstr + idx) for idx in prevs]
             self.waypoints[w_p] = lst_wp
 
+    def create_bonus(self, pos):
+        self.bonuses += [Bonus(pos)]
+
     def __set_weapons(self):
         weap_root = self.model.find('**/Weaponboxs')
         self.bonuses = []
         if not weap_root: return
         _weapons = weap_root.findAllMatches('**/EmptyWeaponboxAnim*')
         for weap in _weapons:
-            self.bonuses += [Bonus(weap.get_pos())]
+            self.create_bonus(weap.get_pos())
 
     def __hide_models(self):
         for mod in ['Road', 'Offroad', 'Wall', 'Respawn', 'Slow', 'Goal']:
