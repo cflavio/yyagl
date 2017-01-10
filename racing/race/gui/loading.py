@@ -1,6 +1,9 @@
 from panda3d.core import TextNode, NodePath
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Colleague
+from yyagl.engine.gui.page import PageGui
+from direct.gui.DirectGuiGlobals import FLAT
+from direct.gui.DirectButton import DirectButton
 
 
 class Loading(Colleague):
@@ -43,6 +46,26 @@ class Loading(Colleague):
         hpr = (360, 0, 0)
         self.cam_pivot.hprInterval(25, hpr, blendType='easeInOut').loop()
         self.cam_tsk = taskMgr.add(self.update_cam, 'update cam')
+        txt = _(
+            'Please, visit our site while the track is loading! We hope you can find interesting stuff there. '
+            'Moreover, by visiting it (especially disabling your adblocker onto the site) '
+            'you support us and contribute to keep Yorg as free as possible. Thank you very much! :)')
+        self.txt = OnscreenText(text=txt, pos=(-1.65, -.4), scale=.08, wordwrap=24,
+            fg=(1, 1, 1, 1), font=eng.font_mgr.load_font('assets/fonts/zekton rg.ttf'),
+            align=TextNode.A_left)
+        menu_data = [
+            ('Visit our site', _('visit our site\nI love to support you!'),
+             lambda: eng.gui.open_browser('http://www.ya2.it'))]
+        btn_args = {
+            'text_font': eng.font_mgr.load_font('assets/fonts/zekton rg.ttf'),
+            'text_fg': (.75, .75, .75, 1),
+            'frameColor': (0, 0, 0, .2),
+            'relief': FLAT,
+            'frameSize': (-.6, .6, -.2, .16),
+            'rolloverSound': loader.loadSfx('assets/sfx/menu_over.wav'),
+            'clickSound': loader.loadSfx('assets/sfx/menu_clicked.ogg')}
+        self.btn = DirectButton(text=menu_data[0][1], pos=(1.0, 0, -.55), command=menu_data[0][2], text_scale=.08, **btn_args)
+        PageGui.transl_text(self.btn, menu_data[0][0])
 
     def on_loading(self, msg):
         self.curr_load_txt.setText(msg)
@@ -62,3 +85,5 @@ class Loading(Colleague):
         self.curr_load_txt.destroy()
         taskMgr.remove(self.cam_tsk)
         eng.base.camera.set_pos(0, 0, 0)
+        self.txt.destroy()
+        self.btn.destroy()
