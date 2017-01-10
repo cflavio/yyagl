@@ -88,7 +88,9 @@ void main() {
     }
     vec3 circleoffs = vec3(lightclip.xy / lightclip.w, 0);
     float falloff = saturate(1.0 - dot(circleoffs, circleoffs));
-    vec4 col = vsaturate(vec4(amb_diff, 1) * tex_col + vec4(spec, 1));
+    vec4 col = vsaturate(vec4(amb_diff, 1) * tex_col + vec4(spec, 1) * vec4(vec3(1), tex_col.a));
     float shade = min(.4 + shadow2DProj(depthmap, shadowcoord).r, 1);
-    p3d_FragColor = col * (((1 - falloff) + falloff * shade));
+    if (gl_FrontFacing)
+        p3d_FragColor = col * (((1 - falloff) + falloff * shade));
+    else discard;
 }
