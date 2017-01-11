@@ -53,7 +53,7 @@ class RaceLogic(Logic):
                     car_class = NetworkCar  # if car in player_cars else Car
                 if eng.client.is_active:
                     car_class = NetworkCar
-                pos = game.track.phys.get_start_pos(grid.index(car))[0]
+                pos = game.track.phys.get_start_pos(grid.index(car))[0] + (0, 0, .2)
                 hpr = game.track.phys.get_start_pos(grid.index(car))[1]
                 func = load_other_cars
                 no_p = car not in player_cars
@@ -63,7 +63,7 @@ class RaceLogic(Logic):
                                     game.options['development']['laps'])
                 game.cars += [new_car]
             path = 'cars/' + car_path
-            pos = game.track.phys.get_start_pos(grid.index(car_path))[0]
+            pos = game.track.phys.get_start_pos(grid.index(car_path))[0] + (0, 0, .2)
             hpr = game.track.phys.get_start_pos(grid.index(car_path))[1]
             func = load_other_cars
             if ai:
