@@ -24,6 +24,7 @@ class Skidmark:
         node.addGeom(geom)
         nodePath = render.attachNewNode(node)
         nodePath.setTransparency(True)
+        nodePath.setDepthOffset(1)
         mat = Material()
         mat.setAmbient((.35, .35, .35, .5))
         mat.setDiffuse((.35, .35, .35, .5))
