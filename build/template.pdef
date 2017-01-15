@@ -8,7 +8,7 @@ path.insert(0, '')
 
 
 class <Name>(p3d):
-    require('panda3d', 'bullet', 'morepy', 'models', 'openal')
+    require('panda3d', 'bullet', 'morepy', 'models', 'openal', 'pygame')
     config(
         start_dir='<name>',
         version='<version>',

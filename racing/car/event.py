@@ -71,6 +71,8 @@ class CarPlayerEvent(CarEvent):
     def __init__(self, mdt):
         CarEvent.__init__(self, mdt)
         self.accept('f11', self.mdt.gui.toggle)
+        self.has_weapon = False
+        self.last_b = False
 
     def on_frame(self):
         CarEvent.on_frame(self)
@@ -94,10 +96,12 @@ class CarPlayerEvent(CarEvent):
         if not self.mdt.logic.weapon:
             self.mdt.logic.weapon = Rocket(self.mdt)
             self.accept('x', self.on_fire)
+            self.has_weapon = True
 
     def on_fire(self):
         self.ignore('x')
         self.mdt.logic.fire()
+        self.has_weapon = False
 
     def __process_wall(self):
         eng.audio.play(self.mdt.audio.crash_sfx)
@@ -134,8 +138,14 @@ class CarPlayerEvent(CarEvent):
             self._process_end_goal()
 
     def _get_input(self):
-        keys = ['forward', 'left', 'reverse', 'right']
-        return {key: inputState.isSet(key) for key in keys}
+        if not game.options['development']['joystick']:
+           keys = ['forward', 'left', 'reverse', 'right']
+           return {key: inputState.isSet(key) for key in keys}
+        else:
+            x, y, a, b = eng.event.get_joystick()
+            if b and not self.last_b and self.has_weapon:
+                self.on_fire()
+            return {'forward': y < -.4, 'reverse': y > .4 or a, 'left': x < -.4, 'right': x > .4}
 
     def destroy(self):
         CarEvent.destroy(self)
