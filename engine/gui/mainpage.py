@@ -9,6 +9,7 @@ class MainPageGui(PageGui):
     def build_page(self):
         self.__build_social()
         self.__build_version()
+        self.transition_enter()
 
     def __build_social(self):
         sites = [

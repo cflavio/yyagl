@@ -1,5 +1,8 @@
 from direct.gui.DirectButton import DirectButton
 from ...gameobject import GameObjectMdt, Gui, Event
+from direct.interval.LerpInterval import LerpPosInterval
+from direct.interval.MetaInterval import Sequence
+from direct.interval.FunctionInterval import Wait, Func
 
 
 class PageGui(Gui):
@@ -13,6 +16,29 @@ class PageGui(Gui):
 
     def build_page(self):
         self.__build_back_btn()
+        self.transition_enter()
+
+    def transition_enter(self):
+        for wdg in self.widgets:
+            pos = wdg.get_pos()
+            start_pos = (pos[0] - 3.6, pos[1], pos[2])
+            wdg.set_pos(start_pos)
+            Sequence(
+                Wait(abs(pos[2] - 1) / 4),
+                LerpPosInterval(wdg, .5, pos, blendType='easeInOut')
+            ).start()
+
+    def transition_exit(self, destroy=True):
+        for wdg in self.widgets:
+            pos = wdg.get_pos()
+            end_pos = (pos[0] + 3.6, pos[1], pos[2])
+            seq = Sequence(
+                Wait(abs(pos[2] - 1) / 4),
+                LerpPosInterval(wdg, .5, end_pos, blendType='easeInOut'),
+                Func(wdg.destroy if destroy else wdg.hide))
+            if not destroy:
+                seq.append(Func(wdg.set_pos, pos))
+            seq.start()
 
     @staticmethod
     def transl_text(obj, text_src):
@@ -37,13 +63,15 @@ class PageGui(Gui):
 
     def show(self):
         map(lambda wdg: wdg.show(), self.widgets)
+        self.transition_enter()
 
     def hide(self):
-        map(lambda wdg: wdg.hide(), self.widgets)
+        #map(lambda wdg: wdg.hide(), self.widgets)
+        self.transition_exit(False)
 
     def destroy(self):
         self.menu = None
-        map(lambda wdg: wdg.destroy(), self.widgets)
+        self.transition_exit()
 
 
 class PageEvent(Event):
