@@ -11,9 +11,10 @@ class CarEvent(Event):
     def __init__(self, mdt):
         Event.__init__(self, mdt)
         eng.phys.attach(self.on_collision)
+        keys = game.options['settings']['keys']
         self.label_events = [
-            ('forward', 'arrow_up'), ('left', 'arrow_left'), ('reverse', 'z'),
-            ('reverse', 'arrow_down'), ('right', 'arrow_right')]
+            ('forward', keys['forward']), ('left', keys['left']), ('reverse', keys['rear']),
+            ('right', keys['right'])]
         watch = inputState.watchWithModifiers
         self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
 
@@ -95,11 +96,11 @@ class CarPlayerEvent(CarEvent):
     def on_bonus(self):
         if not self.mdt.logic.weapon:
             self.mdt.logic.weapon = Rocket(self.mdt)
-            self.accept('x', self.on_fire)
+            self.accept(game.options['settings']['keys']['button'], self.on_fire)
             self.has_weapon = True
 
     def on_fire(self):
-        self.ignore('x')
+        self.ignore(game.options['settings']['keys']['button'])
         self.mdt.logic.fire()
         self.has_weapon = False
 
@@ -138,7 +139,7 @@ class CarPlayerEvent(CarEvent):
             self._process_end_goal()
 
     def _get_input(self):
-        if not game.options['development']['joystick']:
+        if not game.options['settings']['joystick']:
            keys = ['forward', 'left', 'reverse', 'right']
            return {key: inputState.isSet(key) for key in keys}
         else:
@@ -149,7 +150,7 @@ class CarPlayerEvent(CarEvent):
 
     def destroy(self):
         CarEvent.destroy(self)
-        map(self.ignore, ['f11', 'x'])
+        map(self.ignore, ['f11', game.options['settings']['keys']['button']])
 
 
 class CarPlayerEventServer(CarPlayerEvent):
