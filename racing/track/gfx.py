@@ -1,7 +1,9 @@
 from panda3d.core import AmbientLight, BitMask32, Spotlight, NodePath,\
-    OmniBoundingVolume
+    OmniBoundingVolume, Camera, OrthographicLens, TextureStage
 from direct.actor.Actor import Actor
 from yyagl.gameobject import Gfx
+from direct.gui.OnscreenText import OnscreenText
+from random import shuffle
 
 
 class TrackGfx(Gfx):
@@ -15,6 +17,7 @@ class TrackGfx(Gfx):
         self.__actors = []
         self.__flat_roots = {}
         Gfx.__init__(self, mdt)
+        self.__init_signs()
 
     def async_build(self):
         self.__set_model()
@@ -127,21 +130,25 @@ class TrackGfx(Gfx):
         node = models[0]
         node.clearModelNodes()
 
-        def process_flat(flatten_node, orig_node, model, time, nodes):
+        def process_flat(flatten_node, orig_node, model, time, nodes, remove=True):
             flatten_node.reparent_to(orig_node.get_parent())
-            orig_node.remove_node()  # remove 1.9.3
+            if remove: orig_node.remove_node()  # remove 1.9.3
             self.__flat_models(models[1:], model, time, nodes)
         nname = node.get_name()
         self.notify('on_loading', _('flattening model: ') + nname)
         if self.submodels:
-            loader.asyncFlattenStrong(
-                node, callback=process_flat, inPlace=False,
-                extraArgs=[node, nname, curr_t, len(node.get_children())])
+            if not 'NameBillboard2' in nname:
+                loader.asyncFlattenStrong(
+                    node, callback=process_flat, inPlace=False,
+                    extraArgs=[node, nname, curr_t, len(node.get_children())])
+            else:
+                process_flat(node, node, nname, curr_t, 0, False)
         else:
             len_children = len(node.get_children())
             process_flat(node, NodePath(''), node, curr_t, len_children)
 
     def end_loading(self):
+        self.__set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
         Gfx.async_build(self)
 
@@ -166,6 +173,53 @@ class TrackGfx(Gfx):
         render.setLight(self.spot_lgt)
         render.setShaderAuto()
 
+    def __init_signs(self):
+        self.buffers = []
+        self.drs = []
+        self.cameras = []
+        self.renders = []
+
+    def __set_signs(self):
+        signs = self.model.findAllMatches('**/NameBillboard2.egg')
+        names = open('assets/thanks.txt').readlines()
+        for i, sign in enumerate(signs):
+            self.__set_render_to_texture()
+            shuffle(names)
+            text = '\n\n'.join(names[:3])
+            txt = OnscreenText(text, parent=self.renders[i], scale=.2, fg=(0, 0, 0, 1), pos=(-.2, -.28))
+            while txt.getTightBounds()[1][0] - txt.getTightBounds()[0][0] > .8:
+                txt.setScale(txt.getScale()[0] - .01, txt.getScale()[0] - .01)
+            height = txt.getTightBounds()[1][2] - txt.getTightBounds()[0][2]
+            txt.setZ(-.24 + height / 2)
+            ts = TextureStage('ts')
+            ts.setMode(TextureStage.MDecal)
+            sign.setTexture(ts, self.buffers[i].getTexture())
+
+    def __set_render_to_texture(self):
+        self.buffers += [base.win.makeTextureBuffer('result buffer', 512, 512)]
+        self.buffers[-1].setSort(-100)
+
+        self.drs += [self.buffers[-1].makeDisplayRegion()]
+        self.drs[-1].setSort(20)
+
+        self.cameras += [NodePath(Camera('camera 2d'))]
+        lens = OrthographicLens()
+        lens.setFilmSize(1.2, 2)
+        lens.setNearFar(-1000, 1000)
+        self.cameras[-1].node().setLens(lens)
+
+        self.renders += [NodePath('result render')]
+        self.renders[-1].setDepthTest(False)
+        self.renders[-1].setDepthWrite(False)
+        self.cameras[-1].reparentTo(self.renders[-1])
+        self.drs[-1].setCamera(self.cameras[-1])
+
+    def __destroy_signs(self):
+        map(lambda buf: buf.destroy(), self.buffers)
+        map(lambda dr: dr.destroy(), self.drs)
+        map(lambda cam: cam.destroy(), self.cameras)
+        map(lambda ren: ren.destroy(), self.renders)
+
     def destroy(self):
         self.model.removeNode()
         if not game.options['development']['shaders']:
@@ -176,3 +230,4 @@ class TrackGfx(Gfx):
         else:
             eng.shader_mgr.clear_lights()
         self.__actors = self.__flat_roots = None
+        self.__destroy_signs()
