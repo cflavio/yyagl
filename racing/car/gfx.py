@@ -29,14 +29,20 @@ class CarGfx(Gfx):
         self.l_skidmark = None
 
     def async_build(self):
-        self.chassis_np_low = loader.loadModel(self.mdt.path + '/damage_low/car_low')
-        self.chassis_np_mid = loader.loadModel(self.mdt.path + '/damage_mid/car_mid')
-        self.chassis_np_hi = loader.loadModel(self.mdt.path + '/damage_hi/car_hi')
+        try:
+            self.chassis_np_low = loader.loadModel(self.mdt.path + '/cardamage1')
+        except IOError:
+            self.chassis_np_low = loader.loadModel(self.mdt.path + '/car')
+        try:
+            self.chassis_np_hi = loader.loadModel(self.mdt.path + '/cardamage2')
+        except IOError:
+            self.chassis_np_hi = loader.loadModel(self.mdt.path + '/car')
         loader.loadModel(self.mdt.path + '/car', callback=self.load_wheels)
 
     def reparent(self):
         self.chassis_np.reparentTo(self.nodepath)
-        self.chassis_np.setDepthOffset(-2)
+        map(lambda cha: cha.setDepthOffset(-2), [self.chassis_np, self.chassis_np_low, self.chassis_np_hi])
+
         map(lambda whl: whl.reparentTo(eng.gfx.world_np), self.wheels.values())
 
     def load_wheels(self, chassis_model):
@@ -67,11 +73,9 @@ class CarGfx(Gfx):
         curr_chassis = self.nodepath.get_children()[0]
         if reset:
             next_chassis = self.chassis_np
-        elif 'car_low' in curr_chassis.get_name():
-            next_chassis = self.chassis_np_mid
-        elif 'car_mid' in curr_chassis.get_name():
+        elif 'cardamage1' in curr_chassis.get_name():
             next_chassis = self.chassis_np_hi
-        elif 'car_hi' in curr_chassis.get_name():
+        elif 'cardamage2' in curr_chassis.get_name():
             return
         else:
             next_chassis = self.chassis_np_low
