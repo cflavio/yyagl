@@ -2,6 +2,7 @@ from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
 from yyagl.gameobject import Phys
 from yyagl.racing.weapon.bonus.bonus import Bonus
+from panda3d.core import LineSegs
 
 
 class TrackPhys(Phys):
@@ -87,6 +88,15 @@ class TrackPhys(Phys):
             prevs = w_p.getTag('prev').split(',')
             lst_wp = [wp_root.find(wpstr + idx) for idx in prevs]
             self.waypoints[w_p] = lst_wp
+        if not game.options['development']['show_waypoints']:
+            return
+        segs = LineSegs()
+        for w_p in self.waypoints.keys():
+            for dest in self.waypoints[w_p]:
+                segs.moveTo(w_p.get_pos())
+                segs.drawTo(dest.get_pos())
+        segs_node = segs.create()
+        self.wp_np = render.attachNewNode(segs_node)
 
     def create_bonus(self, pos):
         self.bonuses += [Bonus(pos)]
@@ -127,3 +137,6 @@ class TrackPhys(Phys):
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
             self.waypoints = None
         map(lambda bon: bon.destroy(), self.bonuses)
+        if not game.options['development']['show_waypoints']:
+            return
+        self.wp_np.remove_node()
