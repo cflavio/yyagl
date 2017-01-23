@@ -3,6 +3,10 @@ from ...gameobject import GameObjectMdt, Gui, Event
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
+from direct.gui.DirectGuiGlobals import ENTER, EXIT
+from direct.gui.DirectOptionMenu import DirectOptionMenu
+from direct.gui.DirectCheckButton import DirectCheckButton
+from direct.gui.DirectSlider import DirectSlider
 
 
 class PageGui(Gui):
@@ -16,7 +20,37 @@ class PageGui(Gui):
 
     def build_page(self):
         self.__build_back_btn()
+        self._set_buttons()
         self.transition_enter()
+
+    def _set_buttons(self):
+        for wdg in self.widgets:
+            if wdg.__class__ in [DirectButton, DirectOptionMenu, DirectCheckButton]:
+                wdg.start_fg = wdg.component('text0').textNode.getTextColor()
+                wdg.start_frame_col = wdg['frameColor']
+                wdg.bind(ENTER, self._on_enter, [wdg])
+                wdg.bind(EXIT, self._on_exit, [wdg])
+            if wdg.__class__ in [DirectSlider]:
+                wdg.start_frame_col = wdg['frameColor']
+                wdg.bind(ENTER, self._on_enter_slider, [wdg])
+                wdg.bind(EXIT, self._on_exit_slider, [wdg])
+
+    def _on_enter(self, wdg, pos):
+        _fg = wdg.start_fg
+        _fc = wdg.start_frame_col
+        wdg['text_fg'] = (_fg[0] + .2, _fg[1] + .2, _fg[2] + .2, _fg[3])
+        wdg['frameColor'] = (_fc[0] + .2, _fc[1] + .2, _fc[2] + .2, _fc[3])
+
+    def _on_exit(self, wdg, pos):
+        wdg['text_fg'] = wdg.start_fg
+        wdg['frameColor'] = wdg.start_frame_col
+
+    def _on_enter_slider(self, wdg, pos):
+        _fc = wdg.start_frame_col
+        wdg['frameColor'] = (_fc[0] + .2, _fc[1] + .2, _fc[2] + .2, _fc[3])
+
+    def _on_exit_slider(self, wdg, pos):
+        wdg['frameColor'] = wdg.start_frame_col
 
     def transition_enter(self):
         for wdg in self.widgets:

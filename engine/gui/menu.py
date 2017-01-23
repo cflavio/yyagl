@@ -55,11 +55,11 @@ class MenuGui(Gui):
             'clickSound': self.click,
             'text_scale': .85,
             'item_text_font': self.font,
-            'item_frameColor': (.6, .6, .6, 1),
+            'item_frameColor': (.75, .75, .25, 1),
             'item_relief': FLAT,
             'popupMarker_frameColor': self.menu_args.btn_color,
             'textMayChange': 1,
-            'highlightColor': (.8, .8, .8, .2)}
+            'highlightColor': (.85, .85, .3, .2)}
         self.checkbtn_args = {
             'scale': self.menu_args.text_scale,
             'text_font': self.font,
