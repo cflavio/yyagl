@@ -1,4 +1,5 @@
 from ..gameobject import Colleague
+from panda3d.core import Texture
 
 
 class FontMgr(Colleague):
@@ -11,5 +12,6 @@ class FontMgr(Colleague):
         if path not in self.__fonts:
             self.__fonts[path] = eng.base.loader.loadFont(path)
             self.__fonts[path].setPixelsPerUnit(60)
+            self.__fonts[path].setMinfilter(Texture.FTLinearMipmapLinear)
             self.__fonts[path].setOutline((0, 0, 0, 1), .8, .2)
         return self.__fonts[path]
