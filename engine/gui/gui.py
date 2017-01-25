@@ -3,6 +3,7 @@ from os import environ, system
 from webbrowser import open_new_tab
 from panda3d.core import WindowProperties
 from ...gameobject import Gui
+from direct.gui.OnscreenImage import OnscreenImage
 
 
 class EngineGui(Gui):
@@ -72,6 +73,7 @@ class EngineGuiWindow(EngineGui):
         self.set_resolution(tuple(int(size) for size in resol))
         if eng.logic.conf.fullscreen:
             self.toggle_fullscreen()
+        self.set_cursor()
 
     def set_resolution(self, res, check=True):
         eng.log_mgr.log('setting resolution ' + str(res))
@@ -82,3 +84,25 @@ class EngineGuiWindow(EngineGui):
             return
         args = 3.0, self.set_resolution_check, 'resolution check', [res]
         taskMgr.doMethodLater(*args)
+
+    def set_cursor(self):
+        props = WindowProperties()
+        props.setCursorHidden(True)
+        base.win.requestProperties(props)
+        self.cursor_img = OnscreenImage('assets/images/gui/cursor.png')
+        self.cursor_img.setTransparency(True)
+        scale = ((335/257.0) * .05, 1, .05)
+        hotspot = (.04, .04)
+        self.cursor_img.setScale(scale)
+        self.cursor_img.setBin('gui-popup', 50)
+        self.hotspot_dx = scale[0] * (1 - 2 * hotspot[0])
+        self.hotspot_dy = scale[2] * (1 - 2 * hotspot[1])
+        taskMgr.add(self._on_frame, '_on_frame')
+
+    def _on_frame(self, task):
+        if base.mouseWatcherNode.hasMouse():
+            x = base.mouseWatcherNode.getMouseX()
+            y = base.mouseWatcherNode.getMouseY()
+            self.cursor_img.setPos(x * base.getAspectRatio() + self.hotspot_dx, 0, y - self.hotspot_dy)
+        return task.cont
+
