@@ -4,7 +4,7 @@ from .imgbtn import ImageButton
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
-from direct.gui.DirectGuiGlobals import ENTER, EXIT
+from direct.gui.DirectGuiGlobals import ENTER, EXIT, NORMAL
 from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectSlider import DirectSlider
@@ -60,7 +60,8 @@ class PageGui(Gui):
             self.mdt.event.accept('arrow_down-up', self.on_arrow_opt, [1])
             self.mdt.event.accept('enter-up', self.on_enter_opt)
             return
-        if self.curr_wdg and self.curr_wdg['command']: self.curr_wdg['command'](*self.curr_wdg['extraArgs'])
+        if self.curr_wdg and self.curr_wdg['command'] and self.curr_wdg['state'] == NORMAL:
+            self.curr_wdg['command'](*self.curr_wdg['extraArgs'])
 
     def on_arrow_opt(self, d):
         old_idx = self.curr_wdg.highlightedIndex
@@ -129,8 +130,8 @@ class PageGui(Gui):
     def _on_enter(self, wdg, pos=None):
         _fg = wdg.start_fg
         _fc = wdg.start_frame_col
-        wdg['text_fg'] = (_fg[0] + .2, _fg[1] + .2, _fg[2] + .2, _fg[3])
-        wdg['frameColor'] = (_fc[0] + .2, _fc[1] + .2, _fc[2] + .2, _fc[3])
+        wdg['text_fg'] = (_fg[0] + .3, _fg[1] + .3, _fg[2] + .3, _fg[3])
+        wdg['frameColor'] = (_fc[0] + .3, _fc[1] + .3, _fc[2] + .3, _fc[3])
 
     def _on_exit(self, wdg, pos=None):
         wdg['text_fg'] = wdg.start_fg
@@ -138,16 +139,16 @@ class PageGui(Gui):
 
     def _on_enter_slider(self, wdg, pos=None):
         _fc = wdg.start_frame_col
-        wdg['frameColor'] = (_fc[0] + .2, _fc[1] + .2, _fc[2] + .2, _fc[3])
+        wdg['frameColor'] = (_fc[0] + .3, _fc[1] + .3, _fc[2] + .3, _fc[3])
 
     def _on_exit_slider(self, wdg, pos=None):
         wdg['frameColor'] = wdg.start_frame_col
 
     def _on_enter_img_btn(self, wdg, pos=None):
-        wdg.setShaderInput('col_scale', 1.2)
+        wdg.setShaderInput('col_scale', .25)
 
     def _on_exit_img_btn(self, wdg, pos=None):
-        wdg.setShaderInput('col_scale', 1)
+        wdg.setShaderInput('col_scale', 0)
 
     def transition_enter(self):
         for wdg in self.widgets:

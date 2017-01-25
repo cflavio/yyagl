@@ -29,7 +29,7 @@ void main() {
     float dist_u = texcoord.y;
     float dist_b = 1 - texcoord.y;
     float alpha = min(dist_l, min(dist_r, min(dist_u, dist_b))) * 30;
-    p3d_FragColor = texture(p3d_Texture0, texcoord) * vec4(col_scale, col_scale, col_scale, alpha);
+    p3d_FragColor = (texture(p3d_Texture0, texcoord)  + vec4(col_scale, col_scale, col_scale, 1) ) * vec4(1, 1, 1, alpha);
 }'''
 
 
@@ -41,14 +41,14 @@ class ImageButton(DirectButton):
         self['relief'] = FLAT
         shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
         self.setShader(shader)
-        self.setShaderInput('col_scale', 1)
+        self.setShaderInput('col_scale', 0)
         self.setTransparency(True)
         self.bind(ENTER, self._on_enter)
         self.bind(EXIT, self._on_exit)
         self.initialiseoptions(self.__class__)
 
     def _on_enter(self, pos):
-        self.setShaderInput('col_scale', 1.2)
+        self.setShaderInput('col_scale', .25)
 
     def _on_exit(self, pos):
-        self.setShaderInput('col_scale', 1)
+        self.setShaderInput('col_scale', 0)
