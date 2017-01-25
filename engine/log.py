@@ -10,6 +10,7 @@ class LogMgr(Colleague):
     def __init__(self, mdt):
         Colleague.__init__(self, mdt)
         self.__notify = DirectNotify().newCategory('ya2')
+        self.log_conf()
 
     @staticmethod
     def configure():
