@@ -5,7 +5,7 @@ from .log import LogMgr
 class Configuration(object):
 
     def __init__(
-            self, fps=False, win_size='1280 720', win_title='Ya2',
+            self, fps=False, win_size='1280 720', win_orig = None, win_title='Ya2',
             fullscreen=False, cursor_hidden=False, sync_video=True,
             antialiasing=False, profiling=False, mt_render=False,
             model_path='assets/models', lang='en', lang_path='assets/locale',
@@ -13,6 +13,7 @@ class Configuration(object):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title
+        self.win_orig = win_orig
         self.fullscreen = fullscreen
         self.cursor_hidden = cursor_hidden
         self.sync_video = sync_video
@@ -39,6 +40,8 @@ class Configuration(object):
         self.__set('show-frame-rate-meter', int(self.fps))
         if self.win_size:
             self.__set('win-size', self.win_size)
+        if self.win_orig:
+            self.__set('win-origin', self.win_orig)
         self.__set('window-title', self.win_title)
         self.__set('cursor-hidden', int(self.cursor_hidden))
         self.__set('sync-video', int(self.sync_video))
