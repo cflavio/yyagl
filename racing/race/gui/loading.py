@@ -65,7 +65,7 @@ class Loading(Colleague):
             'rolloverSound': loader.loadSfx('assets/sfx/menu_over.wav'),
             'clickSound': loader.loadSfx('assets/sfx/menu_clicked.ogg')}
         self.btn = DirectButton(text=menu_data[0][1], pos=(1.0, 0, -.55), command=menu_data[0][2], text_scale=.08, **btn_args)
-        PageGui.transl_text(self.btn, menu_data[0][0])
+        PageGui.transl_text(self.btn, menu_data[0][0], menu_data[0][1])
 
     def on_loading(self, msg):
         self.curr_load_txt.setText(msg)

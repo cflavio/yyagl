@@ -151,6 +151,7 @@ class PageGui(Gui):
         wdg.setShaderInput('col_scale', 0)
 
     def transition_enter(self):
+        self.update_texts()
         for wdg in self.widgets:
             pos = wdg.get_pos()
             start_pos = (pos[0] - 3.6, pos[1], pos[2])
@@ -181,7 +182,7 @@ class PageGui(Gui):
             seq.start()
 
     @staticmethod
-    def transl_text(obj, text_src):
+    def transl_text(obj, text_src, text_transl):
         obj.__text_src = text_src
         obj.__class__.transl_text = property(lambda self: _(self.__text_src))
 
@@ -194,7 +195,7 @@ class PageGui(Gui):
         self.widgets += [DirectButton(
             text='', pos=(0, 1, -.8), command=self.__on_back,
             **self.menu.gui.btn_args)]
-        PageGui.transl_text(self.widgets[-1], 'Back')
+        PageGui.transl_text(self.widgets[-1], 'Back', _('Back'))
         self.widgets[-1]['text'] = self.widgets[-1].transl_text
 
     def __on_back(self):

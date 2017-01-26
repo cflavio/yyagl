@@ -44,7 +44,8 @@ class MenuGui(Gui):
         self.label_args = {
             'scale': self.menu_args.text_scale,
             'text_fg': self.menu_args.text_fg,
-            'text_font': self.font}
+            'text_font': self.font,
+            'frameColor': (1, 1, 1, 0)}
         self.option_args = {
             'scale': self.menu_args.text_scale,
             'text_font': self.font,
