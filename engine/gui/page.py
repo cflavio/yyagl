@@ -4,7 +4,7 @@ from .imgbtn import ImageButton
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
-from direct.gui.DirectGuiGlobals import ENTER, EXIT, NORMAL
+from direct.gui.DirectGuiGlobals import ENTER, EXIT, NORMAL, DISABLED
 from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectSlider import DirectSlider
@@ -107,6 +107,7 @@ class PageGui(Gui):
 
     def get_next_widget(self, direction, start=None):
         wdgs = [wdg for wdg in self.widgets if wdg.__class__ in [DirectButton, DirectCheckButton, DirectSlider, DirectOptionMenu, ImageButton]]
+        wdgs = filter(lambda wdg: wdg['state'] != DISABLED, wdgs)
         if self.curr_wdg: wdgs.remove(self.curr_wdg)
         wdgs = filter(lambda wdg: self.__get_dot(wdg, direction, start) > .1, wdgs)
         if not wdgs: return
