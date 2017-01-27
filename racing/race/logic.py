@@ -14,7 +14,7 @@ class NetMsgs(object):
 
 class RaceLogic(Logic):
 
-    cars = ['kronos', 'themis', 'diones']
+    cars = ['kronos', 'themis', 'diones', 'iapeto']
 
     def __init__(self, mdt):
         self.load_txt = None
@@ -38,7 +38,7 @@ class RaceLogic(Logic):
 
         def load_car():
             cars = RaceLogic.cars[:]
-            grid = ['kronos', 'themis', 'diones']
+            grid = ['kronos', 'themis', 'diones', 'iapeto']
             cars.remove(car_path)
             ai = dev['ai']
 

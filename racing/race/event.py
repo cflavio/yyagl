@@ -86,7 +86,7 @@ class RaceEventServer(RaceEvent):
             self.__process_player_info(data_lst, sender)
         if data_lst[0] == NetMsgs.end_race_player:
             eng.server.send([NetMsgs.end_race])
-            dct = {'kronos': 0, 'themis': 0, 'diones': 0}
+            dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0}
             game.fsm.race.fsm.demand('Results', dct)
             # forward the actual ranking
             game.fsm.race.gui.results.show(dct)
@@ -120,5 +120,5 @@ class RaceEventClient(RaceEvent):
         if data_lst[0] == NetMsgs.end_race:
             if game.fsm.race.fsm.getCurrentOrNextState() != 'Results':
                 # forward the actual ranking
-                dct = {'kronos': 0, 'themis': 0, 'diones': 0}
+                dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0}
                 game.fsm.race.fsm.demand('Results', dct)

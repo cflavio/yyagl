@@ -9,7 +9,7 @@ class RankingLogic(Logic):
         self.reset()
 
     def reset(self):
-        self.ranking = {'kronos': 0, 'themis': 0, 'diones': 0}
+        self.ranking = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0}
 
     def load(self, ranking):
         self.ranking = ranking
