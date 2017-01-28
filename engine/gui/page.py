@@ -23,8 +23,9 @@ class PageGui(Gui):
         self.curr_wdg = self.get_next_widget((-.1, 0, -1), (-3.6, 1, 1))
         (self._on_enter_img_btn if self.curr_wdg.__class__ == ImageButton else self._on_enter)(self.curr_wdg)
 
-    def build_page(self):
-        self.__build_back_btn()
+    def build_page(self, back_btn=True):
+        if back_btn:
+            self.__build_back_btn()
         self._set_buttons()
         self.transition_enter()
 

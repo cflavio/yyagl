@@ -26,9 +26,10 @@ class MenuGui(Gui):
         self.menu_args = menu_args
         self.font = eng.font_mgr.load_font(menu_args.font)
         self.background = None
-        self.background = OnscreenImage(scale=(1.77778, 1, 1.0),
-                                        image=self.menu_args.background)
-        self.background.setBin('background', 10)
+        if self.menu_args.background:
+            self.background = OnscreenImage(scale=(1.77778, 1, 1.0),
+                                            image=self.menu_args.background)
+            self.background.setBin('background', 10)
         self.rollover = loader.loadSfx(menu_args.rollover)
         self.click = loader.loadSfx(menu_args.click)
         self.imgbtn_args = {
@@ -75,7 +76,8 @@ class MenuGui(Gui):
 
     def destroy(self):
         Gui.destroy(self)
-        self.background.destroy()
+        if self.background:
+            self.background.destroy()
 
 
 class MenuLogic(Logic):
