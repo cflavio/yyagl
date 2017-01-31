@@ -79,7 +79,7 @@ class RaceLogic(Logic):
             game.cars = []
         game.track = Track(
             track_path, load_car, dev['split_world'], dev['submodels'])
-        game.track.attach(self.mdt.gui.loading.on_loading)
+        game.track.attach(self.mdt.gui.loading.menu.gui.menu.logic.pages[0].gui.on_loading)
         self.mdt.track = game.track
 
     def enter_play(self):

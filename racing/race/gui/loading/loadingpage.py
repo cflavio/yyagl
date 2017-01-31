@@ -1,0 +1,230 @@
+from direct.gui.OnscreenText import OnscreenText
+from yyagl.engine.gui.page import Page, PageGui
+from direct.gui.DirectFrame import DirectFrame
+from direct.gui.DirectGuiGlobals import FLAT
+from direct.gui.DirectButton import DirectButton
+from yyagl.gameobject import Gui, GameObjectMdt
+from yyagl.engine.gui.imgbtn import ImageButton
+import sys
+from panda3d.core import TextNode, NodePath, Shader, TextureStage, PNMImage,\
+    Texture
+from direct.gui.OnscreenImage import OnscreenImage
+
+
+vertexShader = '''
+#version 120
+
+uniform mat4 p3d_ModelViewProjectionMatrix;
+uniform mat4 p3d_ViewMatrix;
+attribute vec4 p3d_Vertex;
+attribute vec2 p3d_MultiTexCoord0;
+varying vec2 texcoord;
+varying vec4 pos;
+
+void main() {
+  gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;
+  texcoord = p3d_MultiTexCoord0;
+  pos = p3d_ViewMatrix * p3d_Vertex;
+}'''
+
+
+textFragmentShader = '''
+#version 120
+
+varying vec2 texcoord;
+varying vec4 pos;
+uniform sampler2D p3d_Texture0;
+uniform float ratio;
+
+void main() {
+  vec4 mul_color = (pos.x) < ratio - .5 ? vec4(.75, .75, .25, 1) : vec4(.75, .75, .75, 1);
+  gl_FragColor = texture2D(p3d_Texture0, texcoord) * mul_color;
+}'''
+
+
+vert = '''#version 130
+in vec4 p3d_Vertex;
+in vec2 p3d_MultiTexCoord0;
+uniform mat4 p3d_ModelViewProjectionMatrix;
+out vec2 texcoord;
+
+void main() {
+    gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;
+    texcoord = p3d_MultiTexCoord0;
+}'''
+
+
+frag = '''#version 130
+in vec2 texcoord;
+uniform sampler2D p3d_Texture0;
+uniform sampler2D p3d_Texture1;
+out vec4 p3d_FragColor;
+
+void main() {
+    float dist_l = texcoord.x;
+    float dist_r = 1 - texcoord.x;
+    float dist_u = texcoord.y;
+    float dist_b = 1 - texcoord.y;
+    float alpha = min(dist_l, min(dist_r, min(dist_u, dist_b))) * 30;
+    vec4 pix_a = texture(p3d_Texture0, texcoord);
+    vec4 pix_b = texture(p3d_Texture1, texcoord);
+    vec4 tex_col = mix(pix_a, pix_b, pix_b.a);
+    p3d_FragColor = tex_col * vec4(1, 1, 1, alpha);
+}'''
+
+
+class LoadingPageGui(PageGui):
+
+    def __init__(self, mdt, menu, track_path, car_path, player_cars):
+        Gui.__init__(self, mdt)
+        self.menu = menu
+        self.widgets = []
+        self.build_page(track_path, car_path, player_cars)
+        self.update_texts()
+        self.curr_wdg = None
+        self.cnt = 1
+
+    def build_page(self, track_path, car_path, player_cars):
+        menu_gui = self.menu.gui
+        eng.gfx.init()
+        if not track_path and not car_path:
+            tracks = ['prototype', 'desert']
+            track = tracks[tracks.index(game.options['save']['track'])]
+            track_path = 'tracks/' + track
+            car_path = game.options['save']['car']
+        conf = game.options
+        if 'save' not in conf.dct:
+            conf['save'] = {}
+        conf['save']['track'] = track_path[7:]
+        conf['save']['car'] = car_path
+        conf.store()
+        self.font = eng.font_mgr.load_font('assets/fonts/zekton rg.ttf')
+        self.load_txt = OnscreenText(
+            text=_('LOADING...'),
+            scale=.2, pos=(0, .72), font=self.font, fg=(.75, .75, .25, 1),
+            wordwrap=12)
+        textShader = Shader.make(Shader.SLGLSL, vertexShader, textFragmentShader)
+        self.load_txt.setShader(textShader)
+        self.load_txt.setShaderInput('ratio', 0)
+        self.set_grid(car_path)
+        self.set_ranking(car_path)
+        self.set_controls()
+        self.widgets += [self.load_txt]
+        PageGui.build_page(self, False)
+
+    def set_grid(self, car_path):
+        grid = ['kronos', 'themis', 'diones', 'iapeto']
+        txt = OnscreenText(
+            text=_('Starting grid'),
+            scale=.1, pos=(-.8, .4), font=self.font, fg=(.75, .75, .75, 1))
+        self.widgets += [txt]
+        for i, car in enumerate(grid):
+            txt = OnscreenText(
+                text=str(i + 1) + '. ' + car, align=TextNode.A_left,
+                scale=.08, pos=(-1.0, .2 - i * .16), font=self.font, fg=(.75, .75, .25, 1) if car == car_path else (.75, .75, .75, 1))
+            self.widgets += [txt]
+            img = OnscreenImage(
+                    'assets/images/cars/%s_sel.png' % car,
+                    pos=(-.5, 1, .22 - i * .16), scale=.074)
+            self.widgets += [img]
+            shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
+            img.setShader(shader)
+            img.setTransparency(True)
+            ts = TextureStage('ts')
+            ts.setMode(TextureStage.MDecal)
+            img.setTexture(ts, loader.loadTexture('assets/images/drivers/driver%s_sel.png' % (i + 1)))
+
+    def set_ranking(self, car_path):
+        items = game.logic.season.logic.ranking.logic.ranking.items()
+        sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
+        txt = OnscreenText(
+            text=_('Ranking'),
+            scale=.1, pos=(0, .4), font=self.font, fg=(.75, .75, .75, 1))
+        self.widgets += [txt]
+        for i, car in enumerate(sorted_ranking):
+            txt = OnscreenText(
+                text=str(car[1]) + ' ' + car[0], align=TextNode.A_left,
+                scale=.08, pos=(-.1, .2 - i * .16), font=self.font, fg=(.75, .75, .25, 1) if car[0] == car_path else (.75, .75, .75, 1))
+            self.widgets += [txt]
+            img = OnscreenImage(
+                    'assets/images/cars/%s_sel.png' % car[0],
+                    pos=(.4, 1, .22 - i * .16), scale=.074)
+            self.widgets += [img]
+            shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
+            img.setShader(shader)
+            img.setTransparency(True)
+            ts = TextureStage('ts')
+            ts.setMode(TextureStage.MDecal)
+            img.setTexture(ts, loader.loadTexture('assets/images/drivers/driver%s_sel.png' % (i + 1)))
+
+    def set_controls(self):
+        items = game.logic.season.logic.ranking.logic.ranking.items()
+        sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
+        txt = OnscreenText(
+            text=_('Controls'),
+            scale=.1, pos=(.8, .4), font=self.font, fg=(.75, .75, .75, 1))
+        self.widgets += [txt]
+        conf = game.options
+        if not conf['settings']['joystick']:
+            txt = OnscreenText(
+                text=_('joypad'),
+                scale=.08, pos=(.8, .2), font=self.font, fg=(.75, .75, .75, 1))
+            self.widgets += [txt]
+            return
+        txt = OnscreenText(
+            text=_('accelerate') + ': ' + conf['settings']['keys']['forward'], align=TextNode.A_left,
+            scale=.08, pos=(.6, .2), font=self.font, fg=(.75, .75, .75, 1))
+        self.widgets += [txt]
+        txt = OnscreenText(
+            text=_('brake') + ': ' + conf['settings']['keys']['rear'], align=TextNode.A_left,
+            scale=.08, pos=(.6, .04), font=self.font, fg=(.75, .75, .75, 1))
+        self.widgets += [txt]
+        txt = OnscreenText(
+            text=_('left') + ': ' + conf['settings']['keys']['left'], align=TextNode.A_left,
+            scale=.08, pos=(.6, -.12), font=self.font, fg=(.75, .75, .75, 1))
+        self.widgets += [txt]
+        txt = OnscreenText(
+            text=_('right') + ': ' + conf['settings']['keys']['right'], align=TextNode.A_left,
+            scale=.08, pos=(.6, -.28), font=self.font, fg=(.75, .75, .75, 1))
+        self.widgets += [txt]
+        txt = OnscreenText(
+            text=_('fire') + ': ' + conf['settings']['keys']['button'], align=TextNode.A_left,
+            scale=.08, pos=(.6, -.44), font=self.font, fg=(.75, .75, .75, 1))
+        self.widgets += [txt]
+
+    def on_loading(self, msg):
+        names = [model.getName().split('.')[0][5:] for model in game.fsm.race.track.gfx.empty_models]
+        names = list(set(list(names)))
+        tot = 5 * len(names) - 4 * len([name for name in names if name.endswith('Anim')])
+        self.load_txt.setShaderInput('ratio', float(self.cnt) / tot)
+        self.cnt += 1
+
+    def destroy(self):
+        PageGui.destroy(self)
+        eng.base.camera.set_pos(0, 0, 0)
+        if not hasattr(game, 'player_car'): return
+        game.player_car.event.attach(self.mdt.menu.loading.mdt.event.on_wrong_way)
+        game.player_car.event.attach(self.mdt.menu.loading.mdt.event.on_end_race)
+
+
+class LoadingPage(Page):
+    gui_cls = LoadingPageGui
+
+    def __init__(self, menu, track_path, car_path, player_cars):
+        self.menu = menu
+        self.track_path = track_path
+        self.car_path = car_path
+        self.player_cars= player_cars
+        GameObjectMdt.__init__(self, self.init_lst)
+
+    @property
+    def init_lst(self):
+        return [
+            [('fsm', self.fsm_cls, [self])],
+            [('gfx', self.gfx_cls, [self])],
+            [('phys', self.phys_cls, [self])],
+            [('event', self.event_cls, [self])],
+            [('gui', self.gui_cls, [self, self.menu, self.track_path, self.car_path, self.player_cars])],
+            [('logic', self.logic_cls, [self])],
+            [('audio', self.audio_cls, [self])],
+            [('ai', self.ai_cls, [self])]]

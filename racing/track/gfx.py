@@ -47,11 +47,11 @@ class TrackGfx(Gfx):
 
     def __load_empties(self):
         eng.log_mgr.log('loading track submodels')
-        empty_models = self.model.findAllMatches('**/Empty*')
+        self.empty_models = self.model.findAllMatches('**/Empty*')
 
         def load_models():
-            self.__process_models(list(empty_models))
-        names = [model.getName().split('.')[0][5:] for model in empty_models]
+            self.__process_models(list(self.empty_models))
+        names = [model.getName().split('.')[0][5:] for model in self.empty_models]
         self.__preload_models(list(set(list(names))), load_models)
 
     def __preload_models(self, models, callback, model='', time=0):
@@ -231,3 +231,4 @@ class TrackGfx(Gfx):
             eng.shader_mgr.clear_lights()
         self.__actors = self.__flat_roots = None
         self.__destroy_signs()
+        self.empty_models = None
