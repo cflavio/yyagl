@@ -9,6 +9,7 @@ from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectSlider import DirectSlider
 from panda3d.core import LPoint3f
+from direct.gui.DirectEntry import DirectEntry
 
 
 class PageGui(Gui):
@@ -21,7 +22,13 @@ class PageGui(Gui):
         self.update_texts()
         self.curr_wdg = None
         self.curr_wdg = self.get_next_widget((-.1, 0, -1), (-3.6, 1, 1))
-        (self._on_enter_img_btn if self.curr_wdg.__class__ == ImageButton else self._on_enter)(self.curr_wdg)
+        if self.curr_wdg.__class__ == ImageButton:
+            meth = self._on_enter_img_btn
+        elif self.curr_wdg.__class__ == DirectEntry:
+            meth = self._on_enter_entry
+        else:
+            meth = self._on_enter
+        meth(self.curr_wdg)
 
     def build_page(self, back_btn=True):
         if back_btn:
@@ -40,6 +47,8 @@ class PageGui(Gui):
             self._on_exit_slider(self.curr_wdg)
         elif self.curr_wdg.__class__ == ImageButton:
             self._on_exit_img_btn(self.curr_wdg)
+        elif self.curr_wdg.__class__ == DirectEntry:
+            self._on_exit_entry(self.curr_wdg)
         else:
             self._on_exit(self.curr_wdg)
         self.curr_wdg = next_wdg
@@ -47,6 +56,8 @@ class PageGui(Gui):
             self._on_enter_slider(self.curr_wdg)
         elif self.curr_wdg.__class__ == ImageButton:
             self._on_enter_img_btn(self.curr_wdg)
+        elif self.curr_wdg.__class__ == DirectEntry:
+            self._on_enter_entry(self.curr_wdg)
         else:
             self._on_enter(self.curr_wdg)
 
@@ -107,7 +118,7 @@ class PageGui(Gui):
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)# + .6 * (1 - dist / 4.0)
 
     def get_next_widget(self, direction, start=None):
-        wdgs = [wdg for wdg in self.widgets if wdg.__class__ in [DirectButton, DirectCheckButton, DirectSlider, DirectOptionMenu, ImageButton]]
+        wdgs = [wdg for wdg in self.widgets if wdg.__class__ in [DirectButton, DirectCheckButton, DirectSlider, DirectOptionMenu, ImageButton, DirectEntry]]
         wdgs = filter(lambda wdg: wdg['state'] != DISABLED, wdgs)
         if self.curr_wdg: wdgs.remove(self.curr_wdg)
         wdgs = filter(lambda wdg: self.__get_dot(wdg, direction, start) > .1, wdgs)
@@ -128,6 +139,9 @@ class PageGui(Gui):
                 wdg.start_frame_col = wdg['frameColor']
                 wdg.bind(ENTER, self._on_enter_slider, [wdg])
                 wdg.bind(EXIT, self._on_exit_slider, [wdg])
+            elif wdg.__class__ in [DirectEntry]:
+                wdg.bind(ENTER, self._on_enter_entry, [wdg])
+                wdg.bind(EXIT, self._on_exit_entry, [wdg])
 
     def _on_enter(self, wdg, pos=None):
         _fg = wdg.start_fg
@@ -151,6 +165,14 @@ class PageGui(Gui):
 
     def _on_exit_img_btn(self, wdg, pos=None):
         wdg.setShaderInput('col_scale', 0)
+
+    def _on_enter_entry(self, wdg, pos=None):
+        wdg['focus'] = 1
+        wdg.setFocus()
+
+    def _on_exit_entry(self, wdg, pos=None):
+        wdg['focus'] = 0
+        wdg.setFocus()
 
     def transition_enter(self):
         self.update_texts()

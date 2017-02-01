@@ -12,8 +12,8 @@ class Loading(Colleague):
     def __init__(self, mdt):
         self.mdt = mdt
 
-    def enter_loading(self, track_path='', car_path='', player_cars=[]):
-        self.menu = LoadingMenu(self, track_path, car_path, player_cars)
+    def enter_loading(self, track_path='', car_path='', player_cars=[], drivers=None):
+        self.menu = LoadingMenu(self, track_path, car_path, player_cars, drivers)
 
     def exit_loading(self):
         self.menu.destroy()

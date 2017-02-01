@@ -12,11 +12,11 @@ class _Fsm(Fsm):
             'Countdown': ['Play'],
             'Play': ['Results']}
 
-    def enterLoading(self, track_path='', car_path='', player_cars=[]):
+    def enterLoading(self, track_path='', car_path='', player_cars=[], drivers=None):
         eng.log_mgr.log('entering Loading state')
-        args = [track_path, car_path, player_cars]
+        args = [track_path, car_path, player_cars, drivers]
         self.mdt.gui.loading.enter_loading(*args)
-        taskMgr.doMethodLater(1.0, self.mdt.logic.load_stuff, 'loading stuff', args)
+        taskMgr.doMethodLater(1.0, self.mdt.logic.load_stuff, 'loading stuff', args[:-1])
 
     def exitLoading(self):
         eng.log_mgr.log('exiting Loading state')

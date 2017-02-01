@@ -10,14 +10,17 @@ class SeasonLogic(Logic):
         Logic.__init__(self, mdt)
         self.ranking = Ranking()
         self.tuning = Tuning()
+        self.drivers = {}
 
     def start(self):
         self.ranking.logic.reset()
         self.tuning.logic.reset()
+        self.drivers = {}
 
     def load(self):
         self.ranking.logic.load(game.options['save']['ranking'])
         self.tuning.logic.load(game.options['save']['tuning'])
+        self.drivers = game.options['save']['drivers']
 
     @staticmethod
     def step():
@@ -31,7 +34,8 @@ class SeasonLogic(Logic):
         else:
             next_track = tracks[tracks.index(current_track) + 1]
             curr_car = game.options['save']['car']
-            game.fsm.demand('Race', 'tracks/' + next_track, curr_car)
+            drivers = game.options['save']['drivers']
+            game.fsm.demand('Race', 'tracks/' + next_track, curr_car, [], drivers)
 
 
 class SingleRaceSeasonLogic(SeasonLogic):
