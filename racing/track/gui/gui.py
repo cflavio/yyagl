@@ -14,7 +14,7 @@ class TrackGui(Gui):
         self.way_txt = OnscreenText(
             '', pos=(.1, .4), scale=.1, fg=(1, 1, 1, 1),
             parent=eng.base.a2dBottomLeft, align=TextNode.ALeft,
-            font=eng.font_mgr.load_font('assets/fonts/zekton rg.ttf'))
+            font=eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf'))
         self.minimap = Minimap(track, self.mdt.phys.lrtb)
 
     def destroy(self):

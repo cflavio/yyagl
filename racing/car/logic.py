@@ -191,7 +191,7 @@ class CarPlayerLogic(CarLogic):
             d_t = round(f_t - self.last_time_start, 2)
             self.mdt.gui.time_txt.setText(str(d_t))
         if self.last_time_start:
-            self.mdt.gui.speed_txt.setText(str(round(self.mdt.phys.speed, 2)))
+            self.mdt.gui.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__update_wp()
 
     def fire(self):

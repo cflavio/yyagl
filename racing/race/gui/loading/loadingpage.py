@@ -99,7 +99,7 @@ class LoadingPageGui(PageGui):
         conf['save']['car'] = car_path
         conf['save']['drivers'] = drivers
         conf.store()
-        self.font = eng.font_mgr.load_font('assets/fonts/zekton rg.ttf')
+        self.font = eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')
         self.load_txt = OnscreenText(
             text=_('LOADING...'),
             scale=.2, pos=(0, .72), font=self.font, fg=(.75, .75, .25, 1),

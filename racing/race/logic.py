@@ -35,6 +35,7 @@ class RaceLogic(Logic):
         eng.phys.init()
         player_cars = player_cars[1::2]
         dev = game.options['development']
+        game.player_car_name = car_path
 
         def load_car():
             cars = RaceLogic.cars[:]

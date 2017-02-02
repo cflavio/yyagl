@@ -99,6 +99,12 @@ class EngineGuiWindow(EngineGui):
         self.hotspot_dy = scale[2] * (1 - 2 * hotspot[1])
         taskMgr.add(self._on_frame, '_on_frame')
 
+    def show_cursor(self):
+        self.cursor_img.show()
+
+    def hide_cursor(self):
+        self.cursor_img.hide()
+
     def _on_frame(self, task):
         if base.mouseWatcherNode.hasMouse():
             x = base.mouseWatcherNode.getMouseX()

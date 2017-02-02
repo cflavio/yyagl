@@ -10,7 +10,7 @@ class Countdown(Subject):
         self.countdown_sfx = loader.loadSfx('assets/sfx/countdown.ogg')
         self.__countdown_txt = OnscreenText(
             '', pos=(0, 0), scale=.2, fg=(1, 1, 1, 1),
-            font=eng.font_mgr.load_font('assets/fonts/zekton rg.ttf'))
+            font=eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf'))
         self.countdown_cnt = 3
         taskMgr.doMethodLater(1.0, self.process_countdown, 'coutdown')
 

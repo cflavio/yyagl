@@ -23,6 +23,7 @@ class _Fsm(Fsm):
         self.mdt.gui.loading.exit_loading()
 
     def enterCountdown(self):
+        eng.gui.hide_cursor()
         self.countdown = Countdown()
         self.countdown.attach(self.on_start_race)
         self.mdt.logic.enter_play()
@@ -42,6 +43,7 @@ class _Fsm(Fsm):
 
     def exitPlay(self):
         eng.log_mgr.log('exiting Play state')
+        eng.gui.show_cursor()
 
     def enterResults(self, race_ranking):
         game.fsm.race.gui.results.show(race_ranking)

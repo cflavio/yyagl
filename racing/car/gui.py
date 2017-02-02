@@ -142,24 +142,29 @@ class CarGui(Gui):
             self.__friction_slip, self.__roll_influence]
 
     def set_panel(self):
-        self.panel = OnscreenImage(
-            'assets/images/gui/panel.png', scale=(.4, 1, .2),
-            parent=eng.base.a2dTopRight, pos=(-.45, 1, -.25))
-        self.panel.setTransparency(True)
         pars = {'scale': .065, 'parent': eng.base.a2dTopRight,
-                'fg': (1, 1, 1, 1),
-                'font': eng.font_mgr.load_font('assets/fonts/zekton rg.ttf')}
-        self.speed_txt = OnscreenText(pos=(-.7, -.38), **pars)
+                'fg': (.75, .75, .25, 1), 'align': TextNode.A_left,
+                'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
+        self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
         self.lap_txt = OnscreenText(
-            text='1/' + str(self.mdt.laps), pos=(-.5, -.38), **pars)
-        self.time_txt = OnscreenText(pos=(-.3, -.38), **pars)
-        self.best_txt = OnscreenText(pos=(-.1, -.38), **pars)
+            text='1/' + str(self.mdt.laps), pos=(-.24, -.2), **pars)
+        self.time_txt = OnscreenText(pos=(-.24, -.3), **pars)
+        self.best_txt = OnscreenText(pos=(-.24, -.4), **pars)
+        pars = {'scale': .05, 'parent': eng.base.a2dTopRight,
+                'fg': (.75, .75, .75, 1), 'align': TextNode.A_right,
+                'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
+        self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
+        self.lap_lab = OnscreenText(
+            text=_('lap:'), pos=(-.3, -.2), **pars)
+        self.time_lab = OnscreenText(_('time:'), pos=(-.3, -.3), **pars)
+        self.best_lab = OnscreenText(_('best time:'), pos=(-.3, -.4), **pars)
 
     def toggle(self):
         map(lambda par: par.toggle(), self.__pars)
 
     def destroy(self):
         Gui.destroy(self)
-        labels = [self.panel, self.speed_txt, self.time_txt, self.lap_txt,
-                  self.best_txt]
+        labels = [self.speed_txt, self.time_txt, self.lap_txt,
+                  self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
+                  self.best_lab]
         map(lambda wdg: wdg.destroy(), self.__pars + labels)
