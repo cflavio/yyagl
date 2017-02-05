@@ -4,6 +4,7 @@ from panda3d.core import loadPrcFileData, PandaSystem
 from direct.directnotify.DirectNotify import DirectNotify
 from ..gameobject import Colleague
 from panda3d import bullet
+import platform
 
 
 class LogMgr(Colleague):
@@ -43,5 +44,12 @@ class LogMgr(Colleague):
         res_x, res_y = prop.get_x_size(), prop.get_y_size()
         res_tmpl = 'resolution: {res_x}x{res_y}'
         self.log(res_tmpl.format(res_x=res_x, res_y=res_y))
+        self.log('architecture: ' + str(platform.architecture()))
+        self.log('machine: ' + platform.machine())
+        self.log('platform: ' + platform.platform())
+        self.log('processor: ' + platform.processor())
+        self.log('release: ' + platform.release())
+        self.log('system: ' + platform.system())
+        self.log('version: ' + platform.version())
         self.log('panda version: ' + PandaSystem.getVersionString())
         self.log('bullet version: ' + str(bullet.get_bullet_version()))
