@@ -92,6 +92,7 @@ class RaceLogic(Logic):
         eng.phys.start()
         game.track.event.start()
         self.mdt.event.network_register()
+        game.player_car.logic.attach(self.mdt.event.on_wrong_way)
         game.audio.game_music.play()
         cars = [game.player_car] + game.cars
         map(lambda car: car.logic.reset_car(), cars)
@@ -110,9 +111,9 @@ class RaceLogic(Logic):
         by_laps = sorted(by_wp_num, key=lambda val: val[1])
         return [car[0] for car in reversed(by_laps)]
 
-    @staticmethod
-    def exit_play():
+    def exit_play(self):
         game.audio.game_music.stop()
+        game.player_car.logic.detach(self.mdt.event.on_wrong_way)
         game.track.destroy()
         game.player_car.destroy()
         map(lambda car: car.destroy(), game.cars)
@@ -144,11 +145,10 @@ class RaceLogicServer(RaceLogic):
                 self.start_play()
                 eng.server.send([NetMsgs.start_race])
 
-    @staticmethod
-    def exit_play():
+    def exit_play(self):
         eng.server.destroy()
         eng.server = None
-        RaceLogic.exit_play()
+        RaceLogic.exit_play(self)
 
 
 class RaceLogicClient(RaceLogic):
@@ -171,8 +171,7 @@ class RaceLogicClient(RaceLogic):
             taskMgr.remove(self.send_tsk)
             self.start_play()
 
-    @staticmethod
-    def exit_play():
+    def exit_play(self):
         eng.client.destroy()
         eng.client = None
-        RaceLogic.exit_play()
+        RaceLogic.exit_play(self)
