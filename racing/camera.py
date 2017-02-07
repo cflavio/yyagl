@@ -1,15 +1,15 @@
-from panda3d.core import Vec3
+from panda3d.core import Vec3, LVector3f
 
 
 class Camera(object):
 
     cam_speed = 50
-    cam_dist_min = 12
-    cam_dist_max = 18
+    cam_dist_min = 36
+    cam_dist_max = 72
     cam_z_max = 5
     cam_z_min = 3
     look_dist_min = 2
-    look_dist_max = 6
+    look_dist_max = 16
     look_z_max = 2
     look_z_min = 0
 
@@ -30,12 +30,14 @@ class Camera(object):
         look_z_diff = self.look_z_max - self.look_z_min
 
         nodepath = self.car.gfx.nodepath
-        fwd_vec = eng.base.render.getRelativeVector(nodepath, Vec3(0, 1, 0))
+        fwd_car_vec = eng.base.render.getRelativeVector(nodepath, Vec3(0, 1, 0))
+        fwd_car_vec.normalize()
+        fwd_vec = LVector3f(.1, -.4, -.6)
         fwd_vec.normalize()
 
         car_pos = nodepath.get_pos()
         cam_vec = -fwd_vec * (self.cam_dist_min + cam_dist_diff * speed_ratio)
-        tgt_vec = fwd_vec * (self.look_dist_min + look_dist_diff * speed_ratio)
+        tgt_vec = fwd_car_vec * (self.look_dist_min + look_dist_diff * speed_ratio)
         delta_pos_z = self.cam_z_min + cam_z_diff * speed_ratio
         delta_cam_z = self.look_z_min + look_z_diff * speed_ratio
 
@@ -43,9 +45,9 @@ class Camera(object):
         curr_cam_dist_fact = self.cam_dist_min + cam_dist_diff * speed_ratio
 
         curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
-        if curr_occl:
-            occl_pos = curr_occl.getHitPos()
-            cam_vec = occl_pos - car_pos
+        #if curr_occl:
+        #    occl_pos = curr_occl.getHitPos()
+        #    cam_vec = occl_pos - car_pos
 
         self.tgt_cam_x = car_pos.x + cam_vec.x
         self.tgt_cam_y = car_pos.y + cam_vec.y
