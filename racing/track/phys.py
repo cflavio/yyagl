@@ -102,6 +102,8 @@ class TrackPhys(Phys):
         self.bonuses += [Bonus(pos)]
 
     def __set_weapons(self):
+        if not game.options['development']['weapons']:
+            return
         weap_root = self.model.find('**/Weaponboxs')
         self.bonuses = []
         if not weap_root: return
