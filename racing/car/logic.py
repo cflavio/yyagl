@@ -31,39 +31,64 @@ class CarLogic(Logic):
         speed_ratio = phys.speed_ratio
         steering_range = phys.steering_min_speed - phys.steering_max_speed
         steering_clamp = phys.steering_min_speed - speed_ratio * steering_range
-        if input_dct['forward'] and input_dct['reverse']:
-            eng_frc = phys.engine_acc_frc
-            brake_frc = phys.brake_frc
-        if input_dct['forward'] and not input_dct['reverse']:
-            eng_frc = phys.engine_acc_frc
-            brake_frc = 0
-        if input_dct['reverse'] and not input_dct['forward']:
-            eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
-            brake_frc = phys.brake_frc
-        if not input_dct['forward'] and not input_dct['reverse']:
-            brake_frc = phys.eng_brk_frc
-        if input_dct['left']:
-            if self.start_left is None:
-                self.start_left = f_t
-            mul = min(1, (f_t - self.start_left) / self.react_time)
-            self.__steering += steering_inc * mul
-            self.__steering = min(self.__steering, steering_clamp)
-        else:
-            self.start_left = None
-        if input_dct['right']:
-            if self.start_right is None:
-                self.start_right = globalClock.getFrameTime()
-            mul = min(1, (f_t - self.start_right) / self.react_time)
-            self.__steering -= steering_inc * mul
-            self.__steering = max(self.__steering, -steering_clamp)
-        else:
-            self.start_right = None
-        if not input_dct['left'] and not input_dct['right']:
-            if abs(self.__steering) <= steering_dec:
-                self.__steering = 0
+        if not game.options['settings']['joystick'] or self.__class__ != CarPlayerLogic:
+            if input_dct['forward'] and input_dct['reverse']:
+                eng_frc = phys.engine_acc_frc
+                brake_frc = phys.brake_frc
+            if input_dct['forward'] and not input_dct['reverse']:
+                eng_frc = phys.engine_acc_frc
+                brake_frc = 0
+            if input_dct['reverse'] and not input_dct['forward']:
+                eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
+                brake_frc = phys.brake_frc
+            if not input_dct['forward'] and not input_dct['reverse']:
+                brake_frc = phys.eng_brk_frc
+            if input_dct['left']:
+                if self.start_left is None:
+                    self.start_left = f_t
+                mul = min(1, (f_t - self.start_left) / self.react_time)
+                self.__steering += steering_inc * mul
+                self.__steering = min(self.__steering, steering_clamp)
             else:
-                steering_sign = (-1 if self.__steering > 0 else 1)
-                self.__steering += steering_sign * steering_dec
+                self.start_left = None
+            if input_dct['right']:
+                if self.start_right is None:
+                    self.start_right = globalClock.getFrameTime()
+                mul = min(1, (f_t - self.start_right) / self.react_time)
+                self.__steering -= steering_inc * mul
+                self.__steering = max(self.__steering, -steering_clamp)
+            else:
+                self.start_right = None
+            if not input_dct['left'] and not input_dct['right']:
+                if abs(self.__steering) <= steering_dec:
+                    self.__steering = 0
+                else:
+                    steering_sign = (-1 if self.__steering > 0 else 1)
+                    self.__steering += steering_sign * steering_dec
+        else:
+            x, y, a, b = eng.event.get_joystick()
+            scale = lambda val: min(1, max(-1, val * 1.2))
+            x, y = scale(x), scale(y)
+            if y <= - .1:
+                eng_frc = phys.engine_acc_frc * abs(y)
+                brake_frc = 0
+            if y >= .1:
+                eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
+                brake_frc = phys.brake_frc * y
+            if -.1 <= y <= .1:
+                brake_frc = phys.eng_brk_frc
+            if x < -.1:
+                self.__steering += steering_inc * abs(x)
+                self.__steering = min(self.__steering, steering_clamp)
+            if x > .1:
+                self.__steering -= steering_inc * x
+                self.__steering = max(self.__steering, -steering_clamp)
+            if -.1 < x < .1 :
+                if abs(self.__steering) <= steering_dec:
+                    self.__steering = 0
+                else:
+                    steering_sign = (-1 if self.__steering > 0 else 1)
+                    self.__steering += steering_sign * steering_dec
         phys.set_forces(self.get_eng_frc(eng_frc), brake_frc, self.__steering)
         self.__update_roll_info()
         if self.is_skidmarking:
@@ -193,6 +218,8 @@ class CarPlayerLogic(CarLogic):
         if self.last_time_start:
             self.mdt.gui.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__update_wp()
+        ranking = game.fsm.race.logic.ranking()
+        self.mdt.gui.ranking_txt.setText(str(ranking.index(self.mdt.path[5:]) + 1) + "'")
 
     def fire(self):
         self.weapon.logic.fire()
