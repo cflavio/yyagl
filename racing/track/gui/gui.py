@@ -12,7 +12,7 @@ class TrackGui(Gui):
             '', pos=(-.1, .1), scale=.05, fg=(1, 1, 1, 1),
             parent=eng.base.a2dBottomRight, align=TextNode.ARight)
         self.way_txt = OnscreenText(
-            '', pos=(.1, .4), scale=.1, fg=(1, 1, 1, 1),
+            '', pos=(.1, .1), scale=.1, fg=(.75, .25, .25, 1),
             parent=eng.base.a2dBottomLeft, align=TextNode.ALeft,
             font=eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf'))
         self.minimap = Minimap(track, self.mdt.phys.lrtb)

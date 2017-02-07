@@ -150,6 +150,10 @@ class CarGui(Gui):
             text='1/' + str(self.mdt.laps), pos=(-.24, -.2), **pars)
         self.time_txt = OnscreenText(pos=(-.24, -.3), **pars)
         self.best_txt = OnscreenText(pos=(-.24, -.4), **pars)
+        self.ranking_txt = OnscreenText(pos=(-.24, -.5), **pars)
+        self.damages_txt = OnscreenText(pos=(-.24, -.6), **pars)
+        self.damages_txt['text'] = '-'
+        self.damages_txt['fg'] = (.75, .75, .75, 1)
         pars = {'scale': .05, 'parent': eng.base.a2dTopRight,
                 'fg': (.75, .75, .75, 1), 'align': TextNode.A_right,
                 'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
@@ -158,6 +162,20 @@ class CarGui(Gui):
             text=_('lap:'), pos=(-.3, -.2), **pars)
         self.time_lab = OnscreenText(_('time:'), pos=(-.3, -.3), **pars)
         self.best_lab = OnscreenText(_('best time:'), pos=(-.3, -.4), **pars)
+        self.ranking_lab = OnscreenText(_('ranking:'), pos=(-.3, -.5), **pars)
+        self.ranking_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
+
+    def apply_damage(self, reset=False):
+        if reset:
+            self.damages_txt['text'] = '-'
+            self.damages_txt['fg'] = (.75, .75, .75, 1)
+        else:
+            if self.damages_txt['text'] == '-':
+                self.damages_txt['text'] = _('low')
+                self.damages_txt['fg'] = (.75, .4, .25, 1)
+            elif self.damages_txt['text'] == _('low'):
+                self.damages_txt['text'] = _('hi')
+                self.damages_txt['fg'] = (.75, .25, .25, 1)
 
     def toggle(self):
         map(lambda par: par.toggle(), self.__pars)
