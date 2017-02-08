@@ -32,7 +32,7 @@ class Camera(object):
         nodepath = self.car.gfx.nodepath
         fwd_car_vec = eng.base.render.getRelativeVector(nodepath, Vec3(0, 1, 0))
         fwd_car_vec.normalize()
-        fwd_vec = LVector3f(.1, -.4, -.6)
+        fwd_vec = LVector3f(*game.track.camera_vector)
         fwd_vec.normalize()
 
         car_pos = nodepath.get_pos()
