@@ -2,6 +2,7 @@ from panda3d.core import TextNode
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.engine.gui.imgbtn import ImageButton
+from direct.gui.DirectFrame import DirectFrame
 
 
 class Results(object):
@@ -9,13 +10,11 @@ class Results(object):
     def __init__(self):
         self.__res_txts = None
         self.__buttons = None
-        self.result_img = None
+        self.result_frm = None
 
     def show(self, race_ranking):
         track = game.track.path
-        self.result_img = OnscreenImage(image='assets/images/gui/results.png',
-                                        scale=(.8, 1, .8))
-        self.result_img.setTransparency(True)
+        self.result_frm = DirectFrame(frameColor=(.8, .8, .8, .64), frameSize=(-.8, .8, -.8, .64))
         # race object invokes this
         laps = len(game.player_car.logic.lap_times)
         pars = {'scale': .1, 'fg': (.75, .75, .75, 1),
@@ -24,8 +23,8 @@ class Results(object):
             str(round(game.player_car.logic.lap_times[i], 2)),
             pos=(.3, - .2 * i), **pars)
             for i in range(laps)]
-        self.__res_txts += [OnscreenText(_('LAP'), pos=(-.3, .35), **pars)
-                            for i in range(4)]
+        self.__res_txts += [OnscreenText(_('LAP'), pos=(-.3, .35), **pars)]
+        self.__res_txts += [OnscreenText(_('TIME'), pos=(.3, .35), **pars)]
         self.__res_txts += [
             OnscreenText(str(i), pos=(-.3, .2 - .2 * i), **pars)
             for i in range(1, 4)]
@@ -50,8 +49,8 @@ class Results(object):
                  ('google_plus', plus_url), ('tumblr', tumblr_url)]
         self.__buttons += [
             ImageButton(
-                scale=.1,
-                pos=(.02 + i*.15, 1, -.62), frameColor=(0, 0, 0, 0),
+                scale=.078,
+                pos=(.02 + i*.18, 1, -.62), frameColor=(0, 0, 0, 0),
                 image='assets/images/icons/%s_png.png' % site[0],
                 command=eng.gui.open_browser, extraArgs=[site[1]],
                 rolloverSound=loader.loadSfx('assets/sfx/menu_over.wav'),
@@ -61,7 +60,7 @@ class Results(object):
         def step():
             map(lambda txt: txt.destroy(), self.__res_txts)
             map(lambda btn: btn.destroy(), self.__buttons)
-            self.result_img.destroy()
+            self.result_frm.destroy()
             #TODO: notify and manage into yorg's fsm
             ranking = game.logic.season.logic.ranking
             tuning = game.logic.season.logic.tuning
