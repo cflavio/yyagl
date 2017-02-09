@@ -163,7 +163,7 @@ class CarGui(Gui):
         self.time_lab = OnscreenText(_('time:'), pos=(-.3, -.3), **pars)
         self.best_lab = OnscreenText(_('best time:'), pos=(-.3, -.4), **pars)
         self.ranking_lab = OnscreenText(_('ranking:'), pos=(-.3, -.5), **pars)
-        self.ranking_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
+        self.damages_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
 
     def apply_damage(self, reset=False):
         if reset:
@@ -184,5 +184,6 @@ class CarGui(Gui):
         Gui.destroy(self)
         labels = [self.speed_txt, self.time_txt, self.lap_txt,
                   self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
-                  self.best_lab]
+                  self.best_lab, self.damages_txt, self.damages_lab,
+                  self.ranking_txt, self.ranking_lab]
         map(lambda wdg: wdg.destroy(), self.__pars + labels)

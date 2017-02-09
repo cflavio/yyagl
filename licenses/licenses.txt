@@ -5,7 +5,6 @@ Engine sfx http://opengameart.org/content/car-engine-loop-96khz-4s
 Brake sfx http://opengameart.org/content/car-tire-squeal-skid-loop
 Collision sfx http://opengameart.org/content/crash-collision
 On the other side http://opengameart.org/content/on-the-other-side
-Fade (Alan Walker) CC BY-SA 3.0 http://ccmusic.co
 Lap sfx http://opengameart.org/content/8-bit-sound-effects-library
 Countdown sfx http://opengameart.org/content/8-bit-sound-effects-library
 Crash high speed sfx http://opengameart.org/content/8-bit-sound-effects-library
