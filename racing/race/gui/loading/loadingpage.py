@@ -107,17 +107,32 @@ class LoadingPageGui(PageGui):
         textShader = Shader.make(Shader.SLGLSL, vertexShader, textFragmentShader)
         self.load_txt.setShader(textShader)
         self.load_txt.setShaderInput('ratio', 0)
+        track_number = ''
+        track_name = track_path[7:]
+        track_dct = {
+            'prototype': _('prototype'),
+            'desert': _('desert')}
+        if track_path[7:] in track_dct:
+            track_name = track_dct[track_path[7:]]
+        from yyagl.racing.season.season import SingleRaceSeason
+        if game.logic.season.__class__ != SingleRaceSeason:
+            track_num = ['prototype', 'desert'].index(track_path[7:]) + 1
+            track_number = ' (%s/2)' % track_num
+        track_txt = OnscreenText(
+            text=_('track: ' + track_name + track_number),
+            scale=.08, pos=(0, .56), font=self.font, fg=(.75, .75, .75, 1),
+            wordwrap=12)
         self.set_grid(car_path, drivers)
         self.set_ranking(car_path, drivers)
         self.set_controls()
-        self.widgets += [self.load_txt]
+        self.widgets += [self.load_txt, track_txt]
         PageGui.build_page(self, False)
 
     def set_grid(self, car_path, drivers):
         grid = ['kronos', 'themis', 'diones', 'iapeto']
         txt = OnscreenText(
             text=_('Starting grid'),
-            scale=.1, pos=(-1.0, .4), font=self.font, fg=(.75, .75, .75, 1))
+            scale=.1, pos=(-1.0, .3), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         def get_driver(car):
             for driver in drivers:
@@ -127,11 +142,11 @@ class LoadingPageGui(PageGui):
             idx, name, _car = get_driver(car)
             txt = OnscreenText(
                 text=str(i + 1) + '. ' + name, align=TextNode.A_left,
-                scale=.072, pos=(-1.28, .2 - i * .16), font=self.font, fg=(.75, .75, .25, 1) if car == car_path else (.75, .75, .75, 1))
+                scale=.072, pos=(-1.28, .1 - i * .16), font=self.font, fg=(.75, .75, .25, 1) if car == car_path else (.75, .75, .75, 1))
             self.widgets += [txt]
             img = OnscreenImage(
                     'assets/images/cars/%s_sel.png' % car,
-                    pos=(-1.42, 1, .22 - i * .16), scale=.074)
+                    pos=(-1.42, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
             shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
             img.setShader(shader)
@@ -145,7 +160,7 @@ class LoadingPageGui(PageGui):
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = OnscreenText(
             text=_('Ranking'),
-            scale=.1, pos=(0, .4), font=self.font, fg=(.75, .75, .75, 1))
+            scale=.1, pos=(0, .3), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         def get_driver(car):
             for driver in drivers:
@@ -155,11 +170,11 @@ class LoadingPageGui(PageGui):
             idx, name, _car = get_driver(car[0])
             txt = OnscreenText(
                 text=str(car[1]) + ' ' + name, align=TextNode.A_left,
-                scale=.072, pos=(-.2, .2 - i * .16), font=self.font, fg=(.75, .75, .25, 1) if car[0] == car_path else (.75, .75, .75, 1))
+                scale=.072, pos=(-.2, .1 - i * .16), font=self.font, fg=(.75, .75, .25, 1) if car[0] == car_path else (.75, .75, .75, 1))
             self.widgets += [txt]
             img = OnscreenImage(
                     'assets/images/cars/%s_sel.png' % car[0],
-                    pos=(-.36, 1, .22 - i * .16), scale=.074)
+                    pos=(-.36, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
             shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
             img.setShader(shader)
@@ -173,34 +188,34 @@ class LoadingPageGui(PageGui):
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = OnscreenText(
             text=_('Controls'),
-            scale=.1, pos=(1.0, .4), font=self.font, fg=(.75, .75, .75, 1))
+            scale=.1, pos=(1.0, .3), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         conf = game.options
         if conf['settings']['joystick']:
             txt = OnscreenText(
                 text=_('joypad'),
-                scale=.08, pos=(1.0, .2), font=self.font, fg=(.75, .75, .75, 1))
+                scale=.08, pos=(1.0, .1), font=self.font, fg=(.75, .75, .75, 1))
             self.widgets += [txt]
             return
         txt = OnscreenText(
             text=_('accelerate') + ': ' + conf['settings']['keys']['forward'], align=TextNode.A_left,
-            scale=.072, pos=(.8, .2), font=self.font, fg=(.75, .75, .75, 1))
+            scale=.072, pos=(.8, .1), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
             text=_('brake') + ': ' + conf['settings']['keys']['rear'], align=TextNode.A_left,
-            scale=.072, pos=(.8, .04), font=self.font, fg=(.75, .75, .75, 1))
+            scale=.072, pos=(.8, -.06), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
             text=_('left') + ': ' + conf['settings']['keys']['left'], align=TextNode.A_left,
-            scale=.072, pos=(.8, -.12), font=self.font, fg=(.75, .75, .75, 1))
+            scale=.072, pos=(.8, -.22), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
             text=_('right') + ': ' + conf['settings']['keys']['right'], align=TextNode.A_left,
-            scale=.072, pos=(.8, -.28), font=self.font, fg=(.75, .75, .75, 1))
+            scale=.072, pos=(.8, -.38), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
             text=_('fire') + ': ' + conf['settings']['keys']['button'], align=TextNode.A_left,
-            scale=.072, pos=(.8, -.44), font=self.font, fg=(.75, .75, .75, 1))
+            scale=.072, pos=(.8, -.54), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
 
     def on_loading(self, msg):
