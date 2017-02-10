@@ -1,7 +1,16 @@
+def has_pygame():
+    try:
+        import pygame
+    except ImportError:
+        return False
+    return True
+
+
 from ..gameobject import Event
 import sys
-import pygame
-from pygame import joystick
+if has_pygame():
+    import pygame
+    from pygame import joystick
 
 
 class EngineEvent(Event):
@@ -15,12 +24,16 @@ class EngineEvent(Event):
         self.old_x = self.old_y = self.old_b0 = self.old_b1 = 0
 
     def init_joystick(self):
+        if not has_pygame():
+            return
         pygame.init()
         joystick.init()
         self.joysticks = [joystick.Joystick(x) for x in range(joystick.get_count())]
         map(lambda j_s: j_s.init(), self.joysticks)
 
     def get_joystick(self):
+        if not has_pygame():
+            return 0, 0, 0, 0
         for e in pygame.event.get(): pass
         if not self.joysticks: return 0, 0, 0, 0
         j_s = self.joysticks[0]
@@ -57,8 +70,9 @@ class EngineEvent(Event):
 
     def destroy(self):
         Event.destroy(self)
-        joystick.quit()
-        pygame.quit()
+        if has_pygame():
+            joystick.quit()
+            pygame.quit()
 
 
 class EngineEventWindow(EngineEvent):

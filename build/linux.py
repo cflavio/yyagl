@@ -74,9 +74,10 @@ def build_linux(target, source, env):
     mirr = env['SUPERMIRROR']
     nointernet = '-s' if env['NOINTERNET'] else ''
     int_str = '-nointernet' if env['NOINTERNET'] else ''
+    p3d_path = env['P3D_PATH'][:-4] + 'nopygame.p3d'
     build_command = bld_cmd(mirr).format(
         path=path, name=name, Name=name.capitalize(), version=ver,
-        p3d_path=env['P3D_PATH'], platform='linux_'+platform,
+        p3d_path=p3d_path, platform='linux_'+platform,
         nointernet=nointernet)
     system(build_command)
     start_dir = os_path.abspath('.') + '/'
@@ -84,7 +85,7 @@ def build_linux(target, source, env):
         __prepare_folders(start_dir, platform)
         __build(name, start_dir, platform, ico_file)
         if nointernet:
-            args = name, platform, ico_file, env['P3D_PATH'], nointernet, mirr
+            args = name, platform, ico_file, p3d_path, nointernet, mirr
             __build_no_internet(*args)
         __build_packages(name, platform, int_str)
     rmtree(path+'linux_'+platform)
