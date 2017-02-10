@@ -44,7 +44,7 @@ class CarEvent(Event):
 
     def on_frame(self):
         input_dct = self._get_input()
-        if self.mdt.fsm.getCurrentOrNextState() != 'Play':
+        if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
             input_dct = {key: False for key in input_dct}
             self.mdt.logic.reset_car()
         self.mdt.logic.update(input_dct)
@@ -140,7 +140,9 @@ class CarPlayerEvent(CarEvent):
             self._process_end_goal()
 
     def _get_input(self):
-        if not game.options['settings']['joystick']:
+        if self.mdt.fsm.getCurrentOrNextState() == 'Results':
+            return self.mdt.ai.get_input()
+        elif not game.options['settings']['joystick']:
            keys = ['forward', 'left', 'reverse', 'right']
            return {key: inputState.isSet(key) for key in keys}
         else:

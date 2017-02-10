@@ -95,3 +95,9 @@ class CarAi(Ai):
         left, right = self.left_right
         return {'forward': acceleration, 'left': left, 'reverse': brake,
                 'right': right}
+
+
+class CarResultsAi(CarAi):
+
+    def _end_async(self):
+        pass
