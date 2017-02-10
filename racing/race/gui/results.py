@@ -51,7 +51,7 @@ class Results(object):
         pars = {'scale': .1, 'fg': (.75, .75, .75, 1),
                 'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
         pars_r = {'scale': .08, 'fg': (.75, .75, .75, 1),
-                'font': eng.font_mgr.load_font('assets/fonts/zekton rg.ttf')}
+                'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
         self.__res_txts = [OnscreenText(
             str(round(game.player_car.logic.lap_times[i], 2)),
             pos=(0, .47 - .2 * (i + 1)), **pars)
