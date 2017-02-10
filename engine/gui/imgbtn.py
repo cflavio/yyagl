@@ -39,7 +39,7 @@ class ImageButton(DirectButton):
         DirectButton.__init__(self, *args, **kwargs)
         self['frameSize'] = (-1, 1, -1, 1)
         self['relief'] = FLAT
-        shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
+        shader = Shader.make(Shader.SL_GLSL, vert, frag)
         self.setShader(shader)
         self.setShaderInput('col_scale', 0)
         self.setTransparency(True)

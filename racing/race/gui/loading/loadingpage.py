@@ -119,7 +119,7 @@ class LoadingPageGui(PageGui):
             track_num = ['prototype', 'desert'].index(track_path[7:]) + 1
             track_number = ' (%s/2)' % track_num
         track_txt = OnscreenText(
-            text=_('track: ' + track_name + track_number),
+            text=_('track: ') + track_name + track_number,
             scale=.08, pos=(0, .56), font=self.font, fg=(.75, .75, .75, 1),
             wordwrap=12)
         self.set_grid(car_path, drivers)
@@ -148,7 +148,7 @@ class LoadingPageGui(PageGui):
                     'assets/images/cars/%s_sel.png' % car,
                     pos=(-1.42, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
-            shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
+            shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)
             img.setTransparency(True)
             ts = TextureStage('ts')
@@ -176,7 +176,7 @@ class LoadingPageGui(PageGui):
                     'assets/images/cars/%s_sel.png' % car[0],
                     pos=(-.36, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
-            shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
+            shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)
             img.setTransparency(True)
             ts = TextureStage('ts')
