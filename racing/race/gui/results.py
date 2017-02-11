@@ -39,8 +39,8 @@ void main() {
 class Results(object):
 
     def __init__(self):
-        self.__res_txts = None
-        self.__buttons = None
+        self.__res_txts = []
+        self.__buttons = []
         self.result_frm = None
 
     def show(self, race_ranking):
@@ -114,9 +114,7 @@ class Results(object):
             for i, site in enumerate(sites)]
 
         def step():
-            map(lambda txt: txt.destroy(), self.__res_txts)
-            map(lambda btn: btn.destroy(), self.__buttons)
-            self.result_frm.destroy()
+            self.destroy()
             #TODO: notify and manage into yorg's fsm
             ranking = game.logic.season.logic.ranking
             tuning = game.logic.season.logic.tuning
@@ -130,7 +128,15 @@ class Results(object):
                 game.fsm.demand('Ranking')
             else:
                 game.fsm.demand('Menu')
-        taskMgr.doMethodLater(10.0, lambda tsk: step(), 'step')
+        self.tsk = taskMgr.doMethodLater(10.0, lambda tsk: step(), 'step')
 
     def destroy(self):
-        pass
+        if not self.result_frm or self.result_frm.isEmpty():
+            return
+        # if it is reached by step then there are two destroys: step's one
+        # and race.gui's one
+        map(lambda txt: txt.destroy(), self.__res_txts)
+        map(lambda btn: btn.destroy(), self.__buttons)
+        self.result_frm.destroy()
+        taskMgr.remove(self.tsk)
+        self.tsk = None

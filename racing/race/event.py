@@ -2,6 +2,7 @@ from itertools import chain
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from yyagl.gameobject import Event
 from yyagl.racing.car.ai import CarAi
+from menu.ingamemenu.menu import InGameMenu
 
 
 class NetMsgs(object):
@@ -15,11 +16,21 @@ class RaceEvent(Event):
 
     def __init__(self, mdt):
         Event.__init__(self, mdt)
-        self.accept('p', eng.pause.logic.toggle)
+        base.ignore('escape-up')
+        self.accept('p-up', eng.pause.logic.toggle)
+        self.register_menu()
         self.last_sent = globalClock.getFrameTime()
 
     def network_register(self):
         pass
+
+    def fire_menu(self):
+        self.ignore('escape-up')
+        eng.gui.show_cursor()
+        InGameMenu()
+
+    def register_menu(self):
+        self.accept('escape-up', self.fire_menu)
 
     def on_wrong_way(self, way_str):
         self.mdt.track.gui.way_txt.setText(way_str)
@@ -28,6 +39,12 @@ class RaceEvent(Event):
         points = [10, 8, 6, 4, 3, 2, 1, 0]
         race_ranking = {car: point for car, point in zip(self.mdt.logic.ranking(), points)}
         self.mdt.fsm.demand('Results', race_ranking)
+
+    def destroy(self):
+        Event.destroy(self)
+        self.ignore('escape-up')
+        self.ignore('p-up')
+        base.accept('escape-up', game.fsm.demand, ['Exit'])
 
 
 class RaceEventServer(RaceEvent):
