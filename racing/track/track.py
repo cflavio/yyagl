@@ -19,7 +19,10 @@ class Track(GameObjectMdt):
             [('event', TrackEvent, [self])]]
         GameObjectMdt.__init__(self, init_lst, cb)
         with open('assets/models/%s/track.yml' % path) as track_file:
-            self.camera_vector = yaml.load(track_file)['camera_vector']
+            track_conf = yaml.load(track_file)
+            self.camera_vector = track_conf['camera_vector']
+            self.shadow_source = track_conf['shadow_source']
+            self.laps = track_conf['laps']
 
     def on_loading(self, txt):
         self.notify('on_loading', txt)

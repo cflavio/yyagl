@@ -61,7 +61,7 @@ class RaceLogic(Logic):
                 srv_or_sng = eng.server.is_active or not eng.client.is_active
                 car_class = AiCar if no_p and srv_or_sng else car_class
                 new_car = car_class('cars/' + car, pos, hpr, func, self.mdt,
-                                    game.options['development']['laps'])
+                                    game.track.laps)
                 game.cars += [new_car]
             path = 'cars/' + car_path
             pos = game.track.phys.get_start_pos(grid.index(car_path))[0] + (0, 0, .2)
@@ -76,7 +76,7 @@ class RaceLogic(Logic):
                 if eng.client.is_active:
                     car_cls = PlayerCarClient
             game.player_car = car_cls(path, pos, hpr, func, self.mdt,
-                                      dev['laps'])
+                                      game.track.laps)
             game.cars = []
         game.track = Track(
             track_path, load_car, dev['split_world'], dev['submodels'])

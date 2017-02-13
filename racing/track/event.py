@@ -1,4 +1,5 @@
 from yyagl.gameobject import Event
+from panda3d.core import LPoint3f
 
 
 class TrackEvent(Event):
@@ -14,7 +15,7 @@ class TrackEvent(Event):
         nodepath = game.player_car.gfx.nodepath
         car_pos = nodepath.get_pos()
         if not game.options['development']['shaders']:
-            self.mdt.gfx.spot_lgt.setPos(car_pos + (60, -60, 100))
+            self.mdt.gfx.spot_lgt.setPos(car_pos + LPoint3f(*self.mdt.shadow_source))
             #self.mdt.gfx.spot_lgt.lookAt(car_pos + (-40, 60, -50))
         cars = [game.player_car] + game.cars
         positions = [(car.path[5:], car.gfx.nodepath.get_pos()) for car in cars]
