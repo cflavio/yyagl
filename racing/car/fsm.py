@@ -14,3 +14,4 @@ class CarFsm(Fsm):
     def enterResults(self):
         self.mdt.ai.destroy()
         self.mdt.ai = CarResultsAi(self.mdt)
+        self.mdt.gui.destroy()
