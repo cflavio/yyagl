@@ -168,7 +168,7 @@ class TrackGfx(Gfx):
         self.spot_lgt.node().getLens().setFov(40)
         self.spot_lgt.node().getLens().setNearFar(20, 200)
         self.spot_lgt.node().setCameraMask(BitMask32.bit(0))
-        self.spot_lgt.setPos(50, -80, 80)
+        self.spot_lgt.setPos(*self.mdt.shadow_source)
         self.spot_lgt.lookAt(0, 0, 0)
         render.setLight(self.spot_lgt)
         render.setShaderAuto()
