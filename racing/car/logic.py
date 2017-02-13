@@ -156,7 +156,32 @@ class CarLogic(Logic):
 
     @property
     def correct_lap(self):
+        def fork_wp():
+            in_forks = []
+            start_forks = []
+            for w_p in game.track.phys.waypoints:
+                if len(game.track.phys.waypoints[w_p]) > 1:
+                    start_forks += [w_p]
+            end_forks = []
+            for w_p in game.track.phys.waypoints:
+                count_parents = 0
+                for w_p1 in game.track.phys.waypoints:
+                    if w_p in game.track.phys.waypoints[w_p1]:
+                        count_parents += 1
+                if count_parents > 1:
+                    end_forks += [w_p]
+            for w_p in start_forks:
+                 to_process = game.track.phys.waypoints[w_p][:]
+                 while to_process:
+                     first_wp = to_process.pop(0)
+                     in_forks += [first_wp]
+                     for w_p2 in game.track.phys.waypoints[first_wp]:
+                         if w_p2 not in end_forks:
+                             to_process += [w_p2]
+            return in_forks
         all_wp = [int(w_p.get_name()[8:]) for w_p in game.track.phys.waypoints]
+        f_wp = [int(w_p.get_name()[8:]) for w_p in fork_wp()]
+        map(all_wp.remove, f_wp)
         is_correct = all(w_p in self.waypoints for w_p in all_wp)
         if not is_correct:
             skipped = [str(w_p) for w_p in all_wp if w_p not in self.waypoints]
@@ -211,6 +236,8 @@ class CarPlayerLogic(CarLogic):
 
     def update(self, input_dct):
         CarLogic.update(self, input_dct)
+        if self.mdt.fsm.getCurrentOrNextState() == 'Results':
+            return
         if self.last_time_start:
             f_t = globalClock.getFrameTime()
             d_t = round(f_t - self.last_time_start, 2)
