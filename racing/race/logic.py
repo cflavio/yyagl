@@ -93,7 +93,7 @@ class RaceLogic(Logic):
         game.track.event.start()
         self.mdt.event.network_register()
         game.player_car.logic.attach(self.mdt.event.on_wrong_way)
-        game.audio.game_music.play()
+        game.track.audio.music.play()
         cars = [game.player_car] + game.cars
         map(lambda car: car.logic.reset_car(), cars)
         map(lambda car: car.event.start(), cars)
@@ -112,7 +112,7 @@ class RaceLogic(Logic):
         return [car[0] for car in reversed(by_laps)]
 
     def exit_play(self):
-        game.audio.game_music.stop()
+        game.track.audio.music.stop()
         game.player_car.logic.detach(self.mdt.event.on_wrong_way)
         game.track.destroy()
         game.player_car.destroy()

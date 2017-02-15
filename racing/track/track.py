@@ -3,6 +3,7 @@ from .gfx import TrackGfx
 from .phys import TrackPhys
 from .gui.gui import TrackGui
 from .event import TrackEvent
+from .audio import TrackAudio
 import yaml
 
 
@@ -16,7 +17,8 @@ class Track(GameObjectMdt):
              ('gfx', TrackGfx, [self, split_world, submodels],
               lambda: self.gfx.attach(self.on_loading)),
              ('gui', TrackGui, [self, path[6:]])],
-            [('event', TrackEvent, [self])]]
+            [('event', TrackEvent, [self])],
+            [('audio', TrackAudio, [self])]]
         GameObjectMdt.__init__(self, init_lst, cb)
         with open('assets/models/%s/track.yml' % path) as track_file:
             track_conf = yaml.load(track_file)
