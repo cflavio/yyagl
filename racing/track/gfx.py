@@ -4,6 +4,7 @@ from direct.actor.Actor import Actor
 from yyagl.gameobject import Gfx
 from direct.gui.OnscreenText import OnscreenText
 from random import shuffle
+import os
 
 
 class TrackGfx(Gfx):
@@ -27,8 +28,13 @@ class TrackGfx(Gfx):
         eng.log_mgr.log('loading track model')
         self.notify('on_loading', _('loading track model'))
         time = globalClock.getFrameTime()
-        path = self.mdt.path + '/track'
-        eng.gfx.load_model(path, callback=self.__set_submod, extraArgs=[time])
+        filename = self.mdt.path[7:] + '_' + eng.logic.version.strip().split()[-1] + '.bam'
+        if os.path.exists(filename):
+            eng.log_mgr.log('loading ' + filename)
+            eng.gfx.load_model(filename, callback=self.end_loading)
+        else:
+            path = self.mdt.path + '/track'
+            eng.gfx.load_model(path, callback=self.__set_submod, extraArgs=[time])
 
     def __set_submod(self, model, time):
         d_t = round(globalClock.getFrameTime() - time, 2)
@@ -147,9 +153,14 @@ class TrackGfx(Gfx):
             len_children = len(node.get_children())
             process_flat(node, NodePath(''), node, curr_t, len_children)
 
-    def end_loading(self):
+    def end_loading(self, model=None):
+        if model: self.model = model
         self.__set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
+        filename = self.mdt.path[7:] + '_' + eng.logic.version.strip().split()[-1] + '.bam'
+        if not os.path.exists(filename):
+            eng.log_mgr.log('writing ' + filename)
+            self.model.writeBamFile(filename)
         Gfx.async_build(self)
 
     def __set_light(self):
@@ -215,10 +226,10 @@ class TrackGfx(Gfx):
         self.drs[-1].setCamera(self.cameras[-1])
 
     def __destroy_signs(self):
-        map(lambda buf: buf.destroy(), self.buffers)
-        map(lambda dr: dr.destroy(), self.drs)
-        map(lambda cam: cam.destroy(), self.cameras)
-        map(lambda ren: ren.destroy(), self.renders)
+        map(base.graphicsEngine.removeWindow, self.buffers)
+        map(base.win.removeDisplayRegion, self.drs)
+        map(lambda cam: cam.remove_node(), self.cameras)
+        map(lambda ren: ren.remove_node(), self.renders)
 
     def destroy(self):
         self.model.removeNode()

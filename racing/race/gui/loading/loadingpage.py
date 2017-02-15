@@ -9,6 +9,7 @@ import sys
 from panda3d.core import TextNode, NodePath, Shader, TextureStage, PNMImage,\
     Texture
 from direct.gui.OnscreenImage import OnscreenImage
+import os
 
 
 vertexShader = '''
@@ -125,6 +126,7 @@ class LoadingPageGui(PageGui):
         self.set_grid(car_path, drivers)
         self.set_ranking(car_path, drivers)
         self.set_controls()
+        self.set_first(track_path)
         self.widgets += [self.load_txt, track_txt]
         PageGui.build_page(self, False)
 
@@ -202,7 +204,7 @@ class LoadingPageGui(PageGui):
             scale=.072, pos=(.8, .1), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
-            text=_('brake') + ': ' + conf['settings']['keys']['rear'], align=TextNode.A_left,
+            text=_('brake/reverse') + ': ' + conf['settings']['keys']['rear'], align=TextNode.A_left,
             scale=.072, pos=(.8, -.06), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
@@ -216,6 +218,22 @@ class LoadingPageGui(PageGui):
         txt = OnscreenText(
             text=_('fire') + ': ' + conf['settings']['keys']['button'], align=TextNode.A_left,
             scale=.072, pos=(.8, -.54), font=self.font, fg=(.75, .75, .75, 1))
+        self.widgets += [txt]
+
+    def set_first(self, track_path):
+        filename = track_path[7:] + '_' + eng.logic.version.strip().split()[-1] + '.bam'
+        if os.path.exists(filename): return
+        first_txt = _(
+            'This is the first time that you are loading this track: it will '
+            'require more time since we are computing several information on '
+            'your system in place of putting them into the game package in '
+            'order to reduce the bandwith required to you for downloading the '
+            "game. Don't worry: the loading process will be a lot faster from "
+            'the next time!')
+        txt = OnscreenText(
+            text=first_txt,
+            scale=.06, pos=(1.0, .9), font=self.font, fg=(.8, .2, .2, 1),
+            bg=(.8, .8, .8, .4), wordwrap=24)
         self.widgets += [txt]
 
     def on_loading(self, msg):
