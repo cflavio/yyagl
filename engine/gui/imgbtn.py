@@ -22,14 +22,15 @@ in vec2 texcoord;
 uniform sampler2D p3d_Texture0;
 uniform float col_scale;
 out vec4 p3d_FragColor;
+uniform float enable;
 
 void main() {
     float dist_l = texcoord.x;
     float dist_r = 1 - texcoord.x;
     float dist_u = texcoord.y;
     float dist_b = 1 - texcoord.y;
-    float alpha = min(dist_l, min(dist_r, min(dist_u, dist_b))) * 30;
-    p3d_FragColor = (texture(p3d_Texture0, texcoord)  + vec4(col_scale, col_scale, col_scale, 1) ) * vec4(1, 1, 1, alpha);
+    float alpha = clamp(min(dist_l, min(dist_r, min(dist_u, dist_b))) * 30, 0, 1);
+    p3d_FragColor = (texture(p3d_Texture0, texcoord)  + vec4(col_scale, col_scale, col_scale, 1) ) * vec4(1, 1, 1, alpha * enable);
 }'''
 
 
@@ -42,6 +43,7 @@ class ImageButton(DirectButton):
         shader = Shader.make(Shader.SL_GLSL, vert, frag)
         self.setShader(shader)
         self.setShaderInput('col_scale', 0)
+        self.setShaderInput('enable', 1)
         self.setTransparency(True)
         self.bind(ENTER, self._on_enter)
         self.bind(EXIT, self._on_exit)
