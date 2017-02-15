@@ -1,4 +1,5 @@
 from yaml import load, dump
+import collections
 
 
 class DictFile(object):
@@ -7,9 +8,20 @@ class DictFile(object):
         self.path = path
         try:
             with open(path) as yaml_file:
-                self.dct = load(yaml_file)
+                file_dct = load(yaml_file)
+            self.dct = self.__update(default_dct, file_dct)
         except IOError:
             self.dct = default_dct
+
+    @staticmethod
+    def __update(d, u):
+        for k, v in u.iteritems():
+            if isinstance(v, collections.Mapping):
+                r = DictFile.__update(d.get(k, {}), v)
+                d[k] = r
+            else:
+                d[k] = u[k]
+        return d
 
     def store(self):
         with open(self.path, 'w') as yaml_file:
