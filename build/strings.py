@@ -33,7 +33,7 @@ def build_string_template(target, source, env):
     name = env['NAME']
     lang_path = env['LANG']
     languages = env['LANGUAGES']
-    src_files = ' '.join(get_files(['py']))
+    src_files = ' '.join(get_files(['py'], 'feedparser'))
     cmd_tmpl = 'xgettext -d {name} -L python -o {name}.pot '
     system(cmd_tmpl.format(name=name) + src_files)
     for lang in languages:

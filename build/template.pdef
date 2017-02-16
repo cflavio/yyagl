@@ -14,6 +14,7 @@ class <Name>(p3d):
         version='<version>',
         display_name='<Name>')
     dir('<enginepath>/thirdparty/yaml', 'yaml')
+    file('<enginepath>/thirdparty/feedparser.py', 'feedparser.py')
     for _dir in ['<enginepath>/licenses', 'assets', '<enginepath>/assets']:
         dir(_dir, newDir=_dir)
     file('license.txt')
