@@ -12,8 +12,10 @@ def __get_branch():
 
 
 def __get_version():
-    date = exec_cmd('git show -s --format=%ci HEAD')
-    return __get_branch()+'-'+date[2:4]+date[5:7]+date[8:10]
+    hash = exec_cmd('git rev-parse HEAD')[:7]
+    with open('assets/version.txt') as f:
+        ver = f.read().strip()
+    return ver + '-' + hash
 
 
 def bld_cmd_pref(ptools_path):
