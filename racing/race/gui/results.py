@@ -45,12 +45,11 @@ class Results(object):
 
     def show(self, race_ranking):
         track = game.track.path
-        self.result_frm = DirectFrame(frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
+        self.result_frm = DirectFrame(
+            frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
         # race object invokes this
         laps = len(game.player_car.logic.lap_times)
         pars = {'scale': .1, 'fg': (.75, .75, .75, 1),
-                'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
-        pars_r = {'scale': .08, 'fg': (.75, .75, .75, 1),
                 'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
         self.__res_txts = [OnscreenText(
             str(round(game.player_car.logic.lap_times[i], 2)),
@@ -58,31 +57,35 @@ class Results(object):
             for i in range(laps)]
         self.__res_txts += [OnscreenText(_('LAP'), pos=(-.6, .6), **pars)]
         self.__res_txts += [OnscreenText(_('TIME'), pos=(0, .6), **pars)]
-        self.__res_txts += [OnscreenText(_('RANKING'), pos=(.5, .6), align=TextNode.A_left, **pars)]
+        self.__res_txts += [OnscreenText(_('RANKING'), pos=(.5, .6),
+                                         align=TextNode.A_left, **pars)]
         self.__res_txts += [
             OnscreenText(str(i), pos=(-.6, .47 - .2 * i), **pars)
             for i in range(1, 4)]
         race_ranking_sorted = sorted(race_ranking.items(), key=lambda x: x[1])
         race_ranking_sorted = reversed([el[0] for el in race_ranking_sorted])
+
         def get_driver(car):
             for driver in game.fsm.race.logic.drivers:
                 if driver[2] == car:
                     return driver
         for i, car in enumerate(race_ranking_sorted):
             idx, name, _car = get_driver(car)
+            is_car = car == game.player_car.path[5:]
             txt = OnscreenText(
                 text=str(i + 1) + '. ' + name, align=TextNode.A_left,
-                scale=.072, pos=(.68, .44 - .16 * (i + 1)), font=eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf'),
-                fg=(.75, .75, .25, 1) if car == game.player_car.path[5:] else (.75, .75, .75, 1))
-            img = OnscreenImage(
-                    'assets/images/cars/%s_sel.png' % car,
-                    pos=(.58, 1, .47 - (i + 1) * .16), scale=.074)
+                scale=.072, pos=(.68, .44 - .16 * (i + 1)),
+                font=eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf'),
+                fg=(.75, .75, .25, 1) if is_car else (.75, .75, .75, 1))
+            img = OnscreenImage('assets/images/cars/%s_sel.png' % car,
+                                pos=(.58, 1, .47 - (i + 1) * .16), scale=.074)
             shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
             img.setShader(shader)
             img.setTransparency(True)
             ts = TextureStage('ts')
             ts.setMode(TextureStage.MDecal)
-            img.setTexture(ts, loader.loadTexture('assets/images/drivers/driver%s_sel.png' % idx))
+            txt_path = 'assets/images/drivers/driver%s_sel.png' % idx
+            img.setTexture(ts, loader.loadTexture(txt_path))
             self.__res_txts += [txt, img]
         self.__res_txts += [
             OnscreenText(_('share:'), pos=(-.1, -.82), align=TextNode.A_right,

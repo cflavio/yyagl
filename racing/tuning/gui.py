@@ -1,4 +1,3 @@
-from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Gui
 from yyagl.engine.gui.imgbtn import ImageButton
 from direct.gui.OnscreenImage import OnscreenImage

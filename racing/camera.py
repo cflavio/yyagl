@@ -30,21 +30,23 @@ class Camera(object):
         look_z_diff = self.look_z_max - self.look_z_min
 
         nodepath = self.car.gfx.nodepath
-        fwd_car_vec = eng.base.render.getRelativeVector(nodepath, Vec3(0, 1, 0))
+        z_u = Vec3(0, 1, 0)
+        fwd_car_vec = eng.base.render.getRelativeVector(nodepath, z_u)
         fwd_car_vec.normalize()
         fwd_vec = LVector3f(*game.track.camera_vector)
         fwd_vec.normalize()
 
         car_pos = nodepath.get_pos()
         cam_vec = -fwd_vec * (self.cam_dist_min + cam_dist_diff * speed_ratio)
-        tgt_vec = fwd_car_vec * (self.look_dist_min + look_dist_diff * speed_ratio)
+        l_d = self.look_dist_min + look_dist_diff * speed_ratio
+        tgt_vec = fwd_car_vec * l_d
         delta_pos_z = self.cam_z_min + cam_z_diff * speed_ratio
         delta_cam_z = self.look_z_min + look_z_diff * speed_ratio
 
         curr_cam_pos = car_pos + cam_vec + (0, 0, delta_pos_z)
         curr_cam_dist_fact = self.cam_dist_min + cam_dist_diff * speed_ratio
 
-        curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
+        #curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
         #if curr_occl:
         #    occl_pos = curr_occl.getHitPos()
         #    cam_vec = occl_pos - car_pos
@@ -59,8 +61,8 @@ class Camera(object):
 
         def new_pos(cam_pos, tgt):
             beyond = abs(cam_pos - tgt) > curr_incr
-            fit_pos = lambda: cam_pos + (1 if tgt > cam_pos else -1) * curr_incr
-            return fit_pos() if beyond else tgt
+            fit_p = lambda: cam_pos + (1 if tgt > cam_pos else -1) * curr_incr
+            return fit_p() if beyond else tgt
         new_x = new_pos(eng.base.camera.getX(), self.tgt_cam_x)
         new_y = new_pos(eng.base.camera.getY(), self.tgt_cam_y)
         new_z = new_pos(eng.base.camera.getZ(), self.tgt_cam_z)

@@ -1,5 +1,3 @@
-from panda3d.core import NodePath, TextNode
-from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Logic
 from yyagl.racing.track.track import Track
 from yyagl.racing.car.car import Car, PlayerCar, PlayerCarServer, \
@@ -54,8 +52,9 @@ class RaceLogic(Logic):
                     car_class = NetworkCar  # if car in player_cars else Car
                 if eng.client.is_active:
                     car_class = NetworkCar
-                pos = game.track.phys.get_start_pos(grid.index(car))[0] + (0, 0, .2)
-                hpr = game.track.phys.get_start_pos(grid.index(car))[1]
+                s_p = game.track.phys.get_start_pos(grid.index(car))
+                pos = s_p[0] + (0, 0, .2)
+                hpr = s_p[1]
                 func = load_other_cars
                 no_p = car not in player_cars
                 srv_or_sng = eng.server.is_active or not eng.client.is_active
@@ -64,8 +63,9 @@ class RaceLogic(Logic):
                                     game.track.laps)
                 game.cars += [new_car]
             path = 'cars/' + car_path
-            pos = game.track.phys.get_start_pos(grid.index(car_path))[0] + (0, 0, .2)
-            hpr = game.track.phys.get_start_pos(grid.index(car_path))[1]
+            s_p = game.track.phys.get_start_pos(grid.index(car_path))
+            pos = s_p[0] + (0, 0, .2)
+            hpr = s_p[1]
             func = load_other_cars
             if ai:
                 car_cls = AiCar
@@ -80,7 +80,8 @@ class RaceLogic(Logic):
             game.cars = []
         game.track = Track(
             track_path, load_car, dev['split_world'])
-        game.track.attach(self.mdt.gui.loading.menu.gui.menu.logic.pages[0].gui.on_loading)
+        meth = self.mdt.gui.loading.menu.gui.menu.logic.pages[0].gui.on_loading
+        game.track.attach(meth)
         self.mdt.track = game.track
 
     def enter_play(self):

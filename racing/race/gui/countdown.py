@@ -1,5 +1,4 @@
 from direct.gui.OnscreenText import OnscreenText
-from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.observer import Subject
 
 
@@ -12,7 +11,8 @@ class Countdown(Subject):
             '', pos=(0, 0), scale=.2, fg=(1, 1, 1, 1),
             font=eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf'))
         self.countdown_cnt = 3
-        self.tsk = taskMgr.doMethodLater(1.0, self.process_countdown, 'coutdown')
+        meth = self.process_countdown
+        self.tsk = taskMgr.doMethodLater(1.0, meth, 'coutdown')
 
     def process_countdown(self, task):
         if self.countdown_cnt >= 0:

@@ -31,7 +31,8 @@ class CarLogic(Logic):
         speed_ratio = phys.speed_ratio
         steering_range = phys.steering_min_speed - phys.steering_max_speed
         steering_clamp = phys.steering_min_speed - speed_ratio * steering_range
-        if not game.options['settings']['joystick'] or self.__class__ != CarPlayerLogic:
+        not_j = not game.options['settings']['joystick']
+        if not_j or self.__class__ != CarPlayerLogic:
             if input_dct['forward'] and input_dct['reverse']:
                 eng_frc = phys.engine_acc_frc
                 brake_frc = phys.brake_frc
@@ -83,7 +84,7 @@ class CarLogic(Logic):
             if x > .1:
                 self.__steering -= steering_inc * x
                 self.__steering = max(self.__steering, -steering_clamp)
-            if -.1 < x < .1 :
+            if -.1 < x < .1:
                 if abs(self.__steering) <= steering_dec:
                     self.__steering = 0
                 else:
@@ -97,7 +98,8 @@ class CarLogic(Logic):
             self.mdt.gfx.on_no_skidmarking()
 
     def get_eng_frc(self, eng_frc):
-        curr_max_speed = self.mdt.phys.max_speed * self.mdt.phys.curr_speed_factor
+        m_s = self.mdt.phys.max_speed
+        curr_max_speed = m_s * self.mdt.phys.curr_speed_factor
         if self.mdt.phys.speed / curr_max_speed < .99:
             return eng_frc
         tot = .01 * curr_max_speed
@@ -171,13 +173,13 @@ class CarLogic(Logic):
                 if count_parents > 1:
                     end_forks += [w_p]
             for w_p in start_forks:
-                 to_process = game.track.phys.waypoints[w_p][:]
-                 while to_process:
-                     first_wp = to_process.pop(0)
-                     in_forks += [first_wp]
-                     for w_p2 in game.track.phys.waypoints[first_wp]:
-                         if w_p2 not in end_forks:
-                             to_process += [w_p2]
+                to_process = game.track.phys.waypoints[w_p][:]
+                while to_process:
+                    first_wp = to_process.pop(0)
+                    in_forks += [first_wp]
+                    for w_p2 in game.track.phys.waypoints[first_wp]:
+                        if w_p2 not in end_forks:
+                            to_process += [w_p2]
             return in_forks
         all_wp = [int(w_p.get_name()[8:]) for w_p in game.track.phys.waypoints]
         f_wp = [int(w_p.get_name()[8:]) for w_p in fork_wp()]
@@ -246,7 +248,8 @@ class CarPlayerLogic(CarLogic):
             self.mdt.gui.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__update_wp()
         ranking = game.fsm.race.logic.ranking()
-        self.mdt.gui.ranking_txt.setText(str(ranking.index(self.mdt.path[5:]) + 1) + "'")
+        r_i = ranking.index(self.mdt.path[5:]) + 1
+        self.mdt.gui.ranking_txt.setText(str(r_i) + "'")
 
     def fire(self):
         self.weapon.logic.fire()

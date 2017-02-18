@@ -30,18 +30,21 @@ class CarGfx(Gfx):
 
     def async_build(self):
         try:
-            self.chassis_np_low = loader.loadModel(self.mdt.path + '/cardamage1')
+            path = self.mdt.path + '/cardamage1'
+            self.chassis_np_low = loader.loadModel(path)
         except IOError:
             self.chassis_np_low = loader.loadModel(self.mdt.path + '/car')
         try:
-            self.chassis_np_hi = loader.loadModel(self.mdt.path + '/cardamage2')
+            path = self.mdt.path + '/cardamage2'
+            self.chassis_np_hi = loader.loadModel(path)
         except IOError:
             self.chassis_np_hi = loader.loadModel(self.mdt.path + '/car')
         loader.loadModel(self.mdt.path + '/car', callback=self.load_wheels)
 
     def reparent(self):
         self.chassis_np.reparentTo(self.nodepath)
-        map(lambda cha: cha.setDepthOffset(-2), [self.chassis_np, self.chassis_np_low, self.chassis_np_hi])
+        cha = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
+        map(lambda cha: cha.setDepthOffset(-2), cha)
 
         map(lambda whl: whl.reparentTo(eng.gfx.world_np), self.wheels.values())
 
@@ -60,8 +63,7 @@ class CarGfx(Gfx):
         Gfx._end_async(self)
 
     def crash_sfx(self):
-        speed, speed_ratio = self.mdt.phys.speed, self.mdt.phys.speed_ratio
-        if speed_ratio < .5:
+        if self.mdt.phys.speed_ratio < .5:
             return
         self.apply_damage()
         self.mdt.audio.crash_high_speed_sfx.play()

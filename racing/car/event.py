@@ -13,8 +13,8 @@ class CarEvent(Event):
         eng.phys.attach(self.on_collision)
         keys = game.options['settings']['keys']
         self.label_events = [
-            ('forward', keys['forward']), ('left', keys['left']), ('reverse', keys['rear']),
-            ('right', keys['right'])]
+            ('forward', keys['forward']), ('left', keys['left']),
+            ('reverse', keys['rear']), ('right', keys['right'])]
         watch = inputState.watchWithModifiers
         self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
 
@@ -97,7 +97,8 @@ class CarPlayerEvent(CarEvent):
     def on_bonus(self):
         if not self.mdt.logic.weapon:
             self.mdt.logic.weapon = Rocket(self.mdt)
-            self.accept(game.options['settings']['keys']['button'], self.on_fire)
+            btn = game.options['settings']['keys']['button']
+            self.accept(btn, self.on_fire)
             self.has_weapon = True
 
     def on_fire(self):
@@ -143,13 +144,14 @@ class CarPlayerEvent(CarEvent):
         if self.mdt.fsm.getCurrentOrNextState() == 'Results':
             return self.mdt.ai.get_input()
         elif not game.options['settings']['joystick']:
-           keys = ['forward', 'left', 'reverse', 'right']
-           return {key: inputState.isSet(key) for key in keys}
+            keys = ['forward', 'left', 'reverse', 'right']
+            return {key: inputState.isSet(key) for key in keys}
         else:
             x, y, a, b = eng.event.get_joystick()
             if b and not self.last_b and self.has_weapon:
                 self.on_fire()
-            return {'forward': y < -.4, 'reverse': y > .4 or a, 'left': x < -.4, 'right': x > .4}
+            return {'forward': y < -.4, 'reverse': y > .4 or a,
+                    'left': x < -.4, 'right': x > .4}
 
     def destroy(self):
         CarEvent.destroy(self)
@@ -159,11 +161,11 @@ class CarPlayerEvent(CarEvent):
 class CarPlayerEventServer(CarPlayerEvent):
 
     def __init__(self, mdt):
-        _PlayerEvent.__init__(self, mdt)
+        CarPlayerEvent.__init__(self, mdt)
 
     def _process_end_goal(self):
         eng.server.send([NetMsgs.end_race])
-        _PlayerEvent._process_end_goal(self)
+        CarPlayerEvent._process_end_goal(self)
 
 
 class CarPlayerEventClient(CarPlayerEvent):

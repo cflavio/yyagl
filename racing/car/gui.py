@@ -1,7 +1,6 @@
 from panda3d.core import TextNode, LVector3f
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.OnscreenText import OnscreenText
-from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import Gui
 
 

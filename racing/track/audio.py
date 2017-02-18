@@ -1,4 +1,3 @@
-from panda3d.core import AudioSound
 from yyagl.gameobject import Audio
 import yaml
 

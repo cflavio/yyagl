@@ -1,8 +1,4 @@
-from os.path import exists
 from yyagl.gameobject import Gfx
-from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape, \
-    BulletSphereShape, BulletGhostNode
-from panda3d.core import Mat4
 from direct.actor.Actor import Actor
 
 

@@ -6,7 +6,8 @@ from random import randint
 
 class _Gui(Gui):
 
-    def __init__(self, mdt, loading, track_path, car_path, player_cars, drivers):
+    def __init__(self, mdt, loading, track_path, car_path, player_cars,
+                 drivers):
         Gui.__init__(self, mdt)
         menu_args = MenuArgs(
             'assets/fonts/Hanken-Book.ttf', (.75, .75, .25, 1), .1,
@@ -16,7 +17,8 @@ class _Gui(Gui):
             '')
         self.menu = Menu(menu_args)
         self.menu.loading = loading
-        self.menu.logic.push_page(LoadingPage(self.menu, track_path, car_path, player_cars, drivers))
+        self.menu.logic.push_page(LoadingPage(self.menu, track_path, car_path,
+                                              player_cars, drivers))
 
     def destroy(self):
         Gui.destroy(self)
@@ -26,13 +28,14 @@ class _Gui(Gui):
 class LoadingMenu(Menu):
     gui_cls = _Gui
 
-
-    def __init__(self, loading, track_path='', car_path='', player_cars=[], drivers=None):
+    def __init__(self, loading, track_path='', car_path='', player_cars=[],
+                 drivers=None):
         init_lst = [
             [('fsm', self.fsm_cls, [self])],
             [('gfx', self.gfx_cls, [self])],
             [('phys', self.phys_cls, [self])],
-            [('gui', self.gui_cls, [self, loading, track_path, car_path, player_cars, drivers])],
+            [('gui', self.gui_cls, [self, loading, track_path, car_path,
+                                    player_cars, drivers])],
             [('logic', self.logic_cls, [self])],
             [('audio', self.audio_cls, [self])],
             [('ai', self.ai_cls, [self])],

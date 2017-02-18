@@ -1,6 +1,5 @@
 from yyagl.gameobject import Logic
 from yyagl.racing.ranking.ranking import Ranking
-from yyagl.racing.race.race import Race
 from yyagl.racing.tuning.tuning import Tuning
 
 
@@ -35,7 +34,8 @@ class SeasonLogic(Logic):
             next_track = tracks[tracks.index(current_track) + 1]
             curr_car = game.options['save']['car']
             drivers = game.options['save']['drivers']
-            game.fsm.demand('Race', 'tracks/' + next_track, curr_car, [], drivers)
+            n_t = 'tracks/' + next_track
+            game.fsm.demand('Race', n_t, curr_car, [], drivers)
 
 
 class SingleRaceSeasonLogic(SeasonLogic):

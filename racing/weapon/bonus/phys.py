@@ -1,8 +1,5 @@
-from os.path import exists
 from yyagl.gameobject import Phys
-from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape, \
-    BulletSphereShape, BulletGhostNode
-from panda3d.core import Mat4
+from panda3d.bullet import BulletBoxShape, BulletGhostNode
 
 
 class BonusPhys(Phys):

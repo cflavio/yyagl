@@ -44,4 +44,5 @@ class Minimap(object):
             self.car_handles[car_name].set_pos(pos_x, 1, pos_y)
 
     def destroy(self):
-        map(lambda wdg: wdg.destroy(), [self.minimap] + self.car_handles.values())
+        des = lambda wdg: wdg.destroy()
+        map(des, [self.minimap] + self.car_handles.values())

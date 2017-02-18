@@ -22,7 +22,8 @@ class RankingGui(Gui):
                 '%s %s' % (name, score), pos=(0, .5 - .2 * i), font=font,
                 fg=(.75, .75, .75, 1), scale=.12)
             self.ranking_texts += [txt]
-        taskMgr.doMethodLater(10, lambda task: game.fsm.demand('Tuning'), 'tuning')
+        to_tun = lambda task: game.fsm.demand('Tuning')
+        taskMgr.doMethodLater(10, to_tun, 'tuning')
 
     def hide(self):
         map(lambda wdg: wdg.destroy(), self.ranking_texts + [self.background])

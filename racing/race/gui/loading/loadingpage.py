@@ -1,13 +1,7 @@
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.engine.gui.page import Page, PageGui
-from direct.gui.DirectFrame import DirectFrame
-from direct.gui.DirectGuiGlobals import FLAT
-from direct.gui.DirectButton import DirectButton
 from yyagl.gameobject import Gui, GameObjectMdt
-from yyagl.engine.gui.imgbtn import ImageButton
-import sys
-from panda3d.core import TextNode, NodePath, Shader, TextureStage, PNMImage,\
-    Texture
+from panda3d.core import TextNode, Shader, TextureStage
 from direct.gui.OnscreenImage import OnscreenImage
 import os
 
@@ -38,7 +32,9 @@ uniform sampler2D p3d_Texture0;
 uniform float ratio;
 
 void main() {
-  vec4 mul_color = (pos.x) < ratio - .5 ? vec4(.75, .75, .25, 1) : vec4(.75, .75, .75, .4);
+  vec4 yellow = vec4(.75, .75, .25, 1);
+  vec4 white = vec4(.75, .75, .75, .4);
+  vec4 mul_color = (pos.x) < ratio - .5 ? yellow : white;
   gl_FragColor = texture2D(p3d_Texture0, texcoord) * mul_color;
 }'''
 
@@ -86,7 +82,6 @@ class LoadingPageGui(PageGui):
         self.cnt = 1
 
     def build_page(self, track_path, car_path, player_cars, drivers):
-        menu_gui = self.menu.gui
         eng.gfx.init()
         if not track_path and not car_path:
             tracks = ['prototype', 'desert']
@@ -105,7 +100,8 @@ class LoadingPageGui(PageGui):
             text=_('LOADING...'),
             scale=.2, pos=(0, .72), font=self.font, fg=(.75, .75, .25, 1),
             wordwrap=12)
-        textShader = Shader.make(Shader.SLGLSL, vertexShader, textFragmentShader)
+        args = (Shader.SLGLSL, vertexShader, textFragmentShader)
+        textShader = Shader.make(*args)
         self.load_txt.setShader(textShader)
         self.load_txt.setShaderInput('ratio', 0)
         track_number = ''
@@ -136,15 +132,18 @@ class LoadingPageGui(PageGui):
             text=_('Starting grid'),
             scale=.1, pos=(-1.0, .3), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
+
         def get_driver(car):
             for driver in drivers:
                 if driver[2] == car:
                     return driver
         for i, car in enumerate(grid):
             idx, name, _car = get_driver(car)
+            is_car = car == car_path
             txt = OnscreenText(
                 text=str(i + 1) + '. ' + name, align=TextNode.A_left,
-                scale=.072, pos=(-1.28, .1 - i * .16), font=self.font, fg=(.75, .75, .25, 1) if car == car_path else (.75, .75, .75, 1))
+                scale=.072, pos=(-1.28, .1 - i * .16), font=self.font,
+                fg=(.75, .75, .25, 1) if is_car else (.75, .75, .75, 1))
             self.widgets += [txt]
             img = OnscreenImage(
                     'assets/images/cars/%s_sel.png' % car,
@@ -155,7 +154,8 @@ class LoadingPageGui(PageGui):
             img.setTransparency(True)
             ts = TextureStage('ts')
             ts.setMode(TextureStage.MDecal)
-            img.setTexture(ts, loader.loadTexture('assets/images/drivers/driver%s_sel.png' % idx))
+            txt_path = 'assets/images/drivers/driver%s_sel.png' % idx
+            img.setTexture(ts, loader.loadTexture(txt_path))
 
     def set_ranking(self, car_path, drivers):
         items = game.logic.season.logic.ranking.logic.ranking.items()
@@ -164,15 +164,18 @@ class LoadingPageGui(PageGui):
             text=_('Ranking'),
             scale=.1, pos=(0, .3), font=self.font, fg=(.75, .75, .75, 1))
         self.widgets += [txt]
+
         def get_driver(car):
             for driver in drivers:
                 if driver[2] == car:
                     return driver
         for i, car in enumerate(sorted_ranking):
             idx, name, _car = get_driver(car[0])
+            is_car = car[0] == car_path
             txt = OnscreenText(
                 text=str(car[1]) + ' ' + name, align=TextNode.A_left,
-                scale=.072, pos=(-.2, .1 - i * .16), font=self.font, fg=(.75, .75, .25, 1) if car[0] == car_path else (.75, .75, .75, 1))
+                scale=.072, pos=(-.2, .1 - i * .16), font=self.font,
+                fg=(.75, .75, .25, 1) if is_car else (.75, .75, .75, 1))
             self.widgets += [txt]
             img = OnscreenImage(
                     'assets/images/cars/%s_sel.png' % car[0],
@@ -183,7 +186,8 @@ class LoadingPageGui(PageGui):
             img.setTransparency(True)
             ts = TextureStage('ts')
             ts.setMode(TextureStage.MDecal)
-            img.setTexture(ts, loader.loadTexture('assets/images/drivers/driver%s_sel.png' % idx))
+            txt_path = 'assets/images/drivers/driver%s_sel.png' % idx
+            img.setTexture(ts, loader.loadTexture(txt_path))
 
     def set_controls(self):
         items = game.logic.season.logic.ranking.logic.ranking.items()
@@ -195,34 +199,41 @@ class LoadingPageGui(PageGui):
         conf = game.options
         if conf['settings']['joystick']:
             txt = OnscreenText(
-                text=_('joypad'),
-                scale=.08, pos=(1.0, .1), font=self.font, fg=(.75, .75, .75, 1))
+                text=_('joypad'), scale=.08, pos=(1.0, .1), font=self.font,
+                fg=(.75, .75, .75, 1))
             self.widgets += [txt]
             return
         txt = OnscreenText(
-            text=_('accelerate') + ': ' + conf['settings']['keys']['forward'], align=TextNode.A_left,
-            scale=.072, pos=(.8, .1), font=self.font, fg=(.75, .75, .75, 1))
+            text=_('accelerate') + ': ' + conf['settings']['keys']['forward'],
+            align=TextNode.A_left, scale=.072, pos=(.8, .1), font=self.font,
+            fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
-            text=_('brake/reverse') + ': ' + conf['settings']['keys']['rear'], align=TextNode.A_left,
-            scale=.072, pos=(.8, -.06), font=self.font, fg=(.75, .75, .75, 1))
+            text=_('brake/reverse') + ': ' + conf['settings']['keys']['rear'],
+            align=TextNode.A_left, scale=.072, pos=(.8, -.06), font=self.font,
+            fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
-            text=_('left') + ': ' + conf['settings']['keys']['left'], align=TextNode.A_left,
-            scale=.072, pos=(.8, -.22), font=self.font, fg=(.75, .75, .75, 1))
+            text=_('left') + ': ' + conf['settings']['keys']['left'],
+            align=TextNode.A_left, scale=.072, pos=(.8, -.22), font=self.font,
+            fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
-            text=_('right') + ': ' + conf['settings']['keys']['right'], align=TextNode.A_left,
-            scale=.072, pos=(.8, -.38), font=self.font, fg=(.75, .75, .75, 1))
+            text=_('right') + ': ' + conf['settings']['keys']['right'],
+            align=TextNode.A_left, scale=.072, pos=(.8, -.38), font=self.font,
+            fg=(.75, .75, .75, 1))
         self.widgets += [txt]
         txt = OnscreenText(
-            text=_('fire') + ': ' + conf['settings']['keys']['button'], align=TextNode.A_left,
-            scale=.072, pos=(.8, -.54), font=self.font, fg=(.75, .75, .75, 1))
+            text=_('fire') + ': ' + conf['settings']['keys']['button'],
+            align=TextNode.A_left, scale=.072, pos=(.8, -.54), font=self.font,
+            fg=(.75, .75, .75, 1))
         self.widgets += [txt]
 
     def set_first(self, track_path):
-        filename = track_path[7:] + '_' + eng.logic.version.strip().split()[-1] + '.bam'
-        if os.path.exists(filename): return
+        vrs = eng.logic.version.strip().split()[-1]
+        filename = track_path[7:] + '_' + vrs + '.bam'
+        if os.path.exists(filename):
+            return
         first_txt = _(
             'This is the first time that you are playing this track: we are '
             'going to recreate the track on your system, so you may notice '
@@ -236,7 +247,8 @@ class LoadingPageGui(PageGui):
         self.widgets += [txt]
 
     def on_loading(self, msg):
-        names = [model.getName().split('.')[0][5:] for model in game.fsm.race.track.gfx.empty_models]
+        e_m = game.fsm.race.track.gfx.empty_models
+        names = [model.getName().split('.')[0][5:] for model in e_m]
         names = list(set(list(names)))
         tot = len(names)
         self.load_txt.setShaderInput('ratio', float(self.cnt) / tot)
@@ -245,9 +257,12 @@ class LoadingPageGui(PageGui):
     def destroy(self):
         PageGui.destroy(self)
         eng.base.camera.set_pos(0, 0, 0)
-        if not hasattr(game, 'player_car'): return
-        game.player_car.event.attach(self.mdt.menu.loading.mdt.event.on_wrong_way)
-        game.player_car.event.attach(self.mdt.menu.loading.mdt.event.on_end_race)
+        if not hasattr(game, 'player_car'):
+            return
+        meth = self.mdt.menu.loading.mdt.event.on_wrong_way
+        game.player_car.event.attach(meth)
+        meth = self.mdt.menu.loading.mdt.event.on_end_race
+        game.player_car.event.attach(meth)
 
 
 class LoadingPage(Page):
@@ -257,7 +272,7 @@ class LoadingPage(Page):
         self.menu = menu
         self.track_path = track_path
         self.car_path = car_path
-        self.player_cars= player_cars
+        self.player_cars = player_cars
         self.drivers = drivers
         GameObjectMdt.__init__(self, self.init_lst)
 
@@ -268,7 +283,9 @@ class LoadingPage(Page):
             [('gfx', self.gfx_cls, [self])],
             [('phys', self.phys_cls, [self])],
             [('event', self.event_cls, [self])],
-            [('gui', self.gui_cls, [self, self.menu, self.track_path, self.car_path, self.player_cars, self.drivers])],
+            [('gui', self.gui_cls, [self, self.menu, self.track_path,
+                                    self.car_path, self.player_cars,
+                                    self.drivers])],
             [('logic', self.logic_cls, [self])],
             [('audio', self.audio_cls, [self])],
             [('ai', self.ai_cls, [self])]]

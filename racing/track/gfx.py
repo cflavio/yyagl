@@ -30,13 +30,15 @@ class TrackGfx(Gfx):
         eng.log_mgr.log('loading track model')
         self.notify('on_loading', _('loading track model'))
         time = globalClock.getFrameTime()
-        filename = self.mdt.path[7:] + '_' + eng.logic.version.strip().split()[-1] + '.bam'
+        vrs = eng.logic.version.strip().split()[-1]
+        filename = self.mdt.path[7:] + '_' + vrs + '.bam'
         if os.path.exists(filename):
             eng.log_mgr.log('loading ' + filename)
             eng.gfx.load_model(filename, callback=self.end_loading)
         else:
             path = self.mdt.path + '/track'
-            eng.gfx.load_model(path, callback=self.__set_submod, extraArgs=[time])
+            s_m = self.__set_submod
+            eng.gfx.load_model(path, callback=s_m, extraArgs=[time])
 
     def __set_submod(self, model, time):
         d_t = round(globalClock.getFrameTime() - time, 2)
@@ -59,7 +61,8 @@ class TrackGfx(Gfx):
 
         def load_models():
             self.__process_models(list(self.empty_models))
-        names = [model.getName().split('.')[0][5:] for model in self.empty_models]
+        e_m = self.empty_models
+        names = [model.getName().split('.')[0][5:] for model in e_m]
         self.__preload_models(list(set(list(names))), load_models)
 
     def __preload_models(self, models, callback, model='', time=0):
@@ -77,8 +80,9 @@ class TrackGfx(Gfx):
             self.__actors += [Actor(path, {'anim': path + '-Anim'})]
             self.__preload_models(models, callback, model, curr_t)
         else:
-            eng.base.loader.loadModel(path, callback=
-                lambda model: self.__preload_models(models, callback, model, curr_t))
+            def p_l(model):
+                self.__preload_models(models, callback, model, curr_t)
+            eng.base.loader.loadModel(path, callback=p_l)
 
     def __process_models(self, models):
         for model in models:
@@ -90,7 +94,8 @@ class TrackGfx(Gfx):
                 self.__actors[-1].setPlayRate(.5, 'anim')
                 self.__actors[-1].reparent_to(model)
                 if model.has_tag('omni') and model.get_tag('omni'):
-                    eng.log_mgr.log('set omni for ' + self.__actors[-1].get_name())
+                    a_n = self.__actors[-1].get_name()
+                    eng.log_mgr.log('set omni for ' + a_n)
                     self.__actors[-1].node().setBounds(OmniBoundingVolume())
                     self.__actors[-1].node().setFinal(True)
             else:
@@ -132,26 +137,28 @@ class TrackGfx(Gfx):
 
     def __flat_models(self, model='', time=0, nodes=0):
         #with self.flat_lock:
-            if model:
-                str_tmpl = 'flattened model: %s (%s seconds, %s nodes)'
-                self.in_loading.remove(model)
-                d_t = round(globalClock.getFrameTime() - time, 2)
-                eng.log_mgr.log(str_tmpl % (model, d_t, nodes))
-            if self.models_to_load:
-                mod = self.models_to_load.pop()
-                self.__process_flat_models(mod, self.end_flattening)
-            elif not self.in_loading:
-                #self.end_loading()
-                self.end_flattening()
+        if model:
+            str_tmpl = 'flattened model: %s (%s seconds, %s nodes)'
+            self.in_loading.remove(model)
+            d_t = round(globalClock.getFrameTime() - time, 2)
+            eng.log_mgr.log(str_tmpl % (model, d_t, nodes))
+        if self.models_to_load:
+            mod = self.models_to_load.pop()
+            self.__process_flat_models(mod, self.end_flattening)
+        elif not self.in_loading:
+            #self.end_loading()
+            self.end_flattening()
 
     def __process_flat_models(self, mod, callback):
         curr_t = globalClock.getFrameTime()
         node = mod
         node.clearModelNodes()
 
-        def process_flat(flatten_node, orig_node, model, time, nodes, remove=True):
+        def process_flat(flatten_node, orig_node, model, time, nodes,
+                         remove=True):
             flatten_node.reparent_to(orig_node.get_parent())
-            if remove: orig_node.remove_node()  # remove 1.9.3
+            if remove:
+                orig_node.remove_node()  # remove 1.9.3
             self.__flat_models(model, time, nodes)
         nname = node.get_name()
         self.in_loading += [nname]
@@ -165,10 +172,12 @@ class TrackGfx(Gfx):
             process_flat(node, node, nname, curr_t, 0, False)
 
     def end_loading(self, model=None):
-        if model: self.model = model
+        if model:
+            self.model = model
         self.__set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
-        #filename = self.mdt.path[7:] + '_' + eng.logic.version.strip().split()[-1] + '.bam'
+        #vrs = eng.logic.version.strip().split()[-1]
+        #filename = self.mdt.path[7:] + '_' + vrs + '.bam'
         #if not os.path.exists(filename):
         #    eng.log_mgr.log('writing ' + filename)
         #    self.model.writeBamFile(filename)
@@ -178,7 +187,8 @@ class TrackGfx(Gfx):
         #if model: self.model = model
         #self.__set_signs()
         #self.model.prepareScene(eng.base.win.getGsg())
-        filename = self.mdt.path[7:] + '_' + eng.logic.version.strip().split()[-1] + '.bam'
+        vrs = eng.logic.version.strip().split()[-1]
+        filename = self.mdt.path[7:] + '_' + vrs + '.bam'
         if not os.path.exists(filename):
             eng.log_mgr.log('writing ' + filename)
             self.model.writeBamFile(filename)
@@ -218,7 +228,8 @@ class TrackGfx(Gfx):
             self.__set_render_to_texture()
             shuffle(names)
             text = '\n\n'.join(names[:3])
-            txt = OnscreenText(text, parent=self.renders[i], scale=.2, fg=(0, 0, 0, 1), pos=(-.2, -.28))
+            txt = OnscreenText(text, parent=self.renders[i], scale=.2,
+                               fg=(0, 0, 0, 1), pos=(-.2, -.28))
             while txt.getTightBounds()[1][0] - txt.getTightBounds()[0][0] > .8:
                 txt.setScale(txt.getScale()[0] - .01, txt.getScale()[0] - .01)
             height = txt.getTightBounds()[1][2] - txt.getTightBounds()[0][2]

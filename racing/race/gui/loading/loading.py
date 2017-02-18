@@ -1,9 +1,4 @@
-from panda3d.core import TextNode, NodePath
-from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Colleague
-from yyagl.engine.gui.page import PageGui
-from direct.gui.DirectGuiGlobals import FLAT
-from direct.gui.DirectButton import DirectButton
 from .menu import LoadingMenu
 
 
@@ -12,8 +7,10 @@ class Loading(Colleague):
     def __init__(self, mdt):
         self.mdt = mdt
 
-    def enter_loading(self, track_path='', car_path='', player_cars=[], drivers=None):
-        self.menu = LoadingMenu(self, track_path, car_path, player_cars, drivers)
+    def enter_loading(self, track_path='', car_path='', player_cars=[],
+                      drivers=None):
+        args = (self, track_path, car_path, player_cars, drivers)
+        self.menu = LoadingMenu(*args)
 
     def exit_loading(self):
         self.menu.destroy()

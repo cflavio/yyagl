@@ -37,7 +37,8 @@ class RaceEvent(Event):
 
     def on_end_race(self):
         points = [10, 8, 6, 4, 3, 2, 1, 0]
-        race_ranking = {car: point for car, point in zip(self.mdt.logic.ranking(), points)}
+        zipped = zip(self.mdt.logic.ranking(), points)
+        race_ranking = {car: point for car, point in zipped}
         self.mdt.fsm.demand('Results', race_ranking)
 
     def destroy(self):
@@ -64,9 +65,10 @@ class RaceEventServer(RaceEvent):
             return  # still loading; attach when the race has started
         pos = game.player_car.gfx.nodepath.getPos()
         hpr = game.player_car.gfx.nodepath.getHpr()
-        velocity = game.player_car.phys.vehicle.getChassis().getLinearVelocity()
+        cha = game.player_car.phys.vehicle.getChassis()
+        velocity = cha.getLinearVelocity()
         self.server_info['server'] = (pos, hpr, velocity)
-        for car in [car for car in game.cars if car.ai_cls == _Ai]:
+        for car in [car for car in game.cars if car.ai_cls == CarAi]:
             pos = car.gfx.nodepath.getPos()
             hpr = car.gfx.nodepath.getHpr()
             velocity = car.phys.vehicle.getChassis().getLinearVelocity()

@@ -1,5 +1,5 @@
 from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape
-from panda3d.core import TransformState, LVecBase3f, LPoint3f
+from panda3d.core import LPoint3f
 from yyagl.gameobject import Phys
 import yaml
 
@@ -22,7 +22,8 @@ class CarPhys(Phys):
     def _load_phys(self, name):
         with open('assets/models/%s/phys.yml' % name) as phys_file:
             self.conf = yaml.load(phys_file)
-        map(lambda field: setattr(self, field, self.conf[field]), self.conf.keys())
+        s_a = lambda field: setattr(self, field, self.conf[field])
+        map(s_a, self.conf.keys())
 
     def __set_collision(self, name):
         self.capsule = loader.loadModel('%s/capsule' % name)
@@ -49,7 +50,7 @@ class CarPhys(Phys):
 
     def __set_wheels(self):
         fwheel_bounds = self.mdt.gfx.wheels['fr'].get_tight_bounds()
-        f_radius = (fwheel_bounds[1][2] - fwheel_bounds[0][2]) / 2.0  + .01
+        f_radius = (fwheel_bounds[1][2] - fwheel_bounds[0][2]) / 2.0 + .01
         self.wheel_fr_radius = self.wheel_fl_radius = f_radius
         rwheel_bounds = self.mdt.gfx.wheels['rr'].get_tight_bounds()
         r_radius = (rwheel_bounds[1][2] - rwheel_bounds[0][2]) / 2.0 + .01
@@ -157,8 +158,10 @@ class CarPhys(Phys):
             self.max_speed *= .95
             self.friction_slip *= .95
             self.roll_influence *= .95
-        map(lambda whl: whl.setFrictionSlip(self.friction_slip), self.vehicle.get_wheels())
-        map(lambda whl: whl.setRollInfluence(self.roll_influence), self.vehicle.get_wheels())
+        fric = lambda whl: whl.setFrictionSlip(self.friction_slip)
+        map(fric, self.vehicle.get_wheels())
+        roll = lambda whl: whl.setRollInfluence(self.roll_influence)
+        map(roll, self.vehicle.get_wheels())
         eng.log_mgr.log('speed: ' + str(round(self.max_speed, 2)))
         eng.log_mgr.log('friction: ' + str(round(self.friction_slip, 2)))
         eng.log_mgr.log('roll: ' + str(round(self.roll_influence, 2)))
@@ -188,15 +191,20 @@ class CarPlayerPhys(CarPhys):
         self.conf['friction_slip'] = self.get_friction()
         self.conf['roll_influence'] = self.get_roll_influence()
         eng.log_mgr.log('speed: ' + str(round(self.conf['max_speed'], 2)))
-        eng.log_mgr.log('friction: ' + str(round(self.conf['friction_slip'], 2)))
+        fr_slip = round(self.conf['friction_slip'], 2)
+        eng.log_mgr.log('friction: ' + str(fr_slip))
         eng.log_mgr.log('roll: ' + str(round(self.conf['roll_influence'], 2)))
-        map(lambda field: setattr(self, field, self.conf[field]), self.conf.keys())
+        s_a = lambda field: setattr(self, field, self.conf[field])
+        map(s_a, self.conf.keys())
 
     def get_speed(self):
-        return self.conf['max_speed'] * (1 + .1 * game.logic.season.logic.tuning.logic.tuning['engine'])
+        _en = game.logic.season.logic.tuning.logic.tuning['engine']
+        return self.conf['max_speed'] * (1 + .1 * _en)
 
     def get_friction(self):
-        return self.conf['friction_slip'] * (1 + .1 * game.logic.season.logic.tuning.logic.tuning['tires'])
+        tir = game.logic.season.logic.tuning.logic.tuning['tires']
+        return self.conf['friction_slip'] * (1 + .1 * tir)
 
     def get_roll_influence(self):
-        return self.conf['roll_influence'] * (1 + .1 * game.logic.season.logic.tuning.logic.tuning['suspensions'])
+        susp = game.logic.season.logic.tuning.logic.tuning['suspensions']
+        return self.conf['roll_influence'] * (1 + .1 * susp)

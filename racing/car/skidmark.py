@@ -1,6 +1,5 @@
-from panda3d.core import GeomVertexData, GeomVertexWriter, GeomVertexFormat,\
-    Geom, GeomTriangles, GeomNode, GeomVertexReader, Mat4, Material,\
-    OmniBoundingVolume
+from panda3d.core import GeomVertexData, GeomVertexWriter, GeomVertexFormat, \
+    Geom, GeomTriangles, GeomNode, Mat4, Material, OmniBoundingVolume
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
 from direct.interval.LerpInterval import LerpFunc
@@ -11,7 +10,8 @@ class Skidmark:
     def __init__(self, car, whl):
         self.car = car
         self.whl = whl
-        self.vdata = GeomVertexData('skid', GeomVertexFormat.getV3(), Geom.UHDynamic)
+        v_f = GeomVertexFormat.getV3()
+        self.vdata = GeomVertexData('skid', v_f, Geom.UHDynamic)
         self.vdata.setNumRows(1)
         self.vertex = GeomVertexWriter(self.vdata, 'vertex')
         self.width = .12
@@ -41,7 +41,8 @@ class Skidmark:
         self.remove_seq.start()
 
     def add_vertices(self):
-        base_pos = self.last_pos + (0, 0, -self.car.phys.vehicle.getWheels()[0].getWheelRadius() + .05)
+        w_r = self.car.phys.vehicle.getWheels()[0].getWheelRadius()
+        base_pos = self.last_pos + (0, 0, -w_r + .05)
         rot_mat = Mat4()
         rot_mat.setRotateMat(self.car.gfx.nodepath.get_h(), (0, 0, 1))
         self.vertex.addData3f(base_pos + rot_mat.xformVec((-self.width, 0, 0)))
