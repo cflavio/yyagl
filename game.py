@@ -2,7 +2,6 @@ from abc import ABCMeta
 from .gameobject import Logic, GameObjectMdt
 from .engine.engine import Engine, EngineWindow
 import __builtin__
-import sys
 
 
 class GameLogic(Logic):

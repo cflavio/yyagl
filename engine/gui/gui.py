@@ -109,6 +109,6 @@ class EngineGuiWindow(EngineGui):
         if base.mouseWatcherNode.hasMouse():
             x = base.mouseWatcherNode.getMouseX()
             y = base.mouseWatcherNode.getMouseY()
-            self.cursor_img.setPos(x * base.getAspectRatio() + self.hotspot_dx, 0, y - self.hotspot_dy)
+            h_x = x * base.getAspectRatio() + self.hotspot_dx
+            self.cursor_img.setPos(h_x, 0, y - self.hotspot_dy)
         return task.cont
-

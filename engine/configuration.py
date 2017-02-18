@@ -5,11 +5,12 @@ from .log import LogMgr
 class Configuration(object):
 
     def __init__(
-            self, fps=False, win_size='1280 720', win_orig = None, win_title='Ya2',
-            fullscreen=False, cursor_hidden=False, sync_video=True,
-            antialiasing=False, profiling=False, mt_render=False,
-            model_path='assets/models', lang='en', lang_path='assets/locale',
-            lang_domain='ya2_game', languages=['English', 'Italiano']):
+            self, fps=False, win_size='1280 720', win_orig=None,
+            win_title='Ya2', fullscreen=False, cursor_hidden=False,
+            sync_video=True, antialiasing=False, profiling=False,
+            mt_render=False, model_path='assets/models', lang='en',
+            lang_path='assets/locale', lang_domain='ya2_game',
+            languages=['English', 'Italiano']):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title

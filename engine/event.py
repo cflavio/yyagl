@@ -17,6 +17,7 @@ class EngineEvent(Event):
 
     def __init__(self, mdt):
         Event.__init__(self, mdt)
+        self.joysticks = []
         self.on_close_cb = lambda: None
         self.accept('window-closed', self.__on_close)
         taskMgr.add(self.__on_frame, 'on frame')
@@ -28,16 +29,20 @@ class EngineEvent(Event):
             return
         pygame.init()
         joystick.init()
-        self.joysticks = [joystick.Joystick(x) for x in range(joystick.get_count())]
+        self.joysticks = [
+            joystick.Joystick(x) for x in range(joystick.get_count())]
         map(lambda j_s: j_s.init(), self.joysticks)
 
     def get_joystick(self):
         if not has_pygame():
             return 0, 0, 0, 0
-        for e in pygame.event.get(): pass
-        if not self.joysticks: return 0, 0, 0, 0
+        for _ in pygame.event.get():
+            pass
+        if not self.joysticks:
+            return 0, 0, 0, 0
         j_s = self.joysticks[0]
-        return j_s.get_axis(0), j_s.get_axis(1), j_s.get_button(0), j_s.get_button(1)
+        return j_s.get_axis(0), j_s.get_axis(1), j_s.get_button(0), \
+            j_s.get_button(1)
 
     def register_close_cb(self, on_close_cb):
         self.on_close_cb = on_close_cb

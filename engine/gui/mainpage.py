@@ -2,7 +2,6 @@ from direct.gui.OnscreenText import OnscreenText
 from panda3d.core import TextNode
 from .page import Page, PageGui
 from .imgbtn import ImageButton
-from direct.gui.DirectButton import DirectButton
 
 
 class MainPageGui(PageGui):

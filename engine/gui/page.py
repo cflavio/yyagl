@@ -37,12 +37,14 @@ class PageGui(Gui):
         self.transition_enter()
 
     def on_arrow(self, direction):
-        if direction in [(-1, 0, 0), (1, 0, 0)] and self.curr_wdg.__class__ == DirectSlider:
+        is_hor = direction in [(-1, 0, 0), (1, 0, 0)]
+        if is_hor and self.curr_wdg.__class__ == DirectSlider:
             dval = -.1 if direction == (-1, 0, 0) else .1
             self.curr_wdg['value'] += dval
             return
         next_wdg = self.get_next_widget(direction)
-        if not next_wdg: return
+        if not next_wdg:
+            return
         if self.curr_wdg.__class__ == DirectSlider:
             self._on_exit_slider(self.curr_wdg)
         elif self.curr_wdg.__class__ == ImageButton:
@@ -63,7 +65,8 @@ class PageGui(Gui):
 
     def on_enter(self):
         if self.curr_wdg.__class__ == DirectCheckButton:
-            self.curr_wdg['indicatorValue'] = not self.curr_wdg['indicatorValue']
+            val = self.curr_wdg['indicatorValue']
+            self.curr_wdg['indicatorValue'] = not val
         if self.curr_wdg.__class__ == DirectOptionMenu:
             self.curr_wdg.showPopupMenu()
             self.curr_wdg._highlightItem(self.curr_wdg.component('item0'), 0)
@@ -72,7 +75,8 @@ class PageGui(Gui):
             self.mdt.event.accept('arrow_down-up', self.on_arrow_opt, [1])
             self.mdt.event.accept('enter-up', self.on_enter_opt)
             return
-        if self.curr_wdg and self.curr_wdg['command'] and self.curr_wdg['state'] == NORMAL:
+        has_cmd = self.curr_wdg and self.curr_wdg['command']
+        if has_cmd and self.curr_wdg['state'] == NORMAL:
             self.curr_wdg['command'](*self.curr_wdg['extraArgs'])
 
     def on_arrow_opt(self, d):
@@ -81,17 +85,22 @@ class PageGui(Gui):
         idx = min(len(self.curr_wdg['items']) - 1, max(0, idx))
         if old_idx != idx:
             fc = self.curr_wdg.component('item%s' % idx)['frameColor']
-            self.curr_wdg._unhighlightItem(self.curr_wdg.component('item%s' % old_idx), fc)
-            self.curr_wdg._highlightItem(self.curr_wdg.component('item%s' % idx), idx)
+            old_cmp = self.curr_wdg.component('item%s' % old_idx)
+            self.curr_wdg._unhighlightItem(old_cmp, fc)
+            curr_cmp = self.curr_wdg.component('item%s' % idx)
+            self.curr_wdg._highlightItem(curr_cmp, idx)
 
     def on_enter_opt(self):
         self.curr_wdg.selectHighlightedIndex()
-        if self.curr_wdg['command']: self.curr_wdg['command'](self.curr_wdg['items'][self.curr_wdg.selectedIndex])
+        idx = self.curr_wdg.selectedIndex
+        if self.curr_wdg['command']:
+            self.curr_wdg['command'](self.curr_wdg['items'][idx])
         self.curr_wdg.hidePopupMenu()
         self.mdt.event.ignoreAll()
-        idx = (self.curr_wdg.selectedIndex - 1) if self.curr_wdg.selectedIndex else (self.curr_wdg.selectedIndex + 1)
+        idx = (idx - 1) if idx else (idx + 1)
         fc = self.curr_wdg.component('item%s' % idx)['frameColor']
-        self.curr_wdg._unhighlightItem(self.curr_wdg.component('item%s' % self.curr_wdg.selectedIndex), fc)
+        curr_name = 'item%s' % self.curr_wdg.selectedIndex
+        self.curr_wdg._unhighlightItem(self.curr_wdg.component(curr_name), fc)
         self.enable()
 
     def __get_dot(self, wdg, direction, start=None):
@@ -106,7 +115,6 @@ class PageGui(Gui):
         wdg_pos = wdg.get_pos(aspect2d)
         if wdg.__class__ == DirectSlider:
             wdg_pos = LPoint3f(wdg_pos[0], 1, wdg_pos[2])
-        dist = (wdg_pos - start_pos).length()
         if direction in [(-1, 0, 0), (1, 0, 0)]:
             proj_dist = abs(wdg_pos[0] - start_pos[0])
         else:
@@ -115,22 +123,29 @@ class PageGui(Gui):
             weights = [.5, .5]
         else:
             weights = [.1, .9]
-        return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)# + .6 * (1 - dist / 4.0)
+        return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
 
     def get_next_widget(self, direction, start=None):
-        wdgs = [wdg for wdg in self.widgets if wdg.__class__ in [DirectButton, DirectCheckButton, DirectSlider, DirectOptionMenu, ImageButton, DirectEntry]]
+        clss = [DirectButton, DirectCheckButton, DirectSlider,
+                DirectOptionMenu, ImageButton, DirectEntry]
+        wdgs = [wdg for wdg in self.widgets if wdg.__class__ in clss]
         wdgs = filter(lambda wdg: wdg['state'] != DISABLED, wdgs)
-        if self.curr_wdg: wdgs.remove(self.curr_wdg)
-        wdgs = filter(lambda wdg: self.__get_dot(wdg, direction, start) > .1, wdgs)
-        if not wdgs: return
-        return max(wdgs, key=lambda wdg: self.__next_factor(wdg, direction, start))
+        if self.curr_wdg:
+            wdgs.remove(self.curr_wdg)
+        pos_dot = lambda wdg: self.__get_dot(wdg, direction, start) > .1
+        wdgs = filter(pos_dot, wdgs)
+        if not wdgs:
+            return
+        n_f = lambda wdg: self.__next_factor(wdg, direction, start)
+        return max(wdgs, key=n_f)
 
     def _set_buttons(self):
         for wdg in self.widgets:
+            btn_classes = [DirectButton, DirectOptionMenu, DirectCheckButton]
             if wdg.__class__ in [ImageButton]:
                 wdg.bind(ENTER, self._on_enter_img_btn, [wdg])
                 wdg.bind(EXIT, self._on_exit_img_btn, [wdg])
-            elif wdg.__class__ in [DirectButton, DirectOptionMenu, DirectCheckButton]:
+            elif wdg.__class__ in btn_classes:
                 wdg.start_fg = wdg.component('text0').textNode.getTextColor()
                 wdg.start_frame_col = wdg['frameColor']
                 wdg.bind(ENTER, self._on_enter, [wdg])

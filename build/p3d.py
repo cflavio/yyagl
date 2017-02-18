@@ -21,11 +21,12 @@ def build_p3d(target, source, env):
     with open(name + '.pdef') as pdef:
         with open(name + 'nopygame.pdef', 'w') as pdef_nopygame:
             pdef_nopygame.write(pdef.read().replace(", 'pygame'", ""))
+
     def build(suff):
         if mirr:
             cmd_template = 'panda3d -M {ptools_path} ' + \
-                '{ptools_path}/ppackage1.9.p3d -S {ptools_path}/mycert.pem ' + \
-                '-i {path} {name}{suff}.pdef'
+                '{ptools_path}/ppackage1.9.p3d -S ' + \
+                '{ptools_path}/mycert.pem -i {path} {name}{suff}.pdef'
             cmd_str = cmd_template.format(ptools_path=mirr, path=path,
                                           name=name, suff=suff)
         else:

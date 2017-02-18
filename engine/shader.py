@@ -73,13 +73,14 @@ class ShaderMgr(Colleague):
             render.setShaderInput(pref + 'spec', lgt.node().get_color())
         elif lgt.node().__class__ == Spotlight:
             lgt_pos = lgt.get_mat(base.cam).xform(LVector4f(0, 0, 0, 1))
-            lgt_vec =  base.cam.getRelativeVector(lgt, Vec3(0, 1, 0))
+            lgt_vec = base.cam.getRelativeVector(lgt, Vec3(0, 1, 0))
             render.setShaderInput(pref + 'pos', lgt_pos)
             render.setShaderInput(pref + 'diff', lgt.node().get_color())
             render.setShaderInput(pref + 'spec', lgt.node().get_color())
             render.setShaderInput(pref + 'dir', lgt_vec)
             render.setShaderInput(pref + 'exp', lgt.node().get_exponent())
-            render.setShaderInput(pref + 'cutoff', lgt.node().getLens().getFov()[0])
+            cutoff = lgt.node().getLens().getFov()[0]
+            render.setShaderInput(pref + 'cutoff', cutoff)
 
     def clear_lights(self):
         for light in self.lights:
@@ -135,14 +136,18 @@ class ShaderMgr(Colleague):
         render.setShaderInput('ambient', .15, .15, .15, 1.0)
 
         lci = NodePath(PandaNode('light camera initializer'))
-        with open('yyagl/assets/shaders/caster.vert') as f: vert = f.read()
-        with open('yyagl/assets/shaders/caster.frag') as f: frag = f.read()
+        with open('yyagl/assets/shaders/caster.vert') as f:
+            vert = f.read()
+        with open('yyagl/assets/shaders/caster.frag') as f:
+            frag = f.read()
         lci.setShader(Shader.make(Shader.SLGLSL, vert, frag))
         self.lcam.node().setInitialState(lci.getState())
 
         mci = NodePath(PandaNode('main camera initializer'))
-        with open('yyagl/assets/shaders/main.vert') as f: vert = f.read()
-        with open('yyagl/assets/shaders/main.frag') as f: frag = f.read()
+        with open('yyagl/assets/shaders/main.vert') as f:
+            vert = f.read()
+        with open('yyagl/assets/shaders/main.frag') as f:
+            frag = f.read()
         frag = frag.replace('<LIGHTS>', str(len(self.lights)))
         render.setShader(Shader.make(Shader.SLGLSL, vert, frag))
         render.setShaderInput('num_lights', len(self.lights))

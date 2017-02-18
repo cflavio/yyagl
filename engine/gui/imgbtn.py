@@ -1,7 +1,5 @@
 from direct.gui.DirectButton import DirectButton
-from panda3d.core import PNMImage, Texture, Filename, Shader
-from itertools import product
-from os.path import dirname, realpath
+from panda3d.core import Shader
 from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT
 
 
@@ -29,8 +27,11 @@ void main() {
     float dist_r = 1 - texcoord.x;
     float dist_u = texcoord.y;
     float dist_b = 1 - texcoord.y;
-    float alpha = clamp(min(dist_l, min(dist_r, min(dist_u, dist_b))) * 30, 0, 1);
-    p3d_FragColor = (texture(p3d_Texture0, texcoord)  + vec4(col_scale, col_scale, col_scale, 1) ) * vec4(1, 1, 1, alpha * enable);
+    float min_dist = min(dist_l, min(dist_r, min(dist_u, dist_b)));
+    float alpha = clamp(min_dist * 30, 0, 1);
+    vec4 txt_col = texture(p3d_Texture0, texcoord);
+    vec4 col_scale = vec4(col_scale, col_scale, col_scale, 1);
+    p3d_FragColor = (txt_col + col_scale ) * vec4(1, 1, 1, alpha * enable);
 }'''
 
 

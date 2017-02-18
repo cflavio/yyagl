@@ -8,7 +8,6 @@ import platform
 import multiprocessing
 
 
-
 class LogMgr(Colleague):
 
     def __init__(self, mdt):

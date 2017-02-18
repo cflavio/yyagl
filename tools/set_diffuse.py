@@ -19,4 +19,3 @@ def set_diffuse(_file):
 for _file in os.listdir('.'):
     if _file.endswith('.egg'):
         set_diffuse(_file)
-
