@@ -5,6 +5,8 @@ from direct.directnotify.DirectNotify import DirectNotify
 from ..gameobject import Colleague
 from panda3d import bullet
 import platform
+import multiprocessing
+
 
 
 class LogMgr(Colleague):
@@ -48,6 +50,7 @@ class LogMgr(Colleague):
         self.log('machine: ' + platform.machine())
         self.log('platform: ' + platform.platform())
         self.log('processor: ' + platform.processor())
+        self.log('cores: ' + str(multiprocessing.cpu_count()))
         self.log('release: ' + platform.release())
         self.log('system: ' + platform.system())
         self.log('version: ' + platform.version())

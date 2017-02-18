@@ -5,16 +5,18 @@ from yyagl.gameobject import Gfx
 from direct.gui.OnscreenText import OnscreenText
 from random import shuffle
 import os
+import threading
+import multiprocessing
 
 
 class TrackGfx(Gfx):
 
-    def __init__(self, mdt, split_world, submodels):
+    def __init__(self, mdt, split_world):
         self.ambient_np = None
         self.spot_lgt = None
         self.model = None
         self.split_world = split_world
-        self.submodels = submodels
+        self.loaders = []
         self.__actors = []
         self.__flat_roots = {}
         Gfx.__init__(self, mdt)
@@ -43,7 +45,7 @@ class TrackGfx(Gfx):
         for submodel in self.model.getChildren():
             self.__flat_sm(submodel)
         self.model.hide(BitMask32.bit(0))
-        (self.__load_empties if self.submodels else self.end_loading)()
+        self.__load_empties()
 
     @staticmethod
     def __flat_sm(submodel):
@@ -119,49 +121,68 @@ class TrackGfx(Gfx):
 
     def flattening(self):
         eng.log_mgr.log('track flattening')
-        self.__flat_models(eng.logic.flatlist(self.__flat_roots.values()))
+        flat_cores = max(1, multiprocessing.cpu_count() / 2)
+        eng.log_mgr.log('flattening using %s cores' % flat_cores)
+        self.in_loading = []
+        self.flat_lock = threading.Lock()
+        self.models_to_load = eng.logic.flatlist(self.__flat_roots.values())
+        for i in range(flat_cores):
+            self.__flat_models()
+        self.end_loading()
 
-    def __flat_models(self, models, model='', time=0, nodes=0):
-        if model:
-            str_tmpl = 'flattened model: %s (%s seconds, %s nodes)'
-            d_t = round(globalClock.getFrameTime() - time, 2)
-            eng.log_mgr.log(str_tmpl % (model, d_t, nodes))
-        if models:
-            self.__process_flat_models(models, self.end_loading)
-        else:
-            self.end_loading()
+    def __flat_models(self, model='', time=0, nodes=0):
+        #with self.flat_lock:
+            if model:
+                str_tmpl = 'flattened model: %s (%s seconds, %s nodes)'
+                self.in_loading.remove(model)
+                d_t = round(globalClock.getFrameTime() - time, 2)
+                eng.log_mgr.log(str_tmpl % (model, d_t, nodes))
+            if self.models_to_load:
+                mod = self.models_to_load.pop()
+                self.__process_flat_models(mod, self.end_flattening)
+            elif not self.in_loading:
+                #self.end_loading()
+                self.end_flattening()
 
-    def __process_flat_models(self, models, callback):
+    def __process_flat_models(self, mod, callback):
         curr_t = globalClock.getFrameTime()
-        node = models[0]
+        node = mod
         node.clearModelNodes()
 
         def process_flat(flatten_node, orig_node, model, time, nodes, remove=True):
             flatten_node.reparent_to(orig_node.get_parent())
             if remove: orig_node.remove_node()  # remove 1.9.3
-            self.__flat_models(models[1:], model, time, nodes)
+            self.__flat_models(model, time, nodes)
         nname = node.get_name()
-        self.notify('on_loading', _('flattening model: ') + nname)
-        if self.submodels:
-            if not 'NameBillboard2' in nname:
-                loader.asyncFlattenStrong(
-                    node, callback=process_flat, inPlace=False,
-                    extraArgs=[node, nname, curr_t, len(node.get_children())])
-            else:
-                process_flat(node, node, nname, curr_t, 0, False)
+        self.in_loading += [nname]
+        #self.notify('on_loading', _('flattening model: ') + nname)
+        if not 'NameBillboard2' in nname:
+            loa = loader.asyncFlattenStrong(
+                node, callback=process_flat, inPlace=False,
+                extraArgs=[node, nname, curr_t, len(node.get_children())])
+            self.loaders += [loa]
         else:
-            len_children = len(node.get_children())
-            process_flat(node, NodePath(''), node, curr_t, len_children)
+            process_flat(node, node, nname, curr_t, 0, False)
 
     def end_loading(self, model=None):
         if model: self.model = model
         self.__set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
+        #filename = self.mdt.path[7:] + '_' + eng.logic.version.strip().split()[-1] + '.bam'
+        #if not os.path.exists(filename):
+        #    eng.log_mgr.log('writing ' + filename)
+        #    self.model.writeBamFile(filename)
+        Gfx.async_build(self)
+
+    def end_flattening(self, model=None):
+        #if model: self.model = model
+        #self.__set_signs()
+        #self.model.prepareScene(eng.base.win.getGsg())
         filename = self.mdt.path[7:] + '_' + eng.logic.version.strip().split()[-1] + '.bam'
         if not os.path.exists(filename):
             eng.log_mgr.log('writing ' + filename)
             self.model.writeBamFile(filename)
-        Gfx.async_build(self)
+        #Gfx.async_build(self)
 
     def __set_light(self):
         if game.options['development']['shaders']:
@@ -243,3 +264,4 @@ class TrackGfx(Gfx):
         self.__actors = self.__flat_roots = None
         self.__destroy_signs()
         self.empty_models = None
+        map(loader.cancelRequest, self.loaders)
