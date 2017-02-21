@@ -9,6 +9,7 @@ class TrackPhys(Phys):
 
     def __init__(self, mdt):
         self.corners = None
+        self.bonuses = []
         self.rigid_bodies = []
         self.ghosts = []
         self.nodes = []
@@ -105,7 +106,6 @@ class TrackPhys(Phys):
         if not game.options['development']['weapons']:
             return
         weap_root = self.model.find('**/Weaponboxs')
-        self.bonuses = []
         if not weap_root:
             return
         _weapons = weap_root.findAllMatches('**/EmptyWeaponboxAnim*')

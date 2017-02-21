@@ -235,11 +235,10 @@ class LoadingPageGui(PageGui):
         if os.path.exists(filename):
             return
         first_txt = _(
-            'This is the first time that you are playing this track: we are '
-            'going to recreate the track on your system, so you may notice '
-            'some slowdonws while you play (this process reduces the bandwith '
-            "required to you for downloading the game). Everything will be "
-            'smoother from the next time!')
+            'We need to elaborate the track on your system (this process '
+            'reduces the bandwith required to you for downloading the game), '
+            'so you may notice some slowdonws while you play. Everything will '
+            'be smoother once the track has been processed!')
         txt = OnscreenText(
             text=first_txt,
             scale=.06, pos=(1.0, .9), font=self.font, fg=(.8, .2, .2, 1),
@@ -250,7 +249,11 @@ class LoadingPageGui(PageGui):
         e_m = game.fsm.race.track.gfx.empty_models
         names = [model.getName().split('.')[0][5:] for model in e_m]
         names = list(set(list(names)))
-        tot = len(names)
+        vrs = eng.logic.version.strip().split()[-1]
+        filename = self.mdt.path[7:] + '_' + vrs + '.bam'
+        if not os.path.exists(filename):
+            tot = len(names)
+        else: tot = 1
         self.load_txt.setShaderInput('ratio', float(self.cnt) / tot)
         self.cnt += 1
 

@@ -9,12 +9,12 @@ import yaml
 
 class Track(GameObjectMdt):
 
-    def __init__(self, path, cb, split_world):
+    def __init__(self, path, cb):
         eng.log_mgr.log('init track')
         self.path = path
         init_lst = [
             [('phys', TrackPhys, [self]),
-             ('gfx', TrackGfx, [self, split_world],
+             ('gfx', TrackGfx, [self],
               lambda: self.gfx.attach(self.on_loading)),
              ('gui', TrackGui, [self, path[6:]])],
             [('event', TrackEvent, [self])],

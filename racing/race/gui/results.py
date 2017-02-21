@@ -79,7 +79,7 @@ class Results(object):
                 fg=(.75, .75, .25, 1) if is_car else (.75, .75, .75, 1))
             img = OnscreenImage('assets/images/cars/%s_sel.png' % car,
                                 pos=(.58, 1, .47 - (i + 1) * .16), scale=.074)
-            shader = Shader.make(Shader.SL_GLSL, vertex=vert, fragment=frag)
+            shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)
             img.setTransparency(True)
             ts = TextureStage('ts')

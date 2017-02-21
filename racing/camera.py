@@ -38,7 +38,7 @@ class Camera(object):
 
         car_pos = nodepath.get_pos()
         cam_vec = -fwd_vec * (self.cam_dist_min + cam_dist_diff * speed_ratio)
-        l_d = self.look_dist_min + look_dist_diff * speed_ratio
+        l_d = 0 if self.car.logic.is_rolling else self.look_dist_min + look_dist_diff * speed_ratio
         tgt_vec = fwd_car_vec * l_d
         delta_pos_z = self.cam_z_min + cam_z_diff * speed_ratio
         delta_cam_z = self.look_z_min + look_z_diff * speed_ratio

@@ -79,7 +79,7 @@ class RaceLogic(Logic):
                                       game.track.laps)
             game.cars = []
         game.track = Track(
-            track_path, load_car, dev['split_world'])
+            track_path, load_car)
         meth = self.mdt.gui.loading.menu.gui.menu.logic.pages[0].gui.on_loading
         game.track.attach(meth)
         self.mdt.track = game.track

@@ -11,11 +11,10 @@ import multiprocessing
 
 class TrackGfx(Gfx):
 
-    def __init__(self, mdt, split_world):
+    def __init__(self, mdt):
         self.ambient_np = None
         self.spot_lgt = None
         self.model = None
-        self.split_world = split_world
         self.loaders = []
         self.__actors = []
         self.__flat_roots = {}
@@ -87,18 +86,19 @@ class TrackGfx(Gfx):
     def __process_models(self, models):
         for model in models:
             model_name = model.getName().split('.')[0][5:]
-            if model_name.endswith('Anim'):
-                path = self.mdt.path + '/' + model_name
-                self.__actors += [Actor(path, {'anim': path + '-Anim'})]
-                self.__actors[-1].loop('anim')
-                self.__actors[-1].setPlayRate(.5, 'anim')
-                self.__actors[-1].reparent_to(model)
-                if model.has_tag('omni') and model.get_tag('omni'):
-                    a_n = self.__actors[-1].get_name()
-                    eng.log_mgr.log('set omni for ' + a_n)
-                    self.__actors[-1].node().setBounds(OmniBoundingVolume())
-                    self.__actors[-1].node().setFinal(True)
-            else:
+            #if model_name.endswith('Anim'):
+            #    path = self.mdt.path + '/' + model_name
+            #    self.__actors += [Actor(path, {'anim': path + '-Anim'})]
+            #    self.__actors[-1].loop('anim')
+            #    self.__actors[-1].setPlayRate(.5, 'anim')
+            #    self.__actors[-1].reparent_to(model)
+            #    if model.has_tag('omni') and model.get_tag('omni'):
+            #        a_n = self.__actors[-1].get_name()
+            #        eng.log_mgr.log('set omni for ' + a_n)
+            #        self.__actors[-1].node().setBounds(OmniBoundingVolume())
+            #        self.__actors[-1].node().setFinal(True)
+            #else:
+            if not model_name.endswith('Anim'):
                 self.__process_static(model)
         self.flattening()
 
@@ -113,20 +113,11 @@ class TrackGfx(Gfx):
         left, right, top, bottom = self.mdt.phys.lrtb
         center_x, center_y = (left + right) / 2, (top + bottom) / 2
         pos_x, pos_y = model.get_pos()[0], model.get_pos()[1]
-        if not game.options['development']['split_world']:
-            model.reparentTo(self.__flat_roots[model_name][0])
-        elif pos_x < center_x and pos_y < center_y:
-            model.reparentTo(self.__flat_roots[model_name][0])
-        elif pos_x >= center_x and pos_y < center_y:
-            model.reparentTo(self.__flat_roots[model_name][1])
-        elif pos_x < center_x and pos_y >= center_y:
-            model.reparentTo(self.__flat_roots[model_name][2])
-        else:
-            model.reparentTo(self.__flat_roots[model_name][3])
+        model.reparentTo(self.__flat_roots[model_name][0])
 
     def flattening(self):
         eng.log_mgr.log('track flattening')
-        flat_cores = max(1, multiprocessing.cpu_count() / 2)
+        flat_cores = 1  # max(1, multiprocessing.cpu_count() / 2)
         eng.log_mgr.log('flattening using %s cores' % flat_cores)
         self.in_loading = []
         self.flat_lock = threading.Lock()
@@ -163,17 +154,35 @@ class TrackGfx(Gfx):
         nname = node.get_name()
         self.in_loading += [nname]
         #self.notify('on_loading', _('flattening model: ') + nname)
-        if not 'NameBillboard2' in nname:
-            loa = loader.asyncFlattenStrong(
-                node, callback=process_flat, inPlace=False,
-                extraArgs=[node, nname, curr_t, len(node.get_children())])
-            self.loaders += [loa]
-        else:
-            process_flat(node, node, nname, curr_t, 0, False)
+        loa = loader.asyncFlattenStrong(
+            node, callback=process_flat, inPlace=False,
+            extraArgs=[node, nname, curr_t, len(node.get_children())])
+        self.loaders += [loa]
 
     def end_loading(self, model=None):
         if model:
             self.model = model
+
+        for model in self.model.findAllMatches('**/Empty*Anim*'):  # bam files don't contain actor info
+            new_root = NodePath(model.get_name())
+            new_root.reparent_to(model.get_parent())
+            new_root.set_pos(model.get_pos())
+            new_root.set_hpr(model.get_hpr())
+            new_root.set_scale(model.get_scale())
+            path = self.mdt.path + '/' + model.get_name()[5:]
+            if '.' in path:
+                path = path.split('.')[0]
+            self.__actors += [Actor(path, {'anim': path + '-Anim'})]
+            self.__actors[-1].loop('anim')
+            self.__actors[-1].setPlayRate(.5, 'anim')
+            self.__actors[-1].reparent_to(new_root)
+            if model.has_tag('omni') and model.get_tag('omni'):
+                a_n = self.__actors[-1].get_name()
+                eng.log_mgr.log('set omni for ' + a_n)
+                self.__actors[-1].node().setBounds(OmniBoundingVolume())
+                self.__actors[-1].node().setFinal(True)
+            model.remove_node()
+
         self.__set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
         #vrs = eng.logic.version.strip().split()[-1]
@@ -222,18 +231,18 @@ class TrackGfx(Gfx):
         self.renders = []
 
     def __set_signs(self):
-        signs = self.model.findAllMatches('**/NameBillboard2.egg')
+        signs = self.model.findAllMatches('**/EmptyNameBillboard4Anim*')
         names = open('assets/thanks.txt').readlines()
         for i, sign in enumerate(signs):
             self.__set_render_to_texture()
             shuffle(names)
             text = '\n\n'.join(names[:3])
             txt = OnscreenText(text, parent=self.renders[i], scale=.2,
-                               fg=(0, 0, 0, 1), pos=(-.2, -.28))
-            while txt.getTightBounds()[1][0] - txt.getTightBounds()[0][0] > .8:
+                               fg=(0, 0, 0, 1), pos=(.245, 0))
+            while txt.getTightBounds()[1][0] - txt.getTightBounds()[0][0] > .48:
                 txt.setScale(txt.getScale()[0] - .01, txt.getScale()[0] - .01)
             height = txt.getTightBounds()[1][2] - txt.getTightBounds()[0][2]
-            txt.setZ(-.24 + height / 2)
+            txt.setZ(.06 + height / 2)
             ts = TextureStage('ts')
             ts.setMode(TextureStage.MDecal)
             sign.setTexture(ts, self.buffers[i].getTexture())
@@ -247,7 +256,7 @@ class TrackGfx(Gfx):
 
         self.cameras += [NodePath(Camera('camera 2d'))]
         lens = OrthographicLens()
-        lens.setFilmSize(1.2, 2)
+        lens.setFilmSize(1, 1)
         lens.setNearFar(-1000, 1000)
         self.cameras[-1].node().setLens(lens)
 
