@@ -4,6 +4,17 @@ from shutil import move
 from .build import path, ver_branch, pdf_path_str
 
 
+def __process_step(name, cmd):
+    rename(name + '.pdf', name + '_append.pdf')
+    system(cmd)
+    cmd = 'gs -q -sPAPERSIZE=a4 -dNOPAUSE -dBATCH ' + \
+        '-sDEVICE=pdfwrite -sOutputFile={name}-joined.pdf ' + \
+        '{name}_append.pdf {name}.pdf'
+    system(cmd.format(name=name))
+    map(remove, ['%s%s.pdf' % (name, suff) for suff in ['', '_append']])
+    move(name + '-joined.pdf', name + '.pdf')
+
+
 def __process(opt_lang, cmd_tmpl, name, i):
     filt = ''.join(["-not -path '%s' " % fil for fil in opt_lang[3]])
     lang = ('--pretty-print=' + opt_lang[0]) if opt_lang[0] else ''
@@ -12,21 +23,12 @@ def __process(opt_lang, cmd_tmpl, name, i):
     cmd = cmd_tmpl.format(lang=lang, root=opt_lang[1],
                           wildcard=wcard, filter=filt, name=name)
     if i:
-        rename(name + '.pdf', name + '_append.pdf')
-        system(cmd)
-        cmd = 'gs -q -sPAPERSIZE=a4 -dNOPAUSE -dBATCH ' + \
-            '-sDEVICE=pdfwrite -sOutputFile={name}-joined.pdf ' + \
-            '{name}_append.pdf {name}.pdf'
-        system(cmd.format(name=name))
-        map(remove, ['%s%s.pdf' % (name, suff) for suff in ['', '_append']])
-        move(name + '-joined.pdf', name + '.pdf')
+        __process_step(name, cmd)
     else:
         system(cmd)
 
 
 def build_pdf(target, source, env):
-    pdfname = env['NAME']
-    conf = env['PDF_CONF']
     cmd_tmpl = "enscript --font=Courier10 --continuous-page-numbers " + \
         "--line-numbers {lang} -o - `find {root} {wildcard} " + \
         "{filter}` | ps2pdf - {name}.pdf"
@@ -34,17 +36,17 @@ def build_pdf(target, source, env):
         "| sed 's/==> /# ==> /' > temp.txt ; enscript --font=Courier10 " + \
         "--continuous-page-numbers --no-header {lang} -o - " + \
         "temp.txt | ps2pdf - {name}.pdf ; rm temp.txt"
-
-    for name, options in conf.items():
+    for name, options in env['PDF_CONF'].items():
         for (i, opt_lang), suff in product(enumerate(options), ['', '_cont']):
             cmd = cmd_cont_tmpl if suff else cmd_tmpl
             __process(opt_lang, cmd, name + suff, i)
         cmd_pdf_tmpl = 'pdfnup --nup 2x1 -o {name}.pdf {name}.pdf'
         for name_s in [name + '', name + '_cont']:
             system(cmd_pdf_tmpl.format(name=name_s))
-    pdfs = ''.join([name + '.pdf ' for name in conf])
-    pdfs += ''.join([name + '_cont.pdf ' for name in conf])
+    pdfs = ''.join([name + '.pdf ' for name in env['PDF_CONF']])
+    pdfs += ''.join([name + '_cont.pdf ' for name in env['PDF_CONF']])
     cmd = 'tar -czf {out_name} ' + pdfs + ' && rm ' + pdfs
-    pdf_path = pdf_path_str.format(path=path, name=pdfname, version=ver_branch)
+    pdf_path = pdf_path_str.format(path=path, name=env['NAME'],
+                                   version=ver_branch)
     cmd = cmd.format(out_name=pdf_path)
     system(cmd)

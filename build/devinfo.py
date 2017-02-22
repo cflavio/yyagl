@@ -31,15 +31,14 @@ def __process(src, cond, outfile):
 
 
 def build_devinfo(target, source, env):
-    name = env['NAME']
-    dev_conf = env['DEV_CONF']
-    for fname, cond in dev_conf.items():
+    for fname, cond in env['DEV_CONF'].items():
         for src in source:
             with open(('%s%s.txt') % (path, fname), 'a') as outfile:
                 __process(src, cond, outfile)
-    names = ''.join([fname + '.txt ' for fname in dev_conf])
-    rmnames = ''.join(['{path}' + fname + '.txt ' for fname in dev_conf])
+    names = ''.join([fname + '.txt ' for fname in env['DEV_CONF']])
+    rmnames = ''.join(['{path}%s.txt ' % fname for fname in env['DEV_CONF']])
     build_command_str = \
         'tar -czf {out_name} -C {path} ' + names + ' && rm ' + rmnames
-    fpath = devinfo_path_str.format(path=path, name=name, version=ver_branch)
+    fpath = devinfo_path_str.format(path=path, name=env['NAME'],
+                                    version=ver_branch)
     system(build_command_str.format(path=path, out_name=fpath))

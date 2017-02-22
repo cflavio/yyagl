@@ -38,7 +38,6 @@ class Engine(GameObjectMdt):
         __builtin__.eng = self
         self.base = EngineBase()
         init_lst = [
-            [('fsm', self.fsm_cls, [self])],
             [('logic', EngineLogic, [self, conf])],
             [('log_mgr', LogMgr, [self])],
             [('lang_mgr', LangMgr, [self])],
@@ -46,7 +45,6 @@ class Engine(GameObjectMdt):
             [('phys', EnginePhys, [self])],
             [('gui', self.gui_cls, [self])],
             [('audio', EngineAudio, [self])],
-            [('ai', self.ai_cls, [self])],
             [('event', self.event_cls, [self])],
             [('pause', PauseMgr, [self])],
             [('font_mgr', FontMgr, [self])],

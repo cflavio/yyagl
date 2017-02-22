@@ -15,29 +15,20 @@ class GameLogic(Logic):
 
 class Game(GameObjectMdt):
     __metaclass__ = ABCMeta
-    logic_cls = GameLogic
     engine_cls = Engine
 
-    def __init__(self, classes, conf):
+    def __init__(self, init_lst, cfg):
         __builtin__.game = self
-        eng = self.engine_cls(conf)
-        init_lst = [
-            [('fsm', classes[0], [self])],
-            [('gfx', classes[1], [self])],
-            [('phys', classes[2], [self])],
-            [('gui', classes[3], [self])],
-            [('logic', classes[4], [self])],
-            [('audio', classes[5], [self])],
-            [('ai', classes[6], [self])],
-            [('event', classes[7], [self])]]
+        eng = self.engine_cls(cfg)
         GameObjectMdt.__init__(self, init_lst)
         eng.event.register_close_cb(self.logic.on_end)
         self.logic.on_start()
 
 
 class GameWindow(Game):
+    #TODO do NoWindow in place of Window
     engine_cls = EngineWindow
 
-    def __init__(self, classes, conf):
-        Game.__init__(self, classes, conf)
+    def __init__(self, init_lst, cfg):
+        Game.__init__(self, init_lst, cfg)
         eng.base.run()

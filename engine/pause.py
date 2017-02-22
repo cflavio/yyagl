@@ -121,11 +121,5 @@ class PauseMgr(GameObjectMdt, Colleague):
 
     def __init__(self, mdt):
         Colleague.__init__(self, mdt)
-        self.fsm = self.fsm_cls(self)
-        self.gfx = self.gfx_cls(self)
-        self.phys = self.phys_cls(self)
         self.gui = self.gui_cls(self)
         self.logic = self.logic_cls(self)
-        self.audio = self.audio_cls(self)
-        self.ai = self.ai_cls(self)
-        self.event = self.event_cls(self)

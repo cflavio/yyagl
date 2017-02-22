@@ -18,10 +18,11 @@ class Colleague(Subject):
 
     def _end_async(self):
         self.sync_build(*self._args, **self._kwargs)
-        taskMgr.doMethodLater(.001, self.__notify, 'wait')
-
-    def __notify(self, task):
-        self.mdt.notify('on_component_built', self)
+        args = ['on_component_built', self]
+        taskMgr.doMethodLater(.001, self.mdt.notify, 'wait', args)
+        #TODO this is necessary to schedule the next component into the next
+        # frame otherwise some dependent components may access a non-existent
+        # one. think of something better
 
     def sync_build(self, *args, **kwargs):
         pass
@@ -75,12 +76,10 @@ class Phys(Colleague):
 
 class GODirector(object):
 
-    def __init__(self, obj, init_lst, cb):
+    def __init__(self, obj, init_lst, callback):
         obj.attach(self.on_component_built)
-        self.cb = cb
-        self.completion = {}
-        for i in range(len(init_lst)):
-            self.completion[i] = False
+        self.callback = callback
+        self.completed = [False for i in range(len(init_lst))]
         self.pending = {}
         self.__init_lst = init_lst
         for idx in range(len(init_lst)):
@@ -92,72 +91,35 @@ class GODirector(object):
             return
         comp_info = self.__init_lst[idx].pop(0)
         self.pending[comp_info[1].__name__] = idx
-        args = comp_info[2] if len(comp_info) > 2 else []
-        setattr(obj, comp_info[0], comp_info[1](*args))
-        if len(comp_info) > 3:
-            comp_info[3]()
+        setattr(obj, comp_info[0], comp_info[1](*comp_info[2]))
 
     def on_component_built(self, obj):
         self.__process_lst(obj.mdt, self.pending[obj.__class__.__name__])
 
     def end_lst(self, idx):
-        self.completion[idx] = True
-        if all(self.completion[i] for i in self.completion) and self.cb:
-            self.cb()
+        self.completed[idx] = True
+        if all(self.completed) and self.callback:
+            self.callback()
 
 
 class GameObjectMdt(Subject):
     __metaclass__ = ABCMeta
-    gfx_cls = Gfx
-    gui_cls = Gui
-    logic_cls = Logic
-    audio_cls = Audio
-    phys_cls = Phys
-    ai_cls = Ai
-    event_cls = Event
-    fsm_cls = Fsm
 
-    def __init__(self, init_lst=[], cb=None):
+    def __init__(self, init_lst=[], callback=None):
         Subject.__init__(self)
-        init_lst = init_lst or [
-            [('fsm', self.fsm_cls, [self])],
-            [('gfx', self.gfx_cls, [self])],
-            [('phys', self.phys_cls, [self])],
-            [('gui', self.gui_cls, [self])],
-            [('logic', self.logic_cls, [self])],
-            [('audio', self.audio_cls, [self])],
-            [('ai', self.ai_cls, [self])],
-            [('event', self.event_cls, [self])]]
-        GODirector(self, init_lst, cb)
+        self.comps = self.comp_list(init_lst)
+        GODirector(self, init_lst, callback)
 
-    def build_fsm(self):
-        self.fsm = self.fsm_cls(self)
-
-    def build_gfx(self):
-        self.gfx = self.gfx_cls(self)
-
-    def build_phys(self):
-        self.phys = self.phys_cls(self)
-
-    def build_gui(self):
-        self.gui = self.gui_cls(self)
-
-    def build_logic(self):
-        self.logic = self.logic_cls(self)
-
-    def build_audio(self):
-        self.audio = self.audio_cls(self)
-
-    def build_ai(self):
-        self.ai = self.ai_cls(self)
-
-    def build_event(self):
-        self.event = self.event_cls(self)
-
-    def __safe_destroy(self, component):
-        if hasattr(self, component):
-            getattr(self, component).destroy()
+    @staticmethod
+    def comp_list(init_lst):
+        ret = []
+        for elm in init_lst:
+            if type(elm) == tuple:
+                ret += [elm[0]]
+            else:
+                ret += GameObjectMdt.comp_list(elm)
+        return ret
 
     def destroy(self):
-        comps = ['fsm', 'phys', 'gfx', 'gui', 'logic', 'audio', 'ai', 'event']
-        map(self.__safe_destroy, comps)
+        Subject.destroy(self)
+        map(lambda comp: getattr(self, comp).destroy(), self.comps)

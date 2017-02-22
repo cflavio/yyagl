@@ -282,13 +282,7 @@ class LoadingPage(Page):
     @property
     def init_lst(self):
         return [
-            [('fsm', self.fsm_cls, [self])],
-            [('gfx', self.gfx_cls, [self])],
-            [('phys', self.phys_cls, [self])],
             [('event', self.event_cls, [self])],
             [('gui', self.gui_cls, [self, self.menu, self.track_path,
                                     self.car_path, self.player_cars,
-                                    self.drivers])],
-            [('logic', self.logic_cls, [self])],
-            [('audio', self.audio_cls, [self])],
-            [('ai', self.ai_cls, [self])]]
+                                    self.drivers])]]

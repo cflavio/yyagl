@@ -1,4 +1,4 @@
-from yyagl.gameobject import GameObjectMdt, Ai
+from yyagl.gameobject import GameObjectMdt, Ai, Gui, Audio
 from .fsm import CarFsm
 from .gfx import CarGfx
 from .phys import CarPhys, CarPlayerPhys
@@ -13,10 +13,12 @@ from .ai import CarAi
 class Car(GameObjectMdt):
     fsm_cls = CarFsm
     gfx_cls = CarGfx
+    gui_cls = Gui
     phys_cls = CarPhys
     event_cls = CarEvent
     logic_cls = CarLogic
     ai_cls = Ai
+    audio_cls = Audio
 
     def __init__(self, path, pos, hpr, cb, race, laps):
         eng.log_mgr.log('init car')

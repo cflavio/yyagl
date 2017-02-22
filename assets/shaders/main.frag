@@ -63,7 +63,8 @@ void toon(int lgt_idx, out vec3 amb_diff, out vec3 spec) {
     return;
   float ang = acos(dot(-s, lgt.dir));
   float cutoff = radians(clamp(lgt.cutoff, 0, 90));
-  float spot_factor =  toon_val(pow(dot(-s, lgt.dir), lgt.exp)) * step(ang, cutoff);
+  float col_val = toon_val(pow(dot(-s, lgt.dir), lgt.exp));
+  float spot_factor =  col_val * step(ang, cutoff);
   amb_diff *= spot_factor;
   spec *= spot_factor;
 }
@@ -88,7 +89,8 @@ void main() {
     }
     vec3 circleoffs = vec3(lightclip.xy / lightclip.w, 0);
     float falloff = saturate(1.0 - dot(circleoffs, circleoffs));
-    vec4 col = vsaturate(vec4(amb_diff, 1) * tex_col + vec4(spec, 1) * vec4(vec3(1), tex_col.a));
+    vec4 sat_col = vsaturate(vec4(amb_diff, 1);
+    vec4 col = sat_col * tex_col + vec4(spec, 1) * vec4(vec3(1), tex_col.a));
     float shade = min(.4 + shadow2DProj(depthmap, shadowcoord).r, 1);
     if (gl_FrontFacing)
         p3d_FragColor = col * (((1 - falloff) + falloff * shade));

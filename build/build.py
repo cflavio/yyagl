@@ -12,10 +12,8 @@ def __get_branch():
 
 
 def __get_version():
-    hash = exec_cmd('git rev-parse HEAD')[:7]
-    with open('assets/version.txt') as f:
-        ver = f.read().strip()
-    return ver + '-' + hash
+    with open('assets/version.txt') as _file:
+        return _file.read().strip() + '-' + exec_cmd('git rev-parse HEAD')[:7]
 
 
 def bld_cmd_pref(ptools_path):
@@ -75,10 +73,8 @@ class InsideDir(object):
 
 
 path = 'built/'
-try:
-    ver_branch = {'master': 'dev', 'stable': 'stable'}[__get_branch()]
-except KeyError:
-    ver_branch = __get_branch()
+brd = {'master': 'dev', 'stable': 'stable'}
+ver_branch = brd[__get_branch()] if __get_branch() in brd else  __get_branch()
 ver = __get_version()
 p3d_path_str = '{path}{name}-%s.p3d' % ver_branch
 win_path_str = '{path}{name}-%s-windows.exe' % ver_branch

@@ -1,5 +1,5 @@
 from yaml import load, dump
-import collections
+from collections import Mapping
 
 
 class DictFile(object):
@@ -14,14 +14,13 @@ class DictFile(object):
             self.dct = default_dct
 
     @staticmethod
-    def __update(d, u):
-        for k, v in u.iteritems():
-            if isinstance(v, collections.Mapping):
-                r = DictFile.__update(d.get(k, {}), v)
-                d[k] = r
+    def __update(dct, upd):
+        for key, val in upd.iteritems():
+            if isinstance(val, Mapping):
+                dct[key] = DictFile.__update(dct.get(key, {}), val)
             else:
-                d[k] = u[k]
-        return d
+                dct[key] = upd[key]
+        return dct
 
     def store(self):
         with open(self.path, 'w') as yaml_file:
