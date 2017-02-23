@@ -10,11 +10,11 @@ class EngineGfx(Gfx):
 
     def __init__(self, mdt):
         Gfx.__init__(self, mdt)
-        getModelPath().appendDirectory(eng.logic.conf.model_path)
+        getModelPath().appendDirectory(eng.logic.cfg.model_path)
         mdt.base.enableParticles()
         render.setShaderAuto()
         render.setTwoSided(True)
-        if eng.logic.conf.antialiasing:
+        if eng.logic.cfg.antialiasing:
             render.setAntialias(AntialiasAttrib.MAuto)
         self.world_np = None
 
@@ -40,13 +40,13 @@ class EngineGfx(Gfx):
 
     def print_stats(self):
         print '\n\n#####\nrender2d.analyze()'
-        self.render2d.analyze()
+        self.mdt.base.render2d.analyze()
         print '\n\n#####\nrender.analyze()'
-        self.render.analyze()
+        self.mdt.base.render.analyze()
         print '\n\n#####\nrender2d.ls()'
-        self.render2d.ls()
+        self.mdt.base.render2d.ls()
         print '\n\n#####\nrender.ls()'
-        self.render.ls()
+        self.mdt.base.render.ls()
 
     @staticmethod
     def particle(path, parent, render_parent, pos, timeout):

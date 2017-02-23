@@ -21,6 +21,7 @@ def build_docs(target, source, env):
     system("sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst" % path)
     system('sphinx-build -b html %sdocs_apidoc %sdocs' % (path, path))
     build_command_str = 'tar -C {path} -czf {out_name} ./docs'
-    f_out = docs_path_str.format(path=path, name=env['NAME'], version=ver_branch)
+    f_out = docs_path_str.format(path=path, name=env['NAME'],
+                                 version=ver_branch)
     system(build_command_str.format(path=path, out_name=f_out))
     map(rmtree, [path+'docs_apidoc', path+'docs'])

@@ -26,7 +26,7 @@ class RaceEvent(Event):
 
     def fire_menu(self):
         self.ignore('escape-up')
-        eng.gui.show_cursor()
+        eng.gui.cursor.show()
         InGameMenu()
 
     def register_menu(self):

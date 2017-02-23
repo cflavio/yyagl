@@ -56,7 +56,8 @@ class CarEvent(Event):
 
     def __update_contact_pos(self):
         car_pos = self.mdt.gfx.nodepath.get_pos()
-        top, bottom = (car_pos.x, car_pos.y, 100), (car_pos.x, car_pos.y, -100)
+        top = (car_pos.x, car_pos.y, car_pos.z + 50)
+        bottom = (car_pos.x, car_pos.y, car_pos.z - 50)
         hits = eng.phys.world_phys.rayTestAll(top, bottom).getHits()
         for hit in [hit for hit in hits if 'Road' in hit.getNode().getName()]:
             self.mdt.logic.last_contact_pos = self.mdt.gfx.nodepath.getPos()
@@ -147,7 +148,7 @@ class CarPlayerEvent(CarEvent):
             keys = ['forward', 'left', 'reverse', 'right']
             return {key: inputState.isSet(key) for key in keys}
         else:
-            x, y, a, b = eng.event.get_joystick()
+            x, y, a, b = eng.event.joystick.get_joystick()
             if b and not self.last_b and self.has_weapon:
                 self.on_fire()
             return {'forward': y < -.4, 'reverse': y > .4 or a,

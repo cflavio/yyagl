@@ -1,4 +1,4 @@
-from os import system, makedirs, error
+from os import system, makedirs
 from os.path import exists
 from shutil import move, copy
 from .build import get_files

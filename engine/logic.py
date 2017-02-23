@@ -4,9 +4,9 @@ from .configuration import Configuration
 
 class EngineLogic(Logic):
 
-    def __init__(self, mdt, configuration=None):
+    def __init__(self, mdt, cfg=None):
         Logic.__init__(self, mdt)
-        self.conf = configuration or Configuration()
+        self.cfg = cfg or Configuration()
 
     @property
     def version(self):

@@ -1,5 +1,5 @@
-from ..gameobject import Colleague
 from panda3d.core import Texture
+from ..gameobject import Colleague
 
 
 class FontMgr(Colleague):

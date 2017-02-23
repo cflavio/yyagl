@@ -1,8 +1,6 @@
 from sys import path
-
 from os.path import dirname, realpath
 path.append(dirname(realpath(__file__)) + '/../thirdparty')
-
 import __builtin__
 from direct.showbase.ShowBase import ShowBase
 from .pause import PauseMgr
@@ -27,18 +25,14 @@ class EngineBase(ShowBase):
 
 
 class Engine(GameObjectMdt):
-    gfx_cls = EngineGfx
     gui_cls = EngineGui
-    logic_cls = EngineLogic
-    phys_cls = EnginePhys
     event_cls = EngineEvent
-    audio_cls = EngineAudio
 
-    def __init__(self, conf=None):
+    def __init__(self, cfg=None):
         __builtin__.eng = self
         self.base = EngineBase()
         init_lst = [
-            [('logic', EngineLogic, [self, conf])],
+            [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr, [self])],
             [('lang_mgr', LangMgr, [self])],
             [('gfx', EngineGfx, [self])],
@@ -52,28 +46,6 @@ class Engine(GameObjectMdt):
             [('client', Client, [self])],
             [('shader_mgr', ShaderMgr, [self])]]
         GameObjectMdt.__init__(self, init_lst)
-
-    def build_logic(self, conf):
-        self.logic = self.logic_cls(self, conf)
-
-    def build_log_mgr(self):
-        self.log_mgr = LogMgr(self)
-        self.log_mgr.log_conf()
-
-    def build_lang_mgr(self):
-        self.lang_mgr = LangMgr(self)
-
-    def build_pause(self):
-        self.pause = PauseMgr(self)
-
-    def build_font_mgr(self):
-        self.font_mgr = FontMgr(self)
-
-    def build_server(self):
-        self.server = Server(self)
-
-    def build_client(self):
-        self.client = Client(self)
 
     def destroy(self):
         GameObjectMdt.destroy(self)

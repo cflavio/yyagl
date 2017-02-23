@@ -74,7 +74,7 @@ class InsideDir(object):
 
 path = 'built/'
 brd = {'master': 'dev', 'stable': 'stable'}
-ver_branch = brd[__get_branch()] if __get_branch() in brd else  __get_branch()
+ver_branch = brd[__get_branch()] if __get_branch() in brd else __get_branch()
 ver = __get_version()
 p3d_path_str = '{path}{name}-%s.p3d' % ver_branch
 win_path_str = '{path}{name}-%s-windows.exe' % ver_branch

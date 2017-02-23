@@ -25,7 +25,7 @@ class _Fsm(Fsm):
         self.mdt.gui.loading.exit_loading()
 
     def enterCountdown(self):
-        eng.gui.hide_cursor()
+        eng.gui.cursor.hide()
         self.countdown = Countdown()
         self.countdown.attach(self.on_start_race)
         self.mdt.logic.enter_play()
@@ -36,6 +36,7 @@ class _Fsm(Fsm):
 
     def exitCountdown(self):
         self.countdown.destroy()
+        #eng.gfx.print_stats()
 
     @staticmethod
     def enterPlay():
@@ -48,7 +49,7 @@ class _Fsm(Fsm):
     @staticmethod
     def exitPlay():
         eng.log_mgr.log('exiting Play state')
-        eng.gui.show_cursor()
+        eng.gui.cursor.show()
 
     @staticmethod
     def enterResults(race_ranking):

@@ -79,7 +79,7 @@ class GODirector(object):
     def __init__(self, obj, init_lst, callback):
         obj.attach(self.on_component_built)
         self.callback = callback
-        self.completed = [False for i in range(len(init_lst))]
+        self.completed = [False for _ in range(len(init_lst))]
         self.pending = {}
         self.__init_lst = init_lst
         for idx in range(len(init_lst)):

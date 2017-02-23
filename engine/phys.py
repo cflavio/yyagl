@@ -63,6 +63,7 @@ class EnginePhys(Phys):
 
     @staticmethod
     def find_geoms(model, name):
+        # no need to be cached
         geoms = model.findAllMatches('**/+GeomNode')
         is_nm = lambda geom: geom.getName().startswith(name)
         named_geoms = [geom for geom in geoms if is_nm(geom)]

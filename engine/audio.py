@@ -5,6 +5,6 @@ from ..gameobject import Audio
 class EngineAudio(Audio):
 
     @staticmethod
-    def play(sound):
-        if sound.status() != AudioSound.PLAYING:
-            sound.play()
+    def play(snd):
+        if snd.status() != AudioSound.PLAYING:
+            snd.play()

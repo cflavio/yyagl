@@ -10,7 +10,7 @@ class ShaderMgr(Colleague):
     def __init__(self, mdt):
         Colleague.__init__(self, mdt)
         self.lights = []
-        if game.options['development']['shaders']:
+        if eng.logic.cfg.shaders:
             self.setup_post_fx()
 
     def set_lgt(self, lgt):
@@ -103,8 +103,7 @@ class ShaderMgr(Colleague):
         with open('yyagl/assets/shaders/pass.frag') as f:
             frag = f.read()
         final_quad.setShader(Shader.make(Shader.SLGLSL, vert, frag))
-        gamma_val = game.options['development']['gamma']
-        final_quad.set_shader_input('gamma', gamma_val)
+        final_quad.set_shader_input('gamma', eng.logic.cfg.gamma)
         final_quad.setShaderInput('input_tex', final_tex)
 
     def apply(self):

@@ -1,6 +1,6 @@
+from inspect import getmro
+from panda3d.core import LPoint3f
 from direct.gui.DirectButton import DirectButton
-from ...gameobject import GameObjectMdt, Gui, Event
-from .imgbtn import ImageButton
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
@@ -8,8 +8,10 @@ from direct.gui.DirectGuiGlobals import ENTER, EXIT, NORMAL, DISABLED
 from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectSlider import DirectSlider
-from panda3d.core import LPoint3f
 from direct.gui.DirectEntry import DirectEntry
+from ...gameobject import GameObjectMdt, Gui, Event
+from .imgbtn import ImageButton
+from .widget import Widget
 
 
 class PageGui(Gui):
@@ -20,15 +22,8 @@ class PageGui(Gui):
         self.widgets = []
         self.build_page()
         self.update_texts()
-        self.curr_wdg = None
         self.curr_wdg = self.get_next_widget((-.1, 0, -1), (-3.6, 1, 1))
-        if self.curr_wdg.__class__ == ImageButton:
-            meth = self._on_enter_img_btn
-        elif self.curr_wdg.__class__ == DirectEntry:
-            meth = self._on_enter_entry
-        else:
-            meth = self._on_enter
-        meth(self.curr_wdg)
+        self.curr_wdg.on_enter()
 
     def build_page(self, back_btn=True):
         if back_btn:
@@ -45,29 +40,15 @@ class PageGui(Gui):
         next_wdg = self.get_next_widget(direction)
         if not next_wdg:
             return
-        if self.curr_wdg.__class__ == DirectSlider:
-            self._on_exit_slider(self.curr_wdg)
-        elif self.curr_wdg.__class__ == ImageButton:
-            self._on_exit_img_btn(self.curr_wdg)
-        elif self.curr_wdg.__class__ == DirectEntry:
-            self._on_exit_entry(self.curr_wdg)
-        else:
-            self._on_exit(self.curr_wdg)
+        self.curr_wdg.on_exit()
         self.curr_wdg = next_wdg
-        if self.curr_wdg.__class__ == DirectSlider:
-            self._on_enter_slider(self.curr_wdg)
-        elif self.curr_wdg.__class__ == ImageButton:
-            self._on_enter_img_btn(self.curr_wdg)
-        elif self.curr_wdg.__class__ == DirectEntry:
-            self._on_enter_entry(self.curr_wdg)
-        else:
-            self._on_enter(self.curr_wdg)
+        self.curr_wdg.on_enter()
 
     def on_enter(self):
-        if self.curr_wdg.__class__ == DirectCheckButton:
+        if self.curr_wdg.__class__.__name__ == 'DirectCheckButtonWidget':
             val = self.curr_wdg['indicatorValue']
             self.curr_wdg['indicatorValue'] = not val
-        if self.curr_wdg.__class__ == DirectOptionMenu:
+        if self.curr_wdg.__class__.__name__ == 'DirectOptionMenuWidget':
             self.curr_wdg.showPopupMenu()
             self.curr_wdg._highlightItem(self.curr_wdg.component('item0'), 0)
             self.mdt.event.ignoreAll()
@@ -128,9 +109,10 @@ class PageGui(Gui):
     def get_next_widget(self, direction, start=None):
         clss = [DirectButton, DirectCheckButton, DirectSlider,
                 DirectOptionMenu, ImageButton, DirectEntry]
-        wdgs = [wdg for wdg in self.widgets if wdg.__class__ in clss]
+        inter = lambda wdg: any(pcl in clss for pcl in getmro(wdg.__class__))
+        wdgs = [wdg for wdg in self.widgets if inter(wdg)]
         wdgs = filter(lambda wdg: wdg['state'] != DISABLED, wdgs)
-        if self.curr_wdg:
+        if hasattr(self, 'curr_wdg') and self.curr_wdg:
             wdgs.remove(self.curr_wdg)
         pos_dot = lambda wdg: self.__get_dot(wdg, direction, start) > .1
         wdgs = filter(pos_dot, wdgs)
@@ -141,53 +123,12 @@ class PageGui(Gui):
 
     def _set_buttons(self):
         for wdg in self.widgets:
-            btn_classes = [DirectButton, DirectOptionMenu, DirectCheckButton]
-            if wdg.__class__ in [ImageButton]:
-                wdg.bind(ENTER, self._on_enter_img_btn, [wdg])
-                wdg.bind(EXIT, self._on_exit_img_btn, [wdg])
-            elif wdg.__class__ in btn_classes:
-                wdg.start_fg = wdg.component('text0').textNode.getTextColor()
-                wdg.start_frame_col = wdg['frameColor']
-                wdg.bind(ENTER, self._on_enter, [wdg])
-                wdg.bind(EXIT, self._on_exit, [wdg])
-            elif wdg.__class__ in [DirectSlider]:
-                wdg.start_frame_col = wdg['frameColor']
-                wdg.bind(ENTER, self._on_enter_slider, [wdg])
-                wdg.bind(EXIT, self._on_exit_slider, [wdg])
-            elif wdg.__class__ in [DirectEntry]:
-                wdg.bind(ENTER, self._on_enter_entry, [wdg])
-                wdg.bind(EXIT, self._on_exit_entry, [wdg])
-
-    def _on_enter(self, wdg, pos=None):
-        _fg = wdg.start_fg
-        _fc = wdg.start_frame_col
-        wdg['text_fg'] = (_fg[0] + .3, _fg[1] + .3, _fg[2] + .3, _fg[3])
-        wdg['frameColor'] = (_fc[0] + .3, _fc[1] + .3, _fc[2] + .3, _fc[3])
-
-    def _on_exit(self, wdg, pos=None):
-        wdg['text_fg'] = wdg.start_fg
-        wdg['frameColor'] = wdg.start_frame_col
-
-    def _on_enter_slider(self, wdg, pos=None):
-        _fc = wdg.start_frame_col
-        wdg['frameColor'] = (_fc[0] + .3, _fc[1] + .3, _fc[2] + .3, _fc[3])
-
-    def _on_exit_slider(self, wdg, pos=None):
-        wdg['frameColor'] = wdg.start_frame_col
-
-    def _on_enter_img_btn(self, wdg, pos=None):
-        wdg.setShaderInput('col_scale', .25)
-
-    def _on_exit_img_btn(self, wdg, pos=None):
-        wdg.setShaderInput('col_scale', 0)
-
-    def _on_enter_entry(self, wdg, pos=None):
-        wdg['focus'] = 1
-        wdg.setFocus()
-
-    def _on_exit_entry(self, wdg, pos=None):
-        wdg['focus'] = 0
-        wdg.setFocus()
+            cname = wdg.__class__.__name__ + 'Widget'
+            wdg.__class__ = type(cname, (wdg.__class__, Widget), {})
+            wdg.init(wdg)
+            if hasattr(wdg, 'bind'):
+                wdg.bind(ENTER, wdg.on_enter)
+                wdg.bind(EXIT, wdg.on_exit)
 
     def transition_enter(self):
         self.update_texts()

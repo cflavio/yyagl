@@ -67,7 +67,7 @@ class CarLogic(Logic):
                     steering_sign = (-1 if self.__steering > 0 else 1)
                     self.__steering += steering_sign * steering_dec
         else:
-            x, y, a, b = eng.event.get_joystick()
+            x, y, a, b = eng.event.joystick.get_joystick()
             scale = lambda val: min(1, max(-1, val * 1.2))
             x, y = scale(x), scale(y)
             if y <= - .1:

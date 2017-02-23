@@ -1,5 +1,5 @@
 from yyagl.gameobject import GameObjectMdt, Gui
-from yyagl.engine.gui.menu import MenuArgs, Menu
+from yyagl.engine.gui.menu import MenuArgs, Menu, MenuLogic
 from .loadingpage import LoadingPage
 from random import randint
 
@@ -33,5 +33,5 @@ class LoadingMenu(Menu):
         init_lst = [
             [('gui', self.gui_cls, [self, loading, track_path, car_path,
                                     player_cars, drivers])],
-            [('logic', self.logic_cls, [self])]]
+            [('logic', MenuLogic, [self])]]
         GameObjectMdt.__init__(self, init_lst)

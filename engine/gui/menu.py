@@ -32,9 +32,15 @@ class MenuGui(Gui):
             self.background.setBin('background', 10)
         self.rollover = loader.loadSfx(menu_args.rollover)
         self.click = loader.loadSfx(menu_args.click)
-        self.imgbtn_args = {
+
+    @property
+    def imgbtn_args(self):
+        return {
             'rolloverSound': self.rollover, 'clickSound': self.click}
-        self.btn_args = {
+
+    @property
+    def btn_args(self):
+        return {
             'scale': self.menu_args.text_scale,
             'text_font': self.font,
             'text_fg': self.menu_args.text_fg,
@@ -42,12 +48,18 @@ class MenuGui(Gui):
             'frameSize': self.menu_args.btn_size,
             'rolloverSound': self.rollover,
             'clickSound': self.click}
-        self.label_args = {
+
+    @property
+    def label_args(self):
+        return {
             'scale': self.menu_args.text_scale,
             'text_fg': self.menu_args.text_fg,
             'text_font': self.font,
             'frameColor': (1, 1, 1, 0)}
-        self.option_args = {
+
+    @property
+    def option_args(self):
+        return {
             'scale': self.menu_args.text_scale,
             'text_font': self.font,
             'text_fg': self.menu_args.text_fg,
@@ -62,14 +74,20 @@ class MenuGui(Gui):
             'popupMarker_frameColor': self.menu_args.btn_color,
             'textMayChange': 1,
             'highlightColor': (.85, .85, .3, .2)}
-        self.checkbtn_args = {
+
+    @property
+    def checkbtn_args(self):
+        return {
             'scale': self.menu_args.text_scale,
             'text_font': self.font,
             'text_fg': self.menu_args.text_fg,
             'frameColor': self.menu_args.btn_color,
             'rolloverSound': self.rollover,
             'clickSound': self.click}
-        self.text_args = {
+
+    @property
+    def text_args(self):
+        return {
             'scale': self.menu_args.text_scale,
             'fg': self.menu_args.text_fg,
             'font': self.font}
@@ -109,14 +127,10 @@ class MenuLogic(Logic):
 
 class Menu(GameObjectMdt):
     gui_cls = MenuGui
-    logic_cls = MenuLogic
 
     def __init__(self, menu_args):
         self.menu_args = menu_args
         init_lst = [
             [('gui', self.gui_cls, [self, self.menu_args])],
-            [('logic', self.logic_cls, [self])]]
+            [('logic', MenuLogic, [self])]]
         GameObjectMdt.__init__(self, init_lst)
-
-    def build_gui(self, menu_args):
-        self.gui = self.gui_cls(self, menu_args)

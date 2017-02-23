@@ -35,11 +35,10 @@ class MainPageGui(PageGui):
             for i, site in enumerate(sites)]
 
     def __build_version(self):
-        menu_gui = self.menu.gui
         self.widgets += [OnscreenText(
             text=eng.logic.version, parent=eng.base.a2dBottomLeft,
             pos=(.02, .02), scale=.04, fg=(.8, .8, .8, 1),
-            align=TextNode.ALeft, font=menu_gui.font)]
+            align=TextNode.ALeft, font=self.menu.gui.font)]
 
 
 class MainPage(Page):

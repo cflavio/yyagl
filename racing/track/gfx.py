@@ -105,15 +105,14 @@ class TrackGfx(Gfx):
     def __process_static(self, model):
         model_name = model.getName().split('.')[0][5:]
         if model_name not in self.__flat_roots:
-            nstr = lambda i: '%s_%s' % (model_name, str(i))
-            flat_roots = [self.model.attachNewNode(nstr(i)) for i in range(4)]
-            self.__flat_roots[model_name] = flat_roots
+            flat_root = self.model.attachNewNode(model_name)
+            self.__flat_roots[model_name] = flat_root
         path = self.mdt.path + '/' + model.getName().split('.')[0][5:]
         eng.base.loader.loadModel(path).reparent_to(model)
         left, right, top, bottom = self.mdt.phys.lrtb
         center_x, center_y = (left + right) / 2, (top + bottom) / 2
         pos_x, pos_y = model.get_pos()[0], model.get_pos()[1]
-        model.reparentTo(self.__flat_roots[model_name][0])
+        model.reparentTo(self.__flat_roots[model_name])
 
     def flattening(self):
         eng.log_mgr.log('track flattening')
@@ -121,7 +120,7 @@ class TrackGfx(Gfx):
         eng.log_mgr.log('flattening using %s cores' % flat_cores)
         self.in_loading = []
         self.flat_lock = threading.Lock()
-        self.models_to_load = eng.logic.flatlist(self.__flat_roots.values())
+        self.models_to_load = self.__flat_roots.values()
         for i in range(flat_cores):
             self.__flat_models()
         self.end_loading()
