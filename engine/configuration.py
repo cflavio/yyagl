@@ -41,6 +41,8 @@ class Configuration(object):
         self.__set('gl-coordinate-system', 'default')
         self.__set('textures-power-2', 'none')
         self.__set('show-frame-rate-meter', int(self.fps))
+        self.__set('hardware-animated-vertices', 'true')
+        self.__set('basic-shaders-only', 'false')
         if self.win_size:
             self.__set('win-size', self.win_size)
         if self.win_orig:
