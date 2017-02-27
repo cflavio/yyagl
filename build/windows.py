@@ -8,8 +8,8 @@ def build_windows(target, source, env):
     int_str = '-nointernet' if env['NOINTERNET'] else ''
     build_command = bld_cmd(env['SUPERMIRROR']).format(
         path=path, name=env['NAME'], Name=env['NAME'].capitalize(),
-        version=ver, p3d_path=env['P3D_PATH'], platform='win_i386',
-        nointernet=nointernet)
+        version=ver, p3d_path=env['P3D_PATH'][:-4] + 'nopygame.p3d',
+        platform='win_i386', nointernet=nointernet)
     system(build_command)
     win_path = '{path}win_i386/{Name} {version}.exe'
     win_tgt = '{path}{name}-{version}{int_str}-windows.exe'

@@ -42,7 +42,10 @@ class LogMgr(Colleague):
         self.log('machine: ' + platform.machine())
         self.log('platform: ' + platform.platform())
         self.log('processor: ' + platform.processor())
-        self.log('cores: ' + str(multiprocessing.cpu_count()))
+        try:
+            self.log('cores: ' + str(multiprocessing.cpu_count()))
+        except NotImplementedError:
+            self.log('cores: not implemented')
         self.log('release: ' + platform.release())
         self.log('system: ' + platform.system())
         self.log('version: ' + platform.version())
