@@ -18,6 +18,7 @@ class TrackGfx(Gfx):
         self.loaders = []
         self.__actors = []
         self.__flat_roots = {}
+        self.has_flattened = False
         Gfx.__init__(self, mdt)
         self.__init_signs()
 
@@ -195,11 +196,7 @@ class TrackGfx(Gfx):
         #if model: self.model = model
         #self.__set_signs()
         #self.model.prepareScene(eng.base.win.getGsg())
-        vrs = eng.logic.version.strip().split()[-1]
-        filename = self.mdt.path[7:] + '_' + vrs + '.bam'
-        if not os.path.exists(filename):
-            eng.log_mgr.log('writing ' + filename)
-            self.model.writeBamFile(filename)
+        self.has_flattened = True
         #Gfx.async_build(self)
 
     def __set_light(self):
@@ -272,6 +269,12 @@ class TrackGfx(Gfx):
         map(lambda ren: ren.remove_node(), self.renders)
 
     def destroy(self):
+        if self.has_flattened:
+            vrs = eng.logic.version.strip().split()[-1]
+            filename = self.mdt.path[7:] + '_' + vrs + '.bam'
+            if not os.path.exists(filename):
+                eng.log_mgr.log('writing ' + filename)
+                self.model.writeBamFile(filename)
         self.model.removeNode()
         if not game.options['development']['shaders']:
             eng.base.render.clearLight(self.ambient_np)

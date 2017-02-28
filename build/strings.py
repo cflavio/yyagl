@@ -4,7 +4,7 @@ from shutil import move, copy
 from .build import get_files
 
 
-def __build_language(lang_path, lang, name):
+def __prepare(lang_path, lang, name):
     if not exists(lang_path + lang + '/LC_MESSAGES'):
         makedirs(lang_path + lang + '/LC_MESSAGES')
     move(name + '.pot', lang_path + lang + '/LC_MESSAGES/%s.pot' % name)
@@ -15,10 +15,17 @@ def __build_language(lang_path, lang, name):
         move(path + name + 'tmp.po', path + name + '.pot')
     if not exists(path + name + '.po'):
         copy(path + name + '.pot', path + name + '.po')
+    return path
+
+
+def __merge(path, name):
     cmd_str = 'msgmerge -o {path}{name}merge.po {path}{name}.po ' + \
         '{path}{name}.pot'
     system(cmd_str.format(path=path, name=name))
     copy(path + name + 'merge.po', path + name + '.po')
+
+
+def __postprocess(path, name):
     lines = open(path + name + '.po', 'r').readlines()
     with open(path + name + '.po', 'w') as outf:
         for line in lines:
@@ -26,12 +33,18 @@ def __build_language(lang_path, lang, name):
             outf.write(po_str if line.startswith(po_str[:20]) else line)
 
 
-def build_string_template(target, source, env):
+def __build_templ_merge(lang_path, lang, name):
+    path = __prepare(lang_path, lang, name)
+    __merge(path, name)
+    __postprocess(path, name)
+
+
+def build_templ_merge(target, source, env):
     src_files = ' '.join(get_files(['py'], 'feedparser'))
     cmd_tmpl = 'xgettext -d {name} -L python -o {name}.pot '
     system(cmd_tmpl.format(name=env['NAME']) + src_files)
     for lang in env['LANGUAGES']:
-        __build_language(env['LANG'], lang, env['NAME'])
+        __build_templ_merge(env['LANG'], lang, env['NAME'])
 
 
 def build_strings(target, source, env):

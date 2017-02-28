@@ -6,39 +6,6 @@ from direct.gui.OnscreenImage import OnscreenImage
 import os
 
 
-vertexShader = '''
-#version 120
-
-uniform mat4 p3d_ModelViewProjectionMatrix;
-uniform mat4 p3d_ViewMatrix;
-attribute vec4 p3d_Vertex;
-attribute vec2 p3d_MultiTexCoord0;
-varying vec2 texcoord;
-varying vec4 pos;
-
-void main() {
-  gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;
-  texcoord = p3d_MultiTexCoord0;
-  pos = p3d_ViewMatrix * p3d_Vertex;
-}'''
-
-
-textFragmentShader = '''
-#version 120
-
-varying vec2 texcoord;
-varying vec4 pos;
-uniform sampler2D p3d_Texture0;
-uniform float ratio;
-
-void main() {
-  vec4 yellow = vec4(.75, .75, .25, 1);
-  vec4 white = vec4(.75, .75, .75, .4);
-  vec4 mul_color = (pos.x) < ratio - .5 ? yellow : white;
-  gl_FragColor = texture2D(p3d_Texture0, texcoord) * mul_color;
-}'''
-
-
 vert = '''#version 130
 in vec4 p3d_Vertex;
 in vec2 p3d_MultiTexCoord0;
@@ -98,12 +65,8 @@ class LoadingPageGui(PageGui):
         self.font = eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')
         self.load_txt = OnscreenText(
             text=_('LOADING...'),
-            scale=.2, pos=(0, .72), font=self.font, fg=(.75, .75, .25, 1),
+            scale=.2, pos=(0, .72), font=self.font, fg=(.75, .75, .75, 1),
             wordwrap=12)
-        args = (Shader.SLGLSL, vertexShader, textFragmentShader)
-        textShader = Shader.make(*args)
-        self.load_txt.setShader(textShader)
-        self.load_txt.setShaderInput('ratio', 0)
         track_number = ''
         track_name = track_path[7:]
         track_dct = {
@@ -244,18 +207,6 @@ class LoadingPageGui(PageGui):
             scale=.06, pos=(1.0, .9), font=self.font, fg=(.8, .2, .2, 1),
             bg=(.8, .8, .8, .4), wordwrap=24)
         self.widgets += [txt]
-
-    def on_loading(self, msg):
-        e_m = game.fsm.race.track.gfx.empty_models
-        names = [model.getName().split('.')[0][5:] for model in e_m]
-        names = list(set(list(names)))
-        vrs = eng.logic.version.strip().split()[-1]
-        filename = self.mdt.path[7:] + '_' + vrs + '.bam'
-        if not os.path.exists(filename):
-            tot = len(names)
-        else: tot = 1
-        self.load_txt.setShaderInput('ratio', float(self.cnt) / tot)
-        self.cnt += 1
 
     def destroy(self):
         PageGui.destroy(self)

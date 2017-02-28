@@ -22,10 +22,17 @@ def __process(opt_lang, cmd_tmpl, name, i):
     wcard = '\\( %s\\)' % wcard
     cmd = cmd_tmpl.format(lang=lang, root=opt_lang[1],
                           wildcard=wcard, filter=filt, name=name)
-    if i:
-        __process_step(name, cmd)
-    else:
-        system(cmd)
+    __process_step(name, cmd) if i else system(cmd)
+
+
+def __build_pkg(env):
+    pdfs = ''.join([name + '.pdf ' for name in env['PDF_CONF']])
+    pdfs += ''.join([name + '_cont.pdf ' for name in env['PDF_CONF']])
+    cmd = 'tar -czf {out_name} ' + pdfs + ' && rm ' + pdfs
+    pdf_path = pdf_path_str.format(path=path, name=env['NAME'],
+                                   version=ver_branch)
+    cmd = cmd.format(out_name=pdf_path)
+    system(cmd)
 
 
 def build_pdf(target, source, env):
@@ -43,10 +50,4 @@ def build_pdf(target, source, env):
         cmd_pdf_tmpl = 'pdfnup --nup 2x1 -o {name}.pdf {name}.pdf'
         for name_s in [name + '', name + '_cont']:
             system(cmd_pdf_tmpl.format(name=name_s))
-    pdfs = ''.join([name + '.pdf ' for name in env['PDF_CONF']])
-    pdfs += ''.join([name + '_cont.pdf ' for name in env['PDF_CONF']])
-    cmd = 'tar -czf {out_name} ' + pdfs + ' && rm ' + pdfs
-    pdf_path = pdf_path_str.format(path=path, name=env['NAME'],
-                                   version=ver_branch)
-    cmd = cmd.format(out_name=pdf_path)
-    system(cmd)
+    __build_pkg(env)

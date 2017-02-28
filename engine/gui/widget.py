@@ -15,7 +15,7 @@ class Widget(object):
             self['frameColor'] = (_fc[0] + .3, _fc[1] + .3, _fc[2] + .3,
                                   _fc[3])
         if hasattr(self, 'getShader') and self.getShader():
-            self.setShaderInput('col_scale', .25)
+            self.setShaderInput('col_offset', .25)
         if hasattr(self, 'setFocus'):
             self['focus'] = 1
             self.setFocus()
@@ -26,7 +26,7 @@ class Widget(object):
         if hasattr(self, 'start_frame_col'):
             self['frameColor'] = self.start_frame_col
         if hasattr(self, 'getShader') and self.getShader():
-            self.setShaderInput('col_scale', 0)
+            self.setShaderInput('col_offset', 0)
         if hasattr(self, 'setFocus'):
             self['focus'] = 0
             self.setFocus()

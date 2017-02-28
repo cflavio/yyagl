@@ -4,7 +4,7 @@ from shutil import rmtree, copytree
 from .build import path, ver_branch, docs_path_str
 
 
-def build_docs(target, source, env):
+def __prepare(env):
     curr_path = dirname(realpath(__file__)) + '/'
     copytree(curr_path + 'docs', path+'docs_apidoc')
     cmd = 'sed -i.bak -e "s/<name>/%s/" %sdocs_apidoc/index.rst'
@@ -17,6 +17,14 @@ def build_docs(target, source, env):
     system(cmd_tmpl.format(
         name=env['NAME'].capitalize(), version=ver_branch, path=path,
         src_path=curr_path))
+
+
+def __clean():
+    map(rmtree, [path+'docs_apidoc', path+'docs'])
+
+
+def build_docs(target, source, env):
+    __prepare(env)
     system('sphinx-apidoc -o %sdocs_apidoc .' % path)
     system("sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst" % path)
     system('sphinx-build -b html %sdocs_apidoc %sdocs' % (path, path))
@@ -24,4 +32,4 @@ def build_docs(target, source, env):
     f_out = docs_path_str.format(path=path, name=env['NAME'],
                                  version=ver_branch)
     system(build_command_str.format(path=path, out_name=f_out))
-    map(rmtree, [path+'docs_apidoc', path+'docs'])
+    __clean()

@@ -18,7 +18,7 @@ class Colleague(Subject):
 
     def _end_async(self):
         self.sync_build(*self._args, **self._kwargs)
-        args = ['on_component_built', self]
+        args = 'on_component_built', self
         taskMgr.doMethodLater(.001, self.mdt.notify, 'wait', args)
         #TODO this is necessary to schedule the next component into the next
         # frame otherwise some dependent components may access a non-existent
@@ -79,7 +79,7 @@ class GODirector(object):
     def __init__(self, obj, init_lst, callback):
         obj.attach(self.on_component_built)
         self.callback = callback
-        self.completed = [False for _ in range(len(init_lst))]
+        self.completed = [False for _ in init_lst]
         self.pending = {}
         self.__init_lst = init_lst
         for idx in range(len(init_lst)):
@@ -110,15 +110,12 @@ class GameObjectMdt(Subject):
         self.comps = self.comp_list(init_lst)
         GODirector(self, init_lst, callback)
 
-    @staticmethod
-    def comp_list(init_lst):
-        ret = []
-        for elm in init_lst:
-            if type(elm) == tuple:
-                ret += [elm[0]]
-            else:
-                ret += GameObjectMdt.comp_list(elm)
-        return ret
+    def comp_list(self, init_lst):
+        if not init_lst:
+            return []
+        def process_elm(elm):
+            return [elm[0]] if type(elm) == tuple else self.comp_list(elm)
+        return process_elm(init_lst[0]) + self.comp_list(init_lst[1:])
 
     def destroy(self):
         Subject.destroy(self)

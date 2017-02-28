@@ -99,12 +99,12 @@ class ShaderMgr(Colleague):
         with open('yyagl/assets/shaders/filter.frag') as f:
             frag = f.read()
         inter_quad.setShader(Shader.make(Shader.SLGLSL, vert, frag))
-        inter_quad.setShaderInput('input_tex', col_tex)
+        inter_quad.setShaderInput('in_tex', col_tex)
         with open('yyagl/assets/shaders/pass.frag') as f:
             frag = f.read()
         final_quad.setShader(Shader.make(Shader.SLGLSL, vert, frag))
         final_quad.set_shader_input('gamma', eng.logic.cfg.gamma)
-        final_quad.setShaderInput('input_tex', final_tex)
+        final_quad.setShaderInput('in_tex', final_tex)
 
     def apply(self):
         winprops = WindowProperties.size(2048, 2048)

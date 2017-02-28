@@ -1,6 +1,6 @@
 #version 130
 in vec2 texcoord;
-uniform sampler2D input_tex;
+uniform sampler2D in_tex;
 uniform float gamma;
 out vec4 p3d_FragColor;
 
@@ -9,5 +9,5 @@ vec4 gamma_correct(vec4 col) {
 }
 
 void main() {
-    p3d_FragColor = gamma_correct(texture(input_tex, texcoord));
+    p3d_FragColor = gamma_correct(texture(in_tex, texcoord));
 }
