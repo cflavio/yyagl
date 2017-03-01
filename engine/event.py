@@ -3,14 +3,18 @@ from .joystick import JoystickMgr
 import sys
 
 
-class EngineEvent(Event):
+class EngineEventBase(Event):
 
-    def __init__(self, mdt):
+    @staticmethod
+    def init_cls():
+        return EngineEvent if eng.base.win else EngineEventBase
+
+    def __init__(self, mdt, emulate_keyboard):
         Event.__init__(self, mdt)
         self.on_close_cb = lambda: None
         self.accept('window-closed', self.__on_close)
         taskMgr.add(self.__on_frame, 'on frame')
-        self.joystick = JoystickMgr()
+        self.joystick = JoystickMgr.build(emulate_keyboard)
 
     def register_close_cb(self, on_close_cb):
         self.on_close_cb = on_close_cb
@@ -25,12 +29,12 @@ class EngineEvent(Event):
         return task.cont
 
     def destroy(self):
-        Event.destroy(self)
         self.joystick.destroy()
+        Event.destroy(self)
 
 
-class EngineEventWindow(EngineEvent):
+class EngineEvent(EngineEventBase):
 
-    def __init__(self, mdt):
-        EngineEvent.__init__(self, mdt)
+    def __init__(self, mdt, emulate_keyboard):
+        EngineEventBase.__init__(self, mdt, emulate_keyboard)
         eng.base.win.setCloseRequestEvent('window-closed')

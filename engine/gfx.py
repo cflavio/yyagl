@@ -8,13 +8,13 @@ import os
 
 class EngineGfx(Gfx):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt, model_path, antialiasing):
         Gfx.__init__(self, mdt)
-        getModelPath().appendDirectory(eng.logic.cfg.model_path)
+        getModelPath().appendDirectory(model_path)
         mdt.base.enableParticles()
         render.setShaderAuto()
         render.setTwoSided(True)
-        if eng.logic.cfg.antialiasing:
+        if antialiasing:
             render.setAntialias(AntialiasAttrib.MAuto)
         self.world_np = None
 

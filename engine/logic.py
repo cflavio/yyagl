@@ -10,10 +10,10 @@ class EngineLogic(Logic):
 
     @property
     def version(self):
-        if eng.base.appRunner:
-            package = eng.base.appRunner.p3dInfo.FirstChildElement('package')
-            return 'version: ' + package.Attribute('version')
-        return 'version: source'
+        if not eng.base.appRunner:
+            return 'source'
+        package = eng.base.appRunner.p3dInfo.FirstChildElement('package')
+        return package.Attribute('version')
 
     @staticmethod
     def flatlist(lst):

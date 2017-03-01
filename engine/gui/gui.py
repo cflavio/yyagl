@@ -6,7 +6,11 @@ from ...gameobject import Gui
 from .cursor import Cursor
 
 
-class EngineGui(Gui):
+class EngineGuiBase(Gui):
+
+    @staticmethod
+    def init_cls():
+        return EngineGui if eng.base.win else EngineGuiBase
 
     def __init__(self, mdt):
         Gui.__init__(self, mdt)
@@ -64,10 +68,10 @@ class EngineGui(Gui):
         base.win.requestProperties(props)
 
 
-class EngineGuiWindow(EngineGui):
+class EngineGui(EngineGuiBase):
 
     def __init__(self, mdt):
-        EngineGui.__init__(self, mdt)
+        EngineGuiBase.__init__(self, mdt)
         resol = eng.logic.cfg.win_size.split()
         self.set_resolution(tuple(int(size) for size in resol))
         if eng.logic.cfg.fullscreen:

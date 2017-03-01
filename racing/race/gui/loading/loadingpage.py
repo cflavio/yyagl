@@ -193,7 +193,7 @@ class LoadingPageGui(PageGui):
         self.widgets += [txt]
 
     def set_first(self, track_path):
-        vrs = eng.logic.version.strip().split()[-1]
+        vrs = eng.logic.version
         filename = track_path[7:] + '_' + vrs + '.bam'
         if os.path.exists(filename):
             return

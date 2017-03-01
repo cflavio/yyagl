@@ -6,16 +6,15 @@ from ...gameobject import Gui, Logic, GameObjectMdt
 class MenuArgs(object):
 
     def __init__(self, font, text_fg, text_scale, btn_size, btn_color,
-                 dial_color, background, rollover, click, social_path):
-        self.font = font
+                 background, rollover, click, social_path):
+        self.font = eng.font_mgr.load_font(font)
         self.text_fg = text_fg
         self.text_scale = text_scale
         self.btn_size = btn_size
         self.btn_color = btn_color
-        self.dial_color = dial_color
         self.background = background
-        self.rollover = rollover
-        self.click = click
+        self.rollover = loader.loadSfx(rollover)
+        self.click = loader.loadSfx(click)
         self.social_path = social_path
 
 
@@ -24,73 +23,72 @@ class MenuGui(Gui):
     def __init__(self, mdt, menu_args):
         Gui.__init__(self, mdt)
         self.menu_args = menu_args
-        self.font = eng.font_mgr.load_font(menu_args.font)
         self.background = None
         if self.menu_args.background:
             self.background = OnscreenImage(scale=(1.77778, 1, 1.0),
                                             image=self.menu_args.background)
             self.background.setBin('background', 10)
-        self.rollover = loader.loadSfx(menu_args.rollover)
-        self.click = loader.loadSfx(menu_args.click)
 
     @property
     def imgbtn_args(self):
         return {
-            'rolloverSound': self.rollover, 'clickSound': self.click}
+            'rolloverSound': self.menu_args.rollover,
+            'clickSound': self.menu_args.click}
 
     @property
     def btn_args(self):
         return {
             'scale': self.menu_args.text_scale,
-            'text_font': self.font,
+            'text_font': self.menu_args.font,
             'text_fg': self.menu_args.text_fg,
             'frameColor': self.menu_args.btn_color,
             'frameSize': self.menu_args.btn_size,
-            'rolloverSound': self.rollover,
-            'clickSound': self.click}
+            'rolloverSound': self.menu_args.rollover,
+            'clickSound': self.menu_args.click}
 
     @property
     def label_args(self):
         return {
             'scale': self.menu_args.text_scale,
             'text_fg': self.menu_args.text_fg,
-            'text_font': self.font,
+            'text_font': self.menu_args.font,
             'frameColor': (1, 1, 1, 0)}
 
     @property
     def option_args(self):
+        tfg = self.menu_args.text_fg
         return {
             'scale': self.menu_args.text_scale,
-            'text_font': self.font,
-            'text_fg': self.menu_args.text_fg,
+            'text_font': self.menu_args.font,
+            'text_fg': tfg,
             'frameColor': self.menu_args.btn_color,
             'frameSize': self.menu_args.btn_size,
-            'rolloverSound': self.rollover,
-            'clickSound': self.click,
+            'rolloverSound': self.menu_args.rollover,
+            'clickSound': self.menu_args.click,
             'text_scale': .85,
-            'item_text_font': self.font,
-            'item_frameColor': (.75, .75, .25, 1),
+            'item_text_font': self.menu_args.font,
+            'item_frameColor': tfg,
             'item_relief': FLAT,
             'popupMarker_frameColor': self.menu_args.btn_color,
             'textMayChange': 1,
-            'highlightColor': (.85, .85, .3, .2)}
+            'highlightColor': (tfg[0] * 1.2, tfg[1] * 1.2, tfg[2] * 1.2, .2)}
 
     @property
     def checkbtn_args(self):
         return {
             'scale': self.menu_args.text_scale,
-            'text_font': self.font,
+            'text_font': self.menu_args.font,
             'text_fg': self.menu_args.text_fg,
             'frameColor': self.menu_args.btn_color,
-            'rolloverSound': self.rollover,
-            'clickSound': self.click}
+            'rolloverSound': self.menu_args.rollover,
+            'clickSound': self.menu_args.click}
 
     @property
     def text_args(self):
         return {
             'scale': self.menu_args.text_scale,
             'fg': self.menu_args.text_fg,
-            'font': self.font}
+            'font': self.menu_args.font}
 
     def destroy(self):
         Gui.destroy(self)
@@ -129,8 +127,7 @@ class Menu(GameObjectMdt):
     gui_cls = MenuGui
 
     def __init__(self, menu_args):
-        self.menu_args = menu_args
         init_lst = [
-            [('gui', self.gui_cls, [self, self.menu_args])],
+            [('gui', self.gui_cls, [self, menu_args])],
             [('logic', MenuLogic, [self])]]
         GameObjectMdt.__init__(self, init_lst)

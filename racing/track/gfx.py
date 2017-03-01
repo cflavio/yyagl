@@ -30,7 +30,7 @@ class TrackGfx(Gfx):
         eng.log_mgr.log('loading track model')
         self.notify('on_loading', _('loading track model'))
         time = globalClock.getFrameTime()
-        vrs = eng.logic.version.strip().split()[-1]
+        vrs = eng.logic.version
         filename = self.mdt.path[7:] + '_' + vrs + '.bam'
         if os.path.exists(filename):
             eng.log_mgr.log('loading ' + filename)
@@ -185,7 +185,7 @@ class TrackGfx(Gfx):
 
         self.__set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
-        #vrs = eng.logic.version.strip().split()[-1]
+        #vrs = eng.logic.version
         #filename = self.mdt.path[7:] + '_' + vrs + '.bam'
         #if not os.path.exists(filename):
         #    eng.log_mgr.log('writing ' + filename)
@@ -270,7 +270,7 @@ class TrackGfx(Gfx):
 
     def destroy(self):
         if self.has_flattened:
-            vrs = eng.logic.version.strip().split()[-1]
+            vrs = eng.logic.version
             filename = self.mdt.path[7:] + '_' + vrs + '.bam'
             if not os.path.exists(filename):
                 eng.log_mgr.log('writing ' + filename)

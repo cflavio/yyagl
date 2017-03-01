@@ -1,4 +1,5 @@
 from abc import ABCMeta
+from inspect import isclass
 from direct.fsm.FSM import FSM
 from direct.showbase.DirectObject import DirectObject
 from .observer import Subject

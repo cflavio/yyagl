@@ -10,7 +10,8 @@ class Configuration(object):
             sync_video=True, antialiasing=False, profiling=False,
             mt_render=False, model_path='assets/models', lang='en',
             lang_path='assets/locale', lang_domain='ya2_game',
-            languages=['English', 'Italiano'], shaders=False, gamma=1.0):
+            languages=['English', 'Italiano'], shaders=False, gamma=1.0,
+            menu_joypad=True):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title
@@ -28,6 +29,7 @@ class Configuration(object):
         self.languages = languages
         self.shaders = shaders
         self.gamma = gamma
+        self.menu_joypad = menu_joypad
         self.configure()
 
     @staticmethod

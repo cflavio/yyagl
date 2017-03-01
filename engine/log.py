@@ -8,7 +8,11 @@ import platform
 import multiprocessing
 
 
-class LogMgr(Colleague):
+class LogMgrBase(Colleague):
+
+    @staticmethod
+    def init_cls():
+        return LogMgr if eng.base.win else LogMgrBase
 
     def __init__(self, mdt):
         Colleague.__init__(self, mdt)
@@ -44,15 +48,19 @@ class LogMgr(Colleague):
         self.log('processor: ' + platform.processor())
         try:
             self.log('cores: ' + str(multiprocessing.cpu_count()))
-        except NotImplementedError:
+        except NotImplementedError:  # on Windows
             self.log('cores: not implemented')
         self.log('release: ' + platform.release())
         self.log('system: ' + platform.system())
         self.log('version: ' + platform.version())
         self.log('panda version: ' + PandaSystem.getVersionString())
         self.log('bullet version: ' + str(bullet.get_bullet_version()))
-        if not eng.base.win:
-            return
+
+
+class LogMgr(LogMgrBase):
+
+    def log_conf(self):
+        LogMgrBase.log_conf(self)
         prop = eng.base.win.get_properties()
         self.log('fullscreen: ' + str(prop.get_fullscreen()))
         res_x, res_y = prop.get_x_size(), prop.get_y_size()

@@ -36,9 +36,10 @@ class MainPageGui(PageGui):
 
     def __build_version(self):
         self.widgets += [OnscreenText(
-            text=eng.logic.version, parent=eng.base.a2dBottomLeft,
-            pos=(.02, .02), scale=.04, fg=(.8, .8, .8, 1),
-            align=TextNode.ALeft, font=self.menu.gui.font)]
+            text=_('version: ') + eng.logic.version,
+            parent=eng.base.a2dBottomLeft, pos=(.02, .02), scale=.04,
+            fg=(.8, .8, .8, 1), align=TextNode.ALeft,
+            font=self.menu.gui.menu_args.font)]
 
 
 class MainPage(Page):

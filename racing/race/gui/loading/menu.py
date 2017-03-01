@@ -11,10 +11,9 @@ class _Gui(Gui):
         Gui.__init__(self, mdt)
         menu_args = MenuArgs(
             'assets/fonts/Hanken-Book.ttf', (.75, .75, .25, 1), .1,
-            (-4.6, 4.6, -.32, .88), (0, 0, 0, .2), (.9, .9, .9, .8),
+            (-4.6, 4.6, -.32, .88), (0, 0, 0, .2),
             'assets/images/loading/%s%s.jpg' % (track_path[7:], randint(1, 4)),
-            'assets/sfx/menu_over.wav', 'assets/sfx/menu_clicked.ogg',
-            '')
+            'assets/sfx/menu_over.wav', 'assets/sfx/menu_clicked.ogg', '')
         self.menu = Menu(menu_args)
         self.menu.loading = loading
         self.menu.logic.push_page(LoadingPage(self.menu, track_path, car_path,
