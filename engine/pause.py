@@ -116,10 +116,8 @@ class PauseLogic(Logic):
 
 
 class PauseMgr(GameObjectMdt, Colleague):
-    logic_cls = PauseLogic
-    gui_cls = PauseGui
 
     def __init__(self, mdt):
         Colleague.__init__(self, mdt)
-        self.gui = self.gui_cls(self)
-        self.logic = self.logic_cls(self)
+        self.gui = PauseGui(self)
+        self.logic = PauseLogic(self)

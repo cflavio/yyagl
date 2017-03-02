@@ -23,7 +23,7 @@ class PageGui(Gui):
         self.build_page()
         self.update_texts()
         self.curr_wdg = self.get_next_widget((-.1, 0, -1), (-3.6, 1, 1))
-        self.curr_wdg.on_enter()
+        self.curr_wdg.on_wdg_enter()
 
     def build_page(self, back_btn=True):
         if back_btn:
@@ -32,57 +32,16 @@ class PageGui(Gui):
         self.transition_enter()
 
     def on_arrow(self, direction):
-        is_hor = direction in [(-1, 0, 0), (1, 0, 0)]
-        if is_hor and self.curr_wdg.__class__ == DirectSlider:
-            dval = -.1 if direction == (-1, 0, 0) else .1
-            self.curr_wdg['value'] += dval
-            return
-        next_wdg = self.get_next_widget(direction)
-        if not next_wdg:
-            return
-        self.curr_wdg.on_exit()
-        self.curr_wdg = next_wdg
-        self.curr_wdg.on_enter()
+        if not self.curr_wdg.on_arrow(direction):
+            next_wdg = self.get_next_widget(direction)
+            if next_wdg:
+                self.curr_wdg.on_wdg_exit()
+                self.curr_wdg = next_wdg
+                self.curr_wdg.on_wdg_enter()
 
     def on_enter(self):
-        if self.curr_wdg.__class__.__name__ == 'DirectCheckButtonWidget':
-            val = self.curr_wdg['indicatorValue']
-            self.curr_wdg['indicatorValue'] = not val
-        if self.curr_wdg.__class__.__name__ == 'DirectOptionMenuWidget':
-            self.curr_wdg.showPopupMenu()
-            self.curr_wdg._highlightItem(self.curr_wdg.component('item0'), 0)
-            self.mdt.event.ignoreAll()
-            self.mdt.event.accept('arrow_up-up', self.on_arrow_opt, [-1])
-            self.mdt.event.accept('arrow_down-up', self.on_arrow_opt, [1])
-            self.mdt.event.accept('enter-up', self.on_enter_opt)
-            return
-        has_cmd = self.curr_wdg and self.curr_wdg['command']
-        if has_cmd and self.curr_wdg['state'] == NORMAL:
-            self.curr_wdg['command'](*self.curr_wdg['extraArgs'])
-
-    def on_arrow_opt(self, d):
-        old_idx = self.curr_wdg.highlightedIndex
-        idx = self.curr_wdg.highlightedIndex + d
-        idx = min(len(self.curr_wdg['items']) - 1, max(0, idx))
-        if old_idx != idx:
-            fc = self.curr_wdg.component('item%s' % idx)['frameColor']
-            old_cmp = self.curr_wdg.component('item%s' % old_idx)
-            self.curr_wdg._unhighlightItem(old_cmp, fc)
-            curr_cmp = self.curr_wdg.component('item%s' % idx)
-            self.curr_wdg._highlightItem(curr_cmp, idx)
-
-    def on_enter_opt(self):
-        self.curr_wdg.selectHighlightedIndex()
-        idx = self.curr_wdg.selectedIndex
-        if self.curr_wdg['command']:
-            self.curr_wdg['command'](self.curr_wdg['items'][idx])
-        self.curr_wdg.hidePopupMenu()
-        self.mdt.event.ignoreAll()
-        idx = (idx - 1) if idx else (idx + 1)
-        fc = self.curr_wdg.component('item%s' % idx)['frameColor']
-        curr_name = 'item%s' % self.curr_wdg.selectedIndex
-        self.curr_wdg._unhighlightItem(self.curr_wdg.component(curr_name), fc)
-        self.enable()
+        if self.curr_wdg.on_enter():
+            self.enable()
 
     def __get_dot(self, wdg, direction, start=None):
         start_pos = start if start else self.curr_wdg.get_pos(aspect2d)
@@ -127,8 +86,8 @@ class PageGui(Gui):
             wdg.__class__ = type(cname, (wdg.__class__, Widget), {})
             wdg.init(wdg)
             if hasattr(wdg, 'bind'):
-                wdg.bind(ENTER, wdg.on_enter)
-                wdg.bind(EXIT, wdg.on_exit)
+                wdg.bind(ENTER, wdg.on_wdg_enter)
+                wdg.bind(EXIT, wdg.on_wdg_exit)
 
     def transition_enter(self):
         self.update_texts()
@@ -187,7 +146,6 @@ class PageGui(Gui):
         self.transition_enter()
 
     def hide(self):
-        #map(lambda wdg: wdg.hide(), self.widgets)
         self.transition_exit(False)
         self.mdt.event.ignoreAll()
 

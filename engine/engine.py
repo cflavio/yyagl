@@ -35,14 +35,14 @@ class Engine(GameObjectMdt):
             [('lang_mgr', LangMgr, [self])],
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
             [('phys', EnginePhys, [self])],
+            [('event', EngineEvent.init_cls(), [self, cfg.menu_joypad])],
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self])],
-            [('event', EngineEvent.init_cls(), [self, cfg.menu_joypad])],
             [('pause', PauseMgr, [self])],
             [('font_mgr', FontMgr, [self])],
             [('server', Server, [self])],
             [('client', Client, [self])],
-            [('shader_mgr', ShaderMgr, [self])]]
+            [('shader_mgr', ShaderMgr, [self, cfg.shaders, cfg.gamma])]]
         GameObjectMdt.__init__(self, init_lst)
 
     def destroy(self):

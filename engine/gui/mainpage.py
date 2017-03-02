@@ -1,5 +1,5 @@
-from direct.gui.OnscreenText import OnscreenText
 from panda3d.core import TextNode
+from direct.gui.OnscreenText import OnscreenText
 from .page import Page, PageGui
 from .imgbtn import ImageButton
 

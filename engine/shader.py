@@ -7,13 +7,14 @@ from ..gameobject import Colleague
 
 class ShaderMgr(Colleague):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt, shaders, gamma):
         Colleague.__init__(self, mdt)
         self.lights = []
-        if eng.logic.cfg.shaders:
+        self.gamma = gamma
+        if shaders:
             self.setup_post_fx()
 
-    def set_lgt(self, lgt):
+    def __set_lgt(self, lgt):
         lnp = render.attachNewNode(lgt)
         self.lights += [lnp]
         render.set_light(lnp)
@@ -21,18 +22,18 @@ class ShaderMgr(Colleague):
     def set_amb_lgt(self, col):
         lgt = AmbientLight('ambient light')
         lgt.setColor(col)
-        self.set_lgt(lgt)
+        self.__set_lgt(lgt)
 
     def set_dir_lgt(self, col, direction):
         lgt = DirectionalLight('directional light')
         lgt.setColor(col)
-        self.set_lgt(lgt)
+        self.__set_lgt(lgt)
         self.lights[-1].setHpr(*direction)
 
     def set_pnt_lgt(self, col, pos):
         lgt = PointLight('point light')
         lgt.setColor(col)
-        self.set_lgt(lgt)
+        self.__set_lgt(lgt)
         self.lights[-1].setPos(*pos)
 
     def set_spotlight(self, col, exp, cutoff, pos, look_at):
@@ -40,7 +41,7 @@ class ShaderMgr(Colleague):
         lgt.setColor(col)
         lgt.setExponent(exp)
         lgt.getLens().setFov(cutoff, cutoff)
-        self.set_lgt(lgt)
+        self.__set_lgt(lgt)
         self.lights[-1].setPos(*pos)
         self.lights[-1].lookAt(*look_at)
 
@@ -103,7 +104,7 @@ class ShaderMgr(Colleague):
         with open('yyagl/assets/shaders/pass.frag') as f:
             frag = f.read()
         final_quad.setShader(Shader.make(Shader.SLGLSL, vert, frag))
-        final_quad.set_shader_input('gamma', eng.logic.cfg.gamma)
+        final_quad.set_shader_input('gamma', self.gamma)
         final_quad.setShaderInput('in_tex', final_tex)
 
     def apply(self):

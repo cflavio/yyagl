@@ -1,5 +1,5 @@
-from direct.gui.DirectButton import DirectButton
 from panda3d.core import Shader
+from direct.gui.DirectButton import DirectButton
 from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT
 
 

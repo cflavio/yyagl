@@ -1,9 +1,7 @@
-from sys import platform
-from os import environ, system
-from webbrowser import open_new_tab
 from panda3d.core import WindowProperties
 from ...gameobject import Gui
 from .cursor import Cursor
+from .browser import Browser
 
 
 class EngineGuiBase(Gui):
@@ -15,14 +13,10 @@ class EngineGuiBase(Gui):
     def __init__(self, mdt):
         Gui.__init__(self, mdt)
         eng.base.disableMouse()
+        self.browser = Browser.init_cls()
 
-    @staticmethod
-    def open_browser(url):
-        if platform.startswith('linux'):
-            environ['LD_LIBRARY_PATH'] = ''
-            system('xdg-open '+url)
-        else:
-            open_new_tab(url)
+    def open_browser(self, url):
+        self.browser.open(url)
 
     @property
     def resolutions(self):
@@ -55,11 +49,10 @@ class EngineGuiBase(Gui):
     def set_resolution_check(self, res):
         res_msg = 'resolutions: {curr} (current), {res} (wanted)'
         eng.log_mgr.log(res_msg.format(curr=self.resolution, res=res))
-        if self.resolution == res:
-            return
-        retry = 'second attempt: {curr} (current) {res} (wanted)'
-        eng.log_mgr.log(retry.format(curr=self.resolution, res=res))
-        self.set_resolution(res, False)
+        if self.resolution != res:
+            retry = 'second attempt: {curr} (current) {res} (wanted)'
+            eng.log_mgr.log(retry.format(curr=self.resolution, res=res))
+            self.set_resolution(res, False)
 
     def toggle_fullscreen(self):
         self.set_resolution(self.closest_res)
@@ -72,18 +65,19 @@ class EngineGui(EngineGuiBase):
 
     def __init__(self, mdt):
         EngineGuiBase.__init__(self, mdt)
-        resol = eng.logic.cfg.win_size.split()
+        cfg = eng.logic.cfg
+        resol = cfg.win_size.split()
         self.set_resolution(tuple(int(size) for size in resol))
-        if eng.logic.cfg.fullscreen:
+        if cfg.fullscreen:
             self.toggle_fullscreen()
-        self.cursor = Cursor()
+        self.cursor = Cursor(cfg.cursor_path, cfg.cursor_scale,
+                             cfg.cursor_hotspot)
 
     def set_resolution(self, res, check=True):
         eng.log_mgr.log('setting resolution ' + str(res))
         props = WindowProperties()
         props.set_size(res)
         eng.base.win.request_properties(props)
-        if not check:
-            return
-        args = 3.0, self.set_resolution_check, 'resolution check', [res]
-        taskMgr.doMethodLater(*args)
+        if check:
+            args = 3.0, self.set_resolution_check, 'resolution check', [res]
+            taskMgr.doMethodLater(*args)
