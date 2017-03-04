@@ -34,8 +34,14 @@ class CarParameter(object):
 
 class CarGui(Gui):
 
+    def apply_damage(self, reset=False):
+        pass
+
+
+class CarPlayerGui(CarGui):
+
     def __init__(self, mdt):
-        Gui.__init__(self, mdt)
+        CarGui.__init__(self, mdt)
         self.set_pars()
         self.set_panel()
 

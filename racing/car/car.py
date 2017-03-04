@@ -6,14 +6,14 @@ from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
     CarPlayerEventClient, CarNetworkEvent, CarAiEvent
 from .logic import CarLogic, CarPlayerLogic
 from .audio import CarAudio
-from .gui import CarGui
+from .gui import CarGui, CarPlayerGui
 from .ai import CarAi
 
 
 class Car(GameObjectMdt):
     fsm_cls = CarFsm
     gfx_cls = CarGfx
-    gui_cls = Gui
+    gui_cls = CarGui
     phys_cls = CarPhys
     event_cls = CarEvent
     logic_cls = CarLogic
@@ -47,7 +47,7 @@ class Car(GameObjectMdt):
 class PlayerCar(Car):
     event_cls = CarPlayerEvent
     audio_cls = CarAudio
-    gui_cls = CarGui
+    gui_cls = CarPlayerGui
     logic_cls = CarPlayerLogic
     phys_cls = CarPlayerPhys
 
