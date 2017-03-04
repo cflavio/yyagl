@@ -4,6 +4,7 @@ from panda3d.core import Vec3, LVector3f
 class Camera(object):
 
     cam_speed = 50
+    cam_speed_z = 20
     cam_dist_min = 36
     cam_dist_max = 72
     cam_z_max = 5
@@ -58,14 +59,15 @@ class Camera(object):
         self.tgt_look_x, self.tgt_look_y, self.tgt_look_z = car_pos + tgt_vec
 
         curr_incr = self.cam_speed * globalClock.getDt()
+        curr_incr_z = self.cam_speed_z * globalClock.getDt()
 
-        def new_pos(cam_pos, tgt):
-            beyond = abs(cam_pos - tgt) > curr_incr
-            fit_p = lambda: cam_pos + (1 if tgt > cam_pos else -1) * curr_incr
+        def new_pos(cam_pos, tgt, incr):
+            beyond = abs(cam_pos - tgt) > incr
+            fit_p = lambda: cam_pos + (1 if tgt > cam_pos else -1) * incr
             return fit_p() if beyond else tgt
-        new_x = new_pos(eng.base.camera.getX(), self.tgt_cam_x)
-        new_y = new_pos(eng.base.camera.getY(), self.tgt_cam_y)
-        new_z = new_pos(eng.base.camera.getZ(), self.tgt_cam_z)
+        new_x = new_pos(eng.base.camera.getX(), self.tgt_cam_x, curr_incr)
+        new_y = new_pos(eng.base.camera.getY(), self.tgt_cam_y, curr_incr)
+        new_z = new_pos(eng.base.camera.getZ(), self.tgt_cam_z, curr_incr_z)
 
         # overwrite camera's position to set the physics
         #new_x = car_pos.x + 10
