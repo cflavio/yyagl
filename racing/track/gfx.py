@@ -122,6 +122,7 @@ class TrackGfx(Gfx):
         self.in_loading = []
         self.flat_lock = threading.Lock()
         self.models_to_load = self.__flat_roots.values()
+        map(lambda mod: self.__flat_roots[mod].hide(), self.__flat_roots)
         for i in range(flat_cores):
             self.__flat_models()
         self.end_loading()
@@ -142,6 +143,7 @@ class TrackGfx(Gfx):
 
     def __process_flat_models(self, mod, callback):
         curr_t = globalClock.getFrameTime()
+        self.__flat_roots[mod.get_name()].show()
         node = mod
         node.clearModelNodes()
 
