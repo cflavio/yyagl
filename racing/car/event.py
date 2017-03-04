@@ -6,12 +6,46 @@ from yyagl.racing.race.event import NetMsgs
 from yyagl.racing.weapon.rocket.rocket import Rocket
 
 
+class InputDctBuilder:
+
+    @staticmethod
+    def build(state, joystick):
+        if state == 'Results':
+            return InputDctBuilderAi()
+        elif joystick:
+            return InputDctBuilderJoystick()
+        else:
+            return InputDctBuilderKeyboard()
+
+
+class InputDctBuilderAi(InputDctBuilder):
+
+    def build_dct(self, ai, has_weapon):
+        return ai.get_input()
+
+class InputDctBuilderKeyboard(InputDctBuilder):
+
+    def build_dct(self, ai, has_weapon):
+        keys = ['forward', 'left', 'reverse', 'right']
+        return {key: inputState.isSet(key) for key in keys}
+
+class InputDctBuilderJoystick(InputDctBuilder):
+
+    def build_dct(self, ai, has_weapon):
+        x, y, a, b = eng.event.joystick.get_joystick()
+        if b and has_weapon:
+            self.on_fire()
+        return {'forward': y < -.4, 'reverse': y > .4 or a,
+                'left': x < -.4, 'right': x > .4}
+
+
 class CarEvent(Event):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt, keys, joystick):
         Event.__init__(self, mdt)
         eng.phys.attach(self.on_collision)
-        keys = game.options['settings']['keys']
+        self.keys = keys
+        self.joystick = joystick
         self.label_events = [
             ('forward', keys['forward']), ('left', keys['left']),
             ('reverse', keys['rear']), ('right', keys['right'])]
@@ -22,18 +56,17 @@ class CarEvent(Event):
         eng.event.attach(self.on_frame)
 
     def on_collision(self, obj, obj_name):
-        is_for_me = obj == self.mdt.gfx.nodepath.node()
-        if is_for_me and obj_name.startswith('Respawn'):
-            self.__process_respawn()
-        if is_for_me and obj_name.startswith('PitStop'):
-            self.mdt.gui.apply_damage(True)
-            self.mdt.phys.apply_damage(True)
-            self.mdt.gfx.apply_damage(True)
+        if obj == self.mdt.gfx.nodepath.node():
+            if obj_name.startswith('Respawn'):
+                self.__process_respawn()
+            if obj_name.startswith('PitStop'):
+                self.mdt.gui.apply_damage(True)
+                self.mdt.phys.apply_damage(True)
+                self.mdt.gfx.apply_damage(True)
 
     def __process_respawn(self):
         start_wp_n, end_wp_n = self.mdt.logic.last_wp
         self.mdt.gfx.nodepath.setPos(start_wp_n.get_pos() + (0, 0, 2))
-
         wp_vec = Vec3(end_wp_n.getPos(start_wp_n).xy, 0)
         wp_vec.normalize()
         or_h = (wp_vec.xy).signedAngleDeg(Vec2(0, 1))
@@ -62,20 +95,21 @@ class CarEvent(Event):
             self.mdt.logic.last_wp = self.mdt.logic.closest_wp()
 
     def destroy(self):
-        Event.destroy(self)
         eng.phys.detach(self.on_collision)
         eng.event.detach(self.on_frame)
         map(lambda tok: tok.release(), self.toks)
+        Event.destroy(self)
 
 
 class CarPlayerEvent(CarEvent):
 
-    def __init__(self, mdt):
-        CarEvent.__init__(self, mdt)
+    def __init__(self, mdt, keys, joystick):
+        CarEvent.__init__(self, mdt, keys, joystick)
         self.accept('f11', self.mdt.gui.toggle)
         self.has_weapon = False
-        self.last_b = False
         self.crash_tsk = None
+        state = self.mdt.fsm.getCurrentOrNextState()
+        self.input_dct_bld = InputDctBuilder.build(state, joystick)
 
     def on_frame(self):
         CarEvent.on_frame(self)
@@ -98,12 +132,11 @@ class CarPlayerEvent(CarEvent):
     def on_bonus(self):
         if not self.mdt.logic.weapon:
             self.mdt.logic.weapon = Rocket(self.mdt)
-            btn = game.options['settings']['keys']['button']
-            self.accept(btn, self.on_fire)
+            self.accept(self.keys['button'], self.on_fire)
             self.has_weapon = True
 
     def on_fire(self):
-        self.ignore(game.options['settings']['keys']['button'])
+        self.ignore(self.keys['button']['button'])
         self.mdt.logic.fire()
         self.has_weapon = False
 
@@ -124,40 +157,24 @@ class CarPlayerEvent(CarEvent):
         if self.mdt.logic.last_time_start and not self.mdt.logic.correct_lap:
             return
         self.mdt.logic.reset_waypoints()
-        if self.mdt.gui.time_txt.getText():
-            lap_time = self.mdt.logic.lap_time
-            self.mdt.logic.lap_times += [lap_time]
-        lap_number = 1 + len(self.mdt.logic.lap_times)
-        not_started = self.mdt.logic.last_time_start
-        best_txt = self.mdt.gui.best_txt
-        first_lap = not self.mdt.logic.lap_times
-        is_best_txt = first_lap or min(self.mdt.logic.lap_times) > lap_time
-        if not_started and (first_lap or is_best_txt):
+        lap_times = self.mdt.logic.lap_times
+        is_best = not lap_times or min(lap_times) > self.mdt.logic.lap_time
+        if self.mdt.logic.last_time_start and (not lap_times or is_best):
             self.mdt.gui.best_txt.setText(self.mdt.gui.time_txt.getText())
-        laps = self.mdt.laps
         if self.mdt.logic.last_time_start:
-            self.__process_nonstart_goals(lap_number, laps)
+            lap_times += [self.mdt.logic.lap_time]
+            self.__process_nonstart_goals(1 + len(lap_times), self.mdt.laps)
         self.mdt.logic.last_time_start = globalClock.getFrameTime()
-        if lap_number == laps + 1:
+        if len(lap_times) == self.mdt.laps:
             self._process_end_goal()
 
     def _get_input(self):
-        if self.mdt.fsm.getCurrentOrNextState() == 'Results':
-            return self.mdt.ai.get_input()
-        elif not game.options['settings']['joystick']:
-            keys = ['forward', 'left', 'reverse', 'right']
-            return {key: inputState.isSet(key) for key in keys}
-        else:
-            x, y, a, b = eng.event.joystick.get_joystick()
-            if b and not self.last_b and self.has_weapon:
-                self.on_fire()
-            return {'forward': y < -.4, 'reverse': y > .4 or a,
-                    'left': x < -.4, 'right': x > .4}
+        return self.input_dct_bld.build_dct(self.mdt.ai, self.has_weapon)
 
     def destroy(self):
         if self.crash_tsk:
             taskMgr.remove(self.crash_tsk)
-        map(self.ignore, ['f11', game.options['settings']['keys']['button']])
+        map(self.ignore, ['f11', self.keys['button']])
         CarEvent.destroy(self)
 
 
