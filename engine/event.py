@@ -25,7 +25,9 @@ class EngineEventBase(Event):
         sys.exit()
 
     def __on_frame(self, task):
+        self.notify('on_start_frame')
         self.notify('on_frame')
+        self.notify('on_end_frame')
         return task.cont
 
     def destroy(self):

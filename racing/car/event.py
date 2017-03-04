@@ -1,9 +1,9 @@
 from itertools import chain
+from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import Event
 from yyagl.racing.race.event import NetMsgs
 from yyagl.racing.weapon.rocket.rocket import Rocket
-from panda3d.core import Vec3, Vec2
 
 
 class CarEvent(Event):
@@ -31,8 +31,7 @@ class CarEvent(Event):
             self.mdt.gfx.apply_damage(True)
 
     def __process_respawn(self):
-        last_pos = self.mdt.logic.last_contact_pos
-        start_wp_n, end_wp_n = self.mdt.logic.closest_wp(last_pos)
+        start_wp_n, end_wp_n = self.mdt.logic.last_wp
         self.mdt.gfx.nodepath.setPos(start_wp_n.get_pos() + (0, 0, 2))
 
         wp_vec = Vec3(end_wp_n.getPos(start_wp_n).xy, 0)
@@ -60,7 +59,7 @@ class CarEvent(Event):
         bottom = (car_pos.x, car_pos.y, car_pos.z - 50)
         hits = eng.phys.world_phys.rayTestAll(top, bottom).getHits()
         for hit in [hit for hit in hits if 'Road' in hit.getNode().getName()]:
-            self.mdt.logic.last_contact_pos = self.mdt.gfx.nodepath.getPos()
+            self.mdt.logic.last_wp = self.mdt.logic.closest_wp()
 
     def destroy(self):
         Event.destroy(self)
@@ -76,6 +75,7 @@ class CarPlayerEvent(CarEvent):
         self.accept('f11', self.mdt.gui.toggle)
         self.has_weapon = False
         self.last_b = False
+        self.crash_tsk = None
 
     def on_frame(self):
         CarEvent.on_frame(self)
@@ -110,7 +110,7 @@ class CarPlayerEvent(CarEvent):
     def __process_wall(self):
         eng.audio.play(self.mdt.audio.crash_sfx)
         args = .1, lambda tsk: self.mdt.gfx.crash_sfx(), 'crash sfx'
-        taskMgr.doMethodLater(*args)
+        self.crash_tsk = taskMgr.doMethodLater(*args)
 
     def __process_nonstart_goals(self, lap_number, laps):
         curr_lap = min(laps, lap_number)
@@ -155,8 +155,10 @@ class CarPlayerEvent(CarEvent):
                     'left': x < -.4, 'right': x > .4}
 
     def destroy(self):
-        CarEvent.destroy(self)
+        if self.crash_tsk:
+            taskMgr.remove(self.crash_tsk)
         map(self.ignore, ['f11', game.options['settings']['keys']['button']])
+        CarEvent.destroy(self)
 
 
 class CarPlayerEventServer(CarPlayerEvent):
