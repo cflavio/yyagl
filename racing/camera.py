@@ -4,7 +4,7 @@ from panda3d.core import Vec3, LVector3f
 class Camera(object):
 
     cam_speed = 50
-    cam_speed_z = 20
+    cam_speed_slow = 20
     cam_dist_min = 36
     cam_dist_max = 72
     cam_z_max = 5
@@ -22,8 +22,17 @@ class Camera(object):
         self.tgt_look_x = None
         self.tgt_look_y = None
         self.tgt_look_z = None
+        self.curr_l_d = 0
+
+    @staticmethod
+    def new_val(val, tgt, incr):
+        beyond = abs(val - tgt) > incr
+        fit_p = lambda: val + (1 if tgt > val else -1) * incr
+        return fit_p() if beyond else tgt
 
     def update_cam(self):
+        curr_incr = self.cam_speed * globalClock.getDt()
+        curr_incr_slow = self.cam_speed_slow * globalClock.getDt()
         speed_ratio = self.car.phys.speed_ratio
         cam_dist_diff = self.cam_dist_max - self.cam_dist_min
         look_dist_diff = self.look_dist_max - self.look_dist_min
@@ -41,7 +50,8 @@ class Camera(object):
         cam_vec = -fwd_vec * (self.cam_dist_min + cam_dist_diff * speed_ratio)
         l_d_speed = self.look_dist_min + look_dist_diff * speed_ratio
         l_d = 0 if self.car.logic.is_rolling else l_d_speed
-        tgt_vec = fwd_car_vec * l_d
+        self.curr_l_d = self.new_val(self.curr_l_d, l_d, curr_incr_slow)
+        tgt_vec = fwd_car_vec * self.curr_l_d
         delta_pos_z = self.cam_z_min + cam_z_diff * speed_ratio
         delta_cam_z = self.look_z_min + look_z_diff * speed_ratio
 
@@ -56,18 +66,11 @@ class Camera(object):
         self.tgt_cam_y = car_pos.y + cam_vec.y
         self.tgt_cam_z = car_pos.z + cam_vec.z + delta_pos_z
 
+        cam = eng.base.camera
         self.tgt_look_x, self.tgt_look_y, self.tgt_look_z = car_pos + tgt_vec
-
-        curr_incr = self.cam_speed * globalClock.getDt()
-        curr_incr_z = self.cam_speed_z * globalClock.getDt()
-
-        def new_pos(cam_pos, tgt, incr):
-            beyond = abs(cam_pos - tgt) > incr
-            fit_p = lambda: cam_pos + (1 if tgt > cam_pos else -1) * incr
-            return fit_p() if beyond else tgt
-        new_x = new_pos(eng.base.camera.getX(), self.tgt_cam_x, curr_incr)
-        new_y = new_pos(eng.base.camera.getY(), self.tgt_cam_y, curr_incr)
-        new_z = new_pos(eng.base.camera.getZ(), self.tgt_cam_z, curr_incr_z)
+        new_x = self.new_val(cam.getX(), self.tgt_cam_x, curr_incr)
+        new_y = self.new_val(cam.getY(), self.tgt_cam_y, curr_incr)
+        new_z = self.new_val(cam.getZ(), self.tgt_cam_z, curr_incr_slow)
 
         # overwrite camera's position to set the physics
         #new_x = car_pos.x + 10
