@@ -14,7 +14,12 @@ class RaceLogic(Logic):
 
     cars = ['kronos', 'themis', 'diones', 'iapeto']
 
-    def __init__(self, mdt, keys, joystick, sounds, color_main, color, font):
+    def __init__(
+            self, mdt, keys, joystick, sounds, color_main, color, font,
+            coll_path, coll_name, car_path, phys_file, wheel_names,
+            tuning_engine, tuning_tires, tuning_suspensions, road_name,
+            base_path, model_name, damage_paths, wheel_gfx_names,
+            particle_path):
         self.load_txt = None
         self.cam_tsk = None
         self.cam_node = None
@@ -29,6 +34,20 @@ class RaceLogic(Logic):
         self.color_main = color_main
         self.color = color
         self.font = font
+        self.car_path = car_path
+        self.coll_path = coll_path
+        self.coll_name = coll_name
+        self.phys_file = phys_file
+        self.wheel_names = wheel_names
+        self.tuning_engine = tuning_engine
+        self.tuning_tires = tuning_tires
+        self.tuning_suspensions = tuning_suspensions
+        self.road_name = road_name
+        self.base_path = base_path
+        self.model_name = model_name
+        self.damage_paths = damage_paths
+        self.wheel_gfx_names = wheel_gfx_names
+        self.particle_path = particle_path
         Logic.__init__(self, mdt)
 
     @staticmethod
@@ -66,11 +85,15 @@ class RaceLogic(Logic):
                 srv_or_sng = eng.server.is_active or not eng.client.is_active
                 car_class = AiCar if no_p and srv_or_sng else car_class
                 new_car = car_class(
-                    'cars/' + car, pos, hpr, func, self.mdt, game.track.laps,
-                    self.keys, self.joystick, self.sounds, self.color_main,
-                    self.color, self.font)
+                    car, self.coll_path, self.coll_name, pos, hpr, func,
+                    self.mdt, game.track.laps, self.keys, self.joystick,
+                    self.sounds, self.color_main, self.color, self.font,
+                    self.car_path, self.phys_file, self.wheel_names,
+                    self.tuning_engine, self.tuning_tires,
+                    self.tuning_suspensions, self.road_name, self.base_path,
+                    self.model_name, self.damage_paths, self.wheel_gfx_names,
+                    self.particle_path)
                 game.cars += [new_car]
-            path = 'cars/' + car_path
             s_p = game.track.phys.get_start_pos(grid.index(car_path))
             pos = s_p[0] + (0, 0, .2)
             hpr = s_p[1]
@@ -84,15 +107,20 @@ class RaceLogic(Logic):
                 if eng.client.is_active:
                     car_cls = PlayerCarClient
             game.player_car = car_cls(
-                path, pos, hpr, func, self.mdt, game.track.laps, self.keys,
-                self.joystick, self.sounds, self.color_main, self.color,
-                self.font)
+                car_path, self.coll_path, self.coll_name, pos, hpr, func,
+                self.mdt, game.track.laps, self.keys, self.joystick,
+                self.sounds, self.color_main, self.color, self.font,
+                self.car_path, self.phys_file, self.wheel_names,
+                self.tuning_engine, self.tuning_tires, self.tuning_suspensions,
+                self.road_name, self.base_path, self.model_name,
+                self.damage_paths, self.wheel_gfx_names, self.particle_path)
             game.cars = []
         game.track = Track(
             track_path, load_car)
         self.mdt.track = game.track
 
-    def enter_play(self):
+    @staticmethod
+    def enter_play():
         game.track.gfx.model.reparentTo(eng.gfx.world_np)
         game.player_car.gfx.reparent()
         map(lambda car: car.gfx.reparent(), game.cars)
@@ -107,14 +135,15 @@ class RaceLogic(Logic):
         map(lambda car: car.logic.reset_car(), cars)
         map(lambda car: car.event.start(), cars)
 
-    def ranking(self):
+    @staticmethod
+    def ranking():
         cars = [game.player_car] + game.cars
         info = []
         for car in cars:
             past_wp = car.logic.closest_wp()[0].get_pos()
             wp_num = int(car.logic.closest_wp()[0].get_name()[8:])
             dist = (past_wp - car.gfx.nodepath.get_pos()).length()
-            info += [(car.path[5:], len(car.logic.lap_times), wp_num, dist)]
+            info += [(car.name, len(car.logic.lap_times), wp_num, dist)]
         by_dist = sorted(info, key=lambda val: val[3])
         by_wp_num = sorted(by_dist, key=lambda val: val[2])
         by_laps = sorted(by_wp_num, key=lambda val: val[1])
@@ -133,7 +162,7 @@ class RaceLogic(Logic):
 class RaceLogicSinglePlayer(RaceLogic):
 
     def enter_play(self):
-        RaceLogic.enter_play(self)
+        RaceLogic.enter_play()
         self.start_play()
 
 

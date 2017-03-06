@@ -5,8 +5,6 @@ from yyagl.gameobject import Gfx
 from direct.gui.OnscreenText import OnscreenText
 from random import shuffle
 import os
-import threading
-import multiprocessing
 
 
 class TrackGfx(Gfx):
@@ -111,8 +109,6 @@ class TrackGfx(Gfx):
         path = self.mdt.path + '/' + model.getName().split('.')[0][5:]
         eng.base.loader.loadModel(path).reparent_to(model)
         left, right, top, bottom = self.mdt.phys.lrtb
-        center_x, center_y = (left + right) / 2, (top + bottom) / 2
-        pos_x, pos_y = model.get_pos()[0], model.get_pos()[1]
         model.reparentTo(self.__flat_roots[model_name])
 
     def flattening(self):
@@ -120,14 +116,12 @@ class TrackGfx(Gfx):
         flat_cores = 1  # max(1, multiprocessing.cpu_count() / 2)
         eng.log_mgr.log('flattening using %s cores' % flat_cores)
         self.in_loading = []
-        self.flat_lock = threading.Lock()
         self.models_to_load = self.__flat_roots.values()
         for i in range(flat_cores):
             self.__flat_models()
         self.end_loading()
 
     def __flat_models(self, model='', time=0, nodes=0):
-        #with self.flat_lock:
         if model:
             str_tmpl = 'flattened model: %s (%s seconds, %s nodes)'
             self.in_loading.remove(model)
@@ -153,7 +147,6 @@ class TrackGfx(Gfx):
             self.__flat_models(model, time, nodes)
         nname = node.get_name()
         self.in_loading += [nname]
-        #self.notify('on_loading', _('flattening model: ') + nname)
         loa = loader.asyncFlattenStrong(
             node, callback=process_flat, inPlace=False,
             extraArgs=[node, nname, curr_t, len(node.get_children())])
@@ -162,8 +155,8 @@ class TrackGfx(Gfx):
     def end_loading(self, model=None):
         if model:
             self.model = model
-
-        for model in self.model.findAllMatches('**/Empty*Anim*'):  # bam files don't contain actor info
+        for model in self.model.findAllMatches('**/Empty*Anim*'):
+            # bam files don't contain actor info
             new_root = NodePath(model.get_name())
             new_root.reparent_to(model.get_parent())
             new_root.set_pos(model.get_pos())
@@ -182,7 +175,6 @@ class TrackGfx(Gfx):
                 self.__actors[-1].node().setBounds(OmniBoundingVolume())
                 self.__actors[-1].node().setFinal(True)
             model.remove_node()
-
         self.__set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
         #vrs = eng.logic.version
@@ -235,7 +227,8 @@ class TrackGfx(Gfx):
             text = '\n\n'.join(names[:3])
             txt = OnscreenText(text, parent=self.renders[i], scale=.2,
                                fg=(0, 0, 0, 1), pos=(.245, 0))
-            while txt.getTightBounds()[1][0] - txt.getTightBounds()[0][0] > .48:
+            bounds = lambda: txt.getTightBounds()
+            while bounds()[1][0] - bounds()[0][0] > .48:
                 txt.setScale(txt.getScale()[0] - .01, txt.getScale()[0] - .01)
             height = txt.getTightBounds()[1][2] - txt.getTightBounds()[0][2]
             txt.setZ(.06 + height / 2)

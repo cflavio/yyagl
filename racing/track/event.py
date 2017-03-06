@@ -19,7 +19,7 @@ class TrackEvent(Event):
             self.mdt.gfx.spot_lgt.setPos(car_pos + sh_src)
             #self.mdt.gfx.spot_lgt.lookAt(car_pos + (-40, 60, -50))
         cars = [game.player_car] + game.cars
-        positions = [(car.path[5:], car.gfx.nodepath.get_pos())
+        positions = [(car.name, car.gfx.nodepath.get_pos())
                      for car in cars]
         self.mdt.gui.minimap.update(positions)
 

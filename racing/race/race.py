@@ -14,12 +14,20 @@ class Race(GameObjectMdt):
     gui_cls = RaceGui
     fsm_cls = _Fsm
 
-    def __init__(self, keys, joystick, sounds, color_main, color, font):
+    def __init__(
+            self, keys, joystick, sounds, color_main, color, font, coll_path,
+            coll_name, car_path, phys_file, wheel_names, tuning_engine,
+            tuning_tires, tuning_suspensions, road_name, base_path, model_name,
+            damage_paths, wheel_gfx_names, particle_path):
         init_lst = [
             [('fsm', self.fsm_cls, [self])],
             [('gui', self.gui_cls, [self])],
             [('logic', self.logic_cls, [
-                self, keys, joystick, sounds, color_main, color, font])],
+                self, keys, joystick, sounds, color_main, color, font,
+                coll_path, coll_name, car_path, phys_file, wheel_names,
+                tuning_engine, tuning_tires, tuning_suspensions, road_name,
+                base_path, model_name, damage_paths, wheel_gfx_names,
+                particle_path])],
             [('event', self.event_cls, [self])]]
         GameObjectMdt.__init__(self, init_lst)
 

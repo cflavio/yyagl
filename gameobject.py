@@ -1,5 +1,4 @@
 from abc import ABCMeta
-from inspect import isclass
 from direct.fsm.FSM import FSM
 from direct.showbase.DirectObject import DirectObject
 from .observer import Subject
@@ -114,6 +113,7 @@ class GameObjectMdt(Subject):
     def comp_list(self, init_lst):
         if not init_lst:
             return []
+
         def process_elm(elm):
             return [elm[0]] if type(elm) == tuple else self.comp_list(elm)
         return process_elm(init_lst[0]) + self.comp_list(init_lst[1:])

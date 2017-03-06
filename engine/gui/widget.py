@@ -36,9 +36,12 @@ class Widget(object):
 
     def on_arrow(self, direction):
         is_hor = direction in [(-1, 0, 0), (1, 0, 0)]
-        if not is_hor and hasattr(self, 'setItems') and not self.popupMenu.isHidden():
+        is_menu = hasattr(self, 'setItems')
+        has_popup_open = is_menu and not self.popupMenu.isHidden()
+        if not is_hor and has_popup_open:
             old_idx = self.highlightedIndex
-            idx = self.highlightedIndex + {(0, 0, -1): 1, (0, 0, 1): -1}[direction]
+            dir2offset = {(0, 0, -1): 1, (0, 0, 1): -1}
+            idx = self.highlightedIndex + dir2offset[direction]
             idx = min(len(self['items']) - 1, max(0, idx))
             if old_idx != idx:
                 fc = self.component('item%s' % idx)['frameColor']

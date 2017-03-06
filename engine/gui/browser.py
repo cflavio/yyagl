@@ -3,7 +3,7 @@ from os import environ, system
 from webbrowser import open_new_tab
 
 
-class Browser:
+class Browser(object):
 
     @staticmethod
     def init_cls():
@@ -14,7 +14,7 @@ class Browser:
         open_new_tab(url)
 
 
-class BrowserLinux:
+class BrowserLinux(Browser):
 
     @staticmethod
     def open(url):

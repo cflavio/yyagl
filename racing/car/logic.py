@@ -291,7 +291,7 @@ class CarPlayerLogic(CarLogic):
             self.mdt.gui.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__check_wrong_way()
         ranking = game.fsm.race.logic.ranking()
-        r_i = ranking.index(self.mdt.path[5:]) + 1
+        r_i = ranking.index(self.mdt.name) + 1
         self.mdt.gui.ranking_txt.setText(str(r_i) + "'")
 
     def fire(self):

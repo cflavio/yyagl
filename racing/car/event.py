@@ -30,6 +30,7 @@ class InputDctBuilderKeyboard(InputDctBuilder):
         keys = ['forward', 'left', 'reverse', 'right']
         return {key: inputState.isSet(key) for key in keys}
 
+
 class InputDctBuilderJoystick(InputDctBuilder):
 
     def build_dct(self, ai, has_weapon):
@@ -141,10 +142,17 @@ class CarPlayerEvent(CarEvent):
         self.mdt.logic.fire()
         self.has_weapon = False
 
+    def _on_crash(self):
+        self.mdt.gfx.crash_sfx()
+        self.mdt.gfx.apply_damage()
+        self.mdt.phys.apply_damage()
+        self.mdt.gui.apply_damage()
+
     def __process_wall(self):
         eng.audio.play(self.mdt.audio.crash_sfx)
-        args = .1, lambda tsk: self.mdt.gfx.crash_sfx(), 'crash sfx'
-        self.crash_tsk = taskMgr.doMethodLater(*args)
+        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
+            args = .1, lambda tsk: self._on_crash(), 'crash sfx'
+            self.crash_tsk = taskMgr.doMethodLater(*args)
 
     def __process_nonstart_goals(self, lap_number, laps):
         curr_lap = min(laps, lap_number)

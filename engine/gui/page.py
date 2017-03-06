@@ -4,7 +4,7 @@ from direct.gui.DirectButton import DirectButton
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
-from direct.gui.DirectGuiGlobals import ENTER, EXIT, NORMAL, DISABLED
+from direct.gui.DirectGuiGlobals import ENTER, EXIT, DISABLED
 from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectSlider import DirectSlider

@@ -4,7 +4,7 @@ from .menu import LoadingMenu
 
 class Loading(Colleague):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt):  # otherwise it doesn't work
         self.mdt = mdt
 
     def enter_loading(self, track_path='', car_path='', player_cars=[],

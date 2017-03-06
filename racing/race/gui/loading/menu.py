@@ -33,4 +33,4 @@ class LoadingMenu(Menu):
             [('gui', self.gui_cls, [self, loading, track_path, car_path,
                                     player_cars, drivers])],
             [('logic', MenuLogic, [self])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObjectMdt.__init__(self, init_lst)  # NB doesn't invoke Menu's

@@ -109,8 +109,8 @@ class LoadingPageGui(PageGui):
                 fg=(.75, .75, .25, 1) if is_car else (.75, .75, .75, 1))
             self.widgets += [txt]
             img = OnscreenImage(
-                    'assets/images/cars/%s_sel.png' % car,
-                    pos=(-1.42, 1, .12 - i * .16), scale=.074)
+                'assets/images/cars/%s_sel.png' % car,
+                pos=(-1.42, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
             shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)
@@ -141,8 +141,8 @@ class LoadingPageGui(PageGui):
                 fg=(.75, .75, .25, 1) if is_car else (.75, .75, .75, 1))
             self.widgets += [txt]
             img = OnscreenImage(
-                    'assets/images/cars/%s_sel.png' % car[0],
-                    pos=(-.36, 1, .12 - i * .16), scale=.074)
+                'assets/images/cars/%s_sel.png' % car[0],
+                pos=(-.36, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
             shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)
@@ -153,8 +153,6 @@ class LoadingPageGui(PageGui):
             img.setTexture(ts, loader.loadTexture(txt_path))
 
     def set_controls(self):
-        items = game.logic.season.logic.ranking.logic.ranking.items()
-        sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = OnscreenText(
             text=_('Controls'),
             scale=.1, pos=(1.0, .3), font=self.font, fg=(.75, .75, .75, 1))

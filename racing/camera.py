@@ -39,14 +39,14 @@ class Camera(object):
 
         car_pos = nodepath.get_pos()
         cam_vec = -fwd_vec * (self.cam_dist_min + cam_dist_diff * speed_ratio)
-        l_d = 0 if self.car.logic.is_rolling else self.look_dist_min + look_dist_diff * speed_ratio
+        l_d_speed = self.look_dist_min + look_dist_diff * speed_ratio
+        l_d = 0 if self.car.logic.is_rolling else l_d_speed
         tgt_vec = fwd_car_vec * l_d
         delta_pos_z = self.cam_z_min + cam_z_diff * speed_ratio
         delta_cam_z = self.look_z_min + look_z_diff * speed_ratio
 
-        curr_cam_pos = car_pos + cam_vec + (0, 0, delta_pos_z)
-        curr_cam_dist_fact = self.cam_dist_min + cam_dist_diff * speed_ratio
-
+        #curr_cam_pos = car_pos + cam_vec + (0, 0, delta_pos_z)
+        #curr_cam_dist_fact = self.cam_dist_min + cam_dist_diff * speed_ratio
         #curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
         #if curr_occl:
         #    occl_pos = curr_occl.getHitPos()

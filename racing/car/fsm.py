@@ -16,5 +16,5 @@ class CarFsm(Fsm):
         self.mdt.event.input_dct_bld = InputDctBuilder.build(
             self.getCurrentOrNextState(), self.mdt.event.joystick)
         self.mdt.ai.destroy()
-        self.mdt.ai = CarResultsAi(self.mdt)
+        self.mdt.ai = CarResultsAi(self.mdt, self.mdt.road_name)
         self.mdt.gui.destroy()

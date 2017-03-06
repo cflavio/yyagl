@@ -27,7 +27,8 @@ class JoystickMgrBase(object):
     def init_joystick(self):
         pass
 
-    def get_joystick(self):
+    @staticmethod
+    def get_joystick():
         return 0, 0, 0, 0
 
     def destroy(self):

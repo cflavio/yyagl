@@ -1,34 +1,58 @@
+from yaml import load
 from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape
 from panda3d.core import LPoint3f
 from yyagl.gameobject import Phys
-import yaml
 
 
 class CarPhys(Phys):
 
-    def __init__(self, mdt, name, track_phys):
+    def __init__(self, mdt, name, coll_path, coll_name, track_phys, car_path,
+                 phys_file, wheel_names, tuning_engine, tuning_tires,
+                 tuning_suspensions):
         Phys.__init__(self, mdt)
         self.pnode = None
         self.vehicle = None
         self.curr_speed_factor = 1.0
-        self.__finds = {}
+        self.__finds = {}  # cache for find's results
+        self.name = name
         self.__track_phys = track_phys
-        self._load_phys(name)
-        self.__set_collision(name)
+        self.__coll_path = coll_path
+        self.__coll_name = coll_name
+        self._car_path = car_path
+        self._phys_file = phys_file
+        self.__wheel_names = wheel_names
+        self.tuning_engine = tuning_engine
+        self.tuning_tires = tuning_tires
+        self.tuning_suspensions = tuning_suspensions
+        self._load_phys()
+        self.__set_collision_mesh()
         self.__set_phys_node()
         self.__set_vehicle()
         self.__set_wheels()
 
-    def _load_phys(self, name):
-        with open('assets/models/%s/phys.yml' % name) as phys_file:
-            self.conf = yaml.load(phys_file)
-        s_a = lambda field: setattr(self, field, self.conf[field])
-        map(s_a, self.conf.keys())
+    def _load_phys(self):
+        fpath = '%s/%s/%s' % (self._car_path, self.name, self._phys_file)
+        with open(fpath) as phys_file:
+            self.cfg = load(phys_file)
+        # pass phys props as a class
+        # differentiate for each car
+        self.cfg['max_speed'] = self.get_speed()
+        self.cfg['friction_slip'] = self.get_friction()
+        self.cfg['roll_influence'] = self.get_roll_influence()
+        speeds = 'speed %s: %s' % (self.name, round(self.cfg['max_speed'], 2))
+        eng.log_mgr.log(speeds)
+        fr_slip = round(self.cfg['friction_slip'], 2)
+        eng.log_mgr.log('friction %s: %s' % (self.name, fr_slip))
+        r_s = 'roll %s: %s' % (self.name, round(self.cfg['roll_influence'], 2))
+        eng.log_mgr.log(r_s)
+        s_a = lambda field: setattr(self, field, self.cfg[field])
+        map(s_a, self.cfg.keys())
 
-    def __set_collision(self, name):
-        self.capsule = loader.loadModel('%s/capsule' % name)
+    def __set_collision_mesh(self):
+        fpath = '%s/%s/%s' % (self._car_path, self.name, self.__coll_path)
+        self.coll_mesh = loader.loadModel(fpath)
         chassis_shape = BulletConvexHullShape()
-        for geom in eng.phys.find_geoms(self.capsule, 'Capsule'):
+        for geom in eng.phys.find_geoms(self.coll_mesh, self.__coll_name):
             chassis_shape.addGeom(geom.node().getGeom(0), geom.getTransform())
         self.mdt.gfx.nodepath.node().addShape(chassis_shape)
 
@@ -36,7 +60,7 @@ class CarPhys(Phys):
         self.pnode = self.mdt.gfx.nodepath.node()
         self.pnode.setMass(self.mass)
         self.pnode.setDeactivationEnabled(False)
-        eng.phys.world_phys.attachRigidBody(self.pnode)
+        eng.phys.world_phys.attachRigidBody(self.pnode)  # do facade
         eng.phys.collision_objs += [self.pnode]
 
     def __set_vehicle(self):
@@ -46,61 +70,58 @@ class CarPhys(Phys):
         tuning = self.vehicle.getTuning()
         tuning.setSuspensionCompression(self.suspension_compression)
         tuning.setSuspensionDamping(self.suspension_damping)
-        eng.phys.world_phys.attachVehicle(self.vehicle)
+        eng.phys.world_phys.attachVehicle(self.vehicle)  # facade
 
     def __set_wheels(self):
         fwheel_bounds = self.mdt.gfx.wheels['fr'].get_tight_bounds()
         f_radius = (fwheel_bounds[1][2] - fwheel_bounds[0][2]) / 2.0 + .01
-        self.wheel_fr_radius = self.wheel_fl_radius = f_radius
         rwheel_bounds = self.mdt.gfx.wheels['rr'].get_tight_bounds()
         r_radius = (rwheel_bounds[1][2] - rwheel_bounds[0][2]) / 2.0 + .01
-        self.wheel_rr_radius = self.wheel_rl_radius = r_radius
-        ffr = self.capsule.find('**/EmptyWheelFront')
-        ffl = self.capsule.find('**/EmptyWheelFront.001')
-        rrr = self.capsule.find('**/EmptyWheelRear')
-        rrl = self.capsule.find('**/EmptyWheelRear.001')
-        fr_node = ffr if ffr else self.capsule.find('**/EmptyWheel')
-        fl_node = ffl if ffl else self.capsule.find('**/EmptyWheel.001')
-        rr_node = rrr if rrr else self.capsule.find('**/EmptyWheel.002')
-        rl_node = rrl if rrl else self.capsule.find('**/EmptyWheel.003')
-        self.wheel_fr_pos = fr_node.get_pos() + (0, 0, f_radius)
-        self.wheel_fl_pos = fl_node.get_pos() + (0, 0, f_radius)
-        self.wheel_rr_pos = rr_node.get_pos() + (0, 0, r_radius)
-        self.wheel_rl_pos = rl_node.get_pos() + (0, 0, r_radius)
+        ffr = self.coll_mesh.find('**/' + self.__wheel_names[0][0])
+        ffl = self.coll_mesh.find('**/' + self.__wheel_names[0][1])
+        rrr = self.coll_mesh.find('**/' + self.__wheel_names[0][2])
+        rrl = self.coll_mesh.find('**/' + self.__wheel_names[0][3])
+        meth = self.coll_mesh.find
+        fr_node = ffr if ffr else meth('**/' + self.__wheel_names[1][0])
+        fl_node = ffl if ffl else meth('**/' + self.__wheel_names[1][1])
+        rr_node = rrr if rrr else meth('**/' + self.__wheel_names[1][2])
+        rl_node = rrl if rrl else meth('**/' + self.__wheel_names[1][3])
+        wheel_fr_pos = fr_node.get_pos() + (0, 0, f_radius)
+        wheel_fl_pos = fl_node.get_pos() + (0, 0, f_radius)
+        wheel_rr_pos = rr_node.get_pos() + (0, 0, r_radius)
+        wheel_rl_pos = rl_node.get_pos() + (0, 0, r_radius)
         frw = self.mdt.gfx.wheels['fr']
         flw = self.mdt.gfx.wheels['fl']
         rrw = self.mdt.gfx.wheels['rr']
         rlw = self.mdt.gfx.wheels['rl']
         wheels_info = [
-            (self.wheel_fr_pos, True, frw, self.wheel_fr_radius),
-            (self.wheel_fl_pos, True, flw, self.wheel_fl_radius),
-            (self.wheel_rr_pos, False, rrw, self.wheel_rr_radius),
-            (self.wheel_rl_pos, False, rlw, self.wheel_rl_radius)]
-        #TODO: change this to a for
-        map(lambda (pos, front, nodepath, radius):
-            self.__add_wheel(pos, front, nodepath.node(), radius),
-            wheels_info)
+            (wheel_fr_pos, True, frw, f_radius),
+            (wheel_fl_pos, True, flw, f_radius),
+            (wheel_rr_pos, False, rrw, r_radius),
+            (wheel_rl_pos, False, rlw, r_radius)]
+        for (pos, front, nodepath, radius) in wheels_info:
+            self.__add_wheel(pos, front, nodepath.node(), radius)
 
     def __add_wheel(self, pos, front, node, radius):
-        wheel = self.vehicle.createWheel()
-        wheel.setNode(node)
-        wheel.setChassisConnectionPointCs(LPoint3f(*pos))
-        wheel.setFrontWheel(front)
-        wheel.setWheelDirectionCs((0, 0, -1))
-        wheel.setWheelAxleCs((1, 0, 0))
-        wheel.setWheelRadius(radius)
-        wheel.setSuspensionStiffness(self.suspension_stiffness)
-        wheel.setWheelsDampingRelaxation(self.wheels_damping_relaxation)
-        wheel.setWheelsDampingCompression(self.wheels_damping_compression)
-        wheel.setFrictionSlip(self.friction_slip)  # high -> more adherence
-        wheel.setRollInfluence(self.roll_influence)  # low ->  more stability
-        wheel.setMaxSuspensionForce(self.max_suspension_force)
-        wheel.setMaxSuspensionTravelCm(self.max_suspension_travel_cm)
-        wheel.setSkidInfo(self.skid_info)
+        whl = self.vehicle.createWheel()
+        whl.setNode(node)
+        whl.setChassisConnectionPointCs(LPoint3f(*pos))
+        whl.setFrontWheel(front)
+        whl.setWheelDirectionCs((0, 0, -1))
+        whl.setWheelAxleCs((1, 0, 0))
+        whl.setWheelRadius(radius)
+        whl.setSuspensionStiffness(self.suspension_stiffness)
+        whl.setWheelsDampingRelaxation(self.wheels_damping_relaxation)
+        whl.setWheelsDampingCompression(self.wheels_damping_compression)
+        whl.setFrictionSlip(self.friction_slip)  # high -> more adherence
+        whl.setRollInfluence(self.roll_influence)  # low ->  more stability
+        whl.setMaxSuspensionForce(self.max_suspension_force)
+        whl.setMaxSuspensionTravelCm(self.max_suspension_travel_cm)
+        whl.setSkidInfo(self.skid_info)
 
     @property
-    def is_flying(self):
-        rays = [wheel.getRaycastInfo() for wheel in self.vehicle.get_wheels()]
+    def is_flying(self):  # no need to be cached
+        rays = [whl.getRaycastInfo() for whl in self.vehicle.get_wheels()]
         return not any(ray.isInContact() for ray in rays)
 
     @property
@@ -121,8 +142,9 @@ class CarPhys(Phys):
 
     def update_car_props(self):
         speeds = []
-        for wheel in self.vehicle.get_wheels():
-            ground_name = self.ground_name(wheel)
+        for whl in self.vehicle.get_wheels():
+            contact_pt = whl.get_raycast_info().getContactPointWs()
+            ground_name = self.ground_name(contact_pt)
             if not ground_name:
                 continue
             if ground_name not in self.__finds:
@@ -133,19 +155,20 @@ class CarPhys(Phys):
                 speeds += [float(gfx_node.get_tag('speed'))]
             if gfx_node.has_tag('friction'):
                 fric = float(gfx_node.get_tag('friction'))
-                wheel.setFrictionSlip(self.friction_slip * fric)
+                whl.setFrictionSlip(self.friction_slip * fric)
         self.curr_speed_factor = (sum(speeds) / len(speeds)) if speeds else 1.0
 
     @property
-    def ground_names(self):
-        return map(self.ground_name, self.vehicle.get_wheels())
+    def ground_names(self):  # no need to be cached
+        whls = self.vehicle.get_wheels()
+        pos = map(lambda whl: whl.get_raycast_info().getContactPointWs(), whls)
+        return map(self.ground_name, pos)
 
     @staticmethod
-    def ground_name(wheel):
-        contact_pos = wheel.get_raycast_info().getContactPointWs()
-        top = contact_pos + (0, 0, .1)
-        bottom = contact_pos + (0, 0, -.1)
-        result = eng.phys.world_phys.rayTestClosest(top, bottom)
+    def ground_name(pos):
+        top = pos + (0, 0, 1)
+        bottom = pos + (0, 0, -1)
+        result = eng.phys.world_phys.rayTestClosest(top, bottom)  # facade
         ground = result.get_node()
         return ground.get_name() if ground else ''
 
@@ -157,7 +180,7 @@ class CarPhys(Phys):
         else:
             self.max_speed *= .95
             self.friction_slip *= .95
-            self.roll_influence *= .95
+            self.roll_influence *= 1.05
         fric = lambda whl: whl.setFrictionSlip(self.friction_slip)
         map(fric, self.vehicle.get_wheels())
         roll = lambda whl: whl.setRollInfluence(self.roll_influence)
@@ -167,44 +190,28 @@ class CarPhys(Phys):
         eng.log_mgr.log('roll: ' + str(round(self.roll_influence, 2)))
 
     def get_speed(self):
-        return self.conf['max_speed']
+        return self.cfg['max_speed']
 
     def get_friction(self):
-        return self.conf['friction_slip']
+        return self.cfg['friction_slip']
 
     def get_roll_influence(self):
-        return self.conf['roll_influence']
+        return self.cfg['roll_influence']
 
     def destroy(self):
         eng.phys.world_phys.remove_vehicle(self.vehicle)
         self.pnode = self.vehicle = self.__finds = self.__track_phys = \
-            self.capsule = None
+            self.coll_mesh = None
         Phys.destroy(self)
 
 
 class CarPlayerPhys(CarPhys):
 
-    def _load_phys(self, name):
-        with open('assets/models/%s/phys.yml' % name) as phys_file:
-            self.conf = yaml.load(phys_file)
-        self.conf['max_speed'] = self.get_speed()
-        self.conf['friction_slip'] = self.get_friction()
-        self.conf['roll_influence'] = self.get_roll_influence()
-        eng.log_mgr.log('speed: ' + str(round(self.conf['max_speed'], 2)))
-        fr_slip = round(self.conf['friction_slip'], 2)
-        eng.log_mgr.log('friction: ' + str(fr_slip))
-        eng.log_mgr.log('roll: ' + str(round(self.conf['roll_influence'], 2)))
-        s_a = lambda field: setattr(self, field, self.conf[field])
-        map(s_a, self.conf.keys())
-
     def get_speed(self):
-        _en = game.logic.season.logic.tuning.logic.tuning['engine']
-        return self.conf['max_speed'] * (1 + .1 * _en)
+        return self.cfg['max_speed'] * (1 + .1 * self.tuning_engine)
 
     def get_friction(self):
-        tir = game.logic.season.logic.tuning.logic.tuning['tires']
-        return self.conf['friction_slip'] * (1 + .1 * tir)
+        return self.cfg['friction_slip'] * (1 + .1 * self.tuning_tires)
 
     def get_roll_influence(self):
-        susp = game.logic.season.logic.tuning.logic.tuning['suspensions']
-        return self.conf['roll_influence'] * (1 + .1 * susp)
+        return self.cfg['roll_influence'] * (1 + .1 * self.tuning_suspensions)
