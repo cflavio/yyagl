@@ -19,7 +19,7 @@ class RaceLogic(Logic):
             coll_path, coll_name, car_path, phys_file, wheel_names,
             tuning_engine, tuning_tires, tuning_suspensions, road_name,
             base_path, model_name, damage_paths, wheel_gfx_names,
-            particle_path):
+            particle_path, driver_engine, driver_tires, driver_suspensions):
         self.load_txt = None
         self.cam_tsk = None
         self.cam_node = None
@@ -48,6 +48,9 @@ class RaceLogic(Logic):
         self.damage_paths = damage_paths
         self.wheel_gfx_names = wheel_gfx_names
         self.particle_path = particle_path
+        self.driver_engine = driver_engine
+        self.driver_suspensions = driver_suspensions
+        self.driver_tires = driver_tires
         Logic.__init__(self, mdt)
 
     @staticmethod
@@ -92,7 +95,8 @@ class RaceLogic(Logic):
                     self.tuning_engine, self.tuning_tires,
                     self.tuning_suspensions, self.road_name, self.base_path,
                     self.model_name, self.damage_paths, self.wheel_gfx_names,
-                    self.particle_path)
+                    self.particle_path, self.driver_engine, self.driver_tires,
+                    self.driver_suspensions)
                 game.cars += [new_car]
             s_p = game.track.phys.get_start_pos(grid.index(car_path))
             pos = s_p[0] + (0, 0, .2)
@@ -113,7 +117,8 @@ class RaceLogic(Logic):
                 self.car_path, self.phys_file, self.wheel_names,
                 self.tuning_engine, self.tuning_tires, self.tuning_suspensions,
                 self.road_name, self.base_path, self.model_name,
-                self.damage_paths, self.wheel_gfx_names, self.particle_path)
+                self.damage_paths, self.wheel_gfx_names, self.particle_path,
+                self.driver_engine, self.driver_tires, self.driver_suspensions)
             game.cars = []
         game.track = Track(
             track_path, load_car)

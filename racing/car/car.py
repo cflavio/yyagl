@@ -25,7 +25,7 @@ class Car(GameObjectMdt):
             joystick, sounds, color_main, color, font, car_path, phys_file,
             wheel_names, tuning_engine, tuning_tires, tuning_suspensions,
             road_name, base_path, model_name, damage_paths, wheel_gfx_names,
-            particle_path):
+            particle_path, driver_engine, driver_tires, driver_suspensions):
         eng.log_mgr.log('init car ' + name)  # two params: path and name
         self.pos = pos
         self.hpr = hpr
@@ -42,7 +42,8 @@ class Car(GameObjectMdt):
              ('phys', self.phys_cls, [
                 self, name, coll_path, coll_name, self.race.track.phys.model,
                 car_path, phys_file, wheel_names, tuning_engine, tuning_tires,
-                tuning_suspensions]),
+                tuning_suspensions, driver_engine, driver_tires,
+                driver_suspensions]),
              ('gui', self.gui_cls, [self, color_main, color, font]),
              ('event', self.event_cls, [self, keys, joystick]),
              ('logic', self.logic_cls, [self, self.pos, self.hpr])],

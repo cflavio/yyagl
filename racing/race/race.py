@@ -18,7 +18,9 @@ class Race(GameObjectMdt):
             self, keys, joystick, sounds, color_main, color, font, coll_path,
             coll_name, car_path, phys_file, wheel_names, tuning_engine,
             tuning_tires, tuning_suspensions, road_name, base_path, model_name,
-            damage_paths, wheel_gfx_names, particle_path):
+            damage_paths, wheel_gfx_names, particle_path, driver_engine,
+            driver_tires, driver_suspensions):
+        # tuning and driver's props should be managed from the game
         init_lst = [
             [('fsm', self.fsm_cls, [self])],
             [('gui', self.gui_cls, [self])],
@@ -27,7 +29,8 @@ class Race(GameObjectMdt):
                 coll_path, coll_name, car_path, phys_file, wheel_names,
                 tuning_engine, tuning_tires, tuning_suspensions, road_name,
                 base_path, model_name, damage_paths, wheel_gfx_names,
-                particle_path])],
+                particle_path, driver_engine, driver_tires,
+                driver_suspensions])],
             [('event', self.event_cls, [self])]]
         GameObjectMdt.__init__(self, init_lst)
 

@@ -8,7 +8,8 @@ class CarPhys(Phys):
 
     def __init__(self, mdt, name, coll_path, coll_name, track_phys, car_path,
                  phys_file, wheel_names, tuning_engine, tuning_tires,
-                 tuning_suspensions):
+                 tuning_suspensions, driver_engine, driver_tires,
+                 driver_suspensions):
         Phys.__init__(self, mdt)
         self.pnode = None
         self.vehicle = None
@@ -24,6 +25,9 @@ class CarPhys(Phys):
         self.tuning_engine = tuning_engine
         self.tuning_tires = tuning_tires
         self.tuning_suspensions = tuning_suspensions
+        self.driver_engine = driver_engine
+        self.driver_tires = driver_tires
+        self.driver_suspensions = driver_suspensions
         self._load_phys()
         self.__set_collision_mesh()
         self.__set_phys_node()
@@ -39,12 +43,14 @@ class CarPhys(Phys):
         self.cfg['max_speed'] = self.get_speed()
         self.cfg['friction_slip'] = self.get_friction()
         self.cfg['roll_influence'] = self.get_roll_influence()
-        speeds = 'speed %s: %s' % (self.name, round(self.cfg['max_speed'], 2))
-        eng.log_mgr.log(speeds)
+        s_a = (self.name, round(self.cfg['max_speed'], 2), self.driver_engine)
+        eng.log_mgr.log('speed %s: %s (%s)' % s_a)
         fr_slip = round(self.cfg['friction_slip'], 2)
-        eng.log_mgr.log('friction %s: %s' % (self.name, fr_slip))
-        r_s = 'roll %s: %s' % (self.name, round(self.cfg['roll_influence'], 2))
-        eng.log_mgr.log(r_s)
+        f_a = (self.name, fr_slip, self.driver_tires)
+        eng.log_mgr.log('friction %s: %s (%s)' % f_a)
+        r_a = (self.name, round(self.cfg['roll_influence'], 2),
+               self.driver_suspensions)
+        eng.log_mgr.log('roll %s: %s (%s)' % r_a)
         s_a = lambda field: setattr(self, field, self.cfg[field])
         map(s_a, self.cfg.keys())
 
@@ -185,18 +191,21 @@ class CarPhys(Phys):
         map(fric, self.vehicle.get_wheels())
         roll = lambda whl: whl.setRollInfluence(self.roll_influence)
         map(roll, self.vehicle.get_wheels())
-        eng.log_mgr.log('speed: ' + str(round(self.max_speed, 2)))
-        eng.log_mgr.log('friction: ' + str(round(self.friction_slip, 2)))
-        eng.log_mgr.log('roll: ' + str(round(self.roll_influence, 2)))
+        s_a = (str(round(self.max_speed, 2)), self.driver_engine)
+        eng.log_mgr.log('speed: %s (%s)' % s_a)
+        f_a = (str(round(self.friction_slip, 2)), self.driver_tires)
+        eng.log_mgr.log('friction: %s (%s)' % f_a)
+        r_a = (str(round(self.roll_influence, 2)), self.driver_suspensions)
+        eng.log_mgr.log('roll: %s (%s)' % r_a)
 
     def get_speed(self):
-        return self.cfg['max_speed']
+        return self.cfg['max_speed'] * (1 + .01 * self.driver_engine)
 
     def get_friction(self):
-        return self.cfg['friction_slip']
+        return self.cfg['friction_slip'] * (1 + .01 * self.driver_tires)
 
     def get_roll_influence(self):
-        return self.cfg['roll_influence']
+        return self.cfg['roll_influence'] * (1 + .01 * self.driver_suspensions)
 
     def destroy(self):
         eng.phys.world_phys.remove_vehicle(self.vehicle)
@@ -208,10 +217,16 @@ class CarPhys(Phys):
 class CarPlayerPhys(CarPhys):
 
     def get_speed(self):
-        return self.cfg['max_speed'] * (1 + .1 * self.tuning_engine)
+        t_c = 1 + .1 * self.tuning_engine
+        d_c = 1 + .01 * self.driver_engine
+        return self.cfg['max_speed'] * t_c * d_c
 
     def get_friction(self):
-        return self.cfg['friction_slip'] * (1 + .1 * self.tuning_tires)
+        t_c = 1 + .1 * self.tuning_tires
+        d_c = 1 + .01 * self.driver_tires
+        return self.cfg['friction_slip'] * t_c * d_c
 
     def get_roll_influence(self):
-        return self.cfg['roll_influence'] * (1 + .1 * self.tuning_suspensions)
+        t_c = 1 + .1 * self.tuning_suspensions
+        d_c = 1 + .01 * self.driver_suspensions
+        return self.cfg['roll_influence'] * t_c * d_c
