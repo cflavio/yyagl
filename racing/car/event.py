@@ -6,7 +6,7 @@ from yyagl.racing.race.event import NetMsgs
 from yyagl.racing.weapon.rocket.rocket import Rocket
 
 
-class InputDctBuilder:
+class InputDctBuilder:  # maybe a visitor?
 
     @staticmethod
     def build(state, joystick):
@@ -22,6 +22,7 @@ class InputDctBuilderAi(InputDctBuilder):
 
     def build_dct(self, ai, has_weapon):
         return ai.get_input()
+
 
 class InputDctBuilderKeyboard(InputDctBuilder):
 

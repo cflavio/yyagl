@@ -92,8 +92,8 @@ class CarPhys(Phys):
         wheel.setSuspensionStiffness(self.suspension_stiffness)
         wheel.setWheelsDampingRelaxation(self.wheels_damping_relaxation)
         wheel.setWheelsDampingCompression(self.wheels_damping_compression)
-        wheel.setFrictionSlip(self.friction_slip)
-        wheel.setRollInfluence(self.roll_influence)
+        wheel.setFrictionSlip(self.friction_slip)  # high -> more adherence
+        wheel.setRollInfluence(self.roll_influence)  # low ->  more stability
         wheel.setMaxSuspensionForce(self.max_suspension_force)
         wheel.setMaxSuspensionTravelCm(self.max_suspension_travel_cm)
         wheel.setSkidInfo(self.skid_info)

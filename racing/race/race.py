@@ -14,11 +14,12 @@ class Race(GameObjectMdt):
     gui_cls = RaceGui
     fsm_cls = _Fsm
 
-    def __init__(self, keys, joystick, sounds):
+    def __init__(self, keys, joystick, sounds, color_main, color, font):
         init_lst = [
             [('fsm', self.fsm_cls, [self])],
             [('gui', self.gui_cls, [self])],
-            [('logic', self.logic_cls, [self, keys, joystick, sounds])],
+            [('logic', self.logic_cls, [
+                self, keys, joystick, sounds, color_main, color, font])],
             [('event', self.event_cls, [self])]]
         GameObjectMdt.__init__(self, init_lst)
 

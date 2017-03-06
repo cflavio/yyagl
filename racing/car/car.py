@@ -20,8 +20,9 @@ class Car(GameObjectMdt):
     ai_cls = Ai
     audio_cls = Audio
 
-    def __init__(self, path, pos, hpr, cb, race, laps, keys, joystick, sounds):
-        eng.log_mgr.log('init car')
+    def __init__(self, path, pos, hpr, cb, race, laps, keys, joystick, sounds,
+                 color_main, color, font):
+        eng.log_mgr.log('init car ' + path)  # two params: path and name
         self.pos = pos
         self.hpr = hpr
         self.path = path
@@ -32,7 +33,7 @@ class Car(GameObjectMdt):
             [('gfx', self.gfx_cls, [self, self.path]),
              ('phys', self.phys_cls, [self, self.path,
                                       self.race.track.phys.model]),
-             ('gui', self.gui_cls, [self]),
+             ('gui', self.gui_cls, [self, color_main, color, font]),
              ('event', self.event_cls, [self, keys, joystick]),
              ('logic', self.logic_cls, [self, self.pos, self.hpr])],
             [('audio', self.audio_cls, [self, sounds])],

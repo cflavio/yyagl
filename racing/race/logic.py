@@ -14,7 +14,7 @@ class RaceLogic(Logic):
 
     cars = ['kronos', 'themis', 'diones', 'iapeto']
 
-    def __init__(self, mdt, keys, joystick, sounds):
+    def __init__(self, mdt, keys, joystick, sounds, color_main, color, font):
         self.load_txt = None
         self.cam_tsk = None
         self.cam_node = None
@@ -26,6 +26,9 @@ class RaceLogic(Logic):
         self.keys = keys
         self.joystick = joystick
         self.sounds = sounds
+        self.color_main = color_main
+        self.color = color
+        self.font = font
         Logic.__init__(self, mdt)
 
     @staticmethod
@@ -64,7 +67,8 @@ class RaceLogic(Logic):
                 car_class = AiCar if no_p and srv_or_sng else car_class
                 new_car = car_class(
                     'cars/' + car, pos, hpr, func, self.mdt, game.track.laps,
-                    self.keys, self.joystick, self.sounds)
+                    self.keys, self.joystick, self.sounds, self.color_main,
+                    self.color, self.font)
                 game.cars += [new_car]
             path = 'cars/' + car_path
             s_p = game.track.phys.get_start_pos(grid.index(car_path))
@@ -81,7 +85,8 @@ class RaceLogic(Logic):
                     car_cls = PlayerCarClient
             game.player_car = car_cls(
                 path, pos, hpr, func, self.mdt, game.track.laps, self.keys,
-                self.joystick, self.sounds)
+                self.joystick, self.sounds, self.color_main, self.color,
+                self.font)
             game.cars = []
         game.track = Track(
             track_path, load_car)

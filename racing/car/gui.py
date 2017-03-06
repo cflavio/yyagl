@@ -40,7 +40,10 @@ class CarGui(Gui):
 
 class CarPlayerGui(CarGui):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt, color_main, color, font):
+        self.color_main = color_main
+        self.color = color
+        self.font = font
         CarGui.__init__(self, mdt)
         self.set_pars()
         self.set_panel()
@@ -148,8 +151,8 @@ class CarPlayerGui(CarGui):
 
     def set_panel(self):
         pars = {'scale': .065, 'parent': eng.base.a2dTopRight,
-                'fg': (.75, .75, .25, 1), 'align': TextNode.A_left,
-                'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
+                'fg': self.color_main, 'align': TextNode.A_left,
+                'font': eng.font_mgr.load_font(self.font)}
         self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
         self.lap_txt = OnscreenText(
             text='1/' + str(self.mdt.laps), pos=(-.24, -.2), **pars)
@@ -158,10 +161,10 @@ class CarPlayerGui(CarGui):
         self.ranking_txt = OnscreenText(pos=(-.24, -.5), **pars)
         self.damages_txt = OnscreenText(pos=(-.24, -.6), **pars)
         self.damages_txt['text'] = '-'
-        self.damages_txt['fg'] = (.75, .75, .75, 1)
+        self.damages_txt['fg'] = self.color
         pars = {'scale': .05, 'parent': eng.base.a2dTopRight,
-                'fg': (.75, .75, .75, 1), 'align': TextNode.A_right,
-                'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
+                'fg': self.color, 'align': TextNode.A_right,
+                'font': eng.font_mgr.load_font(self.font)}
         self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
         self.lap_lab = OnscreenText(
             text=_('lap:'), pos=(-.3, -.2), **pars)
@@ -171,16 +174,19 @@ class CarPlayerGui(CarGui):
         self.damages_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
 
     def apply_damage(self, reset=False):
+        col = self.color
         if reset:
             self.damages_txt['text'] = '-'
-            self.damages_txt['fg'] = (.75, .75, .75, 1)
+            self.damages_txt['fg'] = col
         else:
             if self.damages_txt['text'] == '-':
                 self.damages_txt['text'] = _('low')
-                self.damages_txt['fg'] = (.75, .4, .25, 1)
+                yellow = (col[0], col[1] - .25, col[2] - .5, col[3])
+                self.damages_txt['fg'] = yellow
             elif self.damages_txt['text'] == _('low'):
                 self.damages_txt['text'] = _('hi')
-                self.damages_txt['fg'] = (.75, .25, .25, 1)
+                red = (col[0], col[1] - .5, col[2] - .5, col[3])
+                self.damages_txt['fg'] = red
 
     def toggle(self):
         map(lambda par: par.toggle(), self.__pars)
