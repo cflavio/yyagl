@@ -76,6 +76,7 @@ class CarGfx(Gfx, CarGfxFacade):
         part_path = self.particle_path
         node = self.mdt.gfx.nodepath
         eng.gfx.particle(part_path, node, eng.base.render, (0, 1.2, .75), .8)
+        self.apply_damage()
 
     def apply_damage(self, reset=False):
         curr_chassis = self.nodepath.get_children()[0]
@@ -89,6 +90,8 @@ class CarGfx(Gfx, CarGfxFacade):
             next_chassis = self.chassis_np_low
         curr_chassis.remove_node()
         next_chassis.reparent_to(self.nodepath)
+        self.mdt.phys.apply_damage()
+        self.mdt.gui.apply_damage()
 
     def destroy(self):
         meshes = [self.nodepath, self.chassis_np] + self.wheels.values()

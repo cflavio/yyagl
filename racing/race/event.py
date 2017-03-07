@@ -33,7 +33,7 @@ class RaceEvent(Event):
         self.accept('escape-up', self.fire_menu)
 
     def on_wrong_way(self, way_str):
-        self.mdt.track.gui.way_txt.setText(way_str)
+        self.mdt.gui.way_txt.setText(way_str)
 
     def on_end_race(self):
         points = [10, 8, 6, 4, 3, 2, 1, 0]

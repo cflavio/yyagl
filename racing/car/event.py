@@ -143,16 +143,13 @@ class CarPlayerEvent(CarEvent):
         self.has_weapon = False
 
     def _on_crash(self):
-        self.mdt.gfx.crash_sfx()
-        self.mdt.gfx.apply_damage()
-        self.mdt.phys.apply_damage()
-        self.mdt.gui.apply_damage()
+        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
+            self.mdt.gfx.crash_sfx()
 
     def __process_wall(self):
         eng.audio.play(self.mdt.audio.crash_sfx)
-        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
-            args = .1, lambda tsk: self._on_crash(), 'crash sfx'
-            self.crash_tsk = taskMgr.doMethodLater(*args)
+        args = .1, lambda tsk: self._on_crash(), 'crash sfx'
+        self.crash_tsk = taskMgr.doMethodLater(*args)
 
     def __process_nonstart_goals(self, lap_number, laps):
         curr_lap = min(laps, lap_number)

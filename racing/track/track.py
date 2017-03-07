@@ -1,29 +1,33 @@
 from yyagl.gameobject import GameObjectMdt
 from .gfx import TrackGfx
 from .phys import TrackPhys
-from .gui.gui import TrackGui
 from .event import TrackEvent
 from .audio import TrackAudio
-import yaml
 
 
 class Track(GameObjectMdt):
 
-    def __init__(self, path, cb):
-        eng.log_mgr.log('init track')
+    def __init__(
+            self, path, cb, shaders, music_path, coll_path, unmerged, merged,
+            ghosts, corner_names, waypoint_names, show_waypoints, weapons,
+            weapon_names, start, name, track_path, model_name, empty_name,
+            anim_name, omni_tag, thanks, sign_name, camera_vec, shadow_src,
+            laps):
+        eng.log_mgr.log('init track')  # facade
         self.path = path
-        with open('assets/models/%s/track.yml' % path) as track_file:
-            track_conf = yaml.load(track_file)
-            self.camera_vector = track_conf['camera_vector']
-            self.shadow_source = track_conf['shadow_source']
-            self.laps = track_conf['laps']
+        self.camera_vector = camera_vec
+        self.shadow_source = shadow_src
+        self.laps = laps
         init_lst = [
-            [('phys', TrackPhys, [self]),
-             ('gfx', TrackGfx, [self],
-              lambda: self.gfx.attach(self.on_loading)),
-             ('gui', TrackGui, [self, path[6:]])],
-            [('event', TrackEvent, [self])],
-            [('audio', TrackAudio, [self])]]
+            [('phys', TrackPhys, [
+                self, coll_path, unmerged, merged, ghosts, corner_names,
+                waypoint_names, show_waypoints, weapons, weapon_names, start]),
+             ('gfx', TrackGfx, [
+                 self, name, track_path, model_name, empty_name, anim_name,
+                 omni_tag, shaders, thanks, sign_name],
+              lambda: self.gfx.attach(self.on_loading))],
+            [('event', TrackEvent, [self, shaders])],
+            [('audio', TrackAudio, [self, music_path])]]
         GameObjectMdt.__init__(self, init_lst, cb)
 
     def on_loading(self, txt):

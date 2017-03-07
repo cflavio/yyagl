@@ -7,19 +7,31 @@ from panda3d.core import LineSegs
 
 class TrackPhys(Phys):
 
-    def __init__(self, mdt):
+    def __init__(
+            self, mdt, path, unmerged, merged, ghosts, corner_names,
+            waypoint_names, show_waypoints, weapons, weapon_names, start):
         self.corners = None
         self.bonuses = []
         self.rigid_bodies = []
         self.ghosts = []
         self.nodes = []
+        self.path = path
+        self.unmerged = unmerged
+        self.merged = merged
+        self.ghost_names = ghosts
+        self.corner_names = corner_names
+        self.waypoint_names = waypoint_names
+        self.show_waypoints = show_waypoints
+        self.weapons = weapons
+        self.weapon_names = weapon_names
+        self.start = start
         Phys.__init__(self, mdt)
 
     def sync_build(self):
-        self.model = loader.loadModel(self.mdt.path + '/collision')
-        self.__load(['Road', 'Offroad'], False, False)
-        self.__load(['Wall'], True, False)
-        self.__load(['Goal', 'Slow', 'Respawn', 'PitStop'], True, True)
+        self.model = loader.loadModel(self.path)
+        self.__load(self.unmerged, False, False)
+        self.__load(self.merged, True, False)
+        self.__load(self.ghost_names, True, True)
         self.__set_corners()
         self.__set_waypoints()
         self.__set_weapons()
@@ -28,7 +40,7 @@ class TrackPhys(Phys):
     def __load(self, names, merged, ghost):
         for geom_name in names:
             eng.log_mgr.log('setting physics for: ' + geom_name)
-            geoms = eng.phys.find_geoms(self.model, geom_name)
+            geoms = eng.phys.find_geoms(self.model, geom_name)  # facade
             if geoms:
                 self.__process_meshes(geoms, geom_name, merged, ghost)
 
@@ -62,13 +74,13 @@ class TrackPhys(Phys):
     def __build(self, shape, geom_name, ghost):
         if ghost:
             ncls = BulletGhostNode
-            meth = eng.phys.world_phys.attachGhost
+            meth = eng.phys.world_phys.attachGhost  # facade
             lst = self.ghosts
         else:
             ncls = BulletRigidBodyNode
-            meth = eng.phys.world_phys.attachRigidBody
+            meth = eng.phys.world_phys.attachRigidBody  # facade
             lst = self.rigid_bodies
-        nodepath = eng.gfx.world_np.attachNewNode(ncls(geom_name))
+        nodepath = eng.gfx.world_np.attachNewNode(ncls(geom_name))  # facade
         self.nodes += [nodepath]
         nodepath.node().addShape(shape)
         meth(nodepath.node())
@@ -76,20 +88,19 @@ class TrackPhys(Phys):
         nodepath.node().notifyCollisions(True)
 
     def __set_corners(self):
-        corners = ['topleft', 'topright', 'bottomright', 'bottomleft']
         pmod = self.model
-        self.corners = [pmod.find('**/Minimap' + crn) for crn in corners]
+        self.corners = [pmod.find('**/' + crn) for crn in self.corner_names]
 
     def __set_waypoints(self):
-        wp_root = self.model.find('**/Waypoints')
-        _waypoints = wp_root.findAllMatches('**/Waypoint*')
+        wp_root = self.model.find('**/' + self.waypoint_names[0])
+        _waypoints = wp_root.findAllMatches('**/%s*' % self.waypoint_names[1])
         self.waypoints = {}
         for w_p in _waypoints:
-            wpstr = '**/Waypoint'
-            prevs = w_p.getTag('prev').split(',')
+            wpstr = '**/' + self.waypoint_names[1]
+            prevs = w_p.getTag(self.waypoint_names[2]).split(',')
             lst_wp = [wp_root.find(wpstr + idx) for idx in prevs]
             self.waypoints[w_p] = lst_wp
-        if not game.options['development']['show_waypoints']:
+        if not self.show_waypoints:
             return
         segs = LineSegs()
         for w_p in self.waypoints.keys():
@@ -103,24 +114,24 @@ class TrackPhys(Phys):
         self.bonuses += [Bonus(pos)]
 
     def __set_weapons(self):
-        if not game.options['development']['weapons']:
+        if not self.weapons:
             return
-        weap_root = self.model.find('**/Weaponboxs')
+        weap_root = self.model.find('**/' + self.weapon_names[0])
         if not weap_root:
             return
-        _weapons = weap_root.findAllMatches('**/EmptyWeaponboxAnim*')
+        _weapons = weap_root.findAllMatches('**/%s*' % self.weapon_names[1])
         for weap in _weapons:
             self.create_bonus(weap.get_pos())
 
     def __hide_models(self):
-        for mod in ['Road', 'Offroad', 'Wall', 'Respawn', 'Slow', 'Goal']:
+        for mod in self.unmerged + self.merged + self.ghost_names:
             models = self.model.findAllMatches('**/%s*' % mod)
             map(lambda mod: mod.hide(), models)
 
     def get_start_pos(self, i):
         start_pos = (0, 0, 0)
         start_pos_hpr = (0, 0, 0)
-        node_str = '**/Start' + str(i + 1)
+        node_str = '**/' + self.start + str(i + 1)
         start_pos_node = self.model.find(node_str)
         if start_pos_node:
             start_pos = start_pos_node.get_pos()
@@ -135,11 +146,11 @@ class TrackPhys(Phys):
     def destroy(self):
         self.model.removeNode()
         map(lambda chl: chl.remove_node(), self.nodes)
-        map(eng.phys.world_phys.remove_rigid_body, self.rigid_bodies)
-        map(eng.phys.world_phys.remove_ghost, self.ghosts)
+        map(eng.phys.world_phys.remove_rigid_body, self.rigid_bodies)  # facade
+        map(eng.phys.world_phys.remove_ghost, self.ghosts)  # facade
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
             self.waypoints = None
         map(lambda bon: bon.destroy(), self.bonuses)
-        if not game.options['development']['show_waypoints']:
+        if not self.show_waypoints:
             return
         self.wp_np.remove_node()

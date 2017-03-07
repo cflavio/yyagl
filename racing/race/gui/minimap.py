@@ -3,10 +3,10 @@ from direct.gui.OnscreenImage import OnscreenImage
 
 class Minimap(object):
 
-    def __init__(self, track, lrtb):
+    def __init__(self, track, lrtb, path, image, col_dct):
         self.lrtb = lrtb
         self.minimap = OnscreenImage(
-            'assets/images/minimaps/%s.png' % track, pos=(-.25, 1, .25),
+            '%s/%s.png' % (path, track), pos=(-.25, 1, .25),
             scale=.2, parent=eng.base.a2dBottomRight)
         self.minimap.setTransparency(True)
         self.minimap.setAlphaScale(.64)
@@ -17,14 +17,9 @@ class Minimap(object):
         for car_name in cars:
             scale = .015 if car_name == game.player_car_name else .01
             self.car_handles[car_name] = OnscreenImage(
-                'assets/images/minimaps/car_handle.png', pos=(-.25, 1, .25),
+                path + '/' + image, pos=(-.25, 1, .25),
                 scale=scale, parent=eng.base.a2dBottomRight)
-            col = {
-                'kronos': (0, 0, 1, 1),
-                'themis': (1, 0, 0, 1),
-                'diones': (1, 1, 1, 1),
-                'iapeto': (1, 1, 0, 1),
-                }[car_name]
+            col = col_dct[car_name]
             self.car_handles[car_name].set_color_scale(col)
         map(lambda car: car.setTransparency(True), self.car_handles.values())
         self.width = self.minimap.getScale()[0] * 2.0
