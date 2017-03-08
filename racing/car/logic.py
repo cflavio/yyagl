@@ -109,7 +109,7 @@ class AnalogicLogic(AbsLogic):
 
 class CarLogic(Logic):
 
-    def __init__(self, mdt, start_pos, start_pos_hpr):
+    def __init__(self, mdt, start_pos, start_pos_hpr, cam_vec):
         Logic.__init__(self, mdt)
         self.last_time_start = 0
         self.last_roll_ok_time = globalClock.getFrameTime()
@@ -275,9 +275,9 @@ class CarLogic(Logic):
 
 class CarPlayerLogic(CarLogic):
 
-    def __init__(self, mdt, start_pos, start_pos_hpr):
-        CarLogic.__init__(self, mdt, start_pos, start_pos_hpr)
-        self.camera = Camera(mdt)
+    def __init__(self, mdt, start_pos, start_pos_hpr, cam_vec):
+        CarLogic.__init__(self, mdt, start_pos, start_pos_hpr, cam_vec)
+        self.camera = Camera(mdt.gfx.nodepath, cam_vec)
 
     def update(self, input_dct):
         CarLogic.update(self, input_dct)
@@ -295,7 +295,12 @@ class CarPlayerLogic(CarLogic):
         self.mdt.gui.ranking_txt.setText(str(r_i) + "'")
 
     def fire(self):
+        self.weapon.logic.attach(self.on_weapon_destroyed)
         self.weapon.logic.fire()
+
+    def on_weapon_destroyed(self):
+        self.weapon.logic.detach(self.on_weapon_destroyed)
+        self.weapon = None
 
     @property
     def lap_time(self):

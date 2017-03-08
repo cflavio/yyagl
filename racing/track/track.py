@@ -12,7 +12,7 @@ class Track(GameObjectMdt):
             ghosts, corner_names, waypoint_names, show_waypoints, weapons,
             weapon_names, start, name, track_path, model_name, empty_name,
             anim_name, omni_tag, thanks, sign_name, camera_vec, shadow_src,
-            laps):
+            laps, bonus_name, bonus_suff):
         eng.log_mgr.log('init track')  # facade
         self.path = path
         self.camera_vector = camera_vec
@@ -21,7 +21,8 @@ class Track(GameObjectMdt):
         init_lst = [
             [('phys', TrackPhys, [
                 self, coll_path, unmerged, merged, ghosts, corner_names,
-                waypoint_names, show_waypoints, weapons, weapon_names, start]),
+                waypoint_names, show_waypoints, weapons, weapon_names, start,
+                bonus_name, bonus_suff]),
              ('gfx', TrackGfx, [
                  self, name, track_path, model_name, empty_name, anim_name,
                  omni_tag, shaders, thanks, sign_name],

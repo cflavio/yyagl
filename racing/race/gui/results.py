@@ -126,7 +126,7 @@ class Results(object):
                 for car in ranking.logic.ranking:
                     ranking.logic.ranking[car] += race_ranking[car]
                 game.options['save']['ranking'] = ranking.logic.ranking
-                game.options['save']['tuning'] = tuning.logic.tuning
+                game.options['save']['tuning'] = tuning.logic.tunings
                 game.options.store()
                 game.fsm.demand('Ranking')
             else:

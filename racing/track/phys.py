@@ -9,7 +9,8 @@ class TrackPhys(Phys):
 
     def __init__(
             self, mdt, path, unmerged, merged, ghosts, corner_names,
-            waypoint_names, show_waypoints, weapons, weapon_names, start):
+            waypoint_names, show_waypoints, weapons, weapon_names, start,
+            bonus_name, bonus_suff):
         self.corners = None
         self.bonuses = []
         self.rigid_bodies = []
@@ -25,6 +26,9 @@ class TrackPhys(Phys):
         self.weapons = weapons
         self.weapon_names = weapon_names
         self.start = start
+        self.generate_tsk = []
+        self.bonus_name = bonus_name
+        self.bonus_suff = bonus_suff
         Phys.__init__(self, mdt)
 
     def sync_build(self):
@@ -111,7 +115,14 @@ class TrackPhys(Phys):
         self.wp_np = render.attachNewNode(segs_node)
 
     def create_bonus(self, pos):
-        self.bonuses += [Bonus(pos)]
+        self.bonuses += [Bonus(pos, self.bonus_name, self.bonus_suff)]
+        self.bonuses[-1].event.attach(self.on_bonus_collected)
+
+    def on_bonus_collected(self, bonus):
+        bonus.event.detach(self.on_bonus_collected)
+        self.bonuses.remove(bonus)
+        cre = lambda tsk: self.create_bonus(bonus.phys.pos)
+        self.generate_tsk += [taskMgr.doMethodLater(20, cre, 'create bonus')]
 
     def __set_weapons(self):
         if not self.weapons:
@@ -154,3 +165,4 @@ class TrackPhys(Phys):
         if not self.show_waypoints:
             return
         self.wp_np.remove_node()
+        map(lambda tsk: taskMgr.remove_task, self.generate_tsk)

@@ -23,7 +23,8 @@ class RaceLogic(Logic):
             unmerged, merged, ghosts, corner_names, waypoint_names,
             show_waypoints, weapons, weapon_names, start, track_name,
             track_path, track_model_name, empty_name, anim_name, omni_tag,
-            thanks, sign_name, camera_vec, shadow_src, laps):
+            thanks, sign_name, camera_vec, shadow_src, laps, rocket_path,
+            bonus_name, bonus_suff):
         self.load_txt = None
         self.cam_tsk = None
         self.cam_node = None
@@ -76,6 +77,9 @@ class RaceLogic(Logic):
         self.camera_vec = camera_vec
         self.shadow_src = shadow_src
         self.laps = laps
+        self.rocket_path = rocket_path
+        self.bonus_name = bonus_name
+        self.bonus_suff = bonus_suff
         Logic.__init__(self, mdt)
 
     @staticmethod
@@ -122,7 +126,7 @@ class RaceLogic(Logic):
                     self.tuning_suspensions, self.road_name, self.base_path,
                     self.model_name, self.damage_paths, self.wheel_gfx_names,
                     self.particle_path, drv.logic.engine, drv.logic.tires,
-                    drv.logic.suspensions)
+                    drv.logic.suspensions, self.rocket_path, self.camera_vec)
                 game.cars += [new_car]
             s_p = game.track.phys.get_start_pos(grid.index(car_path))
             pos = s_p[0] + (0, 0, .2)
@@ -145,7 +149,8 @@ class RaceLogic(Logic):
                 self.tuning_engine, self.tuning_tires, self.tuning_suspensions,
                 self.road_name, self.base_path, self.model_name,
                 self.damage_paths, self.wheel_gfx_names, self.particle_path,
-                drv.logic.engine, drv.logic.tires, drv.logic.suspensions)
+                drv.logic.engine, drv.logic.tires, drv.logic.suspensions,
+                self.rocket_path, self.camera_vec)
             game.cars = []
         game.track = Track(
             track_path, load_car, self.shaders, self.music_path,
@@ -154,7 +159,8 @@ class RaceLogic(Logic):
             self.weapons, self.weapon_names, self.start_name, self.track_name,
             self.track_path, self.track_model_name, self.empty_name,
             self.anim_name, self.omni_tag, self.thanks, self.sign_name,
-            self.camera_vec, self.shadow_src, self.laps)
+            self.camera_vec, self.shadow_src, self.laps, self.bonus_name,
+            self.bonus_suff)
         self.mdt.track = game.track
 
     def enter_play(self):

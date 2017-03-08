@@ -6,11 +6,11 @@ from .gui import TuningGui
 
 class Tuning(GameObjectMdt):
     __metaclass__ = ABCMeta
-    logic_cls = TuningLogic
-    gui_cls = TuningGui
 
-    def __init__(self, init_lst=[]):
+    def __init__(self, cars, player_car, background, engine_img, tires_img,
+                 suspensions_img):
         init_lst = [
-            [('gui', self.gui_cls, [self])],
-            [('logic', self.logic_cls, [self])]]
+            [('gui', TuningGui, [self, player_car, background, engine_img,
+                                 tires_img, suspensions_img])],
+            [('logic', TuningLogic, [self, cars])]]
         GameObjectMdt.__init__(self, init_lst)

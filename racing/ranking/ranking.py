@@ -6,11 +6,9 @@ from .gui import RankingGui
 
 class Ranking(GameObjectMdt):
     __metaclass__ = ABCMeta
-    logic_cls = RankingLogic
-    gui_cls = RankingGui
 
-    def __init__(self, init_lst=[]):
+    def __init__(self, cars, background, font):
         init_lst = [
-            [('gui', self.gui_cls, [self])],
-            [('logic', self.logic_cls, [self])]]
+            [('gui', RankingGui, [self, background, font])],
+            [('logic', RankingLogic, [self, cars])]]
         GameObjectMdt.__init__(self, init_lst)

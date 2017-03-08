@@ -43,11 +43,12 @@ class InputDctBuilderJoystick(InputDctBuilder):
 
 class CarEvent(Event):
 
-    def __init__(self, mdt, keys, joystick):
+    def __init__(self, mdt, keys, joystick, rocket_path):
         Event.__init__(self, mdt)
         eng.phys.attach(self.on_collision)
         self.keys = keys
         self.joystick = joystick
+        self.rocket_path = rocket_path
         self.label_events = [
             ('forward', keys['forward']), ('left', keys['left']),
             ('reverse', keys['rear']), ('right', keys['right'])]
@@ -105,8 +106,8 @@ class CarEvent(Event):
 
 class CarPlayerEvent(CarEvent):
 
-    def __init__(self, mdt, keys, joystick):
-        CarEvent.__init__(self, mdt, keys, joystick)
+    def __init__(self, mdt, keys, joystick, rocket_path):
+        CarEvent.__init__(self, mdt, keys, joystick, rocket_path)
         self.accept('f11', self.mdt.gui.toggle)
         self.has_weapon = False
         self.crash_tsk = None
@@ -115,7 +116,8 @@ class CarPlayerEvent(CarEvent):
 
     def on_frame(self):
         CarEvent.on_frame(self)
-        self.mdt.logic.camera.update_cam()
+        self.mdt.logic.camera.update(self.mdt.phys.speed_ratio,
+                                     self.mdt.logic.is_rolling)
         self.mdt.audio.update(self._get_input())
 
     def on_collision(self, obj, obj_name):
@@ -133,12 +135,12 @@ class CarPlayerEvent(CarEvent):
 
     def on_bonus(self):
         if not self.mdt.logic.weapon:
-            self.mdt.logic.weapon = Rocket(self.mdt)
+            self.mdt.logic.weapon = Rocket(self.mdt, self.rocket_path)
             self.accept(self.keys['button'], self.on_fire)
             self.has_weapon = True
 
     def on_fire(self):
-        self.ignore(self.keys['button']['button'])
+        self.ignore(self.keys['button'])
         self.mdt.logic.fire()
         self.has_weapon = False
 

@@ -4,23 +4,23 @@ from direct.interval.LerpInterval import LerpHprInterval
 
 class RocketGfx(Gfx):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt, parent, path):
         self.gfx_np = None
+        self.parent = parent
+        self.path = path
         Gfx.__init__(self, mdt)
 
     def sync_build(self):
-        self.gfx_np = loader.loadModel('assets/models/weapons/rocket/rocket')
+        self.gfx_np = loader.loadModel(self.path)
         self.gfx_np.flattenLight()
-        self.gfx_np.reparentTo(self.mdt.car.gfx.nodepath)
+        self.gfx_np.reparentTo(self.parent)
         self.gfx_np.set_h(180)
         self.gfx_np.set_scale(1.5)
-        self.gfx_np.setPos(0, 0, 1.5)
+        self.gfx_np.set_pos(0, 0, 1.5)
         self.ival = LerpHprInterval(self.gfx_np, 3, (180, 0, 360), (180, 0, 0))
         self.ival.loop()
 
     def destroy(self):
-        self.gfx_np.remove_node()
-        self.gfx_np = None
-        self.ival.finish()
-        self.ival = None
+        self.gfx_np = self.gfx_np.remove_node()
+        self.parent = self.ival = self.ival.finish()
         Gfx.destroy(self)

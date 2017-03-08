@@ -9,5 +9,5 @@ class RocketLogic(Logic):
         taskMgr.doMethodLater(5, lambda tsk: self.mdt.destroy(), 'rocket')
 
     def destroy(self):
-        self.mdt.car.logic.weapon = None
+        self.notify('on_weapon_destroyed')
         Logic.destroy(self)

@@ -11,15 +11,10 @@ class Rocket(GameObjectMdt):
     audio_cls = RocketAudio
     logic_cls = RocketLogic
 
-    def __init__(self, car):
-        self.car = car
+    def __init__(self, car, path):
         init_lst = [
-            [('gfx', self.gfx_cls, [self])],
-            [('phys', self.phys_cls, [self])],
+            [('gfx', self.gfx_cls, [self, car.gfx.nodepath, path])],
+            [('phys', self.phys_cls, [self, car.gfx.nodepath])],
             [('audio', self.audio_cls, [self])],
             [('logic', self.logic_cls, [self])]]
         GameObjectMdt.__init__(self, init_lst)
-
-    def destroy(self):
-        GameObjectMdt.destroy(self)
-        self.car = None

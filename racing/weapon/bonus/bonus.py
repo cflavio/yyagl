@@ -9,8 +9,9 @@ class Bonus(GameObjectMdt):
     phys_cls = BonusPhys
     event_cls = BonusEvent
 
-    def __init__(self, pos):
-        init_lst = [[('gfx', self.gfx_cls, [self, pos])],
-                    [('event', self.event_cls, [self])],
-                    [('phys', self.phys_cls, [self, pos])]]
+    def __init__(self, pos, model_name, model_suff):
+        init_lst = [
+            [('gfx', self.gfx_cls, [self, pos, model_name, model_suff])],
+            [('event', self.event_cls, [self])],
+            [('phys', self.phys_cls, [self, pos])]]
         GameObjectMdt.__init__(self, init_lst)
