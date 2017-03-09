@@ -1,9 +1,9 @@
+from os.path import exists
+from panda3d.core import TextNode, Shader, TextureStage
 from direct.gui.OnscreenText import OnscreenText
+from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.engine.gui.page import Page, PageGui
 from yyagl.gameobject import Gui, GameObjectMdt
-from panda3d.core import TextNode, Shader, TextureStage
-from direct.gui.OnscreenImage import OnscreenImage
-import os
 
 
 vert = '''#version 130
@@ -193,7 +193,7 @@ class LoadingPageGui(PageGui):
     def set_first(self, track_path):
         vrs = eng.logic.version
         filename = track_path[7:] + '_' + vrs + '.bam'
-        if os.path.exists(filename):
+        if exists(filename):
             return
         first_txt = _(
             'We need to elaborate the track on your system (this process '

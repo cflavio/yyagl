@@ -8,7 +8,8 @@ from .minimap import Minimap
 
 class RaceGui(Gui):
 
-    def __init__(self, mdt, track, minimap_path, minimap_image, col_dct, font):
+    def __init__(self, mdt, track, minimap_path, minimap_image, col_dct, font,
+                 cars):
         Gui.__init__(self, mdt)
         self.results = Results()
         self.loading = Loading(mdt)
@@ -23,11 +24,12 @@ class RaceGui(Gui):
         self.minimap_path = minimap_path
         self.minimap_image = minimap_image
         self.col_dct = col_dct
+        self.cars = cars
 
     def start(self):
         self.minimap = Minimap(
             self.track, game.track.phys.lrtb, self.minimap_path,
-            self.minimap_image, self.col_dct)
+            self.minimap_image, self.col_dct, self.cars)
 
     def destroy(self):
         Gui.destroy(self)

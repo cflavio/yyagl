@@ -2,10 +2,11 @@ from yyagl.gameobject import Fsm
 from yyagl.racing.race.gui.countdown import Countdown
 
 
-class _Fsm(Fsm):
+class RaceFsm(Fsm):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt, shaders):
         self.countdown = None
+        self.shaders = shaders
         Fsm.__init__(self, mdt)
         self.defaultTransitions = {
             'Loading': ['Countdown'],
@@ -14,24 +15,24 @@ class _Fsm(Fsm):
 
     def enterLoading(self, track_path='', car_path='', player_cars=[],
                      drivers=None):
-        eng.log_mgr.log('entering Loading state')
+        eng.log_mgr.log('entering Loading state')  # facade
         args = [track_path, car_path, player_cars, drivers]
         self.mdt.gui.loading.enter_loading(*args)
         meth = self.mdt.logic.load_stuff
         taskMgr.doMethodLater(1.0, meth, 'loading', args[:-1])
 
     def exitLoading(self):
-        eng.log_mgr.log('exiting Loading state')
+        eng.log_mgr.log('exiting Loading state')  # facade
         self.mdt.gui.loading.exit_loading()
 
     def enterCountdown(self):
-        eng.gui.cursor.hide()
+        eng.gui.cursor.hide()  # facade
         self.countdown = Countdown()
         self.countdown.attach(self.on_start_race)
         self.mdt.logic.enter_play()
-        if game.options['development']['shaders']:
-            eng.shader_mgr.toggle_shader()
-        cars = [game.player_car] + game.cars
+        if self.shaders:
+            eng.shader_mgr.toggle_shader()  # facade
+        cars = [game.player_car] + game.cars  #references into race
         map(lambda car: car.fsm.demand('Countdown'), cars)
 
     def exitCountdown(self):
@@ -40,16 +41,16 @@ class _Fsm(Fsm):
 
     @staticmethod
     def enterPlay():
-        eng.log_mgr.log('entering Play state')
+        eng.log_mgr.log('entering Play state')  # facade
         map(lambda car: car.fsm.demand('Play'), [game.player_car] + game.cars)
 
     def on_start_race(self):
-        self.mdt.fsm.demand('Play')
+        self.demand('Play')
 
     @staticmethod
     def exitPlay():
-        eng.log_mgr.log('exiting Play state')
-        eng.gui.cursor.show()
+        eng.log_mgr.log('exiting Play state')  # facade
+        eng.gui.cursor.show()  # facade
 
     @staticmethod
     def enterResults(race_ranking):
@@ -59,5 +60,5 @@ class _Fsm(Fsm):
 
     def exitResults(self):
         self.mdt.logic.exit_play()
-        if game.options['development']['shaders']:
-            eng.shader_mgr.toggle_shader()
+        if self.shaders:
+            eng.shader_mgr.toggle_shader()  # facade

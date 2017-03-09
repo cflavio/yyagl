@@ -3,7 +3,7 @@ from direct.gui.OnscreenImage import OnscreenImage
 
 class Minimap(object):
 
-    def __init__(self, track, lrtb, path, image, col_dct):
+    def __init__(self, track, lrtb, path, image, col_dct, cars):
         self.lrtb = lrtb
         self.minimap = OnscreenImage(
             '%s/%s.png' % (path, track), pos=(-.25, 1, .25),
@@ -11,7 +11,7 @@ class Minimap(object):
         self.minimap.setTransparency(True)
         self.minimap.setAlphaScale(.64)
         self.car_handles = {}
-        cars = game.fsm.race.logic.cars[:]
+        cars = cars[:]
         cars.remove(game.player_car_name)
         cars += [game.player_car_name]
         for car_name in cars:

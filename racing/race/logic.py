@@ -12,19 +12,8 @@ class NetMsgs(object):
 
 class RaceLogic(Logic):
 
-    cars = ['kronos', 'themis', 'diones', 'iapeto']
-
     def __init__(
-            self, mdt, keys, joystick, sounds, color_main, color, font,
-            coll_path, coll_name, car_path, phys_file, wheel_names,
-            tuning_engine, tuning_tires, tuning_suspensions, road_name,
-            base_path, model_name, damage_paths, wheel_gfx_names,
-            particle_path, drivers, shaders, music_path, coll_track_path,
-            unmerged, merged, ghosts, corner_names, waypoint_names,
-            show_waypoints, weapons, weapon_names, start, track_name,
-            track_path, track_model_name, empty_name, anim_name, omni_tag,
-            thanks, sign_name, camera_vec, shadow_src, laps, rocket_path,
-            bonus_name, bonus_suff):
+            self, mdt, race_props):
         self.load_txt = None
         self.cam_tsk = None
         self.cam_node = None
@@ -33,106 +22,52 @@ class RaceLogic(Logic):
         self.ready_clients = None
         self.preview = None
         self.curr_load_txt = None
-        self.keys = keys
-        self.joystick = joystick
-        self.sounds = sounds
-        self.color_main = color_main
-        self.color = color
-        self.font = font
-        self.car_path = car_path
-        self.coll_path = coll_path
-        self.coll_name = coll_name
-        self.phys_file = phys_file
-        self.wheel_names = wheel_names
-        self.tuning_engine = tuning_engine
-        self.tuning_tires = tuning_tires
-        self.tuning_suspensions = tuning_suspensions
-        self.road_name = road_name
-        self.base_path = base_path
-        self.model_name = model_name
-        self.damage_paths = damage_paths
-        self.wheel_gfx_names = wheel_gfx_names
-        self.particle_path = particle_path
-        self.drivers_dct = drivers
-        self.shaders = shaders
-        self.music_path = music_path
-        self.coll_track_path = coll_track_path
-        self.unmerged = unmerged
-        self.merged = merged
-        self.ghosts = ghosts
-        self.corner_names = corner_names
-        self.waypoint_names = waypoint_names
-        self.show_waypoints = show_waypoints
-        self.weapons = weapons
-        self.weapon_names = weapon_names
-        self.start_name = start
-        self.track_name = track_name
-        self.track_path = track_path
-        self.track_model_name = track_model_name
-        self.empty_name = empty_name
-        self.anim_name = anim_name
-        self.omni_tag = omni_tag
-        self.thanks = thanks
-        self.sign_name = sign_name
-        self.camera_vec = camera_vec
-        self.shadow_src = shadow_src
-        self.laps = laps
-        self.rocket_path = rocket_path
-        self.bonus_name = bonus_name
-        self.bonus_suff = bonus_suff
+        self.race_props = race_props
         Logic.__init__(self, mdt)
 
-    @staticmethod
-    def start():
-        game.fsm.demand('Race')
-
     def load_stuff(self, track_path, car_path, player_cars):
+        r_p = self.race_props
         eng.phys.init()
         player_cars = player_cars[1::2]
-        dev = game.options['development']
         game.player_car_name = car_path
 
         def load_car():
-            cars = RaceLogic.cars[:]
-            grid = ['kronos', 'themis', 'diones', 'iapeto']
+            cars = r_p.cars[:]
+            grid = ['kronos', 'themis', 'diones', 'iapeto']  # pass the grid
             cars.remove(car_path)
-            ai = dev['ai']
 
             def load_other_cars():
                 if not cars:
-                    game.fsm.race.fsm.demand('Countdown')
+                    self.mdt.fsm.demand('Countdown')
                     return
-                car = cars[0]
-                cars.remove(car)
+                car = cars.pop(0)
                 car_class = Car
                 if eng.server.is_active:
                     car_class = NetworkCar  # if car in player_cars else Car
                 if eng.client.is_active:
                     car_class = NetworkCar
                 s_p = game.track.phys.get_start_pos(grid.index(car))
-                pos = s_p[0] + (0, 0, .2)
-                hpr = s_p[1]
+                pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
                 func = load_other_cars
                 no_p = car not in player_cars
                 srv_or_sng = eng.server.is_active or not eng.client.is_active
                 car_class = AiCar if no_p and srv_or_sng else car_class
-                drv = self.drivers_dct[car]
+                drv = r_p.drivers[car]
                 new_car = car_class(
-                    car, self.coll_path, self.coll_name, pos, hpr, func,
-                    self.mdt, game.track.laps, self.keys, self.joystick,
-                    self.sounds, self.color_main, self.color, self.font,
-                    self.car_path, self.phys_file, self.wheel_names,
-                    self.tuning_engine, self.tuning_tires,
-                    self.tuning_suspensions, self.road_name, self.base_path,
-                    self.model_name, self.damage_paths, self.wheel_gfx_names,
-                    self.particle_path, drv.logic.engine, drv.logic.tires,
-                    drv.logic.suspensions, self.rocket_path, self.camera_vec)
+                    car, r_p.coll_path, r_p.coll_name, pos, hpr, func,
+                    self.mdt, game.track.laps, r_p.keys, r_p.joystick,
+                    r_p.sounds, r_p.color_main, r_p.color, r_p.font,
+                    r_p.car_path, r_p.phys_file, r_p.wheel_names,
+                    r_p.tuning_engine, r_p.tuning_tires,
+                    r_p.tuning_suspensions, r_p.road_name, r_p.base_path,
+                    r_p.model_name, r_p.damage_paths, r_p.wheel_gfx_names,
+                    r_p.particle_path, drv.logic.engine, drv.logic.tires,
+                    drv.logic.suspensions, r_p.rocket_path, r_p.camera_vec)
                 game.cars += [new_car]
             s_p = game.track.phys.get_start_pos(grid.index(car_path))
-            pos = s_p[0] + (0, 0, .2)
-            hpr = s_p[1]
+            pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
             func = load_other_cars
-            if ai:
+            if self.race_props.ai:
                 car_cls = AiCar
             else:
                 car_cls = PlayerCar
@@ -140,30 +75,31 @@ class RaceLogic(Logic):
                     car_cls = PlayerCarServer
                 if eng.client.is_active:
                     car_cls = PlayerCarClient
-            drv = self.drivers_dct[car_path]
+            drv = r_p.drivers[car_path]
             game.player_car = car_cls(
-                car_path, self.coll_path, self.coll_name, pos, hpr, func,
-                self.mdt, game.track.laps, self.keys, self.joystick,
-                self.sounds, self.color_main, self.color, self.font,
-                self.car_path, self.phys_file, self.wheel_names,
-                self.tuning_engine, self.tuning_tires, self.tuning_suspensions,
-                self.road_name, self.base_path, self.model_name,
-                self.damage_paths, self.wheel_gfx_names, self.particle_path,
+                car_path, r_p.coll_path, r_p.coll_name, pos, hpr, func,
+                self.mdt, game.track.laps, r_p.keys, r_p.joystick,
+                r_p.sounds, r_p.color_main, r_p.color, r_p.font,
+                r_p.car_path, r_p.phys_file, r_p.wheel_names,
+                r_p.tuning_engine, r_p.tuning_tires, r_p.tuning_suspensions,
+                r_p.road_name, r_p.base_path, r_p.model_name,
+                r_p.damage_paths, r_p.wheel_gfx_names, r_p.particle_path,
                 drv.logic.engine, drv.logic.tires, drv.logic.suspensions,
-                self.rocket_path, self.camera_vec)
+                r_p.rocket_path, r_p.camera_vec)
             game.cars = []
         game.track = Track(
-            track_path, load_car, self.shaders, self.music_path,
-            self.coll_track_path, self.unmerged, self.merged, self.ghosts,
-            self.corner_names, self.waypoint_names, self.show_waypoints,
-            self.weapons, self.weapon_names, self.start_name, self.track_name,
-            self.track_path, self.track_model_name, self.empty_name,
-            self.anim_name, self.omni_tag, self.thanks, self.sign_name,
-            self.camera_vec, self.shadow_src, self.laps, self.bonus_name,
-            self.bonus_suff)
+            track_path, load_car, r_p.shaders, r_p.music_path,
+            r_p.coll_track_path, r_p.unmerged, r_p.merged, r_p.ghosts,
+            r_p.corner_names, r_p.waypoint_names, r_p.show_waypoints,
+            r_p.weapons, r_p.weapon_names, r_p.start, r_p.track_name,
+            r_p.track_path, r_p.track_model_name, r_p.empty_name,
+            r_p.anim_name, r_p.omni_tag, r_p.thanks, r_p.sign_name,
+            r_p.camera_vec, r_p.shadow_src, r_p.laps, r_p.bonus_name,
+            r_p.bonus_suff)
         self.mdt.track = game.track
 
     def enter_play(self):
+        # race must have ref to these
         game.track.gfx.model.reparentTo(eng.gfx.world_np)
         game.player_car.gfx.reparent()
         map(lambda car: car.gfx.reparent(), game.cars)
@@ -172,6 +108,7 @@ class RaceLogic(Logic):
         eng.phys.start()
         eng.event.attach(self.on_frame)
         self.mdt.event.network_register()
+        # race must have ref to these
         game.player_car.logic.attach(self.mdt.event.on_wrong_way)
         game.track.audio.music.play()
         cars = [game.player_car] + game.cars
@@ -180,15 +117,16 @@ class RaceLogic(Logic):
         self.mdt.gui.start()
 
     def on_frame(self):
+        # race must have ref to these
         game.track.event.update(game.player_car.gfx.nodepath.get_pos())
         cars = [game.player_car] + game.cars
         positions = [(car.name, car.gfx.nodepath.get_pos())
                      for car in cars]
-        game.fsm.race.gui.minimap.update(positions)
+        self.mdt.gui.minimap.update(positions)
 
     @staticmethod
     def ranking():
-        cars = [game.player_car] + game.cars
+        cars = [game.player_car] + game.cars  # race must have ref to these
         info = []
         for car in cars:
             past_wp = car.logic.closest_wp()[0].get_pos()
@@ -201,6 +139,7 @@ class RaceLogic(Logic):
         return [car[0] for car in reversed(by_laps)]
 
     def exit_play(self):
+        # race must have ref to these
         game.track.audio.music.stop()
         game.player_car.logic.detach(self.mdt.event.on_wrong_way)
         game.track.destroy()

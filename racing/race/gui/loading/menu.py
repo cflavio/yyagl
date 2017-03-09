@@ -26,6 +26,7 @@ class _Gui(Gui):
 
 class LoadingMenu(Menu):
     gui_cls = _Gui
+    # move to the game level
 
     def __init__(self, loading, track_path='', car_path='', player_cars=[],
                  drivers=None):
