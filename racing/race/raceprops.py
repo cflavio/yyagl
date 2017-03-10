@@ -10,7 +10,8 @@ class RaceProps(object):
             weapon_names, start, track_name, track_path, track_model_name,
             empty_name, anim_name, omni_tag, thanks, sign_name, minimap_path,
             minimap_image, col_dct, camera_vec, shadow_src, laps, rocket_path,
-            bonus_name, bonus_suff, cars, ai, ingame_menu):
+            bonus_name, bonus_suff, cars, ai, ingame_menu, menu_args,
+            drivers_img, cars_imgs, share_urls, share_imgs):
         self.keys = keys
         self.joystick = joystick
         self.sounds = sounds
@@ -64,3 +65,8 @@ class RaceProps(object):
         self.cars = cars
         self.ai = ai
         self.ingame_menu = ingame_menu
+        self.menu_args = menu_args
+        self.drivers_img = drivers_img
+        self.cars_imgs = cars_imgs
+        self.share_urls = share_urls
+        self.share_imgs = share_imgs

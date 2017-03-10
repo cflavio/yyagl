@@ -1,20 +1,9 @@
 from panda3d.core import TextNode, Shader, TextureStage
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText import OnscreenText
-from yyagl.engine.gui.imgbtn import ImageButton
 from direct.gui.DirectFrame import DirectFrame
-
-
-vert = '''#version 130
-in vec4 p3d_Vertex;
-in vec2 p3d_MultiTexCoord0;
-uniform mat4 p3d_ModelViewProjectionMatrix;
-out vec2 texcoord;
-
-void main() {
-    gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;
-    texcoord = p3d_MultiTexCoord0;
-}'''
+from yyagl.engine.gui.imgbtn import ImageButton
+from yyagl.observer import Subject
 
 
 frag = '''#version 130
@@ -36,21 +25,29 @@ void main() {
 }'''
 
 
-class Results(object):
+class Results(Subject):
 
-    def __init__(self):
+    def __init__(self, menu_args, drivers_imgs, cars_imgs, share_urls,
+                 share_imgs):
+        Subject.__init__(self)
         self.__res_txts = []
         self.__buttons = []
         self.result_frm = None
+        self.menu_args = menu_args
+        self.drivers_img = drivers_imgs
+        self.cars_imgs = cars_imgs
+        self.share_urls = share_urls
+        self.share_imgs = share_imgs
 
     def show(self, race_ranking):
-        track = game.track.path
+        track = game.track.path  # ref into race
         self.result_frm = DirectFrame(
             frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
         # race object invokes this
-        laps = len(game.player_car.logic.lap_times)
-        pars = {'scale': .1, 'fg': (.75, .75, .75, 1),
-                'font': eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf')}
+        laps = len(game.player_car.logic.lap_times)  # ref into race
+        pars = {'scale': .1, 'fg': self.menu_args.text_bg,
+                'font': self.menu_args.font}
+        # ref into race
         self.__res_txts = [OnscreenText(
             str(round(game.player_car.logic.lap_times[i], 2)),
             pos=(0, .47 - .2 * (i + 1)), **pars)
@@ -64,27 +61,25 @@ class Results(object):
             for i in range(1, 4)]
         race_ranking_sorted = sorted(race_ranking.items(), key=lambda x: x[1])
         race_ranking_sorted = reversed([el[0] for el in race_ranking_sorted])
-
-        def get_driver(car):
-            for driver in game.fsm.race.logic.drivers:
-                if driver[2] == car:
-                    return driver
+        drvs = game.fsm.race.logic.drivers
         for i, car in enumerate(race_ranking_sorted):
-            idx, name, _car = get_driver(car)
+            idx, name, _car = next(drv for drv in drvs if drv[2] == car)
             is_car = car == game.player_car.path[5:]
+            fgc = self.menu_args.text_fg if is_car else self.menu_args.text_bg
             txt = OnscreenText(
                 text=str(i + 1) + '. ' + name, align=TextNode.A_left,
                 scale=.072, pos=(.68, .44 - .16 * (i + 1)),
-                font=eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf'),
-                fg=(.75, .75, .25, 1) if is_car else (.75, .75, .75, 1))
-            img = OnscreenImage('assets/images/cars/%s_sel.png' % car,
+                font=self.menu_args.font, fg=fgc)
+            img = OnscreenImage(self.cars_imgs % car,
                                 pos=(.58, 1, .47 - (i + 1) * .16), scale=.074)
+            with open('yyagl/assets/shaders/filter.vert') as f:
+                vert = f.read()
             shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)
             img.setTransparency(True)
             ts = TextureStage('ts')
             ts.setMode(TextureStage.MDecal)
-            txt_path = 'assets/images/drivers/driver%s_sel.png' % idx
+            txt_path = self.drivers_img % idx
             img.setTexture(ts, loader.loadTexture(txt_path))
             self.__res_txts += [txt, img]
         self.__res_txts += [
@@ -93,16 +88,13 @@ class Results(object):
         self.__buttons = []
 
         curr_time = min(game.player_car.logic.lap_times or [0])
-        facebook_url = \
-            'https://www.facebook.com/sharer/sharer.php?u=ya2.it/yorg'
+        facebook_url = self.share_urls[0]
         #TODO: find a way to share the time on Facebook
-        twitter_url = 'https://twitter.com/share?text=' + \
-            'I%27ve%20achieved%20{time}%20in%20the%20{track}%20track%20on' + \
-            '%20Yorg%20by%20%40ya2tech%21&hashtags=yorg'
+        twitter_url = self.share_urls[1]
         twitter_url = twitter_url.format(time=curr_time, track=track)
-        plus_url = 'https://plus.google.com/share?url=ya2.it/yorg'
+        plus_url = self.share_urls[2]
         #TODO: find a way to share the time on Google Plus
-        tumblr_url = 'https://www.tumblr.com/widgets/share/tool?url=ya2.it'
+        tumblr_url = self.share_urls[3]
         #TODO: find a way to share the time on Tumblr
         sites = [('facebook', facebook_url), ('twitter', twitter_url),
                  ('google_plus', plus_url), ('tumblr', tumblr_url)]
@@ -110,27 +102,16 @@ class Results(object):
             ImageButton(
                 scale=.078,
                 pos=(.02 + i*.18, 1, -.79), frameColor=(0, 0, 0, 0),
-                image='assets/images/icons/%s_png.png' % site[0],
+                image=self.share_imgs % site[0],
                 command=eng.gui.open_browser, extraArgs=[site[1]],
-                rolloverSound=loader.loadSfx('assets/sfx/menu_over.wav'),
-                clickSound=loader.loadSfx('assets/sfx/menu_clicked.ogg'))
+                rolloverSound=self.menu_args.rollover,
+                clickSound=self.menu_args.click)
             for i, site in enumerate(sites)]
 
         def step():
+            self.notify('on_race_step', race_ranking)
             self.destroy()
-            #TODO: notify and manage into yorg's fsm
-            ranking = game.logic.season.logic.ranking
-            tuning = game.logic.season.logic.tuning
-            from yyagl.racing.season.season import SingleRaceSeason
-            if game.logic.season.__class__ != SingleRaceSeason:
-                for car in ranking.logic.ranking:
-                    ranking.logic.ranking[car] += race_ranking[car]
-                game.options['save']['ranking'] = ranking.logic.ranking
-                game.options['save']['tuning'] = tuning.logic.tunings
-                game.options.store()
-                game.fsm.demand('Ranking')
-            else:
-                game.fsm.demand('Menu')
+            Subject.destroy(self)
         self.tsk = taskMgr.doMethodLater(10.0, lambda tsk: step(), 'step')
 
     def destroy(self):
@@ -141,5 +122,4 @@ class Results(object):
         map(lambda txt: txt.destroy(), self.__res_txts)
         map(lambda btn: btn.destroy(), self.__buttons)
         self.result_frm.destroy()
-        taskMgr.remove(self.tsk)
-        self.tsk = None
+        self.tsk = taskMgr.remove(self.tsk)

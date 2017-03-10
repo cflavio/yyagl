@@ -3,21 +3,21 @@ from direct.gui.OnscreenImage import OnscreenImage
 
 class Minimap(object):
 
-    def __init__(self, track, lrtb, path, image, col_dct, cars):
+    def __init__(self, lrtb, track_img, handle_img, col_dct, cars):
         self.lrtb = lrtb
         self.minimap = OnscreenImage(
-            '%s/%s.png' % (path, track), pos=(-.25, 1, .25),
+            track_img, pos=(-.25, 1, .25),
             scale=.2, parent=eng.base.a2dBottomRight)
         self.minimap.setTransparency(True)
         self.minimap.setAlphaScale(.64)
         self.car_handles = {}
         cars = cars[:]
-        cars.remove(game.player_car_name)
+        cars.remove(game.player_car_name)  # ref into race
         cars += [game.player_car_name]
         for car_name in cars:
             scale = .015 if car_name == game.player_car_name else .01
             self.car_handles[car_name] = OnscreenImage(
-                path + '/' + image, pos=(-.25, 1, .25),
+                handle_img, pos=(-.25, 1, .25),
                 scale=scale, parent=eng.base.a2dBottomRight)
             col = col_dct[car_name]
             self.car_handles[car_name].set_color_scale(col)

@@ -8,10 +8,12 @@ from .minimap import Minimap
 
 class RaceGui(Gui):
 
-    def __init__(self, mdt, track, minimap_path, minimap_image, col_dct, font,
-                 cars):
+    def __init__(
+            self, mdt, minimap_img, minimap_handle, col_dct, font, cars,
+            menu_args, drivers_img, cars_imgs, share_urls, share_imgs):
         Gui.__init__(self, mdt)
-        self.results = Results()
+        self.results = Results(menu_args, drivers_img, cars_imgs, share_urls,
+                               share_imgs)
         self.loading = Loading(mdt)
         self.debug_txt = OnscreenText(
             '', pos=(-.1, .1), scale=.05, fg=(1, 1, 1, 1),
@@ -20,16 +22,16 @@ class RaceGui(Gui):
             '', pos=(.1, .1), scale=.1, fg=(.75, .25, .25, 1),
             parent=eng.base.a2dBottomLeft, align=TextNode.ALeft,
             font=eng.font_mgr.load_font(font))
-        self.track = track
-        self.minimap_path = minimap_path
-        self.minimap_image = minimap_image
+        self.minimap_img = minimap_img
+        self.minimap_handle = minimap_handle
         self.col_dct = col_dct
         self.cars = cars
 
     def start(self):
+        # track's ref into race
         self.minimap = Minimap(
-            self.track, game.track.phys.lrtb, self.minimap_path,
-            self.minimap_image, self.col_dct, self.cars)
+            game.track.phys.lrtb, self.minimap_img, self.minimap_handle,
+            self.col_dct, self.cars)
 
     def destroy(self):
         Gui.destroy(self)

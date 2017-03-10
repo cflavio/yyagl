@@ -23,7 +23,8 @@ class PageGui(Gui):
         self.build_page()
         self.update_texts()
         self.curr_wdg = self.get_next_widget((-.1, 0, -1), (-3.6, 1, 1))
-        self.curr_wdg.on_wdg_enter()
+        if self.curr_wdg:
+            self.curr_wdg.on_wdg_enter()
 
     def build_page(self, back_btn=True):
         if back_btn:

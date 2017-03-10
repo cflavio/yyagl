@@ -4,9 +4,9 @@ from yyagl.observer import Subject
 
 class Countdown(Subject):
 
-    def __init__(self):
+    def __init__(self, countdown_sfx, font):
         Subject.__init__(self)
-        self.countdown_sfx = loader.loadSfx('assets/sfx/countdown.ogg')
+        self.countdown_sfx = loader.loadSfx(countdown_sfx)
         self.__countdown_txt = OnscreenText(
             '', pos=(0, 0), scale=.2, fg=(1, 1, 1, 1),
             font=eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf'))
@@ -26,6 +26,5 @@ class Countdown(Subject):
 
     def destroy(self):
         Subject.destroy(self)
-        taskMgr.remove(self.tsk)
-        self.tsk = None
+        self.tsk = taskMgr.remove(self.tsk)
         self.__countdown_txt.destroy()

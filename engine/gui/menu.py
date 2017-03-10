@@ -5,10 +5,11 @@ from ...gameobject import Gui, Logic, GameObjectMdt
 
 class MenuArgs(object):
 
-    def __init__(self, font, text_fg, text_scale, btn_size, btn_color,
-                 background, rollover, click, social_path):
+    def __init__(self, font, text_fg, text_bg, text_scale, btn_size,
+                 btn_color, background, rollover, click, social_path):
         self.font = eng.font_mgr.load_font(font)
         self.text_fg = text_fg
+        self.text_bg = text_bg
         self.text_scale = text_scale
         self.btn_size = btn_size
         self.btn_color = btn_color

@@ -17,8 +17,9 @@ class Race(GameObjectMdt):
         init_lst = [
             [('fsm', RaceFsm, [self, race_props.shaders])],
             [('gui', RaceGui, [
-                self, r_p.track_name, r_p.minimap_path, r_p.minimap_image,
-                r_p.col_dct, r_p.font, r_p.cars])],
+                self, r_p.minimap_path, r_p.minimap_image, r_p.col_dct,
+                r_p.font, r_p.cars, r_p.menu_args, r_p.drivers_img,
+                r_p.cars_imgs, r_p.share_urls, r_p.share_imgs])],
             [('logic', self.logic_cls, [self, race_props])],
             [('event', self.event_cls, [self, race_props.ingame_menu])]]
         GameObjectMdt.__init__(self, init_lst)
