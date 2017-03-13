@@ -1,15 +1,26 @@
+from math import sin, cos
 from panda3d.core import Vec3, Vec2, deg2Rad
 from yyagl.gameobject import Logic
 from yyagl.racing.camera import Camera
-import math
+
+
+class CarLogicProps:
+
+    def __init__(self, start_pos, start_pos_hpr, cam_vec, joystick,
+                 track_waypoints):
+        self.start_pos = start_pos
+        self.start_pos_hpr = start_pos_hpr
+        self.cam_vec = cam_vec
+        self.joystick = joystick
+        self.track_waypoints = track_waypoints
 
 
 class AbsLogic(object):
+    # perhaps a mixin? a visitor?
 
     @staticmethod
-    def build(cls, phys):
-        not_j = not game.options['settings']['joystick']
-        if not_j or cls != CarPlayerLogic:
+    def build(is_player, joystick, phys):
+        if not joystick or not is_player:
             return DiscreteLogic(phys)
         else:
             return AnalogicLogic(phys)
@@ -109,8 +120,9 @@ class AnalogicLogic(AbsLogic):
 
 class CarLogic(Logic):
 
-    def __init__(self, mdt, start_pos, start_pos_hpr, cam_vec):
+    def __init__(self, mdt, carlogic_props):
         Logic.__init__(self, mdt)
+        self.props = carlogic_props
         self.last_time_start = 0
         self.last_roll_ok_time = globalClock.getFrameTime()
         self.last_roll_ko_time = globalClock.getFrameTime()
@@ -119,10 +131,11 @@ class CarLogic(Logic):
         self.start_right = None
         self.waypoints = []  # collected waypoints for validating laps
         self.weapon = None
-        self.input_logic = AbsLogic.build(self.__class__, self.mdt.phys)
-        self.start_pos = start_pos
-        self.start_pos_hpr = start_pos_hpr
-        eng.event.attach(self.on_start_frame)
+        self.input_logic = AbsLogic.build(self.__class__ == CarPlayerLogic,
+                                          self.props.joystick, self.mdt.phys)
+        self.start_pos = carlogic_props.start_pos
+        self.start_pos_hpr = carlogic_props.start_pos_hpr
+        eng.attach_obs(self.on_start_frame)
 
     def update(self, input_dct):
         phys = self.mdt.phys
@@ -161,7 +174,7 @@ class CarLogic(Logic):
         if self.__start_wp:  # do a decorator @once_per_frame
             return self.__start_wp, self.__end_wp
         node = self.mdt.gfx.nodepath
-        waypoints = game.track.phys.waypoints
+        waypoints = self.props.track_waypoints
         distances = [node.getDistance(wp) for wp in waypoints.keys()]
         curr_wp = waypoints.keys()[distances.index(min(distances))]
         may_prev = waypoints[curr_wp]
@@ -187,7 +200,7 @@ class CarLogic(Logic):
         return start_wp, end_wp
 
     def update_waypoints(self):
-        closest_wp = int(self.closest_wp()[0].get_name()[8:])
+        closest_wp = int(self.closest_wp()[0].get_name()[8:])  # WaypointX
         if closest_wp not in self.waypoints:
             self.waypoints += [closest_wp]
 
@@ -195,32 +208,34 @@ class CarLogic(Logic):
         self.waypoints = []
 
     def __fork_wp(self):
+        wps = self.props.track_waypoints
         in_forks = []
         start_forks = []
-        for w_p in game.track.phys.waypoints:
-            if len(game.track.phys.waypoints[w_p]) > 1:
+        for w_p in wps:
+            if len(wps[w_p]) > 1:
                 start_forks += [w_p]
         end_forks = []
-        for w_p in game.track.phys.waypoints:
+        for w_p in wps:
             count_parents = 0
-            for w_p1 in game.track.phys.waypoints:
-                if w_p in game.track.phys.waypoints[w_p1]:
+            for w_p1 in wps:
+                if w_p in wps[w_p1]:
                     count_parents += 1
             if count_parents > 1:
                 end_forks += [w_p]
         for w_p in start_forks:
-            to_process = game.track.phys.waypoints[w_p][:]
+            to_process = wps[w_p][:]
             while to_process:
                 first_wp = to_process.pop(0)
                 in_forks += [first_wp]
-                for w_p2 in game.track.phys.waypoints[first_wp]:
+                for w_p2 in wps[first_wp]:
                     if w_p2 not in end_forks:
                         to_process += [w_p2]
         return in_forks
 
     @property
     def correct_lap(self):
-        all_wp = [int(w_p.get_name()[8:]) for w_p in game.track.phys.waypoints]
+        wps = self.props.track_waypoints
+        all_wp = [int(w_p.get_name()[8:]) for w_p in wps]
         f_wp = [int(w_p.get_name()[8:]) for w_p in self.__fork_wp()]
         map(all_wp.remove, f_wp)
         is_correct = all(w_p in self.waypoints for w_p in all_wp)
@@ -239,7 +254,7 @@ class CarLogic(Logic):
     @property
     def car_vec(self):
         car_rad = deg2Rad(self.mdt.gfx.nodepath.getH())
-        car_vec = Vec3(-math.sin(car_rad), math.cos(car_rad), 0)
+        car_vec = Vec3(-sin(car_rad), cos(car_rad), 0)
         car_vec.normalize()
         return car_vec
 
@@ -269,15 +284,15 @@ class CarLogic(Logic):
         self.camera = None
         if self.weapon:
             self.weapon = self.weapon.destroy()
-        eng.event.detach(self.on_start_frame)
+        eng.detach_obs(self.on_start_frame)
         Logic.destroy(self)
 
 
 class CarPlayerLogic(CarLogic):
 
-    def __init__(self, mdt, start_pos, start_pos_hpr, cam_vec):
-        CarLogic.__init__(self, mdt, start_pos, start_pos_hpr, cam_vec)
-        self.camera = Camera(mdt.gfx.nodepath, cam_vec)
+    def __init__(self, mdt, carlogic_props):
+        CarLogic.__init__(self, mdt, carlogic_props)
+        self.camera = Camera(mdt.gfx.nodepath, carlogic_props.cam_vec)
 
     def update(self, input_dct):
         CarLogic.update(self, input_dct)
@@ -290,16 +305,16 @@ class CarPlayerLogic(CarLogic):
         if self.last_time_start:
             self.mdt.gui.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__check_wrong_way()
-        ranking = game.fsm.race.logic.ranking()
+        ranking = game.fsm.race.logic.ranking()  # move this to race
         r_i = ranking.index(self.mdt.name) + 1
         self.mdt.gui.ranking_txt.setText(str(r_i) + "'")
 
     def fire(self):
-        self.weapon.logic.attach(self.on_weapon_destroyed)
-        self.weapon.logic.fire()
+        self.weapon.attach_obs(self.on_weapon_destroyed)
+        self.weapon.fire()
 
     def on_weapon_destroyed(self):
-        self.weapon.logic.detach(self.on_weapon_destroyed)
+        self.weapon.detach_obs(self.on_weapon_destroyed)
         self.weapon = None
 
     @property
@@ -307,6 +322,6 @@ class CarPlayerLogic(CarLogic):
         return globalClock.getFrameTime() - self.last_time_start
 
     def __check_wrong_way(self):
-        if game.track.phys.waypoints:
+        if self.props.track_waypoints:
             way_str = _('wrong way') if self.direction < -.6 else ''
             self.notify('on_wrong_way', way_str)

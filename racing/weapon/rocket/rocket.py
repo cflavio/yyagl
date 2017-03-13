@@ -5,7 +5,19 @@ from .audio import RocketAudio
 from .logic import RocketLogic
 
 
-class Rocket(GameObjectMdt):
+class RocketFacade:
+
+    def attach_obs(self, meth):
+        return self.logic.attach(meth)
+
+    def detach_obs(self, meth):
+        return self.logic.detach(meth)
+
+    def fire(self):
+        return self.logic.fire()
+
+
+class Rocket(GameObjectMdt, RocketFacade):
     gfx_cls = RocketGfx
     phys_cls = RocketPhys
     audio_cls = RocketAudio

@@ -181,7 +181,7 @@ class CarPlayerGui(CarGui):
         self.damages_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
 
     def apply_damage(self, reset=False):
-        col = self.color
+        col = self.cargui_props.color
         if reset:
             self.damages_txt['text'] = '-'
             self.damages_txt['fg'] = col

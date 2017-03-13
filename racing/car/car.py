@@ -4,7 +4,7 @@ from .gfx import CarGfx
 from .phys import CarPhys, CarPlayerPhys
 from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
     CarPlayerEventClient, CarNetworkEvent, CarAiEvent
-from .logic import CarLogic, CarPlayerLogic
+from .logic import CarLogic, CarPlayerLogic, CarLogicProps
 from .audio import CarAudio, CarAudioProps
 from .gui import CarGui, CarPlayerGui, CarGuiProps
 from .ai import CarAi
@@ -26,7 +26,7 @@ class Car(GameObjectMdt):
             wheel_names, tuning_engine, tuning_tires, tuning_suspensions,
             road_name, base_path, model_name, damage_paths, wheel_gfx_names,
             particle_path, driver_engine, driver_tires, driver_suspensions,
-            rocket_path, cam_vec):
+            rocket_path, cam_vec, track_waypoints):
         eng.log_mgr.log('init car ' + name)  # two params: path and name
         self.pos = pos
         self.hpr = hpr
@@ -39,6 +39,8 @@ class Car(GameObjectMdt):
         audio_props = CarAudioProps(
             sounds['engine'], sounds['brake'], sounds['crash'],
             sounds['crash_hs'], sounds['lap'], sounds['landing'])
+        carlogic_props = CarLogicProps(self.pos, self.hpr, cam_vec, joystick,
+                                       track_waypoints)
         init_lst = [
             [('fsm', self.fsm_cls, [self])],
             [('gfx', self.gfx_cls, [
@@ -51,7 +53,7 @@ class Car(GameObjectMdt):
                  driver_suspensions]),
              ('gui', self.gui_cls, [self, gui_props]),
              ('event', self.event_cls, [self, keys, joystick, rocket_path]),
-             ('logic', self.logic_cls, [self, self.pos, self.hpr, cam_vec])],
+             ('logic', self.logic_cls, [self, carlogic_props])],
             [('audio', self.audio_cls, [self, audio_props])],
             [('ai', self.ai_cls, [self, road_name])]]
         GameObjectMdt.__init__(self, init_lst, cb)

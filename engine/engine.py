@@ -17,6 +17,7 @@ from .audio import EngineAudio
 from .network.server import Server
 from .network.client import Client
 from ..gameobject import GameObjectMdt
+from .enginefacade import EngineFacade
 
 
 class EngineShowBase(ShowBase):
@@ -24,7 +25,7 @@ class EngineShowBase(ShowBase):
     pass
 
 
-class Engine(GameObjectMdt):
+class Engine(GameObjectMdt, EngineFacade):
 
     def __init__(self, cfg=None):
         __builtin__.eng = self
