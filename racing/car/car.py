@@ -5,8 +5,8 @@ from .phys import CarPhys, CarPlayerPhys
 from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
     CarPlayerEventClient, CarNetworkEvent, CarAiEvent
 from .logic import CarLogic, CarPlayerLogic
-from .audio import CarAudio
-from .gui import CarGui, CarPlayerGui
+from .audio import CarAudio, CarAudioProps
+from .gui import CarGui, CarPlayerGui, CarGuiProps
 from .ai import CarAi
 
 
@@ -35,6 +35,10 @@ class Car(GameObjectMdt):
         self.race = race
         self.laps = laps
         self.road_name = road_name
+        gui_props = CarGuiProps(color_main, color, font, laps)
+        audio_props = CarAudioProps(
+            sounds['engine'], sounds['brake'], sounds['crash'],
+            sounds['crash_hs'], sounds['lap'], sounds['landing'])
         init_lst = [
             [('fsm', self.fsm_cls, [self])],
             [('gfx', self.gfx_cls, [
@@ -45,10 +49,10 @@ class Car(GameObjectMdt):
                  car_path, phys_file, wheel_names, tuning_engine, tuning_tires,
                  tuning_suspensions, driver_engine, driver_tires,
                  driver_suspensions]),
-             ('gui', self.gui_cls, [self, color_main, color, font]),
+             ('gui', self.gui_cls, [self, gui_props]),
              ('event', self.event_cls, [self, keys, joystick, rocket_path]),
              ('logic', self.logic_cls, [self, self.pos, self.hpr, cam_vec])],
-            [('audio', self.audio_cls, [self, sounds])],
+            [('audio', self.audio_cls, [self, audio_props])],
             [('ai', self.ai_cls, [self, road_name])]]
         GameObjectMdt.__init__(self, init_lst, cb)
 

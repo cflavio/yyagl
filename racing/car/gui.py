@@ -4,6 +4,15 @@ from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Gui
 
 
+class CarGuiProps:
+
+    def __init__(self, color_main, color, font, laps):
+        self.color_main = color_main
+        self.color = color
+        self.font = font
+        self.laps = laps
+
+
 class CarParameter(object):
 
     def __init__(self, attr, init_val, pos, val_range, callback):
@@ -40,10 +49,8 @@ class CarGui(Gui):
 
 class CarPlayerGui(CarGui):
 
-    def __init__(self, mdt, color_main, color, font):
-        self.color_main = color_main
-        self.color = color
-        self.font = font
+    def __init__(self, mdt, cargui_props):
+        self.cargui_props = cargui_props
         CarGui.__init__(self, mdt)
         self.set_pars()
         self.set_panel()
@@ -151,20 +158,20 @@ class CarPlayerGui(CarGui):
 
     def set_panel(self):
         pars = {'scale': .065, 'parent': eng.base.a2dTopRight,
-                'fg': self.color_main, 'align': TextNode.A_left,
-                'font': eng.font_mgr.load_font(self.font)}
+                'fg': self.cargui_props.color_main, 'align': TextNode.A_left,
+                'font': eng.font_mgr.load_font(self.cargui_props.font)}
         self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
         self.lap_txt = OnscreenText(
-            text='1/' + str(self.mdt.laps), pos=(-.24, -.2), **pars)
+            text='1/' + str(self.cargui_props.laps), pos=(-.24, -.2), **pars)
         self.time_txt = OnscreenText(pos=(-.24, -.3), **pars)
         self.best_txt = OnscreenText(pos=(-.24, -.4), **pars)
         self.ranking_txt = OnscreenText(pos=(-.24, -.5), **pars)
         self.damages_txt = OnscreenText(pos=(-.24, -.6), **pars)
         self.damages_txt['text'] = '-'
-        self.damages_txt['fg'] = self.color
+        self.damages_txt['fg'] = self.cargui_props.color
         pars = {'scale': .05, 'parent': eng.base.a2dTopRight,
-                'fg': self.color, 'align': TextNode.A_right,
-                'font': eng.font_mgr.load_font(self.font)}
+                'fg': self.cargui_props.color, 'align': TextNode.A_right,
+                'font': eng.font_mgr.load_font(self.cargui_props.font)}
         self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
         self.lap_lab = OnscreenText(
             text=_('lap:'), pos=(-.3, -.2), **pars)
@@ -192,9 +199,9 @@ class CarPlayerGui(CarGui):
         map(lambda par: par.toggle(), self.__pars)
 
     def destroy(self):
-        Gui.destroy(self)
         labels = [self.speed_txt, self.time_txt, self.lap_txt,
                   self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
                   self.best_lab, self.damages_txt, self.damages_lab,
                   self.ranking_txt, self.ranking_lab]
         map(lambda wdg: wdg.destroy(), self.__pars + labels)
+        Gui.destroy(self)
