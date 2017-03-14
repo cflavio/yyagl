@@ -64,7 +64,7 @@ class Results(Subject):
         drvs = game.fsm.race.logic.drivers
         for i, car in enumerate(race_ranking_sorted):
             idx, name, _car = next(drv for drv in drvs if drv[2] == car)
-            is_car = car == game.player_car.path[5:]
+            is_car = car == game.player_car.name
             fgc = self.menu_args.text_fg if is_car else self.menu_args.text_bg
             txt = OnscreenText(
                 text=str(i + 1) + '. ' + name, align=TextNode.A_left,

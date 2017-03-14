@@ -13,35 +13,33 @@ class CarGfxFacade:
         self.skidmark_mgr.on_no_skidmarking()
 
 
-class CarGfx(Gfx, CarGfxFacade):
+class CarGfxProps:
 
-    def __init__(self, mdt, path, base_path, model_name, damage_paths,
-                 wheel_gfx_names, particle_path):
-        self.chassis_np = None
-        self.base_path = base_path
+    def __init__(self, model_name, damage_paths, wheel_gfx_names,
+                 particle_path):
         self.model_name = model_name
         self.damage_paths = damage_paths
         self.wheel_gfx_names = wheel_gfx_names
         self.particle_path = particle_path
+
+
+class CarGfx(Gfx, CarGfxFacade):
+
+    def __init__(self, mdt, cargfx_props):
+        self.chassis_np = None
+        self.props = cargfx_props
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
         vehicle_node = BulletRigidBodyNode('Vehicle')
-        self.nodepath = eng.gfx.world_np.attachNewNode(vehicle_node)  # facade
+        self.nodepath = eng.attach_node(vehicle_node)
         self.skidmark_mgr = SkidmarkMgr(mdt)
         Gfx.__init__(self, mdt)
 
     def async_build(self):
-        base_path = self.base_path + '/' + self.mdt.name
-        fpath = base_path + '/' + self.model_name
-        try:
-            path = base_path + '/' + self.damage_paths[0]
-            self.chassis_np_low = loader.loadModel(path)
-        except IOError:
-            self.chassis_np_low = loader.loadModel(fpath)
-        try:
-            path = base_path + '/' + self.damage_paths[1]
-            self.chassis_np_hi = loader.loadModel(path)
-        except IOError:
-            self.chassis_np_hi = loader.loadModel(fpath)
+        fpath = self.props.model_name % self.mdt.name
+        path = self.props.damage_paths[0] % self.mdt.name
+        self.chassis_np_low = loader.loadModel(path)
+        path = self.props.damage_paths[1] % self.mdt.name
+        self.chassis_np_hi = loader.loadModel(path)
         loader.loadModel(fpath, callback=self.load_wheels)
 
     def reparent(self):
@@ -49,18 +47,15 @@ class CarGfx(Gfx, CarGfxFacade):
         cha = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
         map(lambda cha: cha.setDepthOffset(-2), cha)
         map(lambda whl: whl.reparentTo(eng.gfx.world_np), self.wheels.values())
-        # try RigidBodyCombiner
+        # try RigidBodyCombiner for the wheels
 
     def load_wheels(self, chassis_model):
         self.chassis_np = chassis_model
         load = eng.base.loader.loadModel
-        names = [self.base_path, self.mdt.name, self.wheel_gfx_names[0]]
-        fpath = '/'.join(names)
-        names = [self.base_path, self.mdt.name, self.wheel_gfx_names[1]]
-        rpath = '/'.join(names)
+        fpath = self.props.wheel_gfx_names[0] % self.mdt.name
+        rpath = self.props.wheel_gfx_names[1] % self.mdt.name
         m_exists = lambda path: exists(path + '.egg') or exists(path + '.bam')
-        names = [self.base_path, self.mdt.name, self.wheel_gfx_names[2]]
-        a_path = '/'.join(names)
+        a_path = self.props.wheel_gfx_names[2] % self.mdt.name
         front_path = fpath if m_exists(fpath) else a_path
         rear_path = rpath if m_exists(rpath) else a_path
         self.wheels['fr'] = load(front_path)
@@ -73,18 +68,18 @@ class CarGfx(Gfx, CarGfxFacade):
         if self.mdt.phys.speed_ratio < .5:
             return
         self.mdt.audio.crash_high_speed_sfx.play()
-        part_path = self.particle_path
+        part_path = self.props.particle_path
         node = self.mdt.gfx.nodepath
-        eng.gfx.particle(part_path, node, eng.base.render, (0, 1.2, .75), .8)
+        eng.particle(part_path, node, eng.base.render, (0, 1.2, .75), .8)
         self.apply_damage()
 
     def apply_damage(self, reset=False):
         curr_chassis = self.nodepath.get_children()[0]
         if reset:
             next_chassis = self.chassis_np
-        elif self.damage_paths[0] in curr_chassis.get_name():
+        elif self.chassis_np_low.get_name() in curr_chassis.get_name():
             next_chassis = self.chassis_np_hi
-        elif self.damage_paths[1] in curr_chassis.get_name():
+        elif self.chassis_np_hi.get_name() in curr_chassis.get_name():
             return
         else:
             next_chassis = self.chassis_np_low
@@ -118,8 +113,7 @@ class SkidmarkMgr:
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
 
     def on_no_skidmarking(self):
-        self.r_skidmark = None
-        self.l_skidmark = None
+        self.l_skidmark = self.r_skidmark = None
 
     def destroy(self):
         map(lambda skd: skd.destroy(), self.skidmarks)

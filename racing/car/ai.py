@@ -45,7 +45,7 @@ class CarAi(Ai):
     def acceleration(self):
         if self.mdt.phys.speed < 40:
             return True
-        grounds = self.mdt.phys.ground_names
+        grounds = self.mdt.phys.gnd_names
         if not all(name.startswith(self.road_name) for name in grounds):
             return False
         return self.curr_dot_prod > .8
@@ -58,7 +58,7 @@ class CarAi(Ai):
         lookahead_rot = rot_mat.xformVec((lookahed_vec.x, lookahed_vec.y, 0))
         lookahead_pt = Point3(lookahead_rot.x, lookahead_rot.y, 0)
         lookahead_pos = self.mdt.gfx.nodepath.get_pos() + lookahead_pt
-        return self.mdt.phys.ground_name(lookahead_pos)
+        return self.mdt.phys.gnd_name(lookahead_pos)
 
     @property
     def left_right(self):

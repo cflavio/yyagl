@@ -4,30 +4,32 @@ from panda3d.core import LPoint3f
 from yyagl.gameobject import Phys
 
 
-class CarPhys(Phys):
+class CarPhysProps:
 
-    def __init__(self, mdt, name, coll_path, coll_name, track_phys, car_path,
-                 phys_file, wheel_names, tuning_engine, tuning_tires,
-                 tuning_suspensions, driver_engine, driver_tires,
-                 driver_suspensions):
-        Phys.__init__(self, mdt)
-        self.pnode = None
-        self.vehicle = None
-        self.curr_speed_factor = 1.0
-        self.__finds = {}  # cache for find's results
-        self.name = name
-        self.__track_phys = track_phys
-        self.__coll_path = coll_path
-        self.__coll_name = coll_name
-        self._car_path = car_path
-        self._phys_file = phys_file
-        self.__wheel_names = wheel_names
+    def __init__(self, coll_path, coll_name, track_phys, phys_file, wheel_names,
+                 tuning_engine, tuning_tires, tuning_suspensions,
+                 driver_engine, driver_tires, driver_suspensions):
+        self.coll_path = coll_path
+        self.coll_name = coll_name
+        self.track_phys = track_phys
+        self.phys_file = phys_file
+        self.wheel_names = wheel_names
         self.tuning_engine = tuning_engine
         self.tuning_tires = tuning_tires
         self.tuning_suspensions = tuning_suspensions
         self.driver_engine = driver_engine
         self.driver_tires = driver_tires
         self.driver_suspensions = driver_suspensions
+
+class CarPhys(Phys):
+
+    def __init__(self, mdt, carphys_props):
+        Phys.__init__(self, mdt)
+        self.pnode = None
+        self.vehicle = None
+        self.curr_speed_factor = 1.0
+        self.__finds = {}  # cache for find's results
+        self.props = carphys_props
         self._load_phys()
         self.__set_collision_mesh()
         self.__set_phys_node()
@@ -35,30 +37,29 @@ class CarPhys(Phys):
         self.__set_wheels()
 
     def _load_phys(self):
-        fpath = '%s/%s/%s' % (self._car_path, self.name, self._phys_file)
-        with open(fpath) as phys_file:
+        fpath = self.props.phys_file % self.mdt.name
+        with open(fpath) as phys_file:  # pass phys props as a class
             self.cfg = load(phys_file)
-        # pass phys props as a class
-        # differentiate for each car
         self.cfg['max_speed'] = self.get_speed()
         self.cfg['friction_slip'] = self.get_friction()
         self.cfg['roll_influence'] = self.get_roll_influence()
-        s_a = (self.name, round(self.cfg['max_speed'], 2), self.driver_engine)
-        eng.log_mgr.log('speed %s: %s (%s)' % s_a)
+        s_a = (self.mdt.name, round(self.cfg['max_speed'], 2),
+               self.props.driver_engine)
+        eng.log('speed %s: %s (%s)' % s_a)
         fr_slip = round(self.cfg['friction_slip'], 2)
-        f_a = (self.name, fr_slip, self.driver_tires)
-        eng.log_mgr.log('friction %s: %s (%s)' % f_a)
-        r_a = (self.name, round(self.cfg['roll_influence'], 2),
-               self.driver_suspensions)
-        eng.log_mgr.log('roll %s: %s (%s)' % r_a)
+        f_a = (self.mdt.name, fr_slip, self.props.driver_tires)
+        eng.log('friction %s: %s (%s)' % f_a)
+        r_a = (self.mdt.name, round(self.cfg['roll_influence'], 2),
+               self.props.driver_suspensions)
+        eng.log('roll %s: %s (%s)' % r_a)
         s_a = lambda field: setattr(self, field, self.cfg[field])
         map(s_a, self.cfg.keys())
 
     def __set_collision_mesh(self):
-        fpath = '%s/%s/%s' % (self._car_path, self.name, self.__coll_path)
+        fpath = self.props.coll_path % self.mdt.name
         self.coll_mesh = loader.loadModel(fpath)
         chassis_shape = BulletConvexHullShape()
-        for geom in eng.phys.find_geoms(self.coll_mesh, self.__coll_name):
+        for geom in eng.find_geoms(self.coll_mesh, self.props.coll_name):
             chassis_shape.addGeom(geom.node().getGeom(0), geom.getTransform())
         self.mdt.gfx.nodepath.node().addShape(chassis_shape)
 
@@ -66,8 +67,8 @@ class CarPhys(Phys):
         self.pnode = self.mdt.gfx.nodepath.node()
         self.pnode.setMass(self.mass)
         self.pnode.setDeactivationEnabled(False)
-        eng.phys.world_phys.attachRigidBody(self.pnode)  # do facade
-        eng.phys.collision_objs += [self.pnode]
+        eng.attachRigidBody(self.pnode)
+        eng.add_collision_obj(self.pnode)
 
     def __set_vehicle(self):
         self.vehicle = BulletVehicle(eng.phys.world_phys, self.pnode)
@@ -76,22 +77,22 @@ class CarPhys(Phys):
         tuning = self.vehicle.getTuning()
         tuning.setSuspensionCompression(self.suspension_compression)
         tuning.setSuspensionDamping(self.suspension_damping)
-        eng.phys.world_phys.attachVehicle(self.vehicle)  # facade
+        eng.attachVehicle(self.vehicle)
 
     def __set_wheels(self):
         fwheel_bounds = self.mdt.gfx.wheels['fr'].get_tight_bounds()
         f_radius = (fwheel_bounds[1][2] - fwheel_bounds[0][2]) / 2.0 + .01
         rwheel_bounds = self.mdt.gfx.wheels['rr'].get_tight_bounds()
         r_radius = (rwheel_bounds[1][2] - rwheel_bounds[0][2]) / 2.0 + .01
-        ffr = self.coll_mesh.find('**/' + self.__wheel_names[0][0])
-        ffl = self.coll_mesh.find('**/' + self.__wheel_names[0][1])
-        rrr = self.coll_mesh.find('**/' + self.__wheel_names[0][2])
-        rrl = self.coll_mesh.find('**/' + self.__wheel_names[0][3])
+        ffr = self.coll_mesh.find('**/' + self.props.wheel_names[0][0])
+        ffl = self.coll_mesh.find('**/' + self.props.wheel_names[0][1])
+        rrr = self.coll_mesh.find('**/' + self.props.wheel_names[0][2])
+        rrl = self.coll_mesh.find('**/' + self.props.wheel_names[0][3])
         meth = self.coll_mesh.find
-        fr_node = ffr if ffr else meth('**/' + self.__wheel_names[1][0])
-        fl_node = ffl if ffl else meth('**/' + self.__wheel_names[1][1])
-        rr_node = rrr if rrr else meth('**/' + self.__wheel_names[1][2])
-        rl_node = rrl if rrl else meth('**/' + self.__wheel_names[1][3])
+        fr_node = ffr if ffr else meth('**/' + self.props.wheel_names[1][0])
+        fl_node = ffl if ffl else meth('**/' + self.props.wheel_names[1][1])
+        rr_node = rrr if rrr else meth('**/' + self.props.wheel_names[1][2])
+        rl_node = rrl if rrl else meth('**/' + self.props.wheel_names[1][3])
         wheel_fr_pos = fr_node.get_pos() + (0, 0, f_radius)
         wheel_fl_pos = fl_node.get_pos() + (0, 0, f_radius)
         wheel_rr_pos = rr_node.get_pos() + (0, 0, r_radius)
@@ -150,13 +151,13 @@ class CarPhys(Phys):
         speeds = []
         for whl in self.vehicle.get_wheels():
             contact_pt = whl.get_raycast_info().getContactPointWs()
-            ground_name = self.ground_name(contact_pt)
-            if not ground_name:
+            gnd_name = self.gnd_name(contact_pt)
+            if not gnd_name:
                 continue
-            if ground_name not in self.__finds:
-                ground = self.__track_phys.find('**/' + ground_name)
-                self.__finds[ground_name] = ground
-            gfx_node = self.__finds[ground_name]
+            if gnd_name not in self.__finds:
+                gnd = self.props.track_phys.find('**/' + gnd_name)
+                self.__finds[gnd_name] = gnd
+            gfx_node = self.__finds[gnd_name]
             if gfx_node.has_tag('speed'):
                 speeds += [float(gfx_node.get_tag('speed'))]
             if gfx_node.has_tag('friction'):
@@ -165,16 +166,16 @@ class CarPhys(Phys):
         self.curr_speed_factor = (sum(speeds) / len(speeds)) if speeds else 1.0
 
     @property
-    def ground_names(self):  # no need to be cached
+    def gnd_names(self):  # no need to be cached
         whls = self.vehicle.get_wheels()
         pos = map(lambda whl: whl.get_raycast_info().getContactPointWs(), whls)
-        return map(self.ground_name, pos)
+        return map(self.gnd_name, pos)
 
     @staticmethod
-    def ground_name(pos):
+    def gnd_name(pos):
         top = pos + (0, 0, 1)
         bottom = pos + (0, 0, -1)
-        result = eng.phys.world_phys.rayTestClosest(top, bottom)  # facade
+        result = eng.rayTestClosest(top, bottom)
         ground = result.get_node()
         return ground.get_name() if ground else ''
 
@@ -191,24 +192,26 @@ class CarPhys(Phys):
         map(fric, self.vehicle.get_wheels())
         roll = lambda whl: whl.setRollInfluence(self.roll_influence)
         map(roll, self.vehicle.get_wheels())
-        s_a = (str(round(self.max_speed, 2)), self.driver_engine)
+        s_a = (str(round(self.max_speed, 2)), self.props.driver_engine)
         eng.log_mgr.log('speed: %s (%s)' % s_a)
-        f_a = (str(round(self.friction_slip, 2)), self.driver_tires)
+        f_a = (str(round(self.friction_slip, 2)), self.props.driver_tires)
         eng.log_mgr.log('friction: %s (%s)' % f_a)
-        r_a = (str(round(self.roll_influence, 2)), self.driver_suspensions)
+        r_a = (str(round(self.roll_influence, 2)),
+               self.props.driver_suspensions)
         eng.log_mgr.log('roll: %s (%s)' % r_a)
 
     def get_speed(self):
-        return self.cfg['max_speed'] * (1 + .01 * self.driver_engine)
+        return self.cfg['max_speed'] * (1 + .01 * self.props.driver_engine)
 
     def get_friction(self):
-        return self.cfg['friction_slip'] * (1 + .01 * self.driver_tires)
+        return self.cfg['friction_slip'] * (1 + .01 * self.props.driver_tires)
 
     def get_roll_influence(self):
-        return self.cfg['roll_influence'] * (1 + .01 * self.driver_suspensions)
+        return self.cfg['roll_influence'] * (
+            1 + .01 * self.props.driver_suspensions)
 
     def destroy(self):
-        eng.phys.world_phys.remove_vehicle(self.vehicle)
+        eng.removeVehicle(self.vehicle)
         self.pnode = self.vehicle = self.__finds = self.__track_phys = \
             self.coll_mesh = None
         Phys.destroy(self)
@@ -217,16 +220,16 @@ class CarPhys(Phys):
 class CarPlayerPhys(CarPhys):
 
     def get_speed(self):
-        t_c = 1 + .1 * self.tuning_engine
-        d_c = 1 + .01 * self.driver_engine
+        t_c = 1 + .1 * self.props.tuning_engine
+        d_c = 1 + .01 * self.props.driver_engine
         return self.cfg['max_speed'] * t_c * d_c
 
     def get_friction(self):
-        t_c = 1 + .1 * self.tuning_tires
-        d_c = 1 + .01 * self.driver_tires
+        t_c = 1 + .1 * self.props.tuning_tires
+        d_c = 1 + .01 * self.props.driver_tires
         return self.cfg['friction_slip'] * t_c * d_c
 
     def get_roll_influence(self):
-        t_c = 1 + .1 * self.tuning_suspensions
-        d_c = 1 + .01 * self.driver_suspensions
+        t_c = 1 + .1 * self.props.tuning_suspensions
+        d_c = 1 + .01 * self.props.driver_suspensions
         return self.cfg['roll_influence'] * t_c * d_c

@@ -59,10 +59,10 @@ class RaceLogic(Logic):
                     r_p.sounds, r_p.color_main, r_p.color, r_p.font,
                     r_p.car_path, r_p.phys_file, r_p.wheel_names,
                     r_p.tuning_engine, r_p.tuning_tires,
-                    r_p.tuning_suspensions, r_p.road_name, r_p.base_path,
-                    r_p.model_name, r_p.damage_paths, r_p.wheel_gfx_names,
-                    r_p.particle_path, drv.logic.engine, drv.logic.tires,
-                    drv.logic.suspensions, r_p.rocket_path, r_p.camera_vec,
+                    r_p.tuning_suspensions, r_p.road_name, r_p.model_name,
+                    r_p.damage_paths, r_p.wheel_gfx_names, r_p.particle_path,
+                    drv.logic.engine, drv.logic.tires, drv.logic.suspensions,
+                    r_p.rocket_path, r_p.camera_vec,
                     self.mdt.track.phys.waypoints)
                 game.cars += [new_car]
             s_p = game.track.phys.get_start_pos(grid.index(car_path))
@@ -83,10 +83,10 @@ class RaceLogic(Logic):
                 r_p.sounds, r_p.color_main, r_p.color, r_p.font,
                 r_p.car_path, r_p.phys_file, r_p.wheel_names,
                 r_p.tuning_engine, r_p.tuning_tires, r_p.tuning_suspensions,
-                r_p.road_name, r_p.base_path, r_p.model_name,
-                r_p.damage_paths, r_p.wheel_gfx_names, r_p.particle_path,
-                drv.logic.engine, drv.logic.tires, drv.logic.suspensions,
-                r_p.rocket_path, r_p.camera_vec, self.mdt.track.phys.waypoints)
+                r_p.road_name, r_p.model_name, r_p.damage_paths,
+                r_p.wheel_gfx_names, r_p.particle_path, drv.logic.engine,
+                drv.logic.tires, drv.logic.suspensions, r_p.rocket_path,
+                r_p.camera_vec, self.mdt.track.phys.waypoints)
             game.cars = []
         game.track = Track(
             track_path, load_car, r_p.shaders, r_p.music_path,

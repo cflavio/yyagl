@@ -3,7 +3,7 @@ class RaceProps(object):
     def __init__(
             self, keys, joystick, sounds, color_main, color, font, coll_path,
             coll_name, car_path, phys_file, wheel_names, tuning_engine,
-            tuning_tires, tuning_suspensions, road_name, base_path, model_name,
+            tuning_tires, tuning_suspensions, road_name, model_name,
             damage_paths, wheel_gfx_names, particle_path, drivers, shaders,
             music_path, coll_track_path, unmerged, merged, ghosts,
             corner_names, waypoint_names, show_waypoints, weapons,
@@ -27,7 +27,6 @@ class RaceProps(object):
         self.tuning_tires = tuning_tires
         self.tuning_suspensions = tuning_suspensions
         self.road_name = road_name
-        self.base_path = base_path
         self.model_name = model_name
         self.damage_paths = damage_paths
         self.wheel_gfx_names = wheel_gfx_names
