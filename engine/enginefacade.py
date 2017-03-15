@@ -33,5 +33,11 @@ class EngineFacade(object):
     def rayTestClosest(self, top, bottom):
         return self.phys.world_phys.rayTestClosest(top, bottom)
 
+    def rayTestAll(self, top, bottom):
+        return self.phys.world_phys.rayTestAll(top, bottom)
+
     def log(self, msg):
         return self.log_mgr.log(msg)
+
+    def play(self, sfx):
+        return self.audio.play(sfx)

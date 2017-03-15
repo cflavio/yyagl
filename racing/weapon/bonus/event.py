@@ -6,7 +6,7 @@ class BonusEvent(Event):
     def __init__(self, mdt):
         Event.__init__(self, mdt)
         self.generate_tsk = None
-        eng.phys.attach(self.on_collision)  # facade
+        eng.attach_obs(self.on_collision)  # facade
 
     def on_collision(self, obj, obj_name):
         is_bon = obj_name == 'Bonus'
@@ -15,5 +15,5 @@ class BonusEvent(Event):
             self.mdt.destroy()
 
     def destroy(self):
-        eng.phys.detach(self.on_collision)  # facade
+        eng.detach_obs(self.on_collision)  # facade
         Event.destroy(self)

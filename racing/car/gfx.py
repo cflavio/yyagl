@@ -104,12 +104,16 @@ class SkidmarkMgr:
         self.car = car
 
     def on_skidmarking(self):
+        frpos = self.car.gfx.wheels['fr'].get_pos(render)
+        flpos = self.car.gfx.wheels['fl'].get_pos(render)
+        heading = self.car.gfx.nodepath.get_h()
         if self.r_skidmark:
-            self.r_skidmark.update()
-            self.l_skidmark.update()
+            self.r_skidmark.update(frpos, heading)
+            self.l_skidmark.update(flpos, heading)
         else:
-            self.r_skidmark = Skidmark(self.car, 'fr')
-            self.l_skidmark = Skidmark(self.car, 'fl')
+            radius = self.car.phys.vehicle.getWheels()[0].getWheelRadius()
+            self.r_skidmark = Skidmark(frpos, radius, heading)
+            self.l_skidmark = Skidmark(flpos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
 
     def on_no_skidmarking(self):

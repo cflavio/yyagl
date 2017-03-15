@@ -1,6 +1,6 @@
 from yyagl.gameobject import Logic
 from yyagl.racing.track.track import Track
-from yyagl.racing.car.car import Car, PlayerCar, PlayerCarServer, \
+from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
     PlayerCarClient, NetworkCar, AiCar
 
 
@@ -53,7 +53,7 @@ class RaceLogic(Logic):
                 srv_or_sng = eng.server.is_active or not eng.client.is_active
                 car_class = AiCar if no_p and srv_or_sng else car_class
                 drv = r_p.drivers[car]
-                new_car = car_class(
+                car_props = CarProps(
                     car, r_p.coll_path, r_p.coll_name, pos, hpr, func,
                     self.mdt, game.track.laps, r_p.keys, r_p.joystick,
                     r_p.sounds, r_p.color_main, r_p.color, r_p.font,
@@ -63,7 +63,10 @@ class RaceLogic(Logic):
                     r_p.damage_paths, r_p.wheel_gfx_names, r_p.particle_path,
                     drv.logic.engine, drv.logic.tires, drv.logic.suspensions,
                     r_p.rocket_path, r_p.camera_vec,
-                    self.mdt.track.phys.waypoints)
+                    self.mdt.track.phys.waypoints, r_p.respawn_name,
+                    r_p.pitstop_name, r_p.wall_name, r_p.goal_name,
+                    r_p.bonus_name, r_p.roads_names)
+                new_car = car_class(car_props)
                 game.cars += [new_car]
             s_p = game.track.phys.get_start_pos(grid.index(car_path))
             pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
@@ -77,7 +80,7 @@ class RaceLogic(Logic):
                 if eng.client.is_active:
                     car_cls = PlayerCarClient
             drv = r_p.drivers[car_path]
-            game.player_car = car_cls(
+            car_props = CarProps(
                 car_path, r_p.coll_path, r_p.coll_name, pos, hpr, func,
                 self.mdt, game.track.laps, r_p.keys, r_p.joystick,
                 r_p.sounds, r_p.color_main, r_p.color, r_p.font,
@@ -86,7 +89,10 @@ class RaceLogic(Logic):
                 r_p.road_name, r_p.model_name, r_p.damage_paths,
                 r_p.wheel_gfx_names, r_p.particle_path, drv.logic.engine,
                 drv.logic.tires, drv.logic.suspensions, r_p.rocket_path,
-                r_p.camera_vec, self.mdt.track.phys.waypoints)
+                r_p.camera_vec, self.mdt.track.phys.waypoints,
+                r_p.respawn_name, r_p.pitstop_name, r_p.wall_name,
+                r_p.goal_name, r_p.bonus_name, r_p.roads_names)
+            game.player_car = car_cls(car_props)
             game.cars = []
         game.track = Track(
             track_path, load_car, r_p.shaders, r_p.music_path,
@@ -94,8 +100,8 @@ class RaceLogic(Logic):
             r_p.corner_names, r_p.waypoint_names, r_p.show_waypoints,
             r_p.weapons, r_p.weapon_names, r_p.start, r_p.track_name,
             r_p.track_path, r_p.track_model_name, r_p.empty_name,
-            r_p.anim_name, r_p.omni_tag, r_p.thanks, r_p.sign_name,
-            r_p.camera_vec, r_p.shadow_src, r_p.laps, r_p.bonus_name,
+            r_p.anim_name, r_p.omni_tag, r_p.sign_cb, r_p.sign_name,
+            r_p.camera_vec, r_p.shadow_src, r_p.laps, r_p.bonus_model,
             r_p.bonus_suff)
         self.mdt.track = game.track
 

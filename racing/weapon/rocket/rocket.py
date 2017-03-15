@@ -5,7 +5,7 @@ from .audio import RocketAudio
 from .logic import RocketLogic
 
 
-class RocketFacade:
+class RocketFacade(object):
 
     def attach_obs(self, meth):
         return self.logic.attach(meth)

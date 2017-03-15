@@ -8,10 +8,11 @@ class RaceProps(object):
             music_path, coll_track_path, unmerged, merged, ghosts,
             corner_names, waypoint_names, show_waypoints, weapons,
             weapon_names, start, track_name, track_path, track_model_name,
-            empty_name, anim_name, omni_tag, thanks, sign_name, minimap_path,
+            empty_name, anim_name, omni_tag, sign_cb, sign_name, minimap_path,
             minimap_image, col_dct, camera_vec, shadow_src, laps, rocket_path,
-            bonus_name, bonus_suff, cars, ai, ingame_menu, menu_args,
-            drivers_img, cars_imgs, share_urls, share_imgs):
+            bonus_model, bonus_suff, cars, ai, ingame_menu, menu_args,
+            drivers_img, cars_imgs, share_urls, share_imgs, respawn_name,
+            pitstop_name, wall_name, goal_name, bonus_name, roads_names):
         self.keys = keys
         self.joystick = joystick
         self.sounds = sounds
@@ -50,7 +51,7 @@ class RaceProps(object):
         self.empty_name = empty_name
         self.anim_name = anim_name
         self.omni_tag = omni_tag
-        self.thanks = thanks
+        self.sign_cb = sign_cb
         self.sign_name = sign_name
         self.minimap_path = minimap_path
         self.minimap_image = minimap_image
@@ -59,7 +60,7 @@ class RaceProps(object):
         self.shadow_src = shadow_src
         self.laps = laps
         self.rocket_path = rocket_path
-        self.bonus_name = bonus_name
+        self.bonus_model = bonus_model
         self.bonus_suff = bonus_suff
         self.cars = cars
         self.ai = ai
@@ -69,3 +70,9 @@ class RaceProps(object):
         self.cars_imgs = cars_imgs
         self.share_urls = share_urls
         self.share_imgs = share_imgs
+        self.respawn_name = respawn_name
+        self.pitstop_name = pitstop_name
+        self.wall_name = wall_name
+        self.goal_name = goal_name
+        self.bonus_name = bonus_name
+        self.roads_names = roads_names

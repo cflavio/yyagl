@@ -10,7 +10,7 @@ class TrackPhys(Phys):
     def __init__(
             self, mdt, path, unmerged, merged, ghosts, corner_names,
             waypoint_names, show_waypoints, weapons, weapon_names, start,
-            bonus_name, bonus_suff):
+            bonus_model, bonus_suff):
         self.corners = None
         self.bonuses = []
         self.rigid_bodies = []
@@ -27,7 +27,7 @@ class TrackPhys(Phys):
         self.weapon_names = weapon_names
         self.start = start
         self.generate_tsk = []
-        self.bonus_name = bonus_name
+        self.bonus_model = bonus_model
         self.bonus_suff = bonus_suff
         Phys.__init__(self, mdt)
 
@@ -115,7 +115,7 @@ class TrackPhys(Phys):
         self.wp_np = render.attachNewNode(segs_node)
 
     def create_bonus(self, pos):
-        self.bonuses += [Bonus(pos, self.bonus_name, self.bonus_suff)]
+        self.bonuses += [Bonus(pos, self.bonus_model, self.bonus_suff)]
         self.bonuses[-1].event.attach(self.on_bonus_collected)
 
     def on_bonus_collected(self, bonus):

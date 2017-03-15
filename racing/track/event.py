@@ -8,9 +8,6 @@ class TrackEvent(Event):
         Event.__init__(self, mdt)
         self.shaders = shaders
 
-    def start(self):
-        eng.event.attach(self.on_frame)
-
     def update(self, car_pos):
         if not self.shaders:
             sh_src = LPoint3f(*self.mdt.shadow_source)

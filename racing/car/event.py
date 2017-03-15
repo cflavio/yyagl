@@ -41,14 +41,30 @@ class InputDctBuilderJoystick(InputDctBuilder):
                 'left': x < -.4, 'right': x > .4}
 
 
-class CarEvent(Event):
+class CarEventProps:
 
-    def __init__(self, mdt, keys, joystick, rocket_path):
-        Event.__init__(self, mdt)
-        eng.phys.attach(self.on_collision)
+    def __init__(self, keys, joystick, rocket_path, respawn_name,
+                 pitstop_name, road_name, wall_name, goal_name, bonus_name,
+                 roads_names):
         self.keys = keys
         self.joystick = joystick
         self.rocket_path = rocket_path
+        self.respawn_name = respawn_name
+        self.pitstop_name = pitstop_name
+        self.road_name = road_name
+        self.wall_name = wall_name
+        self.goal_name = goal_name
+        self.bonus_name = bonus_name
+        self.roads_names = roads_names
+
+
+class CarEvent(Event):
+
+    def __init__(self, mdt, carevent_props):
+        Event.__init__(self, mdt)
+        eng.attach_obs(self.on_collision)
+        self.props = carevent_props
+        keys = carevent_props.keys
         self.label_events = [
             ('forward', keys['forward']), ('left', keys['left']),
             ('reverse', keys['rear']), ('right', keys['right'])]
@@ -56,13 +72,13 @@ class CarEvent(Event):
         self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
 
     def start(self):
-        eng.event.attach(self.on_frame)
+        eng.attach_obs(self.on_frame)
 
     def on_collision(self, obj, obj_name):
         if obj == self.mdt.gfx.nodepath.node():
-            if obj_name.startswith('Respawn'):
+            if obj_name.startswith(self.props.respawn_name):
                 self.__process_respawn()
-            if obj_name.startswith('PitStop'):
+            if obj_name.startswith(self.props.pitstop_name):
                 self.mdt.gui.apply_damage(True)
                 self.mdt.phys.apply_damage(True)
                 self.mdt.gfx.apply_damage(True)
@@ -93,26 +109,28 @@ class CarEvent(Event):
         car_pos = self.mdt.gfx.nodepath.get_pos()
         top = (car_pos.x, car_pos.y, car_pos.z + 50)
         bottom = (car_pos.x, car_pos.y, car_pos.z - 50)
-        hits = eng.phys.world_phys.rayTestAll(top, bottom).getHits()
-        for hit in [hit for hit in hits if 'Road' in hit.getNode().getName()]:
+        hits = eng.rayTestAll(top, bottom).getHits()
+        road_n = self.props.road_name
+        for hit in [hit for hit in hits if road_n in hit.getNode().getName()]:
             self.mdt.logic.last_wp = self.mdt.logic.closest_wp()
 
     def destroy(self):
-        eng.phys.detach(self.on_collision)
-        eng.event.detach(self.on_frame)
+        eng.detach_obs(self.on_collision)
+        eng.detach_obs(self.on_frame)
         map(lambda tok: tok.release(), self.toks)
         Event.destroy(self)
 
 
 class CarPlayerEvent(CarEvent):
 
-    def __init__(self, mdt, keys, joystick, rocket_path):
-        CarEvent.__init__(self, mdt, keys, joystick, rocket_path)
+    def __init__(self, mdt, carevent_props):
+        CarEvent.__init__(self, mdt, carevent_props)
         self.accept('f11', self.mdt.gui.toggle)
         self.has_weapon = False
         self.crash_tsk = None
         state = self.mdt.fsm.getCurrentOrNextState()
-        self.input_dct_bld = InputDctBuilder.build(state, joystick)
+        self.input_dct_bld = InputDctBuilder.build(state,
+                                                   carevent_props.joystick)
 
     def on_frame(self):
         CarEvent.on_frame(self)
@@ -124,23 +142,23 @@ class CarPlayerEvent(CarEvent):
         CarEvent.on_collision(self, obj, obj_name)
         if obj != self.mdt.gfx.nodepath.node():
             return
-        if obj_name.startswith('Wall'):
+        if obj_name.startswith(self.props.wall_name):
             self.__process_wall()
-        if any(obj_name.startswith(s) for s in ['Road', 'Offroad']):
+        if any(obj_name.startswith(s) for s in self.props.roads_names):
             eng.audio.play(self.mdt.audio.landing_sfx)
-        if obj_name.startswith('Goal'):
+        if obj_name.startswith(self.props.goal_name):
             self.__process_goal()
-        if obj_name.startswith('Bonus'):
+        if obj_name.startswith(self.props.bonus_name):
             self.on_bonus()
 
     def on_bonus(self):
         if not self.mdt.logic.weapon:
-            self.mdt.logic.weapon = Rocket(self.mdt, self.rocket_path)
-            self.accept(self.keys['button'], self.on_fire)
+            self.mdt.logic.weapon = Rocket(self.mdt, self.props.rocket_path)
+            self.accept(self.props.keys['button'], self.on_fire)
             self.has_weapon = True
 
     def on_fire(self):
-        self.ignore(self.keys['button'])
+        self.ignore(self.props.keys['button'])
         self.mdt.logic.fire()
         self.has_weapon = False
 
@@ -149,14 +167,14 @@ class CarPlayerEvent(CarEvent):
             self.mdt.gfx.crash_sfx()
 
     def __process_wall(self):
-        eng.audio.play(self.mdt.audio.crash_sfx)
+        eng.play(self.mdt.audio.crash_sfx)
         args = .1, lambda tsk: self._on_crash(), 'crash sfx'
         self.crash_tsk = taskMgr.doMethodLater(*args)
 
     def __process_nonstart_goals(self, lap_number, laps):
         curr_lap = min(laps, lap_number)
         self.mdt.gui.lap_txt.setText(str(curr_lap)+'/'+str(laps))
-        eng.audio.play(self.mdt.audio.lap_sfx)
+        eng.play(self.mdt.audio.lap_sfx)
 
     def _process_end_goal(self):
         self.notify('on_end_race')
@@ -182,7 +200,7 @@ class CarPlayerEvent(CarEvent):
     def destroy(self):
         if self.crash_tsk:
             taskMgr.remove(self.crash_tsk)
-        map(self.ignore, ['f11', self.keys['button']])
+        map(self.ignore, ['f11', self.props.keys['button']])
         CarEvent.destroy(self)
 
 

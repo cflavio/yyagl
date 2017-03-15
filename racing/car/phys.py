@@ -6,9 +6,10 @@ from yyagl.gameobject import Phys
 
 class CarPhysProps:
 
-    def __init__(self, coll_path, coll_name, track_phys, phys_file, wheel_names,
-                 tuning_engine, tuning_tires, tuning_suspensions,
-                 driver_engine, driver_tires, driver_suspensions):
+    def __init__(
+            self, coll_path, coll_name, track_phys, phys_file, wheel_names,
+            tuning_engine, tuning_tires, tuning_suspensions, driver_engine,
+            driver_tires, driver_suspensions):
         self.coll_path = coll_path
         self.coll_name = coll_name
         self.track_phys = track_phys
@@ -20,6 +21,7 @@ class CarPhysProps:
         self.driver_engine = driver_engine
         self.driver_tires = driver_tires
         self.driver_suspensions = driver_suspensions
+
 
 class CarPhys(Phys):
 

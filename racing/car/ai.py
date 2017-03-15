@@ -1,21 +1,22 @@
-from yyagl.gameobject import Ai
 from panda3d.core import Vec3, Vec2, Point3, Mat4
+from yyagl.gameobject import Ai
 
 
 class CarAi(Ai):
 
-    def __init__(self, mdt, road_name):
+    def __init__(self, mdt, road_name, waypoints):
         Ai.__init__(self, mdt)
         self.road_name = road_name
+        self.waypoints = waypoints
 
     @property
     def current_target(self):  # no need to be cached
         curr_wp = self.mdt.logic.closest_wp()[1]
-        waypoints = game.track.phys.waypoints
-        next_wp_idx = (waypoints.keys().index(curr_wp) + 1) % len(waypoints)
+        wpn = len(self.waypoints)
+        next_wp_idx = (self.waypoints.keys().index(curr_wp) + 1) % wpn
         dist_vec = curr_wp.get_pos() - self.mdt.gfx.nodepath.get_pos()
         distance = dist_vec.length()
-        return curr_wp if distance > 15 else waypoints.keys()[next_wp_idx]
+        return curr_wp if distance > 15 else self.waypoints.keys()[next_wp_idx]
 
     @property
     def car_vec(self):  # to be cached

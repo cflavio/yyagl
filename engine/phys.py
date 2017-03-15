@@ -41,7 +41,7 @@ class EnginePhys(Phys):
         if node in [coll_pair[0] for coll_pair in self.__coll_dct[obj]]:
             return
         self.__coll_dct[obj] += [(node, globalClock.getFrameTime())]
-        self.notify('on_collision', obj, node.getName())
+        eng.event.notify('on_collision', obj, node.getName())
 
     def __do_collisions(self):
         to_clear = self.collision_objs[:]
