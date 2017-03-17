@@ -14,14 +14,14 @@ class Signs(object):
 
     def set_signs(self):
         signs = self.track_model.findAllMatches('**/%s*' % self.sign_name)
-        map(lambda i_sign: self.__set_sign(*i_sign), enumerate(signs)) 
+        map(lambda i_sign: self.__set_sign(*i_sign), enumerate(signs))
 
     def __set_sign(self, i, sign):
-            self.__set_render_to_texture()
-            self.sign_cb(self.renders[i])
-            ts = TextureStage('ts')
-            ts.setMode(TextureStage.MDecal)
-            sign.setTexture(ts, self.buffers[i].getTexture())
+        self.__set_render_to_texture()
+        self.sign_cb(self.renders[i])
+        ts = TextureStage('ts')
+        ts.setMode(TextureStage.MDecal)
+        sign.setTexture(ts, self.buffers[i].getTexture())
 
     def __set_render_to_texture(self):
         self.buffers += [base.win.makeTextureBuffer('result buffer', 256, 256)]

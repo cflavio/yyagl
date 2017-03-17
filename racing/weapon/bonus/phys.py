@@ -11,10 +11,10 @@ class BonusPhys(Phys):
     def sync_build(self):
         self.ghost = BulletGhostNode('Bonus')
         self.ghost.addShape(BulletBoxShape((1, 1, 2.5)))
-        ghostNP = render.attachNewNode(self.ghost)  # facade
+        ghostNP = eng.attach_node(self.ghost)
         ghostNP.setPos(self.pos)
-        eng.phys.world_phys.attachGhost(self.ghost)  # facade
+        eng.attachGhost(self.ghost)
 
     def destroy(self):
-        self.ghost = eng.phys.world_phys.removeGhost(self.ghost)  # facade
+        self.ghost = eng.removeGhost(self.ghost)
         Phys.destroy(self)

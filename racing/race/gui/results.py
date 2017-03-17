@@ -28,7 +28,7 @@ void main() {
 class Results(Subject):
 
     def __init__(self, menu_args, drivers_imgs, cars_imgs, share_urls,
-                 share_imgs):
+                 share_imgs, track_path):
         Subject.__init__(self)
         self.__res_txts = []
         self.__buttons = []
@@ -38,9 +38,10 @@ class Results(Subject):
         self.cars_imgs = cars_imgs
         self.share_urls = share_urls
         self.share_imgs = share_imgs
+        self.track_path = track_path
 
     def show(self, race_ranking):
-        track = game.track.path  # ref into race
+        track = self.track_path
         self.result_frm = DirectFrame(
             frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
         # race object invokes this
@@ -91,7 +92,7 @@ class Results(Subject):
         facebook_url = self.share_urls[0]
         #TODO: find a way to share the time on Facebook
         twitter_url = self.share_urls[1]
-        twitter_url = twitter_url.format(time=curr_time, track=track)
+        twitter_url = twitter_url.format(time=round(curr_time, 2), track=track)
         plus_url = self.share_urls[2]
         #TODO: find a way to share the time on Google Plus
         tumblr_url = self.share_urls[3]

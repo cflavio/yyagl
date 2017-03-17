@@ -1,5 +1,5 @@
-from yyagl.gameobject import Gfx
 from direct.actor.Actor import Actor
+from yyagl.gameobject import Gfx
 
 
 class BonusGfx(Gfx):

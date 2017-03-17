@@ -1,22 +1,17 @@
 from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
+from panda3d.core import LineSegs
 from yyagl.gameobject import Phys
 from yyagl.racing.weapon.bonus.bonus import Bonus
-from panda3d.core import LineSegs
 
 
-class TrackPhys(Phys):
+class TrackPhysProps:
 
     def __init__(
-            self, mdt, path, unmerged, merged, ghosts, corner_names,
+            self, model_path, unmerged, merged, ghosts, corner_names,
             waypoint_names, show_waypoints, weapons, weapon_names, start,
             bonus_model, bonus_suff):
-        self.corners = None
-        self.bonuses = []
-        self.rigid_bodies = []
-        self.ghosts = []
-        self.nodes = []
-        self.path = path
+        self.model_path = model_path
         self.unmerged = unmerged
         self.merged = merged
         self.ghost_names = ghosts
@@ -26,16 +21,28 @@ class TrackPhys(Phys):
         self.weapons = weapons
         self.weapon_names = weapon_names
         self.start = start
-        self.generate_tsk = []
         self.bonus_model = bonus_model
         self.bonus_suff = bonus_suff
+
+
+class TrackPhys(Phys):
+
+    def __init__(
+            self, mdt, trackphys_props):
+        self.corners = None
+        self.bonuses = []
+        self.rigid_bodies = []
+        self.ghosts = []
+        self.nodes = []
+        self.generate_tsk = []
+        self.props = trackphys_props
         Phys.__init__(self, mdt)
 
     def sync_build(self):
-        self.model = loader.loadModel(self.path)
-        self.__load(self.unmerged, False, False)
-        self.__load(self.merged, True, False)
-        self.__load(self.ghost_names, True, True)
+        self.model = loader.loadModel(self.props.model_path)
+        self.__load(self.props.unmerged, False, False)
+        self.__load(self.props.merged, True, False)
+        self.__load(self.props.ghost_names, True, True)
         self.__set_corners()
         self.__set_waypoints()
         self.__set_weapons()
@@ -44,7 +51,7 @@ class TrackPhys(Phys):
     def __load(self, names, merged, ghost):
         for geom_name in names:
             eng.log_mgr.log('setting physics for: ' + geom_name)
-            geoms = eng.phys.find_geoms(self.model, geom_name)  # facade
+            geoms = eng.find_geoms(self.model, geom_name)
             if geoms:
                 self.__process_meshes(geoms, geom_name, merged, ghost)
 
@@ -78,13 +85,13 @@ class TrackPhys(Phys):
     def __build(self, shape, geom_name, ghost):
         if ghost:
             ncls = BulletGhostNode
-            meth = eng.phys.world_phys.attachGhost  # facade
+            meth = eng.attachGhost
             lst = self.ghosts
         else:
             ncls = BulletRigidBodyNode
-            meth = eng.phys.world_phys.attachRigidBody  # facade
+            meth = eng.attachRigidBody
             lst = self.rigid_bodies
-        nodepath = eng.gfx.world_np.attachNewNode(ncls(geom_name))  # facade
+        nodepath = eng.attach_node(ncls(geom_name))
         self.nodes += [nodepath]
         nodepath.node().addShape(shape)
         meth(nodepath.node())
@@ -92,19 +99,20 @@ class TrackPhys(Phys):
         nodepath.node().notifyCollisions(True)
 
     def __set_corners(self):
-        pmod = self.model
-        self.corners = [pmod.find('**/' + crn) for crn in self.corner_names]
+        corners = self.props.corner_names
+        self.corners = [self.model.find('**/' + crn) for crn in corners]
 
     def __set_waypoints(self):
-        wp_root = self.model.find('**/' + self.waypoint_names[0])
-        _waypoints = wp_root.findAllMatches('**/%s*' % self.waypoint_names[1])
+        waypoint_names = self.props.waypoint_names
+        wp_root = self.model.find('**/' + waypoint_names[0])
+        _waypoints = wp_root.findAllMatches('**/%s*' % waypoint_names[1])
         self.waypoints = {}
         for w_p in _waypoints:
-            wpstr = '**/' + self.waypoint_names[1]
-            prevs = w_p.getTag(self.waypoint_names[2]).split(',')
+            wpstr = '**/' + waypoint_names[1]
+            prevs = w_p.getTag(waypoint_names[2]).split(',')
             lst_wp = [wp_root.find(wpstr + idx) for idx in prevs]
             self.waypoints[w_p] = lst_wp
-        if not self.show_waypoints:
+        if not self.props.show_waypoints:
             return
         segs = LineSegs()
         for w_p in self.waypoints.keys():
@@ -115,34 +123,36 @@ class TrackPhys(Phys):
         self.wp_np = render.attachNewNode(segs_node)
 
     def create_bonus(self, pos):
-        self.bonuses += [Bonus(pos, self.bonus_model, self.bonus_suff)]
-        self.bonuses[-1].event.attach(self.on_bonus_collected)
+        prs = self.props
+        self.bonuses += [Bonus(pos, prs.bonus_model, prs.bonus_suff)]
+        self.bonuses[-1].attach_obs(self.on_bonus_collected)
 
     def on_bonus_collected(self, bonus):
-        bonus.event.detach(self.on_bonus_collected)
+        bonus.detach_obs(self.on_bonus_collected)
         self.bonuses.remove(bonus)
-        cre = lambda tsk: self.create_bonus(bonus.phys.pos)
-        self.generate_tsk += [taskMgr.doMethodLater(20, cre, 'create bonus')]
+        self.generate_tsk += [eng.do_later(20, self.create_bonus, [bonus.pos])]
 
     def __set_weapons(self):
-        if not self.weapons:
+        if not self.props.weapons:
             return
-        weap_root = self.model.find('**/' + self.weapon_names[0])
+        weapon_names = self.props.weapon_names
+        weap_root = self.model.find('**/' + weapon_names[0])
         if not weap_root:
             return
-        _weapons = weap_root.findAllMatches('**/%s*' % self.weapon_names[1])
+        _weapons = weap_root.findAllMatches('**/%s*' % weapon_names[1])
         for weap in _weapons:
             self.create_bonus(weap.get_pos())
 
     def __hide_models(self):
-        for mod in self.unmerged + self.merged + self.ghost_names:
+        nms = self.props.unmerged + self.props.merged + self.props.ghost_names
+        for mod in nms:
             models = self.model.findAllMatches('**/%s*' % mod)
             map(lambda mod: mod.hide(), models)
 
     def get_start_pos(self, i):
         start_pos = (0, 0, 0)
         start_pos_hpr = (0, 0, 0)
-        node_str = '**/' + self.start + str(i + 1)
+        node_str = '**/' + self.props.start + str(i + 1)
         start_pos_node = self.model.find(node_str)
         if start_pos_node:
             start_pos = start_pos_node.get_pos()
@@ -157,12 +167,11 @@ class TrackPhys(Phys):
     def destroy(self):
         self.model.removeNode()
         map(lambda chl: chl.remove_node(), self.nodes)
-        map(eng.phys.world_phys.remove_rigid_body, self.rigid_bodies)  # facade
-        map(eng.phys.world_phys.remove_ghost, self.ghosts)  # facade
+        map(eng.removeRigidBody, self.rigid_bodies)
+        map(eng.removeGhost, self.ghosts)
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
             self.waypoints = None
         map(lambda bon: bon.destroy(), self.bonuses)
-        if not self.show_waypoints:
-            return
-        self.wp_np.remove_node()
-        map(lambda tsk: taskMgr.remove_task, self.generate_tsk)
+        map(lambda tsk: taskMgr.remove, self.generate_tsk)
+        if self.props.show_waypoints:
+            self.wp_np.remove_node()

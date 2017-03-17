@@ -40,7 +40,7 @@ class Camera(object):
         look_z_diff = self.look_z_max - self.look_z_min
 
         z_u = Vec3(0, 1, 0)
-        fwd_car_vec = eng.base.render.getRelativeVector(self.car_np, z_u)
+        fwd_car_vec = render.getRelativeVector(self.car_np, z_u)
         fwd_car_vec.normalize()
         fwd_vec = LVector3f(*self.cam_vec)
         fwd_vec.normalize()
@@ -80,7 +80,6 @@ class Camera(object):
             eng.base.camera.setPos(new_x, new_y, new_z)
         look_z = self.tgt_look_z + delta_cam_z
         eng.base.camera.look_at(self.tgt_look_x, self.tgt_look_y, look_z)
-        # facade
 
     #def __occlusion_mesh(self, pos, curr_cam_dist_fact):
     #    tgt = self.car.gfx.nodepath.getPos()

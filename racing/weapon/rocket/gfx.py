@@ -1,5 +1,5 @@
-from yyagl.gameobject import Gfx
 from direct.interval.LerpInterval import LerpHprInterval
+from yyagl.gameobject import Gfx
 
 
 class RocketGfx(Gfx):

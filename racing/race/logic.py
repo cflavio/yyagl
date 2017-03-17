@@ -1,5 +1,5 @@
 from yyagl.gameobject import Logic
-from yyagl.racing.track.track import Track
+from yyagl.racing.track.track import Track, TrackProps
 from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
     PlayerCarClient, NetworkCar, AiCar
 
@@ -55,7 +55,7 @@ class RaceLogic(Logic):
                 drv = r_p.drivers[car]
                 car_props = CarProps(
                     car, r_p.coll_path, r_p.coll_name, pos, hpr, func,
-                    self.mdt, game.track.laps, r_p.keys, r_p.joystick,
+                    self.mdt, r_p.laps, r_p.keys, r_p.joystick,
                     r_p.sounds, r_p.color_main, r_p.color, r_p.font,
                     r_p.car_path, r_p.phys_file, r_p.wheel_names,
                     r_p.tuning_engine, r_p.tuning_tires,
@@ -71,7 +71,7 @@ class RaceLogic(Logic):
             s_p = game.track.phys.get_start_pos(grid.index(car_path))
             pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
             func = load_other_cars
-            if self.race_props.ai:
+            if self.race_props.a_i:
                 car_cls = AiCar
             else:
                 car_cls = PlayerCar
@@ -82,7 +82,7 @@ class RaceLogic(Logic):
             drv = r_p.drivers[car_path]
             car_props = CarProps(
                 car_path, r_p.coll_path, r_p.coll_name, pos, hpr, func,
-                self.mdt, game.track.laps, r_p.keys, r_p.joystick,
+                self.mdt, r_p.laps, r_p.keys, r_p.joystick,
                 r_p.sounds, r_p.color_main, r_p.color, r_p.font,
                 r_p.car_path, r_p.phys_file, r_p.wheel_names,
                 r_p.tuning_engine, r_p.tuning_tires, r_p.tuning_suspensions,
@@ -94,7 +94,7 @@ class RaceLogic(Logic):
                 r_p.goal_name, r_p.bonus_name, r_p.roads_names)
             game.player_car = car_cls(car_props)
             game.cars = []
-        game.track = Track(
+        track_props = TrackProps(
             track_path, load_car, r_p.shaders, r_p.music_path,
             r_p.coll_track_path, r_p.unmerged, r_p.merged, r_p.ghosts,
             r_p.corner_names, r_p.waypoint_names, r_p.show_waypoints,
@@ -103,6 +103,7 @@ class RaceLogic(Logic):
             r_p.anim_name, r_p.omni_tag, r_p.sign_cb, r_p.sign_name,
             r_p.camera_vec, r_p.shadow_src, r_p.laps, r_p.bonus_model,
             r_p.bonus_suff)
+        game.track = Track(track_props)
         self.mdt.track = game.track
 
     def enter_play(self):

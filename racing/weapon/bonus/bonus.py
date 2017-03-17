@@ -4,7 +4,20 @@ from .phys import BonusPhys
 from .event import BonusEvent
 
 
-class Bonus(GameObjectMdt):
+class BonusFacade(object):
+
+    def attach_obs(self, meth):
+        return self.event.attach(meth)
+
+    def detach_obs(self, meth):
+        return self.event.detach(meth)
+
+    @property
+    def pos(self):
+        return self.phys.pos
+
+
+class Bonus(GameObjectMdt, BonusFacade):
     gfx_cls = BonusGfx
     phys_cls = BonusPhys
     event_cls = BonusEvent

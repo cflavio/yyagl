@@ -1,7 +1,7 @@
 from yyagl.gameobject import Logic
 
 
-class TuningProps(object):
+class TuningCar(object):
 
     def __init__(self, engine, tires, suspensions):
         self.engine = engine
@@ -18,7 +18,7 @@ class TuningLogic(Logic):
         self.reset()
 
     def reset(self):
-        self.tunings = {car: TuningProps(0, 0, 0) for car in self.cars}
+        self.tunings = {car: TuningCar(0, 0, 0) for car in self.cars}
 
     def to_dct(self):
         tun = {}
@@ -34,6 +34,6 @@ class TuningLogic(Logic):
         self.tunings = {}
         for car in tuning:
             c_t = tuning[car]
-            new_t = TuningProps(
+            new_t = TuningCar(
                 c_t['engine'], c_t['tires'], c_t['suspensions'])
             self.tunings[car] = new_t

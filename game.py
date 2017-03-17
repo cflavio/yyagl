@@ -13,7 +13,13 @@ class GameLogic(Logic):
         pass
 
 
-class Game(GameObjectMdt):
+class GameFacade(object):
+
+    def demand(self, state):
+        return self.fsm.demand(state)
+
+
+class Game(GameObjectMdt, GameFacade):
     __metaclass__ = ABCMeta
 
     def __init__(self, init_lst, cfg):

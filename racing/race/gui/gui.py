@@ -10,10 +10,11 @@ class RaceGui(Gui):
 
     def __init__(
             self, mdt, minimap_img, minimap_handle, col_dct, font, cars,
-            menu_args, drivers_img, cars_imgs, share_urls, share_imgs):
+            menu_args, drivers_img, cars_imgs, share_urls, share_imgs,
+            track_path):
         Gui.__init__(self, mdt)
         self.results = Results(menu_args, drivers_img, cars_imgs, share_urls,
-                               share_imgs)
+                               share_imgs, track_path)
         self.loading = Loading(mdt)
         self.debug_txt = OnscreenText(
             '', pos=(-.1, .1), scale=.05, fg=(1, 1, 1, 1),

@@ -3,9 +3,9 @@ from yyagl.gameobject import Logic
 
 class DriverLogic(Logic):
 
-    def __init__(self, mdt, name, engine, tires, suspensions):
+    def __init__(self, mdt, driver_props):
         Logic.__init__(self, mdt)
-        self.name = name
-        self.engine = engine
-        self.tires = tires
-        self.suspensions = suspensions
+        self.name = driver_props.name
+        self.engine = driver_props.engine
+        self.tires = driver_props.tires
+        self.suspensions = driver_props.suspensions
