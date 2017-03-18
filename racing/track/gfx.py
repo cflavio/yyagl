@@ -179,6 +179,7 @@ class TrackGfx(Gfx):
             self.__actors[-1].reparent_to(new_root)
             has_omni = model.has_tag(self.props.omni_tag)
             if has_omni and model.get_tag(self.props.omni_tag):
+                new_root.set_tag(self.props.omni_tag, 'True')
                 a_n = self.__actors[-1].get_name()
                 eng.log('set omni for ' + a_n)
                 self.__actors[-1].node().setBounds(OmniBoundingVolume())
