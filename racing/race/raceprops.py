@@ -12,7 +12,9 @@ class RaceProps(object):
             minimap_image, col_dct, camera_vec, shadow_src, laps, rocket_path,
             bonus_model, bonus_suff, cars, a_i, ingame_menu, menu_args,
             drivers_img, cars_imgs, share_urls, share_imgs, respawn_name,
-            pitstop_name, wall_name, goal_name, bonus_name, roads_names):
+            pitstop_name, wall_name, goal_name, bonus_name, roads_names, grid,
+            player_car_name):
+        # make initializer decorator
         self.keys = keys
         self.joystick = joystick
         self.sounds = sounds
@@ -76,3 +78,5 @@ class RaceProps(object):
         self.goal_name = goal_name
         self.bonus_name = bonus_name
         self.roads_names = roads_names
+        self.grid = grid
+        self.player_car_name = player_car_name

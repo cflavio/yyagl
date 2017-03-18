@@ -15,6 +15,21 @@ class EngineFacade(object):
     def particle(self, path, parent, render_parent, pos, timeout):
         return self.gfx.particle(path, parent, render_parent, pos, timeout)
 
+    def init_gfx(self):
+        return self.gfx.init()
+
+    def clean_gfx(self):
+        return self.gfx.clean()
+
+    def init_phys(self):
+        return self.phys.init()
+
+    def start_phys(self):
+        return self.phys.start()
+
+    def stop_phys(self):
+        return self.phys.stop()
+
     def find_geoms(self, mesh, name):
         return self.phys.find_geoms(mesh, name)
 
@@ -55,6 +70,10 @@ class EngineFacade(object):
         dct = {'callback': callback, 'extraArgs': extraArgs} if callback else {}
         return self.gfx.load_model(filename, **dct)
 
+    def set_cam_pos(self, pos):
+        return self.base.camera.set_pos(pos)
+
+
     def load_font(self, font):
         return self.font_mgr.load_font(font)
 
@@ -62,8 +81,20 @@ class EngineFacade(object):
     def version(self):
         return self.logic.version
 
+    def open_browser(self):
+        return self.gui.open_browser
+
+    def toggle_pause(self):
+        return self.pause.logic.toggle()
+
     def play(self, sfx):
         return self.audio.play(sfx)
+
+    def show_cursor(self):
+        return self.gui.cursor.show()
+
+    def hide_cursor(self):
+        return self.gui.cursor.hide()
 
     def set_amb_lgt(self, col):
         return self.shader_mgr.set_amb_lgt(col)
@@ -73,3 +104,40 @@ class EngineFacade(object):
 
     def clear_lights(self):
         return self.shader_mgr.clear_lights()
+
+    def toggle_shader(self):
+        return self.shader_mgr.toggle_shader()
+
+    @property
+    def is_server_active(self):
+        return self.server.is_active
+
+    def register_server_cb(self, process_srv):
+        return self.server.register_cb(process_srv)
+
+    @property
+    def server_connections(self):
+        return self.server.connections
+
+    def server_send(self, msgs):
+        return self.server.send(msgs)
+
+    @property
+    def  car_mapping(self):
+        return  self.server.car_mapping
+
+    def destroy_server(self):
+        return self.server.destroy()
+
+    @property
+    def is_client_active(self):
+        return self.client.is_active
+
+    def register_client_cb(self, process_client):
+        return self.client.register_cb(process_client)
+
+    def client_send(msgs):
+        return self.client.send(msgs)
+
+    def destroy_client(self):
+        return self.client.destroy()

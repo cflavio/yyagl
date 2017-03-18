@@ -59,7 +59,48 @@ class CarProps(object):
         self.roads_names = roads_names
 
 
-class Car(GameObjectMdt):
+class CarFacade(object):
+
+    def reparent(self):
+        return self.gfx.reparent()
+
+    def attach_obs(self, meth):
+        return self.event.attach(meth)
+
+    def detach_obs(self, meth):
+        return self.event.detach(meth)
+
+    def reset_car(self):
+        return self.logic.reset_car()
+
+    def start(self):
+        return self.event.start()
+
+    def get_pos(self):
+        return self.gfx.nodepath.get_pos()
+
+    def get_hpr(self):
+        return self.gfx.nodepath.get_hpr()
+
+    def closest_wp(self):
+        return self.logic.closest_wp()
+
+    @property
+    def lap_times(self):
+        return self.logic.lap_times
+
+    def getLinearVelocity(self):
+        return self.phys.vehicle.getChassis().getLinearVelocity()
+
+    @property
+    def path(self):
+        return self.gfx.path
+
+    def demand(self, state):
+        return self.fsm.demand(state)
+
+
+class Car(GameObjectMdt, CarFacade):
     fsm_cls = CarFsm
     gfx_cls = CarGfx
     gui_cls = CarGui

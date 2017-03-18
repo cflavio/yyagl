@@ -1,5 +1,6 @@
 from yyagl.gameobject import Fsm
 from yyagl.racing.race.gui.countdown import Countdown
+from .gui.loading.loading import LoadingProps
 
 
 class RaceFsm(Fsm):
@@ -19,56 +20,60 @@ class RaceFsm(Fsm):
             self, track_path, car_path, player_cars, drivers, tracks,
             track_name_transl, single_race, grid, cars_path, drivers_path,
             joystick, keys, menu_args, countdown_sfx):
-        eng.log_mgr.log('entering Loading state')  # facade
+        eng.log('entering Loading state')
         self.menu_args = menu_args
         self.countdown_sfx = countdown_sfx
-        args = [
+        loading_props = LoadingProps(
             track_path, car_path, drivers, tracks, track_name_transl,
             single_race, grid, cars_path, drivers_path, joystick, keys,
-            menu_args]
-        self.mdt.gui.loading.enter_loading(*args)
-        meth = self.mdt.logic.load_stuff
-        taskMgr.doMethodLater(1.0, meth, 'loading', args[:-10] + [[]])
+            menu_args)
+        self.mdt.gui.loading.enter_loading(loading_props)
+        args = [track_path, car_path, player_cars]
+        eng.do_later(1.0, self.mdt.logic.load_stuff, args)
 
     def exitLoading(self):
-        eng.log_mgr.log('exiting Loading state')  # facade
+        eng.log('exiting Loading state')
         self.mdt.gui.loading.exit_loading()
         self.mdt.event.notify('on_race_loaded')
+        eng.set_cam_pos((0, 0, 0))
+        self.mdt.logic.player_car.attach_obs(self.mdt.event.on_wrong_way)
+        self.mdt.logic.player_car.attach_obs(self.mdt.event.on_end_race)
 
     def enterCountdown(self):
-        eng.gui.cursor.hide()  # facade
+        eng.hide_cursor()
         self.countdown = Countdown(self.countdown_sfx, self.menu_args.font)
         self.countdown.attach(self.on_start_race)
         self.mdt.logic.enter_play()
         if self.shaders:
-            eng.shader_mgr.toggle_shader()  # facade
-        cars = [game.player_car] + game.cars  # references into race
-        map(lambda car: car.fsm.demand('Countdown'), cars)
+            self.shader_mgr.toggle_shader()
+        cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
+        map(lambda car: car.demand('Countdown'), cars)
 
     def exitCountdown(self):
         self.countdown.destroy()
         #eng.gfx.print_stats()
 
-    @staticmethod
-    def enterPlay():
-        eng.log_mgr.log('entering Play state')  # facade
-        map(lambda car: car.fsm.demand('Play'), [game.player_car] + game.cars)
+    def enterPlay(self):
+        eng.log('entering Play state')
+        cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
+        map(lambda car: car.demand('Play'), cars)
 
     def on_start_race(self):
         self.demand('Play')
 
     @staticmethod
     def exitPlay():
-        eng.log_mgr.log('exiting Play state')  # facade
-        eng.gui.cursor.show()  # facade
+        eng.log('exiting Play state')
+        eng.show_cursor()
 
-    @staticmethod
-    def enterResults(race_ranking):
-        game.fsm.race.gui.results.show(race_ranking)
-        cars = [game.player_car] + game.cars
-        map(lambda car: car.fsm.demand('Results'), cars)
+    def enterResults(self, race_ranking):
+        self.mdt.gui.results.show(
+            race_ranking, self.mdt.logic.player_car.lap_times,
+            self.mdt.logic.drivers, self.mdt.logic.player_car.name)
+        cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
+        map(lambda car: car.demand('Results'), cars)
 
     def exitResults(self):
         self.mdt.logic.exit_play()
         if self.shaders:
-            eng.shader_mgr.toggle_shader()  # facade
+            eng.toggle_shader()

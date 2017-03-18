@@ -6,7 +6,8 @@ from ...gameobject import Gui, Logic, GameObjectMdt
 class MenuArgs(object):
 
     def __init__(self, font, text_fg, text_bg, text_scale, btn_size,
-                 btn_color, background, rollover, click, social_path):
+                 btn_color, background, rollover, click, social_path,
+                 text_err):
         self.font = eng.font_mgr.load_font(font)
         self.text_fg = text_fg
         self.text_bg = text_bg
@@ -17,6 +18,7 @@ class MenuArgs(object):
         self.rollover = loader.loadSfx(rollover)
         self.click = loader.loadSfx(click)
         self.social_path = social_path
+        self.text_err = text_err
 
 
 class MenuGui(Gui):
@@ -124,7 +126,13 @@ class MenuLogic(Logic):
         self.pages = None
 
 
-class Menu(GameObjectMdt):
+class MenuFacade(object):
+
+    def push_page(self, page):
+        return self.logic.push_page(page)
+
+
+class Menu(GameObjectMdt, MenuFacade):
     gui_cls = MenuGui
 
     def __init__(self, menu_args):

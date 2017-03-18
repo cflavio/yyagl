@@ -8,11 +8,11 @@ class Countdown(Subject):
         Subject.__init__(self)
         self.countdown_sfx = loader.loadSfx(countdown_sfx)
         self.__countdown_txt = OnscreenText(
-            '', pos=(0, 0), scale=.2, fg=(1, 1, 1, 1),
-            font=eng.font_mgr.load_font('assets/fonts/Hanken-Book.ttf'))
+            '', pos=(0, 0), scale=.2, fg=(1, 1, 1, 1), font=font)
         self.countdown_cnt = 3
         meth = self.process_countdown
-        self.tsk = taskMgr.doMethodLater(1.0, meth, 'coutdown')
+        self.tsk = taskMgr.doMethodLater(1.0, meth, 'countdown')
+        # manage repeating do_later
 
     def process_countdown(self, task):
         if self.countdown_cnt >= 0:
@@ -25,6 +25,6 @@ class Countdown(Subject):
         self.notify('on_start_race')
 
     def destroy(self):
-        Subject.destroy(self)
         self.tsk = taskMgr.remove(self.tsk)
         self.__countdown_txt.destroy()
+        Subject.destroy(self)

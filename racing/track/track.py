@@ -42,7 +42,26 @@ class TrackProps(object):
         self.bonus_suff = bonus_suff
 
 
-class Track(GameObjectMdt):
+class TrackFacade(object):
+
+    def get_start_pos(self, idx):
+        return self.phys.get_start_pos(idx)
+
+    def play_music(self):
+        return self.audio.music.play()
+
+    def stop_music(self):
+        return self.audio.music.stop()
+
+    def update(self, player_pos):
+        return self.event.update(player_pos)
+
+    @property
+    def lrtb(self):
+        return self.phys.lrtb
+
+
+class Track(GameObjectMdt, TrackFacade):
 
     def __init__(self, track_props):
         eng.log('init track')
