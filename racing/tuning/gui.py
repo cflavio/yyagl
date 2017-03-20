@@ -5,13 +5,10 @@ from yyagl.engine.gui.imgbtn import ImageButton
 
 class TuningGuiProps(object):
 
-    def __init__(
-            self, car, background, engine_img, tires_img, suspensions_img):
+    def __init__(self, car, background, tuning_imgs):
         self.car = car
         self.background = background
-        self.engine_img = engine_img
-        self.tires_img = tires_img
-        self.suspensions_img = suspensions_img
+        self.tuning_imgs = tuning_imgs
 
 
 class TuningGui(Gui):
@@ -26,15 +23,15 @@ class TuningGui(Gui):
         self.background.setBin('background', 10)
         self.buttons = [ImageButton(
             scale=.4, pos=(-1.2, 1, .1), frameColor=(0, 0, 0, 0),
-            image=self.props.engine_img, command=self.on_btn,
+            image=self.props.tuning_imgs[0], command=self.on_btn,
             extraArgs=['engine'])]
         self.buttons += [ImageButton(
             scale=.4, pos=(0, 1, .1), frameColor=(0, 0, 0, 0),
-            image=self.props.tires_img, command=self.on_btn,
+            image=self.props.tuning_imgs[1], command=self.on_btn,
             extraArgs=['tires'])]
         self.buttons += [ImageButton(
             scale=.4, pos=(1.2, 1, .1), frameColor=(0, 0, 0, 0),
-            image=self.props.suspensions_img, command=self.on_btn,
+            image=self.props.tuning_imgs[2], command=self.on_btn,
             extraArgs=['suspensions'])]
 
     def on_btn(self, val):

@@ -9,6 +9,16 @@ class RankingFacade(object):
     def load(self, ranking):
         return self.logic.load(ranking)
 
+    @property
+    def ranking(self):
+        return self.logic.ranking
+
+    def show(self):
+        return self.gui.show()
+
+    def hide(self):
+        return self.gui.hide()
+
 
 class Ranking(GameObjectMdt, RankingFacade):
     __metaclass__ = ABCMeta

@@ -13,9 +13,12 @@ class Subject(object):
         map(self.observers.remove, observers)
 
     def notify(self, meth, *args, **kwargs):
-        meths = [obs for obs in self.observers if obs[0].__name__ == meth]
-        sorted_observers = sorted(meths, key=lambda obs: obs[1])
-        map(lambda obs: obs[0](*args, **kwargs), sorted_observers)
+        try:
+            meths = [obs for obs in self.observers if obs[0].__name__ == meth]
+            sorted_observers = sorted(meths, key=lambda obs: obs[1])
+            map(lambda obs: obs[0](*args, **kwargs), sorted_observers)
+        except TypeError:
+            eng.log('\n\nERROR: %s - %s\n\n' % (str(self), str(meth)))
 
     def destroy(self):
         self.observers = None

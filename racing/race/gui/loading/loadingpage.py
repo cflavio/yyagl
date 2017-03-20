@@ -42,7 +42,7 @@ class LoadingPageGui(PageGui):
             fg=(.75, .75, .75, 1), wordwrap=12)
         track_number = ''
         if not self.props.single_race:
-            track_num = self.props.tracks.index(self.track_path[7:]) + 1
+            track_num = self.props.tracks.index(self.props.track_path) + 1
             track_number = ' (%s/2)' % track_num
         track_txt = OnscreenText(
             text=_('track: ') + self.props.track_name_transl + track_number,
@@ -59,8 +59,8 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.widgets += [txt]
         for i, car in enumerate(self.props.grid):
-            idx, name, _car = next(
-                driver for driver in self.props.drivers if driver[2] == car)
+            idx, name, _car, skills = next(
+                driver for driver in self.props.drivers if driver[3] == car)
             is_car = car == self.props.car_path
             txt = OnscreenText(
                 text=str(i + 1) + '. ' + name, align=TextNode.A_left,
@@ -89,8 +89,8 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.widgets += [txt]
         for i, car in enumerate(sorted_ranking):
-            idx, name, _car = next(
-                driver for driver in self.props.drivers if driver[2] == car[0])
+            idx, name, _car, skills = next(
+                driver for driver in self.props.drivers if driver[3] == car[0])
             is_car = car[0] == self.props.car_path
             txt = OnscreenText(
                 text=str(car[1]) + ' ' + name, align=TextNode.A_left,
@@ -148,7 +148,7 @@ class LoadingPageGui(PageGui):
         self.widgets += [txt]
 
     def set_first_loading(self):
-        filename = self.props.track_path[7:] + '_' + eng.version + '.bam'
+        filename = self.props.track_path + '_' + eng.version + '.bam'
         if exists(filename):
             return
         first_txt = _(

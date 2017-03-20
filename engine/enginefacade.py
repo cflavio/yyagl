@@ -30,6 +30,9 @@ class EngineFacade(object):
     def stop_phys(self):
         return self.phys.stop()
 
+    def toggle_debug(self):
+        return self.phys.toggle_debug()
+
     def find_geoms(self, mesh, name):
         return self.phys.find_geoms(mesh, name)
 

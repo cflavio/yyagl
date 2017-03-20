@@ -48,7 +48,7 @@ class Results(Subject):
         race_ranking_sorted = sorted(race_ranking.items(), key=lambda x: x[1])
         race_ranking_sorted = reversed([el[0] for el in race_ranking_sorted])
         for i, car in enumerate(race_ranking_sorted):
-            idx, name, _car = next(drv for drv in drivers if drv[2] == car)
+            idx, name, skills, _car = next(drv for drv in drivers if drv[3] == car)
             is_car = car == player_car_name
             fgc = self.props.menu_args.text_fg if is_car else self.props.menu_args.text_bg
             txt = OnscreenText(

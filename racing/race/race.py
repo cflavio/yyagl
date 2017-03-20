@@ -7,7 +7,20 @@ from .gui.gui import RaceGui, RaceGuiProps
 from .fsm import RaceFsm
 
 
-class Race(GameObjectMdt):
+class RaceFacade(object):
+
+    def attach_obs(self, meth):
+        return self.event.attach(meth)
+
+    def detach_obs(self, meth):
+        return self.event.detach(meth)
+
+    @property
+    def results(self):
+        return self.gui.results
+
+
+class Race(GameObjectMdt, RaceFacade):
     __metaclass__ = ABCMeta
     logic_cls = RaceLogic
     event_cls = RaceEvent
