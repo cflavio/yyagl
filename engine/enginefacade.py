@@ -76,7 +76,6 @@ class EngineFacade(object):
     def set_cam_pos(self, pos):
         return self.base.camera.set_pos(pos)
 
-
     def load_font(self, font):
         return self.font_mgr.load_font(font)
 
@@ -84,8 +83,8 @@ class EngineFacade(object):
     def version(self):
         return self.logic.version
 
-    def open_browser(self):
-        return self.gui.open_browser
+    def open_browser(self, url):
+        return self.gui.open_browser(url)
 
     def toggle_pause(self):
         return self.pause.logic.toggle()
@@ -112,6 +111,39 @@ class EngineFacade(object):
         return self.shader_mgr.toggle_shader()
 
     @property
+    def is_runtime(self):
+        return self.logic.is_runtime
+
+    @property
+    def lang_codes(self):
+        return self.lang_mgr.lang_codes
+
+    @property
+    def curr_lang(self):
+        return self.lang_mgr.curr_lang
+
+    def set_lang(self, lang):
+        return eng.lang_mgr.set_lang(lang)
+
+    @property
+    def languages(self):
+        return self.logic.cfg.languages
+
+    @property
+    def resolutions(self):
+        return self.gui.resolutions
+
+    @property
+    def closest_res(self):
+        return self.gui.closest_res
+
+    def set_resolution(self, res):
+        return self.gui.set_resolution(res)
+
+    def toggle_fullscreen(self):
+        return self.gui.toggle_fullscreen()
+
+    @property
     def is_server_active(self):
         return self.server.is_active
 
@@ -126,8 +158,8 @@ class EngineFacade(object):
         return self.server.send(msgs)
 
     @property
-    def  car_mapping(self):
-        return  self.server.car_mapping
+    def car_mapping(self):
+        return self.server.car_mapping
 
     def destroy_server(self):
         return self.server.destroy()

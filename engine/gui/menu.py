@@ -131,6 +131,12 @@ class MenuFacade(object):
     def push_page(self, page):
         return self.logic.push_page(page)
 
+    def attach_obs(self, meth):
+        return self.gui.attach(meth)
+
+    def detach_obs(self, meth):
+        return self.gui.detach(meth)
+
 
 class Menu(GameObjectMdt, MenuFacade):
     gui_cls = MenuGui

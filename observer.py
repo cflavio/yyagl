@@ -17,8 +17,9 @@ class Subject(object):
             meths = [obs for obs in self.observers if obs[0].__name__ == meth]
             sorted_observers = sorted(meths, key=lambda obs: obs[1])
             map(lambda obs: obs[0](*args, **kwargs), sorted_observers)
-        except TypeError:
-            eng.log('\n\nERROR: %s - %s\n\n' % (str(self), str(meth)))
+        except TypeError as e:
+            eng.log('\n\nERROR: %s - %s\n%s\n\n' % (
+                str(self), str(meth), str(e)))
 
     def destroy(self):
         self.observers = None

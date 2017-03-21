@@ -32,6 +32,9 @@ class PageGui(Gui):
         self._set_buttons()
         self.transition_enter()
 
+    def add_widget(self, wdg):
+        self.widgets += [wdg]
+
     def on_arrow(self, direction):
         if not self.curr_wdg.on_arrow(direction):
             next_wdg = self.get_next_widget(direction)
