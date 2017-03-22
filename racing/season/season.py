@@ -28,6 +28,14 @@ class SeasonFacade(object):
     def ranking(self):
         return self.logic.ranking
 
+    @property
+    def drivers(self):
+        return self.logic.drivers
+
+    @drivers.setter
+    def drivers(self, val):
+        self.logic.drivers = val
+
 
 class Season(GameObjectMdt, SeasonFacade):
     logic_cls = SeasonLogic

@@ -26,7 +26,20 @@ class RaceEvent(Event):
     def fire_menu(self):
         self.ignore('escape-up')
         eng.show_cursor()
-        self.menu_cls()
+        self.ingame_menu = self.menu_cls()
+        self.ingame_menu.gui.menu.attach_obs(self.on_ingame_back)
+        self.ingame_menu.gui.menu.attach_obs(self.on_ingame_exit)
+
+    def on_ingame_back(self):
+        self.register_menu()
+        eng.hide_cursor()
+        self.ingame_menu.destroy()
+
+    def on_ingame_exit(self):
+        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
+            self.mdt.logic.exit_play()
+        self.ingame_menu.destroy()
+        self.notify('on_ingame_exit_confirm')
 
     def register_menu(self):
         self.accept('escape-up', self.fire_menu)

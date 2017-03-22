@@ -174,5 +174,11 @@ class EngineFacade(object):
     def client_send(msgs):
         return self.client.send(msgs)
 
+    def client_start(self, meth, addr):
+        return self.client.start(meth, addr)
+
+    def client_stop(self):
+        return self.client.destroy()
+
     def destroy_client(self):
         return self.client.destroy()
