@@ -25,6 +25,19 @@ class TuningFacade(object):
     def load(self, ranking):
         return self.logic.load(ranking)
 
+    def to_dct(self):
+        return self.logic.to_dct()
+
+    def show_gui(self):
+        return self.gui.show()
+
+    def hide_gui(self):
+        return self.gui.hide()
+
+    @property
+    def tunings(self):
+        return self.logic.tunings
+
 
 class Tuning(GameObjectMdt, TuningFacade):
     __metaclass__ = ABCMeta

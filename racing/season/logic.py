@@ -1,6 +1,7 @@
 from yyagl.gameobject import Logic
 from yyagl.racing.ranking.ranking import Ranking
 from yyagl.racing.tuning.tuning import Tuning, TuningProps
+from yyagl.racing.race.race import RaceSinglePlayer, RaceServer, RaceClient
 
 
 class SeasonLogic(Logic):
@@ -38,6 +39,15 @@ class SeasonLogic(Logic):
             next_track = self.props.tracks[self.props.tracks.index(track) + 1]
             self.notify('on_season_cont', next_track, self.props.player_car,
                         self.drivers)
+
+    def create_race_server(self, keys, joystick, sounds):
+        self.race = RaceServer(keys, joystick, sounds)
+
+    def create_race_client(self, keys, joystick, sounds):
+        self.race = RaceClient(keys, joystick, sounds)
+
+    def create_race(self, race_props):
+        self.race = RaceSinglePlayer(race_props)
 
     def destroy(self):
         self.tuning.detach_obs(self.on_tuning_done)

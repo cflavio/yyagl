@@ -305,7 +305,7 @@ class CarPlayerLogic(CarLogic):
         if self.last_time_start:
             self.mdt.gui.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__check_wrong_way()
-        ranking = game.fsm.race.logic.ranking()  # move this to race
+        ranking = game.logic.season.race.logic.ranking()  # move this to race
         r_i = ranking.index(self.mdt.name) + 1
         self.mdt.gui.ranking_txt.setText(str(r_i) + "'")
 
