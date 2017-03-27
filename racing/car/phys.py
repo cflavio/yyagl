@@ -69,7 +69,7 @@ class CarPhys(Phys):
         self.pnode = self.mdt.gfx.nodepath.node()
         self.pnode.setMass(self.mass)
         self.pnode.setDeactivationEnabled(False)
-        eng.attachRigidBody(self.pnode)
+        eng.attach_rigid_body(self.pnode)
         eng.add_collision_obj(self.pnode)
 
     def __set_vehicle(self):
@@ -79,7 +79,7 @@ class CarPhys(Phys):
         tuning = self.vehicle.getTuning()
         tuning.setSuspensionCompression(self.suspension_compression)
         tuning.setSuspensionDamping(self.suspension_damping)
-        eng.attachVehicle(self.vehicle)
+        eng.attach_vehicle(self.vehicle)
 
     def __set_wheels(self):
         fwheel_bounds = self.mdt.gfx.wheels['fr'].get_tight_bounds()
@@ -177,7 +177,7 @@ class CarPhys(Phys):
     def gnd_name(pos):
         top = pos + (0, 0, 1)
         bottom = pos + (0, 0, -1)
-        result = eng.rayTestClosest(top, bottom)
+        result = eng.ray_test_closest(top, bottom)
         ground = result.get_node()
         return ground.get_name() if ground else ''
 
@@ -213,7 +213,7 @@ class CarPhys(Phys):
             1 + .01 * self.props.driver_suspensions)
 
     def destroy(self):
-        eng.removeVehicle(self.vehicle)
+        eng.remove_vehicle(self.vehicle)
         self.pnode = self.vehicle = self.__finds = self.__track_phys = \
             self.coll_mesh = None
         Phys.destroy(self)

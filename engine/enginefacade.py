@@ -36,42 +36,44 @@ class EngineFacade(object):
     def find_geoms(self, mesh, name):
         return self.phys.find_geoms(mesh, name)
 
-    def attachRigidBody(self, node):
+    def attach_rigid_body(self, node):
         return self.phys.world_phys.attachRigidBody(node)
 
-    def removeRigidBody(self, node):
+    def remove_rigid_body(self, node):
         return self.phys.world_phys.removeRigidBody(node)
 
-    def attachGhost(self, node):
+    def attach_ghost(self, node):
         return self.phys.world_phys.attachGhost(node)
 
-    def removeGhost(self, node):
+    def remove_ghost(self, node):
         return self.phys.world_phys.removeGhost(node)
 
     def add_collision_obj(self, node):
         self.phys.collision_objs += [node]
 
-    def attachVehicle(self, vehicle):
+    def attach_vehicle(self, vehicle):
         return self.phys.world_phys.attachVehicle(vehicle)
 
-    def removeVehicle(self, vehicle):
+    def remove_vehicle(self, vehicle):
         return self.phys.world_phys.removeVehicle(vehicle)
 
-    def rayTestClosest(self, top, bottom):
+    def ray_test_closest(self, top, bottom):
         return self.phys.world_phys.rayTestClosest(top, bottom)
 
-    def rayTestAll(self, top, bottom):
+    def ray_test_all(self, top, bottom):
         return self.phys.world_phys.rayTestAll(top, bottom)
 
     def log(self, msg):
         return self.log_mgr.log(msg)
 
-    def do_later(self, time, meth, args=[]):
-        return taskMgr.doMethodLater(time, lambda task: meth(*args), meth.__name__)
+    @staticmethod
+    def do_later(time, meth, args=[]):
+        return taskMgr.doMethodLater(time, lambda task: meth(*args),
+                                     meth.__name__)
 
-    def load_model(self, filename, callback=None, extraArgs=[]):
-        dct = {'callback': callback, 'extraArgs': extraArgs} if callback else {}
-        return self.gfx.load_model(filename, **dct)
+    def load_model(self, filename, callback=None, extra_args=[]):
+        args = {'callback': callback, 'extraArgs': extra_args}
+        return self.gfx.load_model(filename, **(args if callback else {}))
 
     def set_cam_pos(self, pos):
         return self.base.camera.set_pos(pos)
@@ -123,7 +125,7 @@ class EngineFacade(object):
         return self.lang_mgr.curr_lang
 
     def set_lang(self, lang):
-        return eng.lang_mgr.set_lang(lang)
+        return self.lang_mgr.set_lang(lang)
 
     @property
     def languages(self):
@@ -142,6 +144,9 @@ class EngineFacade(object):
 
     def toggle_fullscreen(self):
         return self.gui.toggle_fullscreen()
+
+    def start_server(self, cb_msg, cb_connection):
+        return self.server.start(cb_msg, cb_connection)
 
     @property
     def is_server_active(self):
@@ -171,7 +176,7 @@ class EngineFacade(object):
     def register_client_cb(self, process_client):
         return self.client.register_cb(process_client)
 
-    def client_send(msgs):
+    def client_send(self, msgs):
         return self.client.send(msgs)
 
     def client_start(self, meth, addr):

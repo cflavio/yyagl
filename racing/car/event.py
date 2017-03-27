@@ -109,7 +109,7 @@ class CarEvent(Event):
         car_pos = self.mdt.gfx.nodepath.get_pos()
         top = (car_pos.x, car_pos.y, car_pos.z + 50)
         bottom = (car_pos.x, car_pos.y, car_pos.z - 50)
-        hits = eng.rayTestAll(top, bottom).getHits()
+        hits = eng.ray_test_all(top, bottom).getHits()
         road_n = self.props.road_name
         for hit in [hit for hit in hits if road_n in hit.getNode().getName()]:
             self.mdt.logic.last_wp = self.mdt.logic.closest_wp()

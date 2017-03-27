@@ -15,7 +15,7 @@ class RocketPhys(Phys):
         self.node.addShape(BulletSphereShape(.5))
         self.np = self.parent.attachNewNode(self.node)
         self.np.setPos(0, 0, 1.5)
-        eng.attachRigidBody(self.node)
+        eng.attach_rigid_body(self.node)
         self.mdt.gfx.gfx_np.reparentTo(self.np)
         self.mdt.gfx.gfx_np.setPos(0, 0, 0)
         rot_mat = Mat4()
@@ -25,7 +25,7 @@ class RocketPhys(Phys):
 
     def destroy(self):
         if hasattr(self, 'node'):  # has not been fired
-            eng.removeRigidBody(self.node)
+            eng.remove_rigid_body(self.node)
             self.np = self.np.remove_node()
         self.parent = None
         Phys.destroy(self)

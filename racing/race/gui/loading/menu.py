@@ -48,19 +48,19 @@ class LoadingMenuProps(object):
             self, loading, track_path, car_path, drivers, tracks,
             track_name_transl, single_race, grid, cars_path, drivers_path,
             joystick, keys, menu_args):
-         self.loading = loading
-         self.track_path = track_path
-         self.car_path = car_path
-         self.drivers = drivers
-         self.tracks = tracks
-         self.track_name_transl = track_name_transl
-         self.single_race = single_race
-         self.grid = grid
-         self.cars_path = cars_path
-         self.drivers_path = drivers_path
-         self.joystick = joystick
-         self.keys = keys
-         self.menu_args = menu_args
+        self.loading = loading
+        self.track_path = track_path
+        self.car_path = car_path
+        self.drivers = drivers
+        self.tracks = tracks
+        self.track_name_transl = track_name_transl
+        self.single_race = single_race
+        self.grid = grid
+        self.cars_path = cars_path
+        self.drivers_path = drivers_path
+        self.joystick = joystick
+        self.keys = keys
+        self.menu_args = menu_args
 
 
 class LoadingMenu(Menu):

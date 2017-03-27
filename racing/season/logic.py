@@ -16,6 +16,7 @@ class SeasonLogic(Logic):
         self.drivers = s_p.drivers
         self.tracks = s_p.tracks
         self.player_car = s_p.player_car
+        self.race = None
 
     def start(self):
         self.ranking.logic.reset()

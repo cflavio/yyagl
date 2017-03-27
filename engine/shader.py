@@ -149,6 +149,8 @@ class ShaderMgr(Colleague):
         with open('yyagl/assets/shaders/main.frag') as f:
             frag = f.read()
         frag = frag.replace('<LIGHTS>', str(len(self.lights)))
+        # use PTALVecBaseX instead
+        # setShaderInput('vec3argname', PTALVecBase3(((0, 0, 0), (1, 1, 1))))
         render.setShader(Shader.make(Shader.SLGLSL, vert, frag))
         render.setShaderInput('num_lights', len(self.lights))
         map(lambda lgt: self.set_lgt_args(*lgt), enumerate(self.lights))

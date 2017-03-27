@@ -32,8 +32,8 @@ class Results(Subject):
         self.result_frm = DirectFrame(
             frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
         laps = len(lap_times)
-        pars = {'scale': .1, 'fg': self.props.menu_args.text_bg,
-                'font': self.props.menu_args.font}
+        text_bg = self.props.menu_args.text_bg
+        pars = {'scale': .1, 'fg': text_bg, 'font': self.props.menu_args.font}
         # ref into race
         self.__res_txts = [OnscreenText(
             str(round(lap_times[i], 2)), pos=(0, .47 - .2 * (i + 1)), **pars)
@@ -48,9 +48,10 @@ class Results(Subject):
         race_ranking_sorted = sorted(race_ranking.items(), key=lambda x: x[1])
         race_ranking_sorted = reversed([el[0] for el in race_ranking_sorted])
         for i, car in enumerate(race_ranking_sorted):
-            idx, name, skills, _car = next(drv for drv in drivers if drv[3] == car)
+            carinfo = next(drv for drv in drivers if drv[3] == car)
+            idx, name, skills, _car = carinfo
             is_car = car == player_car_name
-            fgc = self.props.menu_args.text_fg if is_car else self.props.menu_args.text_bg
+            fgc = self.props.menu_args.text_fg if is_car else text_bg
             txt = OnscreenText(
                 text=str(i + 1) + '. ' + name, align=TextNode.A_left,
                 scale=.072, pos=(.68, .44 - .16 * (i + 1)),

@@ -137,7 +137,8 @@ class RaceEventClient(RaceEvent):
             car_name = data_lst[i]
             car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
             car_hpr = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
-            netcars = [car for car in self.mdt.logic.cars if car.__class__ == NetworkCar]
+            cars = self.mdt.logic.cars
+            netcars = [car for car in cars if car.__class__ == NetworkCar]
             for car in netcars:
                 if car_name in car.path:
                     LerpPosInterval(car.gfx.nodepath, .2, car_pos).start()

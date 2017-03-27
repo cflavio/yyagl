@@ -46,7 +46,8 @@ class LoadingPageGui(PageGui):
             track_number = ' (%s/2)' % track_num
         track_txt = OnscreenText(
             text=_('track: ') + self.props.track_name_transl + track_number,
-            scale=.08, pos=(0, .56), font=self.font, fg=self.text_bg, wordwrap=12)
+            scale=.08, pos=(0, .56), font=self.font, fg=self.text_bg,
+            wordwrap=12)
         self.set_grid()
         self.set_ranking()
         self.set_controls()

@@ -94,6 +94,9 @@ class RaceLogic(Logic):
         self.preview = None
         self.curr_load_txt = None
         self.props = racelogic_props
+        self.track = None
+        self.cars = None
+        self.player_car = None
         Logic.__init__(self, mdt)
 
     def load_stuff(self, track_path, car_path, player_cars):

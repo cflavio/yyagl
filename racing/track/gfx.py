@@ -51,7 +51,7 @@ class TrackGfx(Gfx):
         else:
             path = self.props.path + '/' + self.props.model_name
             s_m = self.__set_submod
-            eng.load_model(path, callback=s_m, extraArgs=[time])
+            eng.load_model(path, callback=s_m, extra_args=[time])
 
     def __set_submod(self, model, time):
         d_t = round(globalClock.getFrameTime() - time, 2)

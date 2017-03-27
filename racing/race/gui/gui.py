@@ -9,8 +9,9 @@ from .minimap import Minimap
 class RaceGuiProps(object):
 
     def __init__(
-        self, minimap_path, minimap_image, col_dct, font, cars, menu_args,
-        drivers_img, cars_imgs, share_urls, share_imgs, track_name, car_name):
+            self, minimap_path, minimap_image, col_dct, font, cars, menu_args,
+            drivers_img, cars_imgs, share_urls, share_imgs, track_name,
+            car_name):
         self.minimap_path = minimap_path
         self.minimap_image = minimap_image
         self.col_dct = col_dct

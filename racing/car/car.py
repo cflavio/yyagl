@@ -89,7 +89,7 @@ class CarFacade(object):
     def lap_times(self):
         return self.logic.lap_times
 
-    def getLinearVelocity(self):
+    def get_linear_velocity(self):
         return self.phys.vehicle.getChassis().getLinearVelocity()
 
     @property

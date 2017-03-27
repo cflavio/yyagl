@@ -85,11 +85,11 @@ class TrackPhys(Phys):
     def __build(self, shape, geom_name, ghost):
         if ghost:
             ncls = BulletGhostNode
-            meth = eng.attachGhost
+            meth = eng.attach_ghost
             lst = self.ghosts
         else:
             ncls = BulletRigidBodyNode
-            meth = eng.attachRigidBody
+            meth = eng.attach_rigid_body
             lst = self.rigid_bodies
         nodepath = eng.attach_node(ncls(geom_name))
         self.nodes += [nodepath]
@@ -167,8 +167,8 @@ class TrackPhys(Phys):
     def destroy(self):
         self.model.removeNode()
         map(lambda chl: chl.remove_node(), self.nodes)
-        map(eng.removeRigidBody, self.rigid_bodies)
-        map(eng.removeGhost, self.ghosts)
+        map(eng.remove_rigid_body, self.rigid_bodies)
+        map(eng.remove_ghost, self.ghosts)
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
             self.waypoints = None
         map(lambda bon: bon.destroy(), self.bonuses)

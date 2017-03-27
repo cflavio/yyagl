@@ -17,9 +17,12 @@ from .widget import Widget
 class PageGui(Gui):
 
     def __init__(self, mdt, menu):
+        # don't pass the menu
         Gui.__init__(self, mdt)
         self.menu = menu
         self.widgets = []
+        # infer widgets: attach widgets to page's root nodes (center and
+        # corners) and detect them with getChildren()
         self.build_page()
         self.update_texts()
         self.curr_wdg = self.get_next_widget((-.1, 0, -1), (-3.6, 1, 1))

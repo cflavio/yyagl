@@ -13,8 +13,8 @@ class BonusPhys(Phys):
         self.ghost.addShape(BulletBoxShape((1, 1, 2.5)))
         ghostNP = eng.attach_node(self.ghost)
         ghostNP.setPos(self.pos)
-        eng.attachGhost(self.ghost)
+        eng.attach_ghost(self.ghost)
 
     def destroy(self):
-        self.ghost = eng.removeGhost(self.ghost)
+        self.ghost = eng.remove_ghost(self.ghost)
         Phys.destroy(self)
