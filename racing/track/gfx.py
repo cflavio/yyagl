@@ -33,7 +33,6 @@ class TrackGfx(Gfx):
         self.loaders = []
         self.__actors = []
         self.__flat_roots = {}
-        self.has_flattened = False
         self.props = trackgfx_props
         Gfx.__init__(self, mdt)
 
@@ -191,7 +190,10 @@ class TrackGfx(Gfx):
         Gfx.async_build(self)
 
     def end_flattening(self, model=None):
-        self.has_flattened = True
+        filename = self.props.name + '_' + eng.version + '.bam'
+        if not exists(filename):
+            eng.log('writing ' + filename)
+            self.model.writeBamFile(filename)
 
     def __set_light(self):
         if self.props.shaders:
@@ -215,11 +217,6 @@ class TrackGfx(Gfx):
         render.setShaderAuto()
 
     def destroy(self):
-        if self.has_flattened:
-            filename = self.props.name + '_' + eng.version + '.bam'
-            if not exists(filename):
-                eng.log('writing ' + filename)
-                self.model.writeBamFile(filename)
         self.model.removeNode()
         if not self.props.shaders:
             render.clearLight(self.ambient_np)
