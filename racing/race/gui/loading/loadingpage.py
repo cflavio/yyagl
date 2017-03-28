@@ -155,8 +155,9 @@ class LoadingPageGui(PageGui):
         first_txt = _(
             'We need to elaborate the track on your system (this process '
             'reduces the bandwith required to you for downloading the game), '
-            'so you may notice some slowdonws while you play. Everything will '
-            'be smoother once the track has been processed!')
+            'so you may notice some slowdonws while you play (at the '
+            'beginning). Everything will be smoother once the track has been '
+            'processed!')
         txt = OnscreenText(
             text=first_txt, scale=.06, pos=(1.0, .9), font=self.font,
             fg=self.text_err, bg=(.8, .8, .8, .4), wordwrap=24)

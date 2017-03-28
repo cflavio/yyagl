@@ -176,7 +176,7 @@ class CarPlayerGui(CarGui):
         self.lap_lab = OnscreenText(
             text=_('lap:'), pos=(-.3, -.2), **pars)
         self.time_lab = OnscreenText(_('time:'), pos=(-.3, -.3), **pars)
-        self.best_lab = OnscreenText(_('best time:'), pos=(-.3, -.4), **pars)
+        self.best_lab = OnscreenText(_('best lap:'), pos=(-.3, -.4), **pars)
         self.ranking_lab = OnscreenText(_('ranking:'), pos=(-.3, -.5), **pars)
         self.damages_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
 
