@@ -8,8 +8,8 @@ def build_osx(target, source, env):
     int_str = '-nointernet' if env['NOINTERNET'] else ''
     build_command = bld_cmd(env['SUPERMIRROR']).format(
         path=path, name=env['NAME'], Name=env['NAME'].capitalize(),
-        version=ver, p3d_path=env['P3D_PATH'], platform='osx_i386',
-        nointernet=nointernet)
+        version=ver, p3d_path=env['P3D_PATH'][:-4] + 'nopygame.p3d',
+        platform='osx_i386', nointernet=nointernet)
     system(build_command)
     osx_path = '{Name}.app'
     osx_tgt = '{name}-{version}{int_str}-osx.zip'
