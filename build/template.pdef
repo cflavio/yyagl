@@ -18,13 +18,21 @@ class <Name>(p3d):
     for _dir in ['<enginepath>/licenses', 'assets', '<enginepath>/assets']:
         dir(_dir, newDir=_dir)
     file('license.txt')
-    exclude = ['options.yml']
+    _exclude = ['options.yml']
     for extension in ['mo', 'dds', 'yml', 'vert', 'frag']:
         for root, dirnames, filenames in walk('.'):
             files = [
                 filename for filename in filenames
-                if filename.endswith('.'+extension) and
-                    not filename in exclude]
+                if filename.endswith('.' + extension) and
+                    not filename in _exclude]
             for filename in files:
                 file(join(root, filename), newDir=root)
+    for root, dirnames, filenames in walk('assets/models/tracks'):
+        file(root + '/track.bam')
+        for filename in filenames:
+            fname = root + '/' + filename
+            if fname.endswith('.egg') and not fname.endswith('Anim.egg') \
+                    and not fname.endswith('collision.egg'):
+                exclude(fname)
+
     mainModule('main')

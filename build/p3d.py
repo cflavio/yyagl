@@ -1,4 +1,4 @@
-from os import remove, system, path as os_path
+from os import remove, system, path as os_path, walk
 from os.path import dirname, realpath
 from shutil import move
 from .build import ver, path
@@ -23,6 +23,9 @@ def build(suff, env):
 
 
 def build_p3d(target, source, env):
+    for root, dirnames, filenames in walk('assets/models/tracks'):
+        for dname in dirnames:
+            system('python yyagl/build/process_track.py ' + dname)
     start_dir = os_path.abspath('.') + '/'
     file_path = dirname(realpath(__file__))
     curr_path = dirname(realpath(file_path))

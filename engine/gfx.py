@@ -28,7 +28,7 @@ class EngineGfx(Gfx):
     def load_model(*args, **kwargs):
         if os.path.exists(args[0] + '.bam'):
             args[0] += '.bam'
-        loader.loadModel(*args, **kwargs)
+        return loader.loadModel(*args, **kwargs)
 
     @staticmethod
     def __set_toon():

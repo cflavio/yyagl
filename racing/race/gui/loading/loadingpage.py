@@ -51,7 +51,6 @@ class LoadingPageGui(PageGui):
         self.set_grid()
         self.set_ranking()
         self.set_controls()
-        self.set_first_loading()
         self.widgets += [self.load_txt, track_txt]
         PageGui.build_page(self, False)
 
@@ -146,21 +145,6 @@ class LoadingPageGui(PageGui):
             text=_('fire') + ': ' + self.props.keys['button'],
             align=TextNode.A_left, scale=.072, pos=(.8, -.54),
             font=self.font, fg=self.text_bg)
-        self.widgets += [txt]
-
-    def set_first_loading(self):
-        filename = self.props.track_path + '_' + eng.version + '.bam'
-        if exists(filename):
-            return
-        first_txt = _(
-            'We need to elaborate the track on your system (this process '
-            'reduces the bandwith required to you for downloading the game), '
-            'so you may notice some slowdonws while you play (at the '
-            'beginning). Everything will be smoother once the track has been '
-            'processed!')
-        txt = OnscreenText(
-            text=first_txt, scale=.06, pos=(1.0, .9), font=self.font,
-            fg=self.text_err, bg=(.8, .8, .8, .4), wordwrap=24)
         self.widgets += [txt]
 
 
