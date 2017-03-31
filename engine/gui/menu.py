@@ -20,6 +20,17 @@ class MenuArgs(object):
         self.social_path = social_path
         self.text_err = text_err
 
+    @property
+    def btn_args(self):  # it may be used without a menu e.g. results
+        return {
+            'scale': self.text_scale,
+            'text_font': self.font,
+            'text_fg': self.text_fg,
+            'frameColor': self.btn_color,
+            'frameSize': self.btn_size,
+            'rolloverSound': self.rollover,
+            'clickSound': self.click}
+
 
 class MenuGui(Gui):
 

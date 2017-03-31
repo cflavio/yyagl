@@ -4,6 +4,7 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectFrame import DirectFrame
 from yyagl.engine.gui.imgbtn import ImageButton
 from yyagl.observer import Subject
+from direct.gui.DirectButton import DirectButton
 
 
 class ResultProps(object):
@@ -100,7 +101,10 @@ class Results(Subject):
             self.notify('on_race_step', race_ranking)
             self.destroy()
             Subject.destroy(self)
-        self.tsk = eng.do_later(10.0, step)
+        cont_btn = DirectButton(
+            text=_('Continue'), pos=(0, 1, -.6), command=step,
+            **self.props.menu_args.btn_args)
+        self.__buttons += [cont_btn]
 
     def destroy(self):
         if not self.result_frm or self.result_frm.isEmpty():
@@ -110,4 +114,3 @@ class Results(Subject):
         map(lambda txt: txt.destroy(), self.__res_txts)
         map(lambda btn: btn.destroy(), self.__buttons)
         self.result_frm.destroy()
-        self.tsk = taskMgr.remove(self.tsk)
