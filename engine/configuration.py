@@ -11,7 +11,8 @@ class Configuration(object):
             model_path='assets/models', lang='en', lang_path='assets/locale',
             lang_domain='ya2_game', languages=['English', 'Italiano'],
             shaders=False, gamma=1.0, menu_joypad=True, cursor_hidden=False,
-            cursor_path='', cursor_scale=(1, 1, 1), cursor_hotspot=(0, 0)):
+            cursor_path='', cursor_scale=(1, 1, 1), cursor_hotspot=(0, 0),
+            volume=1):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title
@@ -33,6 +34,7 @@ class Configuration(object):
         self.cursor_path = cursor_path
         self.cursor_scale = cursor_scale
         self.cursor_hotspot = cursor_hotspot
+        self.volume = volume
         self.__configure()
 
     @staticmethod

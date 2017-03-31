@@ -38,7 +38,7 @@ class Engine(GameObjectMdt, EngineFacade):
             [('phys', EnginePhys, [self])],
             [('event', EngineEvent.init_cls(), [self, cfg.menu_joypad])],
             [('gui', EngineGui.init_cls(), [self])],
-            [('audio', EngineAudio, [self])],
+            [('audio', EngineAudio, [self, cfg.volume])],
             [('pause', PauseMgr, [self])],
             [('font_mgr', FontMgr, [self])],
             [('server', Server, [self])],

@@ -94,6 +94,9 @@ class EngineFacade(object):
     def play(self, sfx):
         return self.audio.play(sfx)
 
+    def set_volume(self, vol):
+        return self.audio.set_volume(vol)
+
     def show_cursor(self):
         return self.gui.cursor.show()
 
