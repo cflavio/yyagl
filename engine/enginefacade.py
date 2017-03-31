@@ -109,6 +109,9 @@ class EngineFacade(object):
     def hide_standard_cursor(self):
         return self.gui.cursor.hide_standard()
 
+    def cursor_top(self):
+        return self.gui.cursor.cursor_top()
+
     def set_amb_lgt(self, col):
         return self.shader_mgr.set_amb_lgt(col)
 

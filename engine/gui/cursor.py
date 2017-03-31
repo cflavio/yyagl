@@ -33,6 +33,9 @@ class Cursor:
     def hide_standard(self):
         self.__set_standard_curson(False)
 
+    def cursor_top(self):
+        self.cursor_img.reparent_to(self.cursor_img.get_parent())
+
     def on_frame(self):
         if base.mouseWatcherNode.hasMouse():
             x = base.mouseWatcherNode.getMouseX()
