@@ -12,12 +12,14 @@ class PauseGui(Gui):
         Gui.__init__(self, mdt)
         self.pause_frame = None
 
-    def toggle(self):
+    def toggle(self, show_frm=True):
         if not self.mdt.logic.is_paused:
-            self.pause_frame = DirectFrame(frameColor=(.3, .3, .3, .7),
-                                           frameSize=(-1.8, 1.8, -1, 1))
+            if show_frm:
+                self.pause_frame = DirectFrame(frameColor=(.3, .3, .3, .7),
+                                               frameSize=(-1.8, 1.8, -1, 1))
         else:
-            self.pause_frame.destroy()
+            if self.pause_frame:
+                self.pause_frame.destroy()
 
 
 class PauseLogic(Logic):
@@ -35,8 +37,15 @@ class PauseLogic(Logic):
     def __process_task(self, tsk):
         func = tsk.getFunction()  # ordinary tasks
         mod = func.__module__
-        sys_mod = sys.modules[mod].__file__.find(self.direct_dir) < 0
-        is_act = func.im_class.__name__ == 'ActorInterval'
+        #sys_mod = sys.modules[mod].__file__.find(self.direct_dir) < 0
+        # runtime: AttributeError: 'module' object has no attribute '__file__'
+        modfile = ''
+        if "from '" in str(sys.modules[mod]):
+            modfile = str(sys.modules[mod]).split("from '")[1][:-2]
+        sys_mod = modfile.find(self.direct_dir) < 0
+        is_act = False
+        if hasattr(func, 'im_class'):
+            is_act = func.im_class.__name__ == 'ActorInterval'
         if mod.find('direct.interval') == 0 and not is_act:
             self.paused_tasks.append(tsk)  # python-based intervals
             tsk.interval.pause()
@@ -110,8 +119,8 @@ class PauseLogic(Logic):
         self.is_paused = False
         return self.is_paused
 
-    def toggle(self):
-        self.mdt.gui.toggle()
+    def toggle(self, show_frm=True):
+        self.mdt.gui.toggle(show_frm)
         (self.resume if self.is_paused else self.pause)()
 
 

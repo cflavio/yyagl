@@ -39,6 +39,8 @@ class PageGui(Gui):
         self.widgets += [wdg]
 
     def on_arrow(self, direction):
+        if not self.curr_wdg:
+            return
         if not self.curr_wdg.on_arrow(direction):
             next_wdg = self.get_next_widget(direction)
             if next_wdg:
@@ -47,6 +49,8 @@ class PageGui(Gui):
                 self.curr_wdg.on_wdg_enter()
 
     def on_enter(self):
+        if not self.curr_wdg:
+            return
         if self.curr_wdg.on_enter():
             self.enable()
 

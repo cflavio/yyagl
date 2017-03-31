@@ -293,6 +293,7 @@ class CarPlayerLogic(CarLogic):
     def __init__(self, mdt, carlogic_props):
         CarLogic.__init__(self, mdt, carlogic_props)
         self.camera = Camera(mdt.gfx.nodepath, carlogic_props.cam_vec)
+        self.camera.camera.set_pos(self.start_pos + (0, 0, 50))
 
     def update(self, input_dct):
         CarLogic.update(self, input_dct)

@@ -125,9 +125,9 @@ class CarPlayerEvent(CarEvent):
 
     def __init__(self, mdt, carevent_props):
         CarEvent.__init__(self, mdt, carevent_props)
-        self.accept('f11', self.mdt.gui.toggle)
+        if not eng.is_runtime:
+            self.accept('f11', self.mdt.gui.toggle)
         self.has_weapon = False
-        self.crash_tsk = None
         state = self.mdt.fsm.getCurrentOrNextState()
         self.input_dct_bld = InputDctBuilder.build(state,
                                                    carevent_props.joystick)
@@ -168,8 +168,7 @@ class CarPlayerEvent(CarEvent):
 
     def __process_wall(self):
         eng.play(self.mdt.audio.crash_sfx)
-        args = .1, lambda tsk: self._on_crash(), 'crash sfx'
-        self.crash_tsk = taskMgr.doMethodLater(*args)
+        self._on_crash()
 
     def __process_nonstart_goals(self, lap_number, laps):
         curr_lap = min(laps, lap_number)
@@ -198,8 +197,6 @@ class CarPlayerEvent(CarEvent):
         return self.input_dct_bld.build_dct(self.mdt.ai, self.has_weapon)
 
     def destroy(self):
-        if self.crash_tsk:
-            taskMgr.remove(self.crash_tsk)
         map(self.ignore, ['f11', self.props.keys['button']])
         CarEvent.destroy(self)
 

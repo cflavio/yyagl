@@ -17,7 +17,6 @@ class RaceEvent(Event):
         Event.__init__(self, mdt)
         self.menu_cls = menu_cls
         self.accept('p-up', eng.toggle_pause)
-        self.register_menu()
         self.last_sent = globalClock.getFrameTime()  # for networking
 
     def network_register(self):
@@ -31,11 +30,15 @@ class RaceEvent(Event):
         self.ingame_menu.gui.menu.attach_obs(self.on_ingame_exit)
 
     def on_ingame_back(self):
+        self.ingame_menu.gui.menu.detach_obs(self.on_ingame_back)
+        self.ingame_menu.gui.menu.detach_obs(self.on_ingame_exit)
         self.register_menu()
         eng.hide_cursor()
         self.ingame_menu.destroy()
 
     def on_ingame_exit(self):
+        self.ingame_menu.gui.menu.detach_obs(self.on_ingame_back)
+        self.ingame_menu.gui.menu.detach_obs(self.on_ingame_exit)
         if self.mdt.fsm.getCurrentOrNextState() != 'Results':
             self.mdt.logic.exit_play()
         self.ingame_menu.destroy()

@@ -41,6 +41,7 @@ class RaceFsm(Fsm):
 
     def enterCountdown(self):
         eng.hide_cursor()
+        self.mdt.event.register_menu()
         self.countdown = Countdown(self.countdown_sfx, self.menu_args.font)
         self.countdown.attach(self.on_start_race)
         self.mdt.logic.enter_play()

@@ -7,9 +7,7 @@ class Cursor:
     def __init__(self, path, scale, hotspot):
         if not path:
             return
-        props = WindowProperties()
-        props.setCursorHidden(True)
-        base.win.requestProperties(props)
+        self.__set_standard_curson(False)
         self.cursor_img = OnscreenImage(path)
         self.cursor_img.setTransparency(True)
         self.cursor_img.setScale(scale)
@@ -18,11 +16,22 @@ class Cursor:
         self.hotspot_dy = scale[2] * (1 - 2 * hotspot[1])
         eng.event.attach(self.on_frame)
 
+    def __set_standard_curson(self, show):
+        props = WindowProperties()
+        props.setCursorHidden(not show)
+        base.win.requestProperties(props)
+
     def show(self):
         self.cursor_img.show()
 
+    def show_standard(self):
+        self.__set_standard_curson(True)
+
     def hide(self):
         self.cursor_img.hide()
+
+    def hide_standard(self):
+        self.__set_standard_curson(False)
 
     def on_frame(self):
         if base.mouseWatcherNode.hasMouse():

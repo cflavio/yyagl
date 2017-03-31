@@ -88,8 +88,8 @@ class EngineFacade(object):
     def open_browser(self, url):
         return self.gui.open_browser(url)
 
-    def toggle_pause(self):
-        return self.pause.logic.toggle()
+    def toggle_pause(self, show_frm=True):
+        return self.pause.logic.toggle(show_frm)
 
     def play(self, sfx):
         return self.audio.play(sfx)
@@ -97,8 +97,14 @@ class EngineFacade(object):
     def show_cursor(self):
         return self.gui.cursor.show()
 
+    def show_standard_cursor(self):
+        return self.gui.cursor.show_standard()
+
     def hide_cursor(self):
         return self.gui.cursor.hide()
+
+    def hide_standard_cursor(self):
+        return self.gui.cursor.hide_standard()
 
     def set_amb_lgt(self, col):
         return self.shader_mgr.set_amb_lgt(col)
