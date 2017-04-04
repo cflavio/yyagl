@@ -22,3 +22,8 @@ class EngineLogic(Logic):
     @property
     def is_runtime(self):
         return base.appRunner and base.appRunner.dom
+
+    @property
+    def curr_path(self):
+        return base.appRunner.p3dFilename.getDirname()+'/' \
+            if base.appRunner else ''

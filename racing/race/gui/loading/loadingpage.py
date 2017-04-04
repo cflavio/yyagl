@@ -70,9 +70,9 @@ class LoadingPageGui(PageGui):
             img = OnscreenImage(self.props.cars_path % car,
                                 pos=(-1.42, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
-            with open('yyagl/assets/shaders/filter.vert') as ffilter:
+            with open(eng.curr_path + 'yyagl/assets/shaders/filter.vert') as ffilter:
                 vert = ffilter.read()
-            with open('yyagl/assets/shaders/drv_car.frag') as f:
+            with open(eng.curr_path + 'yyagl/assets/shaders/drv_car.frag') as f:
                 frag = f.read()
             shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)
@@ -100,9 +100,9 @@ class LoadingPageGui(PageGui):
             img = OnscreenImage(self.props.cars_path % car[0],
                                 pos=(-.36, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
-            with open('yyagl/assets/shaders/filter.vert') as ffilter:
+            with open(eng.curr_path + 'yyagl/assets/shaders/filter.vert') as ffilter:
                 vert = ffilter.read()
-            with open('yyagl/assets/shaders/drv_car.frag') as ffilter:
+            with open(eng.curr_path + 'yyagl/assets/shaders/drv_car.frag') as ffilter:
                 frag = ffilter.read()
             shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)

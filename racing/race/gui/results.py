@@ -59,9 +59,9 @@ class Results(Subject):
                 font=self.props.menu_args.font, fg=fgc)
             img = OnscreenImage(self.props.cars_imgs % car,
                                 pos=(.58, 1, .47 - (i + 1) * .16), scale=.074)
-            with open('yyagl/assets/shaders/filter.vert') as f:
+            with open(eng.curr_path + 'yyagl/assets/shaders/filter.vert') as f:
                 vert = f.read()
-            with open('yyagl/assets/shaders/drv_car.frag') as f:
+            with open(eng.curr_path + 'yyagl/assets/shaders/drv_car.frag') as f:
                 frag = f.read()
             shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)

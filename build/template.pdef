@@ -15,24 +15,27 @@ class <Name>(p3d):
         display_name='<Name>')
     dir('<enginepath>/thirdparty/yaml', 'yaml')
     file('<enginepath>/thirdparty/feedparser.py', 'feedparser.py')
-    for _dir in ['<enginepath>/licenses', 'assets', '<enginepath>/assets']:
-        dir(_dir, newDir=_dir)
-    file('license.txt')
+    #for _dir in ['<enginepath>/licenses', 'assets', '<enginepath>/assets']:
+    #    dir(_dir, newDir=_dir)
+    #file('license.txt')
     _exclude = ['options.yml']
-    for extension in ['mo', 'dds', 'yml', 'vert', 'frag']:
-        for root, dirnames, filenames in walk('.'):
-            files = [
-                filename for filename in filenames
-                if filename.endswith('.' + extension) and
-                    not filename in _exclude]
-            for filename in files:
-                file(join(root, filename), newDir=root)
-    for root, dirnames, filenames in walk('assets/models/tracks'):
-        file(root + '/track.bam')
+    #for extension in ['mo', 'dds', 'yml', 'vert', 'frag']:
+    #    for root, dirnames, filenames in walk('.'):
+    #        files = [
+    #            filename for filename in filenames
+    #            if filename.endswith('.' + extension) and
+    #                not filename in _exclude]
+    #        for filename in files:
+    #            file(join(root, filename), newDir=root)
+    #for root, dirnames, filenames in walk('assets/models/tracks'):
+    #    file(root + '/track.bam')
+    #    for filename in filenames:
+    #        fname = root + '/' + filename
+    #        if fname.endswith('.egg') and not fname.endswith('Anim.egg') \
+    #                and not fname.endswith('collision.egg'):
+    #            exclude(fname)
+    for root, dirnames, filenames in walk('assets'):
         for filename in filenames:
-            fname = root + '/' + filename
-            if fname.endswith('.egg') and not fname.endswith('Anim.egg') \
-                    and not fname.endswith('collision.egg'):
-                exclude(fname)
+            exclude(root + '/' + filename)
 
     mainModule('main')

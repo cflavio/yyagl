@@ -24,6 +24,7 @@ class CarAudio(Audio):
         self.lap_sfx = loader.loadSfx(props.lap)
         self.landing_sfx = loader.loadSfx(props.landing)
         map(lambda sfx: sfx.set_loop(True), [self.engine_sfx, self.brake_sfx])
+        self.engine_sfx.set_volume(0)
         self.engine_sfx.play()
 
     def update(self, input_dct):  # use on_frame (independent from caller)

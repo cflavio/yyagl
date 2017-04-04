@@ -11,6 +11,10 @@ class EngineGfx(Gfx):
     def __init__(self, mdt, model_path, antialiasing):
         Gfx.__init__(self, mdt)
         getModelPath().appendDirectory(model_path)
+        if base.appRunner:
+            root_dir = base.appRunner.p3dFilename.getDirname()
+            getModelPath().appendDirectory(root_dir + '/' + model_path)
+            getModelPath().appendDirectory(root_dir)
         mdt.base.enableParticles()
         render.setShaderAuto()
         render.setTwoSided(True)

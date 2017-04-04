@@ -1,4 +1,4 @@
-from os import path as os_path, remove, system, makedirs
+from os import path as os_path, remove, system, makedirs, walk
 from os.path import basename, dirname, realpath
 from shutil import move, rmtree, copytree, copy
 from .build import ver, path, ver_branch, InsideDir, get_size, bld_cmd_pref, \
@@ -38,6 +38,15 @@ def __build(name, start_dir, platform, ico_file):
 
 def __build_no_internet(name, platform, ico_file, p3d_path, nointernet, mirr):
     copytree('usr/lib/'+name, 'image/data/lib')
+    copytree('../../assets', 'image/data/assets')
+    copytree('../../yyagl/assets', 'image/data/yyagl/assets')
+    for root, dirnames, filenames in walk('image/data/assets'):
+        for filename in filenames:
+            fname = root + '/' + filename
+            if any(fname.endswith('.' + ext) for ext in ['psd', 'po', 'pot', 'egg']):
+                remove(fname)
+            if fname.startswith('assets/models/tracks/') and fname.endswith('.bam') and not any(fname.endswith(concl + '.bam') for concl in ['/track', '/collision', 'Anim']):
+                remove(fname)
     cmd_tmpl = bld_cmd_pref(mirr) + \
         '-o  . {nointernet} -t host_dir=./lib ' + \
         '-t verify_contents=never ' + \

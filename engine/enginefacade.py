@@ -85,6 +85,10 @@ class EngineFacade(object):
     def version(self):
         return self.logic.version
 
+    @property
+    def curr_path(self):
+        return self.logic.curr_path
+
     def open_browser(self, url):
         return self.gui.open_browser(url)
 

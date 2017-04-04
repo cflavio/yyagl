@@ -30,6 +30,7 @@ class Conf(object):
         self.lang = 'en'
         self.lang_domain = 'yorg'
         self.lang_path = 'assets/locale'
+        self.volume = 1
 
 
 eng = Engine(Conf())

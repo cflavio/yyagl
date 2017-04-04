@@ -35,7 +35,7 @@ class RaceFsm(Fsm):
         eng.log('exiting Loading state')
         self.mdt.gui.loading.exit_loading()
         self.mdt.event.notify('on_race_loaded')
-        eng.set_cam_pos((0, 0, 0))
+        #eng.set_cam_pos((0, 0, 0))
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_wrong_way)
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_end_race)
 
