@@ -1,4 +1,5 @@
 from os import system, remove, chdir, getcwd, rename, walk
+from os.path import exists
 from shutil import move, rmtree, copytree, copy
 from distutils.dir_util import copy_tree
 from .build import ver, path, ver_branch, bld_cmd
@@ -98,7 +99,8 @@ def build_windows(target, source, env):
             copytree('../../../yyagl/licenses', './licenses')
             copy_tree('../../../licenses', './licenses')  # it already exists
             copy('../../../license.txt', './license.txt')
-            copy('../../../yyagl/assets/core.pyd', './panda3d/cmu_1.9/win_i386/panda3d/core.pyd')
+            if exists('./panda3d/cmu_1.9/win_i386/panda3d/'):
+                copy('../../../yyagl/assets/core.pyd', './panda3d/cmu_1.9/win_i386/panda3d/core.pyd')
             rename('$PLUGINSDIR', 'NSIS Plugins Directory')
             copytree('../../../assets', './assets')
             copytree('../../../yyagl/assets', './yyagl/assets')
