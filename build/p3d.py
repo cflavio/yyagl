@@ -23,15 +23,6 @@ def build(suff, env):
 
 
 def build_p3d(target, source, env):
-    for root, dirnames, filenames in walk('assets/models'):
-        for filename in filenames:
-            fname = root + '/' + filename
-            if fname.endswith('.egg'):
-                system('egg2bam %s -o %s' %(fname, fname[:-3] + 'bam'))
-    for root, dirnames, filenames in walk('assets/models/tracks'):
-        for dname in dirnames:
-            if root == 'assets/models/tracks':
-                system('python yyagl/build/process_track.py ' + dname)
     start_dir = os_path.abspath('.') + '/'
     file_path = dirname(realpath(__file__))
     curr_path = dirname(realpath(file_path))

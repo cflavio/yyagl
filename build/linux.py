@@ -3,6 +3,7 @@ from os.path import basename, dirname, realpath
 from shutil import move, rmtree, copytree, copy
 from .build import ver, path, ver_branch, InsideDir, get_size, bld_cmd_pref, \
     bld_cmd
+from .deployng import build_ng
 
 
 def __prepare_folders(start_dir, platform):
@@ -77,6 +78,9 @@ def __build_packages(name, platform, int_str):
 
 
 def build_linux(target, source, env):
+    if env['NG']:
+        build_ng(env['NAME'], linux_64=True)
+        return
     ico_file = env['ICO_FILE']
     mirr = env['SUPERMIRROR']
     nointernet = '-s' if env['NOINTERNET'] else ''

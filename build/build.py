@@ -38,6 +38,12 @@ def image_extensions(files):
     return [_file[:_file.rfind('.')+1]+ext(_file) for _file in files]
 
 
+def track_files():
+    tr_root = 'assets/models/tracks/'
+    for root, dirnames, filenames in walk(tr_root):
+        return [tr_root + dname + '/track.bam' for dname in dirnames]
+
+
 def set_path(_path):
     global path
     path = _path + ('/' if not _path.endswith('/') else '')
@@ -90,4 +96,4 @@ test_path_str = '{path}{name}-%s-tests.tar.gz' % ver_branch
 docs_path_str = '{path}{name}-%s-docs.tar.gz' % ver_branch
 pdf_path_str = '{path}{name}-%s-code.tar.gz' % ver_branch
 extensions = ['txt', 'ttf', 'dds', 'egg', 'ogg', 'py', 'lua', 'rst', 'pdef',
-              'mo']
+              'mo', 'bam']

@@ -3,6 +3,7 @@ from os.path import exists
 from shutil import move, rmtree, copytree, copy
 from distutils.dir_util import copy_tree
 from .build import ver, path, ver_branch, bld_cmd
+from .deployng import build_ng
 
 
 nsi_src = '''Name {fullName}
@@ -84,6 +85,9 @@ class InsideDir:
 
 
 def build_windows(target, source, env):
+    if env['NG']:
+        build_ng(env['NAME'], win=True)
+        return
     nointernet = '-s' if env['NOINTERNET'] else ''
     int_str = '-nointernet' if env['NOINTERNET'] else ''
     build_command = bld_cmd(env['SUPERMIRROR']).format(

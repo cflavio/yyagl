@@ -1,9 +1,13 @@
 from os import system, walk, remove
 from shutil import rmtree, copytree
 from .build import ver, path, ver_branch, bld_cmd
+from .deployng import build_ng
 
 
 def build_osx(target, source, env):
+    if env['NG']:
+        build_ng(env['NAME'], osx=True)
+        return
     nointernet = '-s' if env['NOINTERNET'] else ''
     int_str = '-nointernet' if env['NOINTERNET'] else ''
     build_command = bld_cmd(env['SUPERMIRROR']).format(
