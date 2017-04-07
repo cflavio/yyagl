@@ -21,7 +21,7 @@ class EngineLogic(Logic):
 
     @property
     def is_runtime(self):
-        return base.appRunner and base.appRunner.dom
+        return base.appRunner
 
     @property
     def curr_path(self):
