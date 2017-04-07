@@ -50,14 +50,15 @@ def set_path(_path):
     return path
 
 
-def get_files(_extensions, exclude_dir=''):
+def get_files(_extensions, exclude_dirs=[]):
     return [os_path.join(root, filename)
             for root, _, filenames in walk('.')
             for filename in [
                 filename
                 for filename in filenames
                 if any(filename.endswith('.'+ext) for ext in _extensions)]
-            if not exclude_dir or exclude_dir not in root.split('/')]
+            if not exclude_dirs or not
+            any(e_d in root.split('/') for e_d in exclude_dirs)]
 
 
 def get_size(start_path='.'):

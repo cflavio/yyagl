@@ -40,7 +40,7 @@ def __build_templ_merge(lang_path, lang, name):
 
 
 def build_templ_merge(target, source, env):
-    src_files = ' '.join(get_files(['py'], 'feedparser'))
+    src_files = ' '.join(get_files(['py'], ['feedparser', 'venv']))
     cmd_tmpl = 'xgettext -d {name} -L python -o {name}.pot '
     system(cmd_tmpl.format(name=env['NAME']) + src_files)
     for lang in env['LANGUAGES']:
