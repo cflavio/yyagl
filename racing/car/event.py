@@ -242,3 +242,8 @@ class CarAiEvent(CarEvent):
 
     def _get_input(self):
         return self.mdt.ai.get_input()
+
+
+class CarAiPlayerEvent(CarAiEvent, CarPlayerEvent):
+
+    pass

@@ -19,22 +19,16 @@ class CarAi(Ai):
         return curr_wp if distance > 15 else self.waypoints.keys()[next_wp_idx]
 
     @property
-    def car_vec(self):  # to be cached
-        car_vec = self.mdt.logic.car_vec.xy
-        car_vec.normalize()
-        return car_vec
-
-    @property
     def tgt_vec(self):  # to be cached
-        curr_tgt_pos = self.current_target.get_pos().xy
-        curr_pos = self.mdt.gfx.nodepath.get_pos().xy
-        tgt_vec = Vec2(curr_tgt_pos - curr_pos)
+        curr_tgt_pos = self.current_target.get_pos()
+        curr_pos = self.mdt.gfx.nodepath.get_pos()
+        tgt_vec = Vec3(curr_tgt_pos - curr_pos)
         tgt_vec.normalize()
         return tgt_vec
 
     @property
     def curr_dot_prod(self):  # to be cached
-        return self.car_vec.dot(self.tgt_vec)
+        return self.mdt.logic.car_vec.dot(self.tgt_vec)
 
     @property
     def brake(self):
@@ -52,13 +46,11 @@ class CarAi(Ai):
         return self.curr_dot_prod > .8
 
     def lookahead_ground(self, dist, deg):
-        lookahed_vec = self.car_vec * dist
-        #TODO: port this algorithm to 3D
+        lookahed_vec = self.mdt.logic.car_vec * dist
         rot_mat = Mat4()
         rot_mat.setRotateMat(deg, (0, 0, 1))
-        lookahead_rot = rot_mat.xformVec((lookahed_vec.x, lookahed_vec.y, 0))
-        lookahead_pt = Point3(lookahead_rot.x, lookahead_rot.y, 0)
-        lookahead_pos = self.mdt.gfx.nodepath.get_pos() + lookahead_pt
+        lookahead_rot = rot_mat.xformVec(lookahed_vec)
+        lookahead_pos = self.mdt.gfx.nodepath.get_pos() + lookahed_vec
         return self.mdt.phys.gnd_name(lookahead_pos)
 
     @property
@@ -82,7 +74,7 @@ class CarAi(Ai):
                 return False, True
         if abs(self.curr_dot_prod) > .9:
             return False, False
-        car_vec = self.car_vec
+        car_vec = self.mdt.logic.car_vec
         tgt = Vec3(self.tgt_vec.x, self.tgt_vec.y, 0)
         dot_res = tgt.cross(Vec3(car_vec.x, car_vec.y, 0)).dot(Vec3(0, 0, 1))
         return dot_res < 0, dot_res >= 0

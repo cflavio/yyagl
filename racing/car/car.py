@@ -3,7 +3,8 @@ from .fsm import CarFsm, CarFsmProps
 from .gfx import CarGfx, CarGfxProps
 from .phys import CarPhys, CarPlayerPhys, CarPhysProps
 from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
-    CarPlayerEventClient, CarNetworkEvent, CarAiEvent, CarEventProps
+    CarPlayerEventClient, CarNetworkEvent, CarAiEvent, CarEventProps, \
+    CarAiPlayerEvent
 from .logic import CarLogic, CarPlayerLogic, CarLogicProps
 from .audio import CarAudio, CarAudioProps
 from .gui import CarGui, CarPlayerGui, CarGuiProps
@@ -184,3 +185,7 @@ class NetworkCar(Car):
 class AiCar(Car):
     ai_cls = CarAi
     event_cls = CarAiEvent
+
+
+class AiPlayerCar(AiCar, PlayerCar):
+    event_cls = CarAiPlayerEvent

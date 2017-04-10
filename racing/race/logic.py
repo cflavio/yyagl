@@ -1,7 +1,7 @@
 from yyagl.gameobject import Logic
 from yyagl.racing.track.track import Track, TrackProps
 from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
-    PlayerCarClient, NetworkCar, AiCar
+    PlayerCarClient, NetworkCar, AiCar, AiPlayerCar
 
 
 class NetMsgs(object):
@@ -145,7 +145,7 @@ class RaceLogic(Logic):
             pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
             func = load_other_cars
             if self.props.a_i:
-                car_cls = AiCar
+                car_cls = AiPlayerCar
             else:
                 car_cls = PlayerCar
                 if eng.is_server_active:
