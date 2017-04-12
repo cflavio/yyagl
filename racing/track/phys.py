@@ -1,6 +1,6 @@
 from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
-from panda3d.core import LineSegs
+from panda3d.core import LineSegs, BitMask32
 from yyagl.gameobject import Phys
 from yyagl.racing.weapon.bonus.bonus import Bonus
 
@@ -97,6 +97,8 @@ class TrackPhys(Phys):
         meth(nodepath.node())
         lst += [nodepath.node()]
         nodepath.node().notifyCollisions(True)
+        if ghost:
+            nodepath.setCollideMask(BitMask32.bit(1))
 
     def __set_corners(self):
         corners = self.props.corner_names

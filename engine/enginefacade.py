@@ -57,8 +57,11 @@ class EngineFacade(object):
     def remove_vehicle(self, vehicle):
         return self.phys.world_phys.removeVehicle(vehicle)
 
-    def ray_test_closest(self, top, bottom):
-        return self.phys.world_phys.rayTestClosest(top, bottom)
+    def ray_test_closest(self, top, bottom, mask=None):
+        if mask:
+            return self.phys.world_phys.rayTestClosest(top, bottom, mask)
+        else:
+            return self.phys.world_phys.rayTestClosest(top, bottom)
 
     def ray_test_all(self, top, bottom):
         return self.phys.world_phys.rayTestAll(top, bottom)

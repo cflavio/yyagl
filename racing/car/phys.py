@@ -1,6 +1,7 @@
 from yaml import load
-from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape
-from panda3d.core import LPoint3f
+from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape,\
+    BulletGhostNode, BulletBoxShape, BulletSphereShape, BulletCapsuleShape
+from panda3d.core import LPoint3f, BitMask32
 from yyagl.gameobject import Phys
 
 
@@ -64,6 +65,13 @@ class CarPhys(Phys):
         for geom in eng.find_geoms(self.coll_mesh, self.props.coll_name):
             chassis_shape.addGeom(geom.node().getGeom(0), geom.getTransform())
         self.mdt.gfx.nodepath.node().addShape(chassis_shape)
+
+        self.mdt.gfx.nodepath.setCollideMask(BitMask32.bit(1))
+
+        #nodepath = self.mdt.gfx.nodepath.attachNewNode(BulletGhostNode('car ghost'))
+        #nodepath.node().addShape(BulletCapsuleShape(4, 5, ZUp))
+        #eng.attach_ghost(nodepath.node())
+        #nodepath.node().notifyCollisions(False)
 
     def __set_phys_node(self):
         self.pnode = self.mdt.gfx.nodepath.node()
