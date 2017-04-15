@@ -1,6 +1,6 @@
 from datetime import datetime
 from platform import system, release
-from panda3d.core import loadPrcFileData, PandaSystem
+from panda3d.core import loadPrcFileData, PandaSystem, Filename
 from panda3d import bullet
 from direct.directnotify.DirectNotify import DirectNotify
 from ..gameobject import Colleague
@@ -44,6 +44,7 @@ class LogMgrBase(Colleague):
         self.log('version: ' + platform.version())
         self.log('panda version: ' + PandaSystem.getVersionString())
         self.log('bullet version: ' + str(bullet.get_bullet_version()))
+        self.log('appdata: ' + str(Filename.get_user_appdata_directory()))
 
 
 class LogMgr(LogMgrBase):
