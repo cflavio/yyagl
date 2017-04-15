@@ -7,7 +7,7 @@ requirements = '''
 panda3d'''
 
 
-exclude_paths = ['build/*', 'setup.py', 'requirements.txt', '*.swp',
+exclude_paths = ['build/*', 'built/*', 'setup.py', 'requirements.txt', '*.swp',
                  'SConstruct', 'venv/*', '.git*', '*.pyc']
 
 setuppy = '''
