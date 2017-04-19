@@ -2,6 +2,7 @@ from yyagl.gameobject import Logic
 from yyagl.racing.track.track import Track, TrackProps
 from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
     PlayerCarClient, NetworkCar, AiCar, AiPlayerCar
+from panda3d.core import LVecBase3f
 
 
 class NetMsgs(object):
@@ -153,6 +154,7 @@ class RaceLogic(Logic):
                 if eng.is_client_active:
                     car_cls = PlayerCarClient
             drv = r_p.drivers[car_path]
+            #pos = LVecBase3f(508, 12, .2)
             car_props = CarProps(
                 car_path, r_p.coll_path, r_p.coll_name, pos, hpr, func,
                 self.mdt, r_p.laps, r_p.keys, r_p.joystick,

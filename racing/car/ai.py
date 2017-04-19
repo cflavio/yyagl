@@ -99,18 +99,19 @@ class CarAi(Ai):
             name_l = hit_left.get_name()
         if hit_right:
             name_r = hit_right.get_name()
-        if hasattr(self, 'ai_lines'):
-            self.ai_lines.remove_node()
-        if self.mdt.name == game.player_car.name:
-            segs = LineSegs()
-            segs.moveTo(start)
-            segs.drawTo(end)
-            segs.moveTo(start)
-            segs.drawTo(lookahead_pos_left)
-            segs.moveTo(start)
-            segs.drawTo(lookahead_pos_right)
-            segs_node = segs.create()
-            self.ai_lines = render.attachNewNode(segs_node)
+        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
+            if hasattr(self, 'ai_lines'):
+                self.ai_lines.remove_node()
+            if self.mdt.name == game.player_car.name:
+                segs = LineSegs()
+                segs.moveTo(start)
+                segs.drawTo(end)
+                segs.moveTo(start)
+                segs.drawTo(lookahead_pos_left)
+                segs.moveTo(start)
+                segs.drawTo(lookahead_pos_right)
+                segs_node = segs.create()
+                self.ai_lines = render.attachNewNode(segs_node)
         return name_c, distance_center, name_l, distance_left, name_r, distance_right
 
     def __eval_obstacle_avoidance(self, obstacles, brake):
@@ -125,15 +126,15 @@ class CarAi(Ai):
                         left = True
                     elif distance_right == min_dist:
                         right = True
-                    if self.mdt.name == game.player_car.name:
-                        print name_c, distance_center, name_l, distance_left, name_r, distance_right, left, right
+                    #if self.mdt.name == game.player_car.name:
+                    #    print name_c, distance_center, name_l, distance_left, name_r, distance_right, left, right
                     return left, right
         if distance_left == max([distance_center, distance_left, distance_right]):
             left = True
         elif distance_right == max([distance_center, distance_left, distance_right]):
             right = True
-        if self.mdt.name == game.player_car.name:
-            print name_c, distance_center, name_l, distance_left, name_r, distance_right, left, right
+        #if self.mdt.name == game.player_car.name:
+        #    print name_c, distance_center, name_l, distance_left, name_r, distance_right, left, right
         return left, right
 
     def left_right(self, obstacles, brake):

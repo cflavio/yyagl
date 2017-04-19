@@ -170,11 +170,103 @@ class CarLogic(Logic):
         self.__start_wp = None
         self.__end_wp = None
 
+    @property
+    def pitstop_path(self):
+        wps = self.props.track_waypoints
+        start_forks = []
+        for w_p in wps:
+            if len(wps[w_p]) > 1:
+                start_forks += [w_p]
+        end_forks = []
+        for w_p in wps:
+            count_parents = 0
+            for w_p1 in wps:
+                if w_p in wps[w_p1]:
+                    count_parents += 1
+            if count_parents > 1:
+                end_forks += [w_p]
+        pitstop_forks = []
+        for w_p in start_forks:
+            starts = wps[w_p][:]
+            for start in starts:
+                to_process = [start]
+                is_pit_stop = False
+                try_forks = []
+                while to_process:
+                    first_wp = to_process.pop(0)
+                    try_forks += [first_wp]
+                    for w_p2 in wps[first_wp]:
+                        if w_p2 not in end_forks:
+                            to_process += [w_p2]
+                        if 'PitStop' in [hit.get_node().get_name() for hit in eng.ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
+                            is_pit_stop = True
+                if is_pit_stop:
+                    pitstop_forks += try_forks
+        return pitstop_forks
+
+    @property
+    def grid_path(self):
+        wps = self.props.track_waypoints
+        start_forks = []
+        for w_p in wps:
+            if len(wps[w_p]) > 1:
+                start_forks += [w_p]
+        end_forks = []
+        for w_p in wps:
+            count_parents = 0
+            for w_p1 in wps:
+                if w_p in wps[w_p1]:
+                    count_parents += 1
+            if count_parents > 1:
+                end_forks += [w_p]
+        grid_forks = []
+        for w_p in start_forks:
+            starts = wps[w_p][:]
+            for start in starts:
+                to_process = [start]
+                is_grid = True
+                try_forks = []
+                while to_process:
+                    first_wp = to_process.pop(0)
+                    try_forks += [first_wp]
+                    for w_p2 in wps[first_wp]:
+                        if w_p2 not in end_forks:
+                            to_process += [w_p2]
+                        if 'PitStop' in [hit.get_node().get_name() for hit in eng.ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
+                            is_grid = False
+                if is_grid:
+                    grid_forks += try_forks
+        return grid_forks
+
+    @property
+    def pitstop_wps(self):
+        wps = self.props.track_waypoints.copy()
+        for _wp in self.grid_path:
+            del wps[_wp]
+        return wps
+
+    @property
+    def grid_wps(self):
+        wps = self.props.track_waypoints.copy()
+        for _wp in self.pitstop_path:
+            del wps[_wp]
+        return wps
+
     def closest_wp(self):
         if self.__start_wp:  # do a decorator @once_per_frame
             return self.__start_wp, self.__end_wp
         node = self.mdt.gfx.nodepath
-        waypoints = self.props.track_waypoints
+        curr_chassis = self.mdt.gfx.nodepath.get_children()[0]
+        if not hasattr(self, '_pitstop_wps'):
+            self._pitstop_wps = self.pitstop_wps
+        if not hasattr(self, '_grid_wps'):
+            self._grid_wps = self.grid_wps
+        if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name() and \
+                len(self.mdt.logic.lap_times) < self.mdt.laps - 1:
+            waypoints = self._pitstop_wps
+        else:
+            waypoints = self._grid_wps
+        #print 'waypoints', [int(w_p.get_name()[8:]) for w_p in waypoints]
         distances = [node.getDistance(wp) for wp in waypoints.keys()]
         curr_wp = waypoints.keys()[distances.index(min(distances))]
         may_prev = waypoints[curr_wp]
