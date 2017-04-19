@@ -31,6 +31,7 @@ class CarPhys(Phys):
         self.pnode = None
         self.vehicle = None
         self.curr_speed_factor = 1.0
+        self.__prev_speed = 0
         self.__finds = {}  # cache for find's results
         self.props = carphys_props
         self._load_phys()
@@ -38,6 +39,7 @@ class CarPhys(Phys):
         self.__set_phys_node()
         self.__set_vehicle()
         self.__set_wheels()
+        eng.attach_obs(self.on_end_frame)
 
     def _load_phys(self):
         fpath = self.props.phys_file % self.mdt.name
@@ -142,6 +144,17 @@ class CarPhys(Phys):
         return not any(ray.isInContact() for ray in rays)
 
     @property
+    def prev_speed(self):
+        return self.__prev_speed
+
+    @property
+    def prev_speed_ratio(self):
+        return max(0, min(1.0, self.prev_speed / self.max_speed))
+
+    def on_end_frame(self):
+        self.__prev_speed = self.speed
+
+    @property
     def speed(self):
         return self.vehicle.getCurrentSpeedKmHour()
 
@@ -221,6 +234,7 @@ class CarPhys(Phys):
             1 + .01 * self.props.driver_suspensions)
 
     def destroy(self):
+        eng.detach_obs(self.on_end_frame)
         eng.remove_vehicle(self.vehicle)
         self.pnode = self.vehicle = self.__finds = self.__track_phys = \
             self.coll_mesh = None
