@@ -24,6 +24,13 @@ FunctionEnd
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_FUNCTION launch
 !define MUI_FINISHPAGE_RUN_TEXT "Run Yorg"
+Function finishpageaction
+CreateShortcut "$DESKTOP\\{shortName}.lnk" "$INSTDIR\\{shortName}.exe"
+FunctionEnd
+!define MUI_FINISHPAGE_SHOWREADME ""
+!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION finishpageaction
 Var StartMenuFolder
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
@@ -52,6 +59,7 @@ Section Uninstall
   Delete "$INSTDIR\\Uninstall.exe"
   RMDir /r "$INSTDIR"
   !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
+  Delete "$DESKTOP\\{shortName}.lnk"
   Delete "$SMPROGRAMS\\$StartMenuFolder\\Uninstall.lnk"
   Delete "$SMPROGRAMS\\$StartMenuFolder\\{fullName}.lnk"
   RMDir "$SMPROGRAMS\\$StartMenuFolder"
