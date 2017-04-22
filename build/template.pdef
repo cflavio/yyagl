@@ -9,33 +9,28 @@ path.insert(0, '')
 
 class <Name>(p3d):
     require('panda3d', 'bullet', 'morepy', 'models', 'openal', 'pygame')
-    config(
-        start_dir='<name>',
-        version='<version>',
-        display_name='<Name>')
-    dir('<enginepath>/thirdparty/yaml', 'yaml')
-    file('<enginepath>/thirdparty/feedparser.py', 'feedparser.py')
-    #for _dir in ['<enginepath>/licenses', 'assets', '<enginepath>/assets']:
+    config(start_dir='<name>', version='<version>', display_name='<Name>')
+    dir('<yyaglpath>/thirdparty/yaml', 'yaml')
+    file('<yyaglpath>/thirdparty/feedparser.py', 'feedparser.py')
+    #for _dir in ['<yyaglpath>/licenses', 'assets', '<yyaglpath>/assets']:
     #    dir(_dir, newDir=_dir)
     #file('license.txt')
-    _exclude = ['options.yml']
-    #for extension in ['mo', 'dds', 'yml', 'vert', 'frag']:
+    #_excl = ['options.yml']
+    #for ext in ['mo', 'dds', 'yml', 'vert', 'frag']:
     #    for root, dirnames, filenames in walk('.'):
     #        files = [
-    #            filename for filename in filenames
-    #            if filename.endswith('.' + extension) and
-    #                not filename in _exclude]
-    #        for filename in files:
-    #            file(join(root, filename), newDir=root)
-    #for root, dirnames, filenames in walk('assets/models/tracks'):
+    #            fname for fname in fnames
+    #            if fname.endswith('.' + ext) and not fname in _excl]
+    #        for fname in files:
+    #            file(join(root, fname), newDir=root)
+    #for root, dnames, fnames in walk('assets/models/tracks'):
     #    file(root + '/track.bam')
-    #    for filename in filenames:
-    #        fname = root + '/' + filename
+    #    for fname in fnames:
+    #        fname = root + '/' + fname
     #        if fname.endswith('.egg') and not fname.endswith('Anim.egg') \
     #                and not fname.endswith('collision.egg'):
     #            exclude(fname)
-    for root, dirnames, filenames in walk('assets'):
-        for filename in filenames:
-            exclude(root + '/' + filename)
-
+    for root, dnames, fnames in walk('assets'):
+        for fname in fnames:
+            exclude(root + '/' + fname)
     mainModule('main')

@@ -4,7 +4,7 @@ from platform import architecture
 from tempfile import NamedTemporaryFile
 
 
-cmd_build = '''rm -rf mojosetup output
+bld_cmd = '''rm -rf mojosetup output
 sudo apt-get install mercurial cmake libgtk2.0-dev
 hg clone http://hg.icculus.org/icculus/mojosetup
 cd mojosetup; mkdir cmake-build; cd cmake-build
@@ -25,15 +25,15 @@ cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DMOJOSETUP_LUALIB_IO=TRUE \
 make; cd ../..; mkdir output; cd output; mkdir data scripts guis meta; cd ..
 cp mojosetup/cmake-build/mojosetup output/mojosetup
 cp mojosetup/scripts/* output/scripts
-# eventuali lib in guis
+# eventually, libs in guis
 cp -r mojosetup/meta output
 rm -rf mojosetup'''
 
 
 with NamedTemporaryFile(mode='w+t') as tmp:
-    tmp.write(cmd_build)
+    tmp.write(bld_cmd)
     tmp.seek(0)
-    system('sh '+tmp.name)
-    suff_dct = {'32': '', '64': '_64'}
-    dst = 'output/mojosetupx86' + suff_dct[architecture()[0][:2]]
+    system('sh ' + tmp.name)
+    suff = {'32': '', '64': '_64'}
+    dst = 'output/mojosetupx86' + suff[architecture()[0][:2]]
     move('output/mojosetup', dst)

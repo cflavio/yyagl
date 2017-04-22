@@ -2,7 +2,7 @@ from os import system, remove, chdir, getcwd, rename, walk
 from os.path import exists
 from shutil import move, rmtree, copytree, copy
 from distutils.dir_util import copy_tree
-from .build import ver, path, ver_branch, bld_cmd
+from .build import ver, bld_dir, branch, bld_cmd
 from .deployng import build_ng
 
 
@@ -94,17 +94,18 @@ class InsideDir:
 
 def build_windows(target, source, env):
     if env['NG']:
-        build_ng(env['NAME'], win=True)
+        build_ng(env['APPNAME'], win=True)
         return
-    nointernet = '-s' if env['NOINTERNET'] else ''
+    internet_switch = '-s' if env['NOINTERNET'] else ''
     int_str = '-nointernet' if env['NOINTERNET'] else ''
-    build_command = bld_cmd(env['SUPERMIRROR']).format(
-        path=path, name=env['NAME'], Name=env['NAME'].capitalize(),
+    bld_command = bld_cmd.format(
+        path=bld_dir, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
         version=ver, p3d_path=env['P3D_PATH'][:-4] + 'nopygame.p3d',
-        platform='win_i386', nointernet=nointernet)
-    system(build_command)
-    with InsideDir('%swin_i386' % path):
-        fileName = '{Name} {version}.exe'.format(Name=env['NAME'].capitalize(), version=ver)
+        platform='win_i386', nointernet=internet_switch)
+    system(bld_command)
+    with InsideDir('%swin_i386' % bld_dir):
+        fileName = '{Name} {version}.exe'.format(
+            Name=env['APPNAME'].capitalize(), version=ver)
         system('7z x -owinInstaller %s' % fileName.replace(' ', '\\ '))
         remove(fileName)
         with InsideDir('winInstaller'):
@@ -112,37 +113,48 @@ def build_windows(target, source, env):
             copy_tree('../../../licenses', './licenses')  # it already exists
             copy('../../../license.txt', './license.txt')
             if exists('./panda3d/cmu_1.9/win_i386/panda3d/'):
-                copy('../../../yyagl/assets/core.pyd', './panda3d/cmu_1.9/win_i386/panda3d/core.pyd')
+                src = '../../../yyagl/assets/core.pyd'
+                copy(src, './panda3d/cmu_1.9/win_i386/panda3d/core.pyd')
             rename('$PLUGINSDIR', 'NSIS Plugins Directory')
             copytree('../../../assets', './assets')
             copytree('../../../yyagl/assets', './yyagl/assets')
             for root, dirnames, filenames in walk('./assets'):
                 for filename in filenames:
                     fname = root + '/' + filename
-                    if any(fname.endswith('.' + ext) for ext in ['psd', 'po', 'pot', 'egg']):
+                    rm_ext = ['psd', 'po', 'pot', 'egg']
+                    if any(fname.endswith('.' + ext) for ext in rm_ext):
                         remove(fname)
-                    if 'assets/models/tracks/' in fname and fname.endswith('.bam') and not any(fname.endswith(concl + '.bam') for concl in ['/track', '/collision', 'Anim']):
+                    if 'assets/models/tracks/' in fname and \
+                            fname.endswith('.bam') and not \
+                            any(fname.endswith(concl + '.bam')
+                                for concl in ['/track', '/collision', 'Anim']):
                         remove(fname)
             installFiles = ''.join(
                 ['\nSetOutPath "$INSTDIR\\%s"\n' % root[2:].replace('/','\\') +
-                 '\n'.join(['File ".\\%s\\%s"' % (root[2:].replace('/','\\'), name) for name in files])
+                 '\n'.join(['File ".\\%s\\%s"' % (root[2:].replace('/','\\'),
+                                                  name)
+                            for name in files])
                  for root, dirs, files in walk('.')])
-            uninstallFiles = '\n'.join('Delete "$INSTDIR\\%s\\%s"' % (root[2:].replace('/','\\'), name)
-                                       for root, dirs, files in walk('.') for name in files)
+            uninstallFiles = '\n'.join(
+                'Delete "$INSTDIR\\%s\\%s"' % (root[2:].replace('/','\\'),
+                                               name)
+                                       for root, dirs, files in walk('.')
+                                       for name in files)
             nsi_src_inst = nsi_src.format(
-                fullName=env['NAME'].capitalize(),
-                outFile='{name}-{version}{int_str}-windows.exe'.format(name=env['NAME'], version=ver_branch, int_str=int_str),
-                shortName=env['NAME'],
-                iconFile=env['NAME'] + '.ico',
+                fullName=env['APPNAME'].capitalize(),
+                outFile='{name}-{version}{int_str}-windows.exe'.format(
+                    name=env['APPNAME'], version=branch, int_str=int_str),
+                shortName=env['APPNAME'],
+                iconFile=env['APPNAME'] + '.ico',
                 installFiles = installFiles,
                 uninstallFiles = uninstallFiles)
             with TempFile('installer.nsi', nsi_src_inst):
                 system( 'makensis installer.nsi' )
-    win_path = '{path}win_i386/winInstaller/{name}-{version}{int_str}-windows.exe'
-    win_tgt = '{path}{name}-{version}{int_str}-windows.exe'
-    win_path_fmt = win_path.format(
-        path=path, name=env['NAME'], version=ver_branch, int_str=int_str)
-    win_tgt_fmt = win_tgt.format(
-        path=path, name=env['NAME'], version=ver_branch, int_str=int_str)
-    move(win_path_fmt, win_tgt_fmt)
-    rmtree('%swin_i386' % path)
+    src = '{path}win_i386/winInstaller/{name}-{version}{int_str}-windows.exe'
+    tgt_file = '{path}{name}-{version}{int_str}-windows.exe'
+    src_fmt = src.format(
+        path=bld_dir, name=env['APPNAME'], version=branch, int_str=int_str)
+    tgt_fmt = tgt_file.format(
+        path=bld_dir, name=env['APPNAME'], version=branch, int_str=int_str)
+    move(src_fmt, tgt_fmt)
+    rmtree('%swin_i386' % bld_dir)

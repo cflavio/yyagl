@@ -1,12 +1,10 @@
 from os import system
-from .build import path, ver_branch, exec_cmd, test_path_str
+from .build import bld_dir, branch, exec_cmd, test_file
 
 
 def build_ut(target, source, env):
     with open('tests.txt', 'w') as outfile:
         outfile.write(exec_cmd('nosetests'))
-    build_command_str = \
-        'tar -czf {out_name} tests.txt && rm tests.txt'
-    fpath = test_path_str.format(path=path, name=env['NAME'],
-                                 version=ver_branch)
-    system(build_command_str.format(out_name=fpath))
+    bld_cmd = 'tar -czf {out_name} tests.txt && rm tests.txt'
+    fpath = test_file.format(path=bld_dir, name=env['APPNAME'], version=branch)
+    system(bld_cmd.format(out_name=fpath))

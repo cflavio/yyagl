@@ -1,35 +1,36 @@
-from os import path as os_path, system
-from os.path import dirname, realpath
+from os import system
+from os.path import dirname, realpath, abspath
 from shutil import rmtree, copytree
-from .build import path, ver_branch, docs_path_str
-
-
-def __prepare(env):
-    curr_path = dirname(realpath(__file__)) + '/'
-    copytree(curr_path + 'docs', path+'docs_apidoc')
-    cmd = 'sed -i.bak -e "s/<name>/%s/" %sdocs_apidoc/index.rst'
-    system(cmd % (env['NAME'].capitalize(), path))
-    curr_path = os_path.abspath('.').replace('/', '\/')
-    curr_path = curr_path.replace('\\', '\\\\')
-    cmd_tmpl = 'sed -i.bak -e "s/<name>/{name}/" ' + \
-        '-e "s/<src_path>/{src_path}/" -e "s/<version>/{version}/" ' + \
-        '{path}docs_apidoc/conf.py'
-    system(cmd_tmpl.format(
-        name=env['NAME'].capitalize(), version=ver_branch, path=path,
-        src_path=curr_path))
-
-
-def __clean():
-    map(rmtree, [path+'docs_apidoc', path+'docs'])
+from .build import bld_dir, branch, docs_file
 
 
 def build_docs(target, source, env):
     __prepare(env)
-    system('sphinx-apidoc -o %sdocs_apidoc .' % path)
-    system("sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst" % path)
-    system('sphinx-build -b html %sdocs_apidoc %sdocs' % (path, path))
-    build_command_str = 'tar -C {path} -czf {out_name} ./docs'
-    f_out = docs_path_str.format(path=path, name=env['NAME'],
-                                 version=ver_branch)
-    system(build_command_str.format(path=path, out_name=f_out))
+    system('sphinx-apidoc -o %sdocs_apidoc .' % bld_dir)
+    system("sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst" % bld_dir)
+    system('sphinx-build -b html %sdocs_apidoc %sdocs' % (bld_dir, bld_dir))
+    bld_cmd = 'tar -C {path} -czf {out_name} ./docs'
+    f_out = docs_file.format(path=bld_dir, name=env['APPNAME'],
+                             version=branch)
+    system(bld_cmd.format(path=bld_dir, out_name=f_out))
     __clean()
+
+
+def __prepare(env):
+    curr_dir = dirname(realpath(__file__)) + '/'
+    copytree(curr_dir + 'docs', bld_dir + 'docs_apidoc')
+    cmd = 'sed -i.bak -e "s/<appname>/%s/" %sdocs_apidoc/index.rst'
+    system(cmd % (env['APPNAME'].capitalize(), bld_dir))
+    curr_dir = abspath('.').replace('/', '\/')
+    curr_dir = curr_dir.replace('\\', '\\\\')
+    args = ['appname', 'src_path', 'version']
+    args = ['-e "s/<%s>/{%s}/"' % (arg, arg) for arg in args ]
+    cmd_tmpl = 'sed -i.bak ' + (' '.join(args)) + ' {path}docs_apidoc/conf.py'
+    cmd = cmd_tmpl.format(
+        appname=env['APPNAME'].capitalize(), version=branch, path=bld_dir,
+        src_path=curr_dir)
+    system(cmd)
+
+
+def __clean():
+    map(rmtree, [bld_dir + 'docs_apidoc', bld_dir + 'docs'])

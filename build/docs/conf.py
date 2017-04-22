@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import os
+from sys import path
+from os.path import abspath
 import datetime
 
-sys.path.insert(0, os.path.abspath('<src_path>'))
+path.insert(0, abspath('<src_path>'))
 
-extensions = [
-    'sphinx.ext.autodoc',
-    #'sphinx.ext.viewcode'  # it crashes
-    ]
+#extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode'] # it crashes
+extensions = ['sphinx.ext.autodoc']
 source_suffix = '.rst'
 master_doc = 'index'
-project = u'<name>'
+project = u'<appname>'
 copyright = u'%s, Ya2' % datetime.datetime.now().year
 version = '<version>'
 release = '<version>'
@@ -25,4 +23,4 @@ html_sidebars = {'*': ['localtoc.html', 'relations.html', 'sourcelink.html',
 html_last_updated_fmt = '%b %d, %Y'
 html_show_sphinx = False
 html_show_copyright = False
-htmlhelp_basename = '<name>doc'
+htmlhelp_basename = '<appname>doc'

@@ -1,17 +1,14 @@
 from os import system
-from .build import src_path_str, ver_branch, path
+from .build import src_file, branch, bld_dir
 
 
 def build_src(target, source, env):
-    build_command_str = \
-        "tar --transform 's/^./{name}/' -czf {out_name} " + \
-        "--exclude '{out_name}' --exclude 'built' --exclude '.git' " + \
-        "--exclude '.kdev4' " + \
-        "--exclude '{name}.kdev4' --exclude '.sconsign.dblite' " + \
-        "--exclude '*.pyc' --exclude .settings --exclude .project " + \
-        "--exclude .pydevproject --exclude '{name}.geany' ."
-    out_name = src_path_str.format(path=path, name=env['NAME'],
-                                   version=ver_branch)
-    build_command = build_command_str.format(name=env['NAME'],
-                                             out_name=out_name)
-    system(build_command)
+    excl = [
+        '{pkg_name}', 'built', '.git', '.kdev4', '{name}.kdev4',
+        '.sconsign.dblite', '*.pyc', '.settings', '.project', '.pydevproject',
+        '{name}.geany']
+    excl = ' '.join(["--exclude '%s'" % exc for exc in excl])
+    bld_cmd = "tar --transform 's/^./{name}/' -czf {pkg_name} %s ." % excl
+    pkg_name = src_file.format(path=bld_dir, name=env['APPNAME'],
+                               version=branch)
+    system(bld_cmd.format(name=env['APPNAME'], pkg_name=pkg_name))

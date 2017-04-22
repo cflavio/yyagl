@@ -1,37 +1,42 @@
 from os import system, walk, remove
 from shutil import rmtree, copytree
-from .build import ver, path, ver_branch, bld_cmd
+from .build import ver, bld_dir, branch, bld_cmd
 from .deployng import build_ng
 
 
 def build_osx(target, source, env):
     if env['NG']:
-        build_ng(env['NAME'], osx=True)
+        build_ng(env['APPNAME'], osx=True)
         return
     nointernet = '-s' if env['NOINTERNET'] else ''
-    int_str = '-nointernet' if env['NOINTERNET'] else ''
-    build_command = bld_cmd(env['SUPERMIRROR']).format(
-        path=path, name=env['NAME'], Name=env['NAME'].capitalize(),
+    internet_str = '-nointernet' if env['NOINTERNET'] else ''
+    build_cmd = bld_cmd.format(
+        path=bld_dir, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
         version=ver, p3d_path=env['P3D_PATH'][:-4] + 'nopygame.p3d',
         platform='osx_i386', nointernet=nointernet)
-    system(build_command)
-    appname = env['NAME'].capitalize()
-    copytree('assets', path + 'osx_i386/%s.app/Contents/MacOS/assets' % appname)
-    copytree('yyagl/assets', path + 'osx_i386/%s.app/Contents/MacOS/yyagl/assets' % appname)
-    for root, dirnames, filenames in walk(path + 'osx_i386/%s.app/Contents/MacOS/assets' % appname):
+    system(build_cmd)
+    appname = env['APPNAME'].capitalize()
+    tgt = bld_dir + 'osx_i386/%s.app/Contents/MacOS/assets' % appname
+    copytree('assets', tgt)
+    tgt = bld_dir + 'osx_i386/%s.app/Contents/MacOS/yyagl/assets' % appname
+    copytree('yyagl/assets', tgt)
+    start_dir = bld_dir + 'osx_i386/%s.app/Contents/MacOS/assets' % appname
+    for root, dirnames, filenames in walk(start_dir):
         for filename in filenames:
             fname = root + '/' + filename
-            if any(fname.endswith('.' + ext) for ext in ['psd', 'po', 'pot', 'egg']):
+            del_ext = ['psd', 'po', 'pot', 'egg']
+            if any(fname.endswith('.' + ext) for ext in del_ext):
                 remove(fname)
-            if 'assets/models/tracks/' in fname and fname.endswith('.bam') and \
-                    not any(fname.endswith(concl + '.bam') for concl in ['/track', '/collision', 'Anim']):
+            if 'assets/models/tracks/' in fname and fname.endswith('.bam') \
+                    and not any(fname.endswith(concl + '.bam')
+                                for concl in ['/track', '/collision', 'Anim']):
                 remove(fname)
-    osx_path = '{Name}.app'
-    osx_tgt = '{name}-{version}{int_str}-osx.zip'
-    osx_cmd_tmpl = 'cd ' + path + 'osx_i386 && zip -r ../' + osx_tgt + ' ' + \
-        osx_path + ' && cd ../..'
+    osx_fname = '{Name}.app'
+    osx_pkg = '{name}-{version}{internet_str}-osx.zip'
+    osx_cmd_tmpl = 'cd ' + bld_dir + 'osx_i386 && zip -r ../' + osx_pkg + \
+        ' ' + osx_fname + ' && cd ../..'
     osx_cmd = osx_cmd_tmpl.format(
-        Name=env['NAME'].capitalize(), name=env['NAME'], version=ver_branch,
-        int_str=int_str)
+        Name=env['APPNAME'].capitalize(), name=env['APPNAME'], version=branch,
+        internet_str=internet_str)
     system(osx_cmd)
-    rmtree('%sosx_i386' % path)
+    rmtree('%sosx_i386' % bld_dir)

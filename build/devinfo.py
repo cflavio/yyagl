@@ -1,9 +1,22 @@
 from os import system
-from .build import path, ver_branch, exec_cmd, devinfo_path_str
+from .build import bld_dir, branch, exec_cmd, devinfo_file
+
+
+def build_devinfo(target, source, env):
+    for fname, cond in env['DEV_CONF'].items():
+        for src in source:
+            with open(('%s%s.txt') % (bld_dir, fname), 'a') as outfile:
+                __process(src, cond, outfile)
+    names = ''.join([fname + '.txt ' for fname in env['DEV_CONF']])
+    rmnames = ''.join(['{path}%s.txt ' % fname for fname in env['DEV_CONF']])
+    bld_cmd = 'tar -czf {out_name} -C {path} ' + names + ' && rm ' + rmnames
+    fpath = devinfo_file.format(path=bld_dir, name=env['APPNAME'],
+                                version=branch)
+    system(bld_cmd.format(path=bld_dir, out_name=fpath))
 
 
 def __clean_pylint(pylint_out):
-    clean_out = ''
+    clean_output = ''
     skipping = False
     err_str = 'No config file found, using default configuration'
     lines = [line for line in pylint_out.split('\n') if line != err_str]
@@ -14,8 +27,8 @@ def __clean_pylint(pylint_out):
                      'while calling a Python object':
             skipping = False
         elif not skipping:
-            clean_out += line + '\n'
-    return clean_out
+            clean_output += line + '\n'
+    return clean_output
 
 
 def __process(src, cond, outfile):
@@ -28,17 +41,3 @@ def __process(src, cond, outfile):
     outs = [out.strip() for out in [out_pylint, out_pyflakes, out_pep8]]
     map(lambda out: outfile.write(out+'\n'), [out for out in outs if out])
     outfile.write('\n')
-
-
-def build_devinfo(target, source, env):
-    for fname, cond in env['DEV_CONF'].items():
-        for src in source:
-            with open(('%s%s.txt') % (path, fname), 'a') as outfile:
-                __process(src, cond, outfile)
-    names = ''.join([fname + '.txt ' for fname in env['DEV_CONF']])
-    rmnames = ''.join(['{path}%s.txt ' % fname for fname in env['DEV_CONF']])
-    build_command_str = \
-        'tar -czf {out_name} -C {path} ' + names + ' && rm ' + rmnames
-    fpath = devinfo_path_str.format(path=path, name=env['NAME'],
-                                    version=ver_branch)
-    system(build_command_str.format(path=path, out_name=fpath))
