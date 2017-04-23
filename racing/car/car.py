@@ -1,4 +1,4 @@
-from yyagl.gameobject import GameObjectMdt, Ai, Audio
+from yyagl.gameobject import GameObject, Ai, Audio
 from .fsm import CarFsm, CarFsmProps
 from .gfx import CarGfx, CarGfxProps
 from .phys import CarPhys, CarPlayerPhys, CarPhysProps
@@ -101,7 +101,7 @@ class CarFacade(object):
         return self.fsm.demand(state)
 
 
-class Car(GameObjectMdt, CarFacade):
+class Car(GameObject, CarFacade):
     fsm_cls = CarFsm
     gfx_cls = CarGfx
     gui_cls = CarGui
@@ -153,7 +153,7 @@ class Car(GameObjectMdt, CarFacade):
             [('audio', self.audio_cls, [self, audio_props])],
             [('ai', self.ai_cls, [self, car_props.road_name,
                                   car_props.track_waypoints])]]
-        GameObjectMdt.__init__(self, init_lst, car_props.callback)
+        GameObject.__init__(self, init_lst, car_props.callback)
 
 
 class PlayerCar(Car):

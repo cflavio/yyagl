@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from yyagl.gameobject import GameObjectMdt
+from yyagl.gameobject import GameObject
 from .logic import RaceLogic, RaceLogicSinglePlayer, RaceLogicServer, \
     RaceLogicClient, RaceLogicProps
 from .event import RaceEvent, RaceEventServer, RaceEventClient
@@ -20,7 +20,7 @@ class RaceFacade(object):
         return self.gui.results
 
 
-class Race(GameObjectMdt, RaceFacade):
+class Race(GameObject, RaceFacade):
     __metaclass__ = ABCMeta
     logic_cls = RaceLogic
     event_cls = RaceEvent
@@ -52,7 +52,7 @@ class Race(GameObjectMdt, RaceFacade):
             [('gui', RaceGui, [self, racegui_props])],
             [('logic', self.logic_cls, [self, racelogic_props])],
             [('event', self.event_cls, [self, race_props.ingame_menu])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObject.__init__(self, init_lst)
 
 
 class RaceSinglePlayer(Race):

@@ -3,7 +3,7 @@ from panda3d.core import loadPrcFileData
 from unittest import TestCase
 
 from racing.game.engine.engine import Engine
-from racing.game.gameobject import Ai, Audio, Event, Fsm, GameObjectMdt, Gfx, Gui, \
+from racing.game.gameobject import Ai, Audio, Event, Fsm, GameObject, Gfx, Gui, \
     Logic, Phys, Colleague
 
 
@@ -18,7 +18,7 @@ class AiTests(TestCase):
 
     def test_init(self):
         self.engine = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         ai = Ai(game_obj)
         self.assertIsInstance(ai, Ai)
 
@@ -34,7 +34,7 @@ class AudioTests(TestCase):
 
     def test_init(self):
         self.engine = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         audio = Audio(game_obj)
         self.assertIsInstance(audio, Audio)
 
@@ -50,7 +50,7 @@ class ColleagueTests(TestCase):
 
     def test_init(self):
         self.engine = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         colleague = Colleague(game_obj)
         self.assertIsInstance(colleague, Colleague)
 
@@ -66,7 +66,7 @@ class EventTests(TestCase):
 
     def test_init(self):
         self.engine = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         event = Event(game_obj)
         self.assertIsInstance(event, Event)
 
@@ -82,7 +82,7 @@ class FsmTests(TestCase):
 
     def test_init(self):
         self.engine = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         fsm = Fsm(game_obj)
         self.assertIsInstance(fsm, Fsm)
 
@@ -98,7 +98,7 @@ class GfxTests(TestCase):
 
     def test_init(self):
         self.engine = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         gfx = Gfx(game_obj)
         self.assertIsInstance(gfx, Gfx)
 
@@ -114,7 +114,7 @@ class GuiTests(TestCase):
 
     def test_init(self):
         self.engine = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         gui = Gui(game_obj)
         self.assertIsInstance(gui, Gui)
 
@@ -130,7 +130,7 @@ class LogicTests(TestCase):
 
     def test_init(self):
         self.engine = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         logic = Logic(game_obj)
         self.assertIsInstance(logic, Logic)
 
@@ -146,7 +146,7 @@ class PhysicsTests(TestCase):
 
     def test_init(self):
         self.engine = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         phys = Phys(game_obj)
         self.assertIsInstance(phys, Phys)
 
@@ -175,8 +175,8 @@ class GameObjectTests(TestCase):
             ):
         self.engine = Engine()
         mock_event_destroy.__name__ = 'destroy'
-        game_obj = GameObjectMdt()
-        self.assertIsInstance(game_obj, GameObjectMdt)
+        game_obj = GameObject()
+        self.assertIsInstance(game_obj, GameObject)
         game_obj.destroy()
         assert mock_fsm_destroy.called
         assert mock_event_destroy.called

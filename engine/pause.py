@@ -3,7 +3,7 @@ import sys
 from direct.task import Task
 from direct.interval.IntervalGlobal import ivalMgr
 from direct.gui.DirectFrame import DirectFrame
-from ..gameobject import Gui, Logic, GameObjectMdt, Colleague
+from ..gameobject import Gui, Logic, GameObject, Colleague
 
 
 class PauseGui(Gui):
@@ -124,7 +124,7 @@ class PauseLogic(Logic):
         (self.resume if self.is_paused else self.pause)()
 
 
-class PauseMgr(GameObjectMdt, Colleague):
+class PauseMgr(GameObject, Colleague):
 
     def __init__(self, mdt):
         Colleague.__init__(self, mdt)

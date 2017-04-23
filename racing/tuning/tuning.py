@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from yyagl.gameobject import GameObjectMdt
+from yyagl.gameobject import GameObject
 from .logic import TuningLogic
 from .gui import TuningGui, TuningGuiProps
 
@@ -39,7 +39,7 @@ class TuningFacade(object):
         return self.logic.tunings
 
 
-class Tuning(GameObjectMdt, TuningFacade):
+class Tuning(GameObject, TuningFacade):
     __metaclass__ = ABCMeta
 
     def __init__(self, tuning_props):
@@ -49,4 +49,4 @@ class Tuning(GameObjectMdt, TuningFacade):
         init_lst = [
             [('gui', TuningGui, [self, tuninggui_props])],
             [('logic', TuningLogic, [self, t_p.cars])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObject.__init__(self, init_lst)

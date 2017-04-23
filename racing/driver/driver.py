@@ -1,4 +1,4 @@
-from yyagl.gameobject import GameObjectMdt
+from yyagl.gameobject import GameObject
 from .logic import DriverLogic
 
 
@@ -11,8 +11,8 @@ class DriverProps(object):
         self.suspensions = suspensions
 
 
-class Driver(GameObjectMdt):
+class Driver(GameObject):
 
     def __init__(self, driver_props):
         init_lst = [[('logic', DriverLogic, [self, driver_props])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObject.__init__(self, init_lst)

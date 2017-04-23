@@ -1,4 +1,4 @@
-from yyagl.gameobject import GameObjectMdt, Gui
+from yyagl.gameobject import GameObject, Gui
 from yyagl.engine.gui.menu import Menu, MenuLogic
 from .loadingpage import LoadingPage, LoadingPageProps
 
@@ -75,4 +75,4 @@ class LoadingMenu(Menu):
         init_lst = [
             [('gui', LoadingGui, [self, loadinggui_props])],
             [('logic', MenuLogic, [self])]]
-        GameObjectMdt.__init__(self, init_lst)  # NB doesn't invoke Menu's
+        GameObject.__init__(self, init_lst)  # NB doesn't invoke Menu's

@@ -1,4 +1,4 @@
-from yyagl.gameobject import GameObjectMdt
+from yyagl.gameobject import GameObject
 from .gfx import TrackGfx, TrackGfxProps
 from .phys import TrackPhys, TrackPhysProps
 from .event import TrackEvent
@@ -61,7 +61,7 @@ class TrackFacade(object):
         return self.phys.lrtb
 
 
-class Track(GameObjectMdt, TrackFacade):
+class Track(GameObject, TrackFacade):
 
     def __init__(self, track_props):
         eng.log('init track')
@@ -80,4 +80,4 @@ class Track(GameObjectMdt, TrackFacade):
              ('gfx', TrackGfx, [self, trackgfx_props])],
             [('event', TrackEvent, [self, t_p.shaders, t_p.shadow_src])],
             [('audio', TrackAudio, [self, t_p.music_path])]]
-        GameObjectMdt.__init__(self, init_lst, t_p.callback)
+        GameObject.__init__(self, init_lst, t_p.callback)

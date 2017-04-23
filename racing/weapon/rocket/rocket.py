@@ -1,4 +1,4 @@
-from yyagl.gameobject import GameObjectMdt
+from yyagl.gameobject import GameObject
 from .gfx import RocketGfx
 from .phys import RocketPhys
 from .audio import RocketAudio
@@ -17,7 +17,7 @@ class RocketFacade(object):
         return self.logic.fire()
 
 
-class Rocket(GameObjectMdt, RocketFacade):
+class Rocket(GameObject, RocketFacade):
     gfx_cls = RocketGfx
     phys_cls = RocketPhys
     audio_cls = RocketAudio
@@ -29,4 +29,4 @@ class Rocket(GameObjectMdt, RocketFacade):
             [('phys', self.phys_cls, [self, car.gfx.nodepath])],
             [('audio', self.audio_cls, [self])],
             [('logic', self.logic_cls, [self])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObject.__init__(self, init_lst)

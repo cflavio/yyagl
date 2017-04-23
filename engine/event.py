@@ -11,15 +11,15 @@ class EngineEventBase(Event):
 
     def __init__(self, mdt, emulate_keyboard):
         Event.__init__(self, mdt)
-        self.on_close_cb = lambda: None
-        self.accept('window-closed', self.__on_close)
+        self.on_end_cb = lambda: None
+        self.accept('window-closed', self.__on_end)
         taskMgr.add(self.__on_frame, 'on frame')
         self.joystick = JoystickMgr.build(emulate_keyboard)
 
-    def register_close_cb(self, on_close_cb):
-        self.on_close_cb = on_close_cb
+    def register_end_cb(self, on_end_cb):
+        self.on_end_cb = on_end_cb
 
-    def __on_close(self):
+    def __on_end(self):
         eng.base.closeWindow(eng.base.win)
         self.on_close_cb()
         sys.exit()

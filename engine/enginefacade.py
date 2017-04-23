@@ -12,6 +12,9 @@ class EngineFacade(object):
     def attach_node(self, node):
         return self.gfx.world_np.attachNewNode(node)
 
+    def register_end_cb(self, end_cb):
+        return self.event.register_end_cb(end_cb)
+
     def particle(self, path, parent, render_parent, pos, timeout):
         return self.gfx.particle(path, parent, render_parent, pos, timeout)
 

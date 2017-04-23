@@ -3,7 +3,7 @@ from panda3d.core import TextNode, Shader, TextureStage
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.engine.gui.page import Page, PageGui
-from yyagl.gameobject import GameObjectMdt, Event
+from yyagl.gameobject import GameObject, Event
 
 
 class LoadingPageGuiProps(object):
@@ -180,4 +180,4 @@ class LoadingPage(Page):
         init_lst = [
             [('event', Event, [self])],
             [('gui', LoadingPageGui, [self, l_p.menu, loadingpagegui_props])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObject.__init__(self, init_lst)

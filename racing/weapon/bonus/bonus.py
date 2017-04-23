@@ -1,4 +1,4 @@
-from yyagl.gameobject import GameObjectMdt
+from yyagl.gameobject import GameObject
 from .gfx import BonusGfx
 from .phys import BonusPhys
 from .event import BonusEvent
@@ -17,7 +17,7 @@ class BonusFacade(object):
         return self.phys.pos
 
 
-class Bonus(GameObjectMdt, BonusFacade):
+class Bonus(GameObject, BonusFacade):
     gfx_cls = BonusGfx
     phys_cls = BonusPhys
     event_cls = BonusEvent
@@ -27,4 +27,4 @@ class Bonus(GameObjectMdt, BonusFacade):
             [('gfx', self.gfx_cls, [self, pos, model_name, model_suff])],
             [('event', self.event_cls, [self])],
             [('phys', self.phys_cls, [self, pos])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObject.__init__(self, init_lst)

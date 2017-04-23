@@ -1,4 +1,4 @@
-from yyagl.gameobject import GameObjectMdt
+from yyagl.gameobject import GameObject
 from .logic import SeasonLogic, SingleRaceSeasonLogic
 
 
@@ -60,12 +60,12 @@ class SeasonFacade(object):
         return self.logic.create_race(race_props)
 
 
-class Season(GameObjectMdt, SeasonFacade):
+class Season(GameObject, SeasonFacade):
     logic_cls = SeasonLogic
 
     def __init__(self, season_props):
         init_lst = [[('logic', self.logic_cls, [self, season_props])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObject.__init__(self, init_lst)
 
 
 class SingleRaceSeason(Season):

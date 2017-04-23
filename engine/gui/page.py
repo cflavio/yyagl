@@ -9,7 +9,7 @@ from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.DirectEntry import DirectEntry
-from ...gameobject import GameObjectMdt, Gui, Event
+from ...gameobject import GameObject, Gui, Event
 from .imgbtn import ImageButton
 from .widget import Widget
 
@@ -172,13 +172,13 @@ class PageEvent(Event):
         pass
 
 
-class Page(GameObjectMdt):
+class Page(GameObject):
     gui_cls = PageGui
     event_cls = PageEvent
 
     def __init__(self, menu):
         self.menu = menu
-        GameObjectMdt.__init__(self, self.init_lst)
+        GameObject.__init__(self, self.init_lst)
 
     @property
     def init_lst(self):

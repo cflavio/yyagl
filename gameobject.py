@@ -8,19 +8,18 @@ class Colleague(Subject):
 
     def __init__(self, mdt, *args, **kwargs):
         Subject.__init__(self)
+        self.notify_tsk = None
         self.mdt = mdt
-        self._args = args
-        self._kwargs = kwargs
         self.async_build(*args, **kwargs)
 
     def async_build(self, *args, **kwargs):
-        self._end_async()
+        self._end_async(*args, **kwargs)
 
-    def _end_async(self):
-        self.sync_build(*self._args, **self._kwargs)
-        args = 'on_component_built', self
-        taskMgr.doMethodLater(.001, self.mdt.notify, 'wait', args)
-        #TODO this is necessary to schedule the next component into the next
+    def _end_async(self, *args, **kwargs):
+        self.sync_build(*args, **kwargs)
+        notify_args = ['on_component_built', self]
+        self.notify_tsk = eng.do_later(.001, self.mdt.notify, notify_args)
+        # this is necessary to schedule the next component into the next
         # frame otherwise some dependent components may access a non-existent
         # one. think of something better
 
@@ -28,11 +27,14 @@ class Colleague(Subject):
         pass
 
     def destroy(self):
-        self.mdt = None
+        if hasattr(self, 'notify_tsk') and self.notify_tsk:
+            taskMgr.remove(self.notify_tsk)
+        self.mdt = self.notify_tsk = None
         Subject.destroy(self)
 
 
 class Fsm(FSM, Colleague):
+
     def __init__(self, mdt):
         FSM.__init__(self, self.__class__.__name__)
         Colleague.__init__(self, mdt)
@@ -77,6 +79,7 @@ class Phys(Colleague):
 class GODirector(object):
 
     def __init__(self, obj, init_lst, callback):
+        self.__obj = obj
         obj.attach(self.on_component_built)
         self.callback = callback
         self.completed = [False for _ in init_lst]
@@ -98,26 +101,32 @@ class GODirector(object):
 
     def end_lst(self, idx):
         self.completed[idx] = True
-        if all(self.completed) and self.callback:
-            self.callback()
+        if all(self.completed):
+            if self.callback:
+                self.callback()
+            self.destroy()
+
+    def destroy(self):
+        self.__obj.detach(self.on_component_built)
+        self.__obj = self.callback = self.__init_lst = None
 
 
-class GameObjectMdt(Subject):
+class GameObject(Subject):
     __metaclass__ = ABCMeta
 
     def __init__(self, init_lst=[], callback=None):
         Subject.__init__(self)
-        self.comps = self.comp_list(init_lst)
+        self.components = self.component_lst(init_lst)
         GODirector(self, init_lst, callback)
 
-    def comp_list(self, init_lst):
+    def component_lst(self, init_lst):
         if not init_lst:
             return []
 
         def process_elm(elm):
-            return [elm[0]] if type(elm) == tuple else self.comp_list(elm)
-        return process_elm(init_lst[0]) + self.comp_list(init_lst[1:])
+            return [elm[0]] if type(elm) == tuple else self.component_lst(elm)
+        return process_elm(init_lst[0]) + self.component_lst(init_lst[1:])
 
     def destroy(self):
         Subject.destroy(self)
-        map(lambda comp: getattr(self, comp).destroy(), self.comps)
+        map(lambda cmp: getattr(self, cmp).destroy(), self.components)

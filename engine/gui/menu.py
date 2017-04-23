@@ -1,6 +1,6 @@
 from direct.gui.DirectGuiGlobals import FLAT
 from direct.gui.OnscreenImage import OnscreenImage
-from ...gameobject import Gui, Logic, GameObjectMdt
+from ...gameobject import Gui, Logic, GameObject
 
 
 class MenuArgs(object):
@@ -149,11 +149,11 @@ class MenuFacade(object):
         return self.gui.detach(meth)
 
 
-class Menu(GameObjectMdt, MenuFacade):
+class Menu(GameObject, MenuFacade):
     gui_cls = MenuGui
 
     def __init__(self, menu_args):
         init_lst = [
             [('gui', self.gui_cls, [self, menu_args])],
             [('logic', MenuLogic, [self])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObject.__init__(self, init_lst)

@@ -16,7 +16,7 @@ from .event import EngineEvent
 from .audio import EngineAudio
 from .network.server import Server
 from .network.client import Client
-from ..gameobject import GameObjectMdt
+from ..gameobject import GameObject
 from .enginefacade import EngineFacade
 
 
@@ -25,7 +25,7 @@ class EngineShowBase(ShowBase):
     pass
 
 
-class Engine(GameObjectMdt, EngineFacade):
+class Engine(GameObject, EngineFacade):
 
     def __init__(self, cfg=None):
         __builtin__.eng = self
@@ -44,8 +44,8 @@ class Engine(GameObjectMdt, EngineFacade):
             [('server', Server, [self])],
             [('client', Client, [self])],
             [('shader_mgr', ShaderMgr, [self, cfg.shaders, cfg.gamma])]]
-        GameObjectMdt.__init__(self, init_lst)
+        GameObject.__init__(self, init_lst)
 
     def destroy(self):
-        GameObjectMdt.destroy(self)
+        GameObject.destroy(self)
         self.base.destroy()

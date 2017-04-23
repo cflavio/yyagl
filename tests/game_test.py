@@ -5,7 +5,7 @@ from unittest import TestCase
 from racing.game.engine.engine import Engine
 from racing.game.engine.configuration import Configuration
 from racing.game.game import GameLogic, Game
-from racing.game.gameobject import GameObjectMdt, Fsm, Gfx, Phys, Gui, Audio, \
+from racing.game.gameobject import GameObject, Fsm, Gfx, Phys, Gui, Audio, \
     Ai, Event
 
 
@@ -20,7 +20,7 @@ class LogicTests(TestCase):
 
     def test_init(self):
         self.eng = Engine()
-        game_obj = GameObjectMdt()
+        game_obj = GameObject()
         logic = GameLogic(game_obj)
         self.assertIsInstance(logic, GameLogic)
 
