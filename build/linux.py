@@ -53,7 +53,7 @@ def __bld(appname, start_dir, platform, ico_file):
     remove('.PKGINFO')
     move('usr/bin/' + appname, 'img/data/' + appname)
     copy(start_dir + ico_file % '48', 'img/data/icon.png')
-    seds = ['version', 'size', 'appname', 'Name']
+    seds = ['version', 'size', 'appname', 'AppName']
     seds = ' '.join(["-e 's/<%s>/{%s}/'" % (sed, sed) for sed in seds])
     cmd_tmpl = 'sed -i.bak %s img/scripts/config.lua' % seds
     cmd = cmd_tmpl.format(version=branch, size=get_size('img'),

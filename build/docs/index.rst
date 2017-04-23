@@ -1,7 +1,7 @@
-Welcome to <name>'s documentation!
+Welcome to <appname>'s documentation!
 ========================================
 
-<name> is a free open source game developed by `Ya2 <http://www.ya2.it>`_. You can follow its development on its `development site <http://www.ya2tech.it>`_. Here you can find the documentation of its code.
+<appname> is a free open source game developed by `Ya2 <http://www.ya2.it>`_. You can follow its development on its `site <http://www.ya.it/yorg>`_. Here you can find the documentation of its code.
 
 
 Contents:

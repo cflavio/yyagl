@@ -20,8 +20,8 @@ end
 
 Setup.Package {
     vendor = "ya2.it",
-    id = "<name>",
-    description = "<Name>",
+    id = "<appname>",
+    description = "<AppName>",
     version = "<version>",
     write_manifest = true,
     support_uninstall = true,
@@ -33,18 +33,18 @@ Setup.Package {
         "/usr/local/games"
     },
     Setup.DesktopMenuItem {
-        name = "<Name>",
+        name = "<AppName>",
         genericname = "Videogame",
-        tooltip = "<Name>",
+        tooltip = "<AppName>",
         icon = "icon.png",
-        commandline = "%0/<name>",
+        commandline = "%0/<appname>",
         category = "Game",
     },
     Setup.Option {
         value = true,
         required = true,
         bytes = <size>,
-        description = "<Name>",
+        description = "<AppName>",
         Setup.File {
             allowoverwrite = true,
             wildcards = {"*"}
