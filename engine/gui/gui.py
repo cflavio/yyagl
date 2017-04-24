@@ -67,16 +67,16 @@ class EngineGui(EngineGuiBase):
         EngineGuiBase.__init__(self, mdt)
         cfg = eng.logic.cfg
         resol = cfg.win_size.split()
-        self.set_resolution(tuple(int(size) for size in resol))
-        if cfg.fullscreen:
-            self.toggle_fullscreen()
+        self.set_resolution(tuple(int(size) for size in resol), fullscreen=cfg.fullscreen)
         self.cursor = Cursor(cfg.cursor_path, cfg.cursor_scale,
                              cfg.cursor_hotspot)
 
-    def set_resolution(self, res, check=True):
+    def set_resolution(self, res, check=True, fullscreen=None):
         eng.log_mgr.log('setting resolution ' + str(res))
         props = WindowProperties()
         props.set_size(res)
+        if fullscreen:
+            props.set_fullscreen(True)
         eng.base.win.request_properties(props)
         if check:
             args = 3.0, self.set_resolution_check, 'resolution check', [res]

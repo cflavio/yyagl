@@ -20,7 +20,6 @@ class Subject(object):
         except TypeError as err:
             eng.log('\n\nERROR: %s - %s\n%s\n\n' % (
                 str(self), str(meth), str(err)))
-            import traceback; traceback.print_stack()
 
     def destroy(self):
         self.observers = None
