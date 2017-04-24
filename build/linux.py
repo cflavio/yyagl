@@ -57,7 +57,7 @@ def __bld(appname, start_dir, platform, ico_file):
     seds = ' '.join(["-e 's/<%s>/{%s}/'" % (sed, sed) for sed in seds])
     cmd_tmpl = 'sed -i.bak %s img/scripts/config.lua' % seds
     cmd = cmd_tmpl.format(version=branch, size=get_size('img'),
-                          appname=appname, Name=appname.capitalize())
+                          appname=appname, AppName=appname.capitalize())
     system(cmd)
 
 
@@ -65,7 +65,7 @@ def __bld_full_pkg(name, platform, ico_file, p3d_path, nointernet):
     copytree('usr/lib/'+name, 'img/data/lib')
     copytree('../../assets', 'img/data/assets')
     copytree('../../yyagl/assets', 'img/data/yyagl/assets')
-    for root, dirnames, filenames in walk('img/data/assets'):
+    for root, _, filenames in walk('img/data/assets'):
         for filename in filenames:
             fname = root + '/' + filename
             rm_ext = ['psd', 'po', 'pot', 'egg']
@@ -83,11 +83,11 @@ def __bld_full_pkg(name, platform, ico_file, p3d_path, nointernet):
         'standalone'
     dims = ['16', '32', '48', '128', '256']
     ico_str = ''.join(["-i '" + ico_file % dim + "' " for dim in dims])
-    bld_cmd = cmd_tmpl.format(
+    cmd = cmd_tmpl.format(
         path=bld_dir, name=name, Name=name.capitalize(), version=ver,
         p3d_path=basename(p3d_path), platform='linux_'+platform,
         nointernet=nointernet, icons=ico_str)
-    system(bld_cmd)
+    system(cmd)
     move('linux_' + platform + '/' + name, 'img/data/' + name)
 
 

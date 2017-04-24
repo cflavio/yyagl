@@ -24,7 +24,7 @@ def __prepare(env):
     curr_dir = abspath('.').replace('/', '\/')
     curr_dir = curr_dir.replace('\\', '\\\\')
     args = ['appname', 'src_path', 'version']
-    args = ['-e "s/<%s>/{%s}/"' % (arg, arg) for arg in args ]
+    args = ['-e "s/<%s>/{%s}/"' % (arg, arg) for arg in args]
     cmd_tmpl = 'sed -i.bak ' + (' '.join(args)) + ' {path}docs_apidoc/conf.py'
     cmd = cmd_tmpl.format(
         appname=env['APPNAME'].capitalize(), version=branch, path=bld_dir,

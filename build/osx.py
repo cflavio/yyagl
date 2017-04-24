@@ -21,7 +21,7 @@ def build_osx(target, source, env):
     tgt = bld_dir + 'osx_i386/%s.app/Contents/MacOS/yyagl/assets' % appname
     copytree('yyagl/assets', tgt)
     start_dir = bld_dir + 'osx_i386/%s.app/Contents/MacOS/assets' % appname
-    for root, dirnames, filenames in walk(start_dir):
+    for root, _, filenames in walk(start_dir):
         for filename in filenames:
             fname = root + '/' + filename
             del_ext = ['psd', 'po', 'pot', 'egg']

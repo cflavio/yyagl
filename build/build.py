@@ -3,12 +3,13 @@ from os.path import join, getsize
 from subprocess import Popen, PIPE
 
 
-bld_cmd = ('pdeploy -o  {path} {nointernet} -n {name} -N {Name} ' +
+bld_cmd = (
+    'pdeploy -o  {path} {nointernet} -n {name} -N {Name} ' +
     '-v {version} -a ya2.it -A "Ya2" -l "GPLv3" -L license.txt ' +
     "-e flavio@ya2.it -t width=800 -t height=600 -P {platform} " +
     "-i '%s16_png.png' -i '%s32_png.png' -i '%s48_png.png' " +
     "-i '%s128_png.png' -i '%s256_png.png' {p3d_path} installer") % (
-        ('assets/images/icon/icon',) * 5)
+    ('assets/images/icon/icon',) * 5)
 
 
 def exec_cmd(cmd):
@@ -32,7 +33,7 @@ def image_extensions(files):
 
 def track_files():
     tr_root = 'assets/models/tracks/'
-    for root, dirnames, filenames in walk(tr_root):
+    for _, dirnames, _ in walk(tr_root):
         return [tr_root + dname + '/track.bam' for dname in dirnames]
 
 

@@ -1,4 +1,4 @@
-from os import remove, system, path as os_path, walk
+from os import remove, system, path as os_path
 from os.path import dirname, realpath
 from shutil import move
 from .build import ver, bld_dir

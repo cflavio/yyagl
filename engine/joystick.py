@@ -27,8 +27,7 @@ class JoystickMgrBase(object):
     def init_joystick(self):
         pass
 
-    @staticmethod
-    def get_joystick():
+    def get_joystick(self):
         return 0, 0, 0, 0
 
     def destroy(self):
@@ -58,7 +57,7 @@ class JoystickMgr(JoystickMgrBase):
     def on_frame(self):
         if not self.emulate_keyboard:
             return
-        x, y, b0, b1 = self.get_joystick()
+        x, y, btn0, btn1 = self.get_joystick()
         if self.old_x <= -.4 <= x:
             messenger.send('arrow_left-up')
         if self.old_x >= .4 >= x:
@@ -67,9 +66,9 @@ class JoystickMgr(JoystickMgrBase):
             messenger.send('arrow_down-up')
         if self.old_y <= -.4 <= y:
             messenger.send('arrow_up-up')
-        if self.old_b0 and not b0:
+        if self.old_b0 and not btn0:
             messenger.send('enter-up')
-        self.old_x, self.old_y, self.old_b0, self.old_b1 = x, y, b0, b1
+        self.old_x, self.old_y, self.old_b0, self.old_b1 = x, y, btn0, btn1
 
     def destroy(self):
         eng.event.detach(self.on_frame)

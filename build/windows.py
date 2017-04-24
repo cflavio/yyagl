@@ -66,30 +66,30 @@ Section Uninstall
 SectionEnd'''
 
 
-class TempFile:
+class TempFile(object):
 
-  def __init__(self, fName, text):
-      self.fName, self.text = fName, text
+    def __init__(self, fname, text):
+        self.fname, self.text = fname, text
 
-  def __enter__(self):
-      with open(self.fName, 'w') as outFile:
-          outFile.write(self.text)
+    def __enter__(self):
+        with open(self.fname, 'w') as outfile:
+            outfile.write(self.text)
 
-  def __exit__(self, exc_type, exc_val, exc_tb):
-      remove(self.fName)
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        remove(self.fname)
 
 
-class InsideDir:
+class InsideDir(object):
 
-  def __init__(self, _dir):
-      self.dir = _dir
+    def __init__(self, _dir):
+        self.dir = _dir
 
-  def __enter__(self):
-      self.oldDir = getcwd()
-      chdir(self.dir)
+    def __enter__(self):
+        self.old_dir = getcwd()
+        chdir(self.dir)
 
-  def __exit__(self, exc_type, exc_val, exc_tb):
-      chdir(self.oldDir)
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        chdir(self.old_dir)
 
 
 def build_windows(target, source, env):
@@ -104,10 +104,10 @@ def build_windows(target, source, env):
         platform='win_i386', nointernet=internet_switch)
     system(bld_command)
     with InsideDir('%swin_i386' % bld_dir):
-        fileName = '{Name} {version}.exe'.format(
+        fname = '{Name} {version}.exe'.format(
             Name=env['APPNAME'].capitalize(), version=ver)
-        system('7z x -owinInstaller %s' % fileName.replace(' ', '\\ '))
-        remove(fileName)
+        system('7z x -owinInstaller %s' % fname.replace(' ', '\\ '))
+        remove(fname)
         with InsideDir('winInstaller'):
             copytree('../../../yyagl/licenses', './licenses')
             copy_tree('../../../licenses', './licenses')  # it already exists
@@ -118,7 +118,7 @@ def build_windows(target, source, env):
             rename('$PLUGINSDIR', 'NSIS Plugins Directory')
             copytree('../../../assets', './assets')
             copytree('../../../yyagl/assets', './yyagl/assets')
-            for root, dirnames, filenames in walk('./assets'):
+            for root, _, filenames in walk('./assets'):
                 for filename in filenames:
                     fname = root + '/' + filename
                     rm_ext = ['psd', 'po', 'pot', 'egg']
@@ -129,27 +129,26 @@ def build_windows(target, source, env):
                             any(fname.endswith(concl + '.bam')
                                 for concl in ['/track', '/collision', 'Anim']):
                         remove(fname)
-            installFiles = ''.join(
-                ['\nSetOutPath "$INSTDIR\\%s"\n' % root[2:].replace('/','\\') +
-                 '\n'.join(['File ".\\%s\\%s"' % (root[2:].replace('/','\\'),
+            install_files = ''.join(
+                ['\nSetOutPath "$INSTDIR\\%s"\n' % root[2:].replace('/', '\\') +
+                 '\n'.join(['File ".\\%s\\%s"' % (root[2:].replace('/', '\\'),
                                                   name)
                             for name in files])
-                 for root, dirs, files in walk('.')])
-            uninstallFiles = '\n'.join(
-                'Delete "$INSTDIR\\%s\\%s"' % (root[2:].replace('/','\\'),
+                 for root, _, files in walk('.')])
+            uninstall_files = '\n'.join(
+                'Delete "$INSTDIR\\%s\\%s"' % (root[2:].replace('/', '\\'),
                                                name)
-                                       for root, dirs, files in walk('.')
-                                       for name in files)
+                for root, dirs, files in walk('.') for name in files)
             nsi_src_inst = nsi_src.format(
                 fullName=env['APPNAME'].capitalize(),
                 outFile='{name}-{version}{int_str}-windows.exe'.format(
                     name=env['APPNAME'], version=branch, int_str=int_str),
                 shortName=env['APPNAME'],
                 iconFile=env['APPNAME'] + '.ico',
-                installFiles = installFiles,
-                uninstallFiles = uninstallFiles)
+                installFiles=install_files,
+                uninstallFiles=uninstall_files)
             with TempFile('installer.nsi', nsi_src_inst):
-                system( 'makensis installer.nsi' )
+                system('makensis installer.nsi')
     src = '{path}win_i386/winInstaller/{name}-{version}{int_str}-windows.exe'
     tgt_file = '{path}{name}-{version}{int_str}-windows.exe'
     src_fmt = src.format(
