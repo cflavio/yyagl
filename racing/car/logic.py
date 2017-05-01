@@ -224,7 +224,7 @@ class CarLogic(Logic):
             starts = wps[w_p][:]
             for start in starts:
                 to_process = [start]
-                is_grid = True
+                is_grid = False
                 try_forks = []
                 while to_process:
                     first_wp = to_process.pop(0)
@@ -232,8 +232,8 @@ class CarLogic(Logic):
                     for w_p2 in wps[first_wp]:
                         if w_p2 not in end_forks:
                             to_process += [w_p2]
-                        if 'PitStop' in [hit.get_node().get_name() for hit in eng.ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
-                            is_grid = False
+                        if 'Goal' in [hit.get_node().get_name() for hit in eng.ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
+                            is_grid = True
                 if is_grid:
                     grid_forks += try_forks
         return grid_forks
