@@ -1,3 +1,4 @@
+from random import uniform
 from panda3d.core import Vec3, Vec2, Point3, Mat4, BitMask32, LineSegs
 from yyagl.gameobject import Ai
 
@@ -8,6 +9,9 @@ class CarAi(Ai):
         Ai.__init__(self, mdt)
         self.road_name = road_name
         self.waypoints = waypoints
+        self.gnd_samples = {'left': [''], 'center': [''],  'right': ['']}
+        self.curr_gnd = 'left'
+        self.last_obst_info = None, 0
 
     @property
     def current_target(self):  # no need to be cached
@@ -137,27 +141,52 @@ class CarAi(Ai):
         #    print name_c, distance_center, name_l, distance_left, name_r, distance_right, left, right
         return left, right
 
+    def __update_gnd(self):
+        if len(self.gnd_samples[self.curr_gnd]) > 5:
+            self.gnd_samples[self.curr_gnd].pop(0)
+        bounds = {'left': (10, 30), 'center': (-10, 10), 'right': (-30, -10)}
+        deg = uniform(*bounds[self.curr_gnd])
+        lgt = uniform(5, 25)
+        self.gnd_samples[self.curr_gnd] += [self.lookahead_ground(deg, lgt)]
+        dirs = ['left', 'center', 'right']
+        self.curr_gnd = dirs[(dirs.index(self.curr_gnd) + 1) % len(dirs)]
+
+    def __eval_gnd(self):
+        road_n = self.road_name
+        n_road = lambda samples: len([smp for smp in samples if smp.startswith(road_n)])
+        r_road = lambda samples: float(n_road(samples)) / len(samples)
+        r_left = r_road(self.gnd_samples['left'])
+        r_center = r_road(self.gnd_samples['center'])
+        r_right = r_road(self.gnd_samples['right'])
+        r_max = max([r_left, r_center, r_right])
+        if r_center == r_max:
+            return 'center'
+        elif r_left == r_max:
+            return 'left'
+        else:
+            return 'right'
+
     def left_right(self, obstacles, brake):
+        # eval obstacles
+        curr_time = globalClock.getFrameTime()
+        if curr_time - self.last_obst_info[1] < .1:
+            return self.last_obst_info[0]
         obst_left, obst_right = self.__eval_obstacle_avoidance(obstacles, brake)
         if obst_left or obst_right:
+            self.last_obst_info = (obst_left, obst_right), curr_time
             return obst_left, obst_right
+
+        # eval on_road
+        self.__update_gnd()
         road_n = self.road_name
-        fwd_gnd = self.lookahead_ground(30, 0)
-        right_gnd = self.lookahead_ground(30, -20)
-        left_gnd = self.lookahead_ground(30, 20)
-        fwd_gnd_close = self.lookahead_ground(10, 0)
-        right_gnd_close = self.lookahead_ground(10, -30)
-        left_gnd_close = self.lookahead_ground(10, 30)
-        if self.curr_dot_prod > 0 and not fwd_gnd.startswith(road_n):
-            if left_gnd.startswith(road_n):
+        gnd_dir = self.__eval_gnd()
+        if self.curr_dot_prod > 0 and gnd_dir != 'center':
+            if gnd_dir == 'left':
                 return True, False
-            elif right_gnd.startswith(road_n):
+            elif gnd_dir == 'right':
                 return False, True
-        if self.curr_dot_prod > 0 and not fwd_gnd_close.startswith(road_n):
-            if left_gnd_close.startswith(road_n):
-                return True, False
-            elif right_gnd_close.startswith(road_n):
-                return False, True
+
+        # eval waypoints
         if abs(self.curr_dot_prod) > .9:
             return False, False
         car_vec = self.mdt.logic.car_vec

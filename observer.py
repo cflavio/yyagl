@@ -18,6 +18,8 @@ class Subject(object):
             sorted_observers = sorted(meths, key=lambda obs: obs[1])
             map(lambda obs: obs[0](*args, **kwargs), sorted_observers)
         except TypeError as err:
+            import traceback
+            traceback.print_stack()
             eng.log('\n\nERROR: %s - %s\n%s\n\n' % (
                 str(self), str(meth), str(err)))
 
