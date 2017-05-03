@@ -149,10 +149,10 @@ class Car(GameObject, CarFacade):
              ('phys', self.phys_cls, [self, carphys_props]),
              ('gui', self.gui_cls, [self, gui_props]),
              ('event', self.event_cls, [self, carevent_props]),
-             ('logic', self.logic_cls, [self, carlogic_props])],
-            [('audio', self.audio_cls, [self, audio_props])],
-            [('ai', self.ai_cls, [self, car_props.road_name,
-                                  car_props.track_waypoints])]]
+             ('logic', self.logic_cls, [self, carlogic_props]),
+             ('ai', self.ai_cls, [self, car_props.road_name,
+                                  car_props.track_waypoints])],
+            [('audio', self.audio_cls, [self, audio_props])]]
         GameObject.__init__(self, init_lst, car_props.callback)
 
 

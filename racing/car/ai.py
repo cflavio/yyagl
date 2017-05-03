@@ -10,8 +10,12 @@ class CarAi(Ai):
         self.road_name = road_name
         self.waypoints = waypoints
         self.gnd_samples = {'left': [''], 'center': [''],  'right': ['']}
+        self.obst_samples = {'left': [], 'center': [],  'right': []}
         self.curr_gnd = 'left'
         self.last_obst_info = None, 0
+        bnds = self.mdt.phys.coll_mesh.get_tight_bounds()
+        self.width_bounds = (bnds[0][0], bnds[1][0])
+        eng.attach_obs(self.on_frame)
 
     @property
     def current_target(self):  # no need to be cached
@@ -36,8 +40,7 @@ class CarAi(Ai):
 
     def brake(self, obstacles):
         name_c, distance_center, name_l, distance_left, name_r, distance_right = obstacles
-        min_dist = min([distance_center, distance_left, distance_right])
-        if min_dist < 4:
+        if distance_center < 4:
             return True
         if self.mdt.phys.speed < 40:
             return False
@@ -61,62 +64,19 @@ class CarAi(Ai):
         return self.mdt.phys.gnd_name(lookahead_pos)
 
     def __get_obstacles(self):
-        start = self.mdt.gfx.nodepath.get_pos() - self.mdt.logic.car_vec * 1
-        lookahed_vec = self.mdt.logic.car_vec * 25
-        end = start + lookahed_vec
-        result = eng.ray_test_closest(start, end, BitMask32.bit(0))
-        hit = result.get_node()
-        lookahed_vec = self.mdt.logic.car_vec * 25
-        left_rot_mat = Mat4()
-        left_rot_mat.setRotateMat(12, (0, 0, 1))
-        lookahead_rot_left = left_rot_mat.xformVec(lookahed_vec)
-        lookahead_pos_left = self.mdt.gfx.nodepath.get_pos() + lookahead_rot_left
-        lookahed_vec = self.mdt.logic.car_vec * 25
-        right_rot_mat = Mat4()
-        right_rot_mat.setRotateMat(-12, (0, 0, 1))
-        lookahead_rot_right = right_rot_mat.xformVec(lookahed_vec)
-        lookahead_pos_right = self.mdt.gfx.nodepath.get_pos() + lookahead_rot_right
-        #print end, lookahead_pos_left, lookahead_pos_right
-        result_left = eng.ray_test_closest(start, lookahead_pos_left, BitMask32.bit(0))
-        hit_left = result_left.get_node()
-        result_right = eng.ray_test_closest(start, lookahead_pos_right, BitMask32.bit(0))
-        hit_right = result_left.get_node()
-        distance_left = 999
-        if hit_left:
-            dist_vec = self.mdt.gfx.nodepath.get_pos() - result_left.get_hit_pos()
-            distance_left = dist_vec.length()
-        distance_right = 999
-        if hit_right:
-            dist_vec = self.mdt.gfx.nodepath.get_pos() - result_right.get_hit_pos()
-            distance_right = dist_vec.length()
-        distance_center = 1000
-        if hit:
-            dist_vec = self.mdt.gfx.nodepath.get_pos() - result.get_hit_pos()
-            distance_center = dist_vec.length()
-        distance_center = min(1000, distance_center)
-        distance_left = min(999, distance_left)
-        distance_right = min(999, distance_right)
-        name_c = name_l = name_r = ''
-        if hit:
-            name_c = hit.get_name()
-        if hit_left:
-            name_l = hit_left.get_name()
-        if hit_right:
-            name_r = hit_right.get_name()
-        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
-            if hasattr(self, 'ai_lines'):
-                self.ai_lines.remove_node()
-            if self.mdt.name == game.player_car.name:
-                segs = LineSegs()
-                segs.moveTo(start)
-                segs.drawTo(end)
-                segs.moveTo(start)
-                segs.drawTo(lookahead_pos_left)
-                segs.moveTo(start)
-                segs.drawTo(lookahead_pos_right)
-                segs_node = segs.create()
-                self.ai_lines = render.attachNewNode(segs_node)
-        return name_c, distance_center, name_l, distance_left, name_r, distance_right
+        left_samples = [smp for smp in self.obst_samples['left'] if smp[1]]
+        right_samples = [smp for smp in self.obst_samples['right'] if smp[1]]
+        center_samples = [smp for smp in self.obst_samples['center'] if smp[1]]
+        min_center = '', 1000
+        min_left = '', 999
+        min_right = '', 999
+        if left_samples:
+            min_left = min(left_samples, key=lambda elm: elm[1])
+        if right_samples:
+            min_right = min(right_samples, key=lambda elm: elm[1])
+        if center_samples:
+            min_center = min(center_samples, key=lambda elm: elm[1])
+        return min_center[0], min_center[1], min_left[0], min_left[1], min_right[0], min_right[1]
 
     def __eval_obstacle_avoidance(self, obstacles, brake):
         name_c, distance_center, name_l, distance_left, name_r, distance_right = obstacles
@@ -130,15 +90,11 @@ class CarAi(Ai):
                         left = True
                     elif distance_right == min_dist:
                         right = True
-                    #if self.mdt.name == game.player_car.name:
-                    #    print name_c, distance_center, name_l, distance_left, name_r, distance_right, left, right
                     return left, right
         if distance_left == max([distance_center, distance_left, distance_right]):
             left = True
         elif distance_right == max([distance_center, distance_left, distance_right]):
             right = True
-        #if self.mdt.name == game.player_car.name:
-        #    print name_c, distance_center, name_l, distance_left, name_r, distance_right, left, right
         return left, right
 
     def __update_gnd(self):
@@ -166,6 +122,50 @@ class CarAi(Ai):
         else:
             return 'right'
 
+    def __update_obst(self):
+        if len(self.obst_samples[self.curr_gnd]) > 5:
+            self.obst_samples[self.curr_gnd].pop(0)
+        bounds = {'left': (0, 25), 'center': (0, 0), 'right': (-25, 0)}
+        if self.curr_gnd == 'center':
+            offset = (uniform(*self.width_bounds), 0, 0)
+            deg = 0
+        else:
+            offset = (self.width_bounds[0 if self.curr_gnd == 'left' else 1], 0, 0)
+            deg = uniform(*bounds[self.curr_gnd])
+        start = self.mdt.gfx.nodepath.get_pos() - self.mdt.logic.car_vec * 1
+        rot_mat = Mat4()
+        rot_mat.setRotateMat(self.mdt.gfx.nodepath.get_h(), (0, 0, 1))
+        offset_rot = rot_mat.xformVec(offset)
+        start = start + offset_rot
+        lgt = 5 + 20 * self.mdt.phys.speed_ratio
+        lookahed_vec = self.mdt.logic.car_vec * lgt
+        rot_mat = Mat4()
+        rot_mat.setRotateMat(uniform(*bounds[self.curr_gnd]), (0, 0, 1))
+        lookahead_rot = rot_mat.xformVec(lookahed_vec)
+        lookahead_pos = self.mdt.gfx.nodepath.get_pos() + lookahead_rot
+        result = eng.ray_test_closest(start, lookahead_pos, BitMask32.bit(0))
+        hit = result.get_node()
+        dist = 0
+        name = ''
+        if hit:
+            dist = self.mdt.gfx.nodepath.get_pos() - result.get_hit_pos()
+            dist = dist.length()
+            name = hit.get_name()
+        self.obst_samples[self.curr_gnd] += [(name, dist)]
+        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
+            if hasattr(self, 'ai_lines'):
+                self.ai_lines.remove_node()
+            if self.mdt.name == game.player_car.name:
+                segs = LineSegs()
+                segs.moveTo(start)
+                segs.drawTo(lookahead_pos)
+                segs_node = segs.create()
+                self.ai_lines = render.attachNewNode(segs_node)
+
+    def on_frame(self):
+        self.__update_gnd()
+        self.__update_obst()
+
     def left_right(self, obstacles, brake):
         # eval obstacles
         curr_time = globalClock.getFrameTime()
@@ -177,7 +177,6 @@ class CarAi(Ai):
             return obst_left, obst_right
 
         # eval on_road
-        self.__update_gnd()
         road_n = self.road_name
         gnd_dir = self.__eval_gnd()
         if self.curr_dot_prod > 0 and gnd_dir != 'center':
@@ -202,6 +201,9 @@ class CarAi(Ai):
         return {'forward': acceleration, 'left': left, 'reverse': brake,
                 'right': right}
 
+    def destroy(self):
+        eng.detach_obs(self.on_frame)
+        Ai.destroy(self)
 
 class CarResultsAi(CarAi):
 
