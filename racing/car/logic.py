@@ -225,6 +225,7 @@ class CarLogic(Logic):
             for start in starts:
                 to_process = [start]
                 is_grid = False
+                is_pitstop = False
                 try_forks = []
                 while to_process:
                     first_wp = to_process.pop(0)
@@ -234,7 +235,9 @@ class CarLogic(Logic):
                             to_process += [w_p2]
                         if 'Goal' in [hit.get_node().get_name() for hit in eng.ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
                             is_grid = True
-                if is_grid:
+                        if 'PitStop' in [hit.get_node().get_name() for hit in eng.ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
+                            is_pitstop = True
+                if is_grid and not is_pitstop:
                     grid_forks += try_forks
         return grid_forks
 
@@ -252,6 +255,9 @@ class CarLogic(Logic):
             del wps[_wp]
         return wps
 
+    def get_succ_wp(self, curr_wp):
+        return [wp for wp in self.props.track_waypoints if curr_wp in self.props.track_waypoints[wp]][0]
+
     def closest_wp(self):
         if self.__start_wp:  # do a decorator @once_per_frame
             return self.__start_wp, self.__end_wp
@@ -266,7 +272,6 @@ class CarLogic(Logic):
             waypoints = self._pitstop_wps
         else:
             waypoints = self._grid_wps
-        #print 'waypoints', [int(w_p.get_name()[8:]) for w_p in waypoints]
         distances = [node.getDistance(wp) for wp in waypoints.keys()]
         curr_wp = waypoints.keys()[distances.index(min(distances))]
         may_prev = waypoints[curr_wp]

@@ -59,9 +59,9 @@ class TrackPhys(Phys):
         meth = self.add_geoms_merged if merged else self.add_geoms_unmerged
         if not merged:
             for geom in geoms:
-                self.__build_mesh(meth, geom, geom_name, ghost)
+                self.__build_mesh(meth, geom, geom_name, ghost, merged)
         else:
-            self.__build_mesh(meth, geoms, geom_name, ghost)
+            self.__build_mesh(meth, geoms, geom_name, ghost, merged)
 
     def add_geoms_merged(self, geoms, mesh, geom_name):
         for geom in geoms:
@@ -76,13 +76,13 @@ class TrackPhys(Phys):
             mesh.addGeom(_geom, geoms.getTransform(self.model))
         return geoms.get_name()
 
-    def __build_mesh(self, meth, geoms, geom_name, ghost):
+    def __build_mesh(self, meth, geoms, geom_name, ghost, merged):
         mesh = BulletTriangleMesh()
         name = meth(geoms, mesh, geom_name)
         shape = BulletTriangleMeshShape(mesh, dynamic=False)
-        self.__build(shape, name, ghost)
+        self.__build(shape, name, ghost, merged)
 
-    def __build(self, shape, geom_name, ghost):
+    def __build(self, shape, geom_name, ghost, merged):
         if ghost:
             ncls = BulletGhostNode
             meth = eng.attach_ghost
@@ -97,7 +97,7 @@ class TrackPhys(Phys):
         meth(nodepath.node())
         lst += [nodepath.node()]
         nodepath.node().notifyCollisions(True)
-        if ghost:
+        if ghost or not merged:
             nodepath.setCollideMask(BitMask32.bit(1))
 
     def __set_corners(self):
