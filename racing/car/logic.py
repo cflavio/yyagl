@@ -1,4 +1,5 @@
 from math import sin, cos
+from random import choice
 from panda3d.core import Vec3, Vec2, deg2Rad
 from yyagl.gameobject import Logic
 from yyagl.racing.camera import Camera
@@ -135,6 +136,7 @@ class CarLogic(Logic):
                                           self.props.joystick, self.mdt.phys)
         self.start_pos = carlogic_props.start_pos
         self.start_pos_hpr = carlogic_props.start_pos_hpr
+        self.last_ai_wp = None
         eng.attach_obs(self.on_start_frame)
 
     def update(self, input_dct):
@@ -241,39 +243,54 @@ class CarLogic(Logic):
                     grid_forks += try_forks
         return grid_forks
 
-    @property
-    def pitstop_wps(self):
+    def pitstop_wps(self, curr_wp):
         wps = self.props.track_waypoints.copy()
-        for _wp in self.grid_path:
-            del wps[_wp]
+        if curr_wp not in self.grid_path:
+            for _wp in self.grid_path:
+                del wps[_wp]
         return wps
 
-    @property
-    def grid_wps(self):
+    def grid_wps(self, curr_wp):
         wps = self.props.track_waypoints.copy()
-        for _wp in self.pitstop_path:
-            del wps[_wp]
+        if curr_wp not in self.pitstop_path:
+            for _wp in self.pitstop_path:
+                del wps[_wp]
         return wps
-
-    def get_succ_wp(self, curr_wp):
-        return [wp for wp in self.props.track_waypoints if curr_wp in self.props.track_waypoints[wp]][0]
 
     def closest_wp(self):
         if self.__start_wp:  # do a decorator @once_per_frame
             return self.__start_wp, self.__end_wp
+        if not self.last_ai_wp:
+            closest_wps = self.props.track_waypoints.keys()
+        else:
+            closest_wps = [self.last_ai_wp] + self.mdt.logic.props.track_waypoints[self.last_ai_wp] + \
+            [wp for wp in self.mdt.logic.props.track_waypoints if self.last_ai_wp in self.mdt.logic.props.track_waypoints[wp]]
         node = self.mdt.gfx.nodepath
+        distances = [node.getDistance(wp) for wp in closest_wps]
+        curr_wp = closest_wps[distances.index(min(distances))]
         curr_chassis = self.mdt.gfx.nodepath.get_children()[0]
         if not hasattr(self, '_pitstop_wps'):
-            self._pitstop_wps = self.pitstop_wps
+            self._pitstop_wps = self.pitstop_wps(curr_wp)
         if not hasattr(self, '_grid_wps'):
-            self._grid_wps = self.grid_wps
+            self._grid_wps = self.grid_wps(curr_wp)
         if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name() and \
                 len(self.mdt.logic.lap_times) < self.mdt.laps - 1:
-            waypoints = self._pitstop_wps
+            waypoints = {wp[0]: wp[1] for wp in self._pitstop_wps.items() if wp[0] in closest_wps}
         else:
-            waypoints = self._grid_wps
+            waypoints = {wp[0]: wp[1] for wp in self._grid_wps.items() if wp[0] in closest_wps}
         distances = [node.getDistance(wp) for wp in waypoints.keys()]
         curr_wp = waypoints.keys()[distances.index(min(distances))]
+        if min(distances) < 10:
+            nexts = [wp for wp in waypoints if curr_wp in waypoints[wp]]
+            curr_wp = choice(nexts)
+            closest_wps = [curr_wp] + self.mdt.logic.props.track_waypoints[curr_wp] + \
+            [wp for wp in self.mdt.logic.props.track_waypoints if curr_wp in self.mdt.logic.props.track_waypoints[wp]]
+            if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name() and \
+                    len(self.mdt.logic.lap_times) < self.mdt.laps - 1:
+                waypoints = {wp[0]: wp[1] for wp in self._pitstop_wps.items() if wp[0] in closest_wps}
+            else:
+                waypoints = {wp[0]: wp[1] for wp in self._grid_wps.items() if wp[0] in closest_wps}
+
         may_prev = waypoints[curr_wp]
         distances = [self.pt_line_dst(node, w_p, curr_wp) for w_p in may_prev]
         prev_wp = may_prev[distances.index(min(distances))]
@@ -294,6 +311,7 @@ class CarLogic(Logic):
             start_wp, end_wp = curr_wp, next_wp
         self.__start_wp = start_wp
         self.__end_wp = end_wp
+        self.last_ai_wp = self.__end_wp
         return start_wp, end_wp
 
     def update_waypoints(self):

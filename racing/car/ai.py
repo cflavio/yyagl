@@ -14,16 +14,13 @@ class CarAi(Ai):
         self.curr_gnd = 'left'
         self.last_obst_info = None, 0
         bnds = self.mdt.phys.coll_mesh.get_tight_bounds()
-        self.width_bounds = (bnds[0][0], bnds[1][0])
+        self.width_bounds = (bnds[0][0] * 1.15, bnds[1][0] * 1.15)
         self.height_bounds = (bnds[0][2], bnds[1][2] + .4)  # wheel's height
         eng.attach_obs(self.on_frame)
 
     @property
     def current_target(self):  # no need to be cached
-        curr_wp = self.mdt.logic.closest_wp()[1]
-        dist_vec = curr_wp.get_pos() - self.mdt.gfx.nodepath.get_pos()
-        distance = dist_vec.length()
-        return curr_wp if distance > 15 else self.mdt.logic.get_succ_wp(curr_wp)
+        return self.mdt.logic.closest_wp()[1]
 
     @property
     def tgt_vec(self):  # to be cached
@@ -139,16 +136,17 @@ class CarAi(Ai):
                 return 'right'
 
     def __update_obst(self):
-        if len(self.obst_samples[self.curr_gnd]) > 4:
+        if len(self.obst_samples[self.curr_gnd]) > 8:
             self.obst_samples[self.curr_gnd].pop(0)
-        bounds = {'left': (0, 25), 'center': (0, 0), 'right': (-25, 0)}
+        lat_deg = 30 - 10 * self.mdt.phys.speed_ratio
+        bounds = {'left': (0, lat_deg), 'center': (0, 0), 'right': (-lat_deg, 0)}
         if self.curr_gnd == 'center':
             offset = (uniform(*self.width_bounds), 0, 0)
             deg = 0
         else:
             offset = (self.width_bounds[0 if self.curr_gnd == 'left' else 1], 0, 0)
             deg = uniform(*bounds[self.curr_gnd])
-        start = self.mdt.gfx.nodepath.get_pos() - self.mdt.logic.car_vec * 1
+        start = self.mdt.gfx.nodepath.get_pos() - self.mdt.logic.car_vec * .8
         rot_mat = Mat4()
         rot_mat.setRotateMat(self.mdt.gfx.nodepath.get_h(), (0, 0, 1))
         offset_rot = rot_mat.xformVec(offset)
@@ -226,7 +224,7 @@ class CarAi(Ai):
         #if self.mdt.name == game.player_car.name: print 'dot_prod', self.curr_dot_prod
         #if self.mdt.name == game.player_car.name: print 'speed', self.mdt.phys.speed
         obstacles = list(self.__get_obstacles())
-        if self.mdt.name == game.player_car.name: print 'obstacles', obstacles
+        #if self.mdt.name == game.player_car.name: print 'obstacles', obstacles
         brake = self.brake(obstacles)
         #if self.mdt.name == game.player_car.name: print 'brake', brake
         acceleration = False if brake else self.acceleration
