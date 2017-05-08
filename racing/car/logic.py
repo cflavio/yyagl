@@ -130,6 +130,8 @@ class CarLogic(Logic):
         self.lap_times = []
         self.start_left = None
         self.start_right = None
+        self.__pitstop_wps = {}
+        self.__grid_wps = {}
         self.waypoints = []  # collected waypoints for validating laps
         self.weapon = None
         self.input_logic = AbsLogic.build(self.__class__ == CarPlayerLogic,
@@ -244,17 +246,23 @@ class CarLogic(Logic):
         return grid_forks
 
     def pitstop_wps(self, curr_wp):
+        if curr_wp in self.__pitstop_wps:
+            return self.__pitstop_wps[curr_wp]
         wps = self.props.track_waypoints.copy()
         if curr_wp not in self.grid_path:
             for _wp in self.grid_path:
                 del wps[_wp]
+        self.__pitstop_wps[curr_wp] = wps
         return wps
 
     def grid_wps(self, curr_wp):
+        if curr_wp in self.__grid_wps:
+            return self.__grid_wps[curr_wp]
         wps = self.props.track_waypoints.copy()
         if curr_wp not in self.pitstop_path:
             for _wp in self.pitstop_path:
                 del wps[_wp]
+        self.__grid_wps[curr_wp] = wps
         return wps
 
     def closest_wp(self):
@@ -269,10 +277,8 @@ class CarLogic(Logic):
         distances = [node.getDistance(wp) for wp in closest_wps]
         curr_wp = closest_wps[distances.index(min(distances))]
         curr_chassis = self.mdt.gfx.nodepath.get_children()[0]
-        if not hasattr(self, '_pitstop_wps'):
-            self._pitstop_wps = self.pitstop_wps(curr_wp)
-        if not hasattr(self, '_grid_wps'):
-            self._grid_wps = self.grid_wps(curr_wp)
+        self._pitstop_wps = self.pitstop_wps(curr_wp)
+        self._grid_wps = self.grid_wps(curr_wp)
         if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name() and \
                 len(self.mdt.logic.lap_times) < self.mdt.laps - 1:
             waypoints = {wp[0]: wp[1] for wp in self._pitstop_wps.items() if wp[0] in closest_wps}
