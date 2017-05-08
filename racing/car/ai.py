@@ -5,10 +5,11 @@ from yyagl.gameobject import Ai
 
 class CarAi(Ai):
 
-    def __init__(self, mdt, road_name, waypoints):
+    def __init__(self, mdt, road_name, waypoints, cars):
         Ai.__init__(self, mdt)
         self.road_name = road_name
         self.waypoints = waypoints
+        self.cars = cars
         self.gnd_samples = {'left': [''], 'center': [''],  'right': ['']}
         self.obst_samples = {'left': [], 'center': [],  'right': []}
         self.curr_gnd = 'left'
@@ -157,7 +158,14 @@ class CarAi(Ai):
         rot_mat.setRotateMat(uniform(*bounds[self.curr_gnd]), (0, 0, 1))
         lookahead_rot = rot_mat.xformVec(lookahed_vec)
         lookahead_pos = self.mdt.gfx.nodepath.get_pos() + lookahead_rot
-        result = eng.ray_test_closest(start, lookahead_pos, BitMask32.bit(0))
+
+        b_m = BitMask32.bit(0)
+        car_idx = self.cars.index(self.mdt.name)
+        cars_idx = range(len(self.cars))
+        cars_idx.remove(car_idx)
+        for bitn in cars_idx:
+            b_m = b_m | BitMask32.bit(2 + bitn)
+        result = eng.ray_test_closest(start, lookahead_pos, b_m)
         hit = result.get_node()
         dist = 0
         name = ''

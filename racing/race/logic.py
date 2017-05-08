@@ -139,7 +139,7 @@ class RaceLogic(Logic):
                     r_p.rocket_path, r_p.camera_vec,
                     self.mdt.track.phys.waypoints, r_p.respawn_name,
                     r_p.pitstop_name, r_p.wall_name, r_p.goal_name,
-                    r_p.bonus_name, r_p.roads_names)
+                    r_p.bonus_name, r_p.roads_names, r_p.cars)
                 new_car = car_class(car_props)
                 game.cars += [new_car]
             s_p = self.track.get_start_pos(grid.index(car_path))
@@ -166,7 +166,7 @@ class RaceLogic(Logic):
                 drv.logic.tires, drv.logic.suspensions, r_p.rocket_path,
                 r_p.camera_vec, self.mdt.track.phys.waypoints,
                 r_p.respawn_name, r_p.pitstop_name, r_p.wall_name,
-                r_p.goal_name, r_p.bonus_name, r_p.roads_names)
+                r_p.goal_name, r_p.bonus_name, r_p.roads_names, r_p.cars)
             game.player_car = self.player_car = car_cls(car_props)  # remove
             game.cars = self.cars = []  # remove game's reference
         track_props = TrackProps(

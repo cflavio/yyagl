@@ -20,7 +20,7 @@ class CarProps(object):
             road_name, model_name, damage_paths, wheel_gfx_names,
             particle_path, driver_engine, driver_tires, driver_suspensions,
             rocket_path, cam_vec, track_waypoints, respawn_name, pitstop_name,
-            wall_name, goal_name, bonus_name, roads_names):
+            wall_name, goal_name, bonus_name, roads_names, car_names):
         self.name = name
         self.coll_path = coll_path
         self.coll_name = coll_name
@@ -58,6 +58,7 @@ class CarProps(object):
         self.goal_name = goal_name
         self.bonus_name = bonus_name
         self.roads_names = roads_names
+        self.car_names = car_names
 
 
 class CarFacade(object):
@@ -135,7 +136,7 @@ class Car(GameObject, CarFacade):
             car_props.wheel_names, car_props.tuning_engine,
             car_props.tuning_tires, car_props.tuning_suspensions,
             car_props.driver_engine, car_props.driver_tires,
-            car_props.driver_suspensions)
+            car_props.driver_suspensions, car_props.car_names)
         carfsm_props = CarFsmProps(car_props.road_name,
                                    car_props.track_waypoints)
         carevent_props = CarEventProps(
@@ -151,7 +152,8 @@ class Car(GameObject, CarFacade):
              ('event', self.event_cls, [self, carevent_props]),
              ('logic', self.logic_cls, [self, carlogic_props]),
              ('ai', self.ai_cls, [self, car_props.road_name,
-                                  car_props.track_waypoints])],
+                                  car_props.track_waypoints,
+                                  car_props.car_names])],
             [('audio', self.audio_cls, [self, audio_props])]]
         GameObject.__init__(self, init_lst, car_props.callback)
 
