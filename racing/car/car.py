@@ -138,7 +138,8 @@ class Car(GameObject, CarFacade):
             car_props.driver_engine, car_props.driver_tires,
             car_props.driver_suspensions, car_props.car_names)
         carfsm_props = CarFsmProps(car_props.road_name,
-                                   car_props.track_waypoints)
+                                   car_props.track_waypoints,
+                                   car_props.car_names)
         carevent_props = CarEventProps(
             car_props.keys, car_props.joystick, car_props.rocket_path,
             car_props.respawn_name, car_props.pitstop_name,

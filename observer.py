@@ -16,7 +16,10 @@ class Subject(object):
         try:
             meths = [obs for obs in self.observers if obs[0].__name__ == meth]
             sorted_observers = sorted(meths, key=lambda obs: obs[1])
-            map(lambda obs: obs[0](*args, **kwargs), sorted_observers)
+            #map(lambda obs: obs[0](*args, **kwargs), sorted_observers)
+            for obs in sorted_observers:
+                if obs in self.observers:  # if an observer removes another one
+                    obs[0](*args, **kwargs)
         except TypeError as err:
             import traceback
             traceback.print_stack()

@@ -77,13 +77,13 @@ class CarEvent(Event):
     def on_collision(self, obj, obj_name):
         if obj == self.mdt.gfx.nodepath.node():
             if obj_name.startswith(self.props.respawn_name):
-                self.__process_respawn()
+                self.process_respawn()
             if obj_name.startswith(self.props.pitstop_name):
                 self.mdt.gui.apply_damage(True)
                 self.mdt.phys.apply_damage(True)
                 self.mdt.gfx.apply_damage(True)
 
-    def __process_respawn(self):
+    def process_respawn(self):
         start_wp_n, end_wp_n = self.mdt.logic.last_wp
         self.mdt.gfx.nodepath.setPos(start_wp_n.get_pos() + (0, 0, 2))
         wp_vec = Vec3(end_wp_n.getPos(start_wp_n).xy, 0)

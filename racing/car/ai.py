@@ -1,5 +1,5 @@
 from random import uniform
-from panda3d.core import Vec3, Vec2, Point3, Mat4, BitMask32, LineSegs
+from panda3d.core import Vec3, Vec2, Point3, Mat4, BitMask32, LineSegs, LPoint3f
 from yyagl.gameobject import Ai
 
 
@@ -14,6 +14,9 @@ class CarAi(Ai):
         self.obst_samples = {'left': [], 'center': [],  'right': []}
         self.curr_gnd = 'left'
         self.last_obst_info = None, 0
+        self.positions = []
+        self.last_dist_time = 0
+        self.last_dist_pos = (0, 0, 0)
         bnds = self.mdt.phys.coll_mesh.get_tight_bounds()
         self.width_bounds = (bnds[0][0] * 1.15, bnds[1][0] * 1.15)
         self.height_bounds = (bnds[0][2], bnds[1][2] + .4)  # wheel's height
@@ -104,7 +107,7 @@ class CarAi(Ai):
             right = True
         return left, right
 
-    def __update_gnd(self):
+    def _update_gnd(self):
         if len(self.gnd_samples[self.curr_gnd]) > 1:
             self.gnd_samples[self.curr_gnd].pop(0)
         center_deg = 10 - 5 * self.mdt.phys.speed_ratio
@@ -136,8 +139,9 @@ class CarAi(Ai):
             else:
                 return 'right'
 
-    def __update_obst(self):
-        if len(self.obst_samples[self.curr_gnd]) > 8:
+    def _update_obst(self):
+        nsam = 4 if self.curr_gnd == 'center' else 1
+        if len(self.obst_samples[self.curr_gnd]) > nsam:
             self.obst_samples[self.curr_gnd].pop(0)
         lat_deg = 30 - 10 * self.mdt.phys.speed_ratio
         bounds = {'left': (0, lat_deg), 'center': (0, 0), 'right': (-lat_deg, 0)}
@@ -186,8 +190,29 @@ class CarAi(Ai):
                 self.ai_lines = render.attachNewNode(segs_node)
 
     def on_frame(self):
-        self.__update_gnd()
-        self.__update_obst()
+        self._update_dist()
+        self._update_gnd()
+        self._update_obst()
+
+    def _update_dist(self):
+        if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
+            return
+        curr_time = globalClock.getFrameTime()
+        if curr_time - self.last_dist_time < 1:
+            return
+        self.last_dist_time = curr_time
+        self.positions += [self.mdt.gfx.nodepath.get_pos()]
+        if len(self.positions) > 10:
+            self.positions.pop(0)
+        else:
+            return
+        center_x = sum(pos.get_x() for pos in self.positions) / len(self.positions)
+        center_y = sum(pos.get_y() for pos in self.positions) / len(self.positions)
+        center_z = sum(pos.get_z() for pos in self.positions) / len(self.positions)
+        center = LPoint3f(center_x, center_y, center_z)
+        if all((pos - center).length() < 6 for pos in self.positions):
+            self.positions = []
+            self.mdt.event.process_respawn()
 
     def left_right(self, obstacles, brake):
         # eval backward
@@ -246,6 +271,7 @@ class CarAi(Ai):
     def destroy(self):
         eng.detach_obs(self.on_frame)
         Ai.destroy(self)
+
 
 class CarResultsAi(CarAi):
 

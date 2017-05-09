@@ -5,9 +5,10 @@ from .event import InputDctBuilder
 
 class CarFsmProps(object):
 
-    def __init__(self, road_name, waypoints):
+    def __init__(self, road_name, waypoints, car_names):
         self.road_name = road_name
         self.waypoints = waypoints
+        self.car_names = car_names
 
 
 class CarFsm(Fsm):
@@ -25,5 +26,5 @@ class CarFsm(Fsm):
             self.getCurrentOrNextState(), self.mdt.event.props.joystick)
         self.mdt.ai.destroy()
         self.mdt.ai = CarResultsAi(self.mdt, self.props.road_name,
-                                   self.props.waypoints)
+                                   self.props.waypoints, self.props.car_names)
         self.mdt.gui.destroy()
