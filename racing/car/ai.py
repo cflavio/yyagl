@@ -111,10 +111,10 @@ class CarAi(Ai):
         if len(self.gnd_samples[self.curr_gnd]) > 1:
             self.gnd_samples[self.curr_gnd].pop(0)
         center_deg = 10 - 5 * self.mdt.phys.speed_ratio
-        lateral_deg = 35 - 20 * self.mdt.phys.speed_ratio
+        lateral_deg = 45 - 40 * self.mdt.phys.speed_ratio
         bounds = {'left': (center_deg, lateral_deg), 'center': (-center_deg, center_deg), 'right': (-lateral_deg, -center_deg)}
         deg = uniform(*bounds[self.curr_gnd])
-        lgt = uniform(5 + 10 * self.mdt.phys.speed_ratio, 5 + 20 * self.mdt.phys.speed_ratio)
+        lgt = uniform(4 + 11 * self.mdt.phys.speed_ratio, 4 + 29 * self.mdt.phys.speed_ratio)
         self.gnd_samples[self.curr_gnd] += [self.lookahead_ground(lgt, deg)]
         dirs = ['left', 'center', 'right']
         self.curr_gnd = dirs[(dirs.index(self.curr_gnd) + 1) % len(dirs)]
@@ -143,7 +143,7 @@ class CarAi(Ai):
         nsam = 4 if self.curr_gnd == 'center' else 1
         if len(self.obst_samples[self.curr_gnd]) > nsam:
             self.obst_samples[self.curr_gnd].pop(0)
-        lat_deg = 30 - 10 * self.mdt.phys.speed_ratio
+        lat_deg = 40 - 35 * self.mdt.phys.speed_ratio
         bounds = {'left': (0, lat_deg), 'center': (0, 0), 'right': (-lat_deg, 0)}
         if self.curr_gnd == 'center':
             offset = (uniform(*self.width_bounds), 0, 0)
@@ -156,7 +156,7 @@ class CarAi(Ai):
         rot_mat.setRotateMat(self.mdt.gfx.nodepath.get_h(), (0, 0, 1))
         offset_rot = rot_mat.xformVec(offset)
         start = start + offset_rot + (0, 0, uniform(*self.height_bounds))
-        lgt = 5 + 20 * self.mdt.phys.speed_ratio
+        lgt = 4 + 31 * self.mdt.phys.speed_ratio
         lookahed_vec = self.mdt.logic.car_vec * lgt
         rot_mat = Mat4()
         rot_mat.setRotateMat(uniform(*bounds[self.curr_gnd]), (0, 0, 1))
