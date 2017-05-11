@@ -100,12 +100,12 @@ class CarAi(Ai):
                         left = True
                     elif distance_right == min_dist:
                         right = True
-                    return left, right
+                    return left, right, distance_left < 4, distance_right < 4
         if distance_left == max([distance_center, distance_left, distance_right]):
             left = True
         elif distance_right == max([distance_center, distance_left, distance_right]):
             right = True
-        return left, right
+        return left, right, distance_left < 4, distance_right < 4
 
     def _update_gnd(self):
         if len(self.gnd_samples[self.curr_gnd]) > 1:
@@ -215,25 +215,32 @@ class CarAi(Ai):
             self.mdt.event.process_respawn()
 
     def left_right(self, obstacles, brake):
+        curr_time = globalClock.getFrameTime()
+        if curr_time - self.last_obst_info[1] < .05:
+            return self.last_obst_info[0]
+
+        obst_left, obst_right, has_obst_left, has_obst_right = self.__eval_obstacle_avoidance(obstacles, brake)
+        car_vec = self.mdt.logic.car_vec
+        tgt = Vec3(self.tgt_vec.x, self.tgt_vec.y, 0)
+        dot_res = tgt.cross(Vec3(car_vec.x, car_vec.y, 0)).dot(Vec3(0, 0, 1))
         # eval backward
         if self.curr_dot_prod < -.2:
-            car_vec = self.mdt.logic.car_vec
-            tgt = Vec3(self.tgt_vec.x, self.tgt_vec.y, 0)
-            dot_res = tgt.cross(Vec3(car_vec.x, car_vec.y, 0)).dot(Vec3(0, 0, 1))
             left, right = dot_res < 0, dot_res >= 0
             if brake and self.mdt.phys.speed < 0:
                 #if self.mdt.name == game.player_car.name: print 'inverting left and right'
                 left, right = right, left
-            return left, right
+            left, right = left and not has_obst_left, right and not has_obst_right
+            if left or right:
+                return left, right
 
         # eval obstacles
-        curr_time = globalClock.getFrameTime()
-        if curr_time - self.last_obst_info[1] < .05:
-            return self.last_obst_info[0]
-        obst_left, obst_right = self.__eval_obstacle_avoidance(obstacles, brake)
         if obst_left or obst_right:
-            self.last_obst_info = (obst_left, obst_right), curr_time
-            return obst_left, obst_right
+            if abs(obst_left - obst_right) < 4:
+                close_left, close_right = dot_res < 0, dot_res >= 0
+            else:
+                close_left, close_right = obst_left, obst_right
+            self.last_obst_info = (close_left, close_right), curr_time
+            return close_left, close_right
 
         # eval on_road
         road_n = self.road_name
@@ -245,7 +252,7 @@ class CarAi(Ai):
                 return False, True
 
         # eval waypoints
-        if abs(self.curr_dot_prod) > .9:
+        if abs(self.curr_dot_prod) > .98:
             return False, False
         car_vec = self.mdt.logic.car_vec
         tgt = Vec3(self.tgt_vec.x, self.tgt_vec.y, 0)

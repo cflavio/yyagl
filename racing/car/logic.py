@@ -286,17 +286,6 @@ class CarLogic(Logic):
             waypoints = {wp[0]: wp[1] for wp in self._grid_wps.items() if wp[0] in closest_wps}
         distances = [node.getDistance(wp) for wp in waypoints.keys()]
         curr_wp = waypoints.keys()[distances.index(min(distances))]
-        if min(distances) < 10:
-            nexts = [wp for wp in waypoints if curr_wp in waypoints[wp]]
-            curr_wp = choice(nexts)
-            closest_wps = [curr_wp] + self.mdt.logic.props.track_waypoints[curr_wp] + \
-            [wp for wp in self.mdt.logic.props.track_waypoints if curr_wp in self.mdt.logic.props.track_waypoints[wp]]
-            if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name() and \
-                    len(self.mdt.logic.lap_times) < self.mdt.laps - 1:
-                waypoints = {wp[0]: wp[1] for wp in self._pitstop_wps.items() if wp[0] in closest_wps}
-            else:
-                waypoints = {wp[0]: wp[1] for wp in self._grid_wps.items() if wp[0] in closest_wps}
-
         may_prev = waypoints[curr_wp]
         distances = [self.pt_line_dst(node, w_p, curr_wp) for w_p in may_prev]
         prev_wp = may_prev[distances.index(min(distances))]
@@ -311,7 +300,7 @@ class CarLogic(Logic):
         next_vec.normalize()
         prev_angle = prev_vec.signedAngleDeg(curr_vec)
         next_angle = next_vec.signedAngleDeg(curr_vec)
-        if abs(prev_angle) > abs(next_angle):
+        if min(distances) > 10 and abs(prev_angle) > abs(next_angle):
             start_wp, end_wp = prev_wp, curr_wp
         else:
             start_wp, end_wp = curr_wp, next_wp
