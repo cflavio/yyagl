@@ -86,6 +86,11 @@ class DiscreteLogic(AbsLogic):
             else:
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
+        if phys.speed > 80:
+            eng_frc = eng_frc + .2 * phys.lateral_force * eng_frc
+            #for whl in phys.vehicle.get_wheels():
+            #    fric = whl.getFrictionSlip()
+            #    whl.setFrictionSlip(fric + .1 * phys.lateral_force * fric)
         return eng_frc, brake_frc, self._steering
 
 

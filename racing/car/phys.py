@@ -138,6 +138,17 @@ class CarPhys(Phys):
         whl.setSkidInfo(self.skid_info)
 
     @property
+    def lateral_force(self):
+        vel = self.vehicle.get_chassis().get_linear_velocity()
+        vel.normalize()
+        dir = self.mdt.logic.car_vec
+        lat = dir.dot(vel)
+        lat_force = 0
+        if lat > .5:
+            lat_force = min(1, (lat - 1.0) / -.2)
+        return lat_force
+
+    @property
     def is_flying(self):  # no need to be cached
         rays = [whl.getRaycastInfo() for whl in self.vehicle.get_wheels()]
         return not any(ray.isInContact() for ray in rays)
