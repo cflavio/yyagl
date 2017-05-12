@@ -58,6 +58,7 @@ class DiscreteLogic(AbsLogic):
             brake_frc = phys.brake_frc
         if input_dct['forward'] and not input_dct['reverse']:
             eng_frc = phys.engine_acc_frc
+            eng_frc *= 1 + .2 * max(min(1, (phys.speed - 80) / - 80), 0)
             brake_frc = 0
         if input_dct['reverse'] and not input_dct['forward']:
             eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0

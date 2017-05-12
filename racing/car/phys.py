@@ -206,8 +206,8 @@ class CarPhys(Phys):
 
     @staticmethod
     def gnd_name(pos):
-        top = pos + (0, 0, 1)
-        bottom = pos + (0, 0, -1)
+        top = pos + (0, 0, 20)
+        bottom = pos + (0, 0, -20)
         result = eng.ray_test_closest(bottom, top)
         ground = result.get_node()
         return ground.get_name() if ground else ''

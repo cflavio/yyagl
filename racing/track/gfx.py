@@ -81,6 +81,7 @@ class TrackGfx(Gfx):
         self.signs = Signs(self.model, self.props.sign_name, self.props.thanks)
         self.signs.set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
+        self.model.premungeScene(eng.base.win.getGsg())
         Gfx.async_build(self)
 
     def __set_light(self):

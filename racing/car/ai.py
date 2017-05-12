@@ -216,7 +216,7 @@ class CarAi(Ai):
         r_center = r_road(curr_logic.gnd_samples['center'])
         r_right = r_road(curr_logic.gnd_samples['right'])
         r_max = max([r_left, r_center, r_right])
-        if self.mdt.name == game.player_car.name: print 'road factors:', curr_logic.gnd_samples
+        #if self.mdt.name == game.player_car.name: print curr_logic.gnd_samples
         if r_left < .3 and r_right > .6:
             return 'right'
         elif r_right < .3 and r_left > .6:
@@ -329,7 +329,7 @@ class CarAi(Ai):
         #if self.mdt.name == game.player_car.name: print 'dot', curr_logic.curr_dot_prod
         if abs(curr_logic.curr_dot_prod) > .98:
             return False, False
-        car_vec = self.mdt.logic.car_vec
+        car_vec = curr_logic.car_vec
         tgt = Vec3(curr_logic.tgt_vec.x, curr_logic.tgt_vec.y, 0)
         dot_res = tgt.cross(Vec3(car_vec.x, car_vec.y, 0)).dot(Vec3(0, 0, 1))
         return dot_res < 0, dot_res >= 0
@@ -349,7 +349,7 @@ class CarAi(Ai):
         left, right = self.left_right(obstacles, brake, obstacles_back)
         #if self.mdt.name == game.player_car.name: print 'left, right', left, right
         #if self.mdt.name == game.player_car.name: print self.__eval_gnd()
-        if self.mdt.name == game.player_car.name: print left, right, self.__eval_gnd(), self.front_logic.curr_dot_prod, obstacles, obstacles_back
+        #if self.mdt.name == game.player_car.name: print left, right, self.__eval_gnd(), self.front_logic.curr_dot_prod, obstacles, obstacles_back
         return {'forward': acceleration, 'left': left, 'reverse': brake,
                 'right': right}
 
