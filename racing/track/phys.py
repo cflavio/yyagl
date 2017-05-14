@@ -65,15 +65,13 @@ class TrackPhys(Phys):
 
     def add_geoms_merged(self, geoms, mesh, geom_name):
         for geom in geoms:
-            geom.flattenLight()
             for _geom in [g.decompose() for g in geom.node().getGeoms()]:
-                mesh.addGeom(_geom, geom.getTransform(self.model))
+                mesh.addGeom(_geom, False, geom.getTransform(self.model))
         return geom_name
 
     def add_geoms_unmerged(self, geoms, mesh, geom_name):
-        geoms.flattenLight()
         for _geom in [g.decompose() for g in geoms.node().getGeoms()]:
-            mesh.addGeom(_geom, geoms.getTransform(self.model))
+            mesh.addGeom(_geom, False, geoms.getTransform(self.model))
         return geoms.get_name()
 
     def __build_mesh(self, meth, geoms, geom_name, ghost, merged):
