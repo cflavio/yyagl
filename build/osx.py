@@ -27,9 +27,12 @@ def build_osx(target, source, env):
             del_ext = ['psd', 'po', 'pot', 'egg']
             if any(fname.endswith('.' + ext) for ext in del_ext):
                 remove(fname)
+            rm_ext = ['png', 'jpg']
+            if 'assets/models/' in fname and any(fname.endswith('.' + ext) for ext in rm_ext):
+                remove(fname)
             if 'assets/models/tracks/' in fname and fname.endswith('.bam') \
                     and not any(fname.endswith(concl + '.bam')
-                                for concl in ['/track', '/collision', 'Anim']):
+                                for concl in ['/track_all', '/collision', 'Anim']):
                 remove(fname)
     osx_fname = '{Name}.app'
     osx_pkg = '{name}-{version}{internet_str}-osx.zip'

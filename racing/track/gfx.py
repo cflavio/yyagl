@@ -44,7 +44,7 @@ class TrackGfx(Gfx):
     def __set_model(self):
         eng.log('loading track model')
         time = globalClock.getFrameTime()
-        filename = 'assets/models/tracks/' + self.props.name + '/track.bam'
+        filename = 'assets/models/tracks/' + self.props.name + '/track_all.bam'
         if not exists(filename):
             system('python yyagl/build/process_track.py ' + self.props.name)
         eng.log('loading ' + filename)

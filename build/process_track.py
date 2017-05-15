@@ -1,6 +1,7 @@
 from panda3d.core import loadPrcFileData, BitMask32
 loadPrcFileData('', 'window-type none')
 loadPrcFileData('', 'audio-library-name null')
+loadPrcFileData('', 'default-model-extension .bam')
 import sys
 import os
 sys.path.append(os.getcwd())
@@ -140,9 +141,9 @@ class TrackProcesser(object):
         process_flat(nname, curr_t, len(node.get_children()))
 
     def end_flattening(self, model=None):
-        print 'writing track.bam'
+        print 'writing track_all.bam'
         self.model.writeBamFile('assets/models/tracks/' + self.props.path +
-                                '/track.bam')
+                                '/track_all.bam')
 
 
 TrackProcesser()

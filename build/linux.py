@@ -71,10 +71,13 @@ def __bld_full_pkg(name, platform, ico_file, p3d_path, nointernet):
             rm_ext = ['psd', 'po', 'pot', 'egg']
             if any(fname.endswith('.' + ext) for ext in rm_ext):
                 remove(fname)
-            if fname.startswith('assets/models/tracks/') and \
+            rm_ext = ['png', 'jpg']
+            if 'assets/models/' in fname and any(fname.endswith('.' + ext) for ext in rm_ext):
+                remove(fname)
+            if 'assets/models/tracks/' in fname and \
                     fname.endswith('.bam') and not \
                     any(fname.endswith(concl + '.bam')
-                        for concl in ['/track', '/collision', 'Anim']):
+                        for concl in ['/track_all', '/collision', 'Anim']):
                 remove(fname)
     cmd_tmpl = 'pdeploy -o  . {nointernet} -t host_dir=./lib ' + \
         '-t verify_contents=never -n {name} -N {Name} -v {version} ' + \
