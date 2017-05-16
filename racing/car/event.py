@@ -98,12 +98,12 @@ class CarEvent(Event):
         if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
             input_dct = {key: False for key in input_dct}
             self.mdt.logic.reset_car()
-        self.mdt.logic.update(input_dct)
-        if self.mdt.logic.is_upside_down:
-            self.mdt.gfx.nodepath.setR(0)
         self.__update_contact_pos()
         self.mdt.phys.update_car_props()
         self.mdt.logic.update_waypoints()
+        self.mdt.logic.update(input_dct)
+        if self.mdt.logic.is_upside_down:
+            self.mdt.gfx.nodepath.setR(0)
 
     def __update_contact_pos(self):
         car_pos = self.mdt.gfx.nodepath.get_pos()
@@ -179,7 +179,9 @@ class CarPlayerEvent(CarEvent):
         self.notify('on_end_race')
 
     def __process_goal(self):
-        if self.mdt.logic.last_time_start and not self.mdt.logic.correct_lap:
+        if self.mdt.fsm.getCurrentOrNextState() == 'Results' or \
+                self.mdt.logic.last_time_start and \
+                not self.mdt.logic.correct_lap:
             return
         self.mdt.logic.reset_waypoints()
         lap_times = self.mdt.logic.lap_times
