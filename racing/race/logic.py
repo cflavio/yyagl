@@ -207,14 +207,26 @@ class RaceLogic(Logic):
         cars = [self.player_car] + self.cars
         info = []
         for car in cars:
-            past_wp = car.closest_wp()[0].get_pos()
-            wp_num = int(car.closest_wp()[0].get_name()[8:])
-            dist = (past_wp - car.get_pos()).length()
+            past_wp = car.logic.last_wp_not_fork()
+            wp_num = car.logic.wps_not_fork().index(past_wp)
+            if not len(car.lap_times) and wp_num == len(car.logic.wps_not_fork()) - 1 and len(car.logic.waypoints) <= 1:
+                wp_num = -1
+            dist = (past_wp.get_pos() - car.get_pos()).length()
             info += [(car.name, len(car.lap_times), wp_num, dist)]
-        by_dist = sorted(info, key=lambda val: val[3])
-        by_wp_num = sorted(by_dist, key=lambda val: val[2])
-        by_laps = sorted(by_wp_num, key=lambda val: val[1])
-        return [car[0] for car in reversed(by_laps)]
+        by_laps = list(reversed(sorted(info, key=lambda val: (val[1], val[2], val[3]))))
+        return [car[0] for car in by_laps]
+
+    def race_ranking(self):
+        ranking = self.ranking()
+        cars = [self.player_car] + self.cars
+        compl_ranking = []
+        for car in cars:
+            if len(car.lap_times) == self.props.laps:
+                compl_ranking += [(car.name, sum(car.lap_times))]
+        rank = list(sorted(compl_ranking, key=lambda val: val[1]))
+        rank = [val[0] for val in rank]
+        ranking = [val for val in ranking if val not in rank]
+        return rank + ranking
 
     def exit_play(self):
         self.track.stop_music()

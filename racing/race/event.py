@@ -52,7 +52,7 @@ class RaceEvent(Event):
 
     def on_end_race(self):
         points = [10, 8, 6, 4, 3, 2, 1, 0]
-        zipped = zip(self.mdt.logic.ranking(), points)
+        zipped = zip(self.mdt.logic.race_ranking(), points)
         race_ranking = {car: point for car, point in zipped}
         self.mdt.fsm.demand('Results', race_ranking)
 

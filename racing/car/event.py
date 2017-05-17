@@ -82,6 +82,23 @@ class CarEvent(Event):
                 self.mdt.gui.apply_damage(True)
                 self.mdt.phys.apply_damage(True)
                 self.mdt.gfx.apply_damage(True)
+            if obj_name.startswith(self.props.goal_name):
+                self._process_goal()
+
+    def _process_goal(self):
+        if self.mdt.fsm.getCurrentOrNextState() == 'Results' or \
+                self.mdt.logic.last_time_start and \
+                not self.mdt.logic.correct_lap:
+            return
+        self.mdt.logic.reset_waypoints()
+        lap_times = self.mdt.logic.lap_times
+        if self.mdt.logic.last_time_start:
+            lap_times += [self.mdt.logic.lap_time]
+            self._process_nonstart_goals(1 + len(lap_times), self.mdt.laps)
+        self.mdt.logic.last_time_start = globalClock.getFrameTime()
+
+    def _process_nonstart_goals(self, lap_number, laps):
+        pass
 
     def process_respawn(self):
         start_wp_n, end_wp_n = self.mdt.logic.last_wp
@@ -146,8 +163,6 @@ class CarPlayerEvent(CarEvent):
             self.__process_wall()
         if any(obj_name.startswith(s) for s in self.props.roads_names):
             eng.audio.play(self.mdt.audio.landing_sfx)
-        if obj_name.startswith(self.props.goal_name):
-            self.__process_goal()
         if obj_name.startswith(self.props.bonus_name):
             self.on_bonus()
 
@@ -170,7 +185,8 @@ class CarPlayerEvent(CarEvent):
         eng.play(self.mdt.audio.crash_sfx)
         self._on_crash()
 
-    def __process_nonstart_goals(self, lap_number, laps):
+    def _process_nonstart_goals(self, lap_number, laps):
+        CarEvent._process_nonstart_goals(self, lap_number, laps)
         curr_lap = min(laps, lap_number)
         self.mdt.gui.lap_txt.setText(str(curr_lap)+'/'+str(laps))
         eng.play(self.mdt.audio.lap_sfx)
@@ -178,20 +194,12 @@ class CarPlayerEvent(CarEvent):
     def _process_end_goal(self):
         self.notify('on_end_race')
 
-    def __process_goal(self):
-        if self.mdt.fsm.getCurrentOrNextState() == 'Results' or \
-                self.mdt.logic.last_time_start and \
-                not self.mdt.logic.correct_lap:
-            return
-        self.mdt.logic.reset_waypoints()
+    def _process_goal(self):
+        CarEvent._process_goal(self)
         lap_times = self.mdt.logic.lap_times
         is_best = not lap_times or min(lap_times) > self.mdt.logic.lap_time
         if self.mdt.logic.last_time_start and (not lap_times or is_best):
             self.mdt.gui.best_txt.setText(self.mdt.gui.time_txt.getText())
-        if self.mdt.logic.last_time_start:
-            lap_times += [self.mdt.logic.lap_time]
-            self.__process_nonstart_goals(1 + len(lap_times), self.mdt.laps)
-        self.mdt.logic.last_time_start = globalClock.getFrameTime()
         if len(lap_times) == self.mdt.laps:
             self._process_end_goal()
 

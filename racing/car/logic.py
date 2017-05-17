@@ -271,6 +271,56 @@ class CarLogic(Logic):
         self.__grid_wps[curr_wp] = wps
         return wps
 
+    def last_wp_not_fork(self):
+        for wp in reversed(self.waypoints):
+            _wp = [__wp for __wp in self.props.track_waypoints.keys() if __wp.get_name()[8:] == str(wp)][0]
+            if _wp in self.wps_not_fork():
+                return _wp
+        return self.wps_not_fork()[-1]
+
+    def wps_not_fork(self):
+        if hasattr(self, '_wps_not_fork'):
+            return self._wps_not_fork
+
+        wps = self.props.track_waypoints
+        for w_p in wps:
+            for w_p2 in wps[w_p]:
+                hits = [hit.get_node().get_name() for hit in eng.ray_test_all(w_p.get_pos(), w_p2.get_pos()).get_hits()]
+                if 'Goal' in hits and 'PitStop' not in hits:
+                    goal_wp = w_p2
+
+        def succ(wp):
+            return [_wp for _wp in self.props.track_waypoints if wp in self.props.track_waypoints[_wp]]
+
+        wps = []
+        processed = [goal_wp]
+
+        while any(wp not in processed for wp in succ(processed[-1])):
+            wp = [wp for wp in succ(processed[-1]) if wp not in processed][0]
+            processed += [wp]
+            while wp in self.__fork_wp():
+                may_succ = [_wp for _wp in succ(wp) if _wp not in processed]
+                if may_succ:
+                    wp = may_succ[0]
+                    processed += [wp]
+                else:
+                    break
+            if wp not in self.__fork_wp():
+                wps += [wp]
+        self._wps_not_fork = wps
+        return self._wps_not_fork
+
+    def __log_wp_info(self, curr_chassis, curr_wp, waypoints):
+        print self.mdt.name
+        print self.mdt.gfx.chassis_np_hi.get_name(), curr_chassis.get_name()
+        print len(self.mdt.logic.lap_times), self.mdt.laps - 1
+        print curr_wp
+        import pprint
+        pprint.pprint(waypoints)
+        pprint.pprint(self._pitstop_wps)
+        pprint.pprint(self._grid_wps)
+        pprint.pprint(self.props.track_waypoints)
+
     def closest_wp(self):
         if self.__start_wp:  # do a decorator @once_per_frame
             return self.__start_wp, self.__end_wp
@@ -291,12 +341,18 @@ class CarLogic(Logic):
         else:
             waypoints = {wp[0]: wp[1] for wp in self._grid_wps.items() if wp[0] in closest_wps}
         distances = [node.getDistance(wp) for wp in waypoints.keys()]
+        if not distances:
+            self.__log_wp_info(curr_chassis, curr_wp, waypoints)
         curr_wp = waypoints.keys()[distances.index(min(distances))]
         may_prev = waypoints[curr_wp]
         distances = [self.pt_line_dst(node, w_p, curr_wp) for w_p in may_prev]
+        if not distances:
+            self.__log_wp_info(curr_chassis, curr_wp, waypoints)
         prev_wp = may_prev[distances.index(min(distances))]
         may_succ = [w_p for w_p in waypoints if curr_wp in waypoints[w_p]]
         distances = [self.pt_line_dst(node, curr_wp, w_p) for w_p in may_succ]
+        if not distances:
+            self.__log_wp_info(curr_chassis, curr_wp, waypoints)
         next_wp = may_succ[distances.index(min(distances))]
         curr_vec = Vec2(node.getPos(curr_wp).xy)
         curr_vec.normalize()
@@ -396,6 +452,10 @@ class CarLogic(Logic):
         input_dct = self.mdt.event._get_input()
         return input_dct['reverse'] and hspeed and not flying
 
+    @property
+    def lap_time(self):
+        return globalClock.getFrameTime() - self.last_time_start
+
     def destroy(self):
         self.camera = None
         if self.weapon:
@@ -433,10 +493,6 @@ class CarPlayerLogic(CarLogic):
     def on_weapon_destroyed(self):
         self.weapon.detach_obs(self.on_weapon_destroyed)
         self.weapon = None
-
-    @property
-    def lap_time(self):
-        return globalClock.getFrameTime() - self.last_time_start
 
     def __check_wrong_way(self):
         if self.props.track_waypoints:
