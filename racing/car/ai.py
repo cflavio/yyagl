@@ -8,18 +8,22 @@ class DebugLines(object):
     def __init__(self, car, color):
         self.car = car
         self.color = color
+        self.gnd_lines = []
+
+    def clear(self):
+        for gndl in self.gnd_lines:
+            gndl.remove_node()
+        self.gnd_lines = []
 
     def draw(self, start, end):
         if self.car.fsm.getCurrentOrNextState() != 'Results':
-            if hasattr(self, 'gnd_lines'):
-                self.gnd_lines.remove_node()
             if self.car.name == game.player_car.name:
                 segs = LineSegs()
                 segs.set_color(*self.color)
                 segs.moveTo(start)
                 segs.drawTo(end)
                 segs_node = segs.create()
-                self.gnd_lines = render.attachNewNode(segs_node)
+                self.gnd_lines += [render.attachNewNode(segs_node)]
 
     def destroy(self):
         self.car = None
@@ -90,7 +94,8 @@ class AbsAiLogic(object):
         return min_center[0], min_center[1], min_left[0], min_left[1], min_right[0], min_right[1]
 
     def _update_obst(self):
-        nsam = 4 if self.curr_gnd == 'center' else 1
+        nsam = 4 if self.curr_gnd == 'center' else 0
+        nsam = nsam if self.car.phys.speed < 20 else 0
         if len(self.obst_samples[self.curr_gnd]) > nsam:
             self.obst_samples[self.curr_gnd].pop(0)
         lat_deg = 40 - 35 * self.car.phys.speed_ratio
@@ -218,7 +223,15 @@ class CarAi(Ai):
 
     def on_frame(self):
         self._update_dist()
+        self.front_logic.debug_lines_gnd.clear()
+        self.front_logic.debug_lines_obst.clear()
+        self.rear_logic.debug_lines_gnd.clear()
+        self.rear_logic.debug_lines_obst.clear()
         self.front_logic._update_gnd()
+        self.front_logic._update_gnd()
+        self.front_logic._update_gnd()
+        self.front_logic._update_obst()
+        self.front_logic._update_obst()
         self.front_logic._update_obst()
         if self.mdt.phys.speed < 10:
             self.rear_logic._update_gnd()
@@ -273,7 +286,7 @@ class CarAi(Ai):
         if curr_time - self.last_obst_info[1] < .05:
             return self.last_obst_info[0]
 
-        if brake and self.mdt.phys.speed < 0:
+        if brake and self.mdt.phys.speed < 10:
             name_c, distance_center, name_l, distance_left, name_r, distance_right = obstacles_back
         else:
             name_c, distance_center, name_l, distance_left, name_r, distance_right = obstacles
@@ -298,18 +311,18 @@ class CarAi(Ai):
         # eval backward
         if curr_logic.curr_dot_prod < -.2:
             left, right = dot_res < 0, dot_res >= 0
-            if brake and self.mdt.phys.speed < 0:
+            if brake and self.mdt.phys.speed < 10:
                 left, right = left and not has_obst_left_back, right and not has_obst_right_back
                 if left or right:
                     return left, right
             else:
-                if self.mdt.phys.speed > 0:
+                if not brake:
                     left, right = left and not has_obst_left, right and not has_obst_right
                     if left or right:
                         return left, right
 
         # eval obstacles
-        if brake and self.mdt.phys.speed < 0:
+        if brake and self.mdt.phys.speed < 10:
             curr_obs_center = obst_center_back
             curr_obs_left = obst_left_back
             curr_obs_right = obst_right_back
@@ -324,7 +337,7 @@ class CarAi(Ai):
             curr_has_obs_left = has_obst_left
             curr_has_obs_right = has_obst_right
         if curr_obs_left or curr_obs_right or curr_obs_center:
-            if brake and self.mdt.phys.speed < 0:
+            if brake and self.mdt.phys.speed < 10:
                 left, right = False, False
                 if curr_obs_center:
                     left, right = not curr_obs_right, not curr_obs_left
@@ -355,15 +368,23 @@ class CarAi(Ai):
         gnd_dir = self.__eval_gnd()
         if curr_logic.curr_dot_prod > 0 and gnd_dir != 'center':
             if gnd_dir == 'left':
-                if brake and self.mdt.phys.speed < 0:
+                if brake and self.mdt.phys.speed < 10 and not curr_has_obs_left:
                     return False, True
-                else:
+                elif brake and self.mdt.phys.speed < 10 and not curr_has_obs_right:
                     return True, False
+                elif not brake and not curr_has_obs_left:
+                    return True, False
+                elif not brake and not curr_has_obs_right:
+                    return False, True
             elif gnd_dir == 'right':
-                if brake and self.mdt.phys.speed < 0:
+                if brake and self.mdt.phys.speed < 10 and not curr_has_obs_left:
                     return True, False
-                else:
+                elif brake and self.mdt.phys.speed < 10 and not curr_has_obs_right:
                     return False, True
+                elif not brake and not curr_has_obs_left:
+                    return False, True
+                elif not brake and not curr_has_obs_right:
+                    return True, False
 
         # eval waypoints
         #if self.mdt.name == game.player_car.name: print 'dot', curr_logic.curr_dot_prod
@@ -372,7 +393,22 @@ class CarAi(Ai):
         car_vec = curr_logic.car_vec
         tgt = Vec3(curr_logic.tgt_vec.x, curr_logic.tgt_vec.y, 0)
         dot_res = tgt.cross(Vec3(car_vec.x, car_vec.y, 0)).dot(Vec3(0, 0, 1))
-        return dot_res < 0, dot_res >= 0
+        left, right = dot_res < 0, dot_res >= 0
+        if brake and self.mdt.phys.speed < 10:
+            if left:
+                if curr_has_obs_right:
+                    left = False
+            if right:
+                if curr_has_obs_left:
+                    right = False
+        elif not brake:
+            if left:
+                if curr_has_obs_left:
+                    left = False
+            if right:
+                if curr_has_obs_right:
+                    right = False
+        return left, right
 
     def get_input(self):
         #import time; time.sleep(.01)
