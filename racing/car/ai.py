@@ -301,18 +301,20 @@ class CarAi(Ai):
             name_c, distance_center, name_l, distance_left, name_r, distance_right = obstacles
 
         curr_logic = self.front_logic if self.mdt.phys.speed >= 0 else self.rear_logic
-        obst_center = distance_center < 12
-        obst_left = distance_left < 12
-        obst_right = distance_right < 12
-        has_obst_center = distance_center < 4
-        has_obst_left = distance_left < 4
-        has_obst_right = distance_right < 4
-        obst_center_back = distance_center < 12
-        obst_left_back = distance_left < 12
-        obst_right_back = distance_right < 12
-        has_obst_center_back = distance_center < 4
-        has_obst_left_back = distance_left < 4
-        has_obst_right_back = distance_right < 4
+        dist_far = 4 + self.mdt.phys.speed_ratio * 8
+        dist_close = 2 + self.mdt.phys.speed_ratio * 2
+        obst_center = distance_center < dist_far
+        obst_left = distance_left < dist_far
+        obst_right = distance_right < dist_far
+        has_obst_center = distance_center < dist_close
+        has_obst_left = distance_left < dist_close
+        has_obst_right = distance_right < dist_close
+        obst_center_back = distance_center < dist_far
+        obst_left_back = distance_left < dist_far
+        obst_right_back = distance_right < dist_far
+        has_obst_center_back = distance_center < dist_close
+        has_obst_left_back = distance_left < dist_close
+        has_obst_right_back = distance_right < dist_close
         car_vec = self.mdt.logic.car_vec
         tgt = Vec3(curr_logic.tgt_vec.x, curr_logic.tgt_vec.y, 0)
         dot_res = tgt.cross(Vec3(car_vec.x, car_vec.y, 0)).dot(Vec3(0, 0, 1))
