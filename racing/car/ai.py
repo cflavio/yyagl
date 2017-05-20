@@ -37,9 +37,9 @@ class AbsAiLogic(object):
         self.gnd_samples = {'left': [''], 'center': [''],  'right': ['']}
         self.obst_samples = {'left': [], 'center': [],  'right': []}
         bnds = car.phys.coll_mesh.get_tight_bounds()
-        self.width_bounds = (bnds[0][0] * 1.2, bnds[1][0] * 1.2)
-        whl_height = .4 # to be retrieved
-        self.height_bounds = (bnds[0][2] - whl_height * 1.2, bnds[1][2] + whl_height * 1.2)
+        self.width_bounds = (bnds[0][0] * 1.15, bnds[1][0] * 1.15)
+        whl_height = .4 / 2.0 # to be retrieved
+        self.height_bounds = (bnds[0][2] - whl_height * 1.15, bnds[1][2] + whl_height * 1.15)
         if show_lines_gnd:
             self.debug_lines_gnd = DebugLines(self.car, (0, 1, 0))
         if show_lines_obst:
