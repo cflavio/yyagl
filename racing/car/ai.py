@@ -303,6 +303,9 @@ class CarAi(Ai):
         curr_logic = self.front_logic if self.mdt.phys.speed >= 0 else self.rear_logic
         dist_far = 4 + self.mdt.phys.speed_ratio * 8
         dist_close = 2 + self.mdt.phys.speed_ratio * 2
+        if brake and self.mdt.phys.speed < 10:
+            dist_far = 12
+            dist_close = 4
         obst_center = distance_center < dist_far
         obst_left = distance_left < dist_far
         obst_right = distance_right < dist_far
