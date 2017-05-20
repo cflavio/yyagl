@@ -34,7 +34,6 @@ class AbsAiLogic(object):
     def __init__(self, car, cars, show_lines_gnd, show_lines_obst):
         self.car = car
         self.cars = cars
-        self.curr_gnd = 'left'
         self.gnd_samples = {'left': [''], 'center': [''],  'right': ['']}
         self.obst_samples = {'left': [], 'center': [],  'right': []}
         bnds = car.phys.coll_mesh.get_tight_bounds()
@@ -69,17 +68,15 @@ class AbsAiLogic(object):
             self.debug_lines_gnd.draw(self.car.gfx.nodepath.get_pos(), lookahead_pos)
         return self.car.phys.gnd_name(lookahead_pos)
 
-    def _update_gnd(self):
-        if len(self.gnd_samples[self.curr_gnd]) > 0:
-            self.gnd_samples[self.curr_gnd].pop(0)
+    def _update_gnd(self, gnd):
+        if len(self.gnd_samples[gnd]) > 0:
+            self.gnd_samples[gnd].pop(0)
         center_deg = 10 - 5 * self.car.phys.speed_ratio
         lateral_deg = 60 - 55 * self.car.phys.speed_ratio
         bounds = {'left': (center_deg, lateral_deg), 'center': (-center_deg, center_deg), 'right': (-lateral_deg, -center_deg)}
-        deg = uniform(*bounds[self.curr_gnd])
+        deg = uniform(*bounds[gnd])
         lgt = uniform(9 + 6 * self.car.phys.speed_ratio, 4 + 29 * self.car.phys.speed_ratio)
-        self.gnd_samples[self.curr_gnd] += [self.lookahead_ground(lgt, deg)]
-        dirs = ['left', 'center', 'right']
-        self.curr_gnd = dirs[(dirs.index(self.curr_gnd) + 1) % len(dirs)]
+        self.gnd_samples[gnd] += [self.lookahead_ground(lgt, deg)]
 
     def _get_obstacles(self):
         left_samples = [smp for smp in self.obst_samples['left'] if smp[1]]
@@ -96,19 +93,19 @@ class AbsAiLogic(object):
             min_center = min(center_samples, key=lambda elm: elm[1])
         return min_center[0], min_center[1], min_left[0], min_left[1], min_right[0], min_right[1]
 
-    def _update_obst(self):
-        nsam = 4 if self.curr_gnd == 'center' else 0
+    def _update_obst(self, gnd):
+        nsam = 4 if gnd == 'center' else 0
         nsam = nsam if self.car.phys.speed < 20 else 0
-        if len(self.obst_samples[self.curr_gnd]) > nsam:
-            self.obst_samples[self.curr_gnd].pop(0)
+        if len(self.obst_samples[gnd]) > nsam:
+            self.obst_samples[gnd].pop(0)
         lat_deg = 40 - 35 * self.car.phys.speed_ratio
         bounds = {'left': (0, lat_deg), 'center': (0, 0), 'right': (-lat_deg, 0)}
-        if self.curr_gnd == 'center':
+        if gnd == 'center':
             offset = (uniform(*self.width_bounds), 0, 0)
             deg = 0
         else:
-            offset = (self.width_bounds[self.bnd_idx()], 0, 0)
-            deg = uniform(*bounds[self.curr_gnd])
+            offset = (self.width_bounds[self.bnd_idx(gnd)], 0, 0)
+            deg = uniform(*bounds[gnd])
         start = self.car.gfx.nodepath.get_pos() - self.car_vec * .8
         rot_mat = Mat4()
         rot_mat.setRotateMat(self.car.gfx.nodepath.get_h(), (0, 0, 1))
@@ -117,7 +114,7 @@ class AbsAiLogic(object):
         lgt = 4 + 31 * self.car.phys.speed_ratio
         lookahed_vec = self.car_vec * lgt
         rot_mat = Mat4()
-        rot_mat.setRotateMat(uniform(*bounds[self.curr_gnd]), (0, 0, 1))
+        rot_mat.setRotateMat(uniform(*bounds[gnd]), (0, 0, 1))
         lookahead_rot = rot_mat.xformVec(lookahed_vec)
         lookahead_pos = self.car.gfx.nodepath.get_pos() + lookahead_rot
 
@@ -135,7 +132,7 @@ class AbsAiLogic(object):
             dist = self.car.gfx.nodepath.get_pos() - result.get_hit_pos()
             dist = dist.length()
             name = hit.get_name()
-        self.obst_samples[self.curr_gnd] += [(name, dist)]
+        self.obst_samples[gnd] += [(name, dist)]
         if hasattr(self, 'debug_lines_obst'):
             self.debug_lines_obst.draw(start, lookahead_pos)
 
@@ -155,8 +152,8 @@ class FrontAiLogic(AbsAiLogic):
     def car_vec(self):
         return self.car.logic.car_vec
 
-    def bnd_idx(self):
-        return 0 if self.curr_gnd == 'left' else 1
+    def bnd_idx(self, gnd):
+        return 0 if gnd == 'left' else 1
 
     def on_brake(self, distance_center, distance_left, distance_right):
         left = False
@@ -181,8 +178,8 @@ class RearAiLogic(AbsAiLogic):
     def car_vec(self):
         return -self.car.logic.car_vec
 
-    def bnd_idx(self):
-        return 1 if self.curr_gnd == 'left' else 0
+    def bnd_idx(self, gnd):
+        return 1 if gnd == 'left' else 0
 
     def on_brake(self, distance_center, distance_left, distance_right):
         pass
@@ -235,15 +232,19 @@ class CarAi(Ai):
             self.rear_logic.debug_lines_gnd.clear()
         if hasattr(self.rear_logic, 'debug_lines_obst'):
             self.rear_logic.debug_lines_obst.clear()
-        self.front_logic._update_gnd()
-        self.front_logic._update_gnd()
-        self.front_logic._update_gnd()
-        self.front_logic._update_obst()
-        self.front_logic._update_obst()
-        self.front_logic._update_obst()
+        self.front_logic._update_gnd('center')
+        self.front_logic._update_gnd('left')
+        self.front_logic._update_gnd('right')
+        self.front_logic._update_obst('center')
+        self.front_logic._update_obst('left')
+        self.front_logic._update_obst('right')
         if self.mdt.phys.speed < 10:
-            self.rear_logic._update_gnd()
-            self.rear_logic._update_obst()
+            self.rear_logic._update_gnd('center')
+            self.rear_logic._update_gnd('left')
+            self.rear_logic._update_gnd('right')
+            self.rear_logic._update_obst('center')
+            self.rear_logic._update_obst('left')
+            self.rear_logic._update_obst('right')
 
     def _update_dist(self):
         if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
