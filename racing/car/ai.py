@@ -31,7 +31,7 @@ class DebugLines(object):
 
 class AbsAiLogic(object):
 
-    def __init__(self, car, cars):
+    def __init__(self, car, cars, show_lines_gnd, show_lines_obst):
         self.car = car
         self.cars = cars
         self.curr_gnd = 'left'
@@ -41,8 +41,10 @@ class AbsAiLogic(object):
         self.width_bounds = (bnds[0][0] * 1.2, bnds[1][0] * 1.2)
         whl_height = .4 # to be retrieved
         self.height_bounds = (bnds[0][2] - whl_height * 1.2, bnds[1][2] + whl_height * 1.2)
-        self.debug_lines_gnd = DebugLines(self.car, (0, 1, 0))
-        self.debug_lines_obst = DebugLines(self.car, (1, 0, 0))
+        if show_lines_gnd:
+            self.debug_lines_gnd = DebugLines(self.car, (0, 1, 0))
+        if show_lines_obst:
+            self.debug_lines_obst = DebugLines(self.car, (1, 0, 0))
 
     @property
     def curr_dot_prod(self):  # to be cached
@@ -63,7 +65,8 @@ class AbsAiLogic(object):
         rot_mat.setRotateMat(deg, (0, 0, 1))
         lookahead_rot = rot_mat.xformVec(lookahed_vec)
         lookahead_pos = self.car.gfx.nodepath.get_pos() + lookahead_rot
-        self.debug_lines_gnd.draw(self.car.gfx.nodepath.get_pos(), lookahead_pos)
+        if hasattr(self, 'debug_lines_gnd'):
+            self.debug_lines_gnd.draw(self.car.gfx.nodepath.get_pos(), lookahead_pos)
         return self.car.phys.gnd_name(lookahead_pos)
 
     def _update_gnd(self):
@@ -133,7 +136,8 @@ class AbsAiLogic(object):
             dist = dist.length()
             name = hit.get_name()
         self.obst_samples[self.curr_gnd] += [(name, dist)]
-        self.debug_lines_obst.draw(start, lookahead_pos)
+        if hasattr(self, 'debug_lines_obst'):
+            self.debug_lines_obst.draw(start, lookahead_pos)
 
     def destroy(self):
         self.car = None
@@ -191,8 +195,8 @@ class CarAi(Ai):
         self.road_name = road_name
         self.waypoints = waypoints
         self.cars = cars
-        self.front_logic = FrontAiLogic(self.mdt, self.cars)
-        self.rear_logic = RearAiLogic(self.mdt, self.cars)
+        self.front_logic = FrontAiLogic(self.mdt, self.cars, True, True)
+        self.rear_logic = RearAiLogic(self.mdt, self.cars, True, True)
         self.positions = []
         self.last_dist_time = 0
         self.last_dist_pos = (0, 0, 0)
@@ -223,10 +227,14 @@ class CarAi(Ai):
 
     def on_frame(self):
         self._update_dist()
-        self.front_logic.debug_lines_gnd.clear()
-        self.front_logic.debug_lines_obst.clear()
-        self.rear_logic.debug_lines_gnd.clear()
-        self.rear_logic.debug_lines_obst.clear()
+        if hasattr(self.front_logic, 'debug_lines_gnd'):
+            self.front_logic.debug_lines_gnd.clear()
+        if hasattr(self.front_logic, 'debug_lines_obst'):
+            self.front_logic.debug_lines_obst.clear()
+        if hasattr(self.rear_logic, 'debug_lines_gnd'):
+            self.rear_logic.debug_lines_gnd.clear()
+        if hasattr(self.rear_logic, 'debug_lines_obst'):
+            self.rear_logic.debug_lines_obst.clear()
         self.front_logic._update_gnd()
         self.front_logic._update_gnd()
         self.front_logic._update_gnd()
