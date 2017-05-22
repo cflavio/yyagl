@@ -310,11 +310,13 @@ class CarLogic(Logic):
         self._wps_not_fork = wps
         return self._wps_not_fork
 
-    def __log_wp_info(self, curr_chassis, curr_wp, waypoints):
+    def __log_wp_info(self, curr_chassis, curr_wp, closest_wps, waypoints):
         print self.mdt.name
         print self.mdt.gfx.chassis_np_hi.get_name(), curr_chassis.get_name()
         print len(self.mdt.logic.lap_times), self.mdt.laps - 1
+        print self.last_ai_wp
         print curr_wp
+        print closest_wps
         import pprint
         pprint.pprint(waypoints)
         pprint.pprint(self._pitstop_wps)
@@ -337,22 +339,22 @@ class CarLogic(Logic):
         self._grid_wps = self.grid_wps(curr_wp)
         if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name() and \
                 len(self.mdt.logic.lap_times) < self.mdt.laps - 1:
-            waypoints = {wp[0]: wp[1] for wp in self._pitstop_wps.items() if wp[0] in closest_wps}
+            waypoints = {wp[0]: wp[1] for wp in self._pitstop_wps.items() if wp[0] in closest_wps or any(_wp in closest_wps for _wp in wp[1])}
         else:
-            waypoints = {wp[0]: wp[1] for wp in self._grid_wps.items() if wp[0] in closest_wps}
+            waypoints = {wp[0]: wp[1] for wp in self._grid_wps.items() if wp[0] in closest_wps or any(_wp in closest_wps for _wp in wp[1])}
         distances = [node.getDistance(wp) for wp in waypoints.keys()]
         if not distances:
-            self.__log_wp_info(curr_chassis, curr_wp, waypoints)
+            self.__log_wp_info(curr_chassis, curr_wp, closest_wps, waypoints)
         curr_wp = waypoints.keys()[distances.index(min(distances))]
         may_prev = waypoints[curr_wp]
         distances = [self.pt_line_dst(node, w_p, curr_wp) for w_p in may_prev]
         if not distances:
-            self.__log_wp_info(curr_chassis, curr_wp, waypoints)
+            self.__log_wp_info(curr_chassis, curr_wp, closest_wps, waypoints)
         prev_wp = may_prev[distances.index(min(distances))]
         may_succ = [w_p for w_p in waypoints if curr_wp in waypoints[w_p]]
         distances = [self.pt_line_dst(node, curr_wp, w_p) for w_p in may_succ]
         if not distances:
-            self.__log_wp_info(curr_chassis, curr_wp, waypoints)
+            self.__log_wp_info(curr_chassis, curr_wp, closest_wps, waypoints)
         next_wp = may_succ[distances.index(min(distances))]
         curr_vec = Vec2(node.getPos(curr_wp).xy)
         curr_vec.normalize()

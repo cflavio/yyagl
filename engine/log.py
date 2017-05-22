@@ -42,7 +42,7 @@ class LogMgrBase(Colleague):
         self.log('release: ' + platform.release())
         self.log('system: ' + platform.system())
         self.log('version: ' + platform.version())
-        self.log('panda version: ' + PandaSystem.getVersionString())
+        self.log('panda version: ' + PandaSystem.getVersionString() + ' ' + PandaSystem.getGitCommit())
         self.log('bullet version: ' + str(bullet.get_bullet_version()))
         self.log('appdata: ' + str(Filename.get_user_appdata_directory()))
 
