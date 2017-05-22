@@ -9,9 +9,11 @@ with open(sys.argv[1]) as f:
     lines = f.readlines()
     for i, line in enumerate(lines):
         if line.strip() != '<Scalar> envtype { GLOSS }':
-            output_lines += [line.rstrip()]
+            if not i or not (line.strip() == output_lines[-1].strip() and line.strip().startswith('<Scalar> alpha-file { ')):
+                output_lines += [line.rstrip()]
         else:
-            outl = line
+            output_lines += [line.rstrip()]
+            outl = ''
             for char in line:
                 if char == ' ':
                     outl += ' '
