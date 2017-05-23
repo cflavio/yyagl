@@ -166,6 +166,8 @@ class CarPhys(Phys):
 
     @property
     def speed(self):
+        if self.mdt.fsm.getCurrentOrNextState() == 'Countdown':
+            return 0  # getCurrentSpeedKmHour returns odd values otherwise
         return self.vehicle.getCurrentSpeedKmHour()
 
     @property
