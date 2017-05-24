@@ -2,7 +2,7 @@ from os import system, remove
 
 
 requirements = '''
---extra-index-url https://panda3d-pypi.stokescloud.ddns.net/
+--extra-index-url https://archive.panda3d.org/branches/deploy-ng/
 --pre
 panda3d'''
 

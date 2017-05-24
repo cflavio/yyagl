@@ -50,6 +50,10 @@ class RaceEvent(Event):
     def on_wrong_way(self, way_str):
         self.mdt.gui.way_txt.setText(way_str)
 
+    def on_respawn(self, is_moving):
+        txt = '' if is_moving else _('press %s to respawn') % self.mdt.logic.props.keys['respawn']
+        self.mdt.gui.way_txt.setText(txt)
+
     def on_end_race(self):
         points = [10, 8, 6, 4, 3, 2, 1, 0]
         zipped = zip(self.mdt.logic.race_ranking(), points)

@@ -148,6 +148,7 @@ class CarPlayerEvent(CarEvent):
         state = self.mdt.fsm.getCurrentOrNextState()
         self.input_dct_bld = InputDctBuilder.build(state,
                                                    carevent_props.joystick)
+        self.accept(self.props.keys['respawn'], self.process_respawn)
 
     def on_frame(self):
         CarEvent.on_frame(self)
@@ -207,7 +208,7 @@ class CarPlayerEvent(CarEvent):
         return self.input_dct_bld.build_dct(self.mdt.ai, self.has_weapon)
 
     def destroy(self):
-        map(self.ignore, ['f11', self.props.keys['button']])
+        map(self.ignore, ['f11', self.props.keys['button'], self.props.keys['respawn']])
         CarEvent.destroy(self)
 
 

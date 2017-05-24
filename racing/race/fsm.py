@@ -37,6 +37,7 @@ class RaceFsm(Fsm):
         self.mdt.event.notify('on_race_loaded')
         #eng.set_cam_pos((0, 0, 0))
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_wrong_way)
+        self.mdt.logic.player_car.attach_obs(self.mdt.event.on_respawn)
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_end_race)
 
     def enterCountdown(self):

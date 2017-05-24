@@ -231,6 +231,7 @@ class RaceLogic(Logic):
     def exit_play(self):
         self.track.stop_music()
         self.player_car.detach_obs(self.mdt.event.on_wrong_way)
+        self.player_car.attach_obs(self.mdt.event.on_respawn)
         self.track.destroy()
         self.player_car.destroy()
         map(lambda car: car.destroy(), self.cars)

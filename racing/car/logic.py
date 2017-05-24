@@ -1,6 +1,6 @@
 from math import sin, cos
 from random import choice
-from panda3d.core import Vec3, Vec2, deg2Rad
+from panda3d.core import Vec3, Vec2, deg2Rad, LPoint3f
 from yyagl.gameobject import Logic
 from yyagl.racing.camera import Camera
 
@@ -472,6 +472,27 @@ class CarPlayerLogic(CarLogic):
         CarLogic.__init__(self, mdt, carlogic_props)
         self.camera = Camera(mdt.gfx.nodepath, carlogic_props.cam_vec)
         self.camera.camera.set_pos(self.start_pos + (0, 0, 50))
+        self.positions = []
+        self.last_dist_time = 0
+
+    def _update_dist(self):
+        if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
+            return
+        curr_time = globalClock.getFrameTime()
+        if curr_time - self.last_dist_time < 1:
+            return
+        self.last_dist_time = curr_time
+        self.positions += [self.mdt.gfx.nodepath.get_pos()]
+        if len(self.positions) > 12:
+            self.positions.pop(0)
+        else:
+            return
+        center_x = sum(pos.get_x() for pos in self.positions) / len(self.positions)
+        center_y = sum(pos.get_y() for pos in self.positions) / len(self.positions)
+        center_z = sum(pos.get_z() for pos in self.positions) / len(self.positions)
+        center = LPoint3f(center_x, center_y, center_z)
+        is_moving = not all((pos - center).length() < 6 for pos in self.positions)
+        self.mdt.event.notify('on_respawn', is_moving)
 
     def update(self, input_dct):
         CarLogic.update(self, input_dct)
@@ -487,6 +508,7 @@ class CarPlayerLogic(CarLogic):
         ranking = game.logic.season.race.logic.ranking()  # move this to race
         r_i = ranking.index(self.mdt.name) + 1
         self.mdt.gui.ranking_txt.setText(str(r_i) + "'")
+        self._update_dist()
 
     def fire(self):
         self.weapon.attach_obs(self.on_weapon_destroyed)
