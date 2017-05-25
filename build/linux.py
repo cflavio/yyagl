@@ -1,7 +1,7 @@
 from os import remove, system, makedirs, walk
 from os.path import basename, dirname, realpath, exists, abspath
 from shutil import move, rmtree, copytree, copy
-from .build import ver, bld_dir, branch, InsideDir, get_size, \
+from .build import ver, bld_dpath, branch, InsideDir, get_size, \
     bld_cmd
 from .deployng import build_ng
 
@@ -15,19 +15,19 @@ def build_linux(target, source, env):
     int_str = '-nointernet' if env['NOINTERNET'] else ''
     p3d_path = env['P3D_PATH'][:-4] + 'nopygame.p3d'
     bld_command = bld_cmd.format(
-        path=bld_dir, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
+        path=bld_dpath, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
         version=ver, p3d_path=p3d_path, platform='linux_'+env['PLATFORM'],
         nointernet=nointernet)
     system(bld_command)
     start_dir = abspath('.') + '/'
-    with InsideDir(bld_dir + 'linux_' + env['PLATFORM']):
+    with InsideDir(bld_dpath + 'linux_' + env['PLATFORM']):
         __prepare(start_dir, env['PLATFORM'])
         __bld(env['APPNAME'], start_dir, env['PLATFORM'], ico_file)
         if nointernet:
             __bld_full_pkg(env['APPNAME'], env['PLATFORM'], ico_file, p3d_path,
                            nointernet)
         __bld_packages(env['APPNAME'], env['PLATFORM'], int_str)
-    rmtree(bld_dir + 'linux_' + env['PLATFORM'])
+    rmtree(bld_dpath + 'linux_' + env['PLATFORM'])
 
 
 def __prepare(start_dir, platform):
@@ -87,7 +87,7 @@ def __bld_full_pkg(name, platform, ico_file, p3d_path, nointernet):
     dims = ['16', '32', '48', '128', '256']
     ico_str = ''.join(["-i '" + ico_file % dim + "' " for dim in dims])
     cmd = cmd_tmpl.format(
-        path=bld_dir, name=name, Name=name.capitalize(), version=ver,
+        path=bld_dpath, name=name, Name=name.capitalize(), version=ver,
         p3d_path=basename(p3d_path), platform='linux_'+platform,
         nointernet=nointernet, icons=ico_str)
     system(cmd)

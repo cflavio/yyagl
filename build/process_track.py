@@ -5,6 +5,7 @@ loadPrcFileData('', 'default-model-extension .bam')
 import sys
 import os
 sys.path.append(os.getcwd())
+from os import walk, system
 from yyagl.engine.engine import Engine
 from direct.actor.Actor import Actor
 
@@ -43,8 +44,16 @@ class TrackProcesser(object):
         self.__flat_roots = {}
         self.props = Props()
         path = self.props.path + '/' + self.props.model_name
+        self.preprocess()
         self.model = eng.load_model(path)
         self.__set_submod()
+
+    def preprocess(self):
+        for root, dirnames, filenames in walk('assets/models/tracks/' + self.props.path):
+            for filename in filenames:
+                fname = root + '/' + filename
+                if fname.endswith('.egg'):
+                    system('egg2bam -txo -mipmap -ctex %s -o %s' % (fname, fname[:-3] + 'bam'))
 
     def __set_submod(self):
         print 'loaded track model'

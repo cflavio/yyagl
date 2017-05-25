@@ -74,21 +74,21 @@ class InsideDir(object):
         chdir(self.old_dir)
 
 
-bld_dir = 'built/'
+bld_dpath = 'built/'
 brd = {'master': 'dev', 'stable': 'stable'}
 branch = brd[__get_branch()] if __get_branch() in brd else __get_branch()
 ver = __get_version()
-p3d_file = '{path}{name}-%s.p3d' % branch
-win_file = '{path}{name}-%s-windows.exe' % branch
-osx_file = '{path}{name}-%s-osx.zip' % branch
-linux_file = '{path}{name}-%s-linux_{platform}' % branch
-win_noint_file = '{path}{name}-%s-nointernet-windows.exe' % branch
-osx_noint_file = '{path}{name}-%s-nointernet-osx.zip' % branch
-linux_noint_file = '{path}{name}-%s-nointernet-linux_{platform}' % branch
-src_file = '{path}{name}-%s-src.tar.gz' % branch
-devinfo_file = '{path}{name}-%s-devinfo.tar.gz' % branch
-test_file = '{path}{name}-%s-tests.tar.gz' % branch
-docs_file = '{path}{name}-%s-docs.tar.gz' % branch
-pdf_file = '{path}{name}-%s-code.tar.gz' % branch
+p3d_fpath = '{path}{appname}-%s.p3d' % branch
+win_fpath = '{path}{appname}-%s-windows.exe' % branch
+osx_fpath = '{path}{appname}-%s-osx.zip' % branch
+linux_fpath = '{path}{appname}-%s-linux_{platform}' % branch
+win_noint_fpath = '{path}{appname}-%s-nointernet-windows.exe' % branch
+osx_noint_fpath = '{path}{appname}-%s-nointernet-osx.zip' % branch
+linux_noint_fpath = '{path}{appname}-%s-nointernet-linux_{platform}' % branch
+src_fpath = '{path}{appname}-%s-src.tar.gz' % branch
+devinfo_fpath = '{path}{appname}-%s-devinfo.tar.gz' % branch
+test_fpath = '{path}{appname}-%s-tests.tar.gz' % branch
+docs_fpath = '{path}{appname}-%s-docs.tar.gz' % branch
+pdf_fpath = '{path}{appname}-%s-code.tar.gz' % branch
 extensions = ['txt', 'ttf', 'dds', 'egg', 'ogg', 'py', 'lua', 'rst', 'pdef',
               'mo', 'bam']

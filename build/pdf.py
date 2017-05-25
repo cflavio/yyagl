@@ -1,7 +1,7 @@
 from os import system, rename, remove
 from itertools import product
 from shutil import move
-from .build import bld_dir, branch, pdf_file
+from .build import bld_dpath, branch, pdf_fpath
 
 
 def build_pdf(target, source, env):
@@ -46,6 +46,6 @@ def __build_pkg(env):
     pdfs = ''.join([name + '.pdf ' for name in env['PDF_CONF']])
     pdfs += ''.join([name + '_cont.pdf ' for name in env['PDF_CONF']])
     cmd = 'tar -czf {out_name} ' + pdfs + ' && rm ' + pdfs
-    pdf_path = pdf_file.format(path=bld_dir, name=env['APPNAME'],
+    pdf_path = pdf_fpath.format(path=bld_dpath, name=env['APPNAME'],
                                version=branch)
     system(cmd.format(out_name=pdf_path))

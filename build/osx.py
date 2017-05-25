@@ -1,6 +1,6 @@
 from os import system, walk, remove
 from shutil import rmtree, copytree
-from .build import ver, bld_dir, branch, bld_cmd
+from .build import ver, bld_dpath, branch, bld_cmd
 from .deployng import build_ng
 
 
@@ -11,16 +11,16 @@ def build_osx(target, source, env):
     nointernet = '-s' if env['NOINTERNET'] else ''
     internet_str = '-nointernet' if env['NOINTERNET'] else ''
     build_cmd = bld_cmd.format(
-        path=bld_dir, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
+        path=bld_dpath, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
         version=ver, p3d_path=env['P3D_PATH'][:-4] + 'nopygame.p3d',
         platform='osx_i386', nointernet=nointernet)
     system(build_cmd)
     appname = env['APPNAME'].capitalize()
-    tgt = bld_dir + 'osx_i386/%s.app/Contents/MacOS/assets' % appname
+    tgt = bld_dpath + 'osx_i386/%s.app/Contents/MacOS/assets' % appname
     copytree('assets', tgt)
-    tgt = bld_dir + 'osx_i386/%s.app/Contents/MacOS/yyagl/assets' % appname
+    tgt = bld_dpath + 'osx_i386/%s.app/Contents/MacOS/yyagl/assets' % appname
     copytree('yyagl/assets', tgt)
-    start_dir = bld_dir + 'osx_i386/%s.app/Contents/MacOS/assets' % appname
+    start_dir = bld_dpath + 'osx_i386/%s.app/Contents/MacOS/assets' % appname
     for root, _, filenames in walk(start_dir):
         for filename in filenames:
             fname = root + '/' + filename
@@ -36,7 +36,7 @@ def build_osx(target, source, env):
                 remove(fname)
     osx_fname = '{Name}.app'
     osx_pkg = '{name}-{version}{internet_str}-osx.zip'
-    osx_cmd_tmpl = 'cd ' + bld_dir + 'osx_i386 && zip -r ../' + osx_pkg + \
+    osx_cmd_tmpl = 'cd ' + bld_dpath + 'osx_i386 && zip -r ../' + osx_pkg + \
         ' ' + osx_fname + ' && cd ../..'
     osx_cmd = osx_cmd_tmpl.format(
         Name=env['APPNAME'].capitalize(), name=env['APPNAME'], version=branch,

@@ -1,7 +1,7 @@
 from os import remove, system, path as os_path
 from os.path import dirname, realpath
 from shutil import move
-from .build import ver, bld_dir
+from .build import ver, bld_dpath
 
 
 def build_p3d(target, source, env):
@@ -25,9 +25,9 @@ def build_p3d(target, source, env):
 
 
 def build(suff, env):
-    system('ppackage -i %s %s%s.pdef' % (bld_dir, env['APPNAME'], suff))
+    system('ppackage -i %s %s%s.pdef' % (bld_dpath, env['APPNAME'], suff))
     p3d_src_tmpl = '{path}{Name}.{version}.p3d'
     p3d_src = p3d_src_tmpl.format(
-        path=bld_dir, Name=env['APPNAME'].capitalize(), version=ver, suff=suff)
+        path=bld_dpath, Name=env['APPNAME'].capitalize(), version=ver, suff=suff)
     move(p3d_src, env['P3D_PATH'][:-4] + suff + '.p3d')
     remove(env['APPNAME'] + suff + '.pdef')

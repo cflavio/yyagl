@@ -2,7 +2,7 @@ from os import system, remove, chdir, getcwd, rename, walk
 from os.path import exists
 from shutil import move, rmtree, copytree, copy
 from distutils.dir_util import copy_tree
-from .build import ver, bld_dir, branch, bld_cmd
+from .build import ver, bld_dpath, branch, bld_cmd
 from .deployng import build_ng
 
 
@@ -99,11 +99,11 @@ def build_windows(target, source, env):
     internet_switch = '-s' if env['NOINTERNET'] else ''
     int_str = '-nointernet' if env['NOINTERNET'] else ''
     bld_command = bld_cmd.format(
-        path=bld_dir, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
+        path=bld_dpath, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
         version=ver, p3d_path=env['P3D_PATH'][:-4] + 'nopygame.p3d',
         platform='win_i386', nointernet=internet_switch)
     system(bld_command)
-    with InsideDir('%swin_i386' % bld_dir):
+    with InsideDir('%swin_i386' % bld_dpath):
         fname = '{Name} {version}.exe'.format(
             Name=env['APPNAME'].capitalize(), version=ver)
         system('7z x -owinInstaller %s' % fname.replace(' ', '\\ '))
@@ -155,8 +155,8 @@ def build_windows(target, source, env):
     src = '{path}win_i386/winInstaller/{name}-{version}{int_str}-windows.exe'
     tgt_file = '{path}{name}-{version}{int_str}-windows.exe'
     src_fmt = src.format(
-        path=bld_dir, name=env['APPNAME'], version=branch, int_str=int_str)
+        path=bld_dpath, name=env['APPNAME'], version=branch, int_str=int_str)
     tgt_fmt = tgt_file.format(
-        path=bld_dir, name=env['APPNAME'], version=branch, int_str=int_str)
+        path=bld_dpath, name=env['APPNAME'], version=branch, int_str=int_str)
     move(src_fmt, tgt_fmt)
     rmtree('%swin_i386' % bld_dir)
