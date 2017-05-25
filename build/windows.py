@@ -159,4 +159,4 @@ def build_windows(target, source, env):
     tgt_fmt = tgt_file.format(
         path=bld_dpath, name=env['APPNAME'], version=branch, int_str=int_str)
     move(src_fmt, tgt_fmt)
-    rmtree('%swin_i386' % bld_dir)
+    rmtree('%swin_i386' % bld_dpath)

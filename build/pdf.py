@@ -46,6 +46,6 @@ def __build_pkg(env):
     pdfs = ''.join([name + '.pdf ' for name in env['PDF_CONF']])
     pdfs += ''.join([name + '_cont.pdf ' for name in env['PDF_CONF']])
     cmd = 'tar -czf {out_name} ' + pdfs + ' && rm ' + pdfs
-    pdf_path = pdf_fpath.format(path=bld_dpath, name=env['APPNAME'],
-                               version=branch)
+    pdf_path = pdf_fpath.format(path=bld_dpath, appname=env['APPNAME'],
+                                version=branch)
     system(cmd.format(out_name=pdf_path))

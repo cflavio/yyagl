@@ -42,4 +42,4 @@ def build_osx(target, source, env):
         Name=env['APPNAME'].capitalize(), name=env['APPNAME'], version=branch,
         internet_str=internet_str)
     system(osx_cmd)
-    rmtree('%sosx_i386' % bld_dir)
+    rmtree('%sosx_i386' % bld_dpath)

@@ -10,8 +10,8 @@ def build_devinfo(target, source, env):
     names = ''.join([fname + '.txt ' for fname in env['DEV_CONF']])
     rmnames = ''.join(['{path}%s.txt ' % fname for fname in env['DEV_CONF']])
     bld_cmd = 'tar -czf {out_name} -C {path} ' + names + ' && rm ' + rmnames
-    fpath = devinfo_fpath.format(path=bld_dpath, name=env['APPNAME'],
-                                version=branch)
+    fpath = devinfo_fpath.format(path=bld_dpath, appname=env['APPNAME'],
+                                 version=branch)
     system(bld_cmd.format(path=bld_dpath, out_name=fpath))
 
 
