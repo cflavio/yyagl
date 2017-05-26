@@ -35,6 +35,7 @@ def track_files():
     tr_root = 'assets/models/tracks/'
     for _, dirnames, _ in walk(tr_root):
         return [tr_root + dname + '/track_all.bam' for dname in dirnames]
+    return []
 
 
 def set_path(_path):

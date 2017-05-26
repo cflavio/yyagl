@@ -346,6 +346,15 @@ class CarLogic(Logic):
         if not distances:
             self.__log_wp_info(curr_chassis, curr_wp, closest_wps, waypoints)
         curr_wp = waypoints.keys()[distances.index(min(distances))]
+        if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name() and \
+                len(self.mdt.logic.lap_times) < self.mdt.laps - 1:
+            for wp in self._pitstop_wps.items():
+                if curr_wp in wp[1]:
+                    waypoints[wp[0]] = wp[1]
+        else:
+            for wp in self._grid_wps.items():
+                if curr_wp in wp[1]:
+                    waypoints[wp[0]] = wp[1]
         may_prev = waypoints[curr_wp]
         distances = [self.pt_line_dst(node, w_p, curr_wp) for w_p in may_prev]
         if not distances:

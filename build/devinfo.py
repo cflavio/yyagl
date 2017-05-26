@@ -2,17 +2,17 @@ from os import system
 from .build import bld_dpath, branch, exec_cmd, devinfo_fpath
 
 
-def build_devinfo(target, source, env):
+def bld_devinfo(target, source, env):
     for fname, cond in env['DEV_CONF'].items():
         for src in source:
-            with open(('%s%s.txt') % (bld_dpath, fname), 'a') as outfile:
-                __process(src, cond, outfile)
-    names = ''.join([fname + '.txt ' for fname in env['DEV_CONF']])
-    rmnames = ''.join(['{path}%s.txt ' % fname for fname in env['DEV_CONF']])
-    bld_cmd = 'tar -czf {out_name} -C {path} ' + names + ' && rm ' + rmnames
+            with open(('%s%s.txt') % (bld_dpath, fname), 'a') as fout:
+                __process(src, cond, fout)
+    names = ' '.join([fname + '.txt' for fname in env['DEV_CONF']])
+    rmnames = ' '.join(['{dstpath}%s.txt' % fname for fname in env['DEV_CONF']])
+    cmd = 'tar -czf {fout} -C {dstpath} ' + names + ' && rm ' + rmnames
     fpath = devinfo_fpath.format(path=bld_dpath, appname=env['APPNAME'],
                                  version=branch)
-    system(bld_cmd.format(path=bld_dpath, out_name=fpath))
+    system(cmd.format(dstpath=bld_dpath, fout=fpath))
 
 
 def __clean_pylint(pylint_out):
@@ -31,13 +31,13 @@ def __clean_pylint(pylint_out):
     return clean_output
 
 
-def __process(src, cond, outfile):
+def __process(src, cond, fout):
     if cond(src):
         return
-    outfile.write('    '+str(src)+'\n')
-    out_pylint = __clean_pylint((exec_cmd('pylint -r n -d C0111 '+str(src))))
-    out_pyflakes = exec_cmd('pyflakes '+str(src))
+    fout.write('    ' + str(src) + '\n')
+    out_pylint = __clean_pylint((exec_cmd('pylint -r n -d C0111 ' + str(src))))
+    out_pyflakes = exec_cmd('pyflakes ' + str(src))
     out_pep8 = exec_cmd('pep8 ' + str(src))
     outs = [out.strip() for out in [out_pylint, out_pyflakes, out_pep8]]
-    map(lambda out: outfile.write(out+'\n'), [out for out in outs if out])
-    outfile.write('\n')
+    map(lambda out: fout.write(out + '\n'), [out for out in outs if out])
+    fout.write('\n')
