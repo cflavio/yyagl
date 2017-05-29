@@ -2,18 +2,20 @@ from os import system, remove
 from .build import exec_cmd
 
 
-def __get_img_fmt(fname):
-    cmd = 'identify -verbose "%s" | grep alpha' % fname
-    alpha = exec_cmd(cmd).strip()
-    geometry = exec_cmd('identify -verbose "%s" | grep Geometry' % fname)
-    split_dim = lambda geom: geom.split()[1].split('+')[0].split('x')
-    size = [int(dim) for dim in split_dim(geometry)]
-    return alpha, size
+def bld_images(target, source, env):
+    map(__bld_img, [str(src) for src in source])
 
 
-def __build_img(fname):
+def __img_alpha_size(fname):
+    alpha = exec_cmd('identify -verbose "%s" | grep alpha' % fname).strip()
+    geom = exec_cmd('identify -verbose "%s" | grep Geometry' % fname)
+    dim_split = lambda _geom: _geom.split()[1].split('+')[0].split('x')
+    return alpha, [int(dim) for dim in dim_split(geom)]
+
+
+def __bld_img(fname):
     png = fname[:-3] + 'png'
-    alpha, size = __get_img_fmt(fname)
+    alpha, size = __img_alpha_size(fname)
     sizes = [2**i for i in range(0, 12)]
     floor_pow = lambda img_sz: max([siz for siz in sizes if siz <= img_sz])
     width, height = map(floor_pow, size)
@@ -23,7 +25,3 @@ def __build_img(fname):
     cmd = 'nvcompress -bc3 {alpha} -nomips "%s" "%sdds"' % (png, fname[:-3])
     system(cmd.format(alpha='-alpha' if alpha else ''))
     remove(png)
-
-
-def build_images(target, source, env):
-    map(lambda fname: __build_img(fname), [str(src) for src in source])

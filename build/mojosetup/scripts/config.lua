@@ -19,7 +19,7 @@ end
 
 
 Setup.Package {
-    vendor = "ya2.it",
+    vendor = "<vendorsite>",
     id = "<appname>",
     description = "<AppName>",
     version = "<version>",

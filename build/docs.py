@@ -19,16 +19,23 @@ def bld_docs(target, source, env):
 def __prepare(env):
     curr_dir = dirname(realpath(__file__)) + '/'
     copytree(curr_dir + 'docs', bld_dpath + 'docs_apidoc')
-    cmd = 'sed -i.bak -e "s/<appname>/%s/" %sdocs_apidoc/index.rst'
-    system(cmd % (env['APPNAME'].capitalize(), bld_dpath))
+
+    args = ['appname', 'DevName', 'devsite', 'prjsite']
+    args = ['-e "s/<%s>/{%s}/"' % ((arg,) * 2) for arg in args]
+    cmd_tmpl = 'sed -i.bak %s {dst_path}docs_apidoc/index.rst' % ' '.join(args)
+    cmd = cmd_tmpl.format(
+        appname=env['APPNAME'].capitalize(), DevName='Ya2',
+        devsite='http://www.ya2.it', prjsite='http://www.ya2.it/yorg',
+        dst_path=bld_dpath)
+    system(cmd)
     curr_dir = abspath('.').replace('/', '\/')
     curr_dir = curr_dir.replace('\\', '\\\\')
-    args = ['appname', 'src_dir', 'version']
+    args = ['appname', 'src_dpath', 'version', 'DevName', 'htmltheme']
     args = ['-e "s/<%s>/{%s}/"' % ((arg,) * 2) for arg in args]
     cmd_tmpl = 'sed -i.bak %s {dir}docs_apidoc/conf.py' % ' '.join(args)
     cmd = cmd_tmpl.format(
         appname=env['APPNAME'].capitalize(), version=branch, dir=bld_dpath,
-        src_dir=curr_dir)
+        src_dpath=curr_dir, DevName='Ya2', htmltheme='ya2')
     system(cmd)
 
 

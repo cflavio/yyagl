@@ -4,18 +4,18 @@ from sys import path
 from os.path import abspath
 import datetime
 
-path.insert(0, abspath('<src_path>'))
+path.insert(0, abspath('<src_dpath>'))
 
 #extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode'] # it crashes
 extensions = ['sphinx.ext.autodoc']
 source_suffix = '.rst'
 master_doc = 'index'
 project = u'<appname>'
-copyright = u'%s, Ya2' % datetime.datetime.now().year
+copyright = u'%s, <DevName>' % datetime.datetime.now().year
 version = '<version>'
 release = '<version>'
 pygments_style = 'sphinx'
-html_theme = 'ya2'
+html_theme = '<htmltheme>'
 html_theme_path = ['.']
 html_theme_options = {'rightsidebar': 'true'}
 html_sidebars = {'*': ['localtoc.html', 'relations.html', 'sourcelink.html',
