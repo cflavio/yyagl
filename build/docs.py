@@ -10,7 +10,7 @@ def bld_docs(target, source, env):
     system('sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst' % bld_dpath)
     system('sphinx-build -b html %sdocs_apidoc %sdocs' % ((bld_dpath,) * 2))
     bld_cmd = 'tar -C {path} -czf {fpath} ./docs'
-    fpath = docs_fpath.format(path=bld_dpath, appname=env['APPNAME'],
+    fpath = docs_fpath.format(dst_dir=bld_dpath, appname=env['APPNAME'],
                               version=branch)
     system(bld_cmd.format(path=bld_dpath, fpath=fpath))
     __clean()

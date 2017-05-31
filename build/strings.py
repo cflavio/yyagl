@@ -1,7 +1,7 @@
 from os import system, makedirs
 from os.path import exists
 from shutil import move, copy
-from .build import get_files
+from .build import files
 
 
 def bld_strings(target, source, env):
@@ -12,7 +12,7 @@ def bld_strings(target, source, env):
 
 
 def bld_tmpl_merge(target, source, env):
-    src_files = ' '.join(get_files(['py'], ['feedparser', 'venv']))
+    src_files = ' '.join(files(['py'], ['feedparser', 'venv']))
     cmd_tmpl = 'xgettext -d {appname} -L python -o {appname}.pot '
     system(cmd_tmpl.format(appname=env['APPNAME']) + src_files)
     for lng in env['LANGUAGES']:

@@ -46,6 +46,6 @@ def __bld_pkg(env):
     pdfs = ''.join([name + '.pdf ' for name in env['PDF_CONF']])
     pdfs += ''.join([name + '_cont.pdf ' for name in env['PDF_CONF']])
     cmd = 'tar -czf {fout} ' + pdfs + ' && rm ' + pdfs
-    pdf_path = pdf_fpath.format(path=bld_dpath, appname=env['APPNAME'],
+    pdf_path = pdf_fpath.format(dst_dir=bld_dpath, appname=env['APPNAME'],
                                 version=branch)
     system(cmd.format(fout=pdf_path))

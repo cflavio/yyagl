@@ -1,22 +1,22 @@
 from os import remove, system, makedirs, walk
 from os.path import basename, dirname, realpath, exists, abspath
 from shutil import move, rmtree, copytree, copy
-from .build import ver, bld_dpath, branch, InsideDir, get_size, \
+from .build import ver, bld_dpath, branch, InsideDir, size, \
     bld_cmd
-from .deployng import build_ng
+from .deployng import bld_ng
 
 
 def build_linux(target, source, env):
     if env['NG']:
-        build_ng(env['APPNAME'], linux_64=True)
+        bld_ng(env['APPNAME'], linux_64=True)
         return
     ico_file = env['ICO_FILE']
     nointernet = '-s' if env['NOINTERNET'] else ''
     int_str = '-nointernet' if env['NOINTERNET'] else ''
-    p3d_path = env['P3D_PATH'][:-4] + 'nopygame.p3d'
+    p3d_fpath = env['P3D_PATH'][:-4] + 'nopygame.p3d'
     bld_command = bld_cmd.format(
-        path=bld_dpath, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
-        version=ver, p3d_path=p3d_path, platform='linux_'+env['PLATFORM'],
+        dst_dir=bld_dpath, appname=env['APPNAME'], AppName=env['APPNAME'].capitalize(),
+        version=ver, p3d_fpath=p3d_fpath, platform='linux_'+env['PLATFORM'],
         nointernet=nointernet)
     system(bld_command)
     start_dir = abspath('.') + '/'
@@ -24,7 +24,7 @@ def build_linux(target, source, env):
         __prepare(start_dir, env['PLATFORM'])
         __bld(env['APPNAME'], start_dir, env['PLATFORM'], ico_file)
         if nointernet:
-            __bld_full_pkg(env['APPNAME'], env['PLATFORM'], ico_file, p3d_path,
+            __bld_full_pkg(env['APPNAME'], env['PLATFORM'], ico_file, p3d_fpath,
                            nointernet)
         __bld_packages(env['APPNAME'], env['PLATFORM'], int_str)
     rmtree(bld_dpath + 'linux_' + env['PLATFORM'])
@@ -56,7 +56,7 @@ def __bld(appname, start_dir, platform, ico_file):
     seds = ['version', 'size', 'appname', 'AppName', 'vendorsite']
     seds = ' '.join(["-e 's/<%s>/{%s}/'" % (sed, sed) for sed in seds])
     cmd_tmpl = 'sed -i.bak %s img/scripts/config.lua' % seds
-    cmd = cmd_tmpl.format(version=branch, size=get_size('img'),
+    cmd = cmd_tmpl.format(version=branch, size=size('img'),
                           appname=appname, AppName=appname.capitalize(),
                           vendorsite='ya2.it')
     system(cmd)

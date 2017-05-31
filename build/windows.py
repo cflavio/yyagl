@@ -3,7 +3,7 @@ from os.path import exists
 from shutil import move, rmtree, copytree, copy
 from distutils.dir_util import copy_tree
 from .build import ver, bld_dpath, branch, bld_cmd
-from .deployng import build_ng
+from .deployng import bld_ng
 
 
 nsi_src = '''Name {fullName}
@@ -94,13 +94,13 @@ class InsideDir(object):
 
 def build_windows(target, source, env):
     if env['NG']:
-        build_ng(env['APPNAME'], win=True)
+        bld_ng(env['APPNAME'], win=True)
         return
     internet_switch = '-s' if env['NOINTERNET'] else ''
     int_str = '-nointernet' if env['NOINTERNET'] else ''
     bld_command = bld_cmd.format(
-        path=bld_dpath, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
-        version=ver, p3d_path=env['P3D_PATH'][:-4] + 'nopygame.p3d',
+        dst_dir=bld_dpath, appname=env['APPNAME'], AppName=env['APPNAME'].capitalize(),
+        version=ver, p3d_fpath=env['P3D_PATH'][:-4] + 'nopygame.p3d',
         platform='win_i386', nointernet=internet_switch)
     system(bld_command)
     with InsideDir('%swin_i386' % bld_dpath):

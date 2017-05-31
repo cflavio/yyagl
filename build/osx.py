@@ -1,18 +1,18 @@
 from os import system, walk, remove
 from shutil import rmtree, copytree
 from .build import ver, bld_dpath, branch, bld_cmd
-from .deployng import build_ng
+from .deployng import bld_ng
 
 
 def build_osx(target, source, env):
     if env['NG']:
-        build_ng(env['APPNAME'], osx=True)
+        bld_ng(env['APPNAME'], osx=True)
         return
     nointernet = '-s' if env['NOINTERNET'] else ''
     internet_str = '-nointernet' if env['NOINTERNET'] else ''
     build_cmd = bld_cmd.format(
-        path=bld_dpath, name=env['APPNAME'], Name=env['APPNAME'].capitalize(),
-        version=ver, p3d_path=env['P3D_PATH'][:-4] + 'nopygame.p3d',
+        dst_dir=bld_dpath, appname=env['APPNAME'], AppName=env['APPNAME'].capitalize(),
+        version=ver, p3d_fpath=env['P3D_PATH'][:-4] + 'nopygame.p3d',
         platform='osx_i386', nointernet=nointernet)
     system(build_cmd)
     appname = env['APPNAME'].capitalize()
