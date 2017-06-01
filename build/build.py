@@ -1,4 +1,4 @@
-from os import walk, chdir, getcwd
+from os import walk, chdir, getcwd, remove
 from os.path import join, getsize
 from subprocess import Popen, PIPE
 
@@ -59,6 +59,19 @@ def size(start_dir='.'):
     return sum(
         getsize(join(root, fname))
         for root, _, fnames in walk(start_dir) for fname in fnames)
+
+
+class TempFile(object):
+
+    def __init__(self, fname, text):
+        self.fname, self.text = fname, text
+
+    def __enter__(self):
+        with open(self.fname, 'w') as outfile:
+            outfile.write(self.text)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        remove(self.fname)
 
 
 class InsideDir(object):
