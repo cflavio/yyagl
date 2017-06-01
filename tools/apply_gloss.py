@@ -4,23 +4,23 @@ if len(sys.argv) != 2:
     print 'Usage: apply_gloss.py filename.egg'
     sys.exit(0)
 
-output_lines = []
-with open(sys.argv[1]) as f:
-    lines = f.readlines()
-    for i, line in enumerate(lines):
+out_lines = []
+with open(sys.argv[1]) as f_in:
+    lines = f_in.readlines()
+    for idx, line in enumerate(lines):
         if line.strip() != '<Scalar> envtype { GLOSS }':
-            if not i or not (line.strip() == output_lines[-1].strip() and line.strip().startswith('<Scalar> alpha-file { ')):
-                output_lines += [line.rstrip()]
+            if not idx or not (line.strip() == out_lines[-1].strip() and line.strip().startswith('<Scalar> alpha-file { ')):
+                out_lines += [line.rstrip()]
         else:
-            output_lines += [line.rstrip()]
+            out_lines += [line.rstrip()]
             outl = ''
             for char in line:
                 if char == ' ':
                     outl += ' '
                 else:
                     break
-            outl += '<Scalar> alpha-file { ' + lines[i - 1].strip() + ' }'
-            output_lines += [outl]
+            outl += '<Scalar> alpha-file { %s }' % lines[i - 1].strip()
+            out_lines += [outl]
 
-with open(sys.argv[1], 'w') as f:
-    map(lambda outl: f.write(outl + '\n'), output_lines)
+with open(sys.argv[1], 'w') as f_out:
+    map(lambda outl: f_out.write(outl + '\n'), output_lines)

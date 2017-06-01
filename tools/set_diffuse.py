@@ -1,21 +1,21 @@
-import os
+from os import listdir
 
 
-def set_diffuse(eggfile):
-    output_lines = []
-    with open(eggfile) as file_:
-        lines = file_.readlines()
+def set_diffuse(fpath):
+    out_lines = []
+    with open(fpath) as f_in:
+        lines = f_in.readlines()
         for line in lines:
             if not line.strip().startswith('<Scalar> diff'):
-                output_lines += [line.rstrip()]
+                out_lines += [line.rstrip()]
             else:
                 outl = line.split(' { ')[0] + ' { 1.000000 }'
-                output_lines += [outl]
+                out_lines += [outl]
 
-    with open(eggfile, 'w') as file_:
-        map(lambda outl: file_.write(outl + '\n'), output_lines)
+    with open(fpath, 'w') as f_in:
+        map(lambda outl: f_in.write(outl + '\n'), out_lines)
 
 
-for _file in os.listdir('.'):
-    if _file.endswith('.egg'):
-        set_diffuse(_file)
+for fname in listdir('.'):
+    if fname.endswith('.egg'):
+        set_diffuse(fname)

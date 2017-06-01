@@ -11,7 +11,7 @@ class BonusGfx(Gfx):
         self.model_suff = model_suff
         Gfx.__init__(self, mdt)
 
-    def sync_build(self):
+    def sync_bld(self):
         path = self.model_name
         self.model = Actor(path, {'anim': path + '-' + self.model_suff})
         self.model.reparent_to(render)

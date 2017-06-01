@@ -38,7 +38,7 @@ class TrackPhys(Phys):
         self.props = trackphys_props
         Phys.__init__(self, mdt)
 
-    def sync_build(self):
+    def sync_bld(self):
         self.model = loader.loadModel(self.props.model_path)
         self.__load(self.props.unmerged, False, False)
         self.__load(self.props.merged, True, False)

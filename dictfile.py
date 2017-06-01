@@ -7,24 +7,24 @@ class DctFile(object):
     def __init__(self, fpath, default_dct={}):
         self.fpath = fpath
         try:
-            with open(fpath) as yaml_file:
-                file_dct = load(yaml_file)
-            self.dct = self.__update(default_dct, file_dct)
+            with open(fpath) as fyaml:
+                fdct = load(fyaml)
+            self.dct = self.__add_default(default_dct, fdct)
         except IOError:
             self.dct = default_dct
 
     @staticmethod
-    def __update(dct, upd):
+    def __add_default(dct, upd):
         for key, val in upd.iteritems():
             if isinstance(val, Mapping):
-                dct[key] = DctFile.__update(dct.get(key, {}), val)
+                dct[key] = DctFile.__add_default(dct.get(key, {}), val)
             else:
                 dct[key] = upd[key]
         return dct
 
     def store(self):
-        with open(self.fpath, 'w') as yaml_file:
-            dump(self.dct, yaml_file, default_flow_style=False)
+        with open(self.fpath, 'w') as fyaml:
+            dump(self.dct, fyaml, default_flow_style=False)
 
     def __getitem__(self, arg):
         return self.dct[arg]

@@ -6,8 +6,8 @@ class Subject(object):
     def attach(self, obs_meth, sort=10):
         self.observers += [(obs_meth, sort)]
 
-    def detach(self, obs):
-        observers = [_obs for _obs in self.observers if _obs[0] == obs]
+    def detach(self, obs_meth):
+        observers = [obs for obs in self.observers if obs[0] == obs_meth]
         if not observers:
             raise Exception
         map(self.observers.remove, observers)
@@ -16,6 +16,7 @@ class Subject(object):
         try:
             meths = [obs for obs in self.observers if obs[0].__name__ == meth]
             sorted_observers = sorted(meths, key=lambda obs: obs[1])
+            #TODO: make a sorted list at attach
             #map(lambda obs: obs[0](*args, **kwargs), sorted_observers)
             for obs in sorted_observers:
                 if obs in self.observers:  # if an observer removes another one

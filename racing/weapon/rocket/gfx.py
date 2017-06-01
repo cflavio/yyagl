@@ -10,7 +10,7 @@ class RocketGfx(Gfx):
         self.path = path
         Gfx.__init__(self, mdt)
 
-    def sync_build(self):
+    def sync_bld(self):
         self.gfx_np = loader.loadModel(self.path)
         self.gfx_np.flattenLight()
         self.gfx_np.reparentTo(self.parent)

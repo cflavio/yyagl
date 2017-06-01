@@ -34,7 +34,7 @@ class CarGfx(Gfx, CarGfxFacade):
         self.skidmark_mgr = SkidmarkMgr(mdt)
         Gfx.__init__(self, mdt)
 
-    def async_build(self):
+    def async_bld(self):
         fpath = self.props.model_name % self.mdt.name
         path = self.props.damage_paths[0] % self.mdt.name
         self.chassis_np_low = loader.loadModel(path)

@@ -2,8 +2,8 @@
 varying vec2 texcoord;
 uniform sampler2D p3d_Texture0;
 uniform float col_offset;
-vec4 p3d_FragColor;
 uniform float enable;
+vec4 p3d_FragColor;
 
 void main() {
     float dist_l = texcoord.x;

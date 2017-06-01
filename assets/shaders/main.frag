@@ -7,7 +7,7 @@ in vec3 normal;
 out vec4 p3d_FragColor;
 uniform sampler2D p3d_Texture0;
 uniform sampler2DShadow depthmap;
-uniform vec4 ambient;
+uniform vec4 ambient;  // TODO: it is not used!?
 uniform int num_lights;
 const int toon_levels = 4;
 const float toon_scale_factor = 1.0 / toon_levels;
@@ -55,9 +55,8 @@ void toon(int lgt_idx, out vec3 amb_diff, out vec3 spec) {
   vec3 n = normalize(normal);
   float s_dot_n = max(dot(s, n), .0);
   amb_diff = lgt.diff * vec3(p3d_Material.diffuse) * toon_val(s_dot_n);
-  vec3 ks = p3d_Material.specular;
-  float spec_factor = pow(max(dot(h, n), .0), p3d_Material.shininess);
-  spec = lgt.spec * ks * toon_val(spec_factor);
+  float spec_fact = pow(max(dot(h, n), .0), p3d_Material.shininess);
+  spec = lgt.spec * p3d_Material.specular * toon_val(spec_fact);
   spec *= step(.0, s_dot_n);
   if (lgt.exp == .0) // point light or directional, not a spotlight
     return;
@@ -79,13 +78,13 @@ vec4 vsaturate(vec4 v) {
 void main() {
     vec3 amb_diff = vec3(.0);
     vec3 spec = vec3(.0);
-    vec3 _amb_diff;
-    vec3 _spec;
+    vec3 amb_diff_i;
+    vec3 spec_i;
     vec4 tex_col = texture(p3d_Texture0, texcoord);
     for (int i=0; i < num_lights; i++) {
-        toon(i, _amb_diff, _spec);
-        amb_diff += _amb_diff;
-        spec += _spec;
+        toon(i, amb_diff_i, spec_i);
+        amb_diff += amb_diff_i;
+        spec += spec_i;
     }
     vec3 circleoffs = vec3(lightclip.xy / lightclip.w, 0);
     float falloff = saturate(1.0 - dot(circleoffs, circleoffs));

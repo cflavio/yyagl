@@ -10,24 +10,24 @@ class Colleague(Subject):
         Subject.__init__(self)
         self.notify_tsk = None
         self.mdt = mdt
-        self.async_build(*args, **kwargs)
+        self.async_bld(*args, **kwargs)
 
-    def async_build(self, *args, **kwargs):
+    def async_bld(self, *args, **kwargs):
         self._end_async(*args, **kwargs)
 
     def _end_async(self, *args, **kwargs):
-        self.sync_build(*args, **kwargs)
-        notify_args = ['on_component_built', self]
+        self.sync_bld(*args, **kwargs)
+        notify_args = 'on_comp_blt', self
         self.notify_tsk = eng.do_later(.001, self.mdt.notify, notify_args)
         # this is necessary to schedule the next component into the next
         # frame otherwise some dependent components may access a non-existent
         # one. think of something better
 
-    def sync_build(self, *args, **kwargs):
+    def sync_bld(self, *args, **kwargs):
         pass
 
     def destroy(self):
-        if hasattr(self, 'notify_tsk') and self.notify_tsk:
+        if self.notify_tsk:
             taskMgr.remove(self.notify_tsk)
         self.mdt = self.notify_tsk = None
         Subject.destroy(self)
@@ -78,25 +78,26 @@ class Phys(Colleague):
 
 class GODirector(object):
 
-    def __init__(self, obj, init_lst, callback):
-        self.__obj = obj
-        obj.attach(self.on_component_built)
+    def __init__(self, tgt_obj, init_lst, callback):
+        self.__obj = tgt_obj
+        tgt_obj.attach(self.on_comp_blt)
         self.callback = callback
         self.completed = [False for _ in init_lst]
         self.pending = {}
         self.__init_lst = init_lst
         for idx in range(len(init_lst)):
-            self.__process_lst(obj, idx)
+            self.__process_lst(tgt_obj, idx)
 
     def __process_lst(self, obj, idx):
         if not self.__init_lst[idx]:
             self.end_lst(idx)
             return
         comp_info = self.__init_lst[idx].pop(0)
+        #TODO: define comp_info as a named tuple
         self.pending[comp_info[1].__name__] = idx
         setattr(obj, comp_info[0], comp_info[1](*comp_info[2]))
 
-    def on_component_built(self, obj):
+    def on_comp_blt(self, obj):
         self.__process_lst(obj.mdt, self.pending[obj.__class__.__name__])
 
     def end_lst(self, idx):
@@ -107,26 +108,26 @@ class GODirector(object):
             self.destroy()
 
     def destroy(self):
-        self.__obj.detach(self.on_component_built)
+        self.__obj.detach(self.on_comp_blt)
         self.__obj = self.callback = self.__init_lst = None
 
 
 class GameObject(Subject):
     __metaclass__ = ABCMeta
 
-    def __init__(self, init_lst=[], callback=None):
+    def __init__(self, init_lst=None, callback=None):
         Subject.__init__(self)
-        self.components = self.component_lst(init_lst)
+        self.comp_names = self.__comp_lst(init_lst)
         GODirector(self, init_lst, callback)
 
-    def component_lst(self, init_lst):
+    def __comp_lst(self, init_lst):
         if not init_lst:
             return []
 
         def process_elm(elm):
-            return [elm[0]] if type(elm) == tuple else self.component_lst(elm)
-        return process_elm(init_lst[0]) + self.component_lst(init_lst[1:])
+            return [elm[0]] if type(elm) == tuple else self.__comp_lst(elm)
+        return process_elm(init_lst[0]) + self.__comp_lst(init_lst[1:])
 
     def destroy(self):
         Subject.destroy(self)
-        map(lambda cmp: getattr(self, cmp).destroy(), self.components)
+        map(lambda cmp: getattr(self, cmp).destroy(), self.comp_names)

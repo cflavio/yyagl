@@ -47,7 +47,7 @@ class RaceFsm(Fsm):
         self.countdown.attach(self.on_start_race)
         self.mdt.logic.enter_play()
         if self.shaders:
-            self.shader_mgr.toggle_shader()
+            eng.shader_mgr.toggle_shader()
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Countdown'), cars)
 

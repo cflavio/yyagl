@@ -22,6 +22,4 @@ vec4 sobel() {
     return mix(vec4(1), vec4(0, 0, 0, 1), smoothstep(.01, 1, g));
 }
 
-void main() {
-    p3d_FragColor = sobel() * texture(in_tex, texcoord);
-}
+void main() { p3d_FragColor = sobel() * texture(in_tex, texcoord); }

@@ -37,7 +37,7 @@ class TrackGfx(Gfx):
         self.props = trackgfx_props
         Gfx.__init__(self, mdt)
 
-    def async_build(self):
+    def async_bld(self):
         self.__set_model()
         self.__set_light()
 
@@ -82,7 +82,7 @@ class TrackGfx(Gfx):
         self.signs.set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
         self.model.premungeScene(eng.base.win.getGsg())
-        Gfx.async_build(self)
+        Gfx.async_bld(self)
 
     def __set_light(self):
         if self.props.shaders:
