@@ -5,7 +5,7 @@ from panda3d.core import loadPrcFileData, NodePath, ConfigVariableBool,\
 from unittest import TestCase
 
 from racing.game.engine.engine import Engine
-from racing.game.engine.configuration import Configuration
+from racing.game.engine.configuration import Cfg
 
 
 class ConfigurationTests(TestCase):
@@ -18,7 +18,7 @@ class ConfigurationTests(TestCase):
         self.engine.destroy()
 
     def test_init(self):
-        self.engine = Engine(Configuration(cursor_hidden=True))
+        self.engine = Engine(Cfg(cursor_hidden=True))
         self.assertTrue(ConfigVariableBool('cursor-hidden'))
         self.assertFalse(ConfigVariableBool('fullscreen'))
 

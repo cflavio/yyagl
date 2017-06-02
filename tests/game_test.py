@@ -3,7 +3,7 @@ from os import chdir, getcwd
 from panda3d.core import loadPrcFileData, NodePath
 from unittest import TestCase
 from racing.game.engine.engine import Engine
-from racing.game.engine.configuration import Configuration
+from racing.game.engine.configuration import Cfg
 from racing.game.game import GameLogic, Game
 from racing.game.gameobject import GameObject, Fsm, Gfx, Phys, Gui, Audio, \
     Ai, Event
@@ -32,7 +32,7 @@ class GameTests(TestCase):
         loadPrcFileData('', 'audio-library-name null')
 
     def test_init(self):
-        conf = Configuration()
+        conf = Cfg()
         classes = [Fsm, Gfx, Phys, Gui, GameLogic, Audio, Ai, Event]
         game = Game(classes, conf)
         self.assertIsInstance(game, Game)

@@ -2,7 +2,7 @@ from panda3d.core import loadPrcFileData
 from .log import LogMgr
 
 
-class Configuration(object):
+class Cfg(object):
 
     def __init__(
             self, fps=False, win_size='1280 720', win_orig=None,
