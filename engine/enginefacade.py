@@ -1,3 +1,6 @@
+from lang import LangMgr
+
+
 class EngineFacade(object):
 
     def get_joystick(self):
@@ -135,19 +138,23 @@ class EngineFacade(object):
         return self.shader_mgr.toggle_shader()
 
     @property
+    def cfg(self):
+        return self.logic.cfg
+
+    @property
     def is_runtime(self):
         return self.logic.is_runtime
 
     @property
     def lang_codes(self):
-        return self.lang_mgr.lang_codes
+        return LangMgr().lang_codes
 
     @property
     def curr_lang(self):
-        return self.lang_mgr.curr_lang
+        return LangMgr().curr_lang
 
     def set_lang(self, lang):
-        return self.lang_mgr.set_lang(lang)
+        return LangMgr().set_lang(lang)
 
     @property
     def languages(self):

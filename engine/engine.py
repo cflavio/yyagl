@@ -30,10 +30,10 @@ class Engine(GameObject, EngineFacade):
     def __init__(self, cfg=None):
         __builtin__.eng = self
         self.base = EngineShowBase()
+        LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
         init_lst = [
             [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr.init_cls(), [self])],
-            [('lang_mgr', LangMgr, [self])],
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
             [('phys', EnginePhys, [self])],
             [('event', EngineEvent.init_cls(), [self, cfg.menu_joypad])],

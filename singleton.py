@@ -1,9 +1,8 @@
-class Singleton(object):
+class Singleton(type):
 
-    def __init__(self, cls):
-        self.cls, self.inst = cls, None
+    _insts = {}
 
-    def __call__(self, *args, **kw_args):
-        if not self.inst:
-            self.inst = self.cls(*args, **kw_args)
-        return self.inst
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._insts:
+            cls._insts[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._insts[cls]
