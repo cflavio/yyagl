@@ -3,6 +3,7 @@ from random import choice
 from panda3d.core import Vec3, Vec2, deg2Rad, LPoint3f
 from yyagl.gameobject import Logic
 from yyagl.racing.camera import Camera
+from yyagl.engine.joystick import JoystickMgr
 
 
 class CarLogicProps:
@@ -99,7 +100,7 @@ class AnalogicLogic(AbsLogic):
 
     def process(self, input_dct, phys):
         eng_frc = brake_frc = 0
-        x, y, a, b = eng.event.joystick.get_joystick()
+        x, y, a, b = JoystickMgr().get_joystick()
         scale = lambda val: min(1, max(-1, val * 1.2))
         x, y = scale(x), scale(y)
         if y <= - .1:

@@ -27,7 +27,7 @@ class EngineShowBase(ShowBase):
 
 class Engine(GameObject, EngineFacade):
 
-    def __init__(self, cfg=None):
+    def __init__(self, cfg=None, on_end_cb=None):
         __builtin__.eng = self
         self.base = EngineShowBase()
         LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
@@ -36,7 +36,7 @@ class Engine(GameObject, EngineFacade):
             [('log_mgr', LogMgr.init_cls(), [self])],
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
             [('phys', EnginePhys, [self])],
-            [('event', EngineEvent.init_cls(), [self, cfg.menu_joypad])],
+            [('event', EngineEvent.init_cls(), [self, cfg.menu_joypad, on_end_cb])],
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self, cfg.volume])],
             [('pause', PauseMgr, [self])],

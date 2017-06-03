@@ -4,6 +4,7 @@ from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import Event
 from yyagl.racing.race.event import NetMsgs
 from yyagl.racing.weapon.rocket.rocket import Rocket
+from yyagl.engine.joystick import JoystickMgr
 
 
 class InputDctBuilder:  # maybe a visitor?
@@ -34,7 +35,7 @@ class InputDctBuilderKeyboard(InputDctBuilder):
 class InputDctBuilderJoystick(InputDctBuilder):
 
     def build_dct(self, ai, has_weapon):
-        x, y, a, b = eng.event.joystick.get_joystick()
+        x, y, a, b = JoystickMgr().get_joystick()
         if b and has_weapon:
             self.on_fire()
         return {'forward': y < -.4, 'reverse': y > .4 or a,

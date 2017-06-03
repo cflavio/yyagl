@@ -1,3 +1,6 @@
+from ..singleton import Singleton
+
+
 def has_pygame():
     try:
         import pygame
@@ -12,6 +15,9 @@ if has_pygame():
 
 
 class JoystickMgrBase(object):
+    # if there is not pygame
+
+    __metaclass__ = Singleton
 
     @staticmethod
     def build(emul_keyb):
@@ -21,7 +27,7 @@ class JoystickMgrBase(object):
         self.emulate_keyboard = emulate_keyboard
         self.joysticks = []
         self.old_x = self.old_y = self.old_b0 = self.old_b1 = 0
-        taskMgr.doMethodLater(.01, lambda task: self.init_joystick(),
+        taskMgr.doMethodLater(.01, lambda tsk: self.init_joystick(),
                               'init joystick')  # eng.event doesn't exist
 
     def init_joystick(self):
@@ -41,18 +47,18 @@ class JoystickMgr(JoystickMgrBase):
         pygame.init()
         joystick.init()
         self.joysticks = [
-            joystick.Joystick(x) for x in range(joystick.get_count())]
-        map(lambda j_s: j_s.init(), self.joysticks)
-        eng.event.attach(self.on_frame)
+            joystick.Joystick(idx) for idx in range(joystick.get_count())]
+        map(lambda joystick: joystick.init(), self.joysticks)
+        eng.attach_obs(self.on_frame)
 
     def get_joystick(self):
         for _ in pygame.event.get():
             pass
         if not self.joysticks:
             return 0, 0, 0, 0
-        j_s = self.joysticks[0]
-        return j_s.get_axis(0), j_s.get_axis(1), j_s.get_button(0), \
-            j_s.get_button(1)
+        joystick = self.joysticks[0]
+        return joystick.get_axis(0), joystick.get_axis(1), \
+            joystick.get_button(0), joystick.get_button(1)
 
     def on_frame(self):
         if not self.emulate_keyboard:
@@ -71,7 +77,8 @@ class JoystickMgr(JoystickMgrBase):
         self.old_x, self.old_y, self.old_b0, self.old_b1 = x, y, btn0, btn1
 
     def destroy(self):
-        eng.event.detach(self.on_frame)
+        eng.detach_obs(self.on_frame)
         joystick.quit()
         pygame.quit()
+        self.joysticks = None
         JoystickMgrBase.destroy(self)

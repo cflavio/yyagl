@@ -1,10 +1,8 @@
 from lang import LangMgr
+from .joystick import JoystickMgr
 
 
 class EngineFacade(object):
-
-    def get_joystick(self):
-        return self.event.joystick.get_joystick()
 
     def attach_obs(self, meth):  # otherwise MRO picks Engine's attach
         return self.event.attach(meth)
@@ -14,9 +12,6 @@ class EngineFacade(object):
 
     def attach_node(self, node):
         return self.gfx.world_np.attachNewNode(node)
-
-    def register_end_cb(self, end_cb):
-        return self.event.register_end_cb(end_cb)
 
     def particle(self, path, parent, render_parent, pos, timeout):
         return self.gfx.particle(path, parent, render_parent, pos, timeout)
@@ -144,17 +139,6 @@ class EngineFacade(object):
     @property
     def is_runtime(self):
         return self.logic.is_runtime
-
-    @property
-    def lang_codes(self):
-        return LangMgr().lang_codes
-
-    @property
-    def curr_lang(self):
-        return LangMgr().curr_lang
-
-    def set_lang(self, lang):
-        return LangMgr().set_lang(lang)
 
     @property
     def languages(self):
