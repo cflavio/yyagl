@@ -72,8 +72,12 @@ class EngineFacade(object):
 
     @staticmethod
     def do_later(time, meth, args=[]):
-        return taskMgr.doMethodLater(time, lambda task: meth(*args),
+        return taskMgr.doMethodLater(time, lambda tsk: meth(*args),
                                      meth.__name__)
+
+    @staticmethod
+    def add_tsk(meth, priority):
+        return taskMgr.add(meth, meth.__name__, priority)
 
     def load_model(self, filename, callback=None, extra_args=[]):
         args = {'callback': callback, 'extraArgs': extra_args}
@@ -157,30 +161,6 @@ class EngineFacade(object):
 
     def toggle_fullscreen(self):
         return self.gui.toggle_fullscreen()
-
-    def start_server(self, cb_msg, cb_connection):
-        return self.server.start(cb_msg, cb_connection)
-
-    @property
-    def is_server_active(self):
-        return self.server.is_active
-
-    def register_server_cb(self, process_srv):
-        return self.server.register_cb(process_srv)
-
-    @property
-    def server_connections(self):
-        return self.server.connections
-
-    def server_send(self, msgs):
-        return self.server.send(msgs)
-
-    @property
-    def car_mapping(self):
-        return self.server.car_mapping
-
-    def destroy_server(self):
-        return self.server.destroy()
 
     @property
     def is_client_active(self):

@@ -31,6 +31,7 @@ class Engine(GameObject, EngineFacade):
         __builtin__.eng = self
         self.base = EngineShowBase()
         LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
+        Server()
         init_lst = [
             [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr.init_cls(), [self])],
@@ -41,7 +42,6 @@ class Engine(GameObject, EngineFacade):
             [('audio', EngineAudio, [self, cfg.volume])],
             [('pause', PauseMgr, [self])],
             [('font_mgr', FontMgr, [self])],
-            [('server', Server, [self])],
             [('client', Client, [self])],
             [('shader_mgr', ShaderMgr, [self, cfg.shaders, cfg.gamma])]]
         GameObject.__init__(self, init_lst)

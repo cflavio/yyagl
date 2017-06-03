@@ -1,5 +1,6 @@
 from itertools import chain
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
+from yyagl.engine.network.server import Server
 from yyagl.gameobject import Event
 from yyagl.racing.car.ai import CarAi
 
@@ -91,7 +92,7 @@ class RaceEventServer(RaceEvent):
             velocity = car.getLinearVelocity()
             self.server_info[car] = (pos, hpr, velocity)
         if globalClock.getFrameTime() - self.last_sent > .2:
-            eng.server.send(self.__prepare_game_packet())
+            Server().send(self.__prepare_game_packet())
             self.last_sent = globalClock.getFrameTime()
 
     @staticmethod
@@ -121,7 +122,7 @@ class RaceEventServer(RaceEvent):
         if data_lst[0] == NetMsgs.player_info:
             self.__process_player_info(data_lst, sender)
         if data_lst[0] == NetMsgs.end_race_player:
-            eng.server.send([NetMsgs.end_race])
+            Server().send([NetMsgs.end_race])
             dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0, 'phoibe': 0, 'rea': 0}
             self.mdt.fsm.demand('Results', dct)
             # forward the actual ranking

@@ -1,4 +1,5 @@
 from yyagl.gameobject import Logic
+from yyagl.engine.network.server import Server
 from yyagl.racing.track.track import Track, TrackProps
 from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
     PlayerCarClient, NetworkCar, AiCar, AiPlayerCar
@@ -116,7 +117,7 @@ class RaceLogic(Logic):
                     return self.mdt.fsm.demand('Countdown')
                 car = cars.pop(0)
                 car_class = Car
-                if eng.is_server_active:
+                if Server().is_active:
                     car_class = NetworkCar  # if car in player_cars else Car
                 if eng.is_client_active:
                     car_class = NetworkCar
@@ -124,7 +125,7 @@ class RaceLogic(Logic):
                 pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
                 func = load_other_cars
                 no_p = car not in player_cars
-                srv_or_sng = eng.is_server_active or not eng.is_client_active
+                srv_or_sng = Server().is_active or not eng.is_client_active
                 car_class = AiCar if no_p and srv_or_sng else car_class
                 drv = r_p.drivers[car]
                 car_props = CarProps(
@@ -149,7 +150,7 @@ class RaceLogic(Logic):
                 car_cls = AiPlayerCar
             else:
                 car_cls = PlayerCar
-                if eng.is_server_active:
+                if Server().is_active:
                     car_cls = PlayerCarServer
                 if eng.is_client_active:
                     car_cls = PlayerCarClient
@@ -259,13 +260,13 @@ class RaceLogicServer(RaceLogic):
             ipaddr = sender.getAddress().getIpString()
             eng.log('client ready: ' + ipaddr)
             self.ready_clients += [sender]
-            connections = eng.server_connections
+            connections = Server().connections
             if all(client in self.ready_clients for client in connections):
                 self.start_play()
-                eng.server_send([NetMsgs.start_race])
+                Server().send([NetMsgs.start_race])
 
     def exit_play(self):
-        eng.server = eng.destroy_server()
+        Server().destroy()
         RaceLogic.exit_play(self)
 
 

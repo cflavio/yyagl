@@ -5,6 +5,7 @@ from yyagl.gameobject import Event
 from yyagl.racing.race.event import NetMsgs
 from yyagl.racing.weapon.rocket.rocket import Rocket
 from yyagl.engine.joystick import JoystickMgr
+from yyagl.engine.network.server import Server
 
 
 class InputDctBuilder:  # maybe a visitor?
@@ -219,7 +220,7 @@ class CarPlayerEventServer(CarPlayerEvent):
         CarPlayerEvent.__init__(self, mdt)
 
     def _process_end_goal(self):
-        eng.server.send([NetMsgs.end_race])
+        Server().send([NetMsgs.end_race])
         CarPlayerEvent._process_end_goal(self)
 
 

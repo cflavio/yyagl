@@ -8,7 +8,7 @@ class ClientError(Exception):
 class Client(AbsNetwork):
 
     def __init__(self, mdt):
-        AbsNetwork.__init__(self, mdt)
+        AbsNetwork.__init__(self)
         self.conn = None
 
     def start(self, reader_cb, server_address):
