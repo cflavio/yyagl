@@ -1,4 +1,5 @@
 from yyagl.gameobject import GameObject
+from yyagl.engine.log import LogMgr
 from .gfx import TrackGfx, TrackGfxProps
 from .phys import TrackPhys, TrackPhysProps
 from .event import TrackEvent
@@ -64,7 +65,7 @@ class TrackFacade(object):
 class Track(GameObject, TrackFacade):
 
     def __init__(self, track_props):
-        eng.log('init track')
+        LogMgr().log('init track')
         self.props = t_p = track_props
         trackphys_props = TrackPhysProps(
             t_p.coll_path, t_p.unmerged, t_p.merged, t_p.ghosts,

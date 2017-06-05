@@ -1,49 +1,47 @@
 from datetime import datetime
-from platform import system, release
+from platform import system, release, architecture, system, platform, \
+    processor, version, machine
+from multiprocessing import cpu_count
 from panda3d.core import loadPrcFileData, PandaSystem, Filename
-from panda3d import bullet
+from panda3d.bullet import get_bullet_version
 from direct.directnotify.DirectNotify import DirectNotify
-from ..gameobject import Colleague
-import platform
-import multiprocessing
+from ..singleton import Singleton
 
 
-class LogMgrBase(Colleague):
+class LogMgrBase(object):
+
+    __metaclass__ = Singleton
 
     @staticmethod
     def init_cls():
         return LogMgr if eng.base.win else LogMgrBase
 
-    def __init__(self, mdt):
-        Colleague.__init__(self, mdt)
+    def __init__(self):
         self.__notify = DirectNotify().newCategory('ya2')
         self.log_conf()
 
     @staticmethod
     def configure():
+        # TODO: in __new__?
         loadPrcFileData('', 'notify-level-ya2 info')
 
     def log(self, msg):
-        str_time = datetime.now().strftime("%H:%M:%S")
-        log_msg = '{time} {msg}'.format(time=str_time, msg=msg)
-        self.__notify.info(log_msg)
+        time = datetime.now().strftime("%H:%M:%S")
+        self.__notify.info('{time} {msg}'.format(time=time, msg=msg))
 
     def log_conf(self):
         self.log('version: ' + eng.logic.version)
-        self.log('operative system: ' + system() + ' ' + release())
-        self.log('architecture: ' + str(platform.architecture()))
-        self.log('machine: ' + platform.machine())
-        self.log('platform: ' + platform.platform())
-        self.log('processor: ' + platform.processor())
+        self.log('operative system: ' + system() + ' ' + release() + ' ' + version())
+        self.log('architecture: ' + str(architecture()))
+        self.log('machine: ' + machine())
+        self.log('platform: ' + platform())
+        self.log('processor: ' + processor())
         try:
-            self.log('cores: ' + str(multiprocessing.cpu_count()))
+            self.log('cores: ' + str(cpu_count()))
         except NotImplementedError:  # on Windows
             self.log('cores: not implemented')
-        self.log('release: ' + platform.release())
-        self.log('system: ' + platform.system())
-        self.log('version: ' + platform.version())
-        self.log('panda version: ' + PandaSystem.getVersionString() + ' ' + PandaSystem.getGitCommit())
-        self.log('bullet version: ' + str(bullet.get_bullet_version()))
+        self.log('panda version: ' + PandaSystem.get_version_string() + ' ' + PandaSystem.get_git_commit())
+        self.log('bullet version: ' + str(get_bullet_version()))
         self.log('appdata: ' + str(Filename.get_user_appdata_directory()))
 
 
@@ -52,18 +50,18 @@ class LogMgr(LogMgrBase):
     def log_conf(self):
         LogMgrBase.log_conf(self)
         gsg = eng.base.win.get_gsg()
-        self.log(gsg.getDriverVendor())
-        self.log(gsg.getDriverRenderer())
-        shad_maj = gsg.getDriverShaderVersionMajor()
-        shad_min = gsg.getDriverShaderVersionMinor()
+        self.log(gsg.get_driver_vendor())
+        self.log(gsg.get_driver_renderer())
+        shad_maj = gsg.get_driver_shader_version_major()
+        shad_min = gsg.get_driver_shader_version_minor()
         self.log('shader: {maj}.{min}'.format(maj=shad_maj, min=shad_min))
-        self.log(gsg.getDriverVersion())
-        drv_maj = gsg.getDriverVersionMajor()
-        drv_min = gsg.getDriverVersionMinor()
+        self.log(gsg.get_driver_version())
+        drv_maj = gsg.get_driver_version_major()
+        drv_min = gsg.get_driver_version_minor()
         drv = 'driver version: {maj}.{min}'
         self.log(drv.format(maj=drv_maj, min=drv_min))
-        prop = eng.base.win.get_properties()
-        self.log('fullscreen: ' + str(prop.get_fullscreen()))
-        res_x, res_y = prop.get_x_size(), prop.get_y_size()
+        props = eng.base.win.get_properties()
+        self.log('fullscreen: ' + str(props.get_fullscreen()))
+        res_x, res_y = props.get_x_size(), props.get_y_size()
         res_tmpl = 'resolution: {res_x}x{res_y}'
         self.log(res_tmpl.format(res_x=res_x, res_y=res_y))

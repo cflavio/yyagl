@@ -3,6 +3,7 @@ from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape,\
     BulletGhostNode, BulletBoxShape, BulletSphereShape, BulletCapsuleShape
 from panda3d.core import LPoint3f, BitMask32
 from yyagl.gameobject import Phys
+from yyagl.engine.log import LogMgr
 
 
 class CarPhysProps:
@@ -51,13 +52,13 @@ class CarPhys(Phys):
         self.cfg['roll_influence'] = self.get_roll_influence()
         s_a = (self.mdt.name, round(self.cfg['max_speed'], 2),
                self.props.driver_engine)
-        eng.log('speed %s: %s (%s)' % s_a)
+        LogMgr().log('speed %s: %s (%s)' % s_a)
         fr_slip = round(self.cfg['friction_slip'], 2)
         f_a = (self.mdt.name, fr_slip, self.props.driver_tires)
-        eng.log('friction %s: %s (%s)' % f_a)
+        LogMgr().log('friction %s: %s (%s)' % f_a)
         r_a = (self.mdt.name, round(self.cfg['roll_influence'], 2),
                self.props.driver_suspensions)
-        eng.log('roll %s: %s (%s)' % r_a)
+        LogMgr().log('roll %s: %s (%s)' % r_a)
         s_a = lambda field: setattr(self, field, self.cfg[field])
         map(s_a, self.cfg.keys())
 
@@ -228,12 +229,12 @@ class CarPhys(Phys):
         roll = lambda whl: whl.setRollInfluence(self.roll_influence)
         map(roll, self.vehicle.get_wheels())
         s_a = (str(round(self.max_speed, 2)), self.props.driver_engine)
-        eng.log_mgr.log('speed: %s (%s)' % s_a)
+        LogMgr().log('speed: %s (%s)' % s_a)
         f_a = (str(round(self.friction_slip, 2)), self.props.driver_tires)
-        eng.log_mgr.log('friction: %s (%s)' % f_a)
+        LogMgr().log('friction: %s (%s)' % f_a)
         r_a = (str(round(self.roll_influence, 2)),
                self.props.driver_suspensions)
-        eng.log_mgr.log('roll: %s (%s)' % r_a)
+        LogMgr().log('roll: %s (%s)' % r_a)
 
     def get_speed(self):
         return self.cfg['max_speed'] * (1 + .01 * self.props.driver_engine)

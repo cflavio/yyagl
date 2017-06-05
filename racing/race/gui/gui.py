@@ -1,6 +1,7 @@
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Gui
+from yyagl.engine.font import FontMgr
 from .results import Results, ResultProps
 from .loading.loading import Loading
 from .minimap import Minimap
@@ -48,7 +49,7 @@ class RaceGui(Gui, RaceGuiFacade):
         self.way_txt = OnscreenText(
             '', pos=(.1, .1), scale=.1, fg=r_p.menu_args.text_err,
             parent=eng.base.a2dBottomLeft, align=TextNode.ALeft,
-            font=eng.font_mgr.load_font(r_p.font))
+            font=FontMgr().load_font(r_p.font))
 
     def start(self):
         self.minimap = Minimap(

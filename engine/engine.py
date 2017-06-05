@@ -31,18 +31,14 @@ class Engine(GameObject, EngineFacade):
         __builtin__.eng = self
         self.base = EngineShowBase()
         LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
-        Server()
         init_lst = [
             [('logic', EngineLogic, [self, cfg])],
-            [('log_mgr', LogMgr.init_cls(), [self])],
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
             [('phys', EnginePhys, [self])],
             [('event', EngineEvent.init_cls(), [self, cfg.menu_joypad, on_end_cb])],
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self, cfg.volume])],
             [('pause', PauseMgr, [self])],
-            [('font_mgr', FontMgr, [self])],
-            [('client', Client, [self])],
             [('shader_mgr', ShaderMgr, [self, cfg.shaders, cfg.gamma])]]
         GameObject.__init__(self, init_lst)
 

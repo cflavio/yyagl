@@ -1,4 +1,5 @@
 from yyagl.gameobject import Fsm
+from yyagl.engine.log import LogMgr
 from yyagl.racing.race.gui.countdown import Countdown
 from .gui.loading.loading import LoadingProps
 
@@ -20,7 +21,7 @@ class RaceFsm(Fsm):
             self, track_path, car_path, player_cars, drivers, tracks,
             track_name_transl, single_race, grid, cars_path, drivers_path,
             joystick, keys, menu_args, countdown_sfx):
-        eng.log('entering Loading state')
+        LogMgr().log('entering Loading state')
         self.menu_args = menu_args
         self.countdown_sfx = countdown_sfx
         loading_props = LoadingProps(
@@ -32,7 +33,7 @@ class RaceFsm(Fsm):
         eng.do_later(1.0, self.mdt.logic.load_stuff, args)
 
     def exitLoading(self):
-        eng.log('exiting Loading state')
+        LogMgr().log('exiting Loading state')
         self.mdt.gui.loading.exit_loading()
         self.mdt.event.notify('on_race_loaded')
         #eng.set_cam_pos((0, 0, 0))
@@ -58,7 +59,7 @@ class RaceFsm(Fsm):
         #eng.gfx.print_stats()
 
     def enterPlay(self):
-        eng.log('entering Play state')
+        LogMgr().log('entering Play state')
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Play'), cars)
 
@@ -67,7 +68,7 @@ class RaceFsm(Fsm):
 
     @staticmethod
     def exitPlay():
-        eng.log('exiting Play state')
+        LogMgr().log('exiting Play state')
         eng.show_cursor()
 
     def enterResults(self, race_ranking):

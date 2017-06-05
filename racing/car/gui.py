@@ -2,6 +2,7 @@ from panda3d.core import TextNode, LVector3f
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Gui
+from yyagl.engine.font import FontMgr
 
 
 class CarGuiProps:
@@ -159,7 +160,7 @@ class CarPlayerGui(CarGui):
     def set_panel(self):
         pars = {'scale': .065, 'parent': eng.base.a2dTopRight,
                 'fg': self.cargui_props.color_main, 'align': TextNode.A_left,
-                'font': eng.font_mgr.load_font(self.cargui_props.font)}
+                'font': FontMgr().load_font(self.cargui_props.font)}
         self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
         self.lap_txt = OnscreenText(
             text='1/' + str(self.cargui_props.laps), pos=(-.24, -.2), **pars)
@@ -171,7 +172,7 @@ class CarPlayerGui(CarGui):
         self.damages_txt['fg'] = self.cargui_props.color
         pars = {'scale': .05, 'parent': eng.base.a2dTopRight,
                 'fg': self.cargui_props.color, 'align': TextNode.A_right,
-                'font': eng.font_mgr.load_font(self.cargui_props.font)}
+                'font': FontMgr().load_font(self.cargui_props.font)}
         self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
         self.lap_lab = OnscreenText(
             text=_('lap:'), pos=(-.3, -.2), **pars)

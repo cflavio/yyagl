@@ -4,6 +4,7 @@ from panda3d.core import AmbientLight, BitMask32, Spotlight, NodePath, \
     OmniBoundingVolume
 from direct.actor.Actor import Actor
 from yyagl.gameobject import Gfx
+from yyagl.engine.log import LogMgr
 from .signs import Signs
 
 
@@ -42,12 +43,12 @@ class TrackGfx(Gfx):
         self.__set_light()
 
     def __set_model(self):
-        eng.log('loading track model')
+        LogMgr().log('loading track model')
         time = globalClock.getFrameTime()
         filename = 'assets/models/tracks/' + self.props.name + '/track_all.bam'
         if not exists(filename):
             system('python yyagl/build/process_track.py ' + self.props.name)
-        eng.log('loading ' + filename)
+        LogMgr().log('loading ' + filename)
         eng.load_model(filename, callback=self.end_loading)
 
     def end_loading(self, model=None):
@@ -74,7 +75,7 @@ class TrackGfx(Gfx):
             if has_omni and model.get_tag(self.props.omni_tag):
                 new_root.set_tag(self.props.omni_tag, 'True')
                 a_n = self.__actors[-1].get_name()
-                eng.log('set omni for ' + a_n)
+                LogMgr().log('set omni for ' + a_n)
                 self.__actors[-1].node().setBounds(OmniBoundingVolume())
                 self.__actors[-1].node().setFinal(True)
             model.remove_node()

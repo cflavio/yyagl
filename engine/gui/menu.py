@@ -1,6 +1,7 @@
 from direct.gui.DirectGuiGlobals import FLAT
 from direct.gui.OnscreenImage import OnscreenImage
 from ...gameobject import Gui, Logic, GameObject
+from ..font import FontMgr
 
 
 class MenuArgs(object):
@@ -8,7 +9,7 @@ class MenuArgs(object):
     def __init__(self, font, text_fg, text_bg, text_scale, btn_size,
                  btn_color, background, rollover, click, social_path,
                  text_err):
-        self.font = eng.font_mgr.load_font(font)
+        self.font = FontMgr().load_font(font)
         self.text_fg = text_fg
         self.text_bg = text_bg
         self.text_scale = text_scale

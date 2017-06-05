@@ -2,6 +2,7 @@ from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
 from panda3d.core import LineSegs, BitMask32
 from yyagl.gameobject import Phys
+from yyagl.engine.log import LogMgr
 from yyagl.racing.weapon.bonus.bonus import Bonus
 
 
@@ -50,7 +51,7 @@ class TrackPhys(Phys):
 
     def __load(self, names, merged, ghost):
         for geom_name in names:
-            eng.log_mgr.log('setting physics for: ' + geom_name)
+            LogMgr().log('setting physics for: ' + geom_name)
             geoms = eng.find_geoms(self.model, geom_name)
             if geoms:
                 self.__process_meshes(geoms, geom_name, merged, ghost)

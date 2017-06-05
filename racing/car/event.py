@@ -237,11 +237,11 @@ class CarPlayerEventClient(CarPlayerEvent):
         velocity = self.mdt.phys.vehicle.getChassis().getLinearVelocity()
         packet = list(chain([NetMsgs.player_info], pos, hpr, velocity))
         if globalClock.getFrameTime() - self.last_sent > .2:
-            eng.client.send(packet)
+            Client().send(packet)
             self.last_sent = globalClock.getFrameTime()
 
     def _process_end_goal(self):
-        eng.client.send([NetMsgs.end_race_player])
+        Client().send([NetMsgs.end_race_player])
         CarPlayerEvent._process_end_goal(self)
 
 

@@ -1,5 +1,6 @@
 from yyagl.gameobject import Logic
 from yyagl.engine.network.server import Server
+from yyagl.engine.network.client import Client
 from yyagl.racing.track.track import Track, TrackProps
 from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
     PlayerCarClient, NetworkCar, AiCar, AiPlayerCar
@@ -119,13 +120,13 @@ class RaceLogic(Logic):
                 car_class = Car
                 if Server().is_active:
                     car_class = NetworkCar  # if car in player_cars else Car
-                if eng.is_client_active:
+                if Client().is_active:
                     car_class = NetworkCar
                 s_p = self.track.get_start_pos(grid.index(car))
                 pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
                 func = load_other_cars
                 no_p = car not in player_cars
-                srv_or_sng = Server().is_active or not eng.is_client_active
+                srv_or_sng = Server().is_active or not Client().is_active
                 car_class = AiCar if no_p and srv_or_sng else car_class
                 drv = r_p.drivers[car]
                 car_props = CarProps(
@@ -152,7 +153,7 @@ class RaceLogic(Logic):
                 car_cls = PlayerCar
                 if Server().is_active:
                     car_cls = PlayerCarServer
-                if eng.is_client_active:
+                if Client().is_active:
                     car_cls = PlayerCarClient
             drv = r_p.drivers[car_path]
             #pos = LVecBase3f(508, 12, .2)
@@ -277,7 +278,7 @@ class RaceLogicClient(RaceLogic):
         eng.register_client_cb(self.process_client)
 
         def send_ready(task):
-            eng.client_send([NetMsgs.client_ready])
+            Client().send([NetMsgs.client_ready])
             eng.log('sent client ready')
             return task.again
         self.send_tsk = taskMgr.doMethodLater(.5, send_ready, 'send ready')
@@ -291,5 +292,5 @@ class RaceLogicClient(RaceLogic):
             self.start_play()
 
     def exit_play(self):
-        eng.client = eng.destroy_client()
+        Client().destroy()
         RaceLogic.exit_play(self)

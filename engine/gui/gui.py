@@ -1,5 +1,6 @@
 from panda3d.core import WindowProperties
 from ...gameobject import Gui
+from ..log import LogMgr
 from .cursor import Cursor
 from .browser import Browser
 
@@ -48,10 +49,10 @@ class EngineGuiBase(Gui):
 
     def set_resolution_check(self, res):
         res_msg = 'resolutions: {curr} (current), {res} (wanted)'
-        eng.log_mgr.log(res_msg.format(curr=self.resolution, res=res))
+        LogMgr().log(res_msg.format(curr=self.resolution, res=res))
         if self.resolution != res:
             retry = 'second attempt: {curr} (current) {res} (wanted)'
-            eng.log_mgr.log(retry.format(curr=self.resolution, res=res))
+            LogMgr().log(retry.format(curr=self.resolution, res=res))
             self.set_resolution(res, False)
 
     def toggle_fullscreen(self):
@@ -72,7 +73,7 @@ class EngineGui(EngineGuiBase):
                              cfg.cursor_hotspot)
 
     def set_resolution(self, res, check=True, fullscreen=None):
-        eng.log_mgr.log('setting resolution ' + str(res))
+        LogMgr().log('setting resolution ' + str(res))
         props = WindowProperties()
         props.set_size(res)
         if fullscreen:

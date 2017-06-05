@@ -4,8 +4,8 @@ from .joystick import JoystickMgr
 
 class EngineFacade(object):
 
-    def attach_obs(self, meth):  # otherwise MRO picks Engine's attach
-        return self.event.attach(meth)
+    def attach_obs(self, meth, sort=10):  # otherwise MRO picks Engine's attach
+        return self.event.attach(meth, sort)
 
     def detach_obs(self, meth):
         return self.event.detach(meth)
@@ -66,9 +66,6 @@ class EngineFacade(object):
 
     def ray_test_all(self, top, bottom):
         return self.phys.world_phys.rayTestAll(top, bottom)
-
-    def log(self, msg):
-        return self.log_mgr.log(msg)
 
     @staticmethod
     def do_later(time, meth, args=[]):
@@ -161,22 +158,3 @@ class EngineFacade(object):
 
     def toggle_fullscreen(self):
         return self.gui.toggle_fullscreen()
-
-    @property
-    def is_client_active(self):
-        return self.client.is_active
-
-    def register_client_cb(self, process_client):
-        return self.client.register_cb(process_client)
-
-    def client_send(self, msgs):
-        return self.client.send(msgs)
-
-    def client_start(self, meth, addr):
-        return self.client.start(meth, addr)
-
-    def client_stop(self):
-        return self.client.destroy()
-
-    def destroy_client(self):
-        return self.client.destroy()

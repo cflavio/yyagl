@@ -16,30 +16,30 @@ class AbsNetwork(object):
         self.c_mgr = QueuedConnectionManager()
         self.c_reader = QueuedConnectionReader(self.c_mgr, 0)
         self.c_writer = ConnectionWriter(self.c_mgr, 0)
-        eng.event.attach(self.on_frame, 1)
+        eng.attach_obs(self.on_frame, 1)
         self.reader_cb = reader_cb
 
-    def send(self, data_lst, receiver=None):
+    def send(self, data, receiver=None):
         datagram = PyDatagram()
-        dct_types = {bool: 'B', int: 'I', float: 'F', str: 'S'}
-        datagram.addString(''.join(dct_types[type(part)] for part in data_lst))
-        dct_meths = {
-            bool: datagram.addBool, int: datagram.addInt64,
-            float: datagram.addFloat64, str: datagram.addString}
-        map(lambda part: dct_meths[type(part)](part), data_lst)
+        types = {bool: 'B', int: 'I', float: 'F', str: 'S'}
+        datagram.add_string(''.join(types[type(part)] for part in data))
+        meths = {
+            bool: datagram.add_bool, int: datagram.add_int64,
+            float: datagram.add_float64, str: datagram.add_string}
+        map(lambda part: meths[type(part)](part), data)
         self._actual_send(datagram, receiver)
 
     def on_frame(self):
-        if not self.c_reader.dataAvailable():
+        if not self.c_reader.data_available():
             return
         datagram = NetDatagram()
-        if not self.c_reader.getData(datagram):
+        if not self.c_reader.get_data(datagram):
             return
         _iter = PyDatagramIterator(datagram)
-        dct_meths = {'B': _iter.getBool, 'I': _iter.getInt64,
-                     'F': _iter.getFloat64, 'S': _iter.getString}
-        msg_lst = [dct_meths[c]() for c in _iter.getString()]
-        self.reader_cb(msg_lst, datagram.getConnection())
+        meths = {'B': _iter.get_bool, 'I': _iter.get_int64,
+                 'F': _iter.get_float64, 'S': _iter.get_string}
+        msg = [meths[c]() for c in _iter.get_string()]
+        self.reader_cb(msg, datagram.get_connection())
 
     def register_cb(self, callback):
         self.reader_cb = callback
@@ -49,4 +49,4 @@ class AbsNetwork(object):
         return self.on_frame in [obs[0] for obs in eng.event.observers]
 
     def destroy(self):
-        eng.event.detach(self.on_frame)
+        eng.detach_obs(self.on_frame)

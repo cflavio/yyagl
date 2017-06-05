@@ -1,4 +1,5 @@
 from yyagl.gameobject import GameObject, Ai, Audio
+from yyagl.engine.log import LogMgr
 from .fsm import CarFsm, CarFsmProps
 from .gfx import CarGfx, CarGfxProps
 from .phys import CarPhys, CarPlayerPhys, CarPhysProps
@@ -113,7 +114,7 @@ class Car(GameObject, CarFacade):
     audio_cls = Audio
 
     def __init__(self, car_props):
-        eng.log_mgr.log('init car ' + car_props.name)
+        LogMgr().log('init car ' + car_props.name)
         self.name = car_props.name
         self.laps = car_props.laps
         self.road_name = car_props.road_name
