@@ -4,6 +4,7 @@ from panda3d.core import Vec3, Vec2, deg2Rad, LPoint3f
 from yyagl.gameobject import Logic
 from yyagl.racing.camera import Camera
 from yyagl.engine.joystick import JoystickMgr
+from yyagl.engine.phys import PhysMgr
 
 
 class CarLogicProps:
@@ -209,7 +210,7 @@ class CarLogic(Logic):
                     for w_p2 in wps[first_wp]:
                         if w_p2 not in end_forks:
                             to_process += [w_p2]
-                        if 'PitStop' in [hit.get_node().get_name() for hit in eng.ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
+                        if 'PitStop' in [hit.get_node().get_name() for hit in PhysMgr().ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
                             is_pit_stop = True
                 if is_pit_stop:
                     pitstop_forks += try_forks
@@ -244,9 +245,9 @@ class CarLogic(Logic):
                     for w_p2 in wps[first_wp]:
                         if w_p2 not in end_forks:
                             to_process += [w_p2]
-                        if 'Goal' in [hit.get_node().get_name() for hit in eng.ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
+                        if 'Goal' in [hit.get_node().get_name() for hit in PhysMgr().ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
                             is_grid = True
-                        if 'PitStop' in [hit.get_node().get_name() for hit in eng.ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
+                        if 'PitStop' in [hit.get_node().get_name() for hit in PhysMgr().ray_test_all(first_wp.get_pos(), w_p2.get_pos()).get_hits()]:
                             is_pitstop = True
                 if is_grid and not is_pitstop:
                     grid_forks += try_forks
@@ -286,7 +287,7 @@ class CarLogic(Logic):
         wps = self.props.track_waypoints
         for w_p in wps:
             for w_p2 in wps[w_p]:
-                hits = [hit.get_node().get_name() for hit in eng.ray_test_all(w_p.get_pos(), w_p2.get_pos()).get_hits()]
+                hits = [hit.get_node().get_name() for hit in PhysMgr().ray_test_all(w_p.get_pos(), w_p2.get_pos()).get_hits()]
                 if 'Goal' in hits and 'PitStop' not in hits:
                     goal_wp = w_p2
 

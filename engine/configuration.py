@@ -35,7 +35,7 @@ class Cfg(object):
         self.cursor_scale = cursor_scale
         self.cursor_hotspot = cursor_hotspot
         self.volume = volume
-        self.__configure()
+        self.__configure()  # in __new__ ?
 
     @staticmethod
     def __set(key, value):

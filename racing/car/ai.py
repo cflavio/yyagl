@@ -1,6 +1,7 @@
 from random import uniform
 from panda3d.core import Vec3, Vec2, Point3, Mat4, BitMask32, LineSegs, LPoint3f
 from yyagl.gameobject import Ai
+from yyagl.engine.phys import PhysMgr
 
 
 class DebugLines(object):
@@ -132,7 +133,7 @@ class AbsAiLogic(object):
         cars_idx.remove(car_idx)
         for bitn in cars_idx:
             b_m = b_m | BitMask32.bit(2 + bitn)
-        result = eng.ray_test_closest(start, lookahead_pos, b_m)
+        result = PhysMgr().ray_test_closest(start, lookahead_pos, b_m)
         hit = result.get_node()
         dist = 0
         name = ''

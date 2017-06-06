@@ -11,7 +11,7 @@ class EngineFacade(object):
         return self.event.detach(meth)
 
     def attach_node(self, node):
-        return self.gfx.world_np.attachNewNode(node)
+        return self.gfx.root.attachNewNode(node)
 
     def particle(self, path, parent, render_parent, pos, timeout):
         return self.gfx.particle(path, parent, render_parent, pos, timeout)
@@ -21,51 +21,6 @@ class EngineFacade(object):
 
     def clean_gfx(self):
         return self.gfx.clean()
-
-    def init_phys(self):
-        return self.phys.init()
-
-    def start_phys(self):
-        return self.phys.start()
-
-    def stop_phys(self):
-        return self.phys.stop()
-
-    def toggle_debug(self):
-        return self.phys.toggle_debug()
-
-    def find_geoms(self, mesh, name):
-        return self.phys.find_geoms(mesh, name)
-
-    def attach_rigid_body(self, node):
-        return self.phys.world_phys.attachRigidBody(node)
-
-    def remove_rigid_body(self, node):
-        return self.phys.world_phys.removeRigidBody(node)
-
-    def attach_ghost(self, node):
-        return self.phys.world_phys.attachGhost(node)
-
-    def remove_ghost(self, node):
-        return self.phys.world_phys.removeGhost(node)
-
-    def add_collision_obj(self, node):
-        self.phys.collision_objs += [node]
-
-    def attach_vehicle(self, vehicle):
-        return self.phys.world_phys.attachVehicle(vehicle)
-
-    def remove_vehicle(self, vehicle):
-        return self.phys.world_phys.removeVehicle(vehicle)
-
-    def ray_test_closest(self, top, bottom, mask=None):
-        if mask:
-            return self.phys.world_phys.rayTestClosest(top, bottom, mask)
-        else:
-            return self.phys.world_phys.rayTestClosest(top, bottom)
-
-    def ray_test_all(self, top, bottom):
-        return self.phys.world_phys.rayTestAll(top, bottom)
 
     @staticmethod
     def do_later(time, meth, args=[]):

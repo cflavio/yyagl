@@ -1,72 +1,108 @@
 from panda3d.bullet import BulletWorld, BulletDebugNode
-from ..gameobject import Phys
+from ..singleton import Singleton
 
 
-class EnginePhys(Phys):
+class PhysFacade(object):
 
-    def __init__(self, mdt):
-        Phys.__init__(self, mdt)
-        self.collision_objs = []  # objects to be tested
-        self.__coll_dct = {}  # obj: [(node, coll_time), ...]
-        self.world_phys = None
+    def attach_rigid_body(self, node):
+        return self.root.attachRigidBody(node)
+
+    def remove_rigid_body(self, node):
+        return self.root.removeRigidBody(node)
+
+    def attach_ghost(self, node):
+        return self.root.attachGhost(node)
+
+    def remove_ghost(self, node):
+        return self.root.removeGhost(node)
+
+    def add_collision_obj(self, node):
+        self.collision_objs += [node]
+
+    def attach_vehicle(self, vehicle):
+        return self.root.attachVehicle(vehicle)
+
+    def remove_vehicle(self, vehicle):
+        return self.root.removeVehicle(vehicle)
+
+    def ray_test_closest(self, top, bottom, mask=None):
+        if mask:
+            return self.root.rayTestClosest(top, bottom, mask)
+        else:
+            return self.root.rayTestClosest(top, bottom)
+
+    def ray_test_all(self, top, bottom):
+        return self.root.rayTestAll(top, bottom)
+
+
+class PhysMgr(PhysFacade):
+
+    __metaclass__ = Singleton
+
+    def __init__(self):
+        self.collision_objs = []  # objects to be processed
+        self.__obj2coll = {}  # obj: [(node, coll_time), ...]
+        self.root = None
         self.__debug_np = None
 
     def init(self):
         self.collision_objs = []
-        self.__coll_dct = {}
-        self.world_phys = BulletWorld()
-        self.world_phys.setGravity((0, 0, -9.81))
+        self.__obj2coll = {}
+        self.root = BulletWorld()
+        self.root.setGravity((0, 0, -9.81))
         debug_node = BulletDebugNode('Debug')
-        debug_node.showBoundingBoxes(True)
-        self.__debug_np = render.attachNewNode(debug_node)
-        self.world_phys.setDebugNode(self.__debug_np.node())
+        debug_node.show_bounding_boxes(True)
+        self.__debug_np = render.attach_new_node(debug_node)
+        self.root.set_debug_node(self.__debug_np.node())
 
     def start(self):
-        eng.event.attach(self.on_frame, 2)
+        eng.attach_obs(self.on_frame, 2)
 
     def on_frame(self):
-        self.world_phys.doPhysics(globalClock.getDt(), 10, 1/180.0)
+        self.root.do_physics(globalClock.get_dt(), 10, 1/180.0)
         self.__do_collisions()
 
+    def add_collision_obj(self, node):
+        self.collision_objs += [node]
+
     def stop(self):
-        self.world_phys = None
+        self.root = None
         self.__debug_np.removeNode()
-        eng.event.detach(self.on_frame)
+        eng.detach_obs(self.on_frame)
 
     def __process_contact(self, obj, node, to_clear):
         if node == obj:
             return
-        if obj in to_clear:
-            to_clear.remove(obj)
-        if node in [coll_pair[0] for coll_pair in self.__coll_dct[obj]]:
+        obj in to_clear and to_clear.remove(obj)
+        if node in [coll[0] for coll in self.__obj2coll[obj]]:
             return
-        self.__coll_dct[obj] += [(node, globalClock.getFrameTime())]
-        eng.event.notify('on_collision', obj, node.getName())
+        self.__obj2coll[obj] += [(node, globalClock.get_frame_time())]
+        eng.event.notify('on_collision', obj, node.get_name())
 
     def __do_collisions(self):
         to_clear = self.collision_objs[:]
         for obj in self.collision_objs:
-            if not obj in self.__coll_dct:
-                self.__coll_dct[obj] = []
-            result = self.world_phys.contactTest(obj)
-            for contact in result.getContacts():
-                self.__process_contact(obj, contact.getNode0(), to_clear)
-                self.__process_contact(obj, contact.getNode1(), to_clear)
+            if not obj in self.__obj2coll:
+                self.__obj2coll[obj] = []
+            result = self.root.contact_test(obj)
+            for contact in result.get_contacts():
+                self.__process_contact(obj, contact.get_node0(), to_clear)
+                self.__process_contact(obj, contact.get_node1(), to_clear)
         for obj in to_clear:
-            for coll_pair in self.__coll_dct[obj]:
-                if globalClock.getFrameTime() - coll_pair[1] > .25:
-                    self.__coll_dct[obj].remove(coll_pair)
+            for coll in self.__obj2coll[obj]:
+                if globalClock.get_frame_time() - coll[1] > .25:
+                    self.__obj2coll[obj].remove(coll)
 
     def toggle_debug(self):
-        is_hidden = self.__debug_np.isHidden()
+        is_hidden = self.__debug_np.is_hidden()
         (self.__debug_np.show if is_hidden else self.__debug_np.hide)()
 
     @staticmethod
     def find_geoms(model, name):
         # no need to be cached
-        geoms = model.findAllMatches('**/+GeomNode')
-        is_nm = lambda geom: geom.getName().startswith(name)
+        geoms = model.find_all_matches('**/+GeomNode')
+        is_nm = lambda geom: geom.get_name().startswith(name)
         named_geoms = [geom for geom in geoms if is_nm(geom)]
-        in_vec = [name in named_geom.getName() for named_geom in named_geoms]
+        in_vec = [name in named_geom.get_name() for named_geom in named_geoms]
         indexes = [i for i, el in enumerate(in_vec) if el]
         return [named_geoms[i] for i in indexes]

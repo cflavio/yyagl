@@ -5,6 +5,7 @@ from yyagl.gameobject import Event
 from yyagl.racing.race.event import NetMsgs
 from yyagl.racing.weapon.rocket.rocket import Rocket
 from yyagl.engine.joystick import JoystickMgr
+from yyagl.engine.phys import PhysMgr
 from yyagl.engine.network.server import Server
 
 
@@ -128,7 +129,7 @@ class CarEvent(Event):
         car_pos = self.mdt.gfx.nodepath.get_pos()
         top = (car_pos.x, car_pos.y, car_pos.z + 50)
         bottom = (car_pos.x, car_pos.y, car_pos.z - 50)
-        hits = eng.ray_test_all(top, bottom).getHits()
+        hits = PhysMgr().ray_test_all(top, bottom).getHits()
         road_n = self.props.road_name
         for hit in [hit for hit in hits if road_n in hit.getNode().getName()]:
             self.mdt.logic.last_wp = self.mdt.logic.closest_wp()

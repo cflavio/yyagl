@@ -4,6 +4,7 @@ from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape,\
 from panda3d.core import LPoint3f, BitMask32
 from yyagl.gameobject import Phys
 from yyagl.engine.log import LogMgr
+from yyagl.engine.phys import PhysMgr
 
 
 class CarPhysProps:
@@ -66,7 +67,7 @@ class CarPhys(Phys):
         fpath = self.props.coll_path % self.mdt.name
         self.coll_mesh = loader.loadModel(fpath)
         chassis_shape = BulletConvexHullShape()
-        for geom in eng.find_geoms(self.coll_mesh, self.props.coll_name):
+        for geom in PhysMgr().find_geoms(self.coll_mesh, self.props.coll_name):
             chassis_shape.addGeom(geom.node().getGeom(0), geom.getTransform())
         self.mdt.gfx.nodepath.node().addShape(chassis_shape)
         self.mdt.gfx.nodepath.setCollideMask(BitMask32.bit(1) | BitMask32.bit(2 + self.props.cars.index(self.mdt.name)))
@@ -79,17 +80,17 @@ class CarPhys(Phys):
         self.pnode = self.mdt.gfx.nodepath.node()
         self.pnode.setMass(self.mass)
         self.pnode.setDeactivationEnabled(False)
-        eng.attach_rigid_body(self.pnode)
-        eng.add_collision_obj(self.pnode)
+        PhysMgr().attach_rigid_body(self.pnode)
+        PhysMgr().add_collision_obj(self.pnode)
 
     def __set_vehicle(self):
-        self.vehicle = BulletVehicle(eng.phys.world_phys, self.pnode)
+        self.vehicle = BulletVehicle(PhysMgr().root, self.pnode)
         self.vehicle.setCoordinateSystem(ZUp)
         self.vehicle.setPitchControl(self.pitch_control)
         tuning = self.vehicle.getTuning()
         tuning.setSuspensionCompression(self.suspension_compression)
         tuning.setSuspensionDamping(self.suspension_damping)
-        eng.attach_vehicle(self.vehicle)
+        PhysMgr().attach_vehicle(self.vehicle)
 
     def __set_wheels(self):
         fwheel_bounds = self.mdt.gfx.wheels['fr'].get_tight_bounds()
@@ -211,7 +212,7 @@ class CarPhys(Phys):
     def gnd_name(pos):
         top = pos + (0, 0, 20)
         bottom = pos + (0, 0, -20)
-        result = eng.ray_test_closest(bottom, top)
+        result = PhysMgr().ray_test_closest(bottom, top)
         ground = result.get_node()
         return ground.get_name() if ground else ''
 

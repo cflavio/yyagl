@@ -1,6 +1,7 @@
 from yyagl.gameobject import Logic
 from yyagl.engine.network.server import Server
 from yyagl.engine.network.client import Client
+from yyagl.engine.phys import PhysMgr
 from yyagl.racing.track.track import Track, TrackProps
 from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
     PlayerCarClient, NetworkCar, AiCar, AiPlayerCar
@@ -104,7 +105,7 @@ class RaceLogic(Logic):
 
     def load_stuff(self, track_path, car_path, player_cars):
         r_p = self.props
-        eng.init_phys()
+        PhysMgr().init()
         player_cars = player_cars[1::2]
         game.player_car_name = car_path
 
@@ -184,12 +185,12 @@ class RaceLogic(Logic):
         self.mdt.track = self.track  # facade this
 
     def enter_play(self):
-        self.track.gfx.model.reparentTo(eng.gfx.world_np)
+        self.track.gfx.model.reparentTo(eng.gfx.root)
         self.player_car.gfx.reparent()
         map(lambda car: car.gfx.reparent(), self.cars)
 
     def start_play(self):
-        eng.start_phys()
+        PhysMgr().start()
         eng.attach_obs(self.on_frame)
         self.mdt.event.network_register()
         self.player_car.attach_obs(self.mdt.event.on_wrong_way)

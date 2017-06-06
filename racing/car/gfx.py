@@ -46,7 +46,7 @@ class CarGfx(Gfx, CarGfxFacade):
         self.chassis_np.reparentTo(self.nodepath)
         cha = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
         map(lambda cha: cha.setDepthOffset(-2), cha)
-        map(lambda whl: whl.reparentTo(eng.gfx.world_np), self.wheels.values())
+        map(lambda whl: whl.reparentTo(eng.gfx.root), self.wheels.values())
         # try RigidBodyCombiner for the wheels
 
     def load_wheels(self, chassis_model):
