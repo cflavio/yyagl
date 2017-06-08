@@ -33,10 +33,10 @@ class LoadingPageGui(PageGui):
 
     def build_page(self):
         eng.init_gfx()
-        self.font = self.menu.gui.menu_args.font
-        self.text_fg = self.menu.gui.menu_args.text_fg
-        self.text_bg = self.menu.gui.menu_args.text_bg
-        self.text_err = self.menu.gui.menu_args.text_err
+        self.font = self.mdt.menu.gui.menu_args.font
+        self.text_fg = self.mdt.menu.gui.menu_args.text_fg
+        self.text_bg = self.mdt.menu.gui.menu_args.text_bg
+        self.text_err = self.mdt.menu.gui.menu_args.text_err
         self.load_txt = OnscreenText(
             text=_('LOADING...'), scale=.2, pos=(0, .72), font=self.font,
             fg=(.75, .75, .75, 1), wordwrap=12)
@@ -173,6 +173,7 @@ class LoadingPage(Page):
     def __init__(self, loadingpage_props):
         l_p = loadingpage_props
         self.props = loadingpage_props
+        self.menu = self.props.menu
         loadingpagegui_props = LoadingPageGuiProps(
             l_p.track_path, l_p.car_path, l_p.drivers, l_p.tracks,
             l_p.track_name_transl, l_p.single_race, l_p.grid, l_p.cars_path,

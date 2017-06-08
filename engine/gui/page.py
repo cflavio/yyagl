@@ -16,10 +16,9 @@ from .widget import Widget
 
 class PageGui(Gui):
 
-    def __init__(self, mdt, menu):
-        # don't pass the menu
+    def __init__(self, mdt, menu_args):
         Gui.__init__(self, mdt)
-        self.menu = menu
+        self.menu_args = menu_args
         self.widgets = []
         # infer widgets: attach widgets to page's root nodes (center and
         # corners) and detect them with getChildren()
@@ -145,7 +144,7 @@ class PageGui(Gui):
     def __build_back_btn(self):
         self.widgets += [DirectButton(
             text='', pos=(0, 1, -.8), command=self.__on_back,
-            **self.menu.gui.btn_args)]
+            **self.menu_args.btn_args)]
         PageGui.transl_text(self.widgets[-1], 'Back', _('Back'))
         self.widgets[-1]['text'] = self.widgets[-1].transl_text
 
@@ -162,7 +161,7 @@ class PageGui(Gui):
         self.mdt.event.ignoreAll()
 
     def destroy(self):
-        self.menu = None
+        self.menu_args = None
         self.transition_exit()
 
 
@@ -172,11 +171,27 @@ class PageEvent(Event):
         pass
 
 
-class Page(GameObject):
+class PageFacade(object):
+
+    def show(self):
+        return self.gui.show()
+
+    def hide(self):
+        return self.gui.hide()
+
+    def attach_obs(self, meth):
+        return self.gui.attach(meth)
+
+    def detach_obs(self, meth):
+        return self.gui.detach(meth)
+
+
+class Page(GameObject, PageFacade):
     gui_cls = PageGui
     event_cls = PageEvent
 
-    def __init__(self, menu):
+    def __init__(self, menu_args, menu):
+        self.menu_args = menu_args
         self.menu = menu
         GameObject.__init__(self, self.init_lst)
 
@@ -184,4 +199,4 @@ class Page(GameObject):
     def init_lst(self):
         return [
             [('event', self.event_cls, [self])],
-            [('gui', self.gui_cls, [self, self.menu])]]
+            [('gui', self.gui_cls, [self, self.menu_args])]]

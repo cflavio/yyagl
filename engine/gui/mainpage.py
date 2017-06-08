@@ -28,10 +28,10 @@ class MainPageGui(PageGui):
                 scale=.06,
                 pos=(-1.0 + i*.15, 1, .1),
                 frameColor=(1, 1, 1, 1),
-                frameTexture=self.menu.gui.menu_args.social_path % site[0],
+                frameTexture=self.menu.gui.menu_args.social_imgs_dpath % site[0],
                 command=eng.gui.open_browser,
                 extraArgs=[site[1]],
-                **self.menu.gui.imgbtn_args)
+                **self.menu.gui.menu_args.imgbtn_args)
             for i, site in enumerate(sites)]
 
     def __build_version(self):
