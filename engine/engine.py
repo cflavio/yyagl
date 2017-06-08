@@ -30,14 +30,14 @@ class Engine(GameObject, EngineFacade):
         __builtin__.eng = self
         self.base = EngineShowBase()
         LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
+        ShaderMgr(cfg.shaders, cfg.gamma)
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
             [('event', EngineEvent.init_cls(), [self, cfg.menu_joypad, on_end_cb])],
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self, cfg.volume])],
-            [('pause', PauseMgr, [self])],
-            [('shader_mgr', ShaderMgr, [self, cfg.shaders, cfg.gamma])]]
+            [('pause', PauseMgr, [self])]]
         GameObject.__init__(self, comps)
 
     def destroy(self):

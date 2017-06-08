@@ -1,5 +1,6 @@
 from lang import LangMgr
 from .joystick import JoystickMgr
+from .shader import ShaderMgr
 
 
 class EngineFacade(object):
@@ -77,10 +78,10 @@ class EngineFacade(object):
         return self.gui.cursor.cursor_top()
 
     def set_amb_lgt(self, col):
-        return self.shader_mgr.set_amb_lgt(col)
+        return ShaderMgr().set_amb_lgt(col)
 
     def set_dir_lgt(self, col, hpr):
-        return self.shader_mgr.set_dir_lgt(col, hpr)
+        return ShaderMgr().set_dir_lgt(col, hpr)
 
     def clear_lights(self):
         return self.shader_mgr.clear_lights()

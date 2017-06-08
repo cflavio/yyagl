@@ -1,3 +1,6 @@
+from .engine.log import LogMgr
+
+
 class Subject(object):
 
     def __init__(self):
@@ -24,7 +27,7 @@ class Subject(object):
         except TypeError as err:
             import traceback
             traceback.print_stack()
-            eng.log('\n\nERROR: %s - %s\n%s\n\n' % (
+            LogMgr().log('\n\nERROR: %s - %s\n%s\n\n' % (
                 str(self), str(meth), str(err)))
 
     def destroy(self):

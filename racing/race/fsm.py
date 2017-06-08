@@ -1,5 +1,6 @@
 from yyagl.gameobject import Fsm
 from yyagl.engine.log import LogMgr
+from yyagl.engine.shader import ShaderMgr
 from yyagl.racing.race.gui.countdown import Countdown
 from .gui.loading.loading import LoadingProps
 
@@ -48,7 +49,7 @@ class RaceFsm(Fsm):
         self.countdown.attach(self.on_start_race)
         self.mdt.logic.enter_play()
         if self.shaders:
-            eng.shader_mgr.toggle_shader()
+            ShaderMgr().toggle_shader()
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Countdown'), cars)
 
