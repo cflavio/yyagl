@@ -20,17 +20,15 @@ class PageGui(Gui):
         Gui.__init__(self, mdt)
         self.menu_args = menu_args
         self.widgets = []
-        # infer widgets: attach widgets to page's root nodes (center and
-        # corners) and detect them with getChildren()
-        self.build_page()
+        self.bld_page()
         self.update_texts()
-        self.curr_wdg = self.get_next_widget((-.1, 0, -1), (-3.6, 1, 1))
+        self.curr_wdg = self.__next_wdg((-.1, 0, -1), (-3.6, 1, 1))
         if self.curr_wdg:
             self.curr_wdg.on_wdg_enter()
 
-    def build_page(self, back_btn=True):
+    def bld_page(self, back_btn=True):
         if back_btn:
-            self.__build_back_btn()
+            self.__bld_back_btn()
         self._set_buttons()
         self.transition_enter()
         eng.cursor_top()
@@ -42,7 +40,7 @@ class PageGui(Gui):
         if not self.curr_wdg:
             return
         if not self.curr_wdg.on_arrow(direction):
-            next_wdg = self.get_next_widget(direction)
+            next_wdg = self.__next_wdg(direction)
             if next_wdg:
                 self.curr_wdg.on_wdg_exit()
                 self.curr_wdg = next_wdg
@@ -54,7 +52,7 @@ class PageGui(Gui):
         if self.curr_wdg.on_enter():
             self.enable()
 
-    def __get_dot(self, wdg, direction, start=None):
+    def __dot(self, wdg, direction, start=None):
         start_pos = start if start else self.curr_wdg.get_pos(aspect2d)
         vec = wdg.get_pos(aspect2d) - start_pos
         vec.normalize()
@@ -62,7 +60,7 @@ class PageGui(Gui):
 
     def __next_factor(self, wdg, direction, start=None):
         start_pos = start if start else self.curr_wdg.get_pos(aspect2d)
-        dot = self.__get_dot(wdg, direction, start)
+        dot = self.__dot(wdg, direction, start)
         wdg_pos = wdg.get_pos(aspect2d)
         if wdg.__class__ == DirectSlider:
             wdg_pos = LPoint3f(wdg_pos[0], 1, wdg_pos[2])
@@ -76,25 +74,25 @@ class PageGui(Gui):
             weights = [.1, .9]
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
 
-    def get_next_widget(self, direction, start=None):
-        clss = [DirectButton, DirectCheckButton, DirectSlider,
-                DirectOptionMenu, ImageButton, DirectEntry]
-        inter = lambda wdg: any(pcl in clss for pcl in getmro(wdg.__class__))
+    def __next_wdg(self, direction, start=None):
+        interactive_clss = [DirectButton, DirectCheckButton, DirectSlider,
+                            DirectOptionMenu, ImageButton, DirectEntry]
+        inter = lambda wdg: any(pcl in interactive_clss for pcl in getmro(wdg.__class__))
         wdgs = [wdg for wdg in self.widgets if inter(wdg)]
         wdgs = filter(lambda wdg: wdg['state'] != DISABLED, wdgs)
         if hasattr(self, 'curr_wdg') and self.curr_wdg:
             wdgs.remove(self.curr_wdg)
-        pos_dot = lambda wdg: self.__get_dot(wdg, direction, start) > .1
+        pos_dot = lambda wdg: self.__dot(wdg, direction, start) > .1
         wdgs = filter(pos_dot, wdgs)
         if not wdgs:
             return
-        n_f = lambda wdg: self.__next_factor(wdg, direction, start)
-        return max(wdgs, key=n_f)
+        nextfact = lambda wdg: self.__next_factor(wdg, direction, start)
+        return max(wdgs, key=nextfact)
 
     def _set_buttons(self):
         for wdg in self.widgets:
-            cname = wdg.__class__.__name__ + 'Widget'
-            wdg.__class__ = type(cname, (wdg.__class__, Widget), {})
+            clsname = wdg.__class__.__name__ + 'Widget'
+            wdg.__class__ = type(clsname, (wdg.__class__, Widget), {})
             wdg.init(wdg)
             if hasattr(wdg, 'bind'):
                 wdg.bind(ENTER, wdg.on_wdg_enter)
@@ -104,8 +102,7 @@ class PageGui(Gui):
         self.update_texts()
         for wdg in self.widgets:
             pos = wdg.get_pos()
-            start_pos = (pos[0] - 3.6, pos[1], pos[2])
-            wdg.set_pos(start_pos)
+            wdg.set_pos((pos[0] - 3.6, pos[1], pos[2]))
             Sequence(
                 Wait(abs(pos[2] - 1) / 4),
                 LerpPosInterval(wdg, .5, pos, blendType='easeInOut')
@@ -141,7 +138,7 @@ class PageGui(Gui):
         for wdg in tr_wdg:
             wdg['text'] = wdg.transl_text
 
-    def __build_back_btn(self):
+    def __bld_back_btn(self):
         self.widgets += [DirectButton(
             text='', pos=(0, 1, -.8), command=self.__on_back,
             **self.menu_args.btn_args)]
@@ -191,6 +188,10 @@ class Page(GameObject, PageFacade):
     event_cls = PageEvent
 
     def __init__(self, menu_args, menu):
+        # we should not pass the menu to the page. now we do this since menu's
+        # clients attach to the menu for observing its events, but them are
+        # fired by pages. maybe the menu should attach clients' methods to the
+        # pages when they are pushed.
         self.menu_args = menu_args
         self.menu = menu
         GameObject.__init__(self, self.init_lst)

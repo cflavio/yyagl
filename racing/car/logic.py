@@ -5,6 +5,7 @@ from yyagl.gameobject import Logic
 from yyagl.racing.camera import Camera
 from yyagl.engine.joystick import JoystickMgr
 from yyagl.engine.phys import PhysMgr
+from yyagl.engine.log import LogMgr
 
 
 class CarLogicProps:
@@ -426,7 +427,7 @@ class CarLogic(Logic):
         is_correct = all(w_p in self.waypoints for w_p in all_wp)
         if not is_correct:
             skipped = [str(w_p) for w_p in all_wp if w_p not in self.waypoints]
-            eng.log_mgr.log('skipped waypoints: ' + ', '.join(skipped))
+            LogMgr().log('skipped waypoints: ' + ', '.join(skipped))
         return is_correct
 
     @staticmethod

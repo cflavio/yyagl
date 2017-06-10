@@ -19,4 +19,4 @@ class BrowserLinux(Browser):
     @staticmethod
     def open(url):
         environ['LD_LIBRARY_PATH'] = ''
-        system('xdg-open '+url)
+        system('xdg-open ' + url)

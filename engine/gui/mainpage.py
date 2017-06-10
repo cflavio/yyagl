@@ -6,7 +6,7 @@ from .imgbtn import ImageButton
 
 class MainPageGui(PageGui):
 
-    def build_page(self):
+    def bld_page(self):
         self.__build_social()
         self.__build_version()
         self._set_buttons()

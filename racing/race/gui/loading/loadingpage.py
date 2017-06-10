@@ -31,7 +31,7 @@ class LoadingPageGui(PageGui):
         self.props = loadingpagegui_props
         PageGui.__init__(self, mdt, menu)
 
-    def build_page(self):
+    def bld_page(self):
         eng.init_gfx()
         self.font = self.mdt.menu.gui.menu_args.font
         self.text_fg = self.mdt.menu.gui.menu_args.text_fg
@@ -52,7 +52,7 @@ class LoadingPageGui(PageGui):
         self.set_ranking()
         self.set_controls()
         self.widgets += [self.load_txt, track_txt]
-        PageGui.build_page(self, False)
+        PageGui.bld_page(self, False)
 
     def set_grid(self):
         txt = OnscreenText(text=_('Starting grid'), scale=.1, pos=(-1.0, .3),
