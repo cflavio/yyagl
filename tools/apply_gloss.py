@@ -23,4 +23,4 @@ with open(sys.argv[1]) as f_in:
             out_lines += [outl]
 
 with open(sys.argv[1], 'w') as f_out:
-    map(lambda outl: f_out.write(outl + '\n'), output_lines)
+    map(lambda outl: f_out.write(outl + '\n'), out_lines)

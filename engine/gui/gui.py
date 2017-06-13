@@ -1,7 +1,7 @@
 from panda3d.core import WindowProperties
 from ...gameobject import Gui
 from ..log import LogMgr
-from .cursor import Cursor
+from .cursor import MouseCursor
 from .browser import Browser
 
 
@@ -69,8 +69,8 @@ class EngineGui(EngineGuiBase):
         cfg = eng.logic.cfg
         resol = cfg.win_size.split()
         self.set_resolution(tuple(int(size) for size in resol), fullscreen=cfg.fullscreen)
-        self.cursor = Cursor(cfg.cursor_path, cfg.cursor_scale,
-                             cfg.cursor_hotspot)
+        self.cursor = MouseCursor(cfg.cursor_path, cfg.cursor_scale,
+                                  cfg.cursor_hotspot)
 
     def set_resolution(self, res, check=True, fullscreen=None):
         LogMgr().log('setting resolution ' + str(res))

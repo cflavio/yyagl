@@ -1,18 +1,18 @@
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from .page import Page, PageGui
-from .imgbtn import ImageButton
+from .imgbtn import ImgBtn
 
 
 class MainPageGui(PageGui):
 
     def bld_page(self):
-        self.__build_social()
-        self.__build_version()
+        self.__bld_social()
+        self.__bld_version()
         self._set_buttons()
         self.transition_enter()
 
-    def __build_social(self):
+    def __bld_social(self):
         sites = [
             ('facebook', 'http://www.facebook.com/Ya2Tech'),
             ('twitter', 'http://twitter.com/ya2tech'),
@@ -23,20 +23,20 @@ class MainPageGui(PageGui):
             ('tumblr', 'http://ya2tech.tumblr.com'),
             ('feed', 'http://www.ya2.it/feed-following')]
         self.widgets += [
-            ImageButton(
+            ImgBtn(
                 parent=eng.base.a2dBottomRight,
                 scale=.06,
                 pos=(-1.0 + i*.15, 1, .1),
                 frameColor=(1, 1, 1, 1),
                 frameTexture=self.menu.gui.menu_args.social_imgs_dpath % site[0],
-                command=eng.gui.open_browser,
+                command=eng.open_browser,
                 extraArgs=[site[1]],
                 **self.menu.gui.menu_args.imgbtn_args)
             for i, site in enumerate(sites)]
 
-    def __build_version(self):
+    def __bld_version(self):
         self.widgets += [OnscreenText(
-            text=_('version: ') + eng.logic.version,
+            text=_('version: ') + eng.version,
             parent=eng.base.a2dBottomLeft, pos=(.02, .02), scale=.04,
             fg=(.8, .8, .8, 1), align=TextNode.ALeft,
             font=self.menu.gui.menu_args.font)]

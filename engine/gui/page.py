@@ -10,7 +10,7 @@ from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.DirectEntry import DirectEntry
 from ...gameobject import GameObject, Gui, Event
-from .imgbtn import ImageButton
+from .imgbtn import ImgBtn
 from .widget import Widget
 
 
@@ -76,7 +76,7 @@ class PageGui(Gui):
 
     def __next_wdg(self, direction, start=None):
         interactive_clss = [DirectButton, DirectCheckButton, DirectSlider,
-                            DirectOptionMenu, ImageButton, DirectEntry]
+                            DirectOptionMenu, ImgBtn, DirectEntry]
         inter = lambda wdg: any(pcl in interactive_clss for pcl in getmro(wdg.__class__))
         wdgs = [wdg for wdg in self.widgets if inter(wdg)]
         wdgs = filter(lambda wdg: wdg['state'] != DISABLED, wdgs)

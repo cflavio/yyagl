@@ -2,7 +2,7 @@ from panda3d.core import TextNode, Shader, TextureStage
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectFrame import DirectFrame
-from yyagl.engine.gui.imgbtn import ImageButton
+from yyagl.engine.gui.imgbtn import ImgBtn
 from yyagl.observer import Subject
 from direct.gui.DirectButton import DirectButton
 
@@ -88,7 +88,7 @@ class Results(Subject):
         sites = [('facebook', facebook_url), ('twitter', twitter_url),
                  ('google_plus', plus_url), ('tumblr', tumblr_url)]
         self.__buttons += [
-            ImageButton(
+            ImgBtn(
                 scale=.078,
                 pos=(.02 + i*.18, 1, -.79), frameColor=(0, 0, 0, 0),
                 image=self.props.share_imgs % site[0],
