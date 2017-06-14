@@ -249,7 +249,7 @@ class CarPhys(Phys):
 
     def destroy(self):
         eng.detach_obs(self.on_end_frame)
-        eng.remove_vehicle(self.vehicle)
+        PhysMgr().remove_vehicle(self.vehicle)
         self.pnode = self.vehicle = self.__finds = self.__track_phys = \
             self.coll_mesh = None
         Phys.destroy(self)

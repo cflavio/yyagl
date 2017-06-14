@@ -169,8 +169,8 @@ class TrackPhys(Phys):
     def destroy(self):
         self.model.removeNode()
         map(lambda chl: chl.remove_node(), self.nodes)
-        map(eng.remove_rigid_body, self.rigid_bodies)
-        map(eng.remove_ghost, self.ghosts)
+        map(PhysMgr().remove_rigid_body, self.rigid_bodies)
+        map(PhysMgr().remove_ghost, self.ghosts)
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
             self.waypoints = None
         map(lambda bon: bon.destroy(), self.bonuses)

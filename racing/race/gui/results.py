@@ -93,8 +93,8 @@ class Results(Subject):
                 pos=(.02 + i*.18, 1, -.79), frameColor=(0, 0, 0, 0),
                 image=self.props.share_imgs % site[0],
                 command=eng.open_browser, extraArgs=[site[1]],
-                rolloverSound=self.props.menu_args.rollover,
-                clickSound=self.props.menu_args.click)
+                rolloverSound=self.props.menu_args.rollover_sfx,
+                clickSound=self.props.menu_args.click_sfx)
             for i, site in enumerate(sites)]
 
         def step():

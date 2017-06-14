@@ -211,7 +211,10 @@ class RaceLogic(Logic):
         info = []
         for car in cars:
             past_wp = car.logic.last_wp_not_fork()
-            wp_num = car.logic.wps_not_fork().index(past_wp)
+            try:
+                wp_num = car.logic.wps_not_fork().index(past_wp)
+            except ValueError:  # if the track has not a goal
+                return [car.name for car in cars]
             if not len(car.lap_times) and wp_num == len(car.logic.wps_not_fork()) - 1 and len(car.logic.waypoints) <= 1:
                 wp_num = -1
             dist = (past_wp.get_pos() - car.get_pos()).length()
@@ -238,7 +241,7 @@ class RaceLogic(Logic):
         self.track.destroy()
         self.player_car.destroy()
         map(lambda car: car.destroy(), self.cars)
-        eng.stop_phys()
+        PhysMgr().stop()
         eng.clean_gfx()
         eng.detach_obs(self.on_frame)
 

@@ -42,7 +42,7 @@ class RaceGui(Gui, RaceGuiFacade):
             r_p.menu_args, r_p.drivers_img, r_p.cars_imgs, r_p.share_urls,
             r_p.share_imgs, r_p.track_name)
         self.results = Results(result_props)
-        self.loading = Loading(mdt)
+        self.loading = Loading()
         self.debug_txt = OnscreenText(
             '', pos=(-.1, .1), scale=.05, fg=(1, 1, 1, 1),
             parent=eng.base.a2dBottomRight, align=TextNode.ARight)
@@ -59,7 +59,7 @@ class RaceGui(Gui, RaceGuiFacade):
 
     def destroy(self):
         self.results.destroy()
-        self.loading.destroy()
+        #self.loading.destroy()
         self.way_txt.destroy()
         self.minimap.destroy()
         Gui.destroy(self)

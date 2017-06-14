@@ -1,4 +1,3 @@
-from yyagl.gameobject import Colleague
 from .menu import LoadingMenu, LoadingMenuProps
 
 
@@ -22,10 +21,7 @@ class LoadingProps(object):
         self.menu_args = menu_args
 
 
-class Loading(Colleague):
-
-    def __init__(self, mdt):  # otherwise it doesn't work
-        self.mdt = mdt
+class Loading:
 
     def enter_loading(self, loading_props):
         l_p = loading_props

@@ -279,7 +279,10 @@ class CarLogic(Logic):
             _wp = [__wp for __wp in self.props.track_waypoints.keys() if __wp.get_name()[8:] == str(wp)][0]
             if _wp in self.wps_not_fork():
                 return _wp
-        return self.wps_not_fork()[-1]
+        try:
+            return self.wps_not_fork()[-1]
+        except IndexError:  # if the track has not a goal
+            return
 
     def wps_not_fork(self):
         if hasattr(self, '_wps_not_fork'):
@@ -296,7 +299,10 @@ class CarLogic(Logic):
             return [_wp for _wp in self.props.track_waypoints if wp in self.props.track_waypoints[_wp]]
 
         wps = []
-        processed = [goal_wp]
+        try:
+            processed = [goal_wp]
+        except UnboundLocalError:  # if the track has not a goal
+            return wps
 
         while any(wp not in processed for wp in succ(processed[-1])):
             wp = [wp for wp in succ(processed[-1]) if wp not in processed][0]
