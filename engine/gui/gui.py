@@ -13,20 +13,19 @@ class EngineGuiBase(Gui):
 
     def __init__(self, mdt):
         Gui.__init__(self, mdt)
-        eng.base.disableMouse()
-        self.browser = Browser.init_cls()
+        mdt.base.disableMouse()
 
     def open_browser(self, url):
-        self.browser.open(url)
+        Browser.init_cls().open(url)
 
     @property
     def resolutions(self):
-        d_i = eng.base.pipe.getDisplayInformation()
+        d_i = eng.base.pipe.get_display_information()
 
         def res(idx):
-            return d_i.getDisplayModeWidth(idx), d_i.getDisplayModeHeight(idx)
+            return d_i.get_display_mode_width(idx), d_i.get_display_mode_height(idx)
 
-        res_values = [res(idx) for idx in range(d_i.getTotalDisplayModes())]
+        res_values = [res(idx) for idx in range(d_i.get_total_display_modes())]
         return sorted(list(set(res_values)))
 
     @property
@@ -40,10 +39,8 @@ class EngineGuiBase(Gui):
             curr_res = self.resolution
             return abs(res[0] - curr_res[0]) + abs(res[1] - curr_res[1])
 
-        dist_lst = map(distance, self.resolutions)
         try:
-            idx_min = dist_lst.index(min(dist_lst))
-            return self.resolutions[idx_min]
+            return min(self.resolutions, key=lambda res: distance(res))
         except ValueError:  # sometimes we have empty resolutions
             return self.resolution
 
@@ -59,7 +56,7 @@ class EngineGuiBase(Gui):
         self.set_resolution(self.closest_res)
         props = WindowProperties()
         props.set_fullscreen(not eng.base.win.is_fullscreen())
-        base.win.requestProperties(props)
+        base.win.request_properties(props)
 
 
 class EngineGui(EngineGuiBase):
@@ -80,5 +77,4 @@ class EngineGui(EngineGuiBase):
             props.set_fullscreen(True)
         eng.base.win.request_properties(props)
         if check:
-            args = 3.0, self.set_resolution_check, 'resolution check', [res]
-            taskMgr.doMethodLater(*args)
+            eng.do_later(3.0, self.set_resolution_check, [res])

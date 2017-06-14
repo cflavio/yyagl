@@ -1,5 +1,7 @@
-import os
 import sys
+from os import pardir
+from os.path import dirname, abspath, join
+from sys import modules
 from direct.task import Task
 from direct.interval.IntervalGlobal import ivalMgr
 from direct.gui.DirectFrame import DirectFrame
@@ -29,19 +31,19 @@ class PauseLogic(Logic):
         self.paused_taskchain = 'ya2 paused tasks'
         taskMgr.setupTaskChain(self.paused_taskchain, frameBudget=0)
         self.is_paused = False
-        fpath = os.path.dirname(sys.modules[Task.__name__].__file__)
-        self.direct_dir = os.path.abspath(os.path.join(fpath, os.pardir))
+        fpath = dirname(modules[Task.__name__].__file__)
+        self.direct_dir = abspath(join(fpath, pardir))
         self.paused_ivals = []
         self.paused_tasks = []
 
     def __process_task(self, tsk):
-        func = tsk.getFunction()  # ordinary tasks
+        func = tsk.get_function()  # ordinary tasks
         mod = func.__module__
         #sys_mod = sys.modules[mod].__file__.find(self.direct_dir) < 0
         # runtime: AttributeError: 'module' object has no attribute '__file__'
         modfile = ''
-        if "from '" in str(sys.modules[mod]):
-            modfile = str(sys.modules[mod]).split("from '")[1][:-2]
+        if "from '" in str(modules[mod]):
+            modfile = str(modules[mod]).split("from '")[1][:-2]
         sys_mod = modfile.find(self.direct_dir) < 0
         is_act = False
         if hasattr(func, 'im_class'):
@@ -49,19 +51,19 @@ class PauseLogic(Logic):
         if mod.find('direct.interval') == 0 and not is_act:
             self.paused_tasks.append(tsk)  # python-based intervals
             tsk.interval.pause()
-        elif mod not in sys.modules or sys_mod:
+        elif mod not in modules or sys_mod:
             self.paused_tasks.append(tsk)
 
     def __pause_tsk(self, tsk):
         has_args = hasattr(tsk, 'getArgs')
-        tsk.stored_extraArgs = tsk.getArgs() if has_args else None
+        tsk.stored_extraArgs = tsk.get_args() if has_args else None
         if hasattr(tsk, 'getFunction'):
-            tsk.stored_call = tsk.getFunction()
+            tsk.stored_call = tsk.get_function()
         has_p = hasattr(tsk, '_priority')
-        tsk.stored_priority = tsk._priority if has_p else tsk.getSort()
-        # only active tasks can be moved to other chain, so removes doLater
+        tsk.stored_priority = tsk._priority if has_p else tsk.get_sort()
+        # only active tasks can be moved to other chain, so removes do_later
         # tasks since they are in sleeping state
-        if hasattr(tsk, 'remainingTime'):  # doLater tasks
+        if hasattr(tsk, 'remainingTime'):  # do_later tasks
             tsk.remove()
         else:  # ordinary tasks
             tsk.lastactivetime = -tsk.time if hasattr(tsk, 'time') else 0
@@ -74,14 +76,14 @@ class PauseLogic(Logic):
         map(lambda tsk: self.__process_task(tsk), tasks)
         for tsk in [tsk for tsk in taskMgr.getDoLaters()if is_tsk(tsk)]:
             self.paused_tasks.append(tsk)
-            tsk.remainingTime = tsk.wakeTime - globalClock.getFrameTime()
+            tsk.remainingTime = tsk.wakeTime - globalClock.get_frame_time()
             # I need to alter the wakeTime during task resume,
             # so I have to save the remaining time.
         map(lambda tsk: self.__pause_tsk(tsk), self.paused_tasks)
 
     @staticmethod
     def __resume_do_later(tsk):
-        d_t = globalClock.getRealTime() - globalClock.getFrameTime()
+        d_t = globalClock.get_real_time() - globalClock.get_frame_time()
         temp_delay = tsk.remainingTime - d_t
         upon_death = tsk.uponDeath if hasattr(tsk, 'uponDeath') else None
         # no need to pass appendTask, since if it's already true,
@@ -96,14 +98,14 @@ class PauseLogic(Logic):
         if hasattr(tsk, 'interval'):  # it must be python-based intervals
             tsk.interval.resume()
             if hasattr(tsk, 'stored_call'):
-                tsk.setFunction(tsk.stored_call)
+                tsk.set_function(tsk.stored_call)
             return
         if hasattr(tsk, 'remainingTime'):
             self.__resume_do_later(tsk)
             return
-        tsk.setDelay(tsk.lastactivetime)  # ordinary tasks
-        tsk.setTaskChain('default')
-        tsk.clearDelay()  # to avoid assertion error on resume
+        tsk.set_delay(tsk.lastactivetime)  # ordinary tasks
+        tsk.set_task_chain('default')
+        tsk.clear_delay()  # to avoid assertion error on resume
 
     def pause(self):
         self.paused_ivals = ivalMgr.getIntervalsMatching('*')

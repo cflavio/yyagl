@@ -3,22 +3,21 @@ from direct.gui.DirectGuiGlobals import NORMAL
 
 class Widget(object):
 
+    col_offset = (.3, .3, .3, 0)
+
     def init(self, wdg):
         if hasattr(wdg, 'component') and wdg.hascomponent('text0'):
-            self.start_fg = wdg.component('text0').textNode.getTextColor()
+            self.start_fg = wdg.component('text0').textNode.get_text_color()
         if hasattr(wdg, 'getFrameColor'):
             self.start_frame_col = wdg['frameColor']
 
     def on_wdg_enter(self, pos=None):  # pos is for mouse
         if hasattr(self, 'start_fg'):
-            _fg = self.start_fg
-            self['text_fg'] = (_fg[0] + .3, _fg[1] + .3, _fg[2] + .3, _fg[3])
+            self['text_fg'] = self.start_fg + Widget.col_offset
         if hasattr(self, 'start_frame_col'):
-            _fc = self.start_frame_col
-            self['frameColor'] = (_fc[0] + .3, _fc[1] + .3, _fc[2] + .3,
-                                  _fc[3])
-        if hasattr(self, 'getShader') and self.getShader():
-            self.setShaderInput('col_offset', .25)
+            self['frameColor'] = self.start_frame_col + Widget.col_offset
+        if hasattr(self, 'getShader') and self.get_shader():
+            self.set_shader_input('col_offset', .25)
         if hasattr(self, 'setFocus'):
             self['focus'] = 1
             self.setFocus()
@@ -28,8 +27,8 @@ class Widget(object):
             self['text_fg'] = self.start_fg
         if hasattr(self, 'start_frame_col'):
             self['frameColor'] = self.start_frame_col
-        if hasattr(self, 'getShader') and self.getShader():
-            self.setShaderInput('col_offset', 0)
+        if hasattr(self, 'getShader') and self.get_shader():
+            self.set_shader_input('col_offset', 0)
         if hasattr(self, 'setFocus'):
             self['focus'] = 0
             self.setFocus()
@@ -37,7 +36,7 @@ class Widget(object):
     def on_arrow(self, direction):
         is_hor = direction in [(-1, 0, 0), (1, 0, 0)]
         is_menu = hasattr(self, 'setItems')
-        has_popup_open = is_menu and not self.popupMenu.isHidden()
+        has_popup_open = is_menu and not self.popupMenu.is_hidden()
         if not is_hor and has_popup_open:
             old_idx = self.highlightedIndex
             dir2offset = {(0, 0, -1): 1, (0, 0, 1): -1}
@@ -51,25 +50,24 @@ class Widget(object):
                 self._highlightItem(curr_cmp, idx)
             return True
         if is_hor and hasattr(self, 'setValue'):
-            dval = -.1 if direction == (-1, 0, 0) else .1
-            self['value'] += dval
+            self['value'] += -.1 if direction == (-1, 0, 0) else .1
             return True
 
     def on_enter(self):
         if hasattr(self, 'setIndicatorValue'):
             val = self['indicatorValue']
             self['indicatorValue'] = not val
-        if hasattr(self, 'setItems') and self.popupMenu.isHidden():
+        if hasattr(self, 'setItems') and self.popupMenu.is_hidden():
             self.showPopupMenu()
             self._highlightItem(self.component('item0'), 0)
             return
-        elif hasattr(self, 'setItems') and not self.popupMenu.isHidden():
+        elif hasattr(self, 'setItems') and not self.popupMenu.is_hidden():
             self.selectHighlightedIndex()
             idx = self.selectedIndex
             if self['command']:
                 self['command'](self['items'][idx])
             self.hidePopupMenu()
-            idx = (idx - 1) if idx else (idx + 1)
+            idx += -1 if idx else 1
             fc = self.component('item%s' % idx)['frameColor']
             curr_name = 'item%s' % self.selectedIndex
             self._unhighlightItem(self.component(curr_name), fc)

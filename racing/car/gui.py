@@ -18,21 +18,27 @@ class CarParameter(object):
 
     def __init__(self, attr, init_val, pos, val_range, callback):
         self.__callback = callback
-        pars = {'scale': .04, 'parent': eng.base.a2dTopLeft}
         self.__lab = OnscreenText(
-            text=attr, pos=pos, align=TextNode.ARight, fg=(1, 1, 1, 1), **pars)
-        _pos = LVector3f(pos[0], 1, pos[1]) + (.5, 0, .01)
+            text=attr, pos=pos, align=TextNode.ARight, fg=(1, 1, 1, 1),
+            parent=eng.base.a2dTopLeft, scale=.06)
+        _pos = LVector3f(pos[0], 1, pos[1]) + (.3, 0, .01)
         self.__slider = DirectSlider(
             pos=_pos, value=init_val, range=val_range, command=self.__set_attr,
-            **pars)
-        _pos = LVector3f(pos[0], 1, pos[1]) + (1, 0, 0)
+            parent=eng.base.a2dTopLeft, scale=.24)
+        _pos = LVector3f(pos[0], pos[1], 1) + (.6, 0, 0)
         self.__val = OnscreenText(pos=_pos, align=TextNode.ALeft,
-                                  fg=(1, 1, 1, 1), **pars)
+                                  fg=(1, 1, 1, 1),
+                                  parent=eng.base.a2dTopLeft, scale=.06)
         self.toggle()
 
     def toggle(self):
         widgets = [self.__slider, self.__lab, self.__val]
         map(lambda wdg: (wdg.show if wdg.isHidden() else wdg.hide)(), widgets)
+
+    @property
+    def is_visible(self):
+        widgets = [self.__slider, self.__lab, self.__val]
+        return any(not wdg.is_hidden() for wdg in widgets)
 
     def __set_attr(self):
         self.__callback(self.__slider['value'])
@@ -144,6 +150,24 @@ class CarPlayerGui(CarGui):
             (.5, -1.64), (-1, 10),
             lambda val: map(lambda whl: whl.setRollInfluence(val),
                             self.mdt.phys.vehicle.get_wheels()))
+        def set_cam_x(val):
+            vec = self.mdt.logic.camera.cam_vec
+            self.mdt.logic.camera.cam_vec = (val, vec[1], vec[2])
+        self.__cam_x = CarParameter(
+            'camera_x', self.mdt.logic.camera.cam_vec[0],
+            (.5, -1.72), (-1, 1), set_cam_x)
+        def set_cam_y(val):
+            vec = self.mdt.logic.camera.cam_vec
+            self.mdt.logic.camera.cam_vec = (vec[0], val, vec[2])
+        self.__cam_y = CarParameter(
+            'camera_y', self.mdt.logic.camera.cam_vec[1],
+            (.5, -1.8), (-1, 1), set_cam_y)
+        def set_cam_z(val):
+            vec = self.mdt.logic.camera.cam_vec
+            self.mdt.logic.camera.cam_vec = (vec[0], vec[1], val)
+        self.__cam_z = CarParameter(
+            'camera_z', self.mdt.logic.camera.cam_vec[2],
+            (.5, -1.88), (-1, 1), set_cam_z)
 
         self.__pars = [
             self.__max_speed_par, self.__mass_par, self.__steering_min_speed,
@@ -155,7 +179,8 @@ class CarPlayerGui(CarGui):
             self.__skid_info, self.__suspension_stiffness,
             self.__wheels_damping_relaxation,
             self.__wheels_damping_compression,
-            self.__friction_slip, self.__roll_influence]
+            self.__friction_slip, self.__roll_influence,
+            self.__cam_x, self.__cam_y, self.__cam_z]
 
     def set_panel(self):
         pars = {'scale': .065, 'parent': eng.base.a2dTopRight,
@@ -198,6 +223,10 @@ class CarPlayerGui(CarGui):
 
     def toggle(self):
         map(lambda par: par.toggle(), self.__pars)
+        if self.__max_speed_par.is_visible:
+            eng.show_cursor()
+        else:
+            eng.hide_cursor()
 
     def destroy(self):
         labels = [self.speed_txt, self.time_txt, self.lap_txt,
