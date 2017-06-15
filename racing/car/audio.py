@@ -2,27 +2,16 @@ from panda3d.core import AudioSound
 from yyagl.gameobject import Audio
 
 
-class CarAudioProps:
-
-    def __init__(self, engine, brake, crash, crash_hs, lap, landing):
-        self.engine = engine
-        self.brake = brake
-        self.crash = crash
-        self.crash_hs = crash_hs
-        self.lap = lap
-        self.landing = landing
-
-
 class CarAudio(Audio):
 
     def __init__(self, mdt, props):
         Audio.__init__(self, mdt)
-        self.engine_sfx = loader.loadSfx(props.engine)
-        self.brake_sfx = loader.loadSfx(props.brake)
-        self.crash_sfx = loader.loadSfx(props.crash)
-        self.crash_high_speed_sfx = loader.loadSfx(props.crash_hs)
-        self.lap_sfx = loader.loadSfx(props.lap)
-        self.landing_sfx = loader.loadSfx(props.landing)
+        self.engine_sfx = loader.loadSfx(props.sounds['engine'])
+        self.brake_sfx = loader.loadSfx(props.sounds['brake'])
+        self.crash_sfx = loader.loadSfx(props.sounds['crash'])
+        self.crash_high_speed_sfx = loader.loadSfx(props.sounds['crash_hs'])
+        self.lap_sfx = loader.loadSfx(props.sounds['lap'])
+        self.landing_sfx = loader.loadSfx(props.sounds['landing'])
         map(lambda sfx: sfx.set_loop(True), [self.engine_sfx, self.brake_sfx])
         self.engine_sfx.set_volume(0)
         self.engine_sfx.play()

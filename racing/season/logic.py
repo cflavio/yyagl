@@ -1,6 +1,6 @@
 from yyagl.gameobject import Logic
 from yyagl.racing.ranking.ranking import Ranking
-from yyagl.racing.tuning.tuning import Tuning, TuningProps
+from yyagl.racing.tuning.tuning import Tuning
 from yyagl.racing.race.race import RaceSinglePlayer, RaceServer, RaceClient
 
 
@@ -10,9 +10,7 @@ class SeasonLogic(Logic):
         Logic.__init__(self, mdt)
         self.props = s_p = season_props
         self.ranking = Ranking(s_p.cars, s_p.background, s_p.font, s_p.fg_col)
-        tuning_props = TuningProps(
-            s_p.cars, s_p.player_car, s_p.background, s_p.tuning_imgs)
-        self.tuning = Tuning(tuning_props)
+        self.tuning = Tuning(s_p)
         self.drivers = s_p.drivers
         self.tracks = s_p.tracks
         self.player_car = s_p.player_car

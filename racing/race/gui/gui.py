@@ -7,26 +7,6 @@ from .loading.loading import Loading
 from .minimap import Minimap
 
 
-class RaceGuiProps(object):
-
-    def __init__(
-            self, minimap_path, minimap_image, col_dct, font, cars, menu_args,
-            drivers_img, cars_imgs, share_urls, share_imgs, track_name,
-            car_name):
-        self.minimap_path = minimap_path
-        self.minimap_image = minimap_image
-        self.col_dct = col_dct
-        self.font = font
-        self.cars = cars
-        self.menu_args = menu_args
-        self.drivers_img = drivers_img
-        self.cars_imgs = cars_imgs
-        self.share_urls = share_urls
-        self.share_imgs = share_imgs
-        self.track_name = track_name
-        self.car_name = car_name
-
-
 class RaceGuiFacade(object):
 
     def update_minimap(self, positions):
@@ -55,7 +35,7 @@ class RaceGui(Gui, RaceGuiFacade):
         self.minimap = Minimap(
             self.mdt.track.lrtb, self.props.minimap_path,
             self.props.minimap_image, self.props.col_dct, self.props.cars,
-            self.props.car_name)
+            self.props.player_car_name)
 
     def destroy(self):
         self.results.destroy()

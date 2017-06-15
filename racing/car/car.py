@@ -1,14 +1,13 @@
 from yyagl.gameobject import GameObject, Ai, Audio
 from yyagl.engine.log import LogMgr
-from .fsm import CarFsm, CarFsmProps
-from .gfx import CarGfx, CarGfxProps
-from .phys import CarPhys, CarPlayerPhys, CarPhysProps
+from .fsm import CarFsm
+from .gfx import CarGfx
+from .phys import CarPhys, CarPlayerPhys
 from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
-    CarPlayerEventClient, CarNetworkEvent, CarAiEvent, CarEventProps, \
-    CarAiPlayerEvent
-from .logic import CarLogic, CarPlayerLogic, CarLogicProps
-from .audio import CarAudio, CarAudioProps
-from .gui import CarGui, CarPlayerGui, CarGuiProps
+    CarPlayerEventClient, CarNetworkEvent, CarAiEvent, CarAiPlayerEvent
+from .logic import CarLogic, CarPlayerLogic
+from .audio import CarAudio
+from .gui import CarGui, CarPlayerGui
 from .ai import CarAi
 
 
@@ -118,45 +117,17 @@ class Car(GameObject, CarFacade):
         self.name = car_props.name
         self.laps = car_props.laps
         self.road_name = car_props.road_name
-        gui_props = CarGuiProps(
-            car_props.color_main, car_props.color, car_props.font,
-            car_props.laps)
-        audio_props = CarAudioProps(
-            car_props.sounds['engine'], car_props.sounds['brake'],
-            car_props.sounds['crash'], car_props.sounds['crash_hs'],
-            car_props.sounds['lap'], car_props.sounds['landing'])
-        carlogic_props = CarLogicProps(
-            car_props.pos, car_props.hpr, car_props.cam_vec,
-            car_props.joystick, car_props.track_waypoints)
-        cargfx_props = CarGfxProps(
-            car_props.model_name, car_props.damage_paths,
-            car_props.wheel_gfx_names, car_props.particle_path)
-        carphys_props = CarPhysProps(
-            car_props.coll_path, car_props.coll_name,
-            car_props.race.track.phys.model, car_props.phys_file,
-            car_props.wheel_names, car_props.tuning_engine,
-            car_props.tuning_tires, car_props.tuning_suspensions,
-            car_props.driver_engine, car_props.driver_tires,
-            car_props.driver_suspensions, car_props.car_names)
-        carfsm_props = CarFsmProps(car_props.road_name,
-                                   car_props.track_waypoints,
-                                   car_props.car_names)
-        carevent_props = CarEventProps(
-            car_props.keys, car_props.joystick, car_props.rocket_path,
-            car_props.respawn_name, car_props.pitstop_name,
-            car_props.road_name, car_props.wall_name, car_props.goal_name,
-            car_props.bonus_name, car_props.roads_names)
         init_lst = [
-            [('fsm', self.fsm_cls, [self, carfsm_props])],
-            [('gfx', self.gfx_cls, [self, cargfx_props]),
-             ('phys', self.phys_cls, [self, carphys_props]),
-             ('logic', self.logic_cls, [self, carlogic_props]),
-             ('gui', self.gui_cls, [self, gui_props]),
-             ('event', self.event_cls, [self, carevent_props]),
+            [('fsm', self.fsm_cls, [self, car_props])],
+            [('gfx', self.gfx_cls, [self, car_props]),
+             ('phys', self.phys_cls, [self, car_props]),
+             ('logic', self.logic_cls, [self, car_props]),
+             ('gui', self.gui_cls, [self, car_props]),
+             ('event', self.event_cls, [self, car_props]),
              ('ai', self.ai_cls, [self, car_props.road_name,
                                   car_props.track_waypoints,
                                   car_props.car_names])],
-            [('audio', self.audio_cls, [self, audio_props])]]
+            [('audio', self.audio_cls, [self, car_props])]]
         GameObject.__init__(self, init_lst, car_props.callback)
 
 

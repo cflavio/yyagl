@@ -3,19 +3,11 @@ from yyagl.gameobject import Gui
 from yyagl.engine.gui.imgbtn import ImgBtn
 
 
-class TuningGuiProps(object):
-
-    def __init__(self, car, background, tuning_imgs):
-        self.car = car
-        self.background = background
-        self.tuning_imgs = tuning_imgs
-
-
 class TuningGui(Gui):
 
-    def __init__(self, mdt, tuninggui_props):
+    def __init__(self, mdt, tuning_props):
         Gui.__init__(self, mdt)
-        self.props = tuninggui_props
+        self.props = tuning_props
 
     def show(self):
         self.background = OnscreenImage(
@@ -35,7 +27,7 @@ class TuningGui(Gui):
             extraArgs=['suspensions'])]
 
     def on_btn(self, val):
-        tun = self.mdt.logic.tunings[self.props.car]
+        tun = self.mdt.logic.tunings[self.props.player_car]
         setattr(tun, val, getattr(tun, val) + 1)
         self.notify('on_tuning_done')
 

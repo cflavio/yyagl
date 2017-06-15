@@ -7,26 +7,6 @@ from yyagl.engine.log import LogMgr
 from yyagl.engine.phys import PhysMgr
 
 
-class CarPhysProps:
-
-    def __init__(
-            self, coll_path, coll_name, track_phys, phys_file, wheel_names,
-            tuning_engine, tuning_tires, tuning_suspensions, driver_engine,
-            driver_tires, driver_suspensions, cars):
-        self.coll_path = coll_path
-        self.coll_name = coll_name
-        self.track_phys = track_phys
-        self.phys_file = phys_file
-        self.wheel_names = wheel_names
-        self.tuning_engine = tuning_engine
-        self.tuning_tires = tuning_tires
-        self.tuning_suspensions = tuning_suspensions
-        self.driver_engine = driver_engine
-        self.driver_tires = driver_tires
-        self.driver_suspensions = driver_suspensions
-        self.cars = cars
-
-
 class CarPhys(Phys):
 
     def __init__(self, mdt, carphys_props):
@@ -70,7 +50,7 @@ class CarPhys(Phys):
         for geom in PhysMgr().find_geoms(self.coll_mesh, self.props.coll_name):
             chassis_shape.addGeom(geom.node().getGeom(0), geom.getTransform())
         self.mdt.gfx.nodepath.node().addShape(chassis_shape)
-        self.mdt.gfx.nodepath.setCollideMask(BitMask32.bit(1) | BitMask32.bit(2 + self.props.cars.index(self.mdt.name)))
+        self.mdt.gfx.nodepath.setCollideMask(BitMask32.bit(1) | BitMask32.bit(2 + self.props.car_names.index(self.mdt.name)))
         #nodepath = self.mdt.gfx.nodepath.attachNewNode(BulletGhostNode('car ghost'))
         #nodepath.node().addShape(BulletCapsuleShape(4, 5, ZUp))
         #eng.attach_ghost(nodepath.node())
@@ -192,7 +172,7 @@ class CarPhys(Phys):
             if not gnd_name:
                 continue
             if gnd_name not in self.__finds:
-                gnd = self.props.track_phys.find('**/' + gnd_name)
+                gnd = self.props.race.track.phys.model.find('**/' + gnd_name)
                 self.__finds[gnd_name] = gnd
             gfx_node = self.__finds[gnd_name]
             if gfx_node.has_tag('speed'):

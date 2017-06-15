@@ -44,23 +44,6 @@ class InputDctBuilderJoystick(InputDctBuilder):
                 'left': x < -.4, 'right': x > .4}
 
 
-class CarEventProps:
-
-    def __init__(self, keys, joystick, rocket_path, respawn_name,
-                 pitstop_name, road_name, wall_name, goal_name, bonus_name,
-                 roads_names):
-        self.keys = keys
-        self.joystick = joystick
-        self.rocket_path = rocket_path
-        self.respawn_name = respawn_name
-        self.pitstop_name = pitstop_name
-        self.road_name = road_name
-        self.wall_name = wall_name
-        self.goal_name = goal_name
-        self.bonus_name = bonus_name
-        self.roads_names = roads_names
-
-
 class CarEvent(Event):
 
     def __init__(self, mdt, carevent_props):

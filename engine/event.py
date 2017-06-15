@@ -14,7 +14,7 @@ class EngineEventBase(Event):
         self.on_end_cb = on_end_cb
         self.accept('window-closed', self.__on_end)
         taskMgr.add(self.__on_frame, 'on frame')
-        JoystickMgr(emulate_keyboard)
+        JoystickMgr.build(emulate_keyboard)
 
     def __on_end(self):
         eng.base.closeWindow(eng.base.win)

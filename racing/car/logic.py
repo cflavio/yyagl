@@ -8,17 +8,6 @@ from yyagl.engine.phys import PhysMgr
 from yyagl.engine.log import LogMgr
 
 
-class CarLogicProps:
-
-    def __init__(self, start_pos, start_pos_hpr, cam_vec, joystick,
-                 track_waypoints):
-        self.start_pos = start_pos
-        self.start_pos_hpr = start_pos_hpr
-        self.cam_vec = cam_vec
-        self.joystick = joystick
-        self.track_waypoints = track_waypoints
-
-
 class AbsLogic(object):
     # perhaps a mixin? a visitor?
 
@@ -145,8 +134,8 @@ class CarLogic(Logic):
         self.weapon = None
         self.input_logic = AbsLogic.build(self.__class__ == CarPlayerLogic,
                                           self.props.joystick, self.mdt.phys)
-        self.start_pos = carlogic_props.start_pos
-        self.start_pos_hpr = carlogic_props.start_pos_hpr
+        self.start_pos = carlogic_props.pos
+        self.start_pos_hpr = carlogic_props.hpr
         self.last_ai_wp = None
         eng.attach_obs(self.on_start_frame)
 

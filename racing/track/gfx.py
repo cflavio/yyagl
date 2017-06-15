@@ -8,23 +8,6 @@ from yyagl.engine.log import LogMgr
 from .signs import Signs
 
 
-class TrackGfxProps(object):
-
-    def __init__(
-            self, name, path, model_name, empty_name, anim_name, omni_tag,
-            shaders, thanks, sign_name, shadow_src):
-        self.name = name
-        self.path = path
-        self.model_name = model_name
-        self.empty_name = empty_name
-        self.anim_name = anim_name
-        self.omni_tag = omni_tag
-        self.shaders = shaders
-        self.thanks = thanks
-        self.sign_name = sign_name
-        self.shadow_src = shadow_src
-
-
 class TrackGfx(Gfx):
 
     def __init__(
@@ -63,7 +46,7 @@ class TrackGfx(Gfx):
             new_root.set_hpr(model.get_hpr())
             new_root.set_scale(model.get_scale())
             model_subname = model.get_name()[len(self.props.empty_name):]
-            path = '%s/%s' % (self.props.path, model_subname)
+            path = '%s/%s' % (self.props.track_path, model_subname)
             if '.' in path:
                 path = path.split('.')[0]
             anim_path = '%s-%s' % (path, self.props.anim_name)
@@ -79,7 +62,7 @@ class TrackGfx(Gfx):
                 self.__actors[-1].node().setBounds(OmniBoundingVolume())
                 self.__actors[-1].node().setFinal(True)
             model.remove_node()
-        self.signs = Signs(self.model, self.props.sign_name, self.props.thanks)
+        self.signs = Signs(self.model, self.props.sign_name, self.props.sign_cb)
         self.signs.set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
         self.model.premungeScene(eng.base.win.getGsg())

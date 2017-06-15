@@ -20,16 +20,23 @@ class Skidmark:
         geom.addPrimitive(self.prim)
         node = GeomNode('gnode')
         node.addGeom(geom)
-        nodePath = render.attachNewNode(node)
+        nodePath = eng.gfx.root.attachNewNode(node)
         nodePath.setTransparency(True)
         nodePath.setDepthOffset(1)
         self.__set_material(nodePath)
         nodePath.node().setBounds(OmniBoundingVolume())
         self.add_vertices(radius, heading)
         self.add_vertices(radius, heading)
+        def alpha(t, np):
+            if not np.is_empty():
+                np.setAlphaScale(t)
+            # this if seems necessary since, if there are skidmarks and you
+            # exit from the race (e.g. back to the menu), then alpha is being
+            # called from the interval manager even if the interval manager
+            # correctly says that there are 0 intervals.
         self.remove_seq = Sequence(
             Wait(8),
-            LerpFunc(nodePath.setAlphaScale, 8, 1, 0, 'easeInOut'),
+            LerpFunc(alpha, 8, 1, 0, 'easeInOut', [nodePath]),
             Func(nodePath.remove_node))
         self.remove_seq.start()
 

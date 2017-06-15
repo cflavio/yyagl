@@ -5,15 +5,6 @@ from yyagl.gameobject import Gui
 from yyagl.engine.font import FontMgr
 
 
-class CarGuiProps:
-
-    def __init__(self, color_main, color, font, laps):
-        self.color_main = color_main
-        self.color = color
-        self.font = font
-        self.laps = laps
-
-
 class CarParameter(object):
 
     def __init__(self, attr, init_val, pos, val_range, callback):

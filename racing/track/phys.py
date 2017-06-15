@@ -7,26 +7,6 @@ from yyagl.engine.phys import PhysMgr
 from yyagl.racing.weapon.bonus.bonus import Bonus
 
 
-class TrackPhysProps:
-
-    def __init__(
-            self, model_path, unmerged, merged, ghosts, corner_names,
-            waypoint_names, show_waypoints, weapons, weapon_names, start,
-            bonus_model, bonus_suff):
-        self.model_path = model_path
-        self.unmerged = unmerged
-        self.merged = merged
-        self.ghost_names = ghosts
-        self.corner_names = corner_names
-        self.waypoint_names = waypoint_names
-        self.show_waypoints = show_waypoints
-        self.weapons = weapons
-        self.weapon_names = weapon_names
-        self.start = start
-        self.bonus_model = bonus_model
-        self.bonus_suff = bonus_suff
-
-
 class TrackPhys(Phys):
 
     def __init__(
@@ -41,10 +21,10 @@ class TrackPhys(Phys):
         Phys.__init__(self, mdt)
 
     def sync_bld(self):
-        self.model = loader.loadModel(self.props.model_path)
+        self.model = loader.loadModel(self.props.coll_path)
         self.__load(self.props.unmerged, False, False)
         self.__load(self.props.merged, True, False)
-        self.__load(self.props.ghost_names, True, True)
+        self.__load(self.props.ghosts, True, True)
         self.__set_corners()
         self.__set_waypoints()
         self.__set_weapons()
@@ -146,7 +126,7 @@ class TrackPhys(Phys):
             self.create_bonus(weap.get_pos())
 
     def __hide_models(self):
-        nms = self.props.unmerged + self.props.merged + self.props.ghost_names
+        nms = self.props.unmerged + self.props.merged + self.props.ghosts
         for mod in nms:
             models = self.model.findAllMatches('**/%s*' % mod)
             map(lambda mod: mod.hide(), models)

@@ -13,16 +13,6 @@ class CarGfxFacade:
         self.skidmark_mgr.on_no_skidmarking()
 
 
-class CarGfxProps:
-
-    def __init__(self, model_name, damage_paths, wheel_gfx_names,
-                 particle_path):
-        self.model_name = model_name
-        self.damage_paths = damage_paths
-        self.wheel_gfx_names = wheel_gfx_names
-        self.particle_path = particle_path
-
-
 class CarGfx(Gfx, CarGfxFacade):
 
     def __init__(self, mdt, cargfx_props):

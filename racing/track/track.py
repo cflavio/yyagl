@@ -1,7 +1,7 @@
 from yyagl.gameobject import GameObject
 from yyagl.engine.log import LogMgr
-from .gfx import TrackGfx, TrackGfxProps
-from .phys import TrackPhys, TrackPhysProps
+from .gfx import TrackGfx
+from .phys import TrackPhys
 from .event import TrackEvent
 from .audio import TrackAudio
 
@@ -67,18 +67,9 @@ class Track(GameObject, TrackFacade):
     def __init__(self, track_props):
         LogMgr().log('init track')
         self.props = t_p = track_props
-        trackphys_props = TrackPhysProps(
-            t_p.coll_path, t_p.unmerged, t_p.merged, t_p.ghosts,
-            t_p.corner_names, t_p.waypoint_names, t_p.show_waypoints,
-            t_p.weapons, t_p.weapon_names, t_p.start, t_p.bonus_model,
-            t_p.bonus_suff)
-        trackgfx_props = TrackGfxProps(
-            t_p.name, t_p.track_path, t_p.model_name, t_p.empty_name,
-            t_p.anim_name, t_p.omni_tag, t_p.shaders, t_p.sign_cb,
-            t_p.sign_name, t_p.shadow_src)
         init_lst = [
-            [('phys', TrackPhys, [self, trackphys_props]),
-             ('gfx', TrackGfx, [self, trackgfx_props])],
+            [('phys', TrackPhys, [self, t_p]),
+             ('gfx', TrackGfx, [self, t_p])],
             [('event', TrackEvent, [self, t_p.shaders, t_p.shadow_src])],
             [('audio', TrackAudio, [self, t_p.music_path])]]
         GameObject.__init__(self, init_lst, t_p.callback)
