@@ -146,6 +146,11 @@ class LoadingPageGui(PageGui):
             align=TextNode.A_left, scale=.072, pos=(.8, -.54),
             font=self.font, fg=self.text_bg)
         self.widgets += [txt]
+        txt = OnscreenText(
+            text=_('respawn') + ': ' + self.props.keys['respawn'],
+            align=TextNode.A_left, scale=.072, pos=(.8, -.7),
+            font=self.font, fg=self.text_bg)
+        self.widgets += [txt]
 
 
 class LoadingPageProps(object):

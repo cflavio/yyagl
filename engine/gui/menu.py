@@ -88,7 +88,7 @@ class MenuGui(Gui):
     def __init__(self, mdt, menu_args):
         Gui.__init__(self, mdt)
         self.menu_args = menu_args
-        self.background_img = None
+        self.background = None
         if self.menu_args.background_img:
             self.background = OnscreenImage(scale=(1.77778, 1, 1.0),
                                             image=self.menu_args.background_img)

@@ -1,6 +1,7 @@
 from lang import LangMgr
 from .joystick import JoystickMgr
 from .shader import ShaderMgr
+from .font import FontMgr
 
 
 class EngineFacade(object):
@@ -40,7 +41,7 @@ class EngineFacade(object):
         return self.base.camera.set_pos(pos)
 
     def load_font(self, font):
-        return self.font_mgr.load_font(font)
+        return FontMgr().load_font(font)
 
     @property
     def version(self):
