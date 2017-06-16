@@ -45,18 +45,26 @@ class AbsAiLogic(object):
             self.debug_lines_gnd = DebugLines(self.car, (0, 1, 0))
         if show_lines_obst:
             self.debug_lines_obst = DebugLines(self.car, (1, 0, 0))
+        self.__tgt_vec = None
+        eng.attach_obs(self.on_start_frame)
 
     @property
     def curr_dot_prod(self):  # to be cached
         return self.car.logic.car_vec.dot(self.tgt_vec)
 
+    def on_start_frame(self):
+        self.__tgt_vec = None
+
     @property
-    def tgt_vec(self):  # to be cached
+    def tgt_vec(self):
+        if self.__tgt_vec:
+            return self.__tgt_vec
         #if self.car.name == game.player_car.name: print 'tgt', self.current_target
         curr_tgt_pos = self.current_target.get_pos()
         curr_pos = self.car.gfx.nodepath.get_pos()
         tgt_vec = Vec3(curr_tgt_pos - curr_pos)
         tgt_vec.normalize()
+        self.__tgt_vec = tgt_vec
         return tgt_vec
 
     def lookahead_ground(self, dist, deg):
@@ -149,6 +157,7 @@ class AbsAiLogic(object):
         self.car = None
         self.debug_lines_gnd.destroy()
         self.debug_lines_obst.destroy()
+        eng.detach_obs(self.on_start_frame)
 
 
 class FrontAiLogic(AbsAiLogic):

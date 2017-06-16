@@ -138,6 +138,10 @@ class CarLogic(Logic):
         self.start_pos_hpr = carlogic_props.hpr
         self.last_ai_wp = None
         eng.attach_obs(self.on_start_frame)
+        for wp in self.props.track_waypoints:
+            self.pitstop_wps(wp)
+        for wp in self.props.track_waypoints:
+            self.grid_wps(wp)
 
     def update(self, input_dct):
         phys = self.mdt.phys
@@ -478,7 +482,8 @@ class CarPlayerLogic(CarLogic):
     def __init__(self, mdt, carlogic_props):
         CarLogic.__init__(self, mdt, carlogic_props)
         self.camera = Camera(mdt.gfx.nodepath, carlogic_props.cam_vec)
-        self.camera.camera.set_pos(self.start_pos + (0, 0, 50))
+        self.camera.render_all()  # workaround for prepare_scene
+        eng.do_later(.01, self.camera.camera.set_pos, [self.start_pos + (0, 0, 10000)])
         self.positions = []
         self.last_dist_time = 0
 

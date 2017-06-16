@@ -5,6 +5,7 @@ class Camera(object):
 
     speed = 50
     speed_slow = 20
+    speed_fast = 5000
     dist_min = 36
     dist_max = 72
     z_max = 5
@@ -31,9 +32,11 @@ class Camera(object):
         fit_p = lambda: val + (1 if tgt > val else -1) * incr
         return fit_p() if beyond else tgt
 
-    def update(self, speed_ratio, is_rolling):
+    def update(self, speed_ratio, is_rolling, fast):
         curr_incr = self.speed * globalClock.getDt()
         curr_incr_slow = self.speed_slow * globalClock.getDt()
+        if fast:
+            curr_incr_slow = self.speed_fast * globalClock.getDt()
         dist_diff = self.dist_max - self.dist_min
         look_dist_diff = self.look_dist_max - self.look_dist_min
         z_diff = self.z_max - self.z_min
@@ -93,6 +96,15 @@ class Camera(object):
     @property
     def camera(self):
         return eng.base.camera
+
+    def render_all(self):
+        eng.base.camera.setPos(0, 0, 10000)
+        eng.base.camera.look_at(0, 0, 0)
+        skydome = game.logic.season.race.logic.track.gfx.model.find('**/OBJSkydome*')
+        skydome and skydome.hide()
+        base.graphicsEngine.renderFrame()
+        base.graphicsEngine.renderFrame()
+        skydome and skydome.show()
 
     def destroy(self):
         self.car = None

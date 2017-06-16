@@ -1,5 +1,6 @@
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
+from panda3d.core import NodePath
 from yyagl.gameobject import Gfx
 from .skidmark import Skidmark
 
@@ -22,6 +23,8 @@ class CarGfx(Gfx, CarGfxFacade):
         vehicle_node = BulletRigidBodyNode('Vehicle')
         self.nodepath = eng.attach_node(vehicle_node)
         self.skidmark_mgr = SkidmarkMgr(mdt)
+        part_path = self.props.particle_path
+        eng.particle(part_path, render, render, (0, 1.2, .75), .8)
         Gfx.__init__(self, mdt)
 
     def async_bld(self):
@@ -38,6 +41,19 @@ class CarGfx(Gfx, CarGfxFacade):
         map(lambda cha: cha.setDepthOffset(-2), cha)
         map(lambda whl: whl.reparentTo(eng.gfx.root), self.wheels.values())
         # try RigidBodyCombiner for the wheels
+        for model in [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]:
+            model.prepare_scene(base.win.getGsg())
+            model.premunge_scene(base.win.getGsg())
+        taskMgr.add(self.preload_tsk, 'preload')
+        self.cnt = 2
+
+    def preload_tsk(self, task):
+        if self.cnt:
+            self.apply_damage()
+            self.cnt -= 1
+            return task.again
+        else:
+            self.apply_damage(True)
 
     def load_wheels(self, chassis_model):
         self.chassis_np = chassis_model

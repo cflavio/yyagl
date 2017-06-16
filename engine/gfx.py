@@ -21,6 +21,7 @@ class EngineGfx(Gfx):
         if antialiasing:
             render.set_antialias(AntialiasAttrib.MAuto)
         self.root = None
+        self.part2eff = {}
 
     def init(self):
         self.root = render.attachNewNode('world')
@@ -52,11 +53,16 @@ class EngineGfx(Gfx):
         print '\n\n#####\nrender.ls()'
         self.mdt.base.render.ls()
 
-    @staticmethod
-    def particle(path, parent, render_parent, pos, timeout):
-        par = ParticleEffect()
-        par.loadConfig(path)
+    def particle(self, path, parent, render_parent, pos, timeout):
+        # particles are really slow, so we don't cleanup them
+        if path not in self.part2eff:
+            par = ParticleEffect()
+            par.loadConfig(path)
+            self.part2eff[path] = par
+            par.start(parent=parent, renderParent=render_parent)
+            par.disable()
+        par = self.part2eff[path]
         par.start(parent=parent, renderParent=render_parent)
         par.set_pos(pos)
-        args = timeout, lambda par: par.cleanup(), [par]
+        args = timeout, lambda par: par.disable(), [par]
         eng.do_later(*args)

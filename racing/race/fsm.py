@@ -1,6 +1,7 @@
 from yyagl.gameobject import Fsm
 from yyagl.engine.log import LogMgr
 from yyagl.engine.shader import ShaderMgr
+from yyagl.engine.profiler import Profiler
 from yyagl.racing.race.gui.countdown import Countdown
 from .gui.loading.loading import LoadingProps
 
@@ -63,6 +64,8 @@ class RaceFsm(Fsm):
         LogMgr().log('entering Play state')
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Play'), cars)
+        Profiler().enable()
+        self.accept('f9', Profiler().printstats)
 
     def on_start_race(self):
         self.demand('Play')

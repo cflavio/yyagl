@@ -7,6 +7,7 @@ from .pause import PauseMgr
 from .font import FontMgr
 from .log import LogMgr
 from .lang import LangMgr
+from .profiler import Profiler
 from .shader import ShaderMgr
 from .gfx import EngineGfx
 from .gui.gui import EngineGui
@@ -31,6 +32,7 @@ class Engine(GameObject, EngineFacade):
         self.base = EngineShowBase()
         LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
         ShaderMgr(cfg.shaders, cfg.gamma)
+        Profiler(cfg.python_profiling)
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
