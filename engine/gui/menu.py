@@ -90,8 +90,8 @@ class MenuGui(Gui):
         self.menu_args = menu_args
         self.background = None
         if self.menu_args.background_img:
-            self.background = OnscreenImage(scale=(1.77778, 1, 1.0),
-                                            image=self.menu_args.background_img)
+            self.background = OnscreenImage(
+                scale=(1.77778, 1, 1.0), image=self.menu_args.background_img)
             self.background.setBin('background', 10)
 
     def destroy(self):

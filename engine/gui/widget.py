@@ -5,6 +5,9 @@ class Widget(object):
 
     col_offset = (.3, .3, .3, 0)
 
+    def __init__(self):
+        self.start_fg = self.start_frame_col = None
+
     def init(self, wdg):
         if hasattr(wdg, 'component') and wdg.hascomponent('text0'):
             self.start_fg = wdg.component('text0').textNode.get_text_color()
@@ -43,9 +46,9 @@ class Widget(object):
             idx = self.highlightedIndex + dir2offset[direction]
             idx = min(len(self['items']) - 1, max(0, idx))
             if old_idx != idx:
-                fc = self.component('item%s' % idx)['frameColor']
+                fcol = self.component('item%s' % idx)['frameColor']
                 old_cmp = self.component('item%s' % old_idx)
-                self._unhighlightItem(old_cmp, fc)
+                self._unhighlightItem(old_cmp, fcol)
                 curr_cmp = self.component('item%s' % idx)
                 self._highlightItem(curr_cmp, idx)
             return True
@@ -68,9 +71,9 @@ class Widget(object):
                 self['command'](self['items'][idx])
             self.hidePopupMenu()
             idx += -1 if idx else 1
-            fc = self.component('item%s' % idx)['frameColor']
+            fcol = self.component('item%s' % idx)['frameColor']
             curr_name = 'item%s' % self.selectedIndex
-            self._unhighlightItem(self.component(curr_name), fc)
+            self._unhighlightItem(self.component(curr_name), fcol)
             return True
         if self['command'] and self['state'] == NORMAL:
             self['command'](*self['extraArgs'])

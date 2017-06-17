@@ -38,7 +38,7 @@ class RaceFsm(Fsm):
         LogMgr().log('exiting Loading state')
         self.mdt.gui.loading.exit_loading()
         self.mdt.event.notify('on_race_loaded')
-        #eng.set_cam_pos((0, 0, 0))
+        # eng.set_cam_pos((0, 0, 0))
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_wrong_way)
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_respawn)
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_end_race)
@@ -56,9 +56,9 @@ class RaceFsm(Fsm):
 
     def exitCountdown(self):
         self.countdown.destroy()
-        #eng.do_later(.5, game.player_car.gfx.apply_damage)
-        #eng.do_later(.6, game.player_car.gfx.apply_damage)
-        #eng.gfx.print_stats()
+        # eng.do_later(.5, game.player_car.gfx.apply_damage)
+        # eng.do_later(.6, game.player_car.gfx.apply_damage)
+        # eng.gfx.print_stats()
 
     def enterPlay(self):
         LogMgr().log('entering Play state')

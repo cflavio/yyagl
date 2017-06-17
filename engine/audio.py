@@ -12,5 +12,6 @@ class EngineAudio(Audio):
     def play(snd):
         snd.status() != AudioSound.PLAYING and snd.play()
 
-    def set_volume(self, vol):
+    @staticmethod
+    def set_volume(vol):
         base.sfxManagerList[0].set_volume(vol)

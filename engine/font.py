@@ -6,7 +6,8 @@ class FontMgr(object):
 
     __metaclass__ = Singleton
 
-    def __init__(self, color_green=(.25, .75, .25, 1), color_red=(.75, .25, .25, 1)):
+    def __init__(self, color_green=(.25, .75, .25, 1),
+                 color_red=(.75, .25, .25, 1)):
         self.__fonts = {}
         tp_mgr = TextPropertiesManager.getGlobalPtr()
         for namecol, col in zip(['green', 'red'], [color_green, color_red]):

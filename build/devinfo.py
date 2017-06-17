@@ -8,7 +8,7 @@ def bld_devinfo(target, source, env):
             with open(('%s%s.txt') % (bld_dpath, fname), 'a') as fout:
                 __process(src, cond, fout)
     names = ' '.join([fname + '.txt' for fname in env['DEV_CONF']])
-    rmnames = ' '.join(['{dstpath}%s.txt' % fname for fname in env['DEV_CONF']])
+    rmnames = ' '.join(['{dstpath}%s.txt' % fnm for fnm in env['DEV_CONF']])
     cmd = 'tar -czf {fout} -C {dstpath} ' + names + ' && rm ' + rmnames
     fpath = devinfo_fpath.format(dst_dir=bld_dpath, appname=env['APPNAME'],
                                  version=branch)

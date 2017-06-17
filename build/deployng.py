@@ -19,7 +19,8 @@ setup(name="%s", options=%s)'''
 
 
 def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
-    #system('pip install panda3 -i https://archive.panda3d.org/branches/deploy-ng --upgrade')
+    # system('pip install panda3 -i '
+    #     'https://archive.panda3d.org/branches/deploy-ng --upgrade')
     if exists('build/__whl_cache__'):
         rmtree('build/__whl_cache__')
     tgts = ['win32', 'macosx_10_6_x86_64', 'manylinux1_x86',

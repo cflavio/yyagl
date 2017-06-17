@@ -15,17 +15,17 @@ def bld_linux(target, source, env):
     int_str = '-nointernet' if env['NOINTERNET'] else ''
     p3d_fpath = env['P3D_PATH'][:-4] + 'nopygame.p3d'
     cmd = bld_cmd.format(
-        dst_dir=bld_dpath, appname=env['APPNAME'], AppName=env['APPNAME'].capitalize(),
-        version=ver, p3d_fpath=p3d_fpath, platform='linux_' + env['PLATFORM'],
-        nointernet=nointernet)
+        dst_dir=bld_dpath, appname=env['APPNAME'],
+        AppName=env['APPNAME'].capitalize(), version=ver, p3d_fpath=p3d_fpath,
+        platform='linux_' + env['PLATFORM'], nointernet=nointernet)
     system(cmd)
     start_dir = abspath('.') + '/'
     with InsideDir(bld_dpath + 'linux_' + env['PLATFORM']):
         __prepare(start_dir, env['PLATFORM'])
         __bld(env['APPNAME'], start_dir, env['PLATFORM'], ico_fpath)
         if nointernet:
-            __bld_full_pkg(env['APPNAME'], env['PLATFORM'], ico_fpath, p3d_fpath,
-                           nointernet)
+            __bld_full_pkg(env['APPNAME'], env['PLATFORM'], ico_fpath,
+                           p3d_fpath, nointernet)
         __bld_pckgs(env['APPNAME'], env['PLATFORM'], int_str)
     rmtree(bld_dpath + 'linux_' + env['PLATFORM'])
 
@@ -54,11 +54,11 @@ def __bld(appname, start_path, platform, ico_fpath):
     move('usr/bin/' + appname, 'img/data/' + appname)
     copy(start_path + ico_fpath % '48', 'img/data/icon.png')
     seds = ['version', 'size', 'appname', 'AppName', 'vendorsite']
-    seds = ' '.join(["-e 's/<%s>/{%s}/'" % (sed, sed) for sed in seds])
-    tmpl = 'sed -i.bak %s img/scripts/config.lua' % seds
+    sseds = ' '.join(["-e 's/<%s>/{%s}/'" % (sed, sed) for sed in seds])
+    tmpl = 'sed -i.bak %s img/scripts/config.lua' % sseds
     cmd = tmpl.format(version=branch, size=size('img'),
-                          appname=appname, AppName=appname.capitalize(),
-                          vendorsite='ya2.it')
+                      appname=appname, AppName=appname.capitalize(),
+                      vendorsite='ya2.it')
     system(cmd)
 
 
@@ -73,12 +73,13 @@ def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
             if any(fpath.endswith('.' + ext) for ext in rm_ext):
                 remove(fpath)
             rm_ext = ['png', 'jpg']
-            if 'assets/models/' in fpath and any(fpath.endswith('.' + ext) for ext in rm_ext):
+            is_ext = any(fpath.endswith('.' + ext) for ext in rm_ext)
+            if 'assets/models/' in fpath and is_ext:
                 remove(fpath)
             if 'assets/models/tracks/' in fpath and \
                     fpath.endswith('.bam') and not \
                     any(fpath.endswith(concl + '.bam')
-                        for concl in ['/track_all', '/collision', 'Anim']):
+                            for concl in ['/track_all', '/collision', 'Anim']):
                 remove(fpath)
     tmpl = 'pdeploy -o  . {nointernet} -t host_dir=./lib ' + \
         '-t verify_contents=never -n {appname} -N {AppName} -v {version} ' + \
@@ -88,8 +89,8 @@ def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
     dims = ['16', '32', '48', '128', '256']
     ico_str = ''.join(["-i '" + ico_fpath % dim + "' " for dim in dims])
     cmd = tmpl.format(
-        path=bld_dpath, appname=appname, AppName=appname.capitalize(), version=ver,
-        p3d_fpath=basename(p3d_fpath), platform='linux_'+platform,
+        path=bld_dpath, appname=appname, AppName=appname.capitalize(),
+        version=ver, p3d_fpath=basename(p3d_fpath), platform='linux_'+platform,
         nointernet=nointernet, icons=ico_str)
     system(cmd)
     move('linux_' + platform + '/' + appname, 'img/data/' + appname)

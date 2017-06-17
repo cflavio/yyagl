@@ -1,11 +1,10 @@
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
-from panda3d.core import NodePath
 from yyagl.gameobject import Gfx
 from .skidmark import Skidmark
 
 
-class CarGfxFacade:
+class CarGfxFacade(object):
 
     def on_skidmarking(self):
         self.skidmark_mgr.on_skidmarking()
@@ -18,6 +17,7 @@ class CarGfx(Gfx, CarGfxFacade):
 
     def __init__(self, mdt, cargfx_props):
         self.chassis_np = None
+        self.cnt = None
         self.props = cargfx_props
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
         vehicle_node = BulletRigidBodyNode('Vehicle')
@@ -41,7 +41,8 @@ class CarGfx(Gfx, CarGfxFacade):
         map(lambda cha: cha.setDepthOffset(-2), cha)
         map(lambda whl: whl.reparentTo(eng.gfx.root), self.wheels.values())
         # try RigidBodyCombiner for the wheels
-        for model in [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]:
+        models = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
+        for model in models:
             model.prepare_scene(base.win.getGsg())
             model.premunge_scene(base.win.getGsg())
         taskMgr.add(self.preload_tsk, 'preload')
@@ -102,7 +103,7 @@ class CarGfx(Gfx, CarGfxFacade):
         Gfx.destroy(self)
 
 
-class SkidmarkMgr:
+class SkidmarkMgr(object):
 
     def __init__(self, car):
         self.l_skidmark = self.r_skidmark = None

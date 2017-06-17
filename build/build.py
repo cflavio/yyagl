@@ -9,7 +9,7 @@ bld_cmd = (
     "-t width=800 -t height=600 -P {platform} -i '%s16_png.png' " +
     "-i '%s32_png.png' -i '%s48_png.png' -i '%s128_png.png' " +
     "-i '%s256_png.png' {p3d_fpath} installer") % (
-    ('assets/images/icon/icon',) * 5)
+        ('assets/images/icon/icon',) * 5)
 
 
 def exec_cmd(cmd):
@@ -26,9 +26,9 @@ def __version():
         return fver.read().strip() + '-' + exec_cmd('git rev-parse HEAD')[:7]
 
 
-def img_extensions(files):
+def img_extensions(files_):
     ext = lambda fname: 'png' if fname.endswith('_png.psd') else 'dds'
-    return [fname[:fname.rfind('.') + 1] + ext(fname) for fname in files]
+    return [fname[:fname.rfind('.') + 1] + ext(fname) for fname in files_]
 
 
 def track_files():
@@ -97,7 +97,8 @@ osx_fpath = '{dst_dir}{appname}-%s-osx.zip' % branch
 linux_fpath = '{dst_dir}{appname}-%s-linux_{platform}' % branch
 win_noint_fpath = '{dst_dir}{appname}-%s-nointernet-windows.exe' % branch
 osx_noint_fpath = '{dst_dir}{appname}-%s-nointernet-osx.zip' % branch
-linux_noint_fpath = '{dst_dir}{appname}-%s-nointernet-linux_{platform}' % branch
+linux_noint_tmpl = '{dst_dir}{appname}-%s-nointernet-linux_{platform}'
+linux_noint_fpath = linux_noint_tmpl % branch
 src_fpath = '{dst_dir}{appname}-%s-src.tar.gz' % branch
 devinfo_fpath = '{dst_dir}{appname}-%s-devinfo.tar.gz' % branch
 test_fpath = '{dst_dir}{appname}-%s-tests.tar.gz' % branch

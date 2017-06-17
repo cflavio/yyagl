@@ -8,6 +8,7 @@ class RocketGfx(Gfx):
         self.gfx_np = None
         self.parent = parent
         self.path = path
+        self.ival = None
         Gfx.__init__(self, mdt)
 
     def sync_bld(self):

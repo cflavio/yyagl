@@ -5,7 +5,7 @@ from direct.interval.FunctionInterval import Wait, Func
 from direct.interval.LerpInterval import LerpFunc
 
 
-class Skidmark:
+class Skidmark(object):
 
     def __init__(self, wheel_pos, radius, heading):
         self.radius = radius
@@ -20,33 +20,35 @@ class Skidmark:
         geom.addPrimitive(self.prim)
         node = GeomNode('gnode')
         node.addGeom(geom)
-        nodePath = eng.gfx.root.attachNewNode(node)
-        nodePath.setTransparency(True)
-        nodePath.setDepthOffset(1)
-        self.__set_material(nodePath)
-        nodePath.node().setBounds(OmniBoundingVolume())
+        nodepath = eng.gfx.root.attachNewNode(node)
+        nodepath.setTransparency(True)
+        nodepath.setDepthOffset(1)
+        self.__set_material(nodepath)
+        nodepath.node().setBounds(OmniBoundingVolume())
         self.add_vertices(radius, heading)
         self.add_vertices(radius, heading)
-        def alpha(t, np):
-            if not np.is_empty():
-                np.setAlphaScale(t)
+
+        def alpha(time, n_p):
+            if not n_p.is_empty():
+                n_p.setAlphaScale(time)
             # this if seems necessary since, if there are skidmarks and you
             # exit from the race (e.g. back to the menu), then alpha is being
             # called from the interval manager even if the interval manager
             # correctly says that there are 0 intervals.
         self.remove_seq = Sequence(
             Wait(8),
-            LerpFunc(alpha, 8, 1, 0, 'easeInOut', [nodePath]),
-            Func(nodePath.remove_node))
+            LerpFunc(alpha, 8, 1, 0, 'easeInOut', [nodepath]),
+            Func(nodepath.remove_node))
         self.remove_seq.start()
 
-    def __set_material(self, nodePath):
+    @staticmethod
+    def __set_material(nodepath):
         mat = Material()
         mat.setAmbient((.35, .35, .35, .5))
         mat.setDiffuse((.35, .35, .35, .5))
         mat.setSpecular((.35, .35, .35, .5))
         mat.setShininess(12.5)
-        nodePath.set_material(mat, 1)
+        nodepath.set_material(mat, 1)
 
     def add_vertices(self, radius, heading):
         base_pos = self.last_pos + (0, 0, -radius + .05)

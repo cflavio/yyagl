@@ -1,6 +1,6 @@
 from direct.gui.OnscreenText import OnscreenText
-from yyagl.gameobject import Gui
 from direct.gui.OnscreenImage import OnscreenImage
+from yyagl.gameobject import Gui
 
 
 class RankingGui(Gui):
@@ -11,6 +11,7 @@ class RankingGui(Gui):
         self.background_path = background
         self.font = font
         self.fg_col = fg_col
+        self.background = None
 
     def show(self):
         self.background = OnscreenImage(

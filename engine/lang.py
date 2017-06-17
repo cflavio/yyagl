@@ -1,5 +1,4 @@
 from gettext import install, translation
-from ..gameobject import Colleague
 from ..singleton import Singleton
 
 

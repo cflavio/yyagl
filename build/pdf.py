@@ -28,7 +28,7 @@ def __process(opt, tmpl, name, i):
     wcard = '-o '.join(["-name '%s' " % wld for wld in opt[2].split()])
     wcard = '\\( %s\\)' % wcard
     cmd = tmpl.format(lng=lng, root=opt[1], wildcard=wcard, filter=filt,
-                          name=name)
+                      name=name)
     __process_step(name, cmd) if i else system(cmd)
 
 

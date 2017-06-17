@@ -7,7 +7,8 @@ def bld_tracks(target, source, env):
             for fname in fnames:
                 _fname = root + '/' + fname
                 if _fname.endswith('.egg'):
-                    system('egg2bam -txo -mipmap -ctex %s -o %s' % (_fname, _fname[:-3] + 'bam'))
+                    cmd_args = (_fname, _fname[:-3] + 'bam')
+                    system('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args)
     for root, dnames, fnames in walk('assets/models/tracks'):
         for dname in dnames:
             if root == env['TRACKS_DIR']:

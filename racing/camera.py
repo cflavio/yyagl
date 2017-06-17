@@ -57,12 +57,12 @@ class Camera(object):
         delta_pos_z = self.z_min + z_diff * speed_ratio
         delta_cam_z = self.look_z_min + look_z_diff * speed_ratio
 
-        #curr_cam_pos = car_pos + vec + (0, 0, delta_pos_z)
-        #curr_cam_dist_fact = self.dist_min + dist_diff * speed_ratio
-        #curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
-        #if curr_occl:
-        #    occl_pos = curr_occl.getHitPos()
-        #    vec = occl_pos - car_pos
+        # curr_cam_pos = car_pos + vec + (0, 0, delta_pos_z)
+        # curr_cam_dist_fact = self.dist_min + dist_diff * speed_ratio
+        # curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
+        # if curr_occl:
+        #     occl_pos = curr_occl.getHitPos()
+        #     vec = occl_pos - car_pos
 
         self.tgt_cam_x = car_pos.x + vec.x
         self.tgt_cam_y = car_pos.y + vec.y
@@ -75,36 +75,38 @@ class Camera(object):
         new_z = self.new_val(cam.getZ(), self.tgt_cam_z, curr_incr_slow)
 
         # overwrite camera's position to set the physics
-        #new_x = car_pos.x + 10
-        #new_y = car_pos.y - 5
-        #new_z = car_pos.z + 5
+        # new_x = car_pos.x + 10
+        # new_y = car_pos.y - 5
+        # new_z = car_pos.z + 5
 
         if not is_rolling:
             eng.base.camera.setPos(new_x, new_y, new_z)
         look_z = self.tgt_look_z + delta_cam_z
         eng.base.camera.look_at(self.tgt_look_x, self.tgt_look_y, look_z)
 
-    #def __occlusion_mesh(self, pos, curr_cam_dist_fact):
-    #    tgt = self.car.gfx.nodepath.getPos()
-    #    occl = eng.phys.world_phys.rayTestClosest(pos, tgt)
-    #    if not occl.hasHit():
-    #        return
-    #    occl_n = occl.getNode().getName()
-    #    if occl_n not in ['Vehicle', 'Goal'] and curr_cam_dist_fact > .1:
-    #        return occl
+    # def __occlusion_mesh(self, pos, curr_cam_dist_fact):
+    #     tgt = self.car.gfx.nodepath.getPos()
+    #     occl = eng.phys.world_phys.rayTestClosest(pos, tgt)
+    #     if not occl.hasHit():
+    #         return
+    #     occl_n = occl.getNode().getName()
+    #     if occl_n not in ['Vehicle', 'Goal'] and curr_cam_dist_fact > .1:
+    #         return occl
 
     @property
     def camera(self):
         return eng.base.camera
 
-    def render_all(self):
+    @staticmethod
+    def render_all():
         eng.base.camera.setPos(0, 0, 10000)
         eng.base.camera.look_at(0, 0, 0)
-        skydome = game.logic.season.race.logic.track.gfx.model.find('**/OBJSkydome*')
+        track_model = game.logic.season.race.logic.track.gfx.model
+        skydome = track_model.find('**/OBJSkydome*')
         skydome and skydome.hide()
         base.graphicsEngine.renderFrame()
         base.graphicsEngine.renderFrame()
         skydome and skydome.show()
 
     def destroy(self):
-        self.car = None
+        pass

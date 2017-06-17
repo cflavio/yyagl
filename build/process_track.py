@@ -42,6 +42,7 @@ class TrackProcesser(object):
     def __init__(self):
         self.__actors = []
         self.__flat_roots = {}
+        self.models_to_load = self.empty_models = self.in_loading = None
         self.props = Props()
         fpath = self.props.track_dir + '/' + self.props.model_name
         self.preprocess()
@@ -49,11 +50,13 @@ class TrackProcesser(object):
         self.__set_submodels()
 
     def preprocess(self):
-        for root, dirnames, filenames in walk('assets/models/tracks/' + self.props.track_dir):
+        troot = 'assets/models/tracks/'
+        for root, _, filenames in walk(troot + self.props.track_dir):
             for filename in filenames:
                 fname = root + '/' + filename
                 if fname.endswith('.egg'):
-                    system('egg2bam -txo -mipmap -ctex %s -o %s' % (fname, fname[:-3] + 'bam'))
+                    cmd_args = (fname, fname[:-3] + 'bam')
+                    system('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args)
 
     def __set_submodels(self):
         print 'loaded track model'
@@ -62,7 +65,6 @@ class TrackProcesser(object):
                 submodel.flatten_light()
         self.model.hide(BitMask32.bit(0))
         self.__load_empties()
-
 
     def __load_empties(self):
         print 'loading track submodels'
@@ -89,7 +91,8 @@ class TrackProcesser(object):
             self.__actors += [Actor(fpath, {'anim': anim_path})]
             self.__preload_models(models, callback, model, curr_t)
         else:
-            self.__preload_models(models, callback, loader.loadModel(fpath), curr_t)
+            fmod = loader.loadModel(fpath)
+            self.__preload_models(models, callback, fmod, curr_t)
 
     def __process_models(self, models):
         empty_name = self.props.empty_name
@@ -116,7 +119,7 @@ class TrackProcesser(object):
         print 'flattening using %s cores' % flat_cores
         self.in_loading = []
         self.models_to_load = self.__flat_roots.values()
-        [self.__flat_models() for i in range(flat_cores)]
+        [self.__flat_models() for _ in range(flat_cores)]
 
     def __flat_models(self, model='', time=0, nodes=0):
         if model:
@@ -126,11 +129,11 @@ class TrackProcesser(object):
             print msg_tmpl % (model, d_t, nodes)
         if self.models_to_load:
             mod = self.models_to_load.pop()
-            self.__process_flat_models(mod, self.end_flattening)
+            self.__process_flat_models(mod)
         elif not self.in_loading:
             self.end_flattening()
 
-    def __process_flat_models(self, mod, callback):
+    def __process_flat_models(self, mod):
         curr_t = globalClock.getFrameTime()
         node = mod
         node.clear_model_nodes()
@@ -141,7 +144,7 @@ class TrackProcesser(object):
         node.flattenStrong()
         process_flat(node.get_name(), curr_t, len(node.get_children()))
 
-    def end_flattening(self, model=None):
+    def end_flattening(self):
         print 'writing track_all.bam'
         fpath = 'assets/models/tracks/' + self.props.track_dir + \
             '/track_all.bam'

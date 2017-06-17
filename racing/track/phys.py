@@ -12,6 +12,7 @@ class TrackPhys(Phys):
     def __init__(
             self, mdt, trackphys_props):
         self.corners = None
+        self.model = self.waypoints = self.wp_np = None
         self.bonuses = []
         self.rigid_bodies = []
         self.ghosts = []

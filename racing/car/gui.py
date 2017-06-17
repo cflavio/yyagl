@@ -141,18 +141,21 @@ class CarPlayerGui(CarGui):
             (.5, -1.64), (-1, 10),
             lambda val: map(lambda whl: whl.setRollInfluence(val),
                             self.mdt.phys.vehicle.get_wheels()))
+
         def set_cam_x(val):
             vec = self.mdt.logic.camera.cam_vec
             self.mdt.logic.camera.cam_vec = (val, vec[1], vec[2])
         self.__cam_x = CarParameter(
             'camera_x', self.mdt.logic.camera.cam_vec[0],
             (.5, -1.72), (-1, 1), set_cam_x)
+
         def set_cam_y(val):
             vec = self.mdt.logic.camera.cam_vec
             self.mdt.logic.camera.cam_vec = (vec[0], val, vec[2])
         self.__cam_y = CarParameter(
             'camera_y', self.mdt.logic.camera.cam_vec[1],
             (.5, -1.8), (-1, 1), set_cam_y)
+
         def set_cam_z(val):
             vec = self.mdt.logic.camera.cam_vec
             self.mdt.logic.camera.cam_vec = (vec[0], vec[1], val)

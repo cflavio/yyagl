@@ -2,7 +2,7 @@ from panda3d.core import WindowProperties
 from direct.gui.OnscreenImage import OnscreenImage
 
 
-class MouseCursor:
+class MouseCursor(object):
 
     def __init__(self, fpath, scale, hotspot):
         if not fpath:
@@ -16,7 +16,8 @@ class MouseCursor:
         self.hotspot_dy = scale[2] * (1 - 2 * hotspot[1])
         eng.attach_obs(self.on_frame)
 
-    def __set_standard_cursor(self, show):
+    @staticmethod
+    def __set_standard_cursor(show):
         props = WindowProperties()
         props.set_cursor_hidden(not show)
         base.win.requestProperties(props)
@@ -39,7 +40,7 @@ class MouseCursor:
     def on_frame(self):
         if not base.mouseWatcherNode.hasMouse():
             return
-        x = base.mouseWatcherNode.get_mouse_x()
-        y = base.mouseWatcherNode.get_mouse_y()
-        h_x = x * base.getAspectRatio() + self.hotspot_dx
-        self.cursor_img.set_pos(h_x, 0, y - self.hotspot_dy)
+        m_x = base.mouseWatcherNode.get_mouse_x()
+        m_y = base.mouseWatcherNode.get_mouse_y()
+        h_x = m_x * base.getAspectRatio() + self.hotspot_dx
+        self.cursor_img.set_pos(h_x, 0, m_y - self.hotspot_dy)

@@ -1,4 +1,3 @@
-from os.path import exists
 from panda3d.core import TextNode, Shader, TextureStage
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
@@ -59,7 +58,7 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.widgets += [txt]
         for i, car in enumerate(self.props.grid):
-            idx, name, _car, skills = next(
+            idx, name, __, __ = next(
                 driver for driver in self.props.drivers if driver[3] == car)
             is_car = car == self.props.car_path
             txt = OnscreenText(
@@ -70,17 +69,19 @@ class LoadingPageGui(PageGui):
             img = OnscreenImage(self.props.cars_path % car,
                                 pos=(-1.42, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
-            with open(eng.curr_path + 'yyagl/assets/shaders/filter.vert') as ffilter:
+            filterpath = eng.curr_path + 'yyagl/assets/shaders/filter.vert'
+            with open(filterpath) as ffilter:
                 vert = ffilter.read()
-            with open(eng.curr_path + 'yyagl/assets/shaders/drv_car.frag') as f:
-                frag = f.read()
+            drvpath = eng.curr_path + 'yyagl/assets/shaders/drv_car.frag'
+            with open(drvpath) as fdrv:
+                frag = fdrv.read()
             shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)
             img.setTransparency(True)
-            ts = TextureStage('ts')
-            ts.setMode(TextureStage.MDecal)
+            t_s = TextureStage('ts')
+            t_s.setMode(TextureStage.MDecal)
             txt_path = self.props.drivers_path % idx
-            img.setTexture(ts, loader.loadTexture(txt_path))
+            img.setTexture(t_s, loader.loadTexture(txt_path))
 
     def set_ranking(self):
         items = game.logic.season.logic.ranking.logic.ranking.items()
@@ -89,7 +90,7 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.widgets += [txt]
         for i, car in enumerate(sorted_ranking):
-            idx, name, _car, skills = next(
+            idx, name, __, __ = next(
                 driver for driver in self.props.drivers if driver[3] == car[0])
             is_car = car[0] == self.props.car_path
             txt = OnscreenText(
@@ -100,17 +101,19 @@ class LoadingPageGui(PageGui):
             img = OnscreenImage(self.props.cars_path % car[0],
                                 pos=(-.36, 1, .12 - i * .16), scale=.074)
             self.widgets += [img]
-            with open(eng.curr_path + 'yyagl/assets/shaders/filter.vert') as ffilter:
+            filterpath = eng.curr_path + 'yyagl/assets/shaders/filter.vert'
+            with open(filterpath) as ffilter:
                 vert = ffilter.read()
-            with open(eng.curr_path + 'yyagl/assets/shaders/drv_car.frag') as ffilter:
+            drvpath = eng.curr_path + 'yyagl/assets/shaders/drv_car.frag'
+            with open(drvpath) as ffilter:
                 frag = ffilter.read()
             shader = Shader.make(Shader.SL_GLSL, vert, frag)
             img.setShader(shader)
             img.setTransparency(True)
-            ts = TextureStage('ts')
-            ts.setMode(TextureStage.MDecal)
+            t_s = TextureStage('ts')
+            t_s.setMode(TextureStage.MDecal)
             txt_path = self.props.drivers_path % idx
-            img.setTexture(ts, loader.loadTexture(txt_path))
+            img.setTexture(t_s, loader.loadTexture(txt_path))
 
     def set_controls(self):
         txt = OnscreenText(text=_('Controls'), scale=.1, pos=(1.0, .3),

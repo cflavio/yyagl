@@ -21,7 +21,7 @@ class LoadingProps(object):
         self.menu_args = menu_args
 
 
-class Loading:
+class Loading(object):
 
     def enter_loading(self, loading_props):
         l_p = loading_props

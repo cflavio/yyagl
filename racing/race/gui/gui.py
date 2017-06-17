@@ -30,6 +30,7 @@ class RaceGui(Gui, RaceGuiFacade):
             '', pos=(.1, .1), scale=.1, fg=r_p.menu_args.text_err,
             parent=eng.base.a2dBottomLeft, align=TextNode.ALeft,
             font=FontMgr().load_font(r_p.font))
+        self.minimap = None
 
     def start(self):
         self.minimap = Minimap(
@@ -39,7 +40,7 @@ class RaceGui(Gui, RaceGuiFacade):
 
     def destroy(self):
         self.results.destroy()
-        #self.loading.destroy()
+        # self.loading.destroy()
         self.way_txt.destroy()
         self.minimap.destroy()
         Gui.destroy(self)

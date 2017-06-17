@@ -1,5 +1,6 @@
-from .network import AbsNetwork
 from ...singleton import Singleton
+from ..log import LogMgr
+from .network import AbsNetwork
 
 
 class ClientError(Exception):

@@ -13,4 +13,4 @@ class TrackEvent(Event):
         if not self.shaders:
             sh_src = LPoint3f(*self.shadow_src)
             self.mdt.gfx.spot_lgt.setPos(car_pos + sh_src)
-            #self.mdt.gfx.spot_lgt.lookAt(car_pos + (-40, 60, -50))
+            # self.mdt.gfx.spot_lgt.lookAt(car_pos + (-40, 60, -50))

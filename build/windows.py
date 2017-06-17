@@ -1,4 +1,4 @@
-from os import system, remove, chdir, getcwd, rename, walk
+from os import system, remove, rename, walk
 from os.path import exists
 from shutil import move, rmtree, copytree, copy
 from distutils.dir_util import copy_tree
@@ -73,9 +73,10 @@ def bld_windows(target, source, env):
     internet_switch = '-s' if env['NOINTERNET'] else ''
     int_str = '-nointernet' if env['NOINTERNET'] else ''
     cmd = bld_cmd.format(
-        dst_dir=bld_dpath, appname=env['APPNAME'], AppName=env['APPNAME'].capitalize(),
-        version=ver, p3d_fpath=env['P3D_PATH'][:-4] + 'nopygame.p3d',
-        platform='win_i386', nointernet=internet_switch)
+        dst_dir=bld_dpath, appname=env['APPNAME'],
+        AppName=env['APPNAME'].capitalize(), version=ver,
+        p3d_fpath=env['P3D_PATH'][:-4] + 'nopygame.p3d', platform='win_i386',
+        nointernet=internet_switch)
     system(cmd)
     with InsideDir('%swin_i386' % bld_dpath):
         fname = '{AppName} {version}.exe'.format(
@@ -99,20 +100,23 @@ def bld_windows(target, source, env):
                     if any(fname.endswith('.' + ext) for ext in rm_ext):
                         remove(fname)
                     rm_ext = ['png', 'jpg']
-                    if 'assets/models/' in fname and any(fname.endswith('.' + ext) for ext in rm_ext):
+                    is_ext = any(fname.endswith('.' + ext) for ext in rm_ext)
+                    if 'assets/models/' in fname and is_ext:
                         remove(fname)
                     is_track = 'assets/models/tracks/' in fname
                     is_bam = fname.endswith('.bam')
                     no_conv = ['/track_all', '/collision', 'Anim']
-                    is_no_conv = any(fname.endswith(concl + '.bam') for concl in no_conv)
+                    is_no_conv = any(fname.endswith(concl + '.bam')
+                                     for concl in no_conv)
                     if is_track and is_bam and not is_no_conv:
                         remove(fname)
-            install_files = ''.join(
-                ['\nSetOutPath "$INSTDIR\\%s"\n' % root[2:].replace('/', '\\') +
-                 '\n'.join(['File ".\\%s\\%s"' % (root[2:].replace('/', '\\'),
+            files_lst = [
+                '\nSetOutPath "$INSTDIR\\%s"\n' % root[2:].replace('/', '\\') +
+                '\n'.join(['File ".\\%s\\%s"' % (root[2:].replace('/', '\\'),
                                                   fnm)
-                            for fnm in files])
-                 for root, _, files in walk('.')])
+                           for fnm in files])
+                for root, _, files in walk('.')]
+            install_files = ''.join(files_lst)
             uninstall_files = '\n'.join(
                 'Delete "$INSTDIR\\%s\\%s"' % (root[2:].replace('/', '\\'),
                                                fnm)
@@ -127,11 +131,12 @@ def bld_windows(target, source, env):
                 uninstallFiles=uninstall_files)
             with TempFile('installer.nsi', nsi_src_inst):
                 system('makensis installer.nsi')
-    src = '{dst_dir}win_i386/winInstaller/{appname}-{version}{int_str}-windows.exe'
+    src = '{dst_dir}win_i386/winInstaller/{appname}-{version}{int_str}' + \
+        '-windows.exe'
     tgt_file = '{dst_dir}{appname}-{version}{int_str}-windows.exe'
-    src_fmt = src.format(
-        dst_dir=bld_dpath, appname=env['APPNAME'], version=branch, int_str=int_str)
-    tgt_fmt = tgt_file.format(
-        dst_dir=bld_dpath, appname=env['APPNAME'], version=branch, int_str=int_str)
+    src_fmt = src.format(dst_dir=bld_dpath, appname=env['APPNAME'],
+                         version=branch, int_str=int_str)
+    tgt_fmt = tgt_file.format(dst_dir=bld_dpath, appname=env['APPNAME'],
+                              version=branch, int_str=int_str)
     move(src_fmt, tgt_fmt)
     rmtree('%swin_i386' % bld_dpath)

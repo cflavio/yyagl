@@ -5,7 +5,6 @@ from yyagl.engine.phys import PhysMgr
 from yyagl.racing.track.track import Track, TrackProps
 from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
     PlayerCarClient, NetworkCar, AiCar, AiPlayerCar
-from panda3d.core import LVecBase3f
 
 
 class NetMsgs(object):
@@ -86,7 +85,7 @@ class RaceLogic(Logic):
                 if Client().is_active:
                     car_cls = PlayerCarClient
             drv = r_p.drivers[car_path]
-            #pos = LVecBase3f(508, 12, .2)
+            # pos = LVecBase3f(508, 12, .2)
             car_props = CarProps(
                 car_path, r_p.coll_path, r_p.coll_name, pos, hpr, func,
                 self.mdt, r_p.laps, r_p.keys, r_p.joystick,
@@ -144,11 +143,14 @@ class RaceLogic(Logic):
                 wp_num = car.logic.wps_not_fork().index(past_wp)
             except ValueError:  # if the track has not a goal
                 return [car.name for car in cars]
-            if not len(car.lap_times) and wp_num == len(car.logic.wps_not_fork()) - 1 and len(car.logic.waypoints) <= 1:
+            first_lap = not len(car.lap_times)
+            wpnf = wp_num == len(car.logic.wps_not_fork()) - 1
+            if first_lap and wpnf and len(car.logic.waypoints) <= 1:
                 wp_num = -1
             dist = (past_wp.get_pos() - car.get_pos()).length()
             info += [(car.name, len(car.lap_times), wp_num, dist)]
-        by_laps = list(reversed(sorted(info, key=lambda val: (val[1], val[2], val[3]))))
+        sortfunc = lambda val: (val[1], val[2], val[3])
+        by_laps = list(reversed(sorted(info, key=sortfunc)))
         return [car[0] for car in by_laps]
 
     def race_ranking(self):

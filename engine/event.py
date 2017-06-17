@@ -1,6 +1,6 @@
+import sys
 from ..gameobject import Event
 from .joystick import JoystickMgr
-import sys
 
 
 class EngineEventBase(Event):

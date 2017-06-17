@@ -15,6 +15,7 @@ class TrackGfx(Gfx):
         self.ambient_np = None
         self.spot_lgt = None
         self.model = None
+        self.empty_models = self.signs = None
         self.loaders = []
         self.__actors = []
         self.__flat_roots = {}
@@ -27,7 +28,6 @@ class TrackGfx(Gfx):
 
     def __set_model(self):
         LogMgr().log('loading track model')
-        time = globalClock.getFrameTime()
         filename = 'assets/models/tracks/' + self.props.name + '/track_all.bam'
         if not exists(filename):
             system('python yyagl/build/process_track.py ' + self.props.name)
@@ -62,7 +62,8 @@ class TrackGfx(Gfx):
                 self.__actors[-1].node().setBounds(OmniBoundingVolume())
                 self.__actors[-1].node().setFinal(True)
             model.remove_node()
-        self.signs = Signs(self.model, self.props.sign_name, self.props.sign_cb)
+        self.signs = Signs(self.model, self.props.sign_name,
+                           self.props.sign_cb)
         self.signs.set_signs()
         self.model.prepareScene(eng.base.win.getGsg())
         self.model.premungeScene(eng.base.win.getGsg())

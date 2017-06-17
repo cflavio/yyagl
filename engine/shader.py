@@ -19,12 +19,14 @@ class ShaderSetter(object):
 
 class ShaderSetterAmbient(ShaderSetter):
 
+    @staticmethod
     def set(self, pref, lgt):
         render.set_shader_input(pref + 'amb', lgt.node().get_color())
 
 
 class ShaderSetterPointLight(ShaderSetter):
 
+    @staticmethod
     def set(self, pref, lgt):
         lgt_pos = lgt.get_mat(base.cam).xform(LVector4f(0, 0, 0, 1))
         render.set_shader_input(pref + 'pos', lgt_pos)
@@ -34,6 +36,7 @@ class ShaderSetterPointLight(ShaderSetter):
 
 class ShaderSetterDirectionalLight(ShaderSetter):
 
+    @staticmethod
     def set(self, pref, lgt):
         lgt_pos = lgt.get_pos()
         lgt_vec = -render.get_relative_vector(lgt, Vec3(0, 1, 0))
@@ -45,6 +48,7 @@ class ShaderSetterDirectionalLight(ShaderSetter):
 
 class ShaderSetterSpotlight(ShaderSetter):
 
+    @staticmethod
     def set(self, pref, lgt):
         lgt_pos = lgt.get_mat(base.cam).xform(LVector4f(0, 0, 0, 1))
         lgt_vec = base.cam.get_relative_vector(lgt, Vec3(0, 1, 0))
@@ -64,6 +68,8 @@ class ShaderMgr(object):
     def __init__(self, shaders, gamma):
         self.lights = []
         self.gamma = gamma
+        self.buffer = None
+        self.lcam = None
         if shaders:
             self.setup_post_fx()
 
@@ -90,6 +96,7 @@ class ShaderMgr(object):
         self.lights[-1].set_pos(*pos)
         self.lights[-1].look_at(*look_at)
 
+    @staticmethod
     def set_default_args(self, idx):
         pref = 'lights[%s].' % idx
         render.set_shader_input(pref + 'pos', LVector4f(0, 0, 0, 1))
@@ -157,18 +164,18 @@ class ShaderMgr(object):
         render.set_shader_input('ambient', .15, .15, .15, 1.0)
 
         lci = NodePath(PandaNode('light camera initializer'))
-        with open('yyagl/assets/shaders/caster.vert') as f:
-            vert = f.read()
-        with open('yyagl/assets/shaders/caster.frag') as f:
-            frag = f.read()
+        with open('yyagl/assets/shaders/caster.vert') as fvert:
+            vert = fvert.read()
+        with open('yyagl/assets/shaders/caster.frag') as ffrag:
+            frag = ffrag.read()
         lci.set_shader(Shader.make(Shader.SLGLSL, vert, frag))
         self.lcam.node().set_initial_state(lci.get_state())
 
         mci = NodePath(PandaNode('main camera initializer'))
-        with open('yyagl/assets/shaders/main.vert') as f:
-            vert = f.read()
-        with open('yyagl/assets/shaders/main.frag') as f:
-            frag = f.read()
+        with open('yyagl/assets/shaders/main.vert') as fvert:
+            vert = fvert.read()
+        with open('yyagl/assets/shaders/main.frag') as ffrag:
+            frag = ffrag.read()
         frag = frag.replace('<LIGHTS>', str(len(self.lights)))
         # use PTALVecBaseX instead
         # setShaderInput('vec3argname', PTALVecBase3(((0, 0, 0), (1, 1, 1))))

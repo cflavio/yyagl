@@ -14,13 +14,14 @@ from .ai import CarAi
 class CarProps(object):
 
     def __init__(
-        self, name, coll_path, coll_name, pos, hpr, callback, race, laps, keys,
-            joystick, sounds, color_main, color, font, car_path, phys_file,
-            wheel_names, tuning_engine, tuning_tires, tuning_suspensions,
-            road_name, model_name, damage_paths, wheel_gfx_names,
-            particle_path, driver_engine, driver_tires, driver_suspensions,
-            rocket_path, cam_vec, track_waypoints, respawn_name, pitstop_name,
-            wall_name, goal_name, bonus_name, roads_names, car_names):
+            self, name, coll_path, coll_name, pos, hpr, callback, race, laps,
+            keys, joystick, sounds, color_main, color, font, car_path,
+            phys_file, wheel_names, tuning_engine, tuning_tires,
+            tuning_suspensions, road_name, model_name, damage_paths,
+            wheel_gfx_names, particle_path, driver_engine, driver_tires,
+            driver_suspensions, rocket_path, cam_vec, track_waypoints,
+            respawn_name, pitstop_name, wall_name, goal_name, bonus_name,
+            roads_names, car_names):
         self.name = name
         self.coll_path = coll_path
         self.coll_name = coll_name

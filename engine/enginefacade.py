@@ -1,5 +1,3 @@
-from lang import LangMgr
-from .joystick import JoystickMgr
 from .shader import ShaderMgr
 from .font import FontMgr
 
@@ -40,6 +38,7 @@ class EngineFacade(object):
     def set_cam_pos(self, pos):
         return self.base.camera.set_pos(pos)
 
+    @staticmethod
     def load_font(self, font):
         return FontMgr().load_font(font)
 
@@ -78,9 +77,11 @@ class EngineFacade(object):
     def cursor_top(self):
         return self.gui.cursor.cursor_top()
 
+    @staticmethod
     def set_amb_lgt(self, col):
         return ShaderMgr().set_amb_lgt(col)
 
+    @staticmethod
     def set_dir_lgt(self, col, hpr):
         return ShaderMgr().set_dir_lgt(col, hpr)
 

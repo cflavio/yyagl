@@ -1,5 +1,5 @@
 from random import uniform
-from panda3d.core import Vec3, Vec2, Point3, Mat4, BitMask32, LineSegs, LPoint3f
+from panda3d.core import Vec3, Mat4, BitMask32, LineSegs, LPoint3f
 from yyagl.gameobject import Ai
 from yyagl.engine.phys import PhysMgr
 
@@ -35,12 +35,13 @@ class AbsAiLogic(object):
     def __init__(self, car, cars, show_lines_gnd, show_lines_obst):
         self.car = car
         self.cars = cars
-        self.gnd_samples = {'left': [''], 'center': [''],  'right': ['']}
-        self.obst_samples = {'left': [], 'center': [],  'right': []}
+        self.gnd_samples = {'left': [''], 'center': [''], 'right': ['']}
+        self.obst_samples = {'left': [], 'center': [], 'right': []}
         bnds = car.phys.coll_mesh.get_tight_bounds()
         self.width_bounds = (bnds[0][0] * 1.15, bnds[1][0] * 1.15)
-        whl_height = .4 / 2.0 # to be retrieved
-        self.height_bounds = (bnds[0][2] - whl_height * 1.15, bnds[1][2] + whl_height * 1.15)
+        whl_height = .4 / 2.0  # to be retrieved
+        self.height_bounds = (bnds[0][2] - whl_height * 1.15,
+                              bnds[1][2] + whl_height * 1.15)
         if show_lines_gnd:
             self.debug_lines_gnd = DebugLines(self.car, (0, 1, 0))
         if show_lines_obst:
@@ -59,7 +60,8 @@ class AbsAiLogic(object):
     def tgt_vec(self):
         if self.__tgt_vec:
             return self.__tgt_vec
-        #if self.car.name == game.player_car.name: print 'tgt', self.current_target
+        # if self.car.name == game.player_car.name:
+        #     print 'tgt', self.current_target
         curr_tgt_pos = self.current_target.get_pos()
         curr_pos = self.car.gfx.nodepath.get_pos()
         tgt_vec = Vec3(curr_tgt_pos - curr_pos)
@@ -74,7 +76,8 @@ class AbsAiLogic(object):
         lookahead_rot = rot_mat.xformVec(lookahed_vec)
         lookahead_pos = self.car.gfx.nodepath.get_pos() + lookahead_rot
         if hasattr(self, 'debug_lines_gnd'):
-            self.debug_lines_gnd.draw(self.car.gfx.nodepath.get_pos(), lookahead_pos)
+            self.debug_lines_gnd.draw(self.car.gfx.nodepath.get_pos(),
+                                      lookahead_pos)
         return self.car.phys.gnd_name(lookahead_pos)
 
     def _update_gnd(self, gnd):
@@ -82,9 +85,12 @@ class AbsAiLogic(object):
             self.gnd_samples[gnd].pop(0)
         center_deg = 10 - 5 * self.car.phys.speed_ratio
         lateral_deg = 60 - 55 * self.car.phys.speed_ratio
-        bounds = {'left': (center_deg, lateral_deg), 'center': (-center_deg, center_deg), 'right': (-lateral_deg, -center_deg)}
+        bounds = {'left': (center_deg, lateral_deg),
+                  'center': (-center_deg, center_deg),
+                  'right': (-lateral_deg, -center_deg)}
         deg = uniform(*bounds[gnd])
-        lgt = uniform(9 + 6 * self.car.phys.speed_ratio, 4 + 29 * self.car.phys.speed_ratio)
+        lgt = uniform(9 + 6 * self.car.phys.speed_ratio,
+                      4 + 29 * self.car.phys.speed_ratio)
         self.gnd_samples[gnd] += [self.lookahead_ground(lgt, deg)]
 
     def _get_obstacles(self):
@@ -100,7 +106,8 @@ class AbsAiLogic(object):
             min_right = min(right_samples, key=lambda elm: elm[1])
         if center_samples:
             min_center = min(center_samples, key=lambda elm: elm[1])
-        return min_center[0], min_center[1], min_left[0], min_left[1], min_right[0], min_right[1]
+        return min_center[0], min_center[1], min_left[0], min_left[1], \
+            min_right[0], min_right[1]
 
     def clear(self):
         for gnd in ['center', 'left', 'right']:
@@ -116,13 +123,12 @@ class AbsAiLogic(object):
         if len(self.obst_samples[gnd]) > nsam:
             self.obst_samples[gnd].pop(0)
         lat_deg = 40 - 35 * self.car.phys.speed_ratio
-        bounds = {'left': (0, lat_deg), 'center': (0, 0), 'right': (-lat_deg, 0)}
+        bounds = {'left': (0, lat_deg), 'center': (0, 0),
+                  'right': (-lat_deg, 0)}
         if gnd == 'center':
             offset = (uniform(*self.width_bounds), 0, 0)
-            deg = 0
         else:
             offset = (self.width_bounds[self.bnd_idx(gnd)], 0, 0)
-            deg = uniform(*bounds[gnd])
         start = self.car.gfx.nodepath.get_pos() - self.car_vec * .8
         rot_mat = Mat4()
         rot_mat.setRotateMat(self.car.gfx.nodepath.get_h(), (0, 0, 1))
@@ -170,7 +176,8 @@ class FrontAiLogic(AbsAiLogic):
     def car_vec(self):
         return self.car.logic.car_vec
 
-    def bnd_idx(self, gnd):
+    @staticmethod
+    def bnd_idx(gnd):
         return 0 if gnd == 'left' else 1
 
     def on_brake(self, distance_center, distance_left, distance_right):
@@ -196,7 +203,8 @@ class RearAiLogic(AbsAiLogic):
     def car_vec(self):
         return -self.car.logic.car_vec
 
-    def bnd_idx(self, gnd):
+    @staticmethod
+    def bnd_idx(gnd):
         return 1 if gnd == 'left' else 0
 
     def on_brake(self, distance_center, distance_left, distance_right):
@@ -219,15 +227,19 @@ class CarAi(Ai):
         eng.attach_obs(self.on_frame)
 
     def __eval_gnd(self):
-        curr_logic = self.front_logic if self.mdt.phys.speed >= 0 else self.rear_logic
+        has_pos_speed = self.mdt.phys.speed >= 0
+        curr_logic = self.front_logic if has_pos_speed else self.rear_logic
         road_n = self.road_name
-        n_road = lambda samples: len([smp for smp in samples if smp.startswith(road_n)])
+
+        def n_road(samples):
+            return len([smp for smp in samples if smp.startswith(road_n)])
         r_road = lambda samples: float(n_road(samples)) / len(samples)
         r_left = r_road(curr_logic.gnd_samples['left'])
         r_center = r_road(curr_logic.gnd_samples['center'])
         r_right = r_road(curr_logic.gnd_samples['right'])
         r_max = max([r_left, r_center, r_right])
-        #if self.mdt.name == game.player_car.name: print curr_logic.gnd_samples
+        # if self.mdt.name == game.player_car.name:
+        #     print curr_logic.gnd_samples
         if r_left < .3 and r_right > .6:
             return 'right'
         elif r_right < .3 and r_left > .6:
@@ -277,26 +289,34 @@ class CarAi(Ai):
             self.positions.pop(0)
         else:
             return
-        center_x = sum(pos.get_x() for pos in self.positions) / len(self.positions)
-        center_y = sum(pos.get_y() for pos in self.positions) / len(self.positions)
-        center_z = sum(pos.get_z() for pos in self.positions) / len(self.positions)
+        npos = len(self.positions)
+        center_x = sum(pos.get_x() for pos in self.positions) / npos
+        center_y = sum(pos.get_y() for pos in self.positions) / npos
+        center_z = sum(pos.get_z() for pos in self.positions) / npos
         center = LPoint3f(center_x, center_y, center_z)
         if all((pos - center).length() < 6 for pos in self.positions):
             self.positions = []
             self.mdt.event.process_respawn()
 
     def brake(self, obstacles, obstacles_back):
-        curr_logic = self.front_logic if self.mdt.phys.speed >= 0 else self.rear_logic
-        name_c, distance_center, name_l, distance_left, name_r, distance_right = obstacles
-        name_c_b, distance_center_b, name_l_b, distance_left_b, name_r_b, distance_right_b = obstacles_back
+        has_pos_speed = self.mdt.phys.speed >= 0
+        curr_logic = self.front_logic if has_pos_speed else self.rear_logic
+        name_c, distance_center, name_l, distance_left, name_r, \
+            distance_right = obstacles
+        name_c_b, distance_center_b, name_l_b, distance_left_b, name_r_b, \
+            distance_right_b = obstacles_back
         dist_c = 4 if name_c == 'Vehicle' else 8
         dist_l = 4 if name_l == 'Vehicle' else 8
         dist_r = 4 if name_r == 'Vehicle' else 8
         if self.mdt.phys.speed < 0:
-            if (distance_center < dist_c or distance_left < dist_l or distance_right < dist_r) and distance_center_b > 2:
+            d_c = distance_center < dist_c
+            d_l = distance_left < dist_l
+            d_r = distance_right < dist_r
+            if (d_c or d_l or d_r) and distance_center_b > 2:
                 return True
         else:
-            dist_c = 3 + (1 if name_c == 'Vehicle' else 5) * self.mdt.phys.speed_ratio
+            dist = 1 if name_c == 'Vehicle' else 5
+            dist_c = 3 + dist * self.mdt.phys.speed_ratio
             if distance_center < dist_c and distance_center_b > 2:
                 return True
         if self.mdt.phys.speed < 40:
@@ -305,7 +325,8 @@ class CarAi(Ai):
 
     @property
     def acceleration(self):
-        curr_logic = self.front_logic if self.mdt.phys.speed >= 0 else self.rear_logic
+        has_pos_speed = self.mdt.phys.speed >= 0
+        curr_logic = self.front_logic if has_pos_speed else self.rear_logic
         if self.mdt.phys.speed < 40:
             return True
         grounds = self.mdt.phys.gnd_names
@@ -319,11 +340,14 @@ class CarAi(Ai):
             return self.last_obst_info[0]
 
         if brake and self.mdt.phys.speed < 10:
-            name_c, distance_center, name_l, distance_left, name_r, distance_right = obstacles_back
+            name_c, distance_center, name_l, distance_left, name_r, \
+                distance_right = obstacles_back
         else:
-            name_c, distance_center, name_l, distance_left, name_r, distance_right = obstacles
+            name_c, distance_center, name_l, distance_left, name_r, \
+                distance_right = obstacles
 
-        curr_logic = self.front_logic if self.mdt.phys.speed >= 0 else self.rear_logic
+        has_pos_speed = self.mdt.phys.speed >= 0
+        curr_logic = self.front_logic if has_pos_speed else self.rear_logic
         dist_far = 4 + self.mdt.phys.speed_ratio * 8
         dist_close = 2 + self.mdt.phys.speed_ratio * 2
         if brake and self.mdt.phys.speed < 10:
@@ -349,12 +373,14 @@ class CarAi(Ai):
         if curr_logic.curr_dot_prod < -.2:
             left, right = dot_res < 0, dot_res >= 0
             if brake and self.mdt.phys.speed < 10:
-                left, right = left and not has_obst_left_back, right and not has_obst_right_back
+                left = left and not has_obst_left_back
+                right = right and not has_obst_right_back
                 if left or right:
                     return left, right
             else:
                 if not brake:
-                    left, right = left and not has_obst_left, right and not has_obst_right
+                    left = left and not has_obst_left
+                    right = right and not has_obst_right
                     if left or right:
                         return left, right
 
@@ -363,14 +389,12 @@ class CarAi(Ai):
             curr_obs_center = obst_center_back
             curr_obs_left = obst_left_back
             curr_obs_right = obst_right_back
-            curr_has_obs_center = has_obst_center_back
             curr_has_obs_left = has_obst_left_back
             curr_has_obs_right = has_obst_right_back
         else:
             curr_obs_center = obst_center
             curr_obs_left = obst_left
             curr_obs_right = obst_right
-            curr_has_obs_center = has_obst_center
             curr_has_obs_left = has_obst_left
             curr_has_obs_right = has_obst_right
         if curr_obs_left or curr_obs_right or curr_obs_center:
@@ -379,31 +403,34 @@ class CarAi(Ai):
                 if curr_obs_center:
                     left, right = not curr_obs_right, not curr_obs_left
                     if left and right:
-                        if max([distance_center, distance_left, distance_right]) == distance_center:
-                             left, right = False, False
-                        elif max([distance_center, distance_left, distance_right]) == distance_left:
-                             left, right = False, True
+                        max_d = max([distance_center, distance_left,
+                                     distance_right])
+                        if max_d == distance_center:
+                            left, right = False, False
+                        elif max_d == distance_left:
+                            left, right = False, True
                         else:
-                             left, right = True, False
+                            left, right = True, False
             else:
                 left, right = False, False
                 if curr_obs_center:
                     left, right = not curr_obs_left, not curr_obs_right
                     if left and right:
-                        if max([distance_center, distance_left, distance_right]) == distance_center:
-                             left, right = False, False
-                        elif max([distance_center, distance_left, distance_right]) == distance_left:
-                             left, right = True, False
+                        max_d = max([distance_center, distance_left,
+                                     distance_right])
+                        if max_d == distance_center:
+                            left, right = False, False
+                        elif max_d == distance_left:
+                            left, right = True, False
                         else:
-                             left, right = False, True
+                            left, right = False, True
             if left or right:
                 self.last_obst_info = (left, right), curr_time
                 return left, right
 
         # eval on_road
-        road_n = self.road_name
         gnd_dir = self.__eval_gnd()
-        #if curr_logic.curr_dot_prod > 0 and gnd_dir != 'center':
+        # if curr_logic.curr_dot_prod > 0 and gnd_dir != 'center':
         if gnd_dir == 'left':
             if brake and self.mdt.phys.speed < 10 and not curr_has_obs_left:
                 return False, True
@@ -424,7 +451,8 @@ class CarAi(Ai):
                 return True, False
 
         # eval waypoints
-        #if self.mdt.name == game.player_car.name: print 'dot', curr_logic.curr_dot_prod
+        # if self.mdt.name == game.player_car.name:
+        #     print 'dot', curr_logic.curr_dot_prod
         if abs(curr_logic.curr_dot_prod) > .98:
             return False, False
         car_vec = curr_logic.car_vec
@@ -451,21 +479,32 @@ class CarAi(Ai):
         return left, right
 
     def get_input(self):
-        #import time; time.sleep(.01)
-        #if self.mdt.name == game.player_car.name: print 'dot_prod', self.curr_dot_prod
-        #if self.mdt.name == game.player_car.name: print 'speed', self.mdt.phys.speed
+        # import time; time.sleep(.01)
+        # if self.mdt.name == game.player_car.name:
+        #     print 'dot_prod', self.curr_dot_prod
+        # if self.mdt.name == game.player_car.name:
+        #     print 'speed', self.mdt.phys.speed
         obstacles = list(self.front_logic._get_obstacles())
-        #if self.mdt.name == game.player_car.name: print 'obstacles', obstacles
+        # if self.mdt.name == game.player_car.name:
+        #     print 'obstacles', obstacles
         obstacles_back = list(self.rear_logic._get_obstacles())
-        #if self.mdt.name == game.player_car.name: print 'obstacles_back', obstacles_back
+        # if self.mdt.name == game.player_car.name:
+        #     print 'obstacles_back', obstacles_back
         brake = self.brake(obstacles, obstacles_back)
-        #if self.mdt.name == game.player_car.name: print 'brake', brake
+        # if self.mdt.name == game.player_car.name:
+        #    print 'brake', brake
         acceleration = False if brake else self.acceleration
-        #if self.mdt.name == game.player_car.name: print 'acceleration', acceleration
+        # if self.mdt.name == game.player_car.name:
+        #     print 'acceleration', acceleration
         left, right = self.left_right(obstacles, brake, obstacles_back)
-        #if self.mdt.name == game.player_car.name: print 'left, right', left, right
-        #if self.mdt.name == game.player_car.name: print self.__eval_gnd()
-        #if self.mdt.name == game.player_car.name: print left, right, brake, acceleration, self.__eval_gnd(), self.front_logic.curr_dot_prod, self.mdt.phys.speed, obstacles, obstacles_back
+        # if self.mdt.name == game.player_car.name:
+        #     print 'left, right', left, right
+        # if self.mdt.name == game.player_car.name:
+        #     print self.__eval_gnd()
+        # if self.mdt.name == game.player_car.name:
+        #     print left, right, brake, acceleration, self.__eval_gnd(), \
+        #         self.front_logic.curr_dot_prod, self.mdt.phys.speed, \
+        #         obstacles, obstacles_back
         return {'forward': acceleration, 'left': left, 'reverse': brake,
                 'right': right}
 

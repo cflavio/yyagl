@@ -21,7 +21,9 @@ class ImgBtn(DirectButton):
         self.initialiseoptions(self.__class__)
 
     def _on_enter(self, pos):
+        # pos comes from mouse
         self.set_shader_input('col_offset', .25)
 
     def _on_exit(self, pos):
+        # pos comes from mouse
         self.set_shader_input('col_offset', 0)

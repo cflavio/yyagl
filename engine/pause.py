@@ -1,4 +1,3 @@
-import sys
 from os import pardir
 from os.path import dirname, abspath, join
 from sys import modules
@@ -39,7 +38,7 @@ class PauseLogic(Logic):
     def __process_task(self, tsk):
         func = tsk.get_function()  # ordinary tasks
         mod = func.__module__
-        #sys_mod = sys.modules[mod].__file__.find(self.direct_dir) < 0
+        # sys_mod = sys.modules[mod].__file__.find(self.direct_dir) < 0
         # runtime: AttributeError: 'module' object has no attribute '__file__'
         modfile = ''
         if "from '" in str(modules[mod]):
@@ -79,7 +78,7 @@ class PauseLogic(Logic):
             tsk.remainingTime = tsk.wakeTime - globalClock.get_frame_time()
             # I need to alter the wakeTime during task resume,
             # so I have to save the remaining time.
-        map(lambda tsk: self.__pause_tsk(tsk), self.paused_tasks)
+        map(self.__pause_tsk, self.paused_tasks)
 
     @staticmethod
     def __resume_do_later(tsk):

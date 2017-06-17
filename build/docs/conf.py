@@ -6,7 +6,7 @@ import datetime
 
 path.insert(0, abspath('<src_dpath>'))
 
-#extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode'] # it crashes
+# extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode'] # it crashes
 extensions = ['sphinx.ext.autodoc']
 source_suffix = '.rst'
 master_doc = 'index'

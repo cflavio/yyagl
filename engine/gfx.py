@@ -1,6 +1,6 @@
 from os.path import exists
-from panda3d.core import get_model_path, LightRampAttrib, PandaNode, NodePath, \
-    AntialiasAttrib
+from panda3d.core import get_model_path, LightRampAttrib, PandaNode, \
+    NodePath, AntialiasAttrib
 from direct.particles.ParticleEffect import ParticleEffect
 from direct.filter.CommonFilters import CommonFilters
 from ..gameobject import Gfx

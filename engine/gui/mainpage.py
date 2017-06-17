@@ -22,16 +22,17 @@ class MainPageGui(PageGui):
             ('pinterest', 'http://www.pinterest.com/ya2tech'),
             ('tumblr', 'http://ya2tech.tumblr.com'),
             ('feed', 'http://www.ya2.it/feed-following')]
+        menu_args = self.menu.gui.menu_args
         self.widgets += [
             ImgBtn(
                 parent=eng.base.a2dBottomRight,
                 scale=.06,
                 pos=(-1.0 + i*.15, 1, .1),
                 frameColor=(1, 1, 1, 1),
-                frameTexture=self.menu.gui.menu_args.social_imgs_dpath % site[0],
+                frameTexture=menu_args.social_imgs_dpath % site[0],
                 command=eng.open_browser,
                 extraArgs=[site[1]],
-                **self.menu.gui.menu_args.imgbtn_args)
+                **menu_args.imgbtn_args)
             for i, site in enumerate(sites)]
 
     def __bld_version(self):

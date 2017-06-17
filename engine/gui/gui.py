@@ -15,7 +15,8 @@ class EngineGuiBase(Gui):
         Gui.__init__(self, mdt)
         mdt.base.disableMouse()
 
-    def open_browser(self, url):
+    @staticmethod
+    def open_browser(url):
         Browser.init_cls().open(url)
 
     @property
@@ -23,7 +24,8 @@ class EngineGuiBase(Gui):
         d_i = eng.base.pipe.get_display_information()
 
         def res(idx):
-            return d_i.get_display_mode_width(idx), d_i.get_display_mode_height(idx)
+            return d_i.get_display_mode_width(idx), \
+                d_i.get_display_mode_height(idx)
 
         res_values = [res(idx) for idx in range(d_i.get_total_display_modes())]
         return sorted(list(set(res_values)))
@@ -40,7 +42,7 @@ class EngineGuiBase(Gui):
             return abs(res[0] - curr_res[0]) + abs(res[1] - curr_res[1])
 
         try:
-            return min(self.resolutions, key=lambda res: distance(res))
+            return min(self.resolutions, key=distance)
         except ValueError:  # sometimes we have empty resolutions
             return self.resolution
 
@@ -65,7 +67,8 @@ class EngineGui(EngineGuiBase):
         EngineGuiBase.__init__(self, mdt)
         cfg = eng.logic.cfg
         resol = cfg.win_size.split()
-        self.set_resolution(tuple(int(size) for size in resol), fullscreen=cfg.fullscreen)
+        res = tuple(int(size) for size in resol)
+        self.set_resolution(res, fullscreen=cfg.fullscreen)
         self.cursor = MouseCursor(cfg.cursor_path, cfg.cursor_scale,
                                   cfg.cursor_hotspot)
 

@@ -1,6 +1,5 @@
 from yaml import load
-from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape,\
-    BulletGhostNode, BulletBoxShape, BulletSphereShape, BulletCapsuleShape
+from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape
 from panda3d.core import LPoint3f, BitMask32
 from yyagl.gameobject import Phys
 from yyagl.engine.log import LogMgr
@@ -13,6 +12,8 @@ class CarPhys(Phys):
         Phys.__init__(self, mdt)
         self.pnode = None
         self.vehicle = None
+        self.friction_slip = self.__track_phys = self.coll_mesh = None
+        self.roll_influence = self.max_speed = None
         self.curr_speed_factor = 1.0
         self.__prev_speed = 0
         self.__finds = {}  # cache for find's results
@@ -40,8 +41,8 @@ class CarPhys(Phys):
         r_a = (self.mdt.name, round(self.cfg['roll_influence'], 2),
                self.props.driver_suspensions)
         LogMgr().log('roll %s: %s (%s)' % r_a)
-        s_a = lambda field: setattr(self, field, self.cfg[field])
-        map(s_a, self.cfg.keys())
+        set_a = lambda field: setattr(self, field, self.cfg[field])
+        map(set_a, self.cfg.keys())
 
     def __set_collision_mesh(self):
         fpath = self.props.coll_path % self.mdt.name
@@ -50,11 +51,14 @@ class CarPhys(Phys):
         for geom in PhysMgr().find_geoms(self.coll_mesh, self.props.coll_name):
             chassis_shape.addGeom(geom.node().getGeom(0), geom.getTransform())
         self.mdt.gfx.nodepath.node().addShape(chassis_shape)
-        self.mdt.gfx.nodepath.setCollideMask(BitMask32.bit(1) | BitMask32.bit(2 + self.props.car_names.index(self.mdt.name)))
-        #nodepath = self.mdt.gfx.nodepath.attachNewNode(BulletGhostNode('car ghost'))
-        #nodepath.node().addShape(BulletCapsuleShape(4, 5, ZUp))
-        #eng.attach_ghost(nodepath.node())
-        #nodepath.node().notifyCollisions(False)
+        car_idx = self.props.car_names.index(self.mdt.name)
+        mask = BitMask32.bit(1) | BitMask32.bit(2 + car_idx)
+        self.mdt.gfx.nodepath.setCollideMask(mask)
+        # nodepath = self.mdt.gfx.nodepath.attachNewNode(
+        #     BulletGhostNode('car ghost'))
+        # nodepath.node().addShape(BulletCapsuleShape(4, 5, ZUp))
+        # eng.attach_ghost(nodepath.node())
+        # nodepath.node().notifyCollisions(False)
 
     def __set_phys_node(self):
         self.pnode = self.mdt.gfx.nodepath.node()
@@ -123,8 +127,8 @@ class CarPhys(Phys):
     def lateral_force(self):
         vel = self.vehicle.get_chassis().get_linear_velocity()
         vel.normalize()
-        dir = self.mdt.logic.car_vec
-        lat = dir.dot(vel)
+        dir_ = self.mdt.logic.car_vec
+        lat = dir_.dot(vel)
         lat_force = 0
         if lat > .5:
             lat_force = min(1, (lat - 1.0) / -.2)

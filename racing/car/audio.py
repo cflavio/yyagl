@@ -17,6 +17,7 @@ class CarAudio(Audio):
         self.engine_sfx.play()
 
     def update(self, input_dct):  # use on_frame (independent from caller)
+        # is input_dct necessary?
         playing = self.brake_sfx.status() == AudioSound.PLAYING
         if self.mdt.logic.is_skidmarking and not playing:
             self.brake_sfx.play()

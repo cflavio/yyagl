@@ -75,9 +75,9 @@ class PageGui(Gui):
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
 
     def __next_wdg(self, direction, start=None):
-        interactive_clss = [DirectButton, DirectCheckButton, DirectSlider,
-                            DirectOptionMenu, ImgBtn, DirectEntry]
-        inter = lambda wdg: any(pcl in interactive_clss for pcl in getmro(wdg.__class__))
+        iclss = [DirectButton, DirectCheckButton, DirectSlider,
+                 DirectOptionMenu, ImgBtn, DirectEntry]  # interactive classes
+        inter = lambda wdg: any(pcl in iclss for pcl in getmro(wdg.__class__))
         wdgs = [wdg for wdg in self.widgets if inter(wdg)]
         wdgs = filter(lambda wdg: wdg['state'] != DISABLED, wdgs)
         if hasattr(self, 'curr_wdg') and self.curr_wdg:
@@ -130,6 +130,7 @@ class PageGui(Gui):
 
     @staticmethod
     def transl_text(obj, text_src, text_transl):
+        # text_transl is not used: why are we passing it?
         obj.__text_src = text_src
         obj.__class__.transl_text = property(lambda self: _(self.__text_src))
 

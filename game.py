@@ -1,7 +1,7 @@
+import __builtin__
 from abc import ABCMeta
 from .gameobject import Logic, GameObject
 from .engine.engine import Engine
-import __builtin__
 
 
 class GameLogic(Logic):
@@ -24,7 +24,7 @@ class GameBase(GameObject, GameFacade):  # it doesn't manage the window
 
     def __init__(self, init_lst, cfg):
         __builtin__.game = self
-        eng = Engine(cfg, self.on_end)
+        Engine(cfg, self.on_end)
         GameObject.__init__(self, init_lst)
         self.logic.on_start()
 

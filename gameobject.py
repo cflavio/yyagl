@@ -93,7 +93,7 @@ class GODirector(object):
             self.end_lst(idx)
             return
         comp_info = self.__init_lst[idx].pop(0)
-        #TODO: define comp_info as a named tuple
+        # TODO: define comp_info as a named tuple
         self.pending[comp_info[1].__name__] = idx
         setattr(obj, comp_info[0], comp_info[1](*comp_info[2]))
 
@@ -125,7 +125,7 @@ class GameObject(Subject):
             return []
 
         def process_elm(elm):
-            return [elm[0]] if type(elm) == tuple else self.__comp_lst(elm)
+            return [elm[0]] if isinstance(elm, tuple) else self.__comp_lst(elm)
         return process_elm(init_lst[0]) + self.__comp_lst(init_lst[1:])
 
     def destroy(self):

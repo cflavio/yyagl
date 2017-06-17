@@ -6,10 +6,11 @@ from yyagl.racing.race.event import NetMsgs
 from yyagl.racing.weapon.rocket.rocket import Rocket
 from yyagl.engine.joystick import JoystickMgr
 from yyagl.engine.phys import PhysMgr
+from yyagl.engine.network.client import Client
 from yyagl.engine.network.server import Server
 
 
-class InputDctBuilder:  # maybe a visitor?
+class InputDctBuilder(object):  # maybe a visitor?
 
     @staticmethod
     def build(state, joystick):
@@ -37,11 +38,11 @@ class InputDctBuilderKeyboard(InputDctBuilder):
 class InputDctBuilderJoystick(InputDctBuilder):
 
     def build_dct(self, ai, has_weapon):
-        x, y, a, b = JoystickMgr().get_joystick()
-        if b and has_weapon:
+        j_x, j_y, j_a, j_b = JoystickMgr().get_joystick()
+        if j_b and has_weapon:
             self.on_fire()
-        return {'forward': y < -.4, 'reverse': y > .4 or a,
-                'left': x < -.4, 'right': x > .4}
+        return {'forward': j_y < -.4, 'reverse': j_y > .4 or j_a,
+                'left': j_x < -.4, 'right': j_x > .4}
 
 
 class CarEvent(Event):
@@ -138,9 +139,9 @@ class CarPlayerEvent(CarEvent):
 
     def on_frame(self):
         CarEvent.on_frame(self)
-        self.mdt.logic.camera.update(self.mdt.phys.speed_ratio,
-                                     self.mdt.logic.is_rolling,
-                                     self.mdt.fsm.getCurrentOrNextState() == 'Countdown')
+        self.mdt.logic.camera.update(
+            self.mdt.phys.speed_ratio, self.mdt.logic.is_rolling,
+            self.mdt.fsm.getCurrentOrNextState() == 'Countdown')
         self.mdt.audio.update(self._get_input())
 
     def on_collision(self, obj, obj_name):
@@ -195,7 +196,8 @@ class CarPlayerEvent(CarEvent):
         return self.input_dct_bld.build_dct(self.mdt.ai, self.has_weapon)
 
     def destroy(self):
-        map(self.ignore, ['f11', self.props.keys['button'], self.props.keys['respawn']])
+        evts = ['f11', self.props.keys['button'], self.props.keys['respawn']]
+        map(self.ignore, evts)
         CarEvent.destroy(self)
 
 

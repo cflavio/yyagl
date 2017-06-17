@@ -82,7 +82,7 @@ class PhysMgr(PhysFacade):
     def __do_collisions(self):
         to_clear = self.collision_objs[:]
         for obj in self.collision_objs:
-            if not obj in self.__obj2coll:
+            if obj not in self.__obj2coll:
                 self.__obj2coll[obj] = []
             result = self.root.contact_test(obj)
             for contact in result.get_contacts():

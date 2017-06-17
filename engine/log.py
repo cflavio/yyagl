@@ -1,6 +1,6 @@
 from datetime import datetime
-from platform import system, release, architecture, system, platform, \
-    processor, version, machine
+from platform import system, release, architecture, platform, processor, \
+    version, machine
 from multiprocessing import cpu_count
 from panda3d.core import loadPrcFileData, PandaSystem, Filename
 from panda3d.bullet import get_bullet_version
@@ -31,7 +31,8 @@ class LogMgrBase(object):
 
     def log_conf(self):
         self.log('version: ' + eng.logic.version)
-        self.log('operative system: ' + system() + ' ' + release() + ' ' + version())
+        os_info = (system(), release(), version())
+        self.log('operative system: %s %s %s' % os_info)
         self.log('architecture: ' + str(architecture()))
         self.log('machine: ' + machine())
         self.log('platform: ' + platform())
@@ -40,7 +41,9 @@ class LogMgrBase(object):
             self.log('cores: ' + str(cpu_count()))
         except NotImplementedError:  # on Windows
             self.log('cores: not implemented')
-        self.log('panda version: ' + PandaSystem.get_version_string() + ' ' + PandaSystem.get_git_commit())
+        panda_ver = PandaSystem.get_version_string()
+        panda_git = PandaSystem.get_git_commit()
+        self.log('panda version: %s %s' % (panda_ver, panda_git))
         self.log('bullet version: ' + str(get_bullet_version()))
         self.log('appdata: ' + str(Filename.get_user_appdata_directory()))
 

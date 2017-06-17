@@ -1,5 +1,5 @@
-from yaml import load, dump
 from collections import Mapping
+from yaml import load, dump
 
 
 class DctFile(object):

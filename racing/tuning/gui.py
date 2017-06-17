@@ -7,6 +7,7 @@ class TuningGui(Gui):
 
     def __init__(self, mdt, tuning_props):
         Gui.__init__(self, mdt)
+        self.buttons = self.background = None
         self.props = tuning_props
 
     def show(self):

@@ -9,7 +9,10 @@ with open(sys.argv[1]) as f_in:
     lines = f_in.readlines()
     for idx, line in enumerate(lines):
         if line.strip() != '<Scalar> envtype { GLOSS }':
-            if not idx or not (line.strip() == out_lines[-1].strip() and line.strip().startswith('<Scalar> alpha-file { ')):
+            is_eq_prev = line.strip() == out_lines[-1].strip()
+            is_scal = line.strip().startswith('<Scalar> alpha-file { ')
+            is_dupl = is_eq_prev and is_scal
+            if not idx or not is_dupl:
                 out_lines += [line.rstrip()]
         else:
             out_lines += [line.rstrip()]
@@ -19,7 +22,7 @@ with open(sys.argv[1]) as f_in:
                     outl += ' '
                 else:
                     break
-            outl += '<Scalar> alpha-file { %s }' % lines[i - 1].strip()
+            outl += '<Scalar> alpha-file { %s }' % lines[idx - 1].strip()
             out_lines += [outl]
 
 with open(sys.argv[1], 'w') as f_out:

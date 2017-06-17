@@ -28,7 +28,8 @@ def __bld_tmpl_merge(lng_dir, lng, appname):
 def __prepare(lng_base_dir, lng, appname):
     if not exists(lng_base_dir + lng + '/LC_MESSAGES'):
         makedirs(lng_base_dir + lng + '/LC_MESSAGES')
-    move(appname + '.pot', lng_base_dir + lng + '/LC_MESSAGES/%s.pot' % appname)
+    dst = lng_base_dir + lng + '/LC_MESSAGES/%s.pot' % appname
+    move(appname + '.pot', dst)
     lng_dir = lng_base_dir + lng + '/LC_MESSAGES/'
     for line in ['CHARSET/UTF-8', 'ENCODING/8bit']:
         cmd_tmpl = "sed 's/{line}/' {lng_dir}{appname}.pot > " + \
@@ -41,8 +42,8 @@ def __prepare(lng_base_dir, lng, appname):
 
 
 def __merge(lng_dir, appname):
-    cmd_str = 'msgmerge -o {lng_dir}{appname}merge.po {lng_dir}{appname}.po ' + \
-        '{lng_dir}{appname}.pot'
+    cmd_str = 'msgmerge -o {lng_dir}{appname}merge.po ' + \
+        '{lng_dir}{appname}.po {lng_dir}{appname}.pot'
     system(cmd_str.format(lng_dir=lng_dir, appname=appname))
     copy(lng_dir + appname + 'merge.po', lng_dir + appname + '.po')
 
