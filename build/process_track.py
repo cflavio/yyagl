@@ -32,6 +32,7 @@ class Conf(object):
         self.lang_domain = 'yorg'
         self.lang_path = 'assets/locale'
         self.volume = 1
+        self.python_profiling = False
 
 
 eng = Engine(Conf())
