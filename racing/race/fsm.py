@@ -44,17 +44,27 @@ class RaceFsm(Fsm):
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_end_race)
 
     def enterCountdown(self):
+        LogMgr().log('entering Countdown state')
         eng.hide_cursor()
         self.mdt.event.register_menu()
-        self.countdown = Countdown(self.countdown_sfx, self.menu_args.font)
-        self.countdown.attach(self.on_start_race)
         self.mdt.logic.enter_play()
         if self.shaders:
             ShaderMgr().toggle_shader()
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Countdown'), cars)
+        eng.do_later(.5, self.aux_start_countdown)
+
+    def aux_start_countdown(self):
+        # i think it's necessary since otherwise panda may use invoking's time
+        # so it may be already elapsed.
+        eng.do_later(3.5, self.start_countdown)
+
+    def start_countdown(self):
+        self.countdown = Countdown(self.countdown_sfx, self.menu_args.font)
+        self.countdown.attach(self.on_start_race)
 
     def exitCountdown(self):
+        LogMgr().log('exiting Countdown state')
         self.countdown.destroy()
         # eng.do_later(.5, game.player_car.gfx.apply_damage)
         # eng.do_later(.6, game.player_car.gfx.apply_damage)
