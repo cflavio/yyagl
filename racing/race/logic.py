@@ -138,16 +138,11 @@ class RaceLogic(Logic):
         cars = [self.player_car] + self.cars
         info = []
         for car in cars:
-            past_wp = car.logic.last_wp_not_fork()
-            try:
-                wp_num = car.logic.wps_not_fork().index(past_wp)
-            except ValueError:  # if the track has not a goal
-                return [car.name for car in cars]
-            first_lap = not len(car.lap_times)
-            wpnf = wp_num == len(car.logic.wps_not_fork()) - 1
-            if first_lap and wpnf and len(car.logic.waypoints) <= 1:
-                wp_num = -1
+            curr_wp = car.logic.last_wp_not_fork()
+            past_wp = car.logic.wps_not_fork()[car.logic.wps_not_fork().index(curr_wp) - 1]
             dist = (past_wp.get_pos() - car.get_pos()).length()
+            wp_num = len([vwp for vwp in car.logic.waypoints if vwp in [
+                int(wp.get_name()[8:]) for wp in car.logic.wps_not_fork()]])
             info += [(car.name, len(car.lap_times), wp_num, dist)]
         sortfunc = lambda val: (val[1], val[2], val[3])
         by_laps = list(reversed(sorted(info, key=sortfunc)))
