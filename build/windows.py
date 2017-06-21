@@ -25,7 +25,8 @@ FunctionEnd
 !define MUI_FINISHPAGE_RUN_FUNCTION launch
 !define MUI_FINISHPAGE_RUN_TEXT "Run Yorg"
 Function finishpageaction
-CreateShortcut "$DESKTOP\\{shortName}.lnk" "$INSTDIR\\{shortName}.exe"
+CreateShortcut "$DESKTOP\\{shortName}.lnk" "$INSTDIR\\{shortName}.exe"\
+  "" "$INSTDIR\\{iconFile}"
 FunctionEnd
 !define MUI_FINISHPAGE_SHOWREADME ""
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
