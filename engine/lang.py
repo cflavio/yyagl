@@ -1,3 +1,4 @@
+from os.path import join
 from gettext import install, translation
 from ..singleton import Singleton
 
@@ -8,7 +9,7 @@ class LangMgr:
     def __init__(self, lang, lang_domain, lang_path):
         self.curr_lang = lang
         self.domain = lang_domain
-        self.path = lang_path
+        self.path = join(eng.curr_path, lang_path)
         self.set_lang(lang)
 
     @property

@@ -2,6 +2,7 @@ import __builtin__
 from abc import ABCMeta
 from .gameobject import Logic, GameObject
 from .engine.engine import Engine
+from .engine.lang import LangMgr
 
 
 class GameLogic(Logic):
@@ -26,6 +27,7 @@ class GameBase(GameObject, GameFacade):  # it doesn't manage the window
         __builtin__.game = self
         Engine(cfg, self.on_end)
         GameObject.__init__(self, init_lst)
+        LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
         self.logic.on_start()
 
     def on_end(self):
