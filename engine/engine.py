@@ -4,7 +4,6 @@ path.append(dirname(realpath(__file__)) + '/../thirdparty')
 import __builtin__
 from direct.showbase.ShowBase import ShowBase
 from .pause import PauseMgr
-from .lang import LangMgr
 from .profiler import Profiler
 from .shader import ShaderMgr
 from .gfx import EngineGfx
@@ -26,7 +25,6 @@ class Engine(GameObject, EngineFacade):
     def __init__(self, cfg=None, on_end_cb=None):
         __builtin__.eng = self
         self.base = EngineShowBase()
-        LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
         ShaderMgr(cfg.shaders, cfg.gamma)
         Profiler(cfg.python_profiling)
         comps = [
