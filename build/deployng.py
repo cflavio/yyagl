@@ -1,5 +1,6 @@
 from os import system, remove
 from os.path import exists
+from sys import executable
 from shutil import rmtree
 
 
@@ -37,5 +38,5 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
         f_setup.write(setuppy % (appname, opt_dct))
     with open('requirements.txt', 'w') as f_req:
         f_req.write(requirements)
-    system('python setup.py bdist_apps')
+    system(executable + ' setup.py bdist_apps')
     map(remove, ['setup.py', 'requirements.txt'])

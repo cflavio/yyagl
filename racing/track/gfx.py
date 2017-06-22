@@ -1,5 +1,6 @@
 from os.path import exists
 from os import system
+from sys import executable
 from panda3d.core import AmbientLight, BitMask32, Spotlight, NodePath, \
     OmniBoundingVolume
 from direct.actor.Actor import Actor
@@ -30,7 +31,8 @@ class TrackGfx(Gfx):
         LogMgr().log('loading track model')
         filename = 'assets/models/tracks/' + self.props.name + '/track_all.bam'
         if not exists(filename):
-            system('python yyagl/build/process_track.py ' + self.props.name)
+            script_path = executable + ' yyagl/build/process_track.py'
+            system(script_path + ' ' + self.props.name)
         LogMgr().log('loading ' + filename)
         eng.load_model(filename, callback=self.end_loading)
 

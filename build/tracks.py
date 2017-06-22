@@ -1,4 +1,5 @@
 from os import system, walk
+from sys import executable
 
 
 def bld_tracks(target, source, env):
@@ -12,4 +13,4 @@ def bld_tracks(target, source, env):
     for root, dnames, fnames in walk('assets/models/tracks'):
         for dname in dnames:
             if root == env['TRACKS_DIR']:
-                system('python yyagl/build/process_track.py ' + dname)
+                system(executable + ' yyagl/build/process_track.py ' + dname)
