@@ -1,6 +1,7 @@
 from panda3d.core import TextNode, LVector3f
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.OnscreenText import OnscreenText
+from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import Gui
 from yyagl.engine.font import FontMgr
 
@@ -199,6 +200,16 @@ class CarPlayerGui(CarGui):
         self.best_lab = OnscreenText(_('best lap:'), pos=(-.3, -.4), **pars)
         self.ranking_lab = OnscreenText(_('ranking:'), pos=(-.3, -.5), **pars)
         self.damages_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
+        self.weapon_lab = OnscreenText(_('weapon:'), pos=(-.3, -.7), **pars)
+
+    def set_weapon(self):
+        self.weapon_img = OnscreenImage(
+            'assets/images/weapons/rocketfront.png',
+            scale=.05, parent=eng.base.a2dTopRight, pos=(-.2, 1, -.69))
+        self.weapon_img.set_transparency(True)
+
+    def unset_weapon(self):
+        self.weapon_img.destroy()
 
     def apply_damage(self, reset=False):
         col = self.cargui_props.color
@@ -226,6 +237,7 @@ class CarPlayerGui(CarGui):
         labels = [self.speed_txt, self.time_txt, self.lap_txt,
                   self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
                   self.best_lab, self.damages_txt, self.damages_lab,
-                  self.ranking_txt, self.ranking_lab]
+                  self.ranking_txt, self.ranking_lab, self.weapon_lab,
+                  self.weapon_img]
         map(lambda wdg: wdg.destroy(), self.__pars + labels)
         Gui.destroy(self)

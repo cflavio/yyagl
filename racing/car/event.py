@@ -160,11 +160,13 @@ class CarPlayerEvent(CarEvent):
             self.mdt.logic.weapon = Rocket(self.mdt, self.props.rocket_path)
             self.accept(self.props.keys['button'], self.on_fire)
             self.has_weapon = True
+            self.mdt.gui.set_weapon()
 
     def on_fire(self):
         self.ignore(self.props.keys['button'])
         self.mdt.logic.fire()
         self.has_weapon = False
+        self.mdt.gui.unset_weapon()
 
     def _on_crash(self):
         if self.mdt.fsm.getCurrentOrNextState() != 'Results':
