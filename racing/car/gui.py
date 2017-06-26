@@ -202,9 +202,9 @@ class CarPlayerGui(CarGui):
         self.damages_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
         self.weapon_lab = OnscreenText(_('weapon:'), pos=(-.3, -.7), **pars)
 
-    def set_weapon(self):
+    def set_weapon(self, wpn):
         self.weapon_img = OnscreenImage(
-            'assets/images/weapons/rocketfront.png',
+            'assets/images/weapons/%s.png' % wpn,
             scale=.05, parent=eng.base.a2dTopRight, pos=(-.2, 1, -.69))
         self.weapon_img.set_transparency(True)
 

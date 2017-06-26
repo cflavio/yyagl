@@ -1,9 +1,11 @@
+from random import choice
 from itertools import chain
 from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import Event
 from yyagl.racing.race.event import NetMsgs
 from yyagl.racing.weapon.rocket.rocket import Rocket
+from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.engine.joystick import JoystickMgr
 from yyagl.engine.phys import PhysMgr
 from yyagl.engine.network.client import Client
@@ -157,10 +159,14 @@ class CarPlayerEvent(CarEvent):
 
     def on_bonus(self):
         if not self.mdt.logic.weapon:
-            self.mdt.logic.weapon = Rocket(self.mdt, self.props.rocket_path)
+            wpn_cls = choice([Rocket, RearRocket])
+            self.mdt.logic.weapon = wpn_cls(self.mdt, self.props.rocket_path)
             self.accept(self.props.keys['button'], self.on_fire)
             self.has_weapon = True
-            self.mdt.gui.set_weapon()
+            wpn2img = {
+                Rocket: 'rocketfront',
+                RearRocket: 'rocketrear'}
+            self.mdt.gui.set_weapon(wpn2img[wpn_cls])
 
     def on_fire(self):
         self.ignore(self.props.keys['button'])
