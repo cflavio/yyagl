@@ -116,8 +116,6 @@ class TrackPhys(Phys):
         self.generate_tsk += [eng.do_later(20, self.create_bonus, [bonus.pos])]
 
     def __set_weapons(self):
-        if not self.props.weapons:
-            return
         weapon_names = self.props.weapon_names
         weap_root = self.model.find('**/' + weapon_names[0])
         if not weap_root:

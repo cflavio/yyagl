@@ -11,9 +11,9 @@ class TrackProps(object):
     def __init__(
             self, path, callback, shaders, music_path, coll_path, unmerged,
             merged, ghosts, corner_names, waypoint_names, show_waypoints,
-            weapons, weapon_names, start, name, track_path, model_name,
-            empty_name, anim_name, omni_tag, sign_cb, sign_name, camera_vec,
-            shadow_src, laps, bonus_model, bonus_suff):
+            weapon_names, start, name, track_path, model_name, empty_name,
+            anim_name, omni_tag, sign_cb, sign_name, camera_vec, shadow_src,
+            laps, bonus_model, bonus_suff):
         self.path = path
         self.callback = callback
         self.shaders = shaders
@@ -25,7 +25,6 @@ class TrackProps(object):
         self.corner_names = corner_names
         self.waypoint_names = waypoint_names
         self.show_waypoints = show_waypoints
-        self.weapons = weapons
         self.weapon_names = weapon_names
         self.start = start
         self.name = name

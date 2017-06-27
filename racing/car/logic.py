@@ -160,7 +160,7 @@ class CarLogic(Logic):
         if self.mdt.phys.speed / curr_max_speed < .99:
             return eng_frc
         tot = .01 * curr_max_speed
-        return eng_frc * min(1, (curr_max_speed - self.mdt.phys.speed) / tot)
+        return eng_frc * max(-.1, min(1, (curr_max_speed - self.mdt.phys.speed) / tot)) # -.1: from turbo to normal
 
     def __update_roll_info(self):
         if -45 <= self.mdt.gfx.nodepath.getR() < 45:
