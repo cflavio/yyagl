@@ -38,14 +38,14 @@ class Results(Subject):
         # ref into race
         self.__res_txts = [
             OnscreenText(str(round(lap_times[i], 2)),
-                         pos=(0, .47 - .2 * (i + 1)), **pars)
+                         pos=(0, .52 - .2 * (i + 1)), **pars)
             for i in range(laps)]
         self.__res_txts += [OnscreenText(_('LAP'), pos=(-.6, .6), **pars)]
         self.__res_txts += [OnscreenText(_('TIME'), pos=(0, .6), **pars)]
         self.__res_txts += [OnscreenText(_('RANKING'), pos=(.5, .6),
                                          align=TextNode.A_left, **pars)]
         self.__res_txts += [
-            OnscreenText(str(i), pos=(-.6, .47 - .2 * i), **pars)
+            OnscreenText(str(i), pos=(-.6, .52 - .2 * i), **pars)
             for i in range(1, 4)]
         race_ranking_sorted = sorted(race_ranking.items(), key=lambda x: x[1])
         race_ranking_sorted = reversed([el[0] for el in race_ranking_sorted])
@@ -56,10 +56,10 @@ class Results(Subject):
             fgc = self.props.menu_args.text_fg if is_car else text_bg
             txt = OnscreenText(
                 text=str(i + 1) + '. ' + name, align=TextNode.A_left,
-                scale=.072, pos=(.68, .44 - .16 * (i + 1)),
+                scale=.072, pos=(.68, .49 - .16 * (i + 1)),
                 font=self.props.menu_args.font, fg=fgc)
             img = OnscreenImage(self.props.cars_imgs % car,
-                                pos=(.58, 1, .47 - (i + 1) * .16), scale=.074)
+                                pos=(.58, 1, .52 - (i + 1) * .16), scale=.074)
             filterpath = eng.curr_path + 'yyagl/assets/shaders/filter.vert'
             with open(filterpath) as ffil:
                 vert = ffil.read()
