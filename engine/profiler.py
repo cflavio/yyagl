@@ -13,8 +13,10 @@ if not exists('main.pyo'):
 
         __metaclass__ = Singleton
 
-        def __init__(self, enabled):
+        def __init__(self, enabled, percall):
             self.enabled = enabled
+            self.percall = percall
+            self.is_profiling = False
             if not enabled:
                 return
             self.prof = Profile()
@@ -24,11 +26,22 @@ if not exists('main.pyo'):
             if not self.enabled:
                 return
             self.prof.enable()
+            self.is_profiling = True
 
         def disable(self):
             if not self.enabled:
                 return
             self.prof.disable()
+            self.is_profiling = False
+
+        def toggle(self):
+            if not self.enabled:
+                return
+            if not self.is_profiling:
+                self.enable()
+            else:
+                self.disable()
+                self.printstats()
 
         def printstats(self):
             self.prof.disable()
@@ -37,15 +50,19 @@ if not exists('main.pyo'):
             if not self.enabled:
                 return
             self.stats.print_stats()
-            print sio.getvalue()
-            # lines = sio.getvalue().split('\n')
-            # out_lines = lines[:5]
-            # lines = lines[5:]
-            # lines = [line.split() for line in lines]
-            # lines = [line for line in lines if line]
-            # lines = reversed(sorted(lines, key=lambda line: line[4]))
-            # lines = ['\t'.join(line) for line in lines]
-            # print '\n'.join(out_lines + lines)
+            if not self.percall:
+                print sio.getvalue()
+            else:
+                lines = sio.getvalue().split('\n')
+                out_lines = lines[:5]
+                lines = lines[5:]
+                lines = [line.split() for line in lines]
+                lines = [line for line in lines if line]
+                lines = reversed(sorted(lines, key=lambda line: line[4]))
+                lines = ['\t'.join(line) for line in lines]
+                print '\n'.join(out_lines + lines)
+
+
 else:
     from ..singleton import Singleton
 

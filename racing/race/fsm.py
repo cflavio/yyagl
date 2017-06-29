@@ -74,8 +74,6 @@ class RaceFsm(Fsm):
         LogMgr().log('entering Play state')
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Play'), cars)
-        Profiler().enable()
-        self.accept('f9', Profiler().printstats)
 
     def on_start_race(self):
         self.demand('Play')

@@ -26,7 +26,7 @@ class Engine(GameObject, EngineFacade):
         __builtin__.eng = self
         self.base = EngineShowBase()
         ShaderMgr(cfg.shaders, cfg.gamma)
-        Profiler(cfg.python_profiling)
+        Profiler(cfg.python_profiling, cfg.python_profiling_percall)
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],

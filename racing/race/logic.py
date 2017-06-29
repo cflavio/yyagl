@@ -140,8 +140,7 @@ class RaceLogic(Logic):
             curr_wp = car.logic.last_wp_not_fork()
             past_wp = car.logic.wps_not_fork()[car.logic.wps_not_fork().index(curr_wp) - 1]
             dist = (past_wp.get_pos() - car.get_pos()).length()
-            wp_num = len([vwp for vwp in car.logic.waypoints if vwp in [
-                int(wp.get_name()[8:]) for wp in car.logic.wps_not_fork()]])
+            wp_num = car.logic.wp_num
             info += [(car.name, len(car.lap_times), wp_num, dist)]
         sortfunc = lambda val: (val[1], val[2], val[3])
         by_laps = list(reversed(sorted(info, key=sortfunc)))

@@ -144,6 +144,7 @@ class CarLogic(Logic):
             self.pitstop_wps(wp)
         for wp in self.props.track_waypoints:  # rename wp
             self.grid_wps(wp)
+        self.__wp_num = None
 
     def update(self, input_dct):
         phys = self.mdt.phys
@@ -412,9 +413,11 @@ class CarLogic(Logic):
         closest_wp = int(self.closest_wp()[0].get_name()[8:])  # WaypointX
         if closest_wp not in self.waypoints:
             self.waypoints += [closest_wp]
+            self.__recompute_wp_num()
 
     def reset_waypoints(self):
         self.waypoints = []
+        self.__recompute_wp_num()
 
     def __fork_wp(self):
         wps = self.props.track_waypoints
@@ -440,6 +443,15 @@ class CarLogic(Logic):
                     if w_p2 not in end_forks:
                         to_process += [w_p2]
         return in_forks
+
+    @property
+    def wp_num(self):
+        return self.__wp_num
+
+    def __recompute_wp_num(self):
+        self.__wp_num = len(
+            [vwp for vwp in self.waypoints if vwp in [
+                int(wp.get_name()[8:]) for wp in self.wps_not_fork()]])
 
     @property
     def correct_lap(self):
