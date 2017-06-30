@@ -9,11 +9,11 @@ class RaceProps(object):
             corner_names, waypoint_names, show_waypoints, weapon_names, start,
             track_name, track_path, track_model_name, empty_name, anim_name,
             omni_tag, sign_cb, sign_name, minimap_path, minimap_image, col_dct,
-            camera_vec, shadow_src, laps, rocket_path, turbo_path, bonus_model,
-            bonus_suff, cars, a_i, ingame_menu, menu_args, drivers_img,
-            cars_imgs, share_urls, share_imgs, respawn_name, pitstop_name,
-            wall_name, goal_name, bonus_name, roads_names, grid,
-            player_car_name):
+            camera_vec, shadow_src, laps, rocket_path, turbo_path,
+            rotate_all_path, bonus_model, bonus_suff, cars, a_i, ingame_menu,
+            menu_args, drivers_img, cars_imgs, share_urls, share_imgs,
+            respawn_name, pitstop_name, wall_name, goal_name, bonus_name,
+            roads_names, grid, player_car_name):
         # make initializer decorator
         self.keys = keys
         self.joystick = joystick
@@ -62,6 +62,7 @@ class RaceProps(object):
         self.laps = laps
         self.rocket_path = rocket_path
         self.turbo_path = turbo_path
+        self.rotate_all_path = rotate_all_path
         self.bonus_model = bonus_model
         self.bonus_suff = bonus_suff
         self.cars = cars

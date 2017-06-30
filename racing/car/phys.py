@@ -231,6 +231,9 @@ class CarPhys(Phys):
         return self.cfg['roll_influence'] * (
             1 + .01 * self.props.driver_suspensions)
 
+    def rotate(self):
+        self.pnode.apply_torque((0, 0, 300000))
+
     def destroy(self):
         eng.detach_obs(self.on_end_frame)
         PhysMgr().remove_vehicle(self.vehicle)
