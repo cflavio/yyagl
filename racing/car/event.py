@@ -8,6 +8,7 @@ from yyagl.racing.weapon.rocket.rocket import Rocket
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.racing.weapon.turbo.turbo import Turbo
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
+from yyagl.racing.weapon.mine.mine import Mine
 from yyagl.engine.joystick import JoystickMgr
 from yyagl.engine.phys import PhysMgr
 from yyagl.engine.network.client import Client
@@ -161,7 +162,7 @@ class CarPlayerEvent(CarEvent):
 
     def on_bonus(self):
         if not self.mdt.logic.weapon:
-            wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll])
+            wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll, Mine])
             if wpn_cls == Rocket:
                 path = self.props.rocket_path
                 self.mdt.logic.weapon = wpn_cls(self.mdt, path)
@@ -174,13 +175,17 @@ class CarPlayerEvent(CarEvent):
             elif wpn_cls == RotateAll:
                 path = self.props.rotate_all_path
                 self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars)
+            elif wpn_cls == Mine:
+                path = self.props.mine_path
+                self.mdt.logic.weapon = wpn_cls(self.mdt, path)
             self.accept(self.props.keys['button'], self.on_fire)
             self.has_weapon = True
             wpn2img = {
                 Rocket: 'rocketfront',
                 RearRocket: 'rocketrear',
                 Turbo: 'turbo',
-                RotateAll: 'turn'}
+                RotateAll: 'turn',
+                Mine: 'mine'}
             self.mdt.gui.set_weapon(wpn2img[wpn_cls])
 
     def on_fire(self):

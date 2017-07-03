@@ -20,8 +20,8 @@ class CarProps(object):
             tuning_suspensions, road_name, model_name, damage_paths,
             wheel_gfx_names, particle_path, driver_engine, driver_tires,
             driver_suspensions, rocket_path, turbo_path, rotate_all_path,
-            cam_vec, track_waypoints, respawn_name, pitstop_name, wall_name,
-            goal_name, bonus_name, roads_names, car_names):
+            mine_path, cam_vec, track_waypoints, respawn_name, pitstop_name,
+            wall_name, goal_name, bonus_name, roads_names, car_names):
         self.name = name
         self.coll_path = coll_path
         self.coll_name = coll_name
@@ -53,6 +53,7 @@ class CarProps(object):
         self.rocket_path = rocket_path
         self.turbo_path = turbo_path
         self.rotate_all_path = rotate_all_path
+        self.mine_path = mine_path
         self.cam_vec = cam_vec
         self.track_waypoints = track_waypoints
         self.respawn_name = respawn_name
