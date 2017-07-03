@@ -33,6 +33,7 @@ class Conf(object):
         self.lang_path = 'assets/locale'
         self.volume = 1
         self.python_profiling = False
+        self.python_profiling_percall = False
 
 
 eng = Engine(Conf())
