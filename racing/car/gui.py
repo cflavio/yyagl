@@ -237,7 +237,8 @@ class CarPlayerGui(CarGui):
         labels = [self.speed_txt, self.time_txt, self.lap_txt,
                   self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
                   self.best_lab, self.damages_txt, self.damages_lab,
-                  self.ranking_txt, self.ranking_lab, self.weapon_lab,
-                  self.weapon_img]
+                  self.ranking_txt, self.ranking_lab, self.weapon_lab]
         map(lambda wdg: wdg.destroy(), self.__pars + labels)
+        if hasattr(self, 'weapon_img') and not self.weapon_img.is_empty():
+            self.weapon_img.destroy()
         Gui.destroy(self)
