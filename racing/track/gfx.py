@@ -90,7 +90,10 @@ class TrackGfx(Gfx):
         self.spot_lgt.setPos(*self.props.shadow_src)
         self.spot_lgt.lookAt(0, 0, 0)
         render.setLight(self.spot_lgt)
-        render.setShaderAuto()
+        if base.win.get_gsg().get_supports_basic_shaders():
+            render.setShaderAuto()
+        else:
+            render.setShaderOff()
 
     def destroy(self):
         self.model.removeNode()
