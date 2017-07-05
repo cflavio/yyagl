@@ -159,34 +159,37 @@ class CarPlayerEvent(CarEvent):
             eng.audio.play(self.mdt.audio.landing_sfx)
         if obj_name.startswith(self.props.bonus_name):
             self.on_bonus()
+        if obj_name.startswith('Mine'):
+            self.mdt.phys.pnode.apply_central_force((0, 0, 200000))
 
     def on_bonus(self):
-        if not self.mdt.logic.weapon:
-            wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll, Mine])
-            if wpn_cls == Rocket:
-                path = self.props.rocket_path
-                self.mdt.logic.weapon = wpn_cls(self.mdt, path)
-            elif wpn_cls == RearRocket:
-                path = self.props.rocket_path
-                self.mdt.logic.weapon = wpn_cls(self.mdt, path)
-            elif wpn_cls == Turbo:
-                path = self.props.turbo_path
-                self.mdt.logic.weapon = wpn_cls(self.mdt, path)
-            elif wpn_cls == RotateAll:
-                path = self.props.rotate_all_path
-                self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars)
-            elif wpn_cls == Mine:
-                path = self.props.mine_path
-                self.mdt.logic.weapon = wpn_cls(self.mdt, path)
-            self.accept(self.props.keys['button'], self.on_fire)
-            self.has_weapon = True
-            wpn2img = {
-                Rocket: 'rocketfront',
-                RearRocket: 'rocketrear',
-                Turbo: 'turbo',
-                RotateAll: 'turn',
-                Mine: 'mine'}
-            self.mdt.gui.set_weapon(wpn2img[wpn_cls])
+        if self.mdt.logic.weapon:
+            self.mdt.logic.weapon.destroy()
+        wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll, Mine])
+        if wpn_cls == Rocket:
+            path = self.props.rocket_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path)
+        elif wpn_cls == RearRocket:
+            path = self.props.rocket_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path)
+        elif wpn_cls == Turbo:
+            path = self.props.turbo_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path)
+        elif wpn_cls == RotateAll:
+            path = self.props.rotate_all_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars)
+        elif wpn_cls == Mine:
+            path = self.props.mine_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path)
+        self.accept(self.props.keys['button'], self.on_fire)
+        self.has_weapon = True
+        wpn2img = {
+            Rocket: 'rocketfront',
+            RearRocket: 'rocketrear',
+            Turbo: 'turbo',
+            RotateAll: 'turn',
+            Mine: 'mine'}
+        self.mdt.gui.set_weapon(wpn2img[wpn_cls])
 
     def on_fire(self):
         self.ignore(self.props.keys['button'])

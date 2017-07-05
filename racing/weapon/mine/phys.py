@@ -6,14 +6,18 @@ from yyagl.engine.phys import PhysMgr
 
 class MinePhys(Phys):
 
+    cnt = 0
+
     def __init__(self, mdt, car):
         Phys.__init__(self, mdt)
         self.parent = car.gfx.nodepath
         self.car = car
         self.n_p = self.node = None
+        MinePhys.cnt += 1
+        self.minename = 'Mine' + str(MinePhys.cnt)
 
     def fire(self):
-        self.node = BulletRigidBodyNode('Box')
+        self.node = BulletRigidBodyNode(self.minename)
         self.node.setMass(10000)
         self.node.addShape(BulletSphereShape(.5))
         self.n_p = self.parent.attachNewNode(self.node)

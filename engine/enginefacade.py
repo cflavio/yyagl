@@ -28,6 +28,10 @@ class EngineFacade(object):
                                      meth.__name__)
 
     @staticmethod
+    def remove_do_later(tsk):
+        return taskMgr.remove(tsk)
+
+    @staticmethod
     def add_tsk(meth, priority):
         return taskMgr.add(meth, meth.__name__, priority)
 
