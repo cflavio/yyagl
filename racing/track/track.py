@@ -9,13 +9,14 @@ from .audio import TrackAudio
 class TrackProps(object):
 
     def __init__(
-            self, path, callback, shaders, music_path, coll_path, unmerged,
-            merged, ghosts, corner_names, waypoint_names, show_waypoints,
-            weapon_names, start, name, track_path, model_name, empty_name,
-            anim_name, omni_tag, sign_cb, sign_name, camera_vec, shadow_src,
-            laps, bonus_model, bonus_suff):
+            self, path, callback, shaders_dev, shaders, music_path, coll_path,
+            unmerged, merged, ghosts, corner_names, waypoint_names,
+            show_waypoints, weapon_names, start, name, track_path, model_name,
+            empty_name, anim_name, omni_tag, sign_cb, sign_name, camera_vec,
+            shadow_src, laps, bonus_model, bonus_suff):
         self.path = path
         self.callback = callback
+        self.shaders_dev = shaders_dev
         self.shaders = shaders
         self.music_path = music_path
         self.coll_path = coll_path
@@ -69,6 +70,6 @@ class Track(GameObject, TrackFacade):
         init_lst = [
             [('phys', TrackPhys, [self, t_p]),
              ('gfx', TrackGfx, [self, t_p])],
-            [('event', TrackEvent, [self, t_p.shaders, t_p.shadow_src])],
+            [('event', TrackEvent, [self, t_p.shaders_dev, t_p.shadow_src])],
             [('audio', TrackAudio, [self, t_p.music_path])]]
         GameObject.__init__(self, init_lst, t_p.callback)

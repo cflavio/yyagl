@@ -4,8 +4,8 @@ class RaceProps(object):
             self, keys, joystick, sounds, color_main, color, font, coll_path,
             coll_name, car_path, phys_file, wheel_names, tuning_engine,
             tuning_tires, tuning_suspensions, road_name, model_name,
-            damage_paths, wheel_gfx_names, particle_path, drivers, shaders,
-            music_path, coll_track_path, unmerged, merged, ghosts,
+            damage_paths, wheel_gfx_names, particle_path, drivers, shaders_dev,
+            shaders, music_path, coll_track_path, unmerged, merged, ghosts,
             corner_names, waypoint_names, show_waypoints, weapon_names, start,
             track_name, track_path, track_model_name, empty_name, anim_name,
             omni_tag, sign_cb, sign_name, minimap_path, minimap_image, col_dct,
@@ -35,6 +35,7 @@ class RaceProps(object):
         self.wheel_gfx_names = wheel_gfx_names
         self.particle_path = particle_path
         self.drivers = drivers
+        self.shaders_dev = shaders_dev
         self.shaders = shaders
         self.music_path = music_path
         self.coll_track_path = coll_track_path

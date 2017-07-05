@@ -11,9 +11,9 @@ class Cfg(object):
             python_profiling_percall=False, mt_render=False,
             model_path='assets/models', lang='en', lang_path='assets/locale',
             lang_domain='ya2_game', languages=['English', 'Italiano'],
-            shaders=False, gamma=1.0, menu_joypad=True, cursor_hidden=False,
-            cursor_path='', cursor_scale=(1, 1, 1), cursor_hotspot=(0, 0),
-            volume=1):
+            shaders_dev=False, gamma=1.0, menu_joypad=True,
+            cursor_hidden=False, cursor_path='', cursor_scale=(1, 1, 1),
+            cursor_hotspot=(0, 0), volume=1):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title
@@ -30,7 +30,7 @@ class Cfg(object):
         self.lang_path = lang_path
         self.lang_domain = lang_domain
         self.languages = languages
-        self.shaders = shaders
+        self.shaders_dev = shaders_dev
         self.gamma = gamma
         self.menu_joypad = menu_joypad
         self.cursor_hidden = cursor_hidden

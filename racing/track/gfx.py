@@ -72,7 +72,7 @@ class TrackGfx(Gfx):
         Gfx.async_bld(self)
 
     def __set_light(self):
-        if self.props.shaders:
+        if self.props.shaders_dev:
             eng.set_amb_lgt((.15, .15, .15, 1))
             eng.set_dir_lgt((.8, .8, .8, 1), (-25, -65, 0))
             return
@@ -89,15 +89,17 @@ class TrackGfx(Gfx):
         self.spot_lgt.node().setCameraMask(BitMask32.bit(0))
         self.spot_lgt.setPos(*self.props.shadow_src)
         self.spot_lgt.lookAt(0, 0, 0)
+        if not self.props.shaders:
+            self.spot_lgt.set_color(.2, .2, .2)
         render.setLight(self.spot_lgt)
-        if base.win.get_gsg().get_supports_basic_shaders():
+        if base.win.get_gsg().get_supports_basic_shaders() and self.props.shaders:
             render.setShaderAuto()
         else:
             render.setShaderOff()
 
     def destroy(self):
         self.model.removeNode()
-        if not self.props.shaders:
+        if not self.props.shaders_dev:
             render.clearLight(self.ambient_np)
             render.clearLight(self.spot_lgt)
             self.ambient_np.removeNode()

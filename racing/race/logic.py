@@ -103,7 +103,7 @@ class RaceLogic(Logic):
             game.player_car = self.player_car = car_cls(car_props)  # remove
             game.cars = self.cars = []  # remove game's reference
         track_props = TrackProps(
-            track_path, load_car, r_p.shaders, r_p.music_path,
+            track_path, load_car, r_p.shaders_dev, r_p.shaders, r_p.music_path,
             r_p.coll_track_path, r_p.unmerged, r_p.merged, r_p.ghosts,
             r_p.corner_names, r_p.waypoint_names, r_p.show_waypoints,
             r_p.weapon_names, r_p.start, r_p.track_name, r_p.track_path,

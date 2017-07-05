@@ -26,7 +26,7 @@ class Conf(object):
         self.model_path = 'assets/models/tracks/'
         self.antialiasing = False
         self.menu_joypad = False
-        self.shaders = False
+        self.shaders_dev = False
         self.gamma = 1.0
         self.lang = 'en'
         self.lang_domain = 'yorg'
