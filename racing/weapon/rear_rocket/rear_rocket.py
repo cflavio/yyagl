@@ -3,6 +3,7 @@ from .gfx import RearRocketGfx
 from .phys import RearRocketPhys
 from .audio import RearRocketAudio
 from .logic import RearRocketLogic
+from .event import RearRocketEvent
 
 
 class RearRocketFacade(object):
@@ -22,11 +23,13 @@ class RearRocket(GameObject, RearRocketFacade):
     phys_cls = RearRocketPhys
     audio_cls = RearRocketAudio
     logic_cls = RearRocketLogic
+    event_cls = RearRocketEvent
 
-    def __init__(self, car, path):
+    def __init__(self, car, path, cars):
         init_lst = [
             [('gfx', self.gfx_cls, [self, car.gfx.nodepath, path])],
-            [('phys', self.phys_cls, [self, car.gfx.nodepath])],
+            [('phys', self.phys_cls, [self, car, cars])],
             [('audio', self.audio_cls, [self])],
-            [('logic', self.logic_cls, [self])]]
+            [('logic', self.logic_cls, [self])],
+            [('event', self.event_cls, [self])]]
         GameObject.__init__(self, init_lst)

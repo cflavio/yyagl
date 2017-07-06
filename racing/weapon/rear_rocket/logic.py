@@ -10,7 +10,7 @@ class RearRocketLogic(Logic):
     def fire(self):
         self.mdt.phys.fire()
         self.mdt.audio.sfx.play()
-        self.tsk = eng.do_later(5, self.mdt.destroy)
+        self.tsk = eng.do_later(10, self.mdt.destroy)
 
     def destroy(self):
         eng.remove_do_later(self.tsk)

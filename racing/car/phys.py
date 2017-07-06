@@ -200,6 +200,14 @@ class CarPhys(Phys):
         ground = result.get_node()
         return ground.get_name() if ground else ''
 
+    @staticmethod
+    def gnd_height(pos):  # this should be a method of the track
+        top = pos + (0, 0, 20)
+        bottom = pos + (0, 0, -20)
+        result = PhysMgr().ray_test_closest(bottom, top)
+        hit_pos = result.get_hit_pos()
+        return hit_pos[2] if hit_pos else None
+
     def apply_damage(self, reset=False):
         if reset:
             self.max_speed = self.get_speed()

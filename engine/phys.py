@@ -65,6 +65,9 @@ class PhysMgr(PhysFacade):
     def add_collision_obj(self, node):
         self.collision_objs += [node]
 
+    def remove_collision_obj(self, node):
+        self.collision_objs.remove(node)
+
     def stop(self):
         self.root = None
         self.__debug_np.removeNode()
@@ -89,9 +92,12 @@ class PhysMgr(PhysFacade):
                 self.__process_contact(obj, contact.get_node0(), to_clear)
                 self.__process_contact(obj, contact.get_node1(), to_clear)
         for obj in to_clear:
-            for coll in self.__obj2coll[obj]:
-                if globalClock.get_frame_time() - coll[1] > .25:
-                    self.__obj2coll[obj].remove(coll)
+            if obj in self.__obj2coll:  # it may be that it isn't here e.g.
+                # when you fire a rocket while you're very close to the prev
+                # car and the rocket is removed suddenly
+                for coll in self.__obj2coll[obj]:
+                    if globalClock.get_frame_time() - coll[1] > .25:
+                        self.__obj2coll[obj].remove(coll)
 
     def toggle_debug(self):
         is_hidden = self.__debug_np.is_hidden()

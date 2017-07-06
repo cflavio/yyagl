@@ -27,7 +27,6 @@ class MinePhys(Phys):
         PhysMgr().attach_rigid_body(self.node)
         self.mdt.gfx.gfx_np.reparentTo(self.n_p)
         self.mdt.gfx.gfx_np.setPos(0, 0, 0)
-        # continue to apply after firing
 
     def destroy(self):
         if hasattr(self, 'node'):  # has not been fired
