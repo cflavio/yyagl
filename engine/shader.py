@@ -20,14 +20,14 @@ class ShaderSetter(object):
 class ShaderSetterAmbient(ShaderSetter):
 
     @staticmethod
-    def set(self, pref, lgt):
+    def set(pref, lgt):
         render.set_shader_input(pref + 'amb', lgt.node().get_color())
 
 
 class ShaderSetterPointLight(ShaderSetter):
 
     @staticmethod
-    def set(self, pref, lgt):
+    def set(pref, lgt):
         lgt_pos = lgt.get_mat(base.cam).xform(LVector4f(0, 0, 0, 1))
         render.set_shader_input(pref + 'pos', lgt_pos)
         render.set_shader_input(pref + 'diff', lgt.node().get_color())
@@ -37,7 +37,7 @@ class ShaderSetterPointLight(ShaderSetter):
 class ShaderSetterDirectionalLight(ShaderSetter):
 
     @staticmethod
-    def set(self, pref, lgt):
+    def set(pref, lgt):
         lgt_pos = lgt.get_pos()
         lgt_vec = -render.get_relative_vector(lgt, Vec3(0, 1, 0))
         lgt_pos = LVector4f(lgt_vec[0], lgt_vec[1], lgt_vec[2], 0)
@@ -49,7 +49,7 @@ class ShaderSetterDirectionalLight(ShaderSetter):
 class ShaderSetterSpotlight(ShaderSetter):
 
     @staticmethod
-    def set(self, pref, lgt):
+    def set(pref, lgt):
         lgt_pos = lgt.get_mat(base.cam).xform(LVector4f(0, 0, 0, 1))
         lgt_vec = base.cam.get_relative_vector(lgt, Vec3(0, 1, 0))
         render.set_shader_input(pref + 'pos', lgt_pos)
@@ -97,7 +97,7 @@ class ShaderMgr(object):
         self.lights[-1].look_at(*look_at)
 
     @staticmethod
-    def set_default_args(self, idx):
+    def set_default_args(idx):
         pref = 'lights[%s].' % idx
         render.set_shader_input(pref + 'pos', LVector4f(0, 0, 0, 1))
         render.set_shader_input(pref + 'amb', LVector3f(0, 0, 0))
@@ -119,21 +119,29 @@ class ShaderMgr(object):
 
     def setup_post_fx(self):
         self.filter_mgr = FilterManager(base.win, base.cam)
-        col_tex = Texture()
-        final_tex = Texture()
-        final_quad = self.filter_mgr.renderSceneInto(colortex=col_tex)
-        inter_quad = self.filter_mgr.renderQuadInto(colortex=final_tex)
+        rendered_scene = Texture()
+        aa_scene = Texture()
+        filtered_scene = Texture()
+        filter_quad = self.filter_mgr.renderQuadInto(colortex=filtered_scene)
+        aa_quad = self.filter_mgr.renderQuadInto(colortex=aa_scene)
+        final_quad = self.filter_mgr.renderSceneInto(colortex=rendered_scene)
         with open('yyagl/assets/shaders/filter.vert') as f:
-            vert = f.read()
+            fvert = f.read()
         with open('yyagl/assets/shaders/filter.frag') as f:
-            frag = f.read()
-        inter_quad.set_shader(Shader.make(Shader.SLGLSL, vert, frag))
-        inter_quad.set_shader_input('in_tex', col_tex)
+            ffrag = f.read()
+        filter_quad.set_shader(Shader.make(Shader.SLGLSL, fvert, ffrag))
+        filter_quad.set_shader_input('in_tex', rendered_scene)
+        with open('yyagl/assets/shaders/fxaa.vert') as f:
+            avert = f.read()
+        with open('yyagl/assets/shaders/fxaa.frag') as f:
+            afrag = f.read()
+        aa_quad.set_shader(Shader.make(Shader.SLGLSL, avert, afrag))
+        aa_quad.set_shader_input('in_tex', filtered_scene)
         with open('yyagl/assets/shaders/pass.frag') as f:
-            frag = f.read()
-        final_quad.set_shader(Shader.make(Shader.SLGLSL, vert, frag))
+            pfrag = f.read()
+        final_quad.set_shader(Shader.make(Shader.SLGLSL, fvert, pfrag))
         final_quad.set_shader_input('gamma', self.gamma)
-        final_quad.set_shader_input('in_tex', final_tex)
+        final_quad.set_shader_input('in_tex', aa_scene)
 
     def apply(self):
         winprops = WindowProperties.size(2048, 2048)

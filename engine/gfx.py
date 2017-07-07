@@ -36,12 +36,12 @@ class EngineGfx(Gfx):
         return loader.loadModel(*args, **kwargs)
 
     @staticmethod
-    def __set_toon():
+    def set_toon():
         tempnode = NodePath(PandaNode('temp node'))
         tempnode.setAttrib(LightRampAttrib.make_single_threshold(.5, .4))
         tempnode.set_shader_auto()
         base.cam.node().set_initial_state(tempnode.get_state())
-        CommonFilters(base.win, base.cam).set_cartoon_ink(separation=1)
+        CommonFilters(base.win, base.cam).setCartoonInk(separation=1)
 
     def print_stats(self):
         print '\n\n#####\nrender2d.analyze()'

@@ -82,11 +82,11 @@ class EngineFacade(object):
         return self.gui.cursor.cursor_top()
 
     @staticmethod
-    def set_amb_lgt(self, col):
+    def set_amb_lgt(col):
         return ShaderMgr().set_amb_lgt(col)
 
     @staticmethod
-    def set_dir_lgt(self, col, hpr):
+    def set_dir_lgt(col, hpr):
         return ShaderMgr().set_dir_lgt(col, hpr)
 
     def clear_lights(self):
