@@ -168,10 +168,10 @@ class CarPlayerEvent(CarEvent):
         wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll, Mine])
         if wpn_cls == Rocket:
             path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars)
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars, self.props.particle_path)
         elif wpn_cls == RearRocket:
             path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars)
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars, self.props.particle_path)
         elif wpn_cls == Turbo:
             path = self.props.turbo_path
             self.mdt.logic.weapon = wpn_cls(self.mdt, path)
@@ -180,7 +180,7 @@ class CarPlayerEvent(CarEvent):
             self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars)
         elif wpn_cls == Mine:
             path = self.props.mine_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path)
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.props.particle_path)
         self.accept(self.props.keys['button'], self.on_fire)
         self.has_weapon = True
         wpn2img = {

@@ -91,12 +91,19 @@ class TrackPhys(Phys):
         _waypoints = wp_root.findAllMatches('**/%s*' % waypoint_names[1])
         self.waypoints = {}
         for w_p in _waypoints:
+            w_p.set_python_tag('initial_pos', w_p.get_pos())  # do a proper wp class
+            w_p.set_python_tag('weapon_boxes', [])
             wpstr = '**/' + waypoint_names[1]
             prevs = w_p.getTag(waypoint_names[2]).split(',')
             lst_wp = [wp_root.find(wpstr + idx) for idx in prevs]
             self.waypoints[w_p] = lst_wp
+        self.redraw_wps()
+
+    def redraw_wps(self):
         if not self.props.show_waypoints:
             return
+        if self.wp_np:
+            self.wp_np.remove_node()
         segs = LineSegs()
         for w_p in self.waypoints.keys():
             for dest in self.waypoints[w_p]:
@@ -107,7 +114,7 @@ class TrackPhys(Phys):
 
     def create_bonus(self, pos):
         prs = self.props
-        self.bonuses += [Bonus(pos, prs.bonus_model, prs.bonus_suff)]
+        self.bonuses += [Bonus(pos, prs.bonus_model, prs.bonus_suff, self)]
         self.bonuses[-1].attach_obs(self.on_bonus_collected)
 
     def on_bonus_collected(self, bonus):

@@ -3,13 +3,15 @@ from yyagl.gameobject import Event
 
 class RearRocketEvent(Event):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt, particle_path):
         Event.__init__(self, mdt)
         eng.attach_obs(self.on_collision)
+        self.particle_path = particle_path
 
     def on_collision(self, obj, obj_name):
         if obj_name == 'RearRocket':
             obj.apply_central_force((0, 0, 200000))
+            eng.particle(self.particle_path, render, render, self.mdt.gfx.gfx_np.get_pos(render) + (0, 0, .5), .8)
             self.mdt.destroy()
         if obj_name == 'Wall' and obj == self.mdt.phys.node:
             self.mdt.destroy()

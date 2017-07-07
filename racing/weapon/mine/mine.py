@@ -25,11 +25,11 @@ class Mine(GameObject, MineFacade):
     logic_cls = MineLogic
     event_cls = MineEvent
 
-    def __init__(self, car, path):
+    def __init__(self, car, path, particle_path):
         init_lst = [
             [('gfx', self.gfx_cls, [self, car.gfx.nodepath, path])],
             [('phys', self.phys_cls, [self, car])],
             [('audio', self.audio_cls, [self])],
             [('logic', self.logic_cls, [self])],
-            [('event', self.event_cls, [self])]]
+            [('event', self.event_cls, [self, particle_path])]]
         GameObject.__init__(self, init_lst)
