@@ -104,6 +104,7 @@ class CarEvent(Event):
             path = self.props.mine_path
             self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.props.particle_path)
         self.has_weapon = True
+        return wpn_cls
 
     def _on_crash(self):
         if self.mdt.fsm.getCurrentOrNextState() != 'Results':
@@ -193,7 +194,7 @@ class CarPlayerEvent(CarEvent):
     def on_bonus(self):
         if self.mdt.logic.weapon:
             self.mdt.gui.unset_weapon()
-        CarEvent.on_bonus(self)
+        wpn_cls = CarEvent.on_bonus(self)
         self.accept(self.props.keys['button'], self.on_fire)
         wpn2img = {
             Rocket: 'rocketfront',
