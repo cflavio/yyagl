@@ -153,7 +153,7 @@ class CarPlayerEvent(CarEvent):
         CarEvent.on_collision(self, obj, obj_name)
         if obj != self.mdt.gfx.nodepath.node():
             return
-        if obj_name.startswith(self.props.wall_name):
+        if any(obj_name.startswith(name) for name in [self.props.wall_name, 'Vehicle']):
             self.__process_wall()
         if any(obj_name.startswith(s) for s in self.props.roads_names):
             eng.audio.play(self.mdt.audio.landing_sfx)
@@ -164,6 +164,7 @@ class CarPlayerEvent(CarEvent):
 
     def on_bonus(self):
         if self.mdt.logic.weapon:
+            self.mdt.gui.unset_weapon()
             self.mdt.logic.weapon.destroy()
         wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll, Mine])
         if wpn_cls == Rocket:

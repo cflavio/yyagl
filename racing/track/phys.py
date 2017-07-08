@@ -100,7 +100,8 @@ class TrackPhys(Phys):
         self.redraw_wps()
 
     def redraw_wps(self):
-        if not self.props.show_waypoints:
+        if not self.props.show_waypoints or not self.waypoints:
+            # it may be invoked on track's destruction
             return
         if self.wp_np:
             self.wp_np.remove_node()

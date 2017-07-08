@@ -240,7 +240,7 @@ class CarPhys(Phys):
             1 + .01 * self.props.driver_suspensions)
 
     def rotate(self):
-        self.pnode.apply_torque((0, 0, 300000))
+        self.pnode.apply_torque((0, 0, 900000))
 
     def destroy(self):
         eng.detach_obs(self.on_end_frame)
