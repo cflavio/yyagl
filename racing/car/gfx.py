@@ -74,7 +74,6 @@ class CarGfx(Gfx, CarGfxFacade):
     def crash_sfx(self):
         if self.mdt.phys.prev_speed_ratio < .64:
             return
-        self.mdt.audio.crash_high_speed_sfx.play()
         part_path = self.props.particle_path
         node = self.mdt.gfx.nodepath
         eng.particle(part_path, node, eng.base.render, (0, 1.2, .75), .8)
@@ -101,6 +100,15 @@ class CarGfx(Gfx, CarGfxFacade):
         self.wheels = None
         self.skidmark_mgr.destroy()
         Gfx.destroy(self)
+
+
+class CarPlayerGfx(CarGfx):
+
+    def crash_sfx(self):
+        if self.mdt.phys.prev_speed_ratio < .64:
+            return
+        CarGfx.crash_sfx(self)
+        self.mdt.audio.crash_high_speed_sfx.play()
 
 
 class SkidmarkMgr(object):

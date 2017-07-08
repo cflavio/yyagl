@@ -1,7 +1,7 @@
 from yyagl.gameobject import GameObject, Ai, Audio
 from yyagl.engine.log import LogMgr
 from .fsm import CarFsm
-from .gfx import CarGfx
+from .gfx import CarGfx, CarPlayerGfx
 from .phys import CarPhys, CarPlayerPhys
 from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
     CarPlayerEventClient, CarNetworkEvent, CarAiEvent, CarAiPlayerEvent
@@ -141,6 +141,7 @@ class PlayerCar(Car):
     gui_cls = CarPlayerGui
     logic_cls = CarPlayerLogic
     phys_cls = CarPlayerPhys
+    gfx_cls = CarPlayerGfx
 
 
 class PlayerCarServer(Car):

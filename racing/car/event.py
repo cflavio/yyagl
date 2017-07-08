@@ -62,6 +62,7 @@ class CarEvent(Event):
             ('reverse', keys['rear']), ('right', keys['right'])]
         watch = inputState.watchWithModifiers
         self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
+        self.has_weapon = False
 
     def start(self):
         eng.attach_obs(self.on_frame)
@@ -76,6 +77,40 @@ class CarEvent(Event):
                 self.mdt.gfx.apply_damage(True)
             if obj_name.startswith(self.props.goal_name):
                 self._process_goal()
+            if any(obj_name.startswith(name) for name in [self.props.wall_name, 'Vehicle']):
+                self._process_wall()
+            if obj_name.startswith(self.props.bonus_name):
+                self.on_bonus()
+            if obj_name.startswith('Mine'):
+                self.mdt.phys.pnode.apply_central_force((0, 0, 200000))
+
+    def on_bonus(self):
+        if self.mdt.logic.weapon:
+            self.mdt.logic.weapon.destroy()
+        wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll, Mine])
+        if wpn_cls == Rocket:
+            path = self.props.rocket_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars, self.props.particle_path)
+        elif wpn_cls == RearRocket:
+            path = self.props.rocket_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars, self.props.particle_path)
+        elif wpn_cls == Turbo:
+            path = self.props.turbo_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path)
+        elif wpn_cls == RotateAll:
+            path = self.props.rotate_all_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars)
+        elif wpn_cls == Mine:
+            path = self.props.mine_path
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.props.particle_path)
+        self.has_weapon = True
+
+    def _on_crash(self):
+        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
+            self.mdt.gfx.crash_sfx()
+
+    def _process_wall(self):
+        self._on_crash()
 
     def _process_goal(self):
         if self.mdt.fsm.getCurrentOrNextState() == 'Results' or \
@@ -136,7 +171,6 @@ class CarPlayerEvent(CarEvent):
         CarEvent.__init__(self, mdt, carevent_props)
         if not eng.is_runtime:
             self.accept('f11', self.mdt.gui.toggle)
-        self.has_weapon = False
         state = self.mdt.fsm.getCurrentOrNextState()
         self.input_dct_bld = InputDctBuilder.build(state,
                                                    carevent_props.joystick)
@@ -153,37 +187,14 @@ class CarPlayerEvent(CarEvent):
         CarEvent.on_collision(self, obj, obj_name)
         if obj != self.mdt.gfx.nodepath.node():
             return
-        if any(obj_name.startswith(name) for name in [self.props.wall_name, 'Vehicle']):
-            self.__process_wall()
         if any(obj_name.startswith(s) for s in self.props.roads_names):
             eng.audio.play(self.mdt.audio.landing_sfx)
-        if obj_name.startswith(self.props.bonus_name):
-            self.on_bonus()
-        if obj_name.startswith('Mine'):
-            self.mdt.phys.pnode.apply_central_force((0, 0, 200000))
 
     def on_bonus(self):
         if self.mdt.logic.weapon:
             self.mdt.gui.unset_weapon()
-            self.mdt.logic.weapon.destroy()
-        wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll, Mine])
-        if wpn_cls == Rocket:
-            path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars, self.props.particle_path)
-        elif wpn_cls == RearRocket:
-            path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars, self.props.particle_path)
-        elif wpn_cls == Turbo:
-            path = self.props.turbo_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path)
-        elif wpn_cls == RotateAll:
-            path = self.props.rotate_all_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars)
-        elif wpn_cls == Mine:
-            path = self.props.mine_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.props.particle_path)
+        CarEvent.on_bonus(self)
         self.accept(self.props.keys['button'], self.on_fire)
-        self.has_weapon = True
         wpn2img = {
             Rocket: 'rocketfront',
             RearRocket: 'rocketrear',
@@ -198,13 +209,9 @@ class CarPlayerEvent(CarEvent):
         self.has_weapon = False
         self.mdt.gui.unset_weapon()
 
-    def _on_crash(self):
-        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
-            self.mdt.gfx.crash_sfx()
-
-    def __process_wall(self):
+    def _process_wall(self):
+        CarEvent._process_wall(self)
         eng.play(self.mdt.audio.crash_sfx)
-        self._on_crash()
 
     def _process_nonstart_goals(self, lap_number, laps):
         CarEvent._process_nonstart_goals(self, lap_number, laps)
