@@ -106,6 +106,9 @@ class PauseLogic(Logic):
         tsk.set_task_chain('default')
         tsk.clear_delay()  # to avoid assertion error on resume
 
+    def remove_task(self, tsk):
+        self.paused_tasks.remove(tsk)
+
     def pause(self):
         self.paused_ivals = ivalMgr.getIntervalsMatching('*')
         self.pause_tasks()
@@ -131,3 +134,6 @@ class PauseMgr(GameObject, Colleague):
         Colleague.__init__(self, mdt)
         self.gui = PauseGui(self)
         self.logic = PauseLogic(self)
+
+    def remove_task(self, tsk):
+        return self.logic.remove_task(tsk)

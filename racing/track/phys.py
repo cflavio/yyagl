@@ -161,6 +161,7 @@ class TrackPhys(Phys):
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
             self.waypoints = None
         map(lambda bon: bon.destroy(), self.bonuses)
-        map(lambda tsk: taskMgr.remove, self.generate_tsk)
+        map(eng.remove_do_later, self.generate_tsk)
+        self.generate_tsk = None
         if self.props.show_waypoints:
             self.wp_np.remove_node()

@@ -13,6 +13,7 @@ class MineLogic(Logic):
         self.tsk = eng.do_later(20, self.mdt.destroy)
 
     def destroy(self):
-        eng.remove_do_later(self.tsk)
+        if self.tsk:
+            eng.remove_do_later(self.tsk)
         self.notify('on_weapon_destroyed')
         Logic.destroy(self)

@@ -29,7 +29,7 @@ class MinePhys(Phys):
         self.mdt.gfx.gfx_np.setPos(0, 0, 0)
 
     def destroy(self):
-        if hasattr(self, 'node'):  # has not been fired
+        if self.node:  # has not been fired
             PhysMgr().remove_rigid_body(self.node)
             self.n_p = self.n_p.remove_node()
         self.parent = None

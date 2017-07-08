@@ -41,10 +41,11 @@ class RearRocketPhys(Phys):
         return tsk.again
 
     def destroy(self):
-        if hasattr(self, 'node'):  # has not been fired
+        if self.node:  # has not been fired
             PhysMgr().remove_rigid_body(self.node)
             PhysMgr().remove_collision_obj(self.node)
             self.n_p = self.n_p.remove_node()
         self.parent = None
-        self.update_tsk = taskMgr.remove(self.update_tsk)
+        if self.update_tsk:
+            self.update_tsk = taskMgr.remove(self.update_tsk)
         Phys.destroy(self)
