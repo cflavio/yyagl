@@ -505,6 +505,14 @@ class CarLogic(Logic):
     def lap_time(self):
         return globalClock.getFrameTime() - self.last_time_start
 
+    def fire(self):
+        self.weapon.attach_obs(self.on_weapon_destroyed)
+        self.weapon.fire()
+
+    def on_weapon_destroyed(self):
+        self.weapon.detach_obs(self.on_weapon_destroyed)
+        self.weapon = None
+
     def destroy(self):
         self.camera = None
         if self.weapon:
@@ -559,14 +567,6 @@ class CarPlayerLogic(CarLogic):
         r_i = ranking.index(self.mdt.name) + 1
         self.mdt.gui.ranking_txt.setText(str(r_i) + "'")
         self._update_dist()
-
-    def fire(self):
-        self.weapon.attach_obs(self.on_weapon_destroyed)
-        self.weapon.fire()
-
-    def on_weapon_destroyed(self):
-        self.weapon.detach_obs(self.on_weapon_destroyed)
-        self.weapon = None
 
     def __check_wrong_way(self):
         if self.props.track_waypoints:

@@ -63,6 +63,8 @@ class CarEvent(Event):
         watch = inputState.watchWithModifiers
         self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
         self.has_weapon = False
+        self._input_dct = None
+        eng.attach_obs(self.on_start_frame)
 
     def start(self):
         eng.attach_obs(self.on_frame)
@@ -90,16 +92,16 @@ class CarEvent(Event):
         wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll, Mine])
         if wpn_cls == Rocket:
             path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars, self.props.particle_path)
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars + [game.player_car], self.props.particle_path)
         elif wpn_cls == RearRocket:
             path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars, self.props.particle_path)
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars + [game.player_car], self.props.particle_path)
         elif wpn_cls == Turbo:
             path = self.props.turbo_path
             self.mdt.logic.weapon = wpn_cls(self.mdt, path)
         elif wpn_cls == RotateAll:
             path = self.props.rotate_all_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars)
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars + [game.player_car])
         elif wpn_cls == Mine:
             path = self.props.mine_path
             self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.props.particle_path)
@@ -138,6 +140,9 @@ class CarEvent(Event):
         self.mdt.gfx.nodepath.node().setLinearVelocity(0)
         self.mdt.gfx.nodepath.node().setAngularVelocity(0)
 
+    def on_start_frame(self):
+        self._input_dct = None
+
     def on_frame(self):
         input_dct = self._get_input()
         if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
@@ -162,6 +167,7 @@ class CarEvent(Event):
     def destroy(self):
         eng.detach_obs(self.on_collision)
         eng.detach_obs(self.on_frame)
+        eng.detach_obs(self.on_start_frame)
         map(lambda tok: tok.release(), self.toks)
         Event.destroy(self)
 
@@ -234,7 +240,9 @@ class CarPlayerEvent(CarEvent):
         #self.on_bonus()  # to test weapons
 
     def _get_input(self):
-        return self.input_dct_bld.build_dct(self.mdt.ai, self.has_weapon)
+        if not self._input_dct:
+            self._input_dct = self.input_dct_bld.build_dct(self.mdt.ai, self.has_weapon)
+        return self._input_dct
 
     def destroy(self):
         evts = ['f11', self.props.keys['button'], self.props.keys['respawn']]
@@ -276,13 +284,17 @@ class CarPlayerEventClient(CarPlayerEvent):
 class CarNetworkEvent(CarEvent):
 
     def _get_input(self):
-        return {key: False for key in ['forward', 'left', 'reverse', 'right']}
+        if not self._input_dct:
+            self._input_dct = {key: False for key in ['forward', 'left', 'reverse', 'right']}
+        return self._input_dct
 
 
 class CarAiEvent(CarEvent):
 
     def _get_input(self):
-        return self.mdt.ai.get_input()
+        if not self._input_dct:
+            self._input_dct = self.mdt.ai.get_input()
+        return self._input_dct
 
 
 class CarAiPlayerEvent(CarAiEvent, CarPlayerEvent):

@@ -505,6 +505,9 @@ class CarAi(Ai):
         #     print left, right, brake, acceleration, self.__eval_gnd(), \
         #         self.front_logic.curr_dot_prod, self.mdt.phys.speed, \
         #         obstacles, obstacles_back
+        if self.mdt.logic.weapon:
+            if self.mdt.logic.weapon.ai_fire():
+                self.mdt.logic.fire()
         return {'forward': acceleration, 'left': left, 'reverse': brake,
                 'right': right}
 
