@@ -107,7 +107,11 @@ class PauseLogic(Logic):
         tsk.clear_delay()  # to avoid assertion error on resume
 
     def remove_task(self, tsk):
-        self.paused_tasks.remove(tsk)
+        if tsk in self.paused_tasks:
+            self.paused_tasks.remove(tsk)
+        # refactor: do_later invokes the method passing the task, so it'll be
+        # possible to remove the task from the client and don't ask here
+        # this will unhide some errors caught here
 
     def pause(self):
         self.paused_ivals = ivalMgr.getIntervalsMatching('*')
