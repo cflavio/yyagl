@@ -2,7 +2,7 @@ from random import uniform
 from yyagl.gameobject import Ai
 
 
-class RotateAllAi(Ai):
+class TurboAi(Ai):
 
     def __init__(self, mdt):
         Ai.__init__(self, mdt)

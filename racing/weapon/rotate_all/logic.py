@@ -7,11 +7,13 @@ class RotateAllLogic(Logic):
         Logic.__init__(self, mdt)
         self.car = car
         self.cars = cars
+        self.has_fired = False
 
     def fire(self):
         self.mdt.audio.sfx.play()
         self.cars = [car for car in self.cars if car.name != self.car.name]
         map(lambda car: car.phys.rotate(), self.cars)
+        self.has_fired = True
         self.mdt.destroy()
 
     def destroy(self):

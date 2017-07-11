@@ -4,6 +4,7 @@ from .phys import RocketPhys
 from .audio import RocketAudio
 from .logic import RocketLogic
 from .event import RocketEvent
+from .ai import RocketAi
 
 
 class RocketFacade(object):
@@ -17,6 +18,9 @@ class RocketFacade(object):
     def fire(self):
         return self.logic.fire()
 
+    def ai_fire(self):
+        return self.ai.update()
+
 
 class Rocket(GameObject, RocketFacade):
     gfx_cls = RocketGfx
@@ -24,6 +28,7 @@ class Rocket(GameObject, RocketFacade):
     audio_cls = RocketAudio
     logic_cls = RocketLogic
     event_cls = RocketEvent
+    ai_cls = RocketAi
 
     def __init__(self, car, path, cars, particle_path):
         init_lst = [
@@ -31,5 +36,6 @@ class Rocket(GameObject, RocketFacade):
             [('phys', self.phys_cls, [self, car, cars])],
             [('audio', self.audio_cls, [self])],
             [('logic', self.logic_cls, [self])],
-            [('event', self.event_cls, [self, particle_path])]]
+            [('event', self.event_cls, [self, particle_path])],
+            [('ai', self.ai_cls, [self])]]
         GameObject.__init__(self, init_lst)
