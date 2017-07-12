@@ -9,6 +9,7 @@ from .deployng import bld_ng
 nsi_src = '''Name {fullName}
 OutFile {outFile}
 InstallDir "$PROGRAMFILES\\{fullName}"
+InstallDirRegKey HKCU "Yorg" ""
 SetCompress auto
 SetCompressor lzma
 ShowInstDetails nevershow
@@ -35,6 +36,9 @@ FunctionEnd
 Var StartMenuFolder
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
+!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU"
+!define MUI_STARTMENUPAGE_REGISTRY_KEY "Yorg"
+!define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -45,6 +49,7 @@ Var StartMenuFolder
 !insertmacro MUI_LANGUAGE "English"
 Section "" SecCore
 {installFiles}
+WriteRegStr HKCU "Yorg" "" $INSTDIR
 WriteUninstaller "$INSTDIR\\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\\$StartMenuFolder"
@@ -64,6 +69,7 @@ Section Uninstall
   Delete "$SMPROGRAMS\\$StartMenuFolder\\Uninstall.lnk"
   Delete "$SMPROGRAMS\\$StartMenuFolder\\{fullName}.lnk"
   RMDir "$SMPROGRAMS\\$StartMenuFolder"
+  DeleteRegKey /ifempty HKCU "Yorg"
 SectionEnd'''
 
 
