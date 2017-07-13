@@ -11,7 +11,7 @@ class MineLogic(Logic):
     def fire(self):
         self.mdt.phys.fire()
         self.mdt.audio.sfx.play()
-        self.tsk = eng.do_later(20, self.mdt.destroy)
+        self.tsk = eng.do_later(30, self.mdt.destroy)
         self.has_fired = True
 
     def destroy(self):

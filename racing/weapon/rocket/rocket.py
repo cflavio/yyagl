@@ -37,5 +37,5 @@ class Rocket(GameObject, RocketFacade):
             [('audio', self.audio_cls, [self])],
             [('logic', self.logic_cls, [self])],
             [('event', self.event_cls, [self, particle_path])],
-            [('ai', self.ai_cls, [self])]]
+            [('ai', self.ai_cls, [self, car])]]
         GameObject.__init__(self, init_lst)

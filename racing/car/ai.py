@@ -324,13 +324,17 @@ class CarAi(Ai):
         return curr_logic.curr_dot_prod < .4
 
     @property
+    def is_on_road(self):
+        grounds = self.mdt.phys.gnd_names
+        return all(name.startswith(self.road_name) for name in grounds)
+
+    @property
     def acceleration(self):
         has_pos_speed = self.mdt.phys.speed >= 0
         curr_logic = self.front_logic if has_pos_speed else self.rear_logic
         if self.mdt.phys.speed < 40:
             return True
-        grounds = self.mdt.phys.gnd_names
-        if not all(name.startswith(self.road_name) for name in grounds):
+        if not self.is_on_road:
             return False
         return curr_logic.curr_dot_prod > .8
 

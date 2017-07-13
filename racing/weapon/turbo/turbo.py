@@ -31,5 +31,5 @@ class Turbo(GameObject, TurboFacade):
             [('gfx', self.gfx_cls, [self, car.gfx.nodepath, path])],
             [('audio', self.audio_cls, [self])],
             [('logic', self.logic_cls, [self, car])],
-            [('ai', self.ai_cls, [self])]]
+            [('ai', self.ai_cls, [self, car])]]
         GameObject.__init__(self, init_lst)
