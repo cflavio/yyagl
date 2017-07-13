@@ -69,8 +69,9 @@ class CarEvent(Event):
     def start(self):
         eng.attach_obs(self.on_frame)
 
-    def on_collision(self, obj, obj_name):
+    def on_collision(self, obj, tgt_obj):
         if obj == self.mdt.gfx.nodepath.node():
+            obj_name = tgt_obj.get_name()
             if obj_name.startswith(self.props.respawn_name):
                 self.process_respawn()
             if obj_name.startswith(self.props.pitstop_name):
@@ -190,10 +191,11 @@ class CarPlayerEvent(CarEvent):
             self.mdt.fsm.getCurrentOrNextState() == 'Countdown')
         self.mdt.audio.update(self._get_input())
 
-    def on_collision(self, obj, obj_name):
-        CarEvent.on_collision(self, obj, obj_name)
+    def on_collision(self, obj, tgt_obj):
+        CarEvent.on_collision(self, obj, tgt_obj)
         if obj != self.mdt.gfx.nodepath.node():
             return
+        obj_name = tgt_obj.get_name()
         if any(obj_name.startswith(s) for s in self.props.roads_names):
             eng.audio.play(self.mdt.audio.landing_sfx)
 

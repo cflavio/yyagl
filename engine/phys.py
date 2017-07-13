@@ -80,7 +80,7 @@ class PhysMgr(PhysFacade):
         if node in [coll[0] for coll in self.__obj2coll[obj]]:
             return
         self.__obj2coll[obj] += [(node, globalClock.get_frame_time())]
-        eng.event.notify('on_collision', obj, node.get_name())
+        eng.event.notify('on_collision', obj, node)
 
     def __do_collisions(self):
         to_clear = self.collision_objs[:]

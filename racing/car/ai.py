@@ -2,6 +2,7 @@ from random import uniform
 from panda3d.core import Vec3, Mat4, BitMask32, LineSegs, LPoint3f
 from yyagl.gameobject import Ai
 from yyagl.engine.phys import PhysMgr
+from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 
 
 class DebugLines(object):
@@ -269,7 +270,7 @@ class CarAi(Ai):
         self.front_logic._update_obst('center')
         self.front_logic._update_obst('left')
         self.front_logic._update_obst('right')
-        if self.mdt.phys.speed < 10:
+        if self.mdt.phys.speed < 10 or self.mdt.logic.weapon and self.mdt.logic.weapon.__class__ == RearRocket:
             self.rear_logic._update_gnd('center')
             self.rear_logic._update_gnd('left')
             self.rear_logic._update_gnd('right')
