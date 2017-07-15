@@ -25,6 +25,8 @@ class Camera(object):
         self.tgt_look_y = None
         self.tgt_look_z = None
         self.curr_l_d = 0
+        self.curr_speed_ratio = 0
+        self.fwd_car_vec = LVector3f(0, 0, 0)
 
     @staticmethod
     def new_val(val, tgt, incr):
@@ -32,7 +34,20 @@ class Camera(object):
         fit_p = lambda: val + (1 if tgt > val else -1) * incr
         return fit_p() if beyond else tgt
 
-    def update(self, speed_ratio, is_rolling, fast):
+    @staticmethod
+    def new_val_vec(vec_val, vec_tgt, incr):
+        val_els = [vec_val.x, vec_val.y, vec_val.z]
+        tgt_els = [vec_tgt.x, vec_tgt.y, vec_tgt.z]
+        res = []
+        for val, tgt in zip(val_els, tgt_els):
+            beyond = abs(val - tgt) > incr
+            fit_p = lambda: val + (1 if tgt > val else -1) * incr
+            res += [fit_p() if beyond else tgt]
+        return LVector3f(* res)
+
+    def update(self, speed_ratio, is_rolling, fast, is_rotating):
+        self.curr_speed_ratio = self.new_val(
+            self.curr_speed_ratio, speed_ratio, 1 * globalClock.getDt())
         curr_incr = self.speed * globalClock.getDt()
         curr_incr_slow = self.speed_slow * globalClock.getDt()
         if fast:
@@ -47,15 +62,17 @@ class Camera(object):
         fwd_car_vec.normalize()
         fwd_vec = LVector3f(*self.cam_vec)
         fwd_vec.normalize()
-
+        fwd_incr = (.05 if is_rotating else .5) * globalClock.getDt()
+        self.fwd_car_vec = self.new_val_vec(self.fwd_car_vec, fwd_car_vec,
+                                            fwd_incr)
         car_pos = self.car_np.get_pos()
-        vec = -fwd_vec * (self.dist_min + dist_diff * speed_ratio)
-        l_d_speed = self.look_dist_min + look_dist_diff * speed_ratio
+        vec = -fwd_vec * (self.dist_min + dist_diff * self.curr_speed_ratio)
+        l_d_speed = self.look_dist_min + look_dist_diff * self.curr_speed_ratio
         l_d = 0 if is_rolling else l_d_speed
         self.curr_l_d = self.new_val(self.curr_l_d, l_d, curr_incr_slow)
-        tgt_vec = fwd_car_vec * self.curr_l_d
-        delta_pos_z = self.z_min + z_diff * speed_ratio
-        delta_cam_z = self.look_z_min + look_z_diff * speed_ratio
+        tgt_vec = self.fwd_car_vec * self.curr_l_d
+        delta_pos_z = self.z_min + z_diff * self.curr_speed_ratio
+        delta_cam_z = self.look_z_min + look_z_diff * self.curr_speed_ratio
 
         # curr_cam_pos = car_pos + vec + (0, 0, delta_pos_z)
         # curr_cam_dist_fact = self.dist_min + dist_diff * speed_ratio
@@ -64,23 +81,15 @@ class Camera(object):
         #     occl_pos = curr_occl.getHitPos()
         #     vec = occl_pos - car_pos
 
-        self.tgt_cam_x = car_pos.x + vec.x
-        self.tgt_cam_y = car_pos.y + vec.y
-        self.tgt_cam_z = car_pos.z + vec.z + delta_pos_z
-
-        cam = eng.base.camera
+        self.tgt_cam = car_pos + vec + (0, 0, delta_pos_z)
         self.tgt_look_x, self.tgt_look_y, self.tgt_look_z = car_pos + tgt_vec
-        new_x = self.new_val(cam.getX(), self.tgt_cam_x, curr_incr)
-        new_y = self.new_val(cam.getY(), self.tgt_cam_y, curr_incr)
-        new_z = self.new_val(cam.getZ(), self.tgt_cam_z, curr_incr_slow)
-
+        c_i = curr_incr_slow if fast else curr_incr
+        cam = eng.base.camera
+        new_pos = self.new_val_vec(cam.get_pos(), self.tgt_cam, c_i)
         # overwrite camera's position to set the physics
-        # new_x = car_pos.x + 10
-        # new_y = car_pos.y - 5
-        # new_z = car_pos.z + 5
-
+        # new_pos = (car_pos.x + 10, car_pos.y - 5, car_pos.z + 5
         if not is_rolling:
-            eng.base.camera.setPos(new_x, new_y, new_z)
+            eng.base.camera.setPos(new_pos)
         look_z = self.tgt_look_z + delta_cam_z
         eng.base.camera.look_at(self.tgt_look_x, self.tgt_look_y, look_z)
 

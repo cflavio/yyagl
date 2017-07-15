@@ -145,6 +145,7 @@ class CarLogic(Logic):
         for wp in self.props.track_waypoints:  # rename wp
             self.grid_wps(wp)
         self.__wp_num = None
+        self.applied_torque = False
 
     def update(self, input_dct):
         phys = self.mdt.phys
@@ -493,6 +494,12 @@ class CarLogic(Logic):
     @property
     def is_rolling(self):
         return globalClock.getFrameTime() - self.last_roll_ko_time < 1.0
+
+    @property
+    def is_rotating(self):
+        if self.applied_torque and self.mdt.phys.pnode.get_angular_velocity().length() < .5:
+            self.applied_torque = False
+        return self.applied_torque
 
     @property
     def is_skidmarking(self):

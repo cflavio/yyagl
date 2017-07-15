@@ -241,6 +241,7 @@ class CarPhys(Phys):
 
     def rotate(self):
         self.pnode.apply_torque((0, 0, 900000))
+        self.mdt.logic.applied_torque = True
 
     def destroy(self):
         eng.detach_obs(self.on_end_frame)

@@ -188,7 +188,8 @@ class CarPlayerEvent(CarEvent):
         CarEvent.on_frame(self)
         self.mdt.logic.camera.update(
             self.mdt.phys.speed_ratio, self.mdt.logic.is_rolling,
-            self.mdt.fsm.getCurrentOrNextState() == 'Countdown')
+            self.mdt.fsm.getCurrentOrNextState() == 'Countdown',
+            self.mdt.logic.is_rotating)
         self.mdt.audio.update(self._get_input())
 
     def on_collision(self, obj, tgt_obj):
