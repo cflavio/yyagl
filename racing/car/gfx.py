@@ -76,7 +76,7 @@ class CarGfx(Gfx, CarGfxFacade):
             return
         part_path = self.props.particle_path
         node = self.mdt.gfx.nodepath
-        eng.particle(part_path, node, eng.base.render, (0, 1.2, .75), .8)
+        eng.particle(part_path, render, render, node.get_pos(render) + (0, 1.2, .75), .8)
         self.apply_damage()
 
     def apply_damage(self, reset=False):
