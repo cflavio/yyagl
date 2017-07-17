@@ -21,5 +21,6 @@ class RocketGfx(Gfx):
         self.gfx_np.set_pos(0, 0, 1.5)
 
     def destroy(self):
+        self.gfx_np.cleanup()
         self.parent = self.gfx_np = self.gfx_np.remove_node()
         Gfx.destroy(self)

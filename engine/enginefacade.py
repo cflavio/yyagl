@@ -23,9 +23,13 @@ class EngineFacade(object):
         return self.gfx.clean()
 
     @staticmethod
-    def do_later(time, meth, args=[]):
-        return taskMgr.doMethodLater(time, lambda tsk: meth(*args),
-                                     meth.__name__)
+    def do_later(time, meth, args=[], pass_tsk=False):
+        if pass_tsk:
+            return taskMgr.doMethodLater(time, lambda tsk: meth(tsk, *args),
+                                         meth.__name__)
+        else:
+            return taskMgr.doMethodLater(time, lambda tsk: meth(*args),
+                                         meth.__name__)
 
     def remove_do_later(self, tsk):
         self.pause.remove_task(tsk)

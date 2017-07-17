@@ -6,7 +6,7 @@ class RaceProps(object):
             tuning_tires, tuning_suspensions, road_name, model_name,
             damage_paths, wheel_gfx_names, particle_path, drivers, shaders_dev,
             shaders, music_path, coll_track_path, unmerged, merged, ghosts,
-            corner_names, waypoint_names, show_waypoints, weapon_names, start,
+            corner_names, wp_info, show_waypoints, weapon_info, start,
             track_name, track_path, track_model_name, empty_name, anim_name,
             omni_tag, sign_cb, sign_name, minimap_path, minimap_image, col_dct,
             camera_vec, shadow_src, laps, rocket_path, turbo_path,
@@ -43,9 +43,9 @@ class RaceProps(object):
         self.merged = merged
         self.ghosts = ghosts
         self.corner_names = corner_names
-        self.waypoint_names = waypoint_names
+        self.wp_info = wp_info
         self.show_waypoints = show_waypoints
-        self.weapon_names = weapon_names
+        self.weapon_info = weapon_info
         self.start = start
         self.track_name = track_name
         self.track_path = track_path

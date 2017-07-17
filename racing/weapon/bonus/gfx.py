@@ -20,5 +20,6 @@ class BonusGfx(Gfx):
         self.model.setPlayRate(.5, 'anim')
 
     def destroy(self):
+        self.model.cleanup()
         self.model = self.model.remove_node()
         Gfx.destroy(self)

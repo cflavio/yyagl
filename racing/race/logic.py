@@ -2,7 +2,7 @@ from yyagl.gameobject import Logic
 from yyagl.engine.network.server import Server
 from yyagl.engine.network.client import Client
 from yyagl.engine.phys import PhysMgr
-from yyagl.racing.track.track import Track, TrackProps
+from yyagl.racing.track.track import Track
 from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
     PlayerCarClient, NetworkCar, AiCar, AiPlayerCar
 
@@ -102,18 +102,16 @@ class RaceLogic(Logic):
                 r_p.goal_name, r_p.bonus_name, r_p.roads_names, r_p.cars)
             game.player_car = self.player_car = car_cls(car_props)  # remove
             game.cars = self.cars = []  # remove game's reference
-        track_props = TrackProps(
-            track_path, load_car, r_p.shaders_dev, r_p.shaders, r_p.music_path,
-            r_p.coll_track_path, r_p.unmerged, r_p.merged, r_p.ghosts,
-            r_p.corner_names, r_p.waypoint_names, r_p.show_waypoints,
-            r_p.weapon_names, r_p.start, r_p.track_name, r_p.track_path,
-            r_p.track_model_name, r_p.empty_name, r_p.anim_name, r_p.omni_tag,
-            r_p.sign_cb, r_p.sign_name, r_p.camera_vec, r_p.shadow_src,
-            r_p.laps, r_p.bonus_model, r_p.bonus_suff)
-        game.track = self.track = Track(track_props)  # remove game.track
+        game.track = self.track = Track(r_p)  # remove game.track
+        game.track.attach_obs(self.on_track_loaded)
+        self.load_car = load_car
         self.mdt.track = self.track  # facade this
 
+    def on_track_loaded(self):
+        self.load_car()
+
     def enter_play(self):
+        game.track.detach_obs(self.on_track_loaded)
         self.track.gfx.model.reparentTo(eng.gfx.root)
         self.player_car.gfx.reparent()
         map(lambda car: car.gfx.reparent(), self.cars)
