@@ -32,9 +32,8 @@ class TuningFacade(object):
 class Tuning(GameObject, TuningFacade):
     __metaclass__ = ABCMeta
 
-    def __init__(self, tuning_props):
-        t_p = tuning_props
+    def __init__(self, props):
         init_lst = [
-            [('gui', TuningGui, [self, t_p])],
-            [('logic', TuningLogic, [self, t_p.cars])]]
+            [('gui', TuningGui, [self, props])],
+            [('logic', TuningLogic, [self, props.cars])]]
         GameObject.__init__(self, init_lst)

@@ -23,19 +23,13 @@ class RocketFacade(object):
 
 
 class Rocket(GameObject, RocketFacade):
-    gfx_cls = RocketGfx
-    phys_cls = RocketPhys
-    audio_cls = RocketAudio
-    logic_cls = RocketLogic
-    event_cls = RocketEvent
-    ai_cls = RocketAi
 
     def __init__(self, car, path, cars, particle_path):
         init_lst = [
-            [('gfx', self.gfx_cls, [self, car.gfx.nodepath, path])],
-            [('phys', self.phys_cls, [self, car, cars])],
-            [('audio', self.audio_cls, [self])],
-            [('logic', self.logic_cls, [self])],
-            [('event', self.event_cls, [self, particle_path])],
-            [('ai', self.ai_cls, [self, car])]]
+            [('gfx', RocketGfx, [self, car.gfx.nodepath, path])],
+            [('phys', RocketPhys, [self, car, cars])],
+            [('audio', RocketAudio, [self])],
+            [('logic', RocketLogic, [self])],
+            [('event', RocketEvent, [self, particle_path])],
+            [('ai', RocketAi, [self, car])]]
         GameObject.__init__(self, init_lst)

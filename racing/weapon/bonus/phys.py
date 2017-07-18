@@ -12,9 +12,9 @@ class BonusPhys(Phys):
 
     def sync_bld(self):
         self.ghost = BulletGhostNode('Bonus')
-        self.ghost.addShape(BulletBoxShape((1, 1, 2.5)))
+        self.ghost.add_shape(BulletBoxShape((1, 1, 2.5)))
         ghost_np = eng.attach_node(self.ghost)
-        ghost_np.setPos(self.pos)
+        ghost_np.set_pos(self.pos)
         PhysMgr().attach_ghost(self.ghost)
 
     def destroy(self):
