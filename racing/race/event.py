@@ -14,10 +14,10 @@ class NetMsgs(object):
 
 class RaceEvent(Event):
 
-    def __init__(self, mdt, menu_cls):
+    def __init__(self, mdt, menu_cls, keys):
         Event.__init__(self, mdt)
         self.menu_cls = menu_cls
-        self.accept('p-up', eng.toggle_pause)
+        self.accept(keys['pause'], eng.toggle_pause)
         self.last_sent = globalClock.getFrameTime()  # for networking
         self.ingame_menu = None
 

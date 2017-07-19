@@ -31,7 +31,7 @@ class Race(GameObject, RaceFacade):
             [('fsm', RaceFsm, [self, race_props.shaders_dev])],
             [('gui', RaceGui, [self, r_p])],
             [('logic', self.logic_cls, [self, r_p])],
-            [('event', self.event_cls, [self, race_props.ingame_menu])]]
+            [('event', self.event_cls, [self, r_p.ingame_menu, r_p.keys])]]
         GameObject.__init__(self, init_lst)
 
 
