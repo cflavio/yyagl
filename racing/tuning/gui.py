@@ -5,32 +5,29 @@ from yyagl.engine.gui.imgbtn import ImgBtn
 
 class TuningGui(Gui):
 
-    def __init__(self, mdt, tuning_props):
+    def __init__(self, mdt, sprops):
         Gui.__init__(self, mdt)
         self.buttons = self.background = None
-        self.props = tuning_props
+        self.sprops = sprops
 
     def show(self):
         self.background = OnscreenImage(
-            self.props.background, scale=(1.77778, 1, 1.0))
+            self.sprops.background_path, scale=(1.77778, 1, 1))
         self.background.setBin('background', 10)
+        bprops = {'scale': .4, 'frameColor': (0, 0, 0, 0),
+                  'command': self.on_btn}
         self.buttons = [ImgBtn(
-            scale=.4, pos=(-1.2, 1, .1), frameColor=(0, 0, 0, 0),
-            image=self.props.tuning_imgs[0], command=self.on_btn,
-            extraArgs=['engine'])]
+            pos=(-1.2, 1, .1), image=self.sprops.tuning_imgs[0],
+            extraArgs=['engine'], **bprops)]
         self.buttons += [ImgBtn(
-            scale=.4, pos=(0, 1, .1), frameColor=(0, 0, 0, 0),
-            image=self.props.tuning_imgs[1], command=self.on_btn,
-            extraArgs=['tires'])]
+            pos=(0, 1, .1), image=self.sprops.tuning_imgs[1],
+            extraArgs=['tires'], **bprops)]
         self.buttons += [ImgBtn(
-            scale=.4, pos=(1.2, 1, .1), frameColor=(0, 0, 0, 0),
-            image=self.props.tuning_imgs[2], command=self.on_btn,
-            extraArgs=['suspensions'])]
+            pos=(1.2, 1, .1), image=self.sprops.tuning_imgs[2],
+            extraArgs=['suspensions'], **bprops)]
 
     def on_btn(self, val):
-        tun = self.mdt.logic.tunings[self.props.player_car]
-        setattr(tun, val, getattr(tun, val) + 1)
-        self.notify('on_tuning_done')
+        self.notify('on_tuning_sel', val)
 
     def hide(self):
         map(lambda wdg: wdg.destroy(), self.buttons + [self.background])

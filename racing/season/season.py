@@ -4,12 +4,12 @@ from .logic import SeasonLogic, SingleRaceSeasonLogic
 
 class SeasonProps(object):
 
-    def __init__(self, cars, player_car, drivers, background, tuning_imgs,
+    def __init__(self, cars, player_car, drivers, background_path, tuning_imgs,
                  tracks, font, fg_col):
         self.cars = cars
         self.player_car = player_car
         self.drivers = drivers
-        self.background = background
+        self.background_path = background_path
         self.tuning_imgs = tuning_imgs
         self.tracks = tracks
         self.font = font

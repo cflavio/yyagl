@@ -25,8 +25,8 @@ class TuningFacade(object):
         return self.gui.hide()
 
     @property
-    def tunings(self):
-        return self.logic.tunings
+    def car2tuning(self):
+        return self.logic.car2tuning
 
 
 class Tuning(GameObject, TuningFacade):

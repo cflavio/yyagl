@@ -3,37 +3,36 @@ from yyagl.gameobject import Logic
 
 class TuningCar(object):
 
-    def __init__(self, engine, tires, suspensions):
-        self.engine = engine
-        self.tires = tires
-        self.suspensions = suspensions
+    def __init__(self, engine_val, tires_val, suspensions_val):
+        self.engine = engine_val
+        self.tires = tires_val
+        self.suspensions = suspensions_val
 
 
 class TuningLogic(Logic):
 
-    def __init__(self, mdt, cars):
+    def __init__(self, mdt, car_names):
         Logic.__init__(self, mdt)
-        self.cars = cars
-        self.tunings = {}
+        self.car_names = car_names
+        self.car2tuning = {}
         self.reset()
 
     def reset(self):
-        self.tunings = {car: TuningCar(0, 0, 0) for car in self.cars}
+        self.car2tuning = {car: TuningCar(0, 0, 0) for car in self.car_names}
 
     def to_dct(self):
         tun = {}
-        for car in self.tunings:
-            c_t = self.tunings[car]
+        for car in self.car2tuning:
             tun[car] = {}
-            tun[car]['engine'] = c_t.engine
-            tun[car]['tires'] = c_t.tires
-            tun[car]['suspensions'] = c_t.suspensions
+            tun[car]['engine'] = self.car2tuning[car].engine
+            tun[car]['tires'] = self.car2tuning[car].tires
+            tun[car]['suspensions'] = self.car2tuning[car].suspensions
         return tun
 
-    def load(self, tuning):
-        self.tunings = {}
-        for car in tuning:
-            c_t = tuning[car]
+    def load(self, tuning_dct):
+        self.car2tuning = {}
+        for car_name in tuning_dct:
+            tun = tuning_dct[car_name]
             new_t = TuningCar(
-                c_t['engine'], c_t['tires'], c_t['suspensions'])
-            self.tunings[car] = new_t
+                tun['engine'], tun['tires'], tun['suspensions'])
+            self.car2tuning[car_name] = new_t
