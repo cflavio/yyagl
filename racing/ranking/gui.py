@@ -5,20 +5,20 @@ from yyagl.gameobject import Gui
 
 class RankingGui(Gui):
 
-    def __init__(self, mdt, background, font, fg_col):
+    def __init__(self, mdt, background_fpath, font, fg_col):
         Gui.__init__(self, mdt)
         self.ranking_texts = []
-        self.background_path = background
+        self.background_path = background_fpath
         self.font = font
         self.fg_col = fg_col
         self.background = None
 
     def show(self):
         self.background = OnscreenImage(
-            self.background_path, scale=(1.77778, 1, 1.0))
-        self.background.setBin('background', 10)
-        items = self.mdt.logic.ranking.items()
-        sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
+            self.background_path, scale=(1.77778, 1, 1))
+        self.background.set_bin('background', 10)
+        items = self.mdt.logic.carname2points.items()
+        sorted_ranking = reversed(sorted(items, key=lambda elm: elm[1]))
         font = eng.load_font(self.font)
         self.ranking_texts = []
         for i, (name, score) in enumerate(sorted_ranking):
@@ -31,5 +31,6 @@ class RankingGui(Gui):
         map(lambda wdg: wdg.destroy(), self.ranking_texts + [self.background])
 
     def destroy(self):
-        self.ranking_texts = None
+        self.hide()
+        self.ranking_texts = self.background = None
         Gui.destroy(self)

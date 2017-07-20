@@ -47,7 +47,7 @@ class EngineFacade(object):
         return self.base.camera.set_pos(pos)
 
     @staticmethod
-    def load_font(self, font):
+    def load_font(font):
         return FontMgr().load_font(font)
 
     @property

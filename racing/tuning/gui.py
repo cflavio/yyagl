@@ -12,19 +12,19 @@ class TuningGui(Gui):
 
     def show(self):
         self.background = OnscreenImage(
-            self.sprops.background_path, scale=(1.77778, 1, 1))
+            self.sprops.background_fpath, scale=(1.77778, 1, 1))
         self.background.setBin('background', 10)
         bprops = {'scale': .4, 'frameColor': (0, 0, 0, 0),
                   'command': self.on_btn}
         self.buttons = [ImgBtn(
             pos=(-1.2, 1, .1), image=self.sprops.tuning_imgs[0],
-            extraArgs=['engine'], **bprops)]
+            extraArgs=['f_engine'], **bprops)]
         self.buttons += [ImgBtn(
             pos=(0, 1, .1), image=self.sprops.tuning_imgs[1],
-            extraArgs=['tires'], **bprops)]
+            extraArgs=['f_tires'], **bprops)]
         self.buttons += [ImgBtn(
             pos=(1.2, 1, .1), image=self.sprops.tuning_imgs[2],
-            extraArgs=['suspensions'], **bprops)]
+            extraArgs=['f_suspensions'], **bprops)]
 
     def on_btn(self, val):
         self.notify('on_tuning_sel', val)

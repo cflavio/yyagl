@@ -84,7 +84,7 @@ class LoadingPageGui(PageGui):
             img.setTexture(t_s, loader.loadTexture(txt_path))
 
     def set_ranking(self):
-        items = game.logic.season.logic.ranking.logic.ranking.items()
+        items = game.logic.season.logic.ranking.logic.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = OnscreenText(text=_('Ranking'), scale=.1, pos=(0, .3),
                            font=self.font, fg=self.text_bg)

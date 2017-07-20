@@ -10,8 +10,8 @@ class RankingFacade(object):
         return self.logic.load(ranking)
 
     @property
-    def ranking(self):
-        return self.logic.ranking
+    def carname2points(self):
+        return self.logic.carname2points
 
     def show(self):
         return self.gui.show()
@@ -19,12 +19,15 @@ class RankingFacade(object):
     def hide(self):
         return self.gui.hide()
 
+    def reset(self):
+        return self.logic.reset()
+
 
 class Ranking(GameObject, RankingFacade):
     __metaclass__ = ABCMeta
 
-    def __init__(self, cars, background, font, fg_col):
+    def __init__(self, car_names, background_fpath, font, fg_col):
         init_lst = [
-            [('gui', RankingGui, [self, background, font, fg_col])],
-            [('logic', RankingLogic, [self, cars])]]
+            [('gui', RankingGui, [self, background_fpath, font, fg_col])],
+            [('logic', RankingLogic, [self, car_names])]]
         GameObject.__init__(self, init_lst)

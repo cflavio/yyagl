@@ -24,6 +24,9 @@ class TuningFacade(object):
     def hide_gui(self):
         return self.gui.hide()
 
+    def reset(self):
+        return self.logic.reset()
+
     @property
     def car2tuning(self):
         return self.logic.car2tuning
@@ -35,5 +38,5 @@ class Tuning(GameObject, TuningFacade):
     def __init__(self, props):
         init_lst = [
             [('gui', TuningGui, [self, props])],
-            [('logic', TuningLogic, [self, props.cars])]]
+            [('logic', TuningLogic, [self, props.car_names])]]
         GameObject.__init__(self, init_lst)

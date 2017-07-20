@@ -8,38 +8,34 @@ class SeasonLogic(Logic):
 
     def __init__(self, mdt, season_props):
         Logic.__init__(self, mdt)
-        self.props = s_p = season_props
-        self.ranking = Ranking(s_p.cars, s_p.background_path, s_p.font, s_p.fg_col)
+        self.sprops = s_p = season_props
+        self.ranking = Ranking(s_p.car_names, s_p.background_fpath, s_p.font, s_p.fg_col)
         self.tuning = Tuning(s_p)
-        self.drivers = s_p.drivers
-        self.tracks = s_p.tracks
-        self.player_car = s_p.player_car
         self.race = None
 
     def start(self):
-        self.ranking.logic.reset()
-        self.tuning.logic.reset()
+        self.ranking.reset()
+        self.tuning.reset()
         self.tuning.attach_obs(self.on_tuning_sel)
 
     def on_tuning_sel(self, val):
-        tun = self.tunings[self.props.player_car]
+        tun = self.tuning.car2tuning[self.sprops.player_car_name]
         setattr(tun, val, getattr(tun, val) + 1)
-        self.step()
+        self.next_race()
 
     def load(self, ranking, tuning, drivers):
         self.ranking.load(ranking)
         self.tuning.load(tuning)
-        self.drivers = drivers
+        self.sprops._replace(drivers=drivers)
 
-    def step(self):
-        track = game.track.props.path
-        # todo: reference of race into season
-        if self.props.tracks.index(track) == len(self.props.tracks) - 1:
+    def next_race(self):
+        track = self.race.track.rprops.track_name
+        if self.sprops.track_names.index(track) == len(self.sprops.track_names) - 1:
             self.notify('on_season_end')
         else:
-            next_track = self.props.tracks[self.props.tracks.index(track) + 1]
-            self.notify('on_season_cont', next_track, self.props.player_car,
-                        self.drivers)
+            next_track = self.sprops.track_names[self.sprops.track_names.index(track) + 1]
+            self.notify('on_season_cont', next_track, self.sprops.player_car_name,
+                        self.sprops.drivers)
 
     def create_race_server(self, keys, joystick, sounds):
         self.race = RaceServer(keys, joystick, sounds)
@@ -52,10 +48,11 @@ class SeasonLogic(Logic):
 
     def destroy(self):
         self.tuning.detach_obs(self.on_tuning_sel)
+        self.sprops = self.ranking = self.tuning = self.race = None
         Logic.destroy(self)
 
 
 class SingleRaceSeasonLogic(SeasonLogic):
 
-    def step(self):
+    def next_race(self):
         game.demand('Menu')

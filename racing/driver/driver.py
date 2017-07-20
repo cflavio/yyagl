@@ -1,17 +1,18 @@
+from collections import namedtuple
 from yyagl.gameobject import GameObject
 from .logic import DriverLogic
 
 
-class DriverProps(object):
-
-    def __init__(self, name, engine, tires, suspensions):
-        self.name = name
-        self.engine = engine
-        self.tires = tires
-        self.suspensions = suspensions
+DriverProps = namedtuple('DriverProps', 'name f_engine f_tires f_suspensions')
 
 
-class Driver(GameObject):
+class DriverFacade(object):
+
+    @property
+    def dprops(self):
+        return self.logic.dprops
+
+class Driver(GameObject, DriverFacade):
 
     def __init__(self, driver_props):
         init_lst = [[('logic', DriverLogic, [self, driver_props])]]

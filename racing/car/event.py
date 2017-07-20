@@ -183,6 +183,7 @@ class CarPlayerEvent(CarEvent):
         self.input_dct_bld = InputDctBuilder.build(state,
                                                    carevent_props.joystick)
         self.accept(self.props.keys['respawn'], self.process_respawn)
+        self.accept('f8', self.notify, ['on_end_race'])
 
     def on_frame(self):
         CarEvent.on_frame(self)
@@ -248,7 +249,7 @@ class CarPlayerEvent(CarEvent):
         return self._input_dct
 
     def destroy(self):
-        evts = ['f11', self.props.keys['button'], self.props.keys['respawn']]
+        evts = ['f11', 'f8', self.props.keys['button'], self.props.keys['respawn']]
         map(self.ignore, evts)
         CarEvent.destroy(self)
 

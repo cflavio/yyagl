@@ -1,19 +1,10 @@
+from collections import namedtuple
 from yyagl.gameobject import GameObject
 from .logic import SeasonLogic, SingleRaceSeasonLogic
 
-
-class SeasonProps(object):
-
-    def __init__(self, cars, player_car, drivers, background_path, tuning_imgs,
-                 tracks, font, fg_col):
-        self.cars = cars
-        self.player_car = player_car
-        self.drivers = drivers
-        self.background_path = background_path
-        self.tuning_imgs = tuning_imgs
-        self.tracks = tracks
-        self.font = font
-        self.fg_col = fg_col
+sp_attrs = "car_names player_car_name drivers background_fpath tuning_imgs track_names " + \
+    "font fg_col"
+SeasonProps = namedtuple("SeasonProps", sp_attrs)
 
 
 class SeasonFacade(object):
@@ -44,7 +35,7 @@ class SeasonFacade(object):
 
     @property
     def drivers(self):
-        return self.logic.drivers
+        return self.logic.sprops.drivers
 
     @drivers.setter
     def drivers(self, val):

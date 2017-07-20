@@ -3,10 +3,10 @@ from yyagl.gameobject import Logic
 
 class TuningCar(object):
 
-    def __init__(self, engine_val, tires_val, suspensions_val):
-        self.engine = engine_val
-        self.tires = tires_val
-        self.suspensions = suspensions_val
+    def __init__(self, f_engine, f_tires, f_suspensions):
+        self.f_engine = f_engine
+        self.f_tires = f_tires
+        self.f_suspensions = f_suspensions
 
 
 class TuningLogic(Logic):
@@ -24,15 +24,14 @@ class TuningLogic(Logic):
         tun = {}
         for car in self.car2tuning:
             tun[car] = {}
-            tun[car]['engine'] = self.car2tuning[car].engine
-            tun[car]['tires'] = self.car2tuning[car].tires
-            tun[car]['suspensions'] = self.car2tuning[car].suspensions
+            tun[car]['engine'] = self.car2tuning[car].f_engine
+            tun[car]['tires'] = self.car2tuning[car].f_tires
+            tun[car]['suspensions'] = self.car2tuning[car].f_suspensions
         return tun
 
     def load(self, tuning_dct):
         self.car2tuning = {}
         for car_name in tuning_dct:
             tun = tuning_dct[car_name]
-            new_t = TuningCar(
-                tun['engine'], tun['tires'], tun['suspensions'])
+            new_t = TuningCar(tun['engine'], tun['tires'], tun['suspensions'])
             self.car2tuning[car_name] = new_t

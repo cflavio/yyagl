@@ -16,7 +16,7 @@ class Subject(object):
         map(self.observers.remove, observers)
 
     def notify(self, meth, *args, **kwargs):
-        try:
+        #try:
             meths = [obs for obs in self.observers if obs[0].__name__ == meth]
             sorted_observers = sorted(meths, key=lambda obs: obs[1])
             # TODO: make a sorted list at attach
@@ -24,11 +24,11 @@ class Subject(object):
             for obs in sorted_observers:
                 if obs in self.observers:  # if an observer removes another one
                     obs[0](*args, **kwargs)
-        except TypeError as err:
-            import traceback
-            traceback.print_stack()
-            LogMgr().log('\n\nERROR: %s - %s\n%s\n\n' % (
-                str(self), str(meth), str(err)))
+        #except TypeError as err:
+        #    import traceback
+        #    traceback.print_stack()
+        #    LogMgr().log('\n\nERROR: %s - %s\n%s\n\n' % (
+        #        str(self), str(meth), str(err)))
 
     def destroy(self):
         self.observers = None
