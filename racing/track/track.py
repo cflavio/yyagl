@@ -1,34 +1,22 @@
 from yyagl.gameobject import GameObject
 from yyagl.engine.log import LogMgr
+from yyagl.facade import Facade
 from .gfx import TrackGfx
 from .phys import TrackPhys
 from .event import TrackEvent
 from .audio import TrackAudio
 
 
-class TrackFacade(object):
+class TrackFacade(Facade):
 
-    def get_start_pos(self, idx):
-        return self.phys.get_start_pos(idx)
-
-    def play_music(self):
-        return self.audio.music.play()
-
-    def stop_music(self):
-        return self.audio.music.stop()
-
-    def update(self, player_pos):
-        return self.event.update(player_pos)
-
-    def attach_obs(self, meth):
-        return self.event.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.event.detach(meth)
-
-    @property
-    def lrtb(self):
-        return self.phys.lrtb
+    def __init__(self):
+        self._fwd_mth('get_start_pos', self.phys.get_start_pos)
+        self._fwd_mth('play_music', self.audio.music.play)
+        self._fwd_mth('stop_music', self.audio.music.stop)
+        self._fwd_mth('update', self.event.update)
+        self._fwd_mth('attach_obs', self.event.attach)
+        self._fwd_mth('detach_obs', self.event.detach)
+        self._fwd_prop('lrtb', self.phys.lrtb)
 
 
 class Track(GameObject, TrackFacade):
@@ -42,6 +30,7 @@ class Track(GameObject, TrackFacade):
             [('event', TrackEvent, [self, r_p.shaders_dev, r_p.shadow_src])],
             [('audio', TrackAudio, [self, r_p.music_path])]]
         GameObject.__init__(self, init_lst, self.__on_track_loaded)
+        TrackFacade.__init__(self)
 
     def __on_track_loaded(self):
         self.event.notify('on_track_loaded')

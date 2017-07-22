@@ -1,23 +1,18 @@
 from yyagl.gameobject import GameObject
+from yyagl.facade import Facade
 from .gfx import RotateAllGfx
 from .audio import RotateAllAudio
 from .logic import RotateAllLogic
 from .ai import RotateAllAi
 
 
-class RotateAllFacade(object):
+class RotateAllFacade(Facade):
 
-    def attach_obs(self, meth):
-        return self.logic.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.logic.detach(meth)
-
-    def fire(self):
-        return self.logic.fire()
-
-    def ai_fire(self):
-        return self.ai.update()
+    def __init__(self):
+        self._fwd_mth('attach_obs', self.logic.attach)
+        self._fwd_mth('detach_obs', self.logic.detach)
+        self._fwd_mth('fire', self.logic.fire)
+        self._fwd_mth('ai_fire', self.ai.update)
 
 
 class RotateAll(GameObject, RotateAllFacade):
@@ -33,3 +28,4 @@ class RotateAll(GameObject, RotateAllFacade):
             [('logic', self.logic_cls, [self, car, cars])],
             [('ai', self.ai_cls, [self])]]
         GameObject.__init__(self, init_lst)
+        RotateAllFacade.__init__(self)

@@ -2,15 +2,16 @@ from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Gui
 from yyagl.engine.font import FontMgr
+from yyagl.facade import Facade
 from .results import Results, ResultProps
 from .loading.loading import Loading
 from .minimap import Minimap
 
 
-class RaceGuiFacade(object):
+class RaceGuiFacade(Facade):
 
-    def update_minimap(self, positions):
-        return self.minimap.update(positions)
+    def __init__(self):
+        self._fwd_mth_lazy('update_minimap', lambda: self.minimap.update)
 
 
 class RaceGui(Gui, RaceGuiFacade):
@@ -31,6 +32,7 @@ class RaceGui(Gui, RaceGuiFacade):
             parent=eng.base.a2dBottomLeft, align=TextNode.ALeft,
             font=FontMgr().load_font(r_p.font))
         self.minimap = None
+        RaceGuiFacade.__init__(self)
 
     def start(self):
         self.minimap = Minimap(

@@ -10,6 +10,7 @@ from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.DirectEntry import DirectEntry
 from ...gameobject import GameObject, Gui, Event
+from ...facade import Facade
 from .imgbtn import ImgBtn
 from .widget import Widget
 
@@ -169,19 +170,13 @@ class PageEvent(Event):
         pass
 
 
-class PageFacade(object):
+class PageFacade(Facade):
 
-    def show(self):
-        return self.gui.show()
-
-    def hide(self):
-        return self.gui.hide()
-
-    def attach_obs(self, meth):
-        return self.gui.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.gui.detach(meth)
+    def __init__(self):
+        self._fwd_mth_lazy('show', lambda: self.gui.show)
+        self._fwd_mth_lazy('hide', lambda: self.gui.hide)
+        self._fwd_mth_lazy('attach_obs', lambda: self.gui.attach)
+        self._fwd_mth_lazy('detach_obs', lambda: self.gui.detach)
 
 
 class Page(GameObject, PageFacade):
@@ -193,6 +188,7 @@ class Page(GameObject, PageFacade):
         # clients attach to the menu for observing its events, but them are
         # fired by pages. maybe the menu should attach clients' methods to the
         # pages when they are pushed.
+        PageFacade.__init__(self)
         self.menu_args = menu_args
         self.menu = menu
         GameObject.__init__(self, self.init_lst)

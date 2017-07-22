@@ -1,4 +1,5 @@
 from yyagl.gameobject import GameObject
+from yyagl.facade import Facade
 from .gfx import RocketGfx
 from .phys import RocketPhys
 from .audio import RocketAudio
@@ -7,19 +8,13 @@ from .event import RocketEvent
 from .ai import RocketAi
 
 
-class RocketFacade(object):
+class RocketFacade(Facade):
 
-    def attach_obs(self, meth):
-        return self.logic.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.logic.detach(meth)
-
-    def fire(self):
-        return self.logic.fire()
-
-    def ai_fire(self):
-        return self.ai.update()
+    def __init__(self):
+        self._fwd_mth('attach_obs', self.logic.attach)
+        self._fwd_mth('detach_obs', self.logic.detach)
+        self._fwd_mth('fire', self.logic.fire)
+        self._fwd_mth('ai_fire', self.ai.update)
 
 
 class Rocket(GameObject, RocketFacade):
@@ -33,3 +28,4 @@ class Rocket(GameObject, RocketFacade):
             [('event', RocketEvent, [self, particle_path])],
             [('ai', RocketAi, [self, car])]]
         GameObject.__init__(self, init_lst)
+        RocketFacade.__init__(self)

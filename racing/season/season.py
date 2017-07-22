@@ -1,5 +1,6 @@
 from collections import namedtuple
 from yyagl.gameobject import GameObject
+from yyagl.facade import Facade
 from .logic import SeasonLogic, SingleRaceSeasonLogic
 
 sp_attrs = "car_names player_car_name drivers background_fpath tuning_imgs track_names " + \
@@ -7,31 +8,19 @@ sp_attrs = "car_names player_car_name drivers background_fpath tuning_imgs track
 SeasonProps = namedtuple("SeasonProps", sp_attrs)
 
 
-class SeasonFacade(object):
+class SeasonFacade(Facade):
 
-    def attach_obs(self, meth):
-        return self.logic.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.logic.detach(meth)
-
-    def start(self):
-        return self.logic.start()
-
-    def load(self, ranking, tuning, drivers):
-        return self.logic.load(ranking, tuning, drivers)
-
-    @property
-    def ranking(self):
-        return self.logic.ranking
-
-    @property
-    def tuning(self):
-        return self.logic.tuning
-
-    @property
-    def race(self):
-        return self.logic.race
+    def __init__(self):
+        self._fwd_mth('attach_obs', self.logic.attach)
+        self._fwd_mth('detach_obs', self.logic.detach)
+        self._fwd_mth('start', self.logic.start)
+        self._fwd_mth('load', self.logic.load)
+        self._fwd_mth('create_race_server', self.logic.create_race_server)
+        self._fwd_mth('create_race_client', self.logic.create_race_client)
+        self._fwd_mth('create_race', self.logic.create_race)
+        self._fwd_prop('ranking', self.logic.ranking)
+        self._fwd_prop('tuning', self.logic.tuning)
+        self._fwd_prop_lazy('race', lambda: self.logic.race)
 
     @property
     def drivers(self):
@@ -41,15 +30,6 @@ class SeasonFacade(object):
     def drivers(self, val):
         self.logic.drivers = val
 
-    def create_race_server(self, keys, joystick, sounds):
-        return self.logic.create_race_server(keys, joystick, sounds)
-
-    def create_race_client(self, keys, joystick, sounds):
-        return self.logic.create_race_client(keys, joystick, sounds)
-
-    def create_race(self, race_props):
-        return self.logic.create_race(race_props)
-
 
 class Season(GameObject, SeasonFacade):
     logic_cls = SeasonLogic
@@ -57,6 +37,7 @@ class Season(GameObject, SeasonFacade):
     def __init__(self, season_props):
         init_lst = [[('logic', self.logic_cls, [self, season_props])]]
         GameObject.__init__(self, init_lst)
+        SeasonFacade.__init__(self)
 
 
 class SingleRaceSeason(Season):

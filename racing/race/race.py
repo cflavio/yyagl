@@ -1,5 +1,6 @@
 from abc import ABCMeta
 from yyagl.gameobject import GameObject
+from yyagl.facade import Facade
 from .logic import RaceLogic, RaceLogicSinglePlayer, RaceLogicServer, \
     RaceLogicClient
 from .event import RaceEvent, RaceEventServer, RaceEventClient
@@ -7,17 +8,12 @@ from .gui.gui import RaceGui
 from .fsm import RaceFsm
 
 
-class RaceFacade(object):
+class RaceFacade(Facade):
 
-    def attach_obs(self, meth):
-        return self.event.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.event.detach(meth)
-
-    @property
-    def results(self):
-        return self.gui.results
+    def __init__(self):
+        self._fwd_mth('attach_obs', self.event.attach)
+        self._fwd_mth('detach_obs', self.event.detach)
+        self._fwd_prop('results', self.gui.results)
 
 
 class Race(GameObject, RaceFacade):
@@ -33,6 +29,7 @@ class Race(GameObject, RaceFacade):
             [('logic', self.logic_cls, [self, r_p])],
             [('event', self.event_cls, [self, r_p.ingame_menu, r_p.keys])]]
         GameObject.__init__(self, init_lst)
+        RaceFacade.__init__(self)
 
 
 class RaceSinglePlayer(Race):

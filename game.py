@@ -3,6 +3,7 @@ from abc import ABCMeta
 from .gameobject import Logic, GameObject
 from .engine.engine import Engine
 from .engine.lang import LangMgr
+from .facade import Facade
 
 
 class GameLogic(Logic):
@@ -14,10 +15,10 @@ class GameLogic(Logic):
         pass
 
 
-class GameFacade(object):
+class GameFacade(Facade):
 
-    def demand(self, state):
-        return self.fsm.demand(state)
+    def __init__(self):
+        self._fwd_mth('demand', self.fsm.demand)
 
 
 class GameBase(GameObject, GameFacade):  # it doesn't manage the window
@@ -28,6 +29,7 @@ class GameBase(GameObject, GameFacade):  # it doesn't manage the window
         Engine(cfg, self.on_end)
         GameObject.__init__(self, init_lst)
         LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
+        GameFacade.__init__(self)
         self.logic.on_start()
 
     def on_end(self):

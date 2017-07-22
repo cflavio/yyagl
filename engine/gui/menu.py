@@ -1,6 +1,7 @@
 from direct.gui.DirectGuiGlobals import FLAT
 from direct.gui.OnscreenImage import OnscreenImage
 from ...gameobject import Gui, Logic, GameObject
+from ...facade import Facade
 from ..font import FontMgr
 
 
@@ -131,16 +132,12 @@ class MenuLogic(Logic):
         self.pages = None
 
 
-class MenuFacade(object):
+class MenuFacade(Facade):
 
-    def push_page(self, page):
-        return self.logic.push_page(page)
-
-    def attach_obs(self, meth):
-        return self.gui.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.gui.detach(meth)
+    def __init__(self):
+        self._fwd_mth('push_page', self.logic.push_page)
+        self._fwd_mth('attach_obs', self.gui.attach)
+        self._fwd_mth('detach_obs', self.gui.detach)
 
 
 class Menu(GameObject, MenuFacade):
@@ -151,3 +148,4 @@ class Menu(GameObject, MenuFacade):
             [('gui', self.gui_cls, [self, menu_args])],
             [('logic', MenuLogic, [self])]]
         GameObject.__init__(self, comps)
+        MenuFacade.__init__(self)

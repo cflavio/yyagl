@@ -1,38 +1,27 @@
 from panda3d.bullet import BulletWorld, BulletDebugNode
 from ..singleton import Singleton
+from ..facade import Facade
 
 
-class PhysFacade(object):
+class PhysFacade(Facade):
 
-    def attach_rigid_body(self, node):
-        return self.root.attachRigidBody(node)
-
-    def remove_rigid_body(self, node):
-        return self.root.removeRigidBody(node)
-
-    def attach_ghost(self, node):
-        return self.root.attachGhost(node)
-
-    def remove_ghost(self, node):
-        return self.root.removeGhost(node)
+    def __init__(self):
+        self._fwd_mth_lazy('attach_rigid_body', lambda: self.root.attachRigidBody)
+        self._fwd_mth_lazy('remove_rigid_body', lambda: self.root.removeRigidBody)
+        self._fwd_mth_lazy('attach_ghost', lambda: self.root.attachGhost)
+        self._fwd_mth_lazy('remove_ghost', lambda: self.root.removeGhost)
+        self._fwd_mth_lazy('attach_vehicle', lambda: self.root.attachVehicle)
+        self._fwd_mth_lazy('remove_vehicle', lambda: self.root.removeVehicle)
+        self._fwd_mth_lazy('ray_test_all', lambda: self.root.rayTestAll)
 
     def add_collision_obj(self, node):
         self.collision_objs += [node]
-
-    def attach_vehicle(self, vehicle):
-        return self.root.attachVehicle(vehicle)
-
-    def remove_vehicle(self, vehicle):
-        return self.root.removeVehicle(vehicle)
 
     def ray_test_closest(self, top, bottom, mask=None):
         if mask:
             return self.root.rayTestClosest(top, bottom, mask)
         else:
             return self.root.rayTestClosest(top, bottom)
-
-    def ray_test_all(self, top, bottom):
-        return self.root.rayTestAll(top, bottom)
 
 
 class PhysMgr(PhysFacade):
@@ -44,6 +33,7 @@ class PhysMgr(PhysFacade):
         self.__obj2coll = {}  # obj: [(node, coll_time), ...]
         self.root = None
         self.__debug_np = None
+        PhysFacade.__init__(self)
 
     def init(self):
         self.collision_objs = []

@@ -1,4 +1,5 @@
 from yyagl.gameobject import GameObject
+from yyagl.facade import Facade
 from .gfx import RearRocketGfx
 from .phys import RearRocketPhys
 from .audio import RearRocketAudio
@@ -7,19 +8,13 @@ from .event import RearRocketEvent
 from .ai import RearRocketAi
 
 
-class RearRocketFacade(object):
+class RearRocketFacade(Facade):
 
-    def attach_obs(self, meth):
-        return self.logic.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.logic.detach(meth)
-
-    def fire(self):
-        return self.logic.fire()
-
-    def ai_fire(self):
-        return self.ai.update()
+    def __init__(self):
+        self._fwd_mth('attach_obs', self.logic.attach)
+        self._fwd_mth('detach_obs', self.logic.detach)
+        self._fwd_mth('fire', self.logic.fire)
+        self._fwd_mth('ai_fire', self.ai.update)
 
 
 class RearRocket(GameObject, RearRocketFacade):
@@ -39,3 +34,4 @@ class RearRocket(GameObject, RearRocketFacade):
             [('event', self.event_cls, [self, particle_path])],
             [('ai', self.ai_cls, [self, car])]]
         GameObject.__init__(self, init_lst)
+        RearRocketFacade.__init__(self)

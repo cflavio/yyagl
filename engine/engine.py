@@ -24,6 +24,7 @@ class Engine(GameObject, EngineFacade):
 
     def __init__(self, cfg=None, on_end_cb=None):
         __builtin__.eng = self
+        EngineFacade.__init__(self)
         self.base = EngineShowBase()
         ShaderMgr(cfg.shaders_dev, cfg.gamma)
         Profiler(cfg.python_profiling, cfg.python_profiling_percall)

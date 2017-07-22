@@ -1,26 +1,18 @@
 from abc import ABCMeta
 from yyagl.gameobject import GameObject
+from yyagl.facade import Facade
 from .logic import RankingLogic
 from .gui import RankingGui
 
 
-class RankingFacade(object):
+class RankingFacade(Facade):
 
-    def load(self, ranking):
-        return self.logic.load(ranking)
-
-    @property
-    def carname2points(self):
-        return self.logic.carname2points
-
-    def show(self):
-        return self.gui.show()
-
-    def hide(self):
-        return self.gui.hide()
-
-    def reset(self):
-        return self.logic.reset()
+    def __init__(self):
+        self._fwd_mth('load', self.logic.load)
+        self._fwd_mth('show', self.gui.show)
+        self._fwd_mth('hide', self.gui.hide)
+        self._fwd_mth('reset', self.logic.reset)
+        self._fwd_prop('carname2points', self.logic.carname2points)
 
 
 class Ranking(GameObject, RankingFacade):
@@ -31,3 +23,4 @@ class Ranking(GameObject, RankingFacade):
             [('gui', RankingGui, [self, background_fpath, font, fg_col])],
             [('logic', RankingLogic, [self, car_names])]]
         GameObject.__init__(self, init_lst)
+        RankingFacade.__init__(self)

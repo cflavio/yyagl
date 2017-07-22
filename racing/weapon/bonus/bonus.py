@@ -1,21 +1,17 @@
 from yyagl.gameobject import GameObject
+from yyagl.facade import Facade
 from .gfx import BonusGfx
 from .phys import BonusPhys
 from .event import BonusEvent
 from .logic import BonusLogic
 
 
-class BonusFacade(object):
+class BonusFacade(Facade):
 
-    def attach_obs(self, meth):
-        return self.event.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.event.detach(meth)
-
-    @property
-    def pos(self):
-        return self.phys.pos
+    def __init__(self):
+        self._fwd_mth('attach_obs', self.event.attach)
+        self._fwd_mth('detach_obs', self.event.detach)
+        self._fwd_prop('pos', self.phys.pos)
 
 
 class Bonus(GameObject, BonusFacade):
@@ -27,3 +23,4 @@ class Bonus(GameObject, BonusFacade):
             [('phys', BonusPhys, [self, pos])],
             [('logic', BonusLogic, [self, waypoints])]]
         GameObject.__init__(self, init_lst)
+        BonusFacade.__init__(self)

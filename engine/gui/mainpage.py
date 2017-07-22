@@ -1,6 +1,6 @@
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
-from .page import Page, PageGui
+from .page import Page, PageGui, PageFacade
 from .imgbtn import ImgBtn
 
 
@@ -43,5 +43,8 @@ class MainPageGui(PageGui):
             font=self.menu.gui.menu_args.font)]
 
 
-class MainPage(Page):
+class MainPage(Page, PageFacade):
     gui_cls = MainPageGui
+
+    def __init__(self):
+        PageFacade.__init__(self)

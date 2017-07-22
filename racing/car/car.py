@@ -1,5 +1,6 @@
 from yyagl.gameobject import GameObject, Ai, Audio
 from yyagl.engine.log import LogMgr
+from yyagl.facade import Facade
 from .fsm import CarFsm
 from .gfx import CarGfx, CarPlayerGfx
 from .phys import CarPhys, CarPlayerPhys
@@ -65,45 +66,21 @@ class CarProps(object):
         self.car_names = car_names
 
 
-class CarFacade(object):
+class CarFacade(Facade):
 
-    def reparent(self):
-        return self.gfx.reparent()
-
-    def attach_obs(self, meth):
-        return self.event.attach(meth)
-
-    def detach_obs(self, meth):
-        return self.event.detach(meth)
-
-    def reset_car(self):
-        return self.logic.reset_car()
-
-    def start(self):
-        return self.event.start()
-
-    def get_pos(self):
-        return self.gfx.nodepath.get_pos()
-
-    def get_hpr(self):
-        return self.gfx.nodepath.get_hpr()
-
-    def closest_wp(self):
-        return self.logic.closest_wp()
-
-    @property
-    def lap_times(self):
-        return self.logic.lap_times
-
-    def get_linear_velocity(self):
-        return self.phys.vehicle.getChassis().getLinearVelocity()
-
-    @property
-    def path(self):
-        return self.gfx.path
-
-    def demand(self, state):
-        return self.fsm.demand(state)
+    def __init__(self):
+        self._fwd_mth_lazy('reparent', lambda: self.gfx.reparent)
+        self._fwd_mth_lazy('attach_obs', lambda: self.event.attach)
+        self._fwd_mth_lazy('detach_obs', lambda: self.event.detach)
+        self._fwd_mth_lazy('reset_car', lambda: self.logic.reset_car)
+        self._fwd_mth_lazy('start', lambda: self.event.start)
+        self._fwd_mth_lazy('get_pos', lambda: self.gfx.nodepath.get_pos)
+        self._fwd_mth_lazy('get_hpr', lambda: self.gfx.nodepath.get_hpr)
+        self._fwd_mth_lazy('closest_wp', lambda: self.logic.closest_wp)
+        self._fwd_mth_lazy('get_linear_velocity', lambda: self.phys.vehicle.getChassis().getLinearVelocity)
+        self._fwd_mth_lazy('demand', lambda: self.fsm.demand)
+        self._fwd_prop_lazy('lap_times', lambda: self.logic.lap_times)
+        self._fwd_prop_lazy('path', lambda: self.gfx.path)
 
 
 class Car(GameObject, CarFacade):
@@ -133,6 +110,7 @@ class Car(GameObject, CarFacade):
                                   car_props.car_names])],
             [('audio', self.audio_cls, [self, car_props])]]
         GameObject.__init__(self, init_lst, car_props.callback)
+        CarFacade.__init__(self)
 
 
 class PlayerCar(Car):
