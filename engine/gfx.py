@@ -53,15 +53,16 @@ class EngineGfx(Gfx):
         print '\n\n#####\nrender.ls()'
         self.mdt.base.render.ls()
 
-    def particle(self, path, parent, render_parent, pos, timeout):
+    def particle(self, path, parent, render_parent, pos, timeout, alias=''):
+        # alias for instancing multiple times the same particle
         # particles are really slow, so we don't cleanup them
-        if path not in self.part2eff:
+        if alias and alias not in self.part2eff or path not in self.part2eff:
             par = ParticleEffect()
             par.loadConfig(path)
-            self.part2eff[path] = par
+            self.part2eff[alias or path] = par
             par.start(parent=parent, renderParent=render_parent)
             par.disable()
-        par = self.part2eff[path]
+        par = self.part2eff[alias or path]
         par.start(parent=parent, renderParent=render_parent)
         par.set_pos(pos)
         args = timeout, lambda par: par.disable(), [par]

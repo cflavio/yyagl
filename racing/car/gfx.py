@@ -130,6 +130,11 @@ class SkidmarkMgr(object):
             self.r_skidmark = Skidmark(frpos, radius, heading)
             self.l_skidmark = Skidmark(flpos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
+            whl_radius = self.car.phys.vehicle.get_wheels()[2].get_wheel_radius()
+            whl_pos_l = self.car.phys.vehicle.get_wheels()[2].get_chassis_connection_point_cs() + (0, -whl_radius, -whl_radius + .05)
+            whl_pos_r = self.car.phys.vehicle.get_wheels()[3].get_chassis_connection_point_cs() + (0, -whl_radius, -whl_radius + .05)
+            eng.particle('assets/particles/skidmark.ptf', self.car.gfx.nodepath, self.car.gfx.nodepath, whl_pos_l, 1.2, 'left skidmark')
+            eng.particle('assets/particles/skidmark.ptf', self.car.gfx.nodepath, self.car.gfx.nodepath, whl_pos_r, 1.2, 'right skidmark')
 
     def on_no_skidmarking(self):
         self.l_skidmark = self.r_skidmark = None
