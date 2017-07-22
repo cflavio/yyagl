@@ -1,5 +1,5 @@
 from math import sin, cos
-from panda3d.core import Vec3, Vec2, deg2Rad, LPoint3f
+from panda3d.core import Vec3, Vec2, deg2Rad, LPoint3f, Mat4, LVecBase3f
 from yyagl.gameobject import Logic
 from yyagl.racing.camera import Camera
 from yyagl.engine.joystick import JoystickMgr
@@ -41,7 +41,8 @@ class DiscreteLogic(AbsLogic):
 
     turn_time = .1  # turn time with keyboard
 
-    def process(self, input_dct, phys):
+    def process(self, input_dct, car):
+        phys = car.phys
         eng_frc = brake_frc = 0
         f_t = globalClock.getFrameTime()
         if input_dct['forward'] and input_dct['reverse']:
@@ -78,17 +79,70 @@ class DiscreteLogic(AbsLogic):
             else:
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
-        if phys.speed > 80:
-            eng_frc = eng_frc + .2 * phys.lateral_force * eng_frc
-            # for whl in phys.vehicle.get_wheels():
-            #     fric = whl.getFrictionSlip()
-            #     whl.setFrictionSlip(fric + .1 * phys.lateral_force * fric)
+        if phys.speed > 10:
+            since_drifting = globalClock.get_frame_time() - phys.last_drift_time
+            drift_eng_effect_time = 2.5
+            drift_eng_fact_per_time = 1 - since_drifting / drift_eng_effect_time
+            drift_eng_multiplier = 1.4
+            drift_eng_fact = max(0, drift_eng_multiplier * drift_eng_fact_per_time)
+            eng_frc = eng_frc + drift_eng_fact * eng_frc
+
+            drift_fric_effect_time = 1.6
+            drift_fric_fact_timed = max(0, 1 - since_drifting / drift_fric_effect_time)
+            drift_fric_fact = drift_fric_fact_timed * max(1, phys.lateral_force)
+            for whl in phys.vehicle.get_wheels():
+                fric = phys.friction_slip
+                drift_front = .0016
+                drift_back = .0024
+                if whl.is_front_wheel():# and phys.is_drifting:
+                    whl.setFrictionSlip(fric - fric * drift_front * drift_fric_fact)
+                elif not whl.is_front_wheel():# and phys.is_drifting:
+                    whl.setFrictionSlip(fric - fric * drift_back * drift_fric_fact)
+                else:
+                    whl.setFrictionSlip(fric)
+
+            car_vec = car.logic.car_vec
+            rot_mat_left = Mat4()
+            rot_mat_left.setRotateMat(90, (0, 0, 1))
+            car_vec_left = rot_mat_left.xformVec(car_vec)
+            rot_mat_right = Mat4()
+            rot_mat_right.setRotateMat(-90, (0, 0, 1))
+            car_vec_right = rot_mat_right.xformVec(car_vec)
+
+            max_intensity = 20000.0
+            drift_inertia_effect_time = 4.0
+            drift_inertia_fact_timed = max(.0, 1.0 - since_drifting / drift_inertia_effect_time)
+            max_intensity *= 1.0 - drift_inertia_fact_timed
+            intensity = drift_inertia_fact_timed * max_intensity
+            if input_dct['left'] or input_dct['right'] or input_dct['forward']:
+                vel = phys.vehicle.get_chassis().get_linear_velocity()
+                vel.normalize()
+                direction = vel
+                if input_dct['forward']:
+                    act_vec = car_vec
+                    if input_dct['left']:
+                        if car_vec_left.dot(vel) > 0:
+                            act_vec = car_vec * .5 + car_vec_left * .5
+                    if input_dct['right']:
+                        if car_vec_right.dot(vel) > 0:
+                            act_vec = car_vec * .5 + car_vec_right * .5
+                else:
+                    act_vec = car_vec
+                    if input_dct['left']:
+                        if car_vec_left.dot(vel) > 0:
+                            act_vec = car_vec_left
+                    if input_dct['right']:
+                        if car_vec_right.dot(vel) > 0:
+                            act_vec = car_vec_right
+                direction = act_vec * (1 - drift_inertia_fact_timed) + vel * drift_inertia_fact_timed
+                phys.pnode.apply_central_force(direction * intensity)
         return eng_frc, brake_frc, self._steering
 
 
 class AnalogicLogic(AbsLogic):
 
-    def process(self, input_dct, phys):
+    def process(self, input_dct, car):
+        phys = car.phys
         eng_frc = brake_frc = 0
         j_x, j_y, j_a, j_b = JoystickMgr().get_joystick()
         scale = lambda val: min(1, max(-1, val * 1.2))
@@ -149,7 +203,7 @@ class CarLogic(Logic):
 
     def update(self, input_dct):
         phys = self.mdt.phys
-        eng_f, brake_f, steering = self.input_logic.process(input_dct, phys)
+        eng_f, brake_f, steering = self.input_logic.process(input_dct, self.mdt)
         phys.set_forces(self.get_eng_frc(eng_f), brake_f, steering)
         self.__update_roll_info()
         gfx = self.mdt.gfx

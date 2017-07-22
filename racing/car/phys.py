@@ -1,6 +1,6 @@
 from yaml import load
 from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape
-from panda3d.core import LPoint3f, BitMask32
+from panda3d.core import LPoint3f, BitMask32, Mat4
 from yyagl.gameobject import Phys
 from yyagl.engine.log import LogMgr
 from yyagl.engine.phys import PhysMgr
@@ -16,6 +16,7 @@ class CarPhys(Phys):
         self.roll_influence = self.max_speed = None
         self.curr_speed_factor = 1.0
         self.__prev_speed = 0
+        self.__last_drift_time = 0
         self.__finds = {}  # cache for find's results
         self.props = carphys_props
         self._load_phys()
@@ -126,18 +127,24 @@ class CarPhys(Phys):
     @property
     def lateral_force(self):
         vel = self.vehicle.get_chassis().get_linear_velocity()
-        vel.normalize()
-        dir_ = self.mdt.logic.car_vec
-        lat = dir_.dot(vel)
-        lat_force = 0
-        if lat > .5:
-            lat_force = min(1, (lat - 1.0) / -.2)
-        return lat_force
+        rot_mat = Mat4()
+        rot_mat.setRotateMat(-90, (0, 0, 1))
+        car_lat = rot_mat.xformVec(self.mdt.logic.car_vec)
+        proj_frc = vel.project(car_lat)
+        return proj_frc.length()
 
     @property
     def is_flying(self):  # no need to be cached
         rays = [whl.getRaycastInfo() for whl in self.vehicle.get_wheels()]
         return not any(ray.isInContact() for ray in rays)
+
+    @property
+    def is_drifting(self):
+        return self.lateral_force > 4.0
+
+    @property
+    def last_drift_time(self):
+        return self.__last_drift_time
 
     @property
     def prev_speed(self):
@@ -184,6 +191,8 @@ class CarPhys(Phys):
             if gfx_node.has_tag('friction'):
                 fric = float(gfx_node.get_tag('friction'))
                 whl.setFrictionSlip(self.friction_slip * fric)
+        if self.is_drifting:
+            self.__last_drift_time = globalClock.get_frame_time()
         self.curr_speed_factor = (sum(speeds) / len(speeds)) if speeds else 1.0
 
     @property
