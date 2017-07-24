@@ -56,7 +56,7 @@ class EngineGfx(Gfx):
     def particle(self, path, parent, render_parent, pos, timeout, alias=''):
         # alias for instancing multiple times the same particle
         # particles are really slow, so we don't cleanup them
-        if alias and alias not in self.part2eff or path not in self.part2eff:
+        if path not in self.part2eff and alias not in self.part2eff:
             par = ParticleEffect()
             par.loadConfig(path)
             self.part2eff[alias or path] = par
