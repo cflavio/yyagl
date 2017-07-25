@@ -8,7 +8,7 @@ class SeasonLogic(Logic):
 
     def __init__(self, mdt, season_props):
         Logic.__init__(self, mdt)
-        self.sprops = s_p = season_props
+        self.props = s_p = season_props
         self.ranking = Ranking(s_p.car_names, s_p.background_fpath, s_p.font, s_p.fg_col)
         self.tuning = Tuning(s_p)
         self.race = None
@@ -19,23 +19,23 @@ class SeasonLogic(Logic):
         self.tuning.attach_obs(self.on_tuning_sel)
 
     def on_tuning_sel(self, val):
-        tun = self.tuning.car2tuning[self.sprops.player_car_name]
+        tun = self.tuning.car2tuning[self.props.player_car_name]
         setattr(tun, val, getattr(tun, val) + 1)
         self.next_race()
 
     def load(self, ranking, tuning, drivers):
         self.ranking.load(ranking)
         self.tuning.load(tuning)
-        self.sprops._replace(drivers=drivers)
+        self.props._replace(drivers=drivers)
 
     def next_race(self):
         track = self.race.track.rprops.track_name
-        if self.sprops.track_names.index(track) == len(self.sprops.track_names) - 1:
+        if self.props.track_names.index(track) == len(self.props.track_names) - 1:
             self.notify('on_season_end')
         else:
-            next_track = self.sprops.track_names[self.sprops.track_names.index(track) + 1]
-            self.notify('on_season_cont', next_track, self.sprops.player_car_name,
-                        self.sprops.drivers)
+            next_track = self.props.track_names[self.props.track_names.index(track) + 1]
+            self.notify('on_season_cont', next_track, self.props.player_car_name,
+                        self.props.drivers)
 
     def create_race_server(self, keys, joystick, sounds):
         self.race = RaceServer(keys, joystick, sounds)
@@ -48,7 +48,7 @@ class SeasonLogic(Logic):
 
     def destroy(self):
         self.tuning.detach_obs(self.on_tuning_sel)
-        self.sprops = self.ranking = self.tuning = self.race = None
+        self.props = self.ranking = self.tuning = self.race = None
         Logic.destroy(self)
 
 

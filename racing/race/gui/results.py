@@ -71,7 +71,7 @@ class Results(Subject):
             img.setTransparency(True)
             ts = TextureStage('ts')
             ts.setMode(TextureStage.MDecal)
-            txt_path = self.props.drivers_imgs % idx
+            txt_path = self.props.drivers_img % idx
             img.setTexture(ts, loader.loadTexture(txt_path))
             self.__res_txts += [txt, img]
         self.__res_txts += [

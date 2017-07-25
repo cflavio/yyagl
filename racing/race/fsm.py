@@ -19,19 +19,17 @@ class RaceFsm(Fsm):
             'Countdown': ['Play'],
             'Play': ['Results']}
 
-    def enterLoading(
-            self, track_path, car_path, player_cars, drivers, tracks,
-            track_name_transl, single_race, grid, cars_path, drivers_path,
-            joystick, keys, menu_args, countdown_sfx):
+    def enterLoading(self, rprops, sprops, track_name_transl, single_race, drivers):
         LogMgr().log('entering Loading state')
-        self.menu_args = menu_args
-        self.countdown_sfx = countdown_sfx
+        self.menu_args = rprops.menu_args
+        self.countdown_sfx = sprops.countdown_sfx
         loading_props = LoadingProps(
-            track_path, car_path, drivers, tracks, track_name_transl,
-            single_race, grid, cars_path, drivers_path, joystick, keys,
-            menu_args)
+            rprops.track_path, rprops.player_car_name, drivers, sprops.track_names,
+            track_name_transl, single_race, rprops.grid,
+            rprops.cars_imgs, rprops.drivers_img, rprops.joystick,
+            rprops.keys, rprops.menu_args)
         self.mdt.gui.loading.enter_loading(loading_props)
-        args = [track_path, car_path, player_cars]
+        args = [rprops.track_path, rprops.player_car_name, []]
         eng.do_later(1.0, self.mdt.logic.load_stuff, args)
 
     def exitLoading(self):
@@ -61,7 +59,7 @@ class RaceFsm(Fsm):
 
     def start_countdown(self):
         self.countdown = Countdown(self.countdown_sfx, self.menu_args.font)
-        self.countdown.attach(self.on_start_race)
+        self.countdown.attach(lambda: self.demand('Play'), rename='on_start_race')
 
     def exitCountdown(self):
         LogMgr().log('exiting Countdown state')
@@ -74,9 +72,6 @@ class RaceFsm(Fsm):
         LogMgr().log('entering Play state')
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Play'), cars)
-
-    def on_start_race(self):
-        self.demand('Play')
 
     @staticmethod
     def exitPlay():

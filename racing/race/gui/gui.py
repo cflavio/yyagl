@@ -16,17 +16,11 @@ class RaceGuiFacade(Facade):
 
 class RaceGui(Gui, RaceGuiFacade):
 
-    def __init__(self, mdt, racegui_props):
+    def __init__(self, mdt, rprops):
         Gui.__init__(self, mdt)
-        r_p = self.props = racegui_props
-        result_props = ResultProps(
-            r_p.menu_args, r_p.drivers_img, r_p.cars_imgs, r_p.share_urls,
-            r_p.share_imgs, r_p.track_name)
-        self.results = Results(result_props)
+        r_p = self.props = rprops
+        self.results = Results(rprops)
         self.loading = Loading()
-        self.debug_txt = OnscreenText(
-            '', pos=(-.1, .1), scale=.05, fg=(1, 1, 1, 1),
-            parent=eng.base.a2dBottomRight, align=TextNode.ARight)
         self.way_txt = OnscreenText(
             '', pos=(.1, .1), scale=.1, fg=r_p.menu_args.text_err,
             parent=eng.base.a2dBottomLeft, align=TextNode.ALeft,
@@ -42,7 +36,6 @@ class RaceGui(Gui, RaceGuiFacade):
 
     def destroy(self):
         self.results.destroy()
-        # self.loading.destroy()
         self.way_txt.destroy()
         self.minimap.destroy()
         Gui.destroy(self)

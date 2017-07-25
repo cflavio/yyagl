@@ -22,12 +22,12 @@ class Race(GameObject, RaceFacade):
     event_cls = RaceEvent
 
     def __init__(self, race_props):
-        r_p = race_props
+        rpr = race_props
         init_lst = [
-            [('fsm', RaceFsm, [self, race_props.shaders_dev])],
-            [('gui', RaceGui, [self, r_p])],
-            [('logic', self.logic_cls, [self, r_p])],
-            [('event', self.event_cls, [self, r_p.ingame_menu, r_p.keys])]]
+            [('fsm', RaceFsm, [self, rpr.shaders_dev])],
+            [('gui', RaceGui, [self, rpr])],
+            [('logic', self.logic_cls, [self, rpr])],
+            [('event', self.event_cls, [self, rpr.ingame_menu, rpr.keys])]]
         GameObject.__init__(self, init_lst)
         RaceFacade.__init__(self)
 

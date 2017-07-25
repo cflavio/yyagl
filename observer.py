@@ -6,7 +6,9 @@ class Subject(object):
     def __init__(self):
         self.observers = []
 
-    def attach(self, obs_meth, sort=10):
+    def attach(self, obs_meth, sort=10, rename=''):
+        if rename:
+            obs_meth.__name__ = rename
         self.observers += [(obs_meth, sort)]
 
     def detach(self, obs_meth):
