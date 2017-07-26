@@ -566,6 +566,10 @@ class CarLogic(Logic):
     def lap_time(self):
         return globalClock.getFrameTime() - self.last_time_start
 
+    @property
+    def laps_num(self):
+        return len(self.lap_times)
+
     def fire(self):
         self.weapon.attach_obs(self.on_weapon_destroyed)
         self.weapon.fire()

@@ -29,7 +29,7 @@ class RaceFsm(Fsm):
             rprops.cars_imgs, rprops.drivers_img, rprops.joystick,
             rprops.keys, rprops.menu_args)
         self.mdt.gui.loading.enter_loading(loading_props)
-        args = [rprops.track_path, rprops.player_car_name, []]
+        args = [rprops.player_car_name, []]
         eng.do_later(1.0, self.mdt.logic.load_stuff, args)
 
     def exitLoading(self):

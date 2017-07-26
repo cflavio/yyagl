@@ -16,6 +16,7 @@ class TrackFacade(Facade):
         self._fwd_mth('update', self.event.update)
         self._fwd_mth('attach_obs', self.event.attach)
         self._fwd_mth('detach_obs', self.event.detach)
+        self._fwd_mth_lazy('reparent_to', lambda: self.gfx.model.reparent_to)
         self._fwd_prop('lrtb', self.phys.lrtb)
 
 
