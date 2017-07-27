@@ -4,7 +4,7 @@ from yyagl.facade import Facade
 from .logic import SeasonLogic, SingleRaceSeasonLogic
 
 sp_attrs = "car_names player_car_name drivers background_fpath tuning_imgs track_names " + \
-    "font fg_col countdown_sfx"
+    "font fg_col countdown_sfx single_race"
 SeasonProps = namedtuple("SeasonProps", sp_attrs)
 
 

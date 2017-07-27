@@ -41,7 +41,7 @@ class RaceEvent(Event):
     def on_ingame_exit(self):
         self.ingame_menu.gui.menu.detach_obs(self.on_ingame_back)
         self.ingame_menu.gui.menu.detach_obs(self.on_ingame_exit)
-        if self.mdt.fsm.get_current_or_next_state() != 'Results':
+        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
             self.mdt.logic.exit_play()
         self.ingame_menu.destroy()
         self.notify('on_ingame_exit_confirm')

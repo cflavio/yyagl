@@ -3,7 +3,7 @@ from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Gui
 from yyagl.engine.font import FontMgr
 from yyagl.facade import Facade
-from .results import Results, ResultProps
+from .results import Results
 from .loading.loading import Loading
 from .minimap import Minimap
 
