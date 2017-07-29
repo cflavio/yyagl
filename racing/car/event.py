@@ -75,7 +75,7 @@ class CarEvent(Event):
             if obj_name.startswith(self.props.respawn_name):
                 self.process_respawn()
             if obj_name.startswith(self.props.pitstop_name):
-                self.mdt.gui.apply_damage(True)
+                self.mdt.gui.panel.apply_damage(True)
                 self.mdt.phys.apply_damage(True)
                 self.mdt.gfx.apply_damage(True)
             if obj_name.startswith(self.props.goal_name):
@@ -178,7 +178,7 @@ class CarPlayerEvent(CarEvent):
     def __init__(self, mdt, carevent_props):
         CarEvent.__init__(self, mdt, carevent_props)
         if not eng.is_runtime:
-            self.accept('f11', self.mdt.gui.toggle)
+            self.accept('f11', self.mdt.gui.pars.toggle)
         state = self.mdt.fsm.getCurrentOrNextState()
         self.input_dct_bld = InputDctBuilder.build(state,
                                                    carevent_props.joystick)
@@ -191,7 +191,7 @@ class CarPlayerEvent(CarEvent):
             self.mdt.phys.speed_ratio, self.mdt.logic.is_rolling,
             self.mdt.fsm.getCurrentOrNextState() == 'Countdown',
             self.mdt.logic.is_rotating)
-        self.mdt.audio.update(self._get_input())
+        self.mdt.audio.update(self.mdt.logic.is_skidmarking, self.mdt.phys.speed_ratio)
 
     def on_collision(self, obj, tgt_obj):
         CarEvent.on_collision(self, obj, tgt_obj)
@@ -203,7 +203,7 @@ class CarPlayerEvent(CarEvent):
 
     def on_bonus(self):
         if self.mdt.logic.weapon:
-            self.mdt.gui.unset_weapon()
+            self.mdt.gui.panel.unset_weapon()
         wpn_cls = CarEvent.on_bonus(self)
         self.accept(self.props.keys['button'], self.on_fire)
         wpn2img = {
@@ -212,13 +212,13 @@ class CarPlayerEvent(CarEvent):
             Turbo: 'turbo',
             RotateAll: 'turn',
             Mine: 'mine'}
-        self.mdt.gui.set_weapon(wpn2img[wpn_cls])
+        self.mdt.gui.panel.set_weapon(wpn2img[wpn_cls])
 
     def on_fire(self):
         self.ignore(self.props.keys['button'])
         self.mdt.logic.fire()
         self.has_weapon = False
-        self.mdt.gui.unset_weapon()
+        self.mdt.gui.panel.unset_weapon()
 
     def _process_wall(self):
         CarEvent._process_wall(self)
@@ -227,7 +227,7 @@ class CarPlayerEvent(CarEvent):
     def _process_nonstart_goals(self, lap_number, laps):
         CarEvent._process_nonstart_goals(self, lap_number, laps)
         curr_lap = min(laps, lap_number)
-        self.mdt.gui.lap_txt.setText(str(curr_lap)+'/'+str(laps))
+        self.mdt.gui.panel.lap_txt.setText(str(curr_lap)+'/'+str(laps))
         eng.play(self.mdt.audio.lap_sfx)
 
     def _process_end_goal(self):
@@ -238,7 +238,7 @@ class CarPlayerEvent(CarEvent):
         lap_times = self.mdt.logic.lap_times
         is_best = not lap_times or min(lap_times) > self.mdt.logic.lap_time
         if self.mdt.logic.last_time_start and (not lap_times or is_best):
-            self.mdt.gui.best_txt.setText(self.mdt.gui.time_txt.getText())
+            self.mdt.gui.panel.best_txt.setText(self.mdt.gui.panel.time_txt.getText())
         if len(lap_times) == self.mdt.laps:
             self._process_end_goal()
         #self.on_bonus()  # to test weapons

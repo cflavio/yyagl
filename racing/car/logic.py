@@ -624,13 +624,13 @@ class CarPlayerLogic(CarLogic):
         if self.last_time_start:
             f_t = globalClock.getFrameTime()
             d_t = round(f_t - self.last_time_start, 2)
-            self.mdt.gui.time_txt.setText(str(d_t))
+            self.mdt.gui.panel.time_txt.setText(str(d_t))
         if self.last_time_start:
-            self.mdt.gui.speed_txt.setText(str(int(self.mdt.phys.speed)))
+            self.mdt.gui.panel.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__check_wrong_way()
         ranking = game.logic.season.race.logic.ranking()  # move this to race
         r_i = ranking.index(self.mdt.name) + 1
-        self.mdt.gui.ranking_txt.setText(str(r_i) + "'")
+        self.mdt.gui.panel.ranking_txt.setText(str(r_i) + "'")
         self._update_dist()
 
     def __check_wrong_way(self):
