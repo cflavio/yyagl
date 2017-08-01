@@ -181,6 +181,8 @@ class CarPlayerGui(CarGui):
         self.pars = CarParameters(mdt.phys, mdt.logic, mdt.gfx)
         self.panel = CarPanel(car_props)
 
+    def apply_damage(self, reset=False):
+        self.panel.apply_damage(reset)
 
     def destroy(self):
         map(lambda wdg: wdg.destroy(), [self.pars, self.panel])

@@ -24,6 +24,10 @@ class EngineLogic(Logic):
         return base.appRunner.p3dFilename.getDirname() + '/' \
             if self.is_runtime else ''
 
+    def norm_vec(self, vec):
+        vec.normalize()
+        return vec
+
     def destroy(self):
         self.cfg = None
         Logic.destroy(self)

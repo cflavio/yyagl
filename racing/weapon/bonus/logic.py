@@ -6,7 +6,7 @@ class BonusLogic(Logic):
     def __init__(self, mdt, track_phys):
         Logic.__init__(self, mdt)
         self.track_phys = track_phys
-        wp_info = [(w_p, (w_p.get_python_tag('initial_pos') - self.mdt.gfx.model.get_pos()).length()) for w_p in track_phys.waypoints]
+        wp_info = [(w_p, (w_p.get_python_tag('initial_pos') - self.mdt.gfx.model.get_pos()).length()) for w_p in track_phys.wp2prevs]
         self.closest_wp = min(wp_info, key=lambda pair: pair[1])[0]
         self.closest_wp.set_pos(self.mdt.gfx.model.get_pos())
         boxes = self.closest_wp.get_python_tag('weapon_boxes')

@@ -1,6 +1,6 @@
 from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
-from panda3d.core import LineSegs, BitMask32
+from panda3d.core import LineSegs, BitMask32, NodePath
 from yyagl.gameobject import Phys
 from yyagl.engine.log import LogMgr
 from yyagl.engine.phys import PhysMgr
@@ -11,7 +11,7 @@ class TrackPhys(Phys):
 
     def __init__(
             self, mdt, race_props):
-        self.corners = self.model = self.waypoints = self.wp_np = None
+        self.corners = self.model = self.wp2prevs = self.wp_np = None
         self.bonuses = []
         self.rigid_bodies = []
         self.ghosts = []
@@ -92,26 +92,26 @@ class TrackPhys(Phys):
         wp_info = self.rprops.wp_info
         wp_root = self.model.find('**/' + wp_info.root_name)
         _waypoints = wp_root.find_all_matches('**/%s*' % wp_info.wp_name)
-        self.waypoints = {}
+        self.wp2prevs = {}
         for w_p in _waypoints:
             w_p.set_python_tag('initial_pos', w_p.get_pos())  # do a proper wp class
             w_p.set_python_tag('weapon_boxes', [])
             wpstr = '**/' + wp_info.wp_name
             prevs = w_p.getTag(wp_info.prev_name).split(',')
             lst_wp = [wp_root.find(wpstr + idx) for idx in prevs]
-            self.waypoints[w_p] = lst_wp
+            self.wp2prevs[w_p] = lst_wp
         self.redraw_wps()
 
     def redraw_wps(self):
         # put draw in a decorator class
-        if not self.rprops.show_waypoints or not self.waypoints:
+        if not self.rprops.show_waypoints or not self.wp2prevs:
             # it may be invoked on track's destruction
             return
         if self.wp_np:
             self.wp_np.remove_node()
         segs = LineSegs()
-        for w_p in self.waypoints.keys():
-            for dest in self.waypoints[w_p]:
+        for w_p in self.wp2prevs.keys():
+            for dest in self.wp2prevs[w_p]:
                 segs.moveTo(w_p.get_pos())
                 segs.drawTo(dest.get_pos())
         segs_node = segs.create()
@@ -165,7 +165,7 @@ class TrackPhys(Phys):
         map(lambda bon: bon.destroy(), self.bonuses)
         map(eng.remove_do_later, self.generate_tsk)
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
-            self.waypoints = self.generate_tsk = self.bonuses = None
+            self.wp2prevs = self.generate_tsk = self.bonuses = None
         if self.rprops.show_waypoints:  # in the drawing class
             self.wp_np = self.wp_np.remove_node()
         self.rprops = None

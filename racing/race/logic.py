@@ -43,7 +43,7 @@ class CarLoaderStrategy:
             r_p.wheel_gfx_names, r_p.particle_path, drv.dprops.f_engine,
             drv.dprops.f_tires, drv.dprops.f_suspensions, r_p.rocket_path,
             r_p.turbo_path, r_p.rotate_all_path, r_p.mine_path, r_p.camera_vec,
-            race.track.phys.waypoints, r_p.respawn_name, r_p.pitstop_name,
+            race.track.phys.wp2prevs, r_p.respawn_name, r_p.pitstop_name,
             r_p.wall_name, r_p.goal_name, r_p.bonus_name, r_p.roads_names,
             r_p.cars)
         return car_cls(car_props)
@@ -125,7 +125,7 @@ class RaceLogic(Logic):
         info = []
         for car in cars:
             curr_wp = car.last_wp_not_fork()
-            past_wp = car.wps_not_fork()[car.wps_not_fork().index(curr_wp) - 1]
+            past_wp = car.not_fork_wps()[car.not_fork_wps().index(curr_wp) - 1]
             # we consider the past since the current may be in front of the car
             dist = (past_wp.get_pos() - car.get_pos()).length()
             wp_num = car.logic.wp_num
@@ -146,7 +146,6 @@ class RaceLogic(Logic):
     def exit_play(self):
         self.track.stop_music()
         self.player_car.detach_obs(self.mdt.event.on_wrong_way)
-        self.player_car.attach_obs(self.mdt.event.on_respawn)
         self.track.destroy()
         map(lambda car: car.destroy(), self.all_cars)
         PhysMgr().stop()

@@ -70,7 +70,7 @@ class CarFacade(Facade):
 
     def __init__(self):
         self._fwd_mth_lazy('last_wp_not_fork', lambda: self.logic.last_wp_not_fork)
-        self._fwd_mth_lazy('wps_not_fork', lambda: self.logic.wps_not_fork)
+        self._fwd_mth_lazy('not_fork_wps', lambda: self.logic.not_fork_wps)
         self._fwd_mth_lazy('reparent', lambda: self.gfx.reparent)
         self._fwd_mth_lazy('attach_obs', lambda: self.event.attach)
         self._fwd_mth_lazy('detach_obs', lambda: self.event.detach)
@@ -83,7 +83,7 @@ class CarFacade(Facade):
         self._fwd_mth_lazy('demand', lambda: self.fsm.demand)
         self._fwd_prop_lazy('lap_times', lambda: self.logic.lap_times)
         self._fwd_prop_lazy('path', lambda: self.gfx.path)
-        self._fwd_prop('laps_num', lambda: self.logic.laps_num)
+        self._fwd_prop_lazy('laps_num', lambda: self.logic.laps_num)
 
 
 class Car(GameObject, CarFacade):

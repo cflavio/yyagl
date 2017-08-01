@@ -32,7 +32,6 @@ class RaceFsm(Fsm):
         self.mdt.event.notify('on_race_loaded')
         # eng.set_cam_pos((0, 0, 0))
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_wrong_way)
-        self.mdt.logic.player_car.attach_obs(self.mdt.event.on_respawn)
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_end_race)
 
     def enterCountdown(self):
@@ -42,9 +41,9 @@ class RaceFsm(Fsm):
         self.mdt.logic.enter_play()
         if self.shaders:
             ShaderMgr().toggle_shader()
+        eng.do_later(.5, self.aux_start_countdown)
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Countdown'), cars)
-        eng.do_later(.5, self.aux_start_countdown)
 
     def aux_start_countdown(self):
         # i think it's necessary since otherwise panda may use invoking's time

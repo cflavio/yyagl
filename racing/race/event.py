@@ -50,12 +50,14 @@ class RaceEvent(Event):
         self.accept('escape-up', self.fire_ingame_menu)
 
     def on_wrong_way(self, way_str):
-        self.mdt.gui.way_txt.setText(way_str)
-
-    def on_respawn(self, is_moving):
-        respawn_key = self.mdt.logic.props.keys['respawn']
-        txt = '' if is_moving else _('press %s to respawn') % respawn_key
-        self.mdt.gui.way_txt.setText(txt)
+        if way_str:
+            self.mdt.gui.way_txt.setText(way_str)
+        elif not self.mdt.logic.player_car.logic.is_moving:
+            respawn_key = self.mdt.logic.props.keys['respawn']
+            txt = _('press %s to respawn') % respawn_key
+            self.mdt.gui.way_txt.setText(txt)
+        else:
+            self.mdt.gui.way_txt.setText('')
 
     def on_end_race(self):
         points = [10, 8, 6, 4, 3, 2, 1, 0]
