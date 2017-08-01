@@ -7,28 +7,25 @@ from yyagl.engine.phys import PhysMgr
 from yyagl.engine.log import LogMgr
 
 
-class AbsLogic(object):
-    # perhaps a mixin? a visitor?
+class Input2ForcesStrategy(object):
 
     @staticmethod
     def build(is_player, joystick, car):
-        if not joystick or not is_player:
-            return DiscreteLogic(car)
-        else:
-            return AnalogicLogic(car)
+        return (DiscreteInput2ForcesStrategy if not joystick or not is_player else AnalogicInput2ForcesStrategy)(car)
 
     def __init__(self, car):
         self._steering = 0  # degrees
         self.car = car
         self.drift = DriftingForce(car)
+        self.start_left_t = self.start_right_t = None
 
     @property
     def steering_inc(self):
-        return globalClock.getDt() * self.car.phys.steering_inc
+        return globalClock.get_dt() * self.car.phys.steering_inc
 
     @property
     def steering_dec(self):
-        return globalClock.getDt() * self.car.phys.steering_dec
+        return globalClock.get_dt() * self.car.phys.steering_dec
 
     @property
     def steering_clamp(self):
@@ -36,6 +33,15 @@ class AbsLogic(object):
         speed_ratio = phys.speed_ratio
         steering_range = phys.steering_min_speed - phys.steering_max_speed
         return phys.steering_min_speed - speed_ratio * steering_range
+
+    def get_eng_frc(self, eng_frc):
+        m_s = self.car.phys.max_speed
+        actual_max_speed = m_s * self.car.phys.curr_speed_factor
+        if self.car.phys.speed / actual_max_speed < .99:
+            return eng_frc
+        tot = .01 * actual_max_speed
+        d_s = (actual_max_speed - self.car.phys.speed) / tot
+        return eng_frc * max(-.1, min(1, d_s)) # -.1: from turbo to normal
 
 
 class DriftingForce(object):
@@ -106,55 +112,55 @@ class DriftingForce(object):
         return eng_frc
 
 
-class DiscreteLogic(AbsLogic):
+class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
 
-    turn_time = .1  # turn time with keyboard
+    turn_time = .1  # after this time the steering is at its max value
 
-    def process(self, input_dct):
+    def input2forces(self, car_input):
         phys = self.car.phys
         eng_frc = brake_frc = 0
-        f_t = globalClock.getFrameTime()
-        if input_dct['forward'] and input_dct['reverse']:
+        f_t = globalClock.get_frame_time()
+        if car_input['forward'] and car_input['reverse']:  # do namedtuple in place of dict
             eng_frc = phys.engine_acc_frc
             brake_frc = phys.brake_frc
-        if input_dct['forward'] and not input_dct['reverse']:
+        if car_input['forward'] and not car_input['reverse']:
             eng_frc = phys.engine_acc_frc
             eng_frc *= 1 + .2 * max(min(1, (phys.speed - 80) / - 80), 0)
-            brake_frc = 0
-        if input_dct['reverse'] and not input_dct['forward']:
+            # accelerate more when < 80 Km/h
+        if car_input['reverse'] and not car_input['forward']:
             eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
             brake_frc = phys.brake_frc
-        if not input_dct['forward'] and not input_dct['reverse']:
+        if not car_input['forward'] and not car_input['reverse']:
             brake_frc = phys.eng_brk_frc
-        if input_dct['left']:
-            if self.start_left is None:
-                self.start_left = f_t
-            mul = min(1, (f_t - self.start_left) / self.turn_time)
-            self._steering += self.steering_inc * mul
+        if car_input['left']:
+            if self.start_left_t is None:
+                self.start_left_t = f_t
+            steer_fact = min(1, (f_t - self.start_left_t) / self.turn_time)
+            self._steering += self.steering_inc * steer_fact
             self._steering = min(self._steering, self.steering_clamp)
         else:
-            self.start_left = None
-        if input_dct['right']:
-            if self.start_right is None:
-                self.start_right = globalClock.getFrameTime()
-            mul = min(1, (f_t - self.start_right) / self.turn_time)
-            self._steering -= self.steering_inc * mul
+            self.start_left_t = None
+        if car_input['right']:
+            if self.start_right_t is None:
+                self.start_right_t = globalClock.getFrameTime()
+            steer_fact = min(1, (f_t - self.start_right_t) / self.turn_time)
+            self._steering -= self.steering_inc * steer_fact
             self._steering = max(self._steering, -self.steering_clamp)
         else:
-            self.start_right = None
-        if not input_dct['left'] and not input_dct['right']:
+            self.start_right_t = None
+        if not car_input['left'] and not car_input['right']:
             if abs(self._steering) <= self.steering_dec:
                 self._steering = 0
             else:
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
-        eng_frc = self.drift.process(eng_frc, input_dct)
-        return eng_frc, brake_frc, self._steering
+        eng_frc = self.drift.process(eng_frc, car_input)
+        return self.get_eng_frc(eng_frc), brake_frc, self._steering
 
 
-class AnalogicLogic(AbsLogic):
+class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
 
-    def process(self, input_dct):
+    def input2forces(self, car_input):
         phys = self.car.phys
         eng_frc = brake_frc = 0
         j_x, j_y, j_a, j_b = JoystickMgr().get_joystick()
@@ -162,7 +168,6 @@ class AnalogicLogic(AbsLogic):
         j_x, j_y = scale(j_x), scale(j_y)
         if j_y <= - .1:
             eng_frc = phys.engine_acc_frc * abs(j_y)
-            brake_frc = 0
         if j_y >= .1:
             eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
             brake_frc = phys.brake_frc * j_y
@@ -180,70 +185,62 @@ class AnalogicLogic(AbsLogic):
             else:
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
-        return eng_frc, brake_frc, self._steering
+        return self.get_eng_frc(eng_frc), brake_frc, self._steering
 
 
 class CarLogic(Logic):
 
-    def __init__(self, mdt, carlogic_props):
+    def __init__(self, mdt, props):
         Logic.__init__(self, mdt)
-        self.props = carlogic_props
-        self.last_time_start = 0
-        self.last_roll_ok_time = globalClock.getFrameTime()
-        self.last_roll_ko_time = globalClock.getFrameTime()
+        self.props = props
+        self.lap_time_start = 0
+        self.last_roll_ok_time = globalClock.get_frame_time()
+        self.last_roll_ko_time = globalClock.get_frame_time()
         self.lap_times = []
-        self.start_left = None
-        self.start_right = None
         self.__pitstop_wps = {}
         self.__grid_wps = {}
-        self.waypoints = []  # collected waypoints for validating laps
+        self.collected_wps = []  # for validating laps
         self.weapon = None
         self.camera = None
         self.__start_wp = self.__end_wp = None
         self._grid_wps = self._pitstop_wps = None
-        self.input_logic = AbsLogic.build(self.__class__ == CarPlayerLogic,
+        self.input_strat = Input2ForcesStrategy.build(self.__class__ == CarPlayerLogic,
                                           self.props.joystick, self.mdt)
-        self.start_pos = carlogic_props.pos
-        self.start_pos_hpr = carlogic_props.hpr
+        self.start_pos = props.pos
+        self.start_pos_hpr = props.hpr
         self.last_ai_wp = None
         eng.attach_obs(self.on_start_frame)
-        for wp in self.props.track_waypoints:  # rename wp
-            self.pitstop_wps(wp)
-        for wp in self.props.track_waypoints:  # rename wp
-            self.grid_wps(wp)
+        for w_p in self.props.track_waypoints:
+            self.pitstop_wps(w_p)
+        for w_p in self.props.track_waypoints:
+            self.grid_wps(w_p)
         self.__wp_num = None
-        self.applied_torque = False
+        self.applied_torque = False  # applied from weapons
 
-    def update(self, input_dct):
+    def update(self, input2forces):
         phys = self.mdt.phys
-        eng_f, brake_f, steering = self.input_logic.process(input_dct)
-        phys.set_forces(self.get_eng_frc(eng_f), brake_f, steering)
+        eng_f, brake_f, steering = self.input_strat.input2forces(input2forces)
+        phys.set_forces(eng_f, brake_f, steering)
         self.__update_roll_info()
         gfx = self.mdt.gfx
         is_skid = self.is_skidmarking
         gfx.on_skidmarking() if is_skid else gfx.on_no_skidmarking()
 
-    def get_eng_frc(self, eng_frc):
-        m_s = self.mdt.phys.max_speed
-        curr_max_speed = m_s * self.mdt.phys.curr_speed_factor
-        if self.mdt.phys.speed / curr_max_speed < .99:
-            return eng_frc
-        tot = .01 * curr_max_speed
-        return eng_frc * max(-.1, min(1, (curr_max_speed - self.mdt.phys.speed) / tot)) # -.1: from turbo to normal
-
     def __update_roll_info(self):
-        if -45 <= self.mdt.gfx.nodepath.getR() < 45:
-            self.last_roll_ok_time = globalClock.getFrameTime()
-        else:
-            self.last_roll_ko_time = globalClock.getFrameTime()
+        status = 'ok' if -45 <= self.mdt.gfx.nodepath.get_r() < 45 else 'ko'
+        curr_t = globalClock.get_frame_time()
+        setattr(self, 'last_roll_%s_time' % status, curr_t)
 
     def reset_car(self):
-        self.mdt.gfx.nodepath.set_pos(self.start_pos)
+        if self.mdt.fsm.getCurrentOrNextState() == 'Loading':
+            self.mdt.gfx.nodepath.set_z(self.start_pos[2])
+        self.mdt.gfx.nodepath.set_x(self.start_pos[0])
+        self.mdt.gfx.nodepath.set_y(self.start_pos[1])
         self.mdt.gfx.nodepath.set_hpr(self.start_pos_hpr)
         wheels = self.mdt.phys.vehicle.get_wheels()
         map(lambda whl: whl.set_rotation(0), wheels)
 
-    def on_start_frame(self):
+    def on_start_frame(self):  # decorator onceaframe
         self.__start_wp = None
         self.__end_wp = None
 
@@ -348,7 +345,7 @@ class CarLogic(Logic):
         return wps
 
     def last_wp_not_fork(self):
-        for wp in reversed(self.waypoints):  # rename wp
+        for wp in reversed(self.collected_wps):  # rename wp
             _wp = [__wp for __wp in self.props.track_waypoints.keys()
                    if __wp.get_name()[8:] == str(wp)][0]
             if _wp in self.wps_not_fork():
@@ -479,12 +476,12 @@ class CarLogic(Logic):
 
     def update_waypoints(self):
         closest_wp = int(self.closest_wp()[0].get_name()[8:])  # WaypointX
-        if closest_wp not in self.waypoints:
-            self.waypoints += [closest_wp]
+        if closest_wp not in self.collected_wps:
+            self.collected_wps += [closest_wp]
             self.__recompute_wp_num()
 
     def reset_waypoints(self):
-        self.waypoints = []
+        self.collected_wps = []
         self.__recompute_wp_num()
 
     def __fork_wp(self):
@@ -518,7 +515,7 @@ class CarLogic(Logic):
 
     def __recompute_wp_num(self):
         self.__wp_num = len(
-            [vwp for vwp in self.waypoints if vwp in [
+            [vwp for vwp in self.collected_wps if vwp in [
                 int(wp.get_name()[8:]) for wp in self.wps_not_fork()]])
 
     @property
@@ -527,9 +524,9 @@ class CarLogic(Logic):
         all_wp = [int(w_p.get_name()[8:]) for w_p in wps]
         f_wp = [int(w_p.get_name()[8:]) for w_p in self.__fork_wp()]
         map(all_wp.remove, f_wp)
-        is_correct = all(w_p in self.waypoints for w_p in all_wp)
+        is_correct = all(w_p in self.collected_wps for w_p in all_wp)
         if not is_correct:
-            skipped = [str(w_p) for w_p in all_wp if w_p not in self.waypoints]
+            skipped = [str(w_p) for w_p in all_wp if w_p not in self.collected_wps]
             LogMgr().log('skipped waypoints: ' + ', '.join(skipped))
         return is_correct
 
@@ -577,7 +574,7 @@ class CarLogic(Logic):
 
     @property
     def lap_time(self):
-        return globalClock.getFrameTime() - self.last_time_start
+        return globalClock.getFrameTime() - self.lap_time_start
 
     @property
     def laps_num(self):
@@ -634,11 +631,11 @@ class CarPlayerLogic(CarLogic):
         CarLogic.update(self, input_dct)
         if self.mdt.fsm.getCurrentOrNextState() == 'Results':
             return
-        if self.last_time_start:
+        if self.lap_time_start:
             f_t = globalClock.getFrameTime()
-            d_t = round(f_t - self.last_time_start, 2)
+            d_t = round(f_t - self.lap_time_start, 2)
             self.mdt.gui.panel.time_txt.setText(str(d_t))
-        if self.last_time_start:
+        if self.lap_time_start:
             self.mdt.gui.panel.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__check_wrong_way()
         ranking = game.logic.season.race.logic.ranking()  # move this to race

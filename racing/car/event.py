@@ -75,7 +75,6 @@ class CarEvent(Event):
             if obj_name.startswith(self.props.respawn_name):
                 self.process_respawn()
             if obj_name.startswith(self.props.pitstop_name):
-                self.mdt.gui.panel.apply_damage(True)
                 self.mdt.phys.apply_damage(True)
                 self.mdt.gfx.apply_damage(True)
             if obj_name.startswith(self.props.goal_name):
@@ -118,15 +117,15 @@ class CarEvent(Event):
 
     def _process_goal(self):
         if self.mdt.fsm.getCurrentOrNextState() == 'Results' or \
-                self.mdt.logic.last_time_start and \
+                self.mdt.logic.lap_time_start and \
                 not self.mdt.logic.correct_lap:
             return
         self.mdt.logic.reset_waypoints()
         lap_times = self.mdt.logic.lap_times
-        if self.mdt.logic.last_time_start:
+        if self.mdt.logic.lap_time_start:
             lap_times += [self.mdt.logic.lap_time]
             self._process_nonstart_goals(1 + len(lap_times), self.mdt.laps)
-        self.mdt.logic.last_time_start = globalClock.getFrameTime()
+        self.mdt.logic.lap_time_start = globalClock.getFrameTime()
 
     def _process_nonstart_goals(self, lap_number, laps):
         pass
@@ -200,6 +199,8 @@ class CarPlayerEvent(CarEvent):
         obj_name = tgt_obj.get_name()
         if any(obj_name.startswith(s) for s in self.props.roads_names):
             eng.audio.play(self.mdt.audio.landing_sfx)
+        if obj_name.startswith(self.props.pitstop_name):
+            self.mdt.gui.panel.apply_damage(True)
 
     def on_bonus(self):
         if self.mdt.logic.weapon:
@@ -237,7 +238,7 @@ class CarPlayerEvent(CarEvent):
         CarEvent._process_goal(self)
         lap_times = self.mdt.logic.lap_times
         is_best = not lap_times or min(lap_times) > self.mdt.logic.lap_time
-        if self.mdt.logic.last_time_start and (not lap_times or is_best):
+        if self.mdt.logic.lap_time_start and (not lap_times or is_best):
             self.mdt.gui.panel.best_txt.setText(self.mdt.gui.panel.time_txt.getText())
         if len(lap_times) == self.mdt.laps:
             self._process_end_goal()
