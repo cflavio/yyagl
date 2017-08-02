@@ -1,70 +1,67 @@
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
 from yyagl.gameobject import Gfx
+from yyagl.facade import Facade
 from .skidmark import Skidmark
 
 
-class CarGfxFacade(object):
+class CarGfxFacade(Facade):
 
-    def on_skidmarking(self):
-        self.skidmark_mgr.on_skidmarking()
-
-    def on_no_skidmarking(self):
-        self.skidmark_mgr.on_no_skidmarking()
+    def __init__(self):
+        self._fwd_mth('on_skidmarking', self.skidmark_mgr.on_skidmarking)
+        self._fwd_mth('on_no_skidmarking', self.skidmark_mgr.on_no_skidmarking)
 
 
 class CarGfx(Gfx, CarGfxFacade):
 
-    def __init__(self, mdt, cargfx_props):
-        self.chassis_np = None
-        self.cnt = None
-        self.props = cargfx_props
+    def __init__(self, mdt, props):
+        self.chassis_np = self.cnt = None
+        self.props = props
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
-        vehicle_node = BulletRigidBodyNode('Vehicle')
-        self.nodepath = eng.attach_node(vehicle_node)
+        self.nodepath = eng.attach_node(BulletRigidBodyNode('Vehicle'))
         self.skidmark_mgr = SkidmarkMgr(mdt)
         part_path = self.props.particle_path
         eng.particle(part_path, render, render, (0, 1.2, .75), .8)
         Gfx.__init__(self, mdt)
+        CarGfxFacade.__init__(self)
 
     def async_bld(self):
-        fpath = self.props.model_name % self.mdt.name
-        path = self.props.damage_paths[0] % self.mdt.name
-        self.chassis_np_low = loader.loadModel(path)
-        path = self.props.damage_paths[1] % self.mdt.name
-        self.chassis_np_hi = loader.loadModel(path)
+        low_dam_fpath = self.props.damage_paths.low % self.mdt.name
+        self.chassis_np_low = loader.loadModel(low_dam_fpath)
+        hi_dam_fpath = self.props.damage_paths.hi % self.mdt.name
+        self.chassis_np_hi = loader.loadModel(low_dam_fpath)
+        fpath = self.props.model_name_tmpl % self.mdt.name
         loader.loadModel(fpath, callback=self.load_wheels)
 
     def reparent(self):
-        self.chassis_np.reparentTo(self.nodepath)
-        cha = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
-        map(lambda cha: cha.setDepthOffset(-2), cha)
-        map(lambda whl: whl.reparentTo(eng.gfx.root), self.wheels.values())
+        self.chassis_np.reparent_to(self.nodepath)
+        chas = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
+        map(lambda cha: cha.set_depth_offset(-2), chas)
+        map(lambda whl: whl.reparent_to(eng.gfx.root), self.wheels.values())
         # try RigidBodyCombiner for the wheels
-        models = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
-        for model in models:
-            model.prepare_scene(base.win.getGsg())
-            model.premunge_scene(base.win.getGsg())
+        for cha in chas:
+            cha.prepare_scene(base.win.get_gsg())
+            cha.premunge_scene(base.win.get_gsg())
         taskMgr.add(self.preload_tsk, 'preload')
         self.cnt = 2
 
-    def preload_tsk(self, task):
+    def preload_tsk(self, tsk):
         if self.cnt:
             self.apply_damage()
             self.cnt -= 1
-            return task.again
+            return tsk.again
         else:
             self.apply_damage(True)
 
     def load_wheels(self, chassis_model):
         self.chassis_np = chassis_model
         load = eng.base.loader.loadModel
-        fpath = self.props.wheel_gfx_names[0] % self.mdt.name
-        rpath = self.props.wheel_gfx_names[1] % self.mdt.name
+        fpath = self.props.wheel_gfx_names.front % self.mdt.name
+        rpath = self.props.wheel_gfx_names.rear % self.mdt.name
         m_exists = lambda path: exists(path + '.egg') or exists(path + '.bam')
-        a_path = self.props.wheel_gfx_names[2] % self.mdt.name
-        front_path = fpath if m_exists(fpath) else a_path
-        rear_path = rpath if m_exists(rpath) else a_path
+        b_path = self.props.wheel_gfx_names.both % self.mdt.name
+        front_path = fpath if m_exists(fpath) else b_path
+        rear_path = rpath if m_exists(rpath) else b_path
         self.wheels['fr'] = load(front_path)
         self.wheels['fl'] = load(front_path)
         self.wheels['rr'] = load(rear_path)
@@ -72,13 +69,14 @@ class CarGfx(Gfx, CarGfxFacade):
         Gfx._end_async(self)
 
     def crash_sfx(self):
-        if self.mdt.phys.prev_speed_ratio < .64:
-            return
+        if self.mdt.phys.prev_speed_ratio < .8:
+            return False
         part_path = self.props.particle_path
         node = self.mdt.gfx.nodepath
         #eng.particle(part_path, render, render, node.get_pos(render) + (0, 1.2, .75), .8)
         # particles are too slow
         self.apply_damage()
+        return True
 
     def apply_damage(self, reset=False):
         curr_chassis = self.nodepath.get_children()[0]
@@ -97,7 +95,7 @@ class CarGfx(Gfx, CarGfxFacade):
 
     def destroy(self):
         meshes = [self.nodepath, self.chassis_np] + self.wheels.values()
-        map(lambda mesh: mesh.removeNode(), meshes)
+        map(lambda mesh: mesh.remove_node(), meshes)
         self.wheels = None
         self.skidmark_mgr.destroy()
         Gfx.destroy(self)
@@ -106,10 +104,8 @@ class CarGfx(Gfx, CarGfxFacade):
 class CarPlayerGfx(CarGfx):
 
     def crash_sfx(self):
-        if self.mdt.phys.prev_speed_ratio < .64:
-            return
-        CarGfx.crash_sfx(self)
-        self.mdt.audio.crash_high_speed_sfx.play()
+        if CarGfx.crash_sfx(self):
+            self.mdt.audio.crash_high_speed_sfx.play()
 
 
 class SkidmarkMgr(object):
@@ -120,16 +116,16 @@ class SkidmarkMgr(object):
         self.car = car
 
     def on_skidmarking(self):
-        frpos = self.car.gfx.wheels['fr'].get_pos(render)
-        flpos = self.car.gfx.wheels['fl'].get_pos(render)
+        fr_pos = self.car.gfx.wheels['fr'].get_pos(render)
+        fl_pos = self.car.gfx.wheels['fl'].get_pos(render)
         heading = self.car.gfx.nodepath.get_h()
         if self.r_skidmark:
-            self.r_skidmark.update(frpos, heading)
-            self.l_skidmark.update(flpos, heading)
+            self.r_skidmark.update(fr_pos, heading)
+            self.l_skidmark.update(fl_pos, heading)
         else:
             radius = self.car.phys.vehicle.getWheels()[0].getWheelRadius()
-            self.r_skidmark = Skidmark(frpos, radius, heading)
-            self.l_skidmark = Skidmark(flpos, radius, heading)
+            self.r_skidmark = Skidmark(fr_pos, radius, heading)
+            self.l_skidmark = Skidmark(fl_pos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
             whl_radius = self.car.phys.vehicle.get_wheels()[2].get_wheel_radius()
             whl_pos_l = self.car.phys.vehicle.get_wheels()[2].get_chassis_connection_point_cs() + (0, -whl_radius, -whl_radius + .05)

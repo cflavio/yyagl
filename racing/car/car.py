@@ -15,16 +15,16 @@ from .ai import CarAi
 class CarProps(object):
 
     def __init__(
-            self, name, coll_path, coll_name, pos, hpr, callback, race, laps,
+            self, name, coll_tmpl, coll_name, pos, hpr, callback, race, laps,
             keys, joystick, sounds, color_main, color, font, car_path,
             phys_file, wheel_names, tuning_engine, tuning_tires,
-            tuning_suspensions, road_name, model_name, damage_paths,
+            tuning_suspensions, road_name, model_name_tmpl, damage_paths,
             wheel_gfx_names, particle_path, driver_engine, driver_tires,
             driver_suspensions, rocket_path, turbo_path, rotate_all_path,
             mine_path, cam_vec, track_waypoints, respawn_name, pitstop_name,
             wall_name, goal_name, bonus_name, roads_names, car_names):
         self.name = name
-        self.coll_path = coll_path
+        self.coll_tmpl = coll_tmpl
         self.coll_name = coll_name
         self.pos = pos
         self.hpr = hpr
@@ -44,7 +44,7 @@ class CarProps(object):
         self.tuning_tires = tuning_tires
         self.tuning_suspensions = tuning_suspensions
         self.road_name = road_name
-        self.model_name = model_name
+        self.model_name_tmpl = model_name_tmpl
         self.damage_paths = damage_paths
         self.wheel_gfx_names = wheel_gfx_names
         self.particle_path = particle_path

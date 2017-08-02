@@ -36,7 +36,7 @@ class Input2ForcesStrategy(object):
 
     def get_eng_frc(self, eng_frc):
         m_s = self.car.phys.max_speed
-        actual_max_speed = m_s * self.car.phys.curr_speed_factor
+        actual_max_speed = m_s * self.car.phys.curr_speed_mul
         if self.car.phys.speed / actual_max_speed < .99:
             return eng_frc
         tot = .01 * actual_max_speed
