@@ -233,7 +233,7 @@ class CarLogic(Logic):
 
     def reset_car(self):
         if self.mdt.fsm.getCurrentOrNextState() in ['Off', 'Loading']:
-            self.mdt.gfx.nodepath.set_z(self.start_pos[2])
+            self.mdt.gfx.nodepath.set_z(self.start_pos[2] + 1.2)
         self.mdt.gfx.nodepath.set_x(self.start_pos[0])
         self.mdt.gfx.nodepath.set_y(self.start_pos[1])
         self.mdt.gfx.nodepath.set_hpr(self.start_pos_hpr)

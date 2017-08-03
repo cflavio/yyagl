@@ -31,10 +31,8 @@ class Camera(object):
         res = []
         for val, tgt in zip(val_els, tgt_els):
             beyond = abs(val - tgt) > incr
-            fit_p = lambda: val + (1 if tgt > val else -1) * incr
-            # Cell variable val defined in loop
-            # Cell variable tgt defined in loop
-            # Cell variable val defined in loop
+            fit_p = lambda val=val, tgt=tgt: \
+                val + (1 if tgt > val else -1) * incr
             res += [fit_p() if beyond else tgt]
         return LVector3f(* res)
 

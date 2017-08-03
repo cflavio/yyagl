@@ -93,9 +93,9 @@ class GODirector(object):
             self.end_lst(idx)
             return
         comp_info = self.__init_lst[idx].pop(0)
-        # TODO: define comp_info as a named tuple
-        self.pending[comp_info[1].__name__] = idx
-        setattr(obj, comp_info[0], comp_info[1](*comp_info[2]))
+        attr_name, cls, arguments = comp_info
+        self.pending[cls.__name__] = idx
+        setattr(obj, attr_name, cls(*arguments))
 
     def on_comp_blt(self, obj):
         self.__process_lst(obj.mdt, self.pending[obj.__class__.__name__])

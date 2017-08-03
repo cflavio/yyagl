@@ -22,7 +22,6 @@ class LogMgrBase(object):
 
     @staticmethod
     def configure():
-        # TODO: in __new__?
         loadPrcFileData('', 'notify-level-ya2 info')
 
     def log(self, msg):
