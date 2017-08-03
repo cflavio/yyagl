@@ -33,7 +33,6 @@ class JoystickMgrBase(object):
     def init_joystick(self):
         pass
 
-    @staticmethod
     def get_joystick(self):
         return 0, 0, 0, 0
 

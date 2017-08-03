@@ -72,8 +72,8 @@ class PauseLogic(Logic):
         self.paused_tasks = []
         is_tsk = lambda tsk: tsk and hasattr(tsk, 'getFunction')
         tasks = [tsk for tsk in taskMgr.getTasks() if is_tsk(tsk)]
-        map(lambda tsk: self.__process_task(tsk), tasks)
-        for tsk in [tsk for tsk in taskMgr.getDoLaters()if is_tsk(tsk)]:
+        map(self.__process_task, tasks)
+        for tsk in [_tsk for _tsk in taskMgr.getDoLaters()if is_tsk(_tsk)]:
             self.paused_tasks.append(tsk)
             tsk.remainingTime = tsk.wakeTime - globalClock.get_frame_time()
             # I need to alter the wakeTime during task resume,
@@ -122,7 +122,7 @@ class PauseLogic(Logic):
 
     def resume(self):
         map(lambda ival: ival.resume(), self.paused_ivals)
-        map(lambda tsk: self.__resume_tsk(tsk), self.paused_tasks)
+        map(self.__resume_tsk, self.paused_tasks)
         base.enableParticles()
         self.is_paused = False
         return self.is_paused

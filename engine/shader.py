@@ -125,20 +125,20 @@ class ShaderMgr(object):
         filter_quad = self.filter_mgr.renderQuadInto(colortex=filtered_scene)
         aa_quad = self.filter_mgr.renderQuadInto(colortex=aa_scene)
         final_quad = self.filter_mgr.renderSceneInto(colortex=rendered_scene)
-        with open('yyagl/assets/shaders/filter.vert') as f:
-            fvert = f.read()
-        with open('yyagl/assets/shaders/filter.frag') as f:
-            ffrag = f.read()
+        with open('yyagl/assets/shaders/filter.vert') as fvfilter:
+            fvert = fvfilter.read()
+        with open('yyagl/assets/shaders/filter.frag') as fffilter:
+            ffrag = fffilter.read()
         filter_quad.set_shader(Shader.make(Shader.SLGLSL, fvert, ffrag))
         filter_quad.set_shader_input('in_tex', rendered_scene)
-        with open('yyagl/assets/shaders/fxaa.vert') as f:
-            avert = f.read()
-        with open('yyagl/assets/shaders/fxaa.frag') as f:
-            afrag = f.read()
+        with open('yyagl/assets/shaders/fxaa.vert') as fvfxaa:
+            avert = fvfxaa.read()
+        with open('yyagl/assets/shaders/fxaa.frag') as fffxaa:
+            afrag = fffxaa.read()
         aa_quad.set_shader(Shader.make(Shader.SLGLSL, avert, afrag))
         aa_quad.set_shader_input('in_tex', filtered_scene)
-        with open('yyagl/assets/shaders/pass.frag') as f:
-            pfrag = f.read()
+        with open('yyagl/assets/shaders/pass.frag') as fpass:
+            pfrag = fpass.read()
         final_quad.set_shader(Shader.make(Shader.SLGLSL, fvert, pfrag))
         final_quad.set_shader_input('gamma', self.gamma)
         final_quad.set_shader_input('in_tex', aa_scene)

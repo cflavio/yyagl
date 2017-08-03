@@ -1,6 +1,6 @@
 from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
-from panda3d.core import LineSegs, BitMask32, NodePath
+from panda3d.core import LineSegs, BitMask32
 from yyagl.gameobject import Phys
 from yyagl.engine.log import LogMgr
 from yyagl.engine.phys import PhysMgr
@@ -94,7 +94,8 @@ class TrackPhys(Phys):
         _waypoints = wp_root.find_all_matches('**/%s*' % wp_info.wp_name)
         self.wp2prevs = {}
         for w_p in _waypoints:
-            w_p.set_python_tag('initial_pos', w_p.get_pos())  # do a proper wp class
+            w_p.set_python_tag('initial_pos', w_p.get_pos())
+            # do a proper wp class
             w_p.set_python_tag('weapon_boxes', [])
             wpstr = '**/' + wp_info.wp_name
             prevs = w_p.getTag(wp_info.prev_name).split(',')

@@ -24,7 +24,8 @@ class EngineLogic(Logic):
         return base.appRunner.p3dFilename.getDirname() + '/' \
             if self.is_runtime else ''
 
-    def norm_vec(self, vec):
+    @staticmethod
+    def norm_vec(vec):
         vec.normalize()
         return vec
 

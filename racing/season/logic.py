@@ -9,7 +9,8 @@ class SeasonLogic(Logic):
     def __init__(self, mdt, season_props):
         Logic.__init__(self, mdt)
         self.props = s_p = season_props
-        self.ranking = Ranking(s_p.car_names, s_p.background_fpath, s_p.font, s_p.fg_col)
+        self.ranking = Ranking(s_p.car_names, s_p.background_fpath, s_p.font,
+                               s_p.fg_col)
         self.tuning = Tuning(s_p)
         self.race = None
 
@@ -30,18 +31,20 @@ class SeasonLogic(Logic):
 
     def next_race(self):
         track = self.race.track.rprops.track_name
-        if self.props.track_names.index(track) == len(self.props.track_names) - 1:
+        ntracks = len(self.props.track_names)
+        if self.props.track_names.index(track) == ntracks - 1:
             self.notify('on_season_end')
         else:
-            next_track = self.props.track_names[self.props.track_names.index(track) + 1]
-            self.notify('on_season_cont', next_track, self.props.player_car_name,
-                        self.props.drivers)
+            idx = self.props.track_names.index(track)
+            next_track = self.props.track_names[idx + 1]
+            self.notify('on_season_cont', next_track,
+                        self.props.player_car_name, self.props.drivers)
 
-    def create_race_server(self, keys, joystick, sounds):
-        self.race = RaceServer(keys, joystick, sounds)
+    def create_race_server(self, race_props):
+        self.race = RaceServer(race_props)
 
-    def create_race_client(self, keys, joystick, sounds):
-        self.race = RaceClient(keys, joystick, sounds)
+    def create_race_client(self, race_props):
+        self.race = RaceClient(race_props)
 
     def create_race(self, race_props):
         self.race = RaceSinglePlayer(race_props)

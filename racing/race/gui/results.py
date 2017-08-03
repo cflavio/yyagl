@@ -1,5 +1,4 @@
-from panda3d.core import TextNode, Shader, TextureStage
-from direct.gui.OnscreenImage import OnscreenImage
+from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.DirectButton import DirectButton
@@ -14,13 +13,13 @@ class Results(Subject):
         Subject.__init__(self)
         self.__res_txts = []
         self.__buttons = []
-        self.result_frm = None
+        self.drivers = self.result_frm = None
         self.rprops = rprops
         self.font = rprops.menu_args.font
         self.text_fg = rprops.menu_args.text_fg
         self.text_bg = rprops.menu_args.text_bg
 
-    def show(self, race_ranking, lap_times, drivers, player_car_name):
+    def show(self, race_ranking, lap_times, drivers):
         track = self.rprops.track_path
         self.drivers = drivers
         self.result_frm = DirectFrame(
@@ -43,7 +42,8 @@ class Results(Subject):
         race_ranking_sorted = reversed([el[0] for el in race_ranking_sorted])
 
         for i, car in enumerate(race_ranking_sorted):
-            txt, img = LoadingPageGui.set_drv_txt_img(self, i, car, .76, .46, str(i + 1) + '. %s')
+            dpars = i, car, .76, .46, str(i + 1) + '. %s'
+            txt, img = LoadingPageGui.set_drv_txt_img(self, *dpars)
             self.__res_txts += [txt, img]
         self.__res_txts += [
             OnscreenText(_('share:'), pos=(-.1, -.82), align=TextNode.A_right,

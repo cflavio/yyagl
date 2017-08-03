@@ -10,8 +10,8 @@ class RearRocketPhys(Phys):
         Phys.__init__(self, mdt)
         self.parent = car.gfx.nodepath
         self.car = car
-        self.cars =cars
-        self.update_tsk = self.n_p = self.node = None
+        self.cars = cars
+        self.update_tsk = self.n_p = self.node = self.rot_mat = None
 
     def fire(self):
         self.node = BulletRigidBodyNode('RearRocket')

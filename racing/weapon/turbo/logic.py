@@ -6,7 +6,8 @@ class TurboLogic(Logic):
     def __init__(self, mdt, car):
         Logic.__init__(self, mdt)
         self.car = car
-        self.stored_max_speed = self.stored_engine_acc_frc = self.destroy_tsk = None
+        self.stored_max_speed = self.stored_engine_acc_frc = \
+            self.destroy_tsk = None
         self.has_fired = False
 
     def fire(self):

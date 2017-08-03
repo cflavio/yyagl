@@ -11,7 +11,7 @@ class RocketPhys(Phys):
         self.parent = car.gfx.nodepath
         self.car = car
         self.cars = cars
-        self.update_tsk = self.rocket_np = self.phys_node = None
+        self.update_tsk = self.rocket_np = self.phys_node = self.rot_mat = None
 
     def fire(self):
         self.phys_node = BulletRigidBodyNode('Rocket')
@@ -20,7 +20,8 @@ class RocketPhys(Phys):
         self.rocket_np = self.parent.attach_new_node(self.phys_node)
         self.rocket_np.set_pos(0, 0, .8)
         self.rocket_np.wrt_reparent_to(render)
-        self.rocket_np.set_pos(self.rocket_np.get_pos() + self.car.logic.car_vec * 3.5)
+        rocket_pos = self.rocket_np.get_pos() + self.car.logic.car_vec * 3.5
+        self.rocket_np.set_pos(rocket_pos)
         b_m = BitMask32.bit(0)
         for bitn in range(len(self.cars)):
             b_m = b_m | BitMask32.bit(2 + bitn)

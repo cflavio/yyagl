@@ -8,7 +8,6 @@ if not exists('main.pyo'):
     from StringIO import StringIO
     from ..singleton import Singleton
 
-
     class Profiler(object):
 
         __metaclass__ = Singleton
@@ -65,7 +64,6 @@ if not exists('main.pyo'):
 
 else:
     from ..singleton import Singleton
-
 
     class Profiler(object):
 

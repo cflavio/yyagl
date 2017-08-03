@@ -11,6 +11,8 @@ class MineAi(Ai):
         self.fire_time = uniform(2, 5)
 
     def update(self):
-        if self.mdt.logic.has_fired or globalClock.get_frame_time() - self.collect_time < self.fire_time:
+        curr_t = globalClock.get_frame_time()
+        is_before_fire = curr_t - self.collect_time < self.fire_time
+        if self.mdt.logic.has_fired or is_before_fire:
             return
         return self.car.ai.is_on_road

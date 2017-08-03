@@ -89,7 +89,7 @@ class RaceEventServer(RaceEvent):
         hpr = self.mdt.logic.player_car.get_hpr()
         velocity = self.mdt.logic.player_car.get_linear_velocity()
         self.server_info['server'] = (pos, hpr, velocity)
-        for car in [car for car in game.cars if car.ai_cls == CarAi]:
+        for car in [_car for _car in game.cars if _car.ai_cls == CarAi]:
             pos = car.get_pos()
             hpr = car.get_hpr()
             velocity = car.get_linear_velocity()
@@ -144,11 +144,12 @@ class RaceEventClient(RaceEvent):
 
     @staticmethod
     def __process_game_packet(data_lst):
-        from racing.car.car import NetworkCar
-        for i in range(1, len(data_lst), 10):
-            car_name = data_lst[i]
-            car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
-            car_hpr = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
+        pass
+        #from racing.car.car import NetworkCar
+        #for i in range(1, len(data_lst), 10):
+            #car_name = data_lst[i]
+            #car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
+            #car_hpr = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
             # cars = self.mdt.logic.cars
             # netcars = [car for car in cars if car.__class__ == NetworkCar]
             # for car in netcars:

@@ -1,7 +1,6 @@
 from yyagl.gameobject import Fsm
 from yyagl.engine.log import LogMgr
 from yyagl.engine.shader import ShaderMgr
-from yyagl.engine.profiler import Profiler
 from yyagl.racing.race.gui.countdown import Countdown
 
 
@@ -22,7 +21,8 @@ class RaceFsm(Fsm):
         LogMgr().log('entering Loading state')
         self.menu_args = rprops.menu_args
         self.countdown_sfx = sprops.countdown_sfx
-        self.mdt.gui.loading.enter_loading(rprops, sprops, track_name_transl, drivers)
+        self.mdt.gui.loading.enter_loading(rprops, sprops, track_name_transl,
+                                           drivers)
         args = [rprops.player_car_name, []]
         eng.do_later(1.0, self.mdt.logic.load_stuff, args)
 
@@ -52,7 +52,8 @@ class RaceFsm(Fsm):
 
     def start_countdown(self):
         self.countdown = Countdown(self.countdown_sfx, self.menu_args.font)
-        self.countdown.attach(lambda: self.demand('Play'), rename='on_start_race')
+        self.countdown.attach(lambda: self.demand('Play'),
+                              rename='on_start_race')
 
     def exitCountdown(self):
         LogMgr().log('exiting Countdown state')
@@ -74,7 +75,7 @@ class RaceFsm(Fsm):
     def enterResults(self, race_ranking):
         self.mdt.gui.results.show(
             race_ranking, self.mdt.logic.player_car.lap_times,
-            self.mdt.logic.drivers, self.mdt.logic.player_car.name)
+            self.mdt.logic.drivers)
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Results'), cars)
 

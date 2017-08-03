@@ -6,13 +6,14 @@ from ..facade import Facade
 class PhysFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth_lazy('attach_rigid_body', lambda: self.root.attachRigidBody)
-        self._fwd_mth_lazy('remove_rigid_body', lambda: self.root.removeRigidBody)
-        self._fwd_mth_lazy('attach_ghost', lambda: self.root.attachGhost)
-        self._fwd_mth_lazy('remove_ghost', lambda: self.root.removeGhost)
-        self._fwd_mth_lazy('attach_vehicle', lambda: self.root.attachVehicle)
-        self._fwd_mth_lazy('remove_vehicle', lambda: self.root.removeVehicle)
-        self._fwd_mth_lazy('ray_test_all', lambda: self.root.rayTestAll)
+        fwd = self._fwd_mth_lazy
+        fwd('attach_rigid_body', lambda: self.root.attachRigidBody)
+        fwd('remove_rigid_body', lambda: self.root.removeRigidBody)
+        fwd('attach_ghost', lambda: self.root.attachGhost)
+        fwd('remove_ghost', lambda: self.root.removeGhost)
+        fwd('attach_vehicle', lambda: self.root.attachVehicle)
+        fwd('remove_vehicle', lambda: self.root.removeVehicle)
+        fwd('ray_test_all', lambda: self.root.rayTestAll)
 
     def add_collision_obj(self, node):
         self.collision_objs += [node]

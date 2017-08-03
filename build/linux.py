@@ -79,7 +79,7 @@ def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
             if 'assets/models/tracks/' in fpath and \
                     fpath.endswith('.bam') and not \
                     any(fpath.endswith(concl + '.bam')
-                            for concl in ['/track_all', '/collision', 'Anim']):
+                        for concl in ['/track_all', '/collision', 'Anim']):
                 remove(fpath)
     tmpl = 'pdeploy -o  . {nointernet} -t host_dir=./lib ' + \
         '-t verify_contents=never -n {appname} -N {AppName} -v {version} ' + \

@@ -26,7 +26,8 @@ class TrackGfx(Gfx):
 
     def __set_model(self):
         LogMgr().log('loading track model')
-        filename = 'assets/models/tracks/' + self.rprops.track_name + '/track_all.bam'
+        ftmpl = 'assets/models/tracks/%s/track_all.bam'
+        filename = ftmpl % self.rprops.track_name
         if not exists(filename):
             script_path = executable + ' yyagl/build/process_track.py'
             system(script_path + ' ' + self.rprops.track_name)
@@ -35,7 +36,8 @@ class TrackGfx(Gfx):
 
     def end_loading(self, model):
         self.model = model
-        anim_name = '**/%s*%s*' % (self.rprops.empty_name, self.rprops.anim_name)
+        anim_name = '**/%s*%s*' % (self.rprops.empty_name,
+                                   self.rprops.anim_name)
         for model in self.model.find_all_matches(anim_name):
             # bam files don't contain actor info
             cloned_root = NodePath(model.get_name())
@@ -93,7 +95,8 @@ class TrackGfx(Gfx):
         if not self.rprops.shaders:
             self.spot_lgt.set_color(.2, .2, .2)
         render.set_light(self.spot_lgt)
-        if base.win.get_gsg().get_supports_basic_shaders() and self.rprops.shaders:
+        shaders_supp = base.win.get_gsg().get_supports_basic_shaders()
+        if shaders_supp and self.rprops.shaders:
             render.set_shader_auto()
         else:
             render.set_shader_off()

@@ -32,6 +32,9 @@ class Camera(object):
         for val, tgt in zip(val_els, tgt_els):
             beyond = abs(val - tgt) > incr
             fit_p = lambda: val + (1 if tgt > val else -1) * incr
+            # Cell variable val defined in loop
+            # Cell variable tgt defined in loop
+            # Cell variable val defined in loop
             res += [fit_p() if beyond else tgt]
         return LVector3f(* res)
 
@@ -56,7 +59,8 @@ class Camera(object):
         vec = -fwd_vec * (self.dist_min + dist_diff * self.curr_speed_ratio)
         l_d_speed = self.look_dist_min + look_dist_diff * self.curr_speed_ratio
         l_d = 0 if is_rolling else l_d_speed
-        self.curr_look_dist = self.new_val(self.curr_look_dist, l_d, curr_incr_slow)
+        self.curr_look_dist = self.new_val(self.curr_look_dist, l_d,
+                                           curr_incr_slow)
         tgt_vec = self.fwd_car_vec * self.curr_look_dist
 
         # curr_cam_pos = car_pos + vec + (0, 0, delta_pos_z)

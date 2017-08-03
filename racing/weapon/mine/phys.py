@@ -1,5 +1,4 @@
 from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape
-from panda3d.core import Mat4, LVector3f
 from yyagl.gameobject import Phys
 from yyagl.engine.phys import PhysMgr
 

@@ -11,7 +11,7 @@ class Minimap(object):
         self.minimap.set_transparency(True)
         self.minimap.set_alpha_scale(.64)
         self.car_handles = {}
-        for car_name in sorted(cars, key= lambda car: car==player_car):
+        for car_name in sorted(cars, key=lambda car: car == player_car):
             self.__set_car(car_name, player_car, handle_img, col_dct)
         map(lambda car: car.set_transparency(True), self.car_handles.values())
         self.width = self.minimap.get_scale()[0] * 2.0

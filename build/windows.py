@@ -120,7 +120,7 @@ def bld_windows(target, source, env):
             files_lst = [
                 '\nSetOutPath "$INSTDIR\\%s"\n' % root[2:].replace('/', '\\') +
                 '\n'.join(['File ".\\%s\\%s"' % (root[2:].replace('/', '\\'),
-                                                  fnm)
+                                                 fnm)
                            for fnm in files])
                 for root, _, files in walk('.')]
             install_files = ''.join(files_lst)

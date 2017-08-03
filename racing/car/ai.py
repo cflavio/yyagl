@@ -94,7 +94,7 @@ class AbsAiLogic(object):
                       4 + 29 * self.car.phys.speed_ratio)
         self.gnd_samples[gnd] += [self.lookahead_ground(lgt, deg)]
 
-    def _get_obstacles(self):
+    def get_obstacles(self):
         left_samples = [smp for smp in self.obst_samples['left'] if smp[1]]
         right_samples = [smp for smp in self.obst_samples['right'] if smp[1]]
         center_samples = [smp for smp in self.obst_samples['center'] if smp[1]]
@@ -489,10 +489,10 @@ class CarAi(Ai):
         #     print 'dot_prod', self.curr_dot_prod
         # if self.mdt.name == game.player_car.name:
         #     print 'speed', self.mdt.phys.speed
-        obstacles = list(self.front_logic._get_obstacles())
+        obstacles = list(self.front_logic.get_obstacles())
         # if self.mdt.name == game.player_car.name:
         #     print 'obstacles', obstacles
-        obstacles_back = list(self.rear_logic._get_obstacles())
+        obstacles_back = list(self.rear_logic.get_obstacles())
         # if self.mdt.name == game.player_car.name:
         #     print 'obstacles_back', obstacles_back
         brake = self.brake(obstacles, obstacles_back)

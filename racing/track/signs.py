@@ -23,7 +23,8 @@ class Signs(object):
         sign.setTexture(t_s, self.buffers[i].get_texture())
 
     def __set_render_to_texture(self):
-        self.buffers += [base.win.make_texture_buffer('result buffer', 256, 256)]
+        buf = base.win.make_texture_buffer('result buffer', 256, 256)
+        self.buffers += [buf]
         self.buffers[-1].set_sort(-100)
 
         self.drs += [self.buffers[-1].makeDisplayRegion()]

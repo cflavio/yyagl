@@ -25,8 +25,9 @@ class LoadingPageGui(PageGui):
             fg=(.75, .75, .75, 1), wordwrap=12)
         track_number = ''
         if not self.sprops.single_race:
-            track_num = self.sprops.track_names.index(self.rprops.track_name) + 1
-            track_number = ' (%s/%s)' % (track_num, len(self.sprops.track_names))
+            track_names = self.sprops.track_names
+            track_num = track_names.index(self.rprops.track_name) + 1
+            track_number = ' (%s/%s)' % (track_num, len(track_names))
         track_txt = OnscreenText(
             text=_('track: ') + self.track_name_transl + track_number,
             scale=.08, pos=(0, .56), font=self.font, fg=self.text_bg,
@@ -42,20 +43,22 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.add_widget(txt)
         for i, car_name in enumerate(self.rprops.grid):
-            txt, img = LoadingPageGui.set_drv_txt_img(self, i, car_name, -1.28, .1, str(i + 1) + '. %s')
+            pars = i, car_name, -1.28, .1, str(i + 1) + '. %s'
+            txt, img = LoadingPageGui.set_drv_txt_img(self, *pars)
             map(self.add_widget, [txt, img])
 
     @staticmethod
-    def set_drv_txt_img(page, i, car_name, x, top, text):
-        idx, drvname, __, __ = next(
+    def set_drv_txt_img(page, i, car_name, pos_x, top, text):
+        idx, drvname, _, _ = next(
             driver for driver in page.drivers if driver[3] == car_name)
         is_player_car = car_name == page.rprops.player_car_name
         txt = OnscreenText(
             text=text % drvname, align=TextNode.A_left, scale=.072,
-            pos=(x, top - i * .16), font=page.font,
+            pos=(pos_x, top - i * .16), font=page.font,
             fg=page.text_fg if is_player_car else page.text_bg)
-        img = OnscreenImage(page.rprops.cars_imgs % car_name,
-                            pos=(x - .16, 1, top + .02 - i * .16), scale=.074)
+        img = OnscreenImage(
+            page.rprops.cars_imgs % car_name,
+            pos=(pos_x - .16, 1, top + .02 - i * .16), scale=.074)
         filtervpath = eng.curr_path + 'yyagl/assets/shaders/filter.vert'
         with open(filtervpath) as fvs:
             vert = fvs.read()
@@ -78,7 +81,8 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.add_widget(txt)
         for i, car in enumerate(sorted_ranking):
-            txt, img = LoadingPageGui.set_drv_txt_img(self, i, car[0], -.2, .1, str(car[1]) + ' %s')
+            txt, img = LoadingPageGui.set_drv_txt_img(self, i, car[0], -.2, .1,
+                                                      str(car[1]) + ' %s')
             map(self.add_widget, [txt, img])
 
     def set_controls(self):
@@ -97,10 +101,10 @@ class LoadingPageGui(PageGui):
         self.__cmd_label(_('fire'), 'button', -.54)
         self.__cmd_label(_('respawn'), 'respawn', -.7)
 
-    def __cmd_label(self, text, key, z):
+    def __cmd_label(self, text, key, pos_z):
         txt = OnscreenText(
             text=text + ': ' + self.rprops.keys[key], align=TextNode.A_left,
-            scale=.072, pos=(.8, z), font=self.font, fg=self.text_bg)
+            scale=.072, pos=(.8, pos_z), font=self.font, fg=self.text_bg)
         self.widgets += [txt]
 
 
@@ -111,6 +115,7 @@ class LoadingPage(Page):
         self.menu = menu
         init_lst = [
             [('event', Event, [self])],
-            [('gui', LoadingPageGui, [self, menu, rprops, sprops, track_name_transl, drivers])]]
+            [('gui', LoadingPageGui, [self, menu, rprops, sprops,
+                                      track_name_transl, drivers])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)

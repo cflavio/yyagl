@@ -9,11 +9,13 @@ class RearRocketEvent(Event):
         self.particle_path = particle_path
 
     def on_collision(self, obj, tgt_obj):
-        if tgt_obj.get_name() == 'RearRocket' and tgt_obj == self.mdt.phys.node:
+        pnode = self.mdt.phys.node
+        if tgt_obj.get_name() == 'RearRocket' and tgt_obj == pnode:
             obj.apply_central_force((0, 0, 200000))
-            eng.particle(self.particle_path, render, render, self.mdt.gfx.gfx_np.get_pos(render) + (0, 0, .5), .8)
+            rocket_pos = self.mdt.gfx.gfx_np.get_pos(render) + (0, 0, .5)
+            eng.particle(self.particle_path, render, render, rocket_pos, .8)
             self.mdt.destroy()
-        if tgt_obj.get_name() == 'Wall' and obj == self.mdt.phys.node:
+        if tgt_obj.get_name() == 'Wall' and obj == pnode:
             self.mdt.destroy()
 
     def destroy(self):
