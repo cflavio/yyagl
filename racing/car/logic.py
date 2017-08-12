@@ -1,6 +1,7 @@
 from math import sin, cos
 from panda3d.core import Vec3, Vec2, deg2Rad, LPoint3f, Mat4, LVecBase3f
 from yyagl.gameobject import Logic
+from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera
 from yyagl.engine.joystick import JoystickMgr
 from yyagl.engine.phys import PhysMgr
@@ -188,10 +189,11 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
         return self.get_eng_frc(eng_frc), brake_frc, self._steering
 
 
-class CarLogic(Logic):
+class CarLogic(Logic, ComputerProxy):
 
     def __init__(self, mdt, props):
         Logic.__init__(self, mdt)
+        ComputerProxy.__init__(self)
         self.props = props
         self.lap_time_start = 0
         self.last_roll_ok_time = globalClock.get_frame_time()
@@ -202,14 +204,12 @@ class CarLogic(Logic):
         self.collected_wps = []  # for validating laps
         self.weapon = None
         self.camera = None
-        self.__start_wp = self.__end_wp = None
         self._grid_wps = self._pitstop_wps = None
         self.input_strat = Input2ForcesStrategy.build(self.__class__ == CarPlayerLogic,
                                           self.props.joystick, self.mdt)
         self.start_pos = props.pos
         self.start_pos_hpr = props.hpr
         self.last_ai_wp = None
-        eng.attach_obs(self.on_start_frame)
         for w_p in self.props.track_waypoints:
             self.nogrid_wps(w_p)
         for w_p in self.props.track_waypoints:
@@ -239,10 +239,6 @@ class CarLogic(Logic):
         self.mdt.gfx.nodepath.set_hpr(self.start_pos_hpr)
         wheels = self.mdt.phys.vehicle.get_wheels()
         map(lambda whl: whl.set_rotation(0), wheels)
-
-    def on_start_frame(self):  # decorator onceaframe
-        self.__start_wp = None
-        self.__end_wp = None
 
     @property
     def pitstop_wps(self):
@@ -306,14 +302,12 @@ class CarLogic(Logic):
                 for hit in PhysMgr().ray_test_all(
                     wp1.get_pos(), wp2.get_pos()).get_hits()]
 
-    def nogrid_wps(self, curr_wp):  # decorator @computeonce
-        if curr_wp in self.__pitstop_wps:
-            return self.__pitstop_wps[curr_wp]
+    @compute_once
+    def nogrid_wps(self, curr_wp):
         wps = self.props.track_waypoints.copy()
         if curr_wp not in self.grid_wps:
             for _wp in self.grid_wps:
                 del wps[_wp]
-        self.__pitstop_wps[curr_wp] = wps
         return wps
 
     def nopitlane_wps(self, curr_wp):
@@ -336,10 +330,9 @@ class CarLogic(Logic):
         if self.not_fork_wps():  # if the track has a goal
             return self.not_fork_wps()[-1]
 
+    @compute_once
     def not_fork_wps(self):
         # waypoints that are not on a fork
-        if hasattr(self, '_wps_not_fork'):  # decorator computeonce
-            return self._wps_not_fork
         goal_wp = None
         wps = self.props.track_waypoints
         for curr_wp in wps:
@@ -365,8 +358,7 @@ class CarLogic(Logic):
                 processed += [may_succ[0]]
             if pwp not in self.__fork_wp():
                 wps += [pwp]
-        self._wps_not_fork = wps
-        return self._wps_not_fork
+        return wps
 
     def __log_wp_info(self, curr_chassis, curr_wp, closest_wps, waypoints):
         print self.mdt.name
@@ -390,9 +382,8 @@ class CarLogic(Logic):
     def hi_chassis_name(self):
         return self.mdt.gfx.chassis_np_hi.get_name()
 
+    @once_a_frame
     def closest_wp(self):
-        if self.__start_wp:  # do a decorator @once_per_frame
-            return self.__start_wp, self.__end_wp
         w2p = self.props.track_waypoints
         closest_wps = w2p.keys()
         if self.last_ai_wp:
@@ -436,9 +427,7 @@ class CarLogic(Logic):
             start_wp, end_wp = prev_wp, curr_wp
         else:
             start_wp, end_wp = curr_wp, next_wp
-        self.__start_wp = start_wp
-        self.__end_wp = end_wp
-        self.last_ai_wp = self.__end_wp
+        self.last_ai_wp = end_wp
         return start_wp, end_wp
 
     def update_waypoints(self):
@@ -558,8 +547,8 @@ class CarLogic(Logic):
         self.camera = None
         if self.weapon:
             self.weapon = self.weapon.destroy()
-        eng.detach_obs(self.on_start_frame)
         Logic.destroy(self)
+        ComputerProxy.destroy(self)
 
 
 class CarPlayerLogic(CarLogic):
