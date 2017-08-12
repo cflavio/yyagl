@@ -1,5 +1,6 @@
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.observer import Subject
+from direct.task.Task import Task
 
 
 class Countdown(Subject):
@@ -10,16 +11,15 @@ class Countdown(Subject):
         self.__countdown_txt = OnscreenText(
             '', pos=(0, 0), scale=.2, fg=(1, 1, 1, 1), font=font)
         self.__cnt = 3
-        self.tsk = eng.do_later(1.0, self.process_countdown, pass_tsk=True)
-        # think of a better way of doing repeated do-laters
+        self.tsk = eng.do_later(1.0, self.process_countdown)
 
-    def process_countdown(self, tsk):
+    def process_countdown(self):
         if self.__cnt >= 0:
             self.countdown_sfx.play()
             txt = str(self.__cnt) if self.__cnt else _('GO!')
             self.__countdown_txt.setText(txt)
             self.__cnt -= 1
-            return tsk.again
+            return Task.again
         self.__countdown_txt.destroy()
         self.notify('on_start_race')
 
