@@ -1,26 +1,31 @@
 class Subject(object):
 
     def __init__(self):
-        self.observers = []
+        self.observers = {}
 
     def attach(self, obs_meth, sort=10, rename=''):
         if rename:
             obs_meth.__name__ = rename
-        self.observers += [(obs_meth, sort)]
+        onm = obs_meth.__name__
+        if onm not in self.observers:
+            self.observers[onm] = []
+        self.observers[onm] += [(obs_meth, sort)]
+        sorted_obs = sorted(self.observers[onm], key=lambda obs: obs[1])
+        self.observers[onm] = sorted_obs
 
     def detach(self, obs_meth):
-        observers = [obs for obs in self.observers if obs[0] == obs_meth]
+        onm = obs_meth.__name__
+        observers = [obs for obs in self.observers[onm] if obs[0] == obs_meth]
         if not observers:
             raise Exception
-        map(self.observers.remove, observers)
+        map(self.observers[onm].remove, observers)
 
     def notify(self, meth, *args, **kwargs):
-        meths = [obs for obs in self.observers if obs[0].__name__ == meth]
-        sorted_observers = sorted(meths, key=lambda obs: obs[1])
-        # TODO: make a sorted list at attach
-        # map(lambda obs: obs[0](*args, **kwargs), sorted_observers)
-        for obs in sorted_observers:
-            if obs in self.observers:  # if an observer removes another one
+        if meth not in self.observers:
+            return  # it there aren't observers for this notification
+        for obs in self.observers[meth]:
+            if obs in self.observers[meth]:
+                # if an observer removes another one
                 obs[0](*args, **kwargs)
 
     def destroy(self):
