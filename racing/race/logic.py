@@ -36,20 +36,12 @@ class CarLoaderStrategy(object):
         s_p = track.get_start_pos(r_p.grid.index(load_car_name))
         pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
         car_props = CarProps(
-            load_car_name, r_p.coll_path, r_p.coll_name, pos, hpr,
+            load_car_name, pos, hpr,
             lambda: CarLoaderStrategy.load(cars, r_p, load_car_name, track,
                                            race, player_car_names),
-            race, r_p.laps, r_p.keys, r_p.joystick, r_p.sounds, r_p.color_main,
-            r_p.color, r_p.font, r_p.car_path, r_p.phys_file, r_p.wheel_names,
-            r_p.tuning_engine, r_p.tuning_tires, r_p.tuning_suspensions,
-            r_p.road_name, r_p.model_name, r_p.damage_paths,
-            r_p.wheel_gfx_names, r_p.particle_path, drv.dprops.f_engine,
-            drv.dprops.f_tires, drv.dprops.f_suspensions, r_p.rocket_path,
-            r_p.turbo_path, r_p.rotate_all_path, r_p.mine_path, r_p.camera_vec,
-            race.track.phys.wp2prevs, r_p.respawn_name, r_p.pitstop_name,
-            r_p.wall_name, r_p.goal_name, r_p.bonus_name, r_p.roads_names,
-            r_p.cars)
-        return car_cls(car_props)
+            race, drv.dprops.f_engine, drv.dprops.f_tires,
+            drv.dprops.f_suspensions, race.track.phys.wp2prevs)
+        return car_cls(car_props, r_p)
 
 
 class PlayerCarLoaderStrategy(object):

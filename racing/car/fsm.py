@@ -5,19 +5,20 @@ from .event import InputDctBuilder
 
 class CarFsm(Fsm):
 
-    def __init__(self, mdt, carfsm_props):
+    def __init__(self, mdt, car_props, race_props):
         Fsm.__init__(self, mdt)
         self.defaultTransitions = {
             'Loading': ['Countdown'],
             'Countdown': ['Play'],
             'Play': ['Results']}
-        self.props = carfsm_props
+        self.cprops = car_props
+        self.rprops = race_props
 
     def enterResults(self):
         self.mdt.event.input_dct_bld = InputDctBuilder.build(
             self.getCurrentOrNextState(), self.mdt.event.props.joystick)
         self.mdt.ai.destroy()
         self.mdt.ai = CarResultsAi(
-            self.mdt, self.props.road_name, self.props.track_waypoints,
-            self.props.car_names)
+            self.mdt, self.rprops.road_name, self.cprops.track_waypoints,
+            self.rprops.cars)
         self.mdt.gui.destroy()

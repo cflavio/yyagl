@@ -191,10 +191,10 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
 
 class CarLogic(Logic, ComputerProxy):
 
-    def __init__(self, mdt, props):
+    def __init__(self, mdt, car_props, race_props):
         Logic.__init__(self, mdt)
         ComputerProxy.__init__(self)
-        self.props = props
+        self.cprops = car_props
         self.lap_time_start = 0
         self.last_roll_ok_time = globalClock.get_frame_time()
         self.last_roll_ko_time = globalClock.get_frame_time()
@@ -206,13 +206,13 @@ class CarLogic(Logic, ComputerProxy):
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
         self.input_strat = Input2ForcesStrategy.build(self.__class__ == CarPlayerLogic,
-                                          self.props.joystick, self.mdt)
-        self.start_pos = props.pos
-        self.start_pos_hpr = props.hpr
+                                          race_props.joystick, self.mdt)
+        self.start_pos = car_props.pos
+        self.start_pos_hpr = car_props.hpr
         self.last_ai_wp = None
-        for w_p in self.props.track_waypoints:
+        for w_p in car_props.track_waypoints:
             self.nogrid_wps(w_p)
-        for w_p in self.props.track_waypoints:
+        for w_p in car_props.track_waypoints:
             self.nopitlane_wps(w_p)
         self.__wp_num = None
         self.applied_torque = False  # applied from weapons
@@ -243,7 +243,7 @@ class CarLogic(Logic, ComputerProxy):
     @property
     def pitstop_wps(self):
         # it returns the waypoints of the pitlane
-        wps = self.props.track_waypoints
+        wps = self.cprops.track_waypoints
         start_forks = [w_p for w_p in wps if len(wps[w_p]) > 1]
 
         def parents(w_p):
@@ -269,7 +269,7 @@ class CarLogic(Logic, ComputerProxy):
 
     @property
     def grid_wps(self):
-        wps = self.props.track_waypoints
+        wps = self.cprops.track_waypoints
         start_forks = [w_p for w_p in wps if len(wps[w_p]) > 1]
 
         def parents(w_p):
@@ -304,7 +304,7 @@ class CarLogic(Logic, ComputerProxy):
 
     @compute_once
     def nogrid_wps(self, curr_wp):
-        wps = self.props.track_waypoints.copy()
+        wps = self.cprops.track_waypoints.copy()
         if curr_wp not in self.grid_wps:
             for _wp in self.grid_wps:
                 del wps[_wp]
@@ -313,7 +313,7 @@ class CarLogic(Logic, ComputerProxy):
     def nopitlane_wps(self, curr_wp):
         if curr_wp in self.__grid_wps:
             return self.__grid_wps[curr_wp]
-        wps = self.props.track_waypoints.copy()
+        wps = self.cprops.track_waypoints.copy()
         if curr_wp not in self.pitstop_wps:
             for _wp in self.pitstop_wps:
                 del wps[_wp]
@@ -323,7 +323,7 @@ class CarLogic(Logic, ComputerProxy):
     def last_wp_not_fork(self):
         # make a Waypoint class which contains the nodepath and facades stuff
         for pwp in reversed(self.collected_wps):
-            _wp = [__wp for __wp in self.props.track_waypoints
+            _wp = [__wp for __wp in self.cprops.track_waypoints
                    if __wp.get_name()[8:] == str(pwp)][0]  # facade wp's name
             if _wp in self.not_fork_wps():
                 return _wp
@@ -334,7 +334,7 @@ class CarLogic(Logic, ComputerProxy):
     def not_fork_wps(self):
         # waypoints that are not on a fork
         goal_wp = None
-        wps = self.props.track_waypoints
+        wps = self.cprops.track_waypoints
         for curr_wp in wps:
             for next_wp in wps[curr_wp]:
                 hits = self.__get_hits(curr_wp, next_wp)
@@ -342,8 +342,8 @@ class CarLogic(Logic, ComputerProxy):
                     goal_wp = next_wp
 
         def parents(wp):
-            return [_wp for _wp in self.props.track_waypoints
-                    if wp in self.props.track_waypoints[_wp]]
+            return [_wp for _wp in self.cprops.track_waypoints
+                    if wp in self.cprops.track_waypoints[_wp]]
         wps = []
         if not goal_wp:
             return wps
@@ -367,7 +367,7 @@ class CarLogic(Logic, ComputerProxy):
         print self.last_ai_wp, '\n', curr_wp, '\n', closest_wps
         import pprint
         to_print = [waypoints, self._pitstop_wps, self._grid_wps,
-                    self.props.track_waypoints]
+                    self.cprops.track_waypoints]
         map(pprint.pprint, to_print)
 
     @property
@@ -384,7 +384,7 @@ class CarLogic(Logic, ComputerProxy):
 
     @once_a_frame
     def closest_wp(self):
-        w2p = self.props.track_waypoints
+        w2p = self.cprops.track_waypoints
         closest_wps = w2p.keys()
         if self.last_ai_wp:
             closest_wps = [self.last_ai_wp] + \
@@ -442,7 +442,7 @@ class CarLogic(Logic, ComputerProxy):
         self.__recompute_wp_num()
 
     def __fork_wp(self):
-        wps = self.props.track_waypoints
+        wps = self.cprops.track_waypoints
         in_forks, start_forks = [], []
         for w_p in wps:
             if len(wps[w_p]) > 1:
@@ -476,7 +476,7 @@ class CarLogic(Logic, ComputerProxy):
 
     @property
     def correct_lap(self):
-        wps = self.props.track_waypoints
+        wps = self.cprops.track_waypoints
         all_wp = [int(w_p.get_name()[8:]) for w_p in wps]
         f_wp = [int(w_p.get_name()[8:]) for w_p in self.__fork_wp()]
         map(all_wp.remove, f_wp)
@@ -553,9 +553,9 @@ class CarLogic(Logic, ComputerProxy):
 
 class CarPlayerLogic(CarLogic):
 
-    def __init__(self, mdt, props):
-        CarLogic.__init__(self, mdt, props)
-        self.camera = Camera(mdt.gfx.nodepath, props.cam_vec)
+    def __init__(self, mdt, car_props, race_props):
+        CarLogic.__init__(self, mdt, car_props, race_props)
+        self.camera = Camera(mdt.gfx.nodepath, race_props.camera_vec)
         self.camera.render_all()  # workaround for prepare_scene (panda3d 1.9)
         start_pos = self.start_pos + (0, 0, 10000)
         eng.do_later(.01, self.camera.camera.set_pos, [start_pos])
@@ -595,6 +595,6 @@ class CarPlayerLogic(CarLogic):
         self._update_dist()
 
     def __check_wrong_way(self):
-        if self.props.track_waypoints:
+        if self.cprops.track_waypoints:
             way_str = _('wrong way') if self.direction < -.6 else ''
             self.mdt.event.notify('on_wrong_way', way_str)

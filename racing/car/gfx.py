@@ -30,7 +30,7 @@ class CarGfx(Gfx, CarGfxFacade):
         self.chassis_np_low = loader.loadModel(low_dam_fpath)
         hi_dam_fpath = self.props.damage_paths.hi % self.mdt.name
         self.chassis_np_hi = loader.loadModel(low_dam_fpath)
-        fpath = self.props.model_name_tmpl % self.mdt.name
+        fpath = self.props.model_name % self.mdt.name
         loader.loadModel(fpath, callback=self.load_wheels)
 
     def reparent(self):
