@@ -38,6 +38,8 @@ class CarFacade(Facade):
         self._fwd_prop_lazy('lap_times', lambda: self.logic.lap_times)
         self._fwd_prop_lazy('path', lambda: self.gfx.path)
         self._fwd_prop_lazy('laps_num', lambda: self.logic.laps_num)
+        self._fwd_prop_lazy('name', lambda: self.logic.cprops.name)
+        self._fwd_prop_lazy('laps', lambda: self.logic.rprops.laps)
 
 
 class Car(GameObject, CarFacade):
@@ -52,25 +54,26 @@ class Car(GameObject, CarFacade):
 
     def __init__(self, car_props, race_props):
         LogMgr().log('init car ' + car_props.name)
-        self.name = car_props.name
-        self.laps = race_props.laps
-        self.road_name = race_props.road_name
+        #self.name = car_props.name
+        #self.laps = race_props.laps
+        #self.road_name = race_props.road_name
         init_lst = [
             [('fsm', self.fsm_cls, [self, car_props, race_props])],
-            [('gfx', self.gfx_cls, [self, race_props]),
+            [('gfx', self.gfx_cls, [self, car_props, race_props]),
              ('phys', self.phys_cls, [self, car_props, race_props]),
              ('logic', self.logic_cls, [self, car_props, race_props]),
              ('gui', self.gui_cls, [self, race_props]),
              ('event', self.event_cls, [self, race_props]),
              ('ai', self.ai_cls, [self, race_props.road_name,
                                   car_props.track_waypoints,
-                                  race_props.cars])],
+                                  race_props.cars,
+                                  car_props.name])],
             [('audio', self.audio_cls, [self, race_props])]]
         GameObject.__init__(self, init_lst, car_props.callback)
         CarFacade.__init__(self)
 
 
-class PlayerCar(Car):
+class CarPlayer(Car):
     event_cls = CarPlayerEvent
     audio_cls = CarAudio
     gui_cls = CarPlayerGui
@@ -79,14 +82,14 @@ class PlayerCar(Car):
     gfx_cls = CarPlayerGfx
 
 
-class PlayerCarServer(Car):
+class CarPlayerServer(Car):
     event_cls = CarPlayerEventServer
     audio_cls = CarAudio
     gui_cls = CarGui
     logic_cls = CarPlayerLogic
 
 
-class PlayerCarClient(Car):
+class CarPlayerClient(Car):
     event_cls = CarPlayerEventClient
     audio_cls = CarAudio
     gui_cls = CarGui
@@ -102,5 +105,5 @@ class AiCar(Car):
     event_cls = CarAiEvent
 
 
-class AiPlayerCar(AiCar, PlayerCar):
+class AiCarPlayer(AiCar, CarPlayer):
     event_cls = CarAiPlayerEvent

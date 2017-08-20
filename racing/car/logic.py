@@ -195,6 +195,7 @@ class CarLogic(Logic, ComputerProxy):
         Logic.__init__(self, mdt)
         ComputerProxy.__init__(self)
         self.cprops = car_props
+        self.rprops = race_props
         self.lap_time_start = 0
         self.last_roll_ok_time = globalClock.get_frame_time()
         self.last_roll_ko_time = globalClock.get_frame_time()

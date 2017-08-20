@@ -14,23 +14,24 @@ class CarGfxFacade(Facade):
 
 class CarGfx(Gfx, CarGfxFacade):
 
-    def __init__(self, mdt, props):
+    def __init__(self, mdt, car_props, race_props):
         self.chassis_np = self.cnt = None
-        self.props = props
+        self.cprops = car_props
+        self.rprops = race_props
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
         self.nodepath = eng.attach_node(BulletRigidBodyNode('Vehicle'))
         self.skidmark_mgr = SkidmarkMgr(mdt)
-        part_path = self.props.particle_path
+        part_path = self.rprops.particle_path
         eng.particle(part_path, render, render, (0, 1.2, .75), .8)
         Gfx.__init__(self, mdt)
         CarGfxFacade.__init__(self)
 
     def async_bld(self):
-        low_dam_fpath = self.props.damage_paths.low % self.mdt.name
+        low_dam_fpath = self.rprops.damage_paths.low % self.cprops.name
         self.chassis_np_low = loader.loadModel(low_dam_fpath)
-        hi_dam_fpath = self.props.damage_paths.hi % self.mdt.name
+        hi_dam_fpath = self.rprops.damage_paths.hi % self.cprops.name
         self.chassis_np_hi = loader.loadModel(low_dam_fpath)
-        fpath = self.props.model_name % self.mdt.name
+        fpath = self.rprops.model_name % self.cprops.name
         loader.loadModel(fpath, callback=self.load_wheels)
 
     def reparent(self):
@@ -56,10 +57,10 @@ class CarGfx(Gfx, CarGfxFacade):
     def load_wheels(self, chassis_model):
         self.chassis_np = chassis_model
         load = eng.base.loader.loadModel
-        fpath = self.props.wheel_gfx_names.front % self.mdt.name
-        rpath = self.props.wheel_gfx_names.rear % self.mdt.name
+        fpath = self.rprops.wheel_gfx_names.front % self.cprops.name
+        rpath = self.rprops.wheel_gfx_names.rear % self.cprops.name
         m_exists = lambda path: exists(path + '.egg') or exists(path + '.bam')
-        b_path = self.props.wheel_gfx_names.both % self.mdt.name
+        b_path = self.rprops.wheel_gfx_names.both % self.cprops.name
         front_path = fpath if m_exists(fpath) else b_path
         rear_path = rpath if m_exists(rpath) else b_path
         self.wheels['fr'] = load(front_path)
@@ -71,7 +72,7 @@ class CarGfx(Gfx, CarGfxFacade):
     def crash_sfx(self):
         if self.mdt.phys.prev_speed_ratio < .8:
             return False
-        part_path = self.props.particle_path
+        part_path = self.rprops.particle_path
         node = self.mdt.gfx.nodepath
         #eng.particle(part_path, render, render, node.get_pos(render) + (0, 1.2, .75), .8)
         # particles are too slow

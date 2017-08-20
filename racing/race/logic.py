@@ -3,8 +3,8 @@ from yyagl.engine.network.server import Server
 from yyagl.engine.network.client import Client
 from yyagl.engine.phys import PhysMgr
 from yyagl.racing.track.track import Track
-from yyagl.racing.car.car import Car, CarProps, PlayerCar, PlayerCarServer, \
-    PlayerCarClient, NetworkCar, AiCar, AiPlayerCar
+from yyagl.racing.car.car import Car, CarProps, CarPlayer, CarPlayerServer, \
+    CarPlayerClient, NetworkCar, AiCar, AiCarPlayer
 
 
 class NetMsgs(object):
@@ -44,19 +44,19 @@ class CarLoaderStrategy(object):
         return car_cls(car_props, r_p)
 
 
-class PlayerCarLoaderStrategy(object):
+class CarPlayerLoaderStrategy(object):
 
     @staticmethod
     def load(r_p, car_name, track, race, player_car_names):
         cars = [car for car in r_p.cars if car != car_name]
         if r_p.a_i:
-            car_cls = AiPlayerCar
+            car_cls = AiCarPlayer
         else:
-            car_cls = PlayerCar
+            car_cls = CarPlayer
             if Server().is_active:
-                car_cls = PlayerCarServer
+                car_cls = CarPlayerServer
             if Client().is_active:
-                car_cls = PlayerCarClient
+                car_cls = CarPlayerClient
         game.player_car = CarLoaderStrategy.actual_load(
             cars, car_name, r_p, track, race, car_cls, player_car_names)
 
@@ -79,7 +79,7 @@ class RaceLogic(Logic):
         game.player_car_name = car_name
         game.track = self.track = Track(r_p)  # remove game.track
         game.track.attach_obs(self.on_track_loaded)
-        self.load_car = lambda: PlayerCarLoaderStrategy.load(
+        self.load_car = lambda: CarPlayerLoaderStrategy.load(
             r_p, car_name, self.track, self.mdt, player_car_names)
         self.mdt.track = self.track  # facade this
 

@@ -20,5 +20,5 @@ class CarFsm(Fsm):
         self.mdt.ai.destroy()
         self.mdt.ai = CarResultsAi(
             self.mdt, self.rprops.road_name, self.cprops.track_waypoints,
-            self.rprops.cars)
+            self.rprops.cars, self.cprops.name)
         self.mdt.gui.destroy()

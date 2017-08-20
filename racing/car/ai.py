@@ -17,9 +17,9 @@ class DebugLines(object):
             gndl.remove_node()
         self.gnd_lines = []
 
-    def draw(self, start, end):
+    def draw(self, start, end, car_name):
         if self.car.fsm.getCurrentOrNextState() != 'Results':
-            if self.car.name == game.player_car.name:
+            if car_name == game.player_car.name:
                 segs = LineSegs()
                 segs.set_color(*self.color)
                 segs.moveTo(start)
@@ -33,9 +33,10 @@ class DebugLines(object):
 
 class AbsAiLogic(object):
 
-    def __init__(self, car, cars, show_lines_gnd, show_lines_obst):
+    def __init__(self, car, cars, show_lines_gnd, show_lines_obst, car_name):
         self.car = car
         self.cars = cars
+        self.car_name = car_name
         self.gnd_samples = {'left': [''], 'center': [''], 'right': ['']}
         self.obst_samples = {'left': [], 'center': [], 'right': []}
         bnds = car.phys.coll_mesh.get_tight_bounds()
@@ -78,7 +79,7 @@ class AbsAiLogic(object):
         lookahead_pos = self.car.gfx.nodepath.get_pos() + lookahead_rot
         if hasattr(self, 'debug_lines_gnd'):
             self.debug_lines_gnd.draw(self.car.gfx.nodepath.get_pos(),
-                                      lookahead_pos)
+                                      lookahead_pos, self.car_name)
         return self.car.phys.gnd_name(lookahead_pos)
 
     def _update_gnd(self, gnd):
@@ -143,7 +144,7 @@ class AbsAiLogic(object):
         lookahead_pos = self.car.gfx.nodepath.get_pos() + lookahead_rot
 
         b_m = BitMask32.bit(0)
-        car_idx = self.cars.index(self.car.name)
+        car_idx = self.cars.index(self.car_name)
         cars_idx = range(len(self.cars))
         cars_idx.remove(car_idx)
         for bitn in cars_idx:
@@ -158,7 +159,7 @@ class AbsAiLogic(object):
             name = hit.get_name()
         self.obst_samples[gnd] += [(name, dist)]
         if hasattr(self, 'debug_lines_obst'):
-            self.debug_lines_obst.draw(start, lookahead_pos)
+            self.debug_lines_obst.draw(start, lookahead_pos, self.car_name)
 
     def destroy(self):
         self.car = None
@@ -214,13 +215,13 @@ class RearAiLogic(AbsAiLogic):
 
 class CarAi(Ai):
 
-    def __init__(self, mdt, road_name, waypoints, cars):
+    def __init__(self, mdt, road_name, waypoints, cars, car_name):
         Ai.__init__(self, mdt)
         self.road_name = road_name
         self.waypoints = waypoints
         self.cars = cars
-        self.front_logic = FrontAiLogic(self.mdt, self.cars, True, True)
-        self.rear_logic = RearAiLogic(self.mdt, self.cars, True, True)
+        self.front_logic = FrontAiLogic(self.mdt, self.cars, True, True, car_name)
+        self.rear_logic = RearAiLogic(self.mdt, self.cars, True, True, car_name)
         self.positions = []
         self.last_dist_time = 0
         self.last_dist_pos = (0, 0, 0)
