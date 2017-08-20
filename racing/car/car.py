@@ -40,6 +40,7 @@ class CarFacade(Facade):
         self._fwd_prop_lazy('laps_num', lambda: self.logic.laps_num)
         self._fwd_prop_lazy('name', lambda: self.logic.cprops.name)
         self._fwd_prop_lazy('laps', lambda: self.logic.rprops.laps)
+        self._fwd_prop_lazy('pos', lambda: self.gfx.nodepath.get_pos())
 
 
 class Car(GameObject, CarFacade):

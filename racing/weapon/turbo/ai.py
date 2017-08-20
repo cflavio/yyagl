@@ -16,6 +16,5 @@ class TurboAi(Ai):
         if self.mdt.logic.has_fired or is_before_fire:
             return
         obstacles = list(self.car.ai.front_logic.get_obstacles())
-        name_c, distance_center, name_l, distance_left, name_r, \
-            distance_right = obstacles
-        return distance_center > 40
+        closest_center, closest_left, closest_right = obstacles
+        return closest_center.dist > 40
