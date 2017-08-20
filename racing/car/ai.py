@@ -215,13 +215,13 @@ class RearAiLogic(AbsAiLogic):
 
 class CarAi(Ai):
 
-    def __init__(self, mdt, road_name, waypoints, cars, car_name):
+    def __init__(self, mdt, car_props, race_props):
         Ai.__init__(self, mdt)
-        self.road_name = road_name
-        self.waypoints = waypoints
-        self.cars = cars
-        self.front_logic = FrontAiLogic(self.mdt, self.cars, True, True, car_name)
-        self.rear_logic = RearAiLogic(self.mdt, self.cars, True, True, car_name)
+        self.road_name = race_props.road_name
+        self.waypoints = car_props.track_waypoints
+        self.cars = race_props.cars
+        self.front_logic = FrontAiLogic(self.mdt, self.cars, True, True, car_props.name)
+        self.rear_logic = RearAiLogic(self.mdt, self.cars, True, True, car_props.name)
         self.positions = []
         self.last_dist_time = 0
         self.last_dist_pos = (0, 0, 0)

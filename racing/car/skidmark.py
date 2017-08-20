@@ -7,30 +7,30 @@ from direct.interval.LerpInterval import LerpFunc
 
 class Skidmark(object):
 
-    def __init__(self, wheel_pos, radius, heading):
-        self.radius = radius
+    def __init__(self, whl_pos, whl_radius, car_h):
+        self.radius = whl_radius
         v_f = GeomVertexFormat.getV3()
         self.vdata = GeomVertexData('skid', v_f, Geom.UHDynamic)
-        self.vdata.setNumRows(1)
-        self.vertex = GeomVertexWriter(self.vdata, 'vertex')
+        self.vdata.set_num_rows(1)
+        self.vwriter = GeomVertexWriter(self.vdata, 'vertex')
         self.prim = GeomTriangles(Geom.UHStatic)
-        self.cnt = 1
-        self.last_pos = wheel_pos
+        self.vtx_cnt = 1
+        self.last_pos = whl_pos
         geom = Geom(self.vdata)
-        geom.addPrimitive(self.prim)
+        geom.add_primitive(self.prim)
         node = GeomNode('gnode')
-        node.addGeom(geom)
-        nodepath = eng.gfx.root.attachNewNode(node)
-        nodepath.setTransparency(True)
-        nodepath.setDepthOffset(1)
+        node.add_geom(geom)
+        nodepath = eng.gfx.root.attach_new_node(node)
+        nodepath.set_transparency(True)
+        nodepath.set_depth_offset(1)
         self.__set_material(nodepath)
-        nodepath.node().setBounds(OmniBoundingVolume())
-        self.add_vertices(radius, heading)
-        self.add_vertices(radius, heading)
+        nodepath.node().set_bounds(OmniBoundingVolume())
+        self.add_vertices(whl_radius, car_h)
+        self.add_vertices(whl_radius, car_h)
 
         def alpha(time, n_p):
             if not n_p.is_empty():
-                n_p.setAlphaScale(time)
+                n_p.set_alpha_scale(time)
             # this if seems necessary since, if there are skidmarks and you
             # exit from the race (e.g. back to the menu), then alpha is being
             # called from the interval manager even if the interval manager
@@ -44,27 +44,28 @@ class Skidmark(object):
     @staticmethod
     def __set_material(nodepath):
         mat = Material()
-        mat.setAmbient((.35, .35, .35, .5))
-        mat.setDiffuse((.35, .35, .35, .5))
-        mat.setSpecular((.35, .35, .35, .5))
-        mat.setShininess(12.5)
+        mat.set_ambient((.35, .35, .35, .5))
+        mat.set_diffuse((.35, .35, .35, .5))
+        mat.set_specular((.35, .35, .35, .5))
+        mat.set_shininess(12.5)
         nodepath.set_material(mat, 1)
 
-    def add_vertices(self, radius, heading):
-        base_pos = self.last_pos + (0, 0, -radius + .05)
+    def add_vertices(self, whl_radius, car_h):
+        base_pos = self.last_pos + (0, 0, -whl_radius + .05)
         rot_mat = Mat4()
-        rot_mat.setRotateMat(heading, (0, 0, 1))
-        self.vertex.addData3f(base_pos + rot_mat.xformVec((-.12, 0, 0)))
-        self.vertex.addData3f(base_pos + rot_mat.xformVec((.12, 0, 0)))
-        if self.cnt >= 3:
-            self.prim.addVertices(self.cnt - 3, self.cnt - 2, self.cnt - 1)
-            self.prim.addVertices(self.cnt - 2, self.cnt, self.cnt - 1)
-        self.cnt += 2
+        rot_mat.set_rotate_mat(car_h, (0, 0, 1))
+        self.vwriter.add_data3f(base_pos + rot_mat.xform_vec((-.12, 0, 0)))
+        self.vwriter.add_data3f(base_pos + rot_mat.xform_vec((.12, 0, 0)))
+        cnt = self.vtx_cnt
+        if cnt >= 3:
+            self.prim.add_vertices(cnt - 3, cnt - 2, cnt - 1)
+            self.prim.add_vertices(cnt - 2, cnt, cnt - 1)
+        self.vtx_cnt += 2
 
-    def update(self, pos, heading):
-        if (pos - self.last_pos).length() > .2:
-            self.last_pos = pos
-            self.add_vertices(self.radius, heading)
+    def update(self, whl_pos, car_h):
+        if (whl_pos - self.last_pos).length() > .2:
+            self.last_pos = whl_pos
+            self.add_vertices(self.radius, car_h)
 
     def destroy(self):
         self.remove_seq = self.remove_seq.finish()
