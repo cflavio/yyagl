@@ -16,4 +16,5 @@ class Facade(object):
         setattr(self, mth_name, fun)
 
     def _fwd_prop_lazy(self, prop_name, tgt_prop):
-        setattr(self.__class__, prop_name, property(lambda self: tgt_prop(self)))
+        lprop = lambda self: tgt_prop(self)
+        setattr(self.__class__, prop_name, property(lprop))

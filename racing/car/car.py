@@ -23,7 +23,8 @@ CarProps = namedtuple('CarProps', __fields)
 class CarFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth_lazy('last_wp_not_fork', lambda obj: obj.logic.last_wp_not_fork)
+        self._fwd_mth_lazy('last_wp_not_fork',
+                           lambda obj: obj.logic.last_wp_not_fork)
         self._fwd_mth_lazy('not_fork_wps', lambda obj: obj.logic.not_fork_wps)
         self._fwd_mth_lazy('reparent', lambda obj: obj.gfx.reparent)
         self._fwd_mth_lazy('attach_obs', lambda obj: obj.event.attach)
@@ -33,7 +34,9 @@ class CarFacade(Facade):
         self._fwd_mth_lazy('get_pos', lambda obj: obj.gfx.nodepath.get_pos)
         self._fwd_mth_lazy('get_hpr', lambda obj: obj.gfx.nodepath.get_hpr)
         self._fwd_mth_lazy('closest_wp', lambda obj: obj.logic.closest_wp)
-        self._fwd_mth_lazy('get_linear_velocity', lambda obj: obj.phys.vehicle.getChassis().getLinearVelocity)
+        self._fwd_mth_lazy(
+            'get_linear_velocity',
+            lambda obj: obj.phys.vehicle.get_chassis().get_linear_velocity)
         self._fwd_mth_lazy('demand', lambda obj: obj.fsm.demand)
         self._fwd_prop_lazy('lap_times', lambda obj: obj.logic.lap_times)
         self._fwd_prop_lazy('path', lambda obj: obj.gfx.path)
@@ -41,6 +44,7 @@ class CarFacade(Facade):
         self._fwd_prop_lazy('name', lambda obj: obj.logic.cprops.name)
         self._fwd_prop_lazy('laps', lambda obj: obj.logic.rprops.laps)
         self._fwd_prop_lazy('pos', lambda obj: obj.gfx.nodepath.get_pos())
+        self._fwd_prop_lazy('heading', lambda obj: obj.gfx.nodepath.get_h())
 
 
 class Car(GameObject, CarFacade):

@@ -40,7 +40,8 @@ class EngineFacade(Facade):
         self._fwd_prop_lazy('languages', lambda obj: obj.logic.cfg.languages)
         self._fwd_prop_lazy('resolutions', lambda obj: obj.gui.resolutions)
         self._fwd_prop_lazy('closest_res', lambda obj: obj.gui.closest_res)
-        self._fwd_prop_lazy('curr_time', lambda obj: globalClock.get_frame_time())
+        self._fwd_prop_lazy('curr_time',
+                            lambda obj: globalClock.get_frame_time())
 
     @staticmethod
     def do_later(time, meth, args=[]):

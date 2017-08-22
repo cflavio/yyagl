@@ -31,7 +31,6 @@ class CarGfx(Gfx, CarGfxFacade):
     def async_bld(self):
         low_dam_fpath = self.rprops.damage_paths.low % self.cprops.name
         self.chassis_np_low = loader.loadModel(low_dam_fpath)
-        hi_dam_fpath = self.rprops.damage_paths.hi % self.cprops.name
         self.chassis_np_hi = loader.loadModel(low_dam_fpath)
         fpath = self.rprops.model_name % self.cprops.name
         loader.loadModel(fpath, callback=self.load_wheels)
@@ -73,11 +72,13 @@ class CarGfx(Gfx, CarGfxFacade):
 
     def crash_sfx(self):
         self.crash_cnt += 1
-        if self.mdt.phys.prev_speed_ratio < .8 or eng.curr_time - self.last_crash_t < 5.0 or self.crash_cnt < 2:
+        if self.mdt.phys.prev_speed_ratio < .8 or \
+                eng.curr_time - self.last_crash_t < 5.0 or self.crash_cnt < 2:
             return False
-        part_path = self.rprops.particle_path
-        node = self.mdt.gfx.nodepath
-        #eng.particle(part_path, render, render, node.get_pos(render) + (0, 1.2, .75), .8)
+        # part_path = self.rprops.particle_path
+        # node = self.mdt.gfx.nodepath
+        # eng.particle(part_path, render, render,
+        #              node.get_pos(render) + (0, 1.2, .75), .8)
         # particles are too slow
         self.apply_damage()
         return True
@@ -133,11 +134,15 @@ class SkidmarkMgr(object):
             self.r_skidmark = Skidmark(fr_pos, radius, heading)
             self.l_skidmark = Skidmark(fl_pos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
-            whl_radius = self.car.phys.vehicle.get_wheels()[2].get_wheel_radius()
-            whl_pos_l = self.car.phys.vehicle.get_wheels()[2].get_chassis_connection_point_cs() + (0, -whl_radius, -whl_radius + .05)
-            whl_pos_r = self.car.phys.vehicle.get_wheels()[3].get_chassis_connection_point_cs() + (0, -whl_radius, -whl_radius + .05)
-            #eng.particle('assets/particles/skidmark.ptf', self.car.gfx.nodepath, self.car.gfx.nodepath, whl_pos_l, 1.2, 'left skidmark')
-            #eng.particle('assets/particles/skidmark.ptf', self.car.gfx.nodepath, self.car.gfx.nodepath, whl_pos_r, 1.2, 'right skidmark')
+            # whl_radius = self.car.phys.vehicle.get_wheels()[2].get_wheel_radius()
+            # whl_pos_l = self.car.phys.vehicle.get_wheels()[2].get_chassis_connection_point_cs() + (0, -whl_radius, -whl_radius + .05)
+            # whl_pos_r = self.car.phys.vehicle.get_wheels()[3].get_chassis_connection_point_cs() + (0, -whl_radius, -whl_radius + .05)
+            # eng.particle(
+            #     'assets/particles/skidmark.ptf', self.car.gfx.nodepath,
+            #     self.car.gfx.nodepath, whl_pos_l, 1.2, 'left skidmark')
+            # eng.particle(
+            #     'assets/particles/skidmark.ptf', self.car.gfx.nodepath,
+            #     self.car.gfx.nodepath, whl_pos_r, 1.2, 'right skidmark')
             # particles are too slow
 
     def on_no_skidmarking(self):

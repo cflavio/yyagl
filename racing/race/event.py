@@ -145,17 +145,17 @@ class RaceEventClient(RaceEvent):
     @staticmethod
     def __process_game_packet(data_lst):
         pass
-        #from racing.car.car import NetworkCar
-        #for i in range(1, len(data_lst), 10):
-            #car_name = data_lst[i]
-            #car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
-            #car_hpr = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
-            # cars = self.mdt.logic.cars
-            # netcars = [car for car in cars if car.__class__ == NetworkCar]
-            # for car in netcars:
-            #     if car_name in car.path:
-            #         LerpPosInterval(car.gfx.nodepath, .2, car_pos).start()
-            #         LerpHprInterval(car.gfx.nodepath, .2, car_hpr).start()
+        # from racing.car.car import NetworkCar
+        # for i in range(1, len(data_lst), 10):
+        #     car_name = data_lst[i]
+        #     car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
+        #     car_hpr = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
+        #     cars = self.mdt.logic.cars
+        #     netcars = [car for car in cars if car.__class__ == NetworkCar]
+        #     for car in netcars:
+        #         if car_name in car.path:
+        #             LerpPosInterval(car.gfx.nodepath, .2, car_pos).start()
+        #             LerpHprInterval(car.gfx.nodepath, .2, car_hpr).start()
 
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.game_packet:

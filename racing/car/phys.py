@@ -43,9 +43,12 @@ class CarPhys(Phys):
         s_f = self.cfg['friction_slip'] if starting else self.friction_slip
         s_r = self.cfg['roll_influence'] if starting else self.roll_influence
         log_info = [
-            ('speed', self.cprops.name, round(s_s, 2), self.cprops.driver_engine),
-            ('friction', self.cprops.name, round(s_f, 2), self.cprops.driver_tires),
-            ('roll', self.cprops.name, round(s_r, 2), self.cprops.driver_suspensions)]
+            ('speed', self.cprops.name, round(s_s, 2),
+             self.cprops.driver_engine),
+            ('friction', self.cprops.name, round(s_f, 2),
+             self.cprops.driver_tires),
+            ('roll', self.cprops.name, round(s_r, 2),
+             self.cprops.driver_suspensions)]
         for l_i in log_info:
             LogMgr().log('%s %s: %s (%s)' % l_i)
 
@@ -53,8 +56,10 @@ class CarPhys(Phys):
         fpath = self.rprops.coll_path % self.cprops.name
         self.coll_mesh = loader.loadModel(fpath)
         chassis_shape = BulletConvexHullShape()
-        for geom in PhysMgr().find_geoms(self.coll_mesh, self.rprops.coll_name):
-            chassis_shape.add_geom(geom.node().get_geom(0), geom.get_transform())
+        for geom in PhysMgr().find_geoms(self.coll_mesh,
+                                         self.rprops.coll_name):
+            chassis_shape.add_geom(geom.node().get_geom(0),
+                                   geom.get_transform())
         self.mdt.gfx.nodepath.node().add_shape(chassis_shape)
         car_idx = self.rprops.cars.index(self.cprops.name)
         mask = BitMask32.bit(1) | BitMask32.bit(2 + car_idx)
@@ -196,7 +201,8 @@ class CarPhys(Phys):
     @property
     def gnd_names(self):  # no need to be cached
         whls = self.vehicle.get_wheels()
-        pos = map(lambda whl: whl.get_raycast_info().get_contact_point_ws(), whls)
+        pos = map(lambda whl: whl.get_raycast_info().get_contact_point_ws(),
+                  whls)
         return map(self.gnd_name, pos)
 
     @staticmethod
@@ -226,7 +232,6 @@ class CarPhys(Phys):
         map(lambda whl: whl.set_friction_slip(self.friction_slip), wheels)
         map(lambda whl: whl.set_roll_influence(self.roll_influence), wheels)
         self.__log_props(False)
-
 
     def get_speed(self):
         return self.cfg['max_speed'] * (1 + .01 * self.cprops.driver_engine)

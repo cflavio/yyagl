@@ -1,18 +1,25 @@
 from math import sin, cos
-from panda3d.core import Vec3, Vec2, deg2Rad, LPoint3f, Mat4, LVecBase3f
+from collections import namedtuple
+from panda3d.core import Vec3, Vec2, deg2Rad, LPoint3f, Mat4, BitMask32
 from yyagl.gameobject import Logic
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera
+from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.engine.joystick import JoystickMgr
 from yyagl.engine.phys import PhysMgr
 from yyagl.engine.log import LogMgr
+
+
+WPInfo = namedtuple('WPInfo', 'prev next')
 
 
 class Input2ForcesStrategy(object):
 
     @staticmethod
     def build(is_player, joystick, car):
-        return (DiscreteInput2ForcesStrategy if not joystick or not is_player else AnalogicInput2ForcesStrategy)(car)
+        return (DiscreteInput2ForcesStrategy
+                if not joystick or not is_player
+                else AnalogicInput2ForcesStrategy)(car)
 
     def __init__(self, car):
         self._steering = 0  # degrees
@@ -42,7 +49,7 @@ class Input2ForcesStrategy(object):
             return eng_frc
         tot = .01 * actual_max_speed
         d_s = (actual_max_speed - self.car.phys.speed) / tot
-        return eng_frc * max(-.1, min(1, d_s)) # -.1: from turbo to normal
+        return eng_frc * max(-.1, min(1, d_s))  # -.1: from turbo to normal
 
 
 class DriftingForce(object):
@@ -62,15 +69,17 @@ class DriftingForce(object):
         eng_frc = eng_frc + drift_eng_fact * eng_frc
 
         drift_fric_effect_time = 1.6
-        drift_fric_fact_timed = max(0, 1 - since_drifting / drift_fric_effect_time)
+        drift_fric_fact_timed = max(
+            0, 1 - since_drifting / drift_fric_effect_time)
         drift_fric_fact = drift_fric_fact_timed * max(1, phys.lateral_force)
         for whl in phys.vehicle.get_wheels():
             fric = phys.friction_slip
             drift_front = .0016
             drift_back = .0024
-            if whl.is_front_wheel():# and phys.is_drifting:
-                whl.setFrictionSlip(fric - fric * drift_front * drift_fric_fact)
-            elif not whl.is_front_wheel():# and phys.is_drifting:
+            if whl.is_front_wheel():  # and phys.is_drifting:
+                whl.setFrictionSlip(
+                    fric - fric * drift_front * drift_fric_fact)
+            elif not whl.is_front_wheel():  # and phys.is_drifting:
                 whl.setFrictionSlip(fric - fric * drift_back * drift_fric_fact)
             else:
                 whl.setFrictionSlip(fric)
@@ -85,7 +94,8 @@ class DriftingForce(object):
 
         max_intensity = 20000.0
         drift_inertia_effect_time = 4.0
-        drift_inertia_fact_timed = max(.0, 1.0 - since_drifting / drift_inertia_effect_time)
+        drift_inertia_fact_timed = max(
+            .0, 1.0 - since_drifting / drift_inertia_effect_time)
         max_intensity *= 1.0 - drift_inertia_fact_timed
         intensity = drift_inertia_fact_timed * max_intensity
         if input_dct.left or input_dct.right or input_dct.forward:
@@ -108,7 +118,8 @@ class DriftingForce(object):
                 if input_dct.right:
                     if car_vec_right.dot(vel) > 0:
                         act_vec = car_vec_right
-            direction = act_vec * (1 - drift_inertia_fact_timed) + vel * drift_inertia_fact_timed
+            direction = act_vec * (1 - drift_inertia_fact_timed) + \
+                vel * drift_inertia_fact_timed
             phys.pnode.apply_central_force(direction * intensity)
         return eng_frc
 
@@ -121,7 +132,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
         phys = self.car.phys
         eng_frc = brake_frc = 0
         f_t = globalClock.get_frame_time()
-        if car_input.forward and car_input.rear:  # do namedtuple in place of dict
+        if car_input.forward and car_input.rear:
             eng_frc = phys.engine_acc_frc
             brake_frc = phys.brake_frc
         if car_input.forward and not car_input.rear:
@@ -206,8 +217,8 @@ class CarLogic(Logic, ComputerProxy):
         self.weapon = None
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
-        self.input_strat = Input2ForcesStrategy.build(self.__class__ == CarPlayerLogic,
-                                          race_props.joystick, self.mdt)
+        self.input_strat = Input2ForcesStrategy.build(
+            self.__class__ == CarPlayerLogic, race_props.joystick, self.mdt)
         self.start_pos = car_props.pos
         self.start_pos_hpr = car_props.hpr
         self.last_ai_wp = None
@@ -297,11 +308,12 @@ class CarLogic(Logic, ComputerProxy):
                     grid_forks += try_forks
         return grid_forks
 
-    def __get_hits(self, wp1, wp2):
-            return [
-                hit.get_node().get_name()
-                for hit in PhysMgr().ray_test_all(
-                    wp1.get_pos(), wp2.get_pos()).get_hits()]
+    @staticmethod
+    def __get_hits(wp1, wp2):
+        return [
+            hit.get_node().get_name()
+            for hit in PhysMgr().ray_test_all(
+                wp1.get_pos(), wp2.get_pos()).get_hits()]
 
     @compute_once
     def nogrid_wps(self, curr_wp):
@@ -350,10 +362,12 @@ class CarLogic(Logic, ComputerProxy):
             return wps
         processed = [goal_wp]
         while any(pwp not in processed for pwp in parents(processed[-1])):
-            pwp = [pwp for pwp in parents(processed[-1]) if pwp not in processed][0]
+            pwp = [pwp for pwp in parents(processed[-1])
+                   if pwp not in processed][0]
             processed += [pwp]
             while pwp in self.__fork_wp():
-                may_succ = [_wp for _wp in parents(pwp) if _wp not in processed]
+                may_succ = [_wp for _wp in parents(pwp)
+                            if _wp not in processed]
                 if not may_succ:
                     break
                 processed += [may_succ[0]]
@@ -370,6 +384,21 @@ class CarLogic(Logic, ComputerProxy):
         to_print = [waypoints, self._pitstop_wps, self._grid_wps,
                     self.cprops.track_waypoints]
         map(pprint.pprint, to_print)
+
+    @property
+    @compute_once
+    def bitmask(self):
+        b_m = BitMask32.bit(0)
+        cars_idx = range(len(self.rprops.cars))
+        cars_idx.remove(self.rprops.cars.index(self.mdt.name))
+        for bitn in cars_idx:
+            b_m = b_m | BitMask32.bit(2 + bitn)
+        return b_m
+
+    @property
+    def has_rear_weapon(self):
+        return self.mdt.logic.weapon and \
+            self.mdt.logic.weapon.__class__ == RearRocket
 
     @property
     def curr_chassis(self):
@@ -397,27 +426,34 @@ class CarLogic(Logic, ComputerProxy):
         curr_wp = closest_wps[distances.index(min(distances))]
         self._pitstop_wps = self.nogrid_wps(curr_wp)
         self._grid_wps = self.nopitlane_wps(curr_wp)
-        considered_wps = self._pitstop_wps.items() if self.hi_chassis_name in self.curr_chassis_name and not_last else self._grid_wps.items()
+        considered_wps = self._pitstop_wps.items() \
+            if self.hi_chassis_name in self.curr_chassis_name and not_last \
+            else self._grid_wps.items()
         waypoints = {
             wp[0]: wp[1] for wp in considered_wps if wp[0] in closest_wps
             or any(_wp in closest_wps for _wp in wp[1])}
         distances = [car_np.get_distance(wp) for wp in waypoints.keys()]
         if not distances:  # there is a bug
-            self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps, waypoints)
+            self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps,
+                               waypoints)
         dist_lst = zip(waypoints.keys(), distances)
         curr_wp = min(dist_lst, key=lambda pair: pair[1])[0]
         for wp in considered_wps:
             if curr_wp in wp[1]:
                 waypoints[wp[0]] = wp[1]
         may_prev = waypoints[curr_wp]
-        distances = [self.pt_line_dst(car_np, w_p, curr_wp) for w_p in may_prev]
+        distances = [self.pt_line_dst(car_np, w_p, curr_wp)
+                     for w_p in may_prev]
         if not distances:  # there is a bug
-            self.__log_wp_info(curr_chassis, curr_wp, closest_wps, waypoints)
+            self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps,
+                               waypoints)
         prev_wp = may_prev[distances.index(min(distances))]
         may_succ = [w_p for w_p in waypoints if curr_wp in waypoints[w_p]]
-        distances = [self.pt_line_dst(car_np, curr_wp, w_p) for w_p in may_succ]
+        distances = [self.pt_line_dst(car_np, curr_wp, w_p)
+                     for w_p in may_succ]
         if not distances:  # there is a bug
-            self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps, waypoints)
+            self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps,
+                               waypoints)
         next_wp = may_succ[distances.index(min(distances))]
         curr_vec = eng.norm_vec(Vec2(car_np.get_pos(curr_wp).xy))
         prev_vec = eng.norm_vec(Vec2(car_np.get_pos(prev_wp).xy))
@@ -429,7 +465,7 @@ class CarLogic(Logic, ComputerProxy):
         else:
             start_wp, end_wp = curr_wp, next_wp
         self.last_ai_wp = end_wp
-        return start_wp, end_wp
+        return WPInfo(start_wp, end_wp)
 
     def update_waypoints(self):
         closest_wp = int(self.closest_wp()[0].get_name()[8:])  # WaypointX
@@ -483,7 +519,8 @@ class CarLogic(Logic, ComputerProxy):
         map(all_wp.remove, f_wp)
         is_correct = all(w_p in self.collected_wps for w_p in all_wp)
         if not is_correct:
-            skipped = [str(w_p) for w_p in all_wp if w_p not in self.collected_wps]
+            skipped = [str(w_p) for w_p in all_wp
+                       if w_p not in self.collected_wps]
             LogMgr().log('skipped waypoints: ' + ', '.join(skipped))
         return is_correct
 
@@ -517,7 +554,8 @@ class CarLogic(Logic, ComputerProxy):
 
     @property
     def is_rotating(self):
-        if self.applied_torque and self.mdt.phys.pnode.get_angular_velocity().length() < .5:
+        if self.applied_torque and \
+                self.mdt.phys.pnode.get_angular_velocity().length() < .5:
             self.applied_torque = False
         return self.applied_torque
 
@@ -576,9 +614,11 @@ class CarPlayerLogic(CarLogic):
             return
         self.car_positions.pop(0)
         positions = self.car_positions
-        center = [sum([pos[idx] for pos in positions]) / len(positions) for idx in range(3)]
+        center = [sum([pos[idx] for pos in positions]) / len(positions)
+                  for idx in range(3)]
         center = LPoint3f(*center)
-        self.is_moving = not all((pos - center).length() < 6 for pos in positions)
+        self.is_moving = not all((pos - center).length() < 6
+                                 for pos in positions)
 
     def update(self, input_dct):
         CarLogic.update(self, input_dct)
@@ -593,6 +633,7 @@ class CarPlayerLogic(CarLogic):
         self.__check_wrong_way()
         ranking = game.logic.season.race.logic.ranking()  # move this to race
         r_i = ranking.index(self.mdt.name) + 1
+        self.mdt.gui.panel.ranking_txt.setText(str(r_i) + "'")
         self._update_dist()
 
     def __check_wrong_way(self):

@@ -103,8 +103,9 @@ class LoadingPageGui(PageGui):
 
     def __cmd_label(self, text, key, pos_z):
         txt = OnscreenText(
-            text=text + ': ' + getattr(self.rprops.keys, key), align=TextNode.A_left,
-            scale=.072, pos=(.8, pos_z), font=self.font, fg=self.text_bg)
+            text=text + ': ' + getattr(self.rprops.keys, key),
+            align=TextNode.A_left, scale=.072, pos=(.8, pos_z), font=self.font,
+            fg=self.text_bg)
         self.widgets += [txt]
 
 

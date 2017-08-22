@@ -1,5 +1,5 @@
 from collections import namedtuple
-from random import choice, uniform
+from random import uniform
 from itertools import chain
 from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
@@ -85,7 +85,8 @@ class CarEvent(Event, ComputerProxy):
             self.mdt.gfx.apply_damage(True)
         if obj_name.startswith(self.props.goal_name):
             self._process_goal()
-        if any(obj_name.startswith(name) for name in [self.props.wall_name, 'Vehicle']):
+        obst_names = [self.props.wall_name, 'Vehicle']
+        if any(obj_name.startswith(name) for name in obst_names):
             self._process_wall()
         if obj_name.startswith(self.props.bonus_name):
             self.on_bonus()
@@ -98,7 +99,7 @@ class CarEvent(Event, ComputerProxy):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
         probs = [.2, .2, .2, .1, .2]
         sel = uniform(0, sum(probs))
-        for i, cls in enumerate(wpn_classes):
+        for i in range(len(wpn_classes)):
             if sum(probs[:i]) <= sel <= sum(probs[:i + 1]):
                 wpn_cls = wpn_classes[i]
         cars = game.cars + [game.player_car]
@@ -168,8 +169,8 @@ class CarEvent(Event, ComputerProxy):
         top = self.mdt.pos + (0, 0, 50)
         bottom = self.mdt.pos + (0, 0, -50)
         hits = PhysMgr().ray_test_all(top, bottom).get_hits()
-        road_n = self.props.road_name
-        for hit in [hit for hit in hits if road_n in hit.get_node().get_name()]:
+        r_n = self.props.road_name
+        for hit in [hit for hit in hits if r_n in hit.get_node().get_name()]:
             self.mdt.logic.last_wp = self.mdt.logic.closest_wp()
 
     def destroy(self):
@@ -196,7 +197,8 @@ class CarPlayerEvent(CarEvent):
             self.mdt.phys.speed_ratio, self.mdt.logic.is_rolling,
             self.mdt.fsm.getCurrentOrNextState() == 'Countdown',
             self.mdt.logic.is_rotating)
-        self.mdt.audio.update(self.mdt.logic.is_skidmarking, self.mdt.phys.speed_ratio)
+        self.mdt.audio.update(self.mdt.logic.is_skidmarking,
+                              self.mdt.phys.speed_ratio)
 
     def on_collision(self, obj, tgt_obj):
         CarEvent.on_collision(self, obj, tgt_obj)
@@ -238,10 +240,11 @@ class CarPlayerEvent(CarEvent):
         lap_times = self.mdt.logic.lap_times
         is_best = not lap_times or min(lap_times) > self.mdt.logic.lap_time
         if self.mdt.logic.lap_time_start and (not lap_times or is_best):
-            self.mdt.gui.panel.best_txt.setText(self.mdt.gui.panel.time_txt.getText())
+            self.mdt.gui.panel.best_txt.setText(
+                self.mdt.gui.panel.time_txt.getText())
         if len(lap_times) == self.mdt.laps:
             self._process_end_goal()
-        #self.on_bonus()  # to test weapons
+        # self.on_bonus()  # to test weapons
 
     @once_a_frame
     def _get_input(self):

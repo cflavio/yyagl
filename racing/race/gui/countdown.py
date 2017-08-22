@@ -1,6 +1,6 @@
 from direct.gui.OnscreenText import OnscreenText
-from yyagl.observer import Subject
 from direct.task.Task import Task
+from yyagl.observer import Subject
 
 
 class Countdown(Subject):
