@@ -4,7 +4,7 @@ from yyagl.facade import Facade
 from .logic import SeasonLogic, SingleRaceSeasonLogic
 
 sp_attrs = 'car_names player_car_name drivers background_fpath ' + \
-    'tuning_imgs track_names font fg_col countdown_sfx single_race'
+    'tuning_imgs track_names font fg_col countdown_sfx single_race wpn2img'
 SeasonProps = namedtuple('SeasonProps', sp_attrs)
 
 
@@ -21,7 +21,7 @@ class SeasonFacade(Facade):
         self._fwd_prop('ranking', self.logic.ranking)
         self._fwd_prop('tuning', self.logic.tuning)
         self._fwd_prop('props', self.logic.props)
-        self._fwd_prop_lazy('race', lambda: self.logic.race)
+        self._fwd_prop_lazy('race', lambda obj: obj.logic.race)
 
     @property
     def drivers(self):

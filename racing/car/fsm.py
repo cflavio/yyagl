@@ -1,6 +1,6 @@
 from yyagl.gameobject import Fsm
 from yyagl.racing.car.ai import CarResultsAi
-from .event import InputDctBuilder
+from .event import InputBuilder
 
 
 class CarFsm(Fsm):
@@ -15,7 +15,7 @@ class CarFsm(Fsm):
     def enterResults(self):
         state = self.getCurrentOrNextState()
         has_j = self.mdt.event.props.joystick
-        self.mdt.event.input_dct_bld = InputDctBuilder.build(state, has_j)
+        self.mdt.event.input_bld = InputBuilder.create(state, has_j)
         self.mdt.ai.destroy()
         self.mdt.ai = CarResultsAi(self.mdt, self.cprops, self.rprops)
         self.mdt.gui.destroy()

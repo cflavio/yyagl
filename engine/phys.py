@@ -7,13 +7,13 @@ class PhysFacade(Facade):
 
     def __init__(self):
         fwd = self._fwd_mth_lazy
-        fwd('attach_rigid_body', lambda: self.root.attachRigidBody)
-        fwd('remove_rigid_body', lambda: self.root.removeRigidBody)
-        fwd('attach_ghost', lambda: self.root.attachGhost)
-        fwd('remove_ghost', lambda: self.root.removeGhost)
-        fwd('attach_vehicle', lambda: self.root.attachVehicle)
-        fwd('remove_vehicle', lambda: self.root.removeVehicle)
-        fwd('ray_test_all', lambda: self.root.rayTestAll)
+        fwd('attach_rigid_body', lambda obj: obj.root.attachRigidBody)
+        fwd('remove_rigid_body', lambda obj: obj.root.removeRigidBody)
+        fwd('attach_ghost', lambda obj: obj.root.attachGhost)
+        fwd('remove_ghost', lambda obj: obj.root.removeGhost)
+        fwd('attach_vehicle', lambda obj: obj.root.attachVehicle)
+        fwd('remove_vehicle', lambda obj: obj.root.removeVehicle)
+        fwd('ray_test_all', lambda obj: obj.root.rayTestAll)
 
     def add_collision_obj(self, node):
         self.collision_objs += [node]

@@ -98,12 +98,12 @@ class LoadingPageGui(PageGui):
         self.__cmd_label(_('brake/reverse'), 'rear', -.06)
         self.__cmd_label(_('left'), 'left', -.22)
         self.__cmd_label(_('right'), 'right', -.38)
-        self.__cmd_label(_('fire'), 'button', -.54)
+        self.__cmd_label(_('fire'), 'fire', -.54)
         self.__cmd_label(_('respawn'), 'respawn', -.7)
 
     def __cmd_label(self, text, key, pos_z):
         txt = OnscreenText(
-            text=text + ': ' + self.rprops.keys[key], align=TextNode.A_left,
+            text=text + ': ' + getattr(self.rprops.keys, key), align=TextNode.A_left,
             scale=.072, pos=(.8, pos_z), font=self.font, fg=self.text_bg)
         self.widgets += [txt]
 

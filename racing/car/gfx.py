@@ -23,6 +23,8 @@ class CarGfx(Gfx, CarGfxFacade):
         self.skidmark_mgr = SkidmarkMgr(mdt)
         part_path = self.rprops.particle_path
         eng.particle(part_path, render, render, (0, 1.2, .75), .8)
+        self.crash_cnt = 0
+        self.last_crash_t = 0
         Gfx.__init__(self, mdt)
         CarGfxFacade.__init__(self)
 
@@ -70,7 +72,8 @@ class CarGfx(Gfx, CarGfxFacade):
         Gfx._end_async(self)
 
     def crash_sfx(self):
-        if self.mdt.phys.prev_speed_ratio < .8:
+        self.crash_cnt += 1
+        if self.mdt.phys.prev_speed_ratio < .8 or eng.curr_time - self.last_crash_t < 5.0 or self.crash_cnt < 2:
             return False
         part_path = self.rprops.particle_path
         node = self.mdt.gfx.nodepath
@@ -93,6 +96,8 @@ class CarGfx(Gfx, CarGfxFacade):
         next_chassis.reparent_to(self.nodepath)
         self.mdt.phys.apply_damage(reset)
         self.mdt.gui.apply_damage(reset)
+        self.last_crash_t = eng.curr_time
+        self.crash_cnt = 0
 
     def destroy(self):
         meshes = [self.nodepath, self.chassis_np] + self.wheels.values()

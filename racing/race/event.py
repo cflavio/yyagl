@@ -17,7 +17,7 @@ class RaceEvent(Event):
     def __init__(self, mdt, menu_cls, keys):
         Event.__init__(self, mdt)
         self.menu_cls = menu_cls
-        self.accept(keys['pause'], eng.toggle_pause)
+        self.accept(keys.pause, eng.toggle_pause)
         self.last_sent = globalClock.get_frame_time()  # for networking
         self.ingame_menu = None
 
@@ -53,7 +53,7 @@ class RaceEvent(Event):
         if way_str:
             self.mdt.gui.way_txt.setText(way_str)
         elif not self.mdt.logic.player_car.logic.is_moving:
-            respawn_key = self.mdt.logic.props.keys['respawn']
+            respawn_key = self.mdt.logic.props.keys.respawn
             txt = _('press %s to respawn') % respawn_key
             self.mdt.gui.way_txt.setText(txt)
         else:

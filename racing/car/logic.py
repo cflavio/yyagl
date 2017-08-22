@@ -88,24 +88,24 @@ class DriftingForce(object):
         drift_inertia_fact_timed = max(.0, 1.0 - since_drifting / drift_inertia_effect_time)
         max_intensity *= 1.0 - drift_inertia_fact_timed
         intensity = drift_inertia_fact_timed * max_intensity
-        if input_dct['left'] or input_dct['right'] or input_dct['forward']:
+        if input_dct.left or input_dct.right or input_dct.forward:
             vel = phys.vehicle.get_chassis().get_linear_velocity()
             vel.normalize()
             direction = vel
-            if input_dct['forward']:
+            if input_dct.forward:
                 act_vec = car_vec
-                if input_dct['left']:
+                if input_dct.left:
                     if car_vec_left.dot(vel) > 0:
                         act_vec = car_vec * .5 + car_vec_left * .5
-                if input_dct['right']:
+                if input_dct.right:
                     if car_vec_right.dot(vel) > 0:
                         act_vec = car_vec * .5 + car_vec_right * .5
             else:
                 act_vec = car_vec
-                if input_dct['left']:
+                if input_dct.left:
                     if car_vec_left.dot(vel) > 0:
                         act_vec = car_vec_left
-                if input_dct['right']:
+                if input_dct.right:
                     if car_vec_right.dot(vel) > 0:
                         act_vec = car_vec_right
             direction = act_vec * (1 - drift_inertia_fact_timed) + vel * drift_inertia_fact_timed
@@ -121,19 +121,19 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
         phys = self.car.phys
         eng_frc = brake_frc = 0
         f_t = globalClock.get_frame_time()
-        if car_input['forward'] and car_input['reverse']:  # do namedtuple in place of dict
+        if car_input.forward and car_input.rear:  # do namedtuple in place of dict
             eng_frc = phys.engine_acc_frc
             brake_frc = phys.brake_frc
-        if car_input['forward'] and not car_input['reverse']:
+        if car_input.forward and not car_input.rear:
             eng_frc = phys.engine_acc_frc
             eng_frc *= 1 + .2 * max(min(1, (phys.speed - 80) / - 80), 0)
             # accelerate more when < 80 Km/h
-        if car_input['reverse'] and not car_input['forward']:
+        if car_input.rear and not car_input.forward:
             eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
             brake_frc = phys.brake_frc
-        if not car_input['forward'] and not car_input['reverse']:
+        if not car_input.forward and not car_input.rear:
             brake_frc = phys.eng_brk_frc
-        if car_input['left']:
+        if car_input.left:
             if self.start_left_t is None:
                 self.start_left_t = f_t
             steer_fact = min(1, (f_t - self.start_left_t) / self.turn_time)
@@ -141,7 +141,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
             self._steering = min(self._steering, self.steering_clamp)
         else:
             self.start_left_t = None
-        if car_input['right']:
+        if car_input.right:
             if self.start_right_t is None:
                 self.start_right_t = globalClock.getFrameTime()
             steer_fact = min(1, (f_t - self.start_right_t) / self.turn_time)
@@ -149,7 +149,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
             self._steering = max(self._steering, -self.steering_clamp)
         else:
             self.start_right_t = None
-        if not car_input['left'] and not car_input['right']:
+        if not car_input.left and not car_input.right:
             if abs(self._steering) <= self.steering_dec:
                 self._steering = 0
             else:
@@ -526,7 +526,7 @@ class CarLogic(Logic, ComputerProxy):
         hspeed = self.mdt.phys.speed > 50.0
         flying = self.mdt.phys.is_flying
         input_dct = self.mdt.event._get_input()
-        return input_dct['reverse'] and hspeed and not flying
+        return input_dct.rear and hspeed and not flying
 
     @property
     def lap_time(self):

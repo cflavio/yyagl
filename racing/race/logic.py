@@ -16,7 +16,7 @@ class NetMsgs(object):
 class CarLoaderStrategy(object):
 
     @staticmethod
-    def load(cars, r_p, car_name, track, race, player_car_names):
+    def load(cars, r_p, car_name, track, race, player_car_names, s_p):
         if not cars:
             return race.fsm.demand('Countdown')
         car = cars.pop(0)
@@ -27,27 +27,27 @@ class CarLoaderStrategy(object):
         srv_or_sng = Server().is_active or not Client().is_active
         car_cls = AiCar if no_p and srv_or_sng else car_cls
         game.cars += [CarLoaderStrategy.actual_load(
-            cars, car, r_p, track, race, car_cls, player_car_names)]
+            cars, car, r_p, track, race, car_cls, player_car_names, s_p)]
 
     @staticmethod
     def actual_load(cars, load_car_name, r_p, track, race, car_cls,
-                    player_car_names):
+                    player_car_names, seas_p):
         drv = r_p.drivers[load_car_name]
         s_p = track.get_start_pos(r_p.grid.index(load_car_name))
         pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
         car_props = CarProps(
             load_car_name, pos, hpr,
             lambda: CarLoaderStrategy.load(cars, r_p, load_car_name, track,
-                                           race, player_car_names),
+                                           race, player_car_names, seas_p),
             race, drv.dprops.f_engine, drv.dprops.f_tires,
             drv.dprops.f_suspensions, race.track.phys.wp2prevs)
-        return car_cls(car_props, r_p)
+        return car_cls(car_props, r_p, seas_p)
 
 
 class CarPlayerLoaderStrategy(object):
 
     @staticmethod
-    def load(r_p, car_name, track, race, player_car_names):
+    def load(r_p, car_name, track, race, player_car_names, s_p):
         cars = [car for car in r_p.cars if car != car_name]
         if r_p.a_i:
             car_cls = AiCarPlayer
@@ -58,18 +58,18 @@ class CarPlayerLoaderStrategy(object):
             if Client().is_active:
                 car_cls = CarPlayerClient
         game.player_car = CarLoaderStrategy.actual_load(
-            cars, car_name, r_p, track, race, car_cls, player_car_names)
+            cars, car_name, r_p, track, race, car_cls, player_car_names, s_p)
 
 
 class RaceLogic(Logic):
 
-    def __init__(
-            self, mdt, rprops):
+    def __init__(self, mdt, rprops, sprops):
         self.load_txt = self.cam_tsk = self.cam_node = self.send_tsk = \
             self.cam_pivot = self.ready_clients = self.preview = \
             self.curr_load_txt = self.track = self.cars = self.player_car = \
             self.load_car = None
         self.props = rprops
+        self.sprops = sprops
         Logic.__init__(self, mdt)
 
     def load_stuff(self, car_name, player_car_names):
@@ -80,7 +80,7 @@ class RaceLogic(Logic):
         game.track = self.track = Track(r_p)  # remove game.track
         game.track.attach_obs(self.on_track_loaded)
         self.load_car = lambda: CarPlayerLoaderStrategy.load(
-            r_p, car_name, self.track, self.mdt, player_car_names)
+            r_p, car_name, self.track, self.mdt, player_car_names, self.sprops)
         self.mdt.track = self.track  # facade this
 
     def on_track_loaded(self):

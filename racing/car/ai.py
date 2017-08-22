@@ -8,6 +8,7 @@ from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 
 
 ObstInfo = namedtuple('ObstInfo', 'name dist')
+DirKeys = namedtuple('DirKeys', 'forward left rear right')
 
 
 class DebugLines(object):
@@ -153,7 +154,6 @@ class AbsAiLogic(ComputerProxy):
         self.car = None
         self.debug_lines_gnd.destroy()
         self.debug_lines_obst.destroy()
-        eng.detach_obs(self.on_start_frame)
         ComputerProxy.destroy(self)
 
 
@@ -499,8 +499,7 @@ class CarAi(Ai):
         if self.mdt.logic.weapon:
             if self.mdt.logic.weapon.ai_fire():
                 self.mdt.logic.fire()
-        return {'forward': acceleration, 'left': left, 'reverse': brake,
-                'right': right}
+        return DirKeys(acceleration, left, brake, right)
 
     def destroy(self):
         eng.detach_obs(self.on_frame)

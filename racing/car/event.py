@@ -1,4 +1,5 @@
-from random import choice
+from collections import namedtuple
+from random import choice, uniform
 from itertools import chain
 from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
@@ -11,101 +12,112 @@ from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
 from yyagl.racing.weapon.mine.mine import Mine
 from yyagl.engine.joystick import JoystickMgr
 from yyagl.engine.phys import PhysMgr
+from yyagl.computer_proxy import ComputerProxy, once_a_frame
 from yyagl.engine.network.client import Client
 from yyagl.engine.network.server import Server
 
 
-class InputDctBuilder(object):  # maybe a visitor?
+Keys = namedtuple('Keys', 'forward rear left right fire respawn pause')
+DirKeys = namedtuple('Keys', 'forward rear left right')
+
+
+class InputBuilder(object):
 
     @staticmethod
-    def build(state, joystick):
+    def create(state, joystick):
         if state == 'Results':
-            return InputDctBuilderAi()
+            return InputBuilderAi()
         elif joystick:
-            return InputDctBuilderJoystick()
+            return InputBuilderJoystick()
         else:
-            return InputDctBuilderKeyboard()
+            return InputBuilderKeyboard()
 
 
-class InputDctBuilderAi(InputDctBuilder):
+class InputBuilderAi(InputBuilder):
 
-    def build_dct(self, ai, has_weapon):
+    def build(self, ai):
         return ai.get_input()
 
 
-class InputDctBuilderKeyboard(InputDctBuilder):
+class InputBuilderKeyboard(InputBuilder):
 
-    def build_dct(self, ai, has_weapon):
-        keys = ['forward', 'left', 'reverse', 'right']
-        return {key: inputState.isSet(key) for key in keys}
+    def build(self, ai):
+        keys = ['forward', 'rear', 'left', 'right']
+        return DirKeys(*[inputState.isSet(key) for key in keys])
 
 
-class InputDctBuilderJoystick(InputDctBuilder):
+class InputBuilderJoystick(InputBuilder):
 
-    def build_dct(self, ai, has_weapon):
+    def build(self, ai):
         j_x, j_y, j_a, j_b = JoystickMgr().get_joystick()
-        if j_b and has_weapon:
+        if j_b and self.mdt.logic.weapon:
             self.on_fire()
-        return {'forward': j_y < -.4, 'reverse': j_y > .4 or j_a,
+        return {'forward': j_y < -.4, 'rear': j_y > .4 or j_a,
                 'left': j_x < -.4, 'right': j_x > .4}
 
 
-class CarEvent(Event):
+class CarEvent(Event, ComputerProxy):
 
-    def __init__(self, mdt, carevent_props):
+    def __init__(self, mdt, race_props, season_props):
         Event.__init__(self, mdt)
+        ComputerProxy.__init__(self)
         eng.attach_obs(self.on_collision)
-        self.props = carevent_props
-        keys = carevent_props.keys
+        self.props = race_props
+        self.sprops = season_props
+        keys = race_props.keys
         self.label_events = [
-            ('forward', keys['forward']), ('left', keys['left']),
-            ('reverse', keys['rear']), ('right', keys['right'])]
+            ('forward', keys.forward), ('left', keys.left),
+            ('rear', keys.rear), ('right', keys.right)]
         watch = inputState.watchWithModifiers
         self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
-        self.has_weapon = False
-        self._input_dct = None
-        eng.attach_obs(self.on_start_frame)
 
     def start(self):
         eng.attach_obs(self.on_frame)
 
     def on_collision(self, obj, tgt_obj):
-        if obj == self.mdt.gfx.nodepath.node():
-            obj_name = tgt_obj.get_name()
-            if obj_name.startswith(self.props.respawn_name):
-                self.process_respawn()
-            if obj_name.startswith(self.props.pitstop_name):
-                self.mdt.phys.apply_damage(True)
-                self.mdt.gfx.apply_damage(True)
-            if obj_name.startswith(self.props.goal_name):
-                self._process_goal()
-            if any(obj_name.startswith(name) for name in [self.props.wall_name, 'Vehicle']):
-                self._process_wall()
-            if obj_name.startswith(self.props.bonus_name):
-                self.on_bonus()
-            if obj_name.startswith('Mine'):
-                self.mdt.phys.pnode.apply_central_force((0, 0, 200000))
+        if obj != self.mdt.gfx.nodepath.node():
+            return
+        obj_name = tgt_obj.get_name()
+        if obj_name.startswith(self.props.respawn_name):
+            self.process_respawn()
+        if obj_name.startswith(self.props.pitstop_name):
+            self.mdt.phys.apply_damage(True)
+            self.mdt.gfx.apply_damage(True)
+        if obj_name.startswith(self.props.goal_name):
+            self._process_goal()
+        if any(obj_name.startswith(name) for name in [self.props.wall_name, 'Vehicle']):
+            self._process_wall()
+        if obj_name.startswith(self.props.bonus_name):
+            self.on_bonus()
+        if obj_name.startswith('Mine'):
+            self.mdt.phys.pnode.apply_central_force((0, 0, 200000))
 
     def on_bonus(self):
         if self.mdt.logic.weapon:
             self.mdt.logic.weapon.destroy()
-        wpn_cls = choice([Rocket, RearRocket, Turbo, RotateAll, Mine])
+        wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
+        probs = [.2, .2, .2, .1, .2]
+        sel = uniform(0, sum(probs))
+        for i, cls in enumerate(wpn_classes):
+            if sum(probs[:i]) <= sel <= sum(probs[:i + 1]):
+                wpn_cls = wpn_classes[i]
+        cars = game.cars + [game.player_car]
+        part_path = self.props.particle_path
         if wpn_cls == Rocket:
             path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars + [game.player_car], self.props.particle_path)
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, cars, part_path)
         elif wpn_cls == RearRocket:
             path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars + [game.player_car], self.props.particle_path)
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, cars, part_path)
         elif wpn_cls == Turbo:
             path = self.props.turbo_path
             self.mdt.logic.weapon = wpn_cls(self.mdt, path)
         elif wpn_cls == RotateAll:
             path = self.props.rotate_all_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, game.cars + [game.player_car])
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, cars)
         elif wpn_cls == Mine:
             path = self.props.mine_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.props.particle_path)
-        self.has_weapon = True
+            self.mdt.logic.weapon = wpn_cls(self.mdt, path, part_path)
         return wpn_cls
 
     def _on_crash(self):
@@ -116,72 +128,66 @@ class CarEvent(Event):
         self._on_crash()
 
     def _process_goal(self):
-        if self.mdt.fsm.getCurrentOrNextState() == 'Results' or \
-                self.mdt.logic.lap_time_start and \
-                not self.mdt.logic.correct_lap:
+        is_res = self.mdt.fsm.getCurrentOrNextState() == 'Results'
+        has_started = self.mdt.logic.lap_time_start
+        is_corr = self.mdt.logic.correct_lap
+        if is_res or has_started and not is_corr:
             return
         self.mdt.logic.reset_waypoints()
         lap_times = self.mdt.logic.lap_times
         if self.mdt.logic.lap_time_start:
             lap_times += [self.mdt.logic.lap_time]
             self._process_nonstart_goals(1 + len(lap_times), self.mdt.laps)
-        self.mdt.logic.lap_time_start = globalClock.getFrameTime()
+        self.mdt.logic.lap_time_start = eng.curr_time
 
     def _process_nonstart_goals(self, lap_number, laps):
         pass
 
     def process_respawn(self):
         start_wp_n, end_wp_n = self.mdt.logic.last_wp
-        self.mdt.gfx.nodepath.setPos(start_wp_n.get_pos() + (0, 0, 2))
-        wp_vec = Vec3(end_wp_n.getPos(start_wp_n).xy, 0)
-        wp_vec.normalize()
-        or_h = (wp_vec.xy).signedAngleDeg(Vec2(0, 1))
-        self.mdt.gfx.nodepath.setHpr(-or_h, 0, 0)
-        self.mdt.gfx.nodepath.node().setLinearVelocity(0)
-        self.mdt.gfx.nodepath.node().setAngularVelocity(0)
-
-    def on_start_frame(self):
-        self._input_dct = None
+        self.mdt.gfx.nodepath.set_pos(start_wp_n.get_pos() + (0, 0, 2))
+        wp_vec = eng.norm_vec(Vec3(end_wp_n.get_pos(start_wp_n).xy, 0))
+        or_h = (wp_vec.xy).signed_angle_deg(Vec2(0, 1))
+        self.mdt.gfx.nodepath.set_hpr(-or_h, 0, 0)
+        self.mdt.gfx.nodepath.node().set_linear_velocity(0)
+        self.mdt.gfx.nodepath.node().set_angular_velocity(0)
 
     def on_frame(self):
-        input_dct = self._get_input()
+        _input = self._get_input()
         if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
-            input_dct = {key: False for key in input_dct}
+            _input = DirKeys(*[False for _ in range(4)])
             self.mdt.logic.reset_car()
         self.__update_contact_pos()
         self.mdt.phys.update_car_props()
         self.mdt.logic.update_waypoints()
-        self.mdt.logic.update(input_dct)
+        self.mdt.logic.update(_input)
         if self.mdt.logic.is_upside_down:
-            self.mdt.gfx.nodepath.setR(0)
+            self.mdt.gfx.nodepath.set_r(0)
 
     def __update_contact_pos(self):
-        car_pos = self.mdt.gfx.nodepath.get_pos()
-        top = (car_pos.x, car_pos.y, car_pos.z + 50)
-        bottom = (car_pos.x, car_pos.y, car_pos.z - 50)
-        hits = PhysMgr().ray_test_all(top, bottom).getHits()
+        top = self.mdt.pos + (0, 0, 50)
+        bottom = self.mdt.pos + (0, 0, -50)
+        hits = PhysMgr().ray_test_all(top, bottom).get_hits()
         road_n = self.props.road_name
-        for hit in [hit for hit in hits if road_n in hit.getNode().getName()]:
+        for hit in [hit for hit in hits if road_n in hit.get_node().get_name()]:
             self.mdt.logic.last_wp = self.mdt.logic.closest_wp()
 
     def destroy(self):
-        eng.detach_obs(self.on_collision)
-        eng.detach_obs(self.on_frame)
-        eng.detach_obs(self.on_start_frame)
+        map(eng.detach_obs, [self.on_collision, self.on_frame])
         map(lambda tok: tok.release(), self.toks)
         Event.destroy(self)
+        ComputerProxy.destroy(self)
 
 
 class CarPlayerEvent(CarEvent):
 
-    def __init__(self, mdt, carevent_props):
-        CarEvent.__init__(self, mdt, carevent_props)
+    def __init__(self, mdt, race_props, season_props):
+        CarEvent.__init__(self, mdt, race_props, season_props)
         if not eng.is_runtime:
             self.accept('f11', self.mdt.gui.pars.toggle)
         state = self.mdt.fsm.getCurrentOrNextState()
-        self.input_dct_bld = InputDctBuilder.build(state,
-                                                   carevent_props.joystick)
-        self.accept(self.props.keys['respawn'], self.process_respawn)
+        self.input_bld = InputBuilder.create(state, race_props.joystick)
+        self.accept(self.props.keys.respawn, self.process_respawn)
         self.accept('f8', self.notify, ['on_end_race'])
 
     def on_frame(self):
@@ -206,19 +212,12 @@ class CarPlayerEvent(CarEvent):
         if self.mdt.logic.weapon:
             self.mdt.gui.panel.unset_weapon()
         wpn_cls = CarEvent.on_bonus(self)
-        self.accept(self.props.keys['button'], self.on_fire)
-        wpn2img = {
-            Rocket: 'rocketfront',
-            RearRocket: 'rocketrear',
-            Turbo: 'turbo',
-            RotateAll: 'turn',
-            Mine: 'mine'}
-        self.mdt.gui.panel.set_weapon(wpn2img[wpn_cls])
+        self.accept(self.props.keys.fire, self.on_fire)
+        self.mdt.gui.panel.set_weapon(self.sprops.wpn2img[wpn_cls.__name__])
 
     def on_fire(self):
-        self.ignore(self.props.keys['button'])
+        self.ignore(self.props.keys.fire)
         self.mdt.logic.fire()
-        self.has_weapon = False
         self.mdt.gui.panel.unset_weapon()
 
     def _process_wall(self):
@@ -244,21 +243,17 @@ class CarPlayerEvent(CarEvent):
             self._process_end_goal()
         #self.on_bonus()  # to test weapons
 
+    @once_a_frame
     def _get_input(self):
-        if not self._input_dct:
-            self._input_dct = self.input_dct_bld.build_dct(self.mdt.ai, self.has_weapon)
-        return self._input_dct
+        return self.input_bld.build(self.mdt.ai)
 
     def destroy(self):
-        evts = ['f11', 'f8', self.props.keys['button'], self.props.keys['respawn']]
+        evts = ['f11', 'f8', self.props.keys.fire, self.props.keys.respawn]
         map(self.ignore, evts)
         CarEvent.destroy(self)
 
 
 class CarPlayerEventServer(CarPlayerEvent):
-
-    def __init__(self, mdt):
-        CarPlayerEvent.__init__(self, mdt)
 
     def _process_end_goal(self):
         Server().send([NetMsgs.end_race])
@@ -269,17 +264,17 @@ class CarPlayerEventClient(CarPlayerEvent):
 
     def __init__(self, mdt):
         CarPlayerEvent.__init__(self, mdt)
-        self.last_sent = globalClock.getFrameTime()
+        self.last_sent = eng.curr_time
 
     def on_frame(self):
         CarPlayerEvent.on_frame(self)
-        pos = self.mdt.gfx.nodepath.getPos()
-        hpr = self.mdt.gfx.nodepath.getHpr()
-        velocity = self.mdt.phys.vehicle.getChassis().getLinearVelocity()
+        pos = self.mdt.pos
+        hpr = self.mdt.gfx.nodepath.get_hpr()
+        velocity = self.mdt.phys.vehicle.get_chassis().get_linear_velocity()
         packet = list(chain([NetMsgs.player_info], pos, hpr, velocity))
-        if globalClock.getFrameTime() - self.last_sent > .2:
+        if eng.curr_time - self.last_sent > .2:
             Client().send(packet)
-            self.last_sent = globalClock.getFrameTime()
+            self.last_sent = eng.curr_time
 
     def _process_end_goal(self):
         Client().send([NetMsgs.end_race_player])
@@ -288,18 +283,16 @@ class CarPlayerEventClient(CarPlayerEvent):
 
 class CarNetworkEvent(CarEvent):
 
+    @once_a_frame
     def _get_input(self):
-        if not self._input_dct:
-            self._input_dct = {key: False for key in ['forward', 'left', 'reverse', 'right']}
-        return self._input_dct
+        return {key: False for key in ['forward', 'left', 'rear', 'right']}
 
 
 class CarAiEvent(CarEvent):
 
+    @once_a_frame
     def _get_input(self):
-        if not self._input_dct:
-            self._input_dct = self.mdt.ai.get_input()
-        return self._input_dct
+        return self.mdt.ai.get_input()
 
 
 class CarAiPlayerEvent(CarAiEvent, CarPlayerEvent):

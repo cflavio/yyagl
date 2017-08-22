@@ -46,8 +46,8 @@ class SeasonLogic(Logic):
     def create_race_client(self, race_props):
         self.race = RaceClient(race_props)
 
-    def create_race(self, race_props):
-        self.race = RaceSinglePlayer(race_props)
+    def create_race(self, race_props, season_props):
+        self.race = RaceSinglePlayer(race_props, season_props)
 
     def destroy(self):
         self.tuning.detach_obs(self.on_tuning_sel)
