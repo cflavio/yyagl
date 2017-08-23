@@ -228,6 +228,7 @@ class CarLogic(Logic, ComputerProxy):
             self.nopitlane_wps(w_p)
         self.__wp_num = None
         self.applied_torque = False  # applied from weapons
+        self.alt_jmp_wp = None
 
     def update(self, input2forces):
         phys = self.mdt.phys
@@ -438,6 +439,14 @@ class CarLogic(Logic, ComputerProxy):
                                waypoints)
         dist_lst = zip(waypoints.keys(), distances)
         curr_wp = min(dist_lst, key=lambda pair: pair[1])[0]
+        if self.alt_jmp_wp:
+            dist_wp = (car_np.get_pos() - curr_wp.get_pos()).length()
+            dist_alt = (car_np.get_pos() - self.alt_jmp_wp.get_pos()).length()
+            dist_h_wp = abs(car_np.get_z() - curr_wp.get_z())
+            dist_h_alt = abs(car_np.get_z() - self.alt_jmp_wp.get_z())
+            if dist_wp > .5 * dist_alt and dist_h_wp > 1.5 * dist_h_alt:
+                curr_wp = self.alt_jmp_wp
+                waypoints[curr_wp] = self._grid_wps[curr_wp]
         for wp in considered_wps:
             if curr_wp in wp[1]:
                 waypoints[wp[0]] = wp[1]
@@ -449,12 +458,27 @@ class CarLogic(Logic, ComputerProxy):
                                waypoints)
         prev_wp = may_prev[distances.index(min(distances))]
         may_succ = [w_p for w_p in waypoints if curr_wp in waypoints[w_p]]
+        if len(may_succ) >= 2:
+            if any(wp.has_tag('jump') for wp in may_succ):
+                cha_name = self.mdt.gfx.chassis_np.get_name()
+                if cha_name in self.curr_chassis_name:
+                    may_succ = [wp for wp in may_succ if wp.has_tag('jump')]
+                    if not self.alt_jmp_wp:
+                        jmp_wp_str = may_succ[0].get_tag('jump')
+                        for cwp in self._grid_wps.keys():
+                            if cwp.get_name() == 'Waypoint' + jmp_wp_str:
+                                self.alt_jmp_wp = cwp
+                else:
+                    may_succ = [wp for wp in may_succ
+                                if not wp.has_tag('jump')]
         distances = [self.pt_line_dst(car_np, curr_wp, w_p)
                      for w_p in may_succ]
         if not distances:  # there is a bug
             self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps,
                                waypoints)
         next_wp = may_succ[distances.index(min(distances))]
+        if len(self._grid_wps[curr_wp]) >= 2:
+            self.alt_jmp_wp = None
         curr_vec = eng.norm_vec(Vec2(car_np.get_pos(curr_wp).xy))
         prev_vec = eng.norm_vec(Vec2(car_np.get_pos(prev_wp).xy))
         next_vec = eng.norm_vec(Vec2(car_np.get_pos(next_wp).xy))
