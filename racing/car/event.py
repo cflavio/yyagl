@@ -90,7 +90,8 @@ class CarEvent(Event, ComputerProxy):
             self._process_wall()
         if obj_name.startswith(self.props.bonus_name):
             self.on_bonus()
-        if obj_name.startswith('Mine'):
+        weapons = ['Mine', 'Rocket', 'RearRocket']
+        if any(obj_name.startswith(wpn_name) for wpn_name in weapons):
             self.mdt.phys.pnode.apply_central_force((0, 0, 200000))
 
     def on_bonus(self):
@@ -186,10 +187,10 @@ class CarPlayerEvent(CarEvent):
         CarEvent.__init__(self, mdt, race_props, season_props)
         if not eng.is_runtime:
             self.accept('f11', self.mdt.gui.pars.toggle)
+            self.accept('f8', self.notify, ['on_end_race'])
         state = self.mdt.fsm.getCurrentOrNextState()
         self.input_bld = InputBuilder.create(state, race_props.joystick)
         self.accept(self.props.keys.respawn, self.process_respawn)
-        self.accept('f8', self.notify, ['on_end_race'])
 
     def on_frame(self):
         CarEvent.on_frame(self)
