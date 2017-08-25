@@ -95,6 +95,8 @@ class CarGfx(Gfx, CarGfxFacade):
             next_chassis = self.chassis_np_low
         curr_chassis.remove_node()
         next_chassis.reparent_to(self.nodepath)
+        if self.mdt.logic.weapon:
+            self.mdt.logic.weapon.reparent(next_chassis)
         self.mdt.phys.apply_damage(reset)
         self.mdt.gui.apply_damage(reset)
         self.last_crash_t = eng.curr_time

@@ -13,6 +13,7 @@ class RotateAllFacade(Facade):
         self._fwd_mth('detach_obs', self.logic.detach)
         self._fwd_mth('fire', self.logic.fire)
         self._fwd_mth('ai_fire', self.ai.update)
+        self._fwd_mth('reparent', self.gfx.reparent)
 
 
 class RotateAll(GameObject, RotateAllFacade):
