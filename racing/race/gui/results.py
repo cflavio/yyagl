@@ -31,9 +31,9 @@ class Results(Subject):
             OnscreenText(str(round(lap_times[i], 2)),
                          pos=(0, .52 - .2 * (i + 1)), **pars)
             for i in range(laps)]
-        self.__res_txts += [OnscreenText(_('LAP'), pos=(-.6, .6), **pars)]
-        self.__res_txts += [OnscreenText(_('TIME'), pos=(0, .6), **pars)]
-        self.__res_txts += [OnscreenText(_('RANKING'), pos=(.5, .6),
+        self.__res_txts += [OnscreenText(_('LAP'), pos=(-.6, .68), **pars)]
+        self.__res_txts += [OnscreenText(_('TIME'), pos=(0, .68), **pars)]
+        self.__res_txts += [OnscreenText(_('RANKING'), pos=(.5, .68),
                                          align=TextNode.A_left, **pars)]
         self.__res_txts += [
             OnscreenText(str(i), pos=(-.6, .52 - .2 * i), **pars)
@@ -42,7 +42,7 @@ class Results(Subject):
         race_ranking_sorted = reversed([el[0] for el in race_ranking_sorted])
 
         for i, car in enumerate(race_ranking_sorted):
-            dpars = i, car, .76, .46, str(i + 1) + '. %s'
+            dpars = i, car, .76, .54, str(i + 1) + '. %s'
             txt, img = LoadingPageGui.set_drv_txt_img(self, *dpars)
             self.__res_txts += [txt, img]
         self.__res_txts += [

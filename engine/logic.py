@@ -12,7 +12,8 @@ class EngineLogic(Logic):
     @property
     def version(self):
         if not eng.base.appRunner:
-            return 'source'
+            with open('assets/version.txt') as fver:
+                return fver.read().strip() + '-source'
         package = eng.base.appRunner.p3dInfo.FirstChildElement('package')
         return package.Attribute('version')
 
