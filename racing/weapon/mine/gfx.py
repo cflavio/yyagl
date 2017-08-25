@@ -20,6 +20,9 @@ class MineGfx(Gfx):
         self.gfx_np.set_scale(1.5)
         self.gfx_np.set_pos(0, 0, 1.5)
 
+    def reparent(self, parent):
+        self.gfx_np.reparent_to(parent)
+
     def destroy(self):
         self.gfx_np.cleanup()
         self.parent = self.gfx_np = self.gfx_np.remove_node()

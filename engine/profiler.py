@@ -69,7 +69,7 @@ else:
 
         __metaclass__ = Singleton
 
-        def __init__(self, enabled):
+        def __init__(self, enabled, percall):
             pass
 
         def enable(self):
