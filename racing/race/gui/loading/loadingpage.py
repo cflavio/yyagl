@@ -3,6 +3,7 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.engine.gui.page import Page, PageGui, PageFacade
 from yyagl.gameobject import GameObject, Event
+from yyagl.racing.ranking.gui import RankingGui
 
 
 class LoadingPageGui(PageGui):
@@ -35,6 +36,7 @@ class LoadingPageGui(PageGui):
         self.set_grid()
         self.set_ranking()
         self.set_controls()
+        self.set_upgrades()
         map(self.add_widget, [self.load_txt, track_txt])
         PageGui.bld_page(self, False)
 
@@ -44,35 +46,8 @@ class LoadingPageGui(PageGui):
         self.add_widget(txt)
         for i, car_name in enumerate(self.rprops.grid):
             pars = i, car_name, -1.28, .22, str(i + 1) + '. %s'
-            txt, img = LoadingPageGui.set_drv_txt_img(self, *pars)
+            txt, img = RankingGui.set_drv_txt_img(self, *pars)
             map(self.add_widget, [txt, img])
-
-    @staticmethod
-    def set_drv_txt_img(page, i, car_name, pos_x, top, text):
-        idx, drvname, _, _ = next(
-            driver for driver in page.drivers if driver[3] == car_name)
-        is_player_car = car_name == page.rprops.player_car_name
-        txt = OnscreenText(
-            text=text % drvname, align=TextNode.A_left, scale=.072,
-            pos=(pos_x, top - i * .16), font=page.font,
-            fg=page.text_fg if is_player_car else page.text_bg)
-        img = OnscreenImage(
-            page.rprops.cars_imgs % car_name,
-            pos=(pos_x - .16, 1, top + .02 - i * .16), scale=.074)
-        filtervpath = eng.curr_path + 'yyagl/assets/shaders/filter.vert'
-        with open(filtervpath) as fvs:
-            vert = fvs.read()
-        drvfpath = eng.curr_path + 'yyagl/assets/shaders/drv_car.frag'
-        with open(drvfpath) as ffs:
-            frag = ffs.read()
-        shader = Shader.make(Shader.SL_GLSL, vert, frag)
-        img.set_shader(shader)
-        img.set_transparency(True)
-        t_s = TextureStage('ts')
-        t_s.set_mode(TextureStage.MDecal)
-        txt_path = page.rprops.drivers_img % idx
-        img.set_texture(t_s, loader.loadTexture(txt_path))
-        return txt, img
 
     def set_ranking(self):
         items = game.logic.season.ranking.carname2points.items()
@@ -81,7 +56,7 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.add_widget(txt)
         for i, car in enumerate(sorted_ranking):
-            txt, img = LoadingPageGui.set_drv_txt_img(self, i, car[0], -.2,
+            txt, img = RankingGui.set_drv_txt_img(self, i, car[0], -.2,
                                                       .22, str(car[1]) + ' %s')
             map(self.add_widget, [txt, img])
 
@@ -95,11 +70,32 @@ class LoadingPageGui(PageGui):
             self.add_widget(txt)
             return
         self.__cmd_label(_('accelerate'), 'forward', .22)
-        self.__cmd_label(_('brake/reverse'), 'rear', .06)
-        self.__cmd_label(_('left'), 'left', -.1)
-        self.__cmd_label(_('right'), 'right', -.26)
-        self.__cmd_label(_('fire'), 'fire', -.42)
-        self.__cmd_label(_('respawn'), 'respawn', -.58)
+        self.__cmd_label(_('brake/reverse'), 'rear', .12)
+        self.__cmd_label(_('left'), 'left', .02)
+        self.__cmd_label(_('right'), 'right', -.08)
+        self.__cmd_label(_('fire'), 'fire', -.18)
+        self.__cmd_label(_('respawn'), 'respawn', -.28)
+
+    def set_upgrades(self):
+        txt = OnscreenText(text=_('Upgrades'), scale=.1, pos=(1.0, -.56),
+                           font=self.font, fg=self.text_bg)
+        self.add_widget(txt)
+        tuning = game.logic.season.tuning.car2tuning[self.sprops.player_car_name]
+        txt = OnscreenText(
+            text=_('engine: +') + str(tuning.f_engine),
+            align=TextNode.A_left, scale=.072, pos=(.8, -.7), font=self.font,
+            fg=self.text_bg)
+        self.widgets += [txt]
+        txt = OnscreenText(
+            text=_('tires: +') + str(tuning.f_tires),
+            align=TextNode.A_left, scale=.072, pos=(.8, -.8), font=self.font,
+            fg=self.text_bg)
+        self.widgets += [txt]
+        txt = OnscreenText(
+            text=_('suspensions: +') + str(tuning.f_suspensions),
+            align=TextNode.A_left, scale=.072, pos=(.8, -.9), font=self.font,
+            fg=self.text_bg)
+        self.widgets += [txt]
 
     def __cmd_label(self, text, key, pos_z):
         txt = OnscreenText(

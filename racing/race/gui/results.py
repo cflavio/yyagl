@@ -3,6 +3,7 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.DirectButton import DirectButton
 from yyagl.racing.race.gui.loading.loadingpage import LoadingPageGui
+from yyagl.racing.ranking.gui import RankingGui
 from yyagl.engine.gui.imgbtn import ImgBtn
 from yyagl.observer import Subject
 
@@ -43,7 +44,7 @@ class Results(Subject):
 
         for i, car in enumerate(race_ranking_sorted):
             dpars = i, car, .76, .54, str(i + 1) + '. %s'
-            txt, img = LoadingPageGui.set_drv_txt_img(self, *dpars)
+            txt, img = RankingGui.set_drv_txt_img(self, *dpars)
             self.__res_txts += [txt, img]
         self.__res_txts += [
             OnscreenText(_('share:'), pos=(-.1, -.82), align=TextNode.A_right,

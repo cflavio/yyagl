@@ -1,6 +1,7 @@
 from yyagl.gameobject import Logic
 from yyagl.racing.ranking.ranking import Ranking
 from yyagl.racing.tuning.tuning import Tuning
+from yyagl.racing.tuning.logic import TuningCar
 from yyagl.racing.race.race import RaceSinglePlayer, RaceServer, RaceClient
 
 
@@ -14,9 +15,10 @@ class SeasonLogic(Logic):
         self.tuning = Tuning(s_p)
         self.race = None
 
-    def start(self):
-        self.ranking.reset()
-        self.tuning.reset()
+    def start(self, reset=True):
+        if reset:
+            self.ranking.reset()
+            self.tuning.reset()
         self.tuning.attach_obs(self.on_tuning_sel)
 
     def on_tuning_sel(self, val):

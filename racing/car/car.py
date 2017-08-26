@@ -62,7 +62,8 @@ class Car(GameObject, CarFacade):
         init_lst = [
             [('fsm', self.fsm_cls, [self, car_props, race_props])],
             [('gfx', self.gfx_cls, [self, car_props, race_props]),
-             ('phys', self.phys_cls, [self, car_props, race_props]),
+             ('phys', self.phys_cls, [self, car_props, race_props,
+                                      season_props]),
              ('logic', self.logic_cls, [self, car_props, race_props]),
              ('gui', self.gui_cls, [self, race_props]),
              ('event', self.event_cls, [self, race_props, season_props]),

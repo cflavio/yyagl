@@ -12,6 +12,8 @@ class RankingFacade(Facade):
         self._fwd_mth('show', self.gui.show)
         self._fwd_mth('hide', self.gui.hide)
         self._fwd_mth('reset', self.logic.reset)
+        self._fwd_mth('attach_obs', self.gui.attach_obs)
+        self._fwd_mth('detach_obs', self.gui.detach_obs)
         self._fwd_prop('carname2points', self.logic.carname2points)
 
 

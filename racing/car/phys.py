@@ -8,7 +8,7 @@ from yyagl.engine.phys import PhysMgr
 
 class CarPhys(Phys):
 
-    def __init__(self, mdt, car_props, race_props):
+    def __init__(self, mdt, car_props, race_props, season_props):
         Phys.__init__(self, mdt)
         self.pnode = self.vehicle = self.friction_slip = self.__track_phys = \
             self.coll_mesh = self.roll_influence = self.max_speed = None
@@ -18,6 +18,7 @@ class CarPhys(Phys):
         self.__finds = {}  # cache for find's results
         self.cprops = car_props
         self.rprops = race_props
+        self.sprops = season_props
         self._load_phys()
         self.__set_collision_mesh()
         self.__set_phys_node()
@@ -258,16 +259,16 @@ class CarPhys(Phys):
 class CarPlayerPhys(CarPhys):
 
     def get_speed(self):
-        tun_c = 1 + .1 * self.rprops.tuning_engine
+        tun_c = 1 + .1 * self.sprops.tuning_engine
         drv_c = 1 + .01 * self.cprops.driver_engine
         return self.cfg['max_speed'] * tun_c * drv_c
 
     def get_friction(self):
-        tun_c = 1 + .1 * self.rprops.tuning_tires
+        tun_c = 1 + .1 * self.sprops.tuning_tires
         drv_c = 1 + .01 * self.cprops.driver_tires
         return self.cfg['friction_slip'] * tun_c * drv_c
 
     def get_roll_influence(self):
-        tun_c = 1 + .1 * self.rprops.tuning_suspensions
+        tun_c = 1 + .1 * self.sprops.tuning_suspensions
         drv_c = 1 + .01 * self.cprops.driver_suspensions
         return self.cfg['roll_influence'] * tun_c * drv_c
