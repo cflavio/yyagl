@@ -33,5 +33,5 @@ class TuningLogic(Logic):
         self.car2tuning = {}
         for car_name in tuning_dct:
             tun = tuning_dct[car_name]
-            new_t = TuningCar(tun['engine'], tun['tires'], tun['suspensions'])
+            new_t = TuningCar(tun.f_engine, tun.f_tires, tun.f_suspensions)
             self.car2tuning[car_name] = new_t

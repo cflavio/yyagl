@@ -18,7 +18,7 @@ class CarLoaderStrategy(object):
     @staticmethod
     def load(cars, r_p, car_name, track, race, player_car_names, s_p):
         if not cars:
-            return race.fsm.demand('Countdown')
+            return race.fsm.demand('Countdown', s_p)
         car = cars.pop(0)
         car_cls = Car
         if Server().is_active or Client().is_active:

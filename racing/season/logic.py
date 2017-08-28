@@ -55,9 +55,3 @@ class SeasonLogic(Logic):
         self.tuning.detach_obs(self.on_tuning_sel)
         self.props = self.ranking = self.tuning = self.race = None
         Logic.destroy(self)
-
-
-class SingleRaceSeasonLogic(SeasonLogic):
-
-    def next_race(self):
-        game.demand('Menu')

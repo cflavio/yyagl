@@ -31,9 +31,17 @@ class RankingPageGui(PageGui):
             txt, img = RankingGui.set_drv_txt_img(self, i, car[0], 0, .52,
                                                   str(car[1]) + ' %s')
             map(self.add_widget, [txt, img])
+        track = self.rprops.track_name
+        ntracks = len(self.sprops.track_names)
+        if self.sprops.track_names.index(track) == ntracks - 1:
+            cont_btn_cmd = game.logic.season.logic.next_race
+            cont_btn_ea = []
+        else:
+            cont_btn_cmd = self.notify
+            cont_btn_ea = ['on_ranking_end']
         cont_btn = DirectButton(
-            text=_('Continue'), pos=(0, 1, -.8), command=self.notify,
-            extraArgs=['on_ranking_end'], **self.rprops.menu_args.btn_args)
+            text=_('Continue'), pos=(0, 1, -.8), command=cont_btn_cmd,
+            extraArgs=cont_btn_ea, **self.rprops.menu_args.btn_args)
         self.add_widget(cont_btn)
         PageGui.bld_page(self, False)
 
