@@ -10,7 +10,7 @@ class MenuArgs(object):
     def __init__(self, font, text_fg, text_bg, text_err, text_scale, btn_size,
                  btn_color, background_img, rollover_sfx, click_sfx,
                  social_imgs_dpath):
-        self.font = FontMgr().load_font(font)
+        self.__font = font
         self.text_fg = text_fg
         self.text_bg = text_bg
         self.text_err = text_err
@@ -18,9 +18,21 @@ class MenuArgs(object):
         self.btn_size = btn_size
         self.btn_color = btn_color
         self.background_img = background_img
-        self.rollover_sfx = loader.loadSfx(rollover_sfx)
-        self.click_sfx = loader.loadSfx(click_sfx)
+        self.__rollover_sfx = rollover_sfx
+        self.__click_sfx = click_sfx
         self.social_imgs_dpath = social_imgs_dpath
+
+    @property
+    def font(self):
+        return FontMgr().load_font(self.__font)
+
+    @property
+    def rollover_sfx(self):
+        return loader.loadSfx(self.__rollover_sfx)
+
+    @property
+    def click_sfx(self):
+        return loader.loadSfx(self.__click_sfx)
 
     @property
     def btn_args(self):  # it may be used without a menu e.g. results

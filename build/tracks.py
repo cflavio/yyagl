@@ -3,7 +3,7 @@ from sys import executable
 
 
 def bld_tracks(target, source, env):
-    for root, dnames, fnames in walk(env['MODELS_DIR']):
+    for root, dnames, fnames in walk(env['MODELS_DIR_PATH']):
         if not root.startswith('assets/models/tracks'):
             for fname in fnames:
                 _fname = root + '/' + fname
@@ -12,5 +12,5 @@ def bld_tracks(target, source, env):
                     system('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args)
     for root, dnames, fnames in walk('assets/models/tracks'):
         for dname in dnames:
-            if root == env['TRACKS_DIR']:
+            if root == env['TRACKS_DIR_PATH']:
                 system(executable + ' yyagl/build/process_track.py ' + dname)

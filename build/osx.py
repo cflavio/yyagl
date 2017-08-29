@@ -5,7 +5,7 @@ from .deployng import bld_ng
 
 
 def bld_osx(target, source, env):
-    if env['NG']:
+    if env['DEPLOYNG']:
         bld_ng(env['APPNAME'], osx=True)
         return
     nointernet = '-s' if env['NOINTERNET'] else ''

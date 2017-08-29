@@ -7,7 +7,7 @@ from .deployng import bld_ng
 
 
 def bld_linux(target, source, env):
-    if env['NG']:
+    if env['DEPLOYNG']:
         bld_ng(env['APPNAME'], linux_64=True)
         return
     ico_fpath = env['ICO_FPATH']

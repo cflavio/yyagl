@@ -74,7 +74,7 @@ SectionEnd'''
 
 
 def bld_windows(target, source, env):
-    if env['NG']:
+    if env['DEPLOYNG']:
         bld_ng(env['APPNAME'], win=True)
         return
     internet_switch = '-s' if env['NOINTERNET'] else ''

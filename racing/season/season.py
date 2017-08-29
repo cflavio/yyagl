@@ -3,7 +3,7 @@ from yyagl.gameobject import GameObject
 from yyagl.facade import Facade
 from .logic import SeasonLogic
 
-sp_attrs = 'car_names player_car_name drivers background_fpath ' + \
+sp_attrs = 'gameprops car_names player_car_name drivers background_fpath ' + \
     'tuning_imgs track_names font fg_col countdown_sfx single_race ' + \
     'wpn2img tuning_engine tuning_tires tuning_suspensions ' + \
     'race_start_time countdown_seconds'

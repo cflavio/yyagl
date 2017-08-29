@@ -27,7 +27,7 @@ class RaceEvent(Event):
     def fire_ingame_menu(self):
         self.ignore('escape-up')
         eng.show_cursor()
-        self.ingame_menu = self.menu_cls()
+        self.ingame_menu = self.menu_cls(self.mdt.logic.sprops.gameprops.menu_args)
         self.ingame_menu.gui.menu.attach_obs(self.on_ingame_back)
         self.ingame_menu.gui.menu.attach_obs(self.on_ingame_exit)
 
