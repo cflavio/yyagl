@@ -20,6 +20,7 @@ class TuningLogic(Logic):
     def reset(self):
         self.car2tuning = {car: TuningCar(0, 0, 0) for car in self.car_names}
 
+    @property
     def to_dct(self):
         tun = {}
         for car in self.car2tuning:

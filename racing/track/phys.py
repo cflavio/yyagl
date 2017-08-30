@@ -7,6 +7,74 @@ from yyagl.engine.phys import PhysMgr
 from yyagl.racing.weapon.bonus.bonus import Bonus
 
 
+class MeshBuilder(object):
+
+    def __init__(self, model, geom_names, is_ghost):
+        self.model = model
+        self.rigid_bodies = []
+        self.ghosts = []
+        self.nodes = []
+        for geom_name in geom_names:
+            self.__set_mesh(geom_name, is_ghost)
+
+    def __set_mesh(self, geom_name, is_ghost):
+        LogMgr().log('setting physics for: ' + geom_name)
+        geoms = PhysMgr().find_geoms(self.model, geom_name)
+        if geoms:
+            self._process_meshes(geoms, geom_name, is_ghost)
+
+    def _build_mesh(self, geoms, geom_name, is_ghost, is_merged):
+        mesh = BulletTriangleMesh()
+        name = self._add_geoms(geoms, mesh, geom_name)
+        shape = BulletTriangleMeshShape(mesh, dynamic=False)
+        self._build(shape, name, is_ghost, is_merged)
+
+    def _build(self, shape, geom_name, is_ghost, is_merged):
+        if is_ghost:
+            ncls = BulletGhostNode
+            meth = PhysMgr().attach_ghost
+            lst = self.ghosts
+        else:
+            ncls = BulletRigidBodyNode
+            meth = PhysMgr().attach_rigid_body
+            lst = self.rigid_bodies
+        nodepath = eng.attach_node(ncls(geom_name))
+        self.nodes += [nodepath]
+        nodepath.node().addShape(shape)
+        meth(nodepath.node())
+        lst += [nodepath.node()]
+        nodepath.node().notify_collisions(True)
+        if is_ghost or not is_merged:
+            nodepath.set_collide_mask(BitMask32.bit(1))
+
+    def destroy(self):
+        self.model = self.rigid_bodies = self.ghosts = self.nodes = None
+
+
+class MeshBuilderMerged(MeshBuilder):
+
+    def _process_meshes(self, geoms, geom_name, is_ghost):
+        self._build_mesh(geoms, geom_name, is_ghost, True)
+
+    def _add_geoms(self, geoms, mesh, geom_name):
+        for geom in geoms:
+            for _geom in [g.decompose() for g in geom.node().get_geoms()]:
+                mesh.add_geom(_geom, False, geom.get_transform(self.model))
+        return geom_name
+
+
+class MeshBuilderUnmerged(MeshBuilder):
+
+    def _process_meshes(self, geoms, geom_name, is_ghost):
+        for geom in geoms:
+            self._build_mesh(geom, geom_name, is_ghost, False)
+
+    def _add_geoms(self, geoms, mesh, geom_name):
+        for _geom in [g.decompose() for g in geoms.node().get_geoms()]:
+            mesh.addGeom(_geom, False, geoms.get_transform(self.model))
+        return geoms.get_name()
+
+
 class TrackPhys(Phys):
 
     def __init__(
@@ -22,67 +90,19 @@ class TrackPhys(Phys):
 
     def sync_bld(self):
         self.model = loader.loadModel(self.rprops.coll_track_path)
-        self.__set_meshes(self.rprops.unmerged, False, False)
-        self.__set_meshes(self.rprops.merged, True, False)
-        self.__set_meshes(self.rprops.ghosts, True, True)
+        builders = [
+            MeshBuilderUnmerged(self.model, self.rprops.unmerged, False),
+            MeshBuilderMerged(self.model, self.rprops.merged, False),
+            MeshBuilderMerged(self.model, self.rprops.ghosts, True)]
+        for bld in builders:
+            self.nodes += bld.nodes
+            self.ghosts += bld.ghosts
+            self.rigid_bodies += bld.rigid_bodies
+            bld.destroy()
         self.__set_corners()
         self.__set_waypoints()
         self.__set_weapons()
         self.__hide_models()
-
-    def __set_meshes(self, geom_names, is_merged, is_ghost):
-        # refactor using builder_merged, builder_ghost
-        for geom_name in geom_names:
-            self.__set_mesh(geom_name, is_merged, is_ghost)
-
-    def __set_mesh(self, geom_name, is_merged, is_ghost):
-        LogMgr().log('setting physics for: ' + geom_name)
-        geoms = PhysMgr().find_geoms(self.model, geom_name)
-        if geoms:
-            self.__process_meshes(geoms, geom_name, is_merged, is_ghost)
-
-    def __process_meshes(self, geoms, geom_name, merged, ghost):
-        meth = self.add_geoms_merged if merged else self.add_geoms_unmerged
-        if not merged:
-            for geom in geoms:
-                self.__build_mesh(meth, geom, geom_name, ghost, merged)
-        else:
-            self.__build_mesh(meth, geoms, geom_name, ghost, merged)
-
-    def add_geoms_merged(self, geoms, mesh, geom_name):
-        for geom in geoms:
-            for _geom in [g.decompose() for g in geom.node().get_geoms()]:
-                mesh.add_geom(_geom, False, geom.get_transform(self.model))
-        return geom_name
-
-    def add_geoms_unmerged(self, geoms, mesh, geom_name):
-        for _geom in [g.decompose() for g in geoms.node().get_geoms()]:
-            mesh.addGeom(_geom, False, geoms.get_transform(self.model))
-        return geoms.get_name()
-
-    def __build_mesh(self, meth, geoms, geom_name, ghost, merged):
-        mesh = BulletTriangleMesh()
-        name = meth(geoms, mesh, geom_name)
-        shape = BulletTriangleMeshShape(mesh, dynamic=False)
-        self.__build(shape, name, ghost, merged)
-
-    def __build(self, shape, geom_name, ghost, merged):
-        if ghost:
-            ncls = BulletGhostNode
-            meth = PhysMgr().attach_ghost
-            lst = self.ghosts
-        else:
-            ncls = BulletRigidBodyNode
-            meth = PhysMgr().attach_rigid_body
-            lst = self.rigid_bodies
-        nodepath = eng.attach_node(ncls(geom_name))
-        self.nodes += [nodepath]
-        nodepath.node().addShape(shape)
-        meth(nodepath.node())
-        lst += [nodepath.node()]
-        nodepath.node().notify_collisions(True)
-        if ghost or not merged:
-            nodepath.set_collide_mask(BitMask32.bit(1))
 
     def __set_corners(self):
         corners = self.rprops.corner_names
@@ -104,19 +124,7 @@ class TrackPhys(Phys):
         self.redraw_wps()
 
     def redraw_wps(self):
-        # put draw in a decorator class
-        if not self.rprops.show_waypoints or not self.wp2prevs:
-            # it may be invoked on track's destruction
-            return
-        if self.wp_np:
-            self.wp_np.remove_node()
-        segs = LineSegs()
-        for w_p in self.wp2prevs.keys():
-            for dest in self.wp2prevs[w_p]:
-                segs.moveTo(w_p.get_pos())
-                segs.drawTo(dest.get_pos())
-        segs_node = segs.create()
-        self.wp_np = render.attach_new_node(segs_node)
+        pass
 
     def __set_weapons(self):
         weapon_info = self.rprops.weapon_info
@@ -170,3 +178,20 @@ class TrackPhys(Phys):
         if self.rprops.show_waypoints:  # in the drawing class
             self.wp_np = self.wp_np.remove_node()
         self.rprops = None
+
+
+class TrackPhysDebug(TrackPhys):
+
+    def redraw_wps(self):
+        if not self.wp2prevs:
+            # it may be invoked on track's destruction
+            return
+        if self.wp_np:
+            self.wp_np.remove_node()
+        segs = LineSegs()
+        for w_p in self.wp2prevs.keys():
+            for dest in self.wp2prevs[w_p]:
+                segs.moveTo(w_p.get_pos())
+                segs.drawTo(dest.get_pos())
+        segs_node = segs.create()
+        self.wp_np = render.attach_new_node(segs_node)

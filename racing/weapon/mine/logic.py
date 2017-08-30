@@ -3,7 +3,7 @@ from yyagl.gameobject import Logic
 
 class MineLogic(Logic):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt, car, cars):
         Logic.__init__(self, mdt)
         self.tsk = None
         self.has_fired = False

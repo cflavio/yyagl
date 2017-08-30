@@ -655,9 +655,6 @@ class CarPlayerLogic(CarLogic):
         if self.lap_time_start:
             self.mdt.gui.panel.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__check_wrong_way()
-        ranking = game.logic.season.race.logic.ranking()  # move this to race
-        r_i = ranking.index(self.mdt.name) + 1
-        self.mdt.gui.panel.ranking_txt.setText(str(r_i) + "'")
         self._update_dist()
 
     def __check_wrong_way(self):

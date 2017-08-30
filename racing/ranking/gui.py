@@ -68,8 +68,7 @@ class RankingMenuGui(Gui):
 
     def __init__(self, mdt, rprops, sprops, menu):
         Gui.__init__(self, mdt)
-        from yorg.utils import Utils
-        menu_args = Utils().menu_args
+        menu_args = sprops.gameprops.menu_args
         menu_args.btn_size = (-8.6, 8.6, -.42, .98)
         self.menu = Menu(menu_args)
         self.rank_page = RankingPage(rprops, sprops, self.menu)

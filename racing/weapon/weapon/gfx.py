@@ -2,20 +2,21 @@ from direct.actor.Actor import Actor
 from yyagl.gameobject import Gfx
 
 
-class TurboGfx(Gfx):
+class WeaponGfx(Gfx):
 
-    def __init__(self, mdt, parent, path):
+    def __init__(self, mdt, parent, fpath, deg=0):
         self.gfx_np = None
         self.parent = parent
-        self.path = path
-        self.ival = None
+        self.fpath = fpath
+        self.deg = deg
         Gfx.__init__(self, mdt)
 
     def sync_bld(self):
-        self.gfx_np = Actor(self.path, {'anim': self.path + '-Anim'})
+        self.gfx_np = Actor(self.fpath, {'anim': self.fpath + '-Anim'})
         self.gfx_np.loop('anim')
-        self.gfx_np.flattenLight()
-        self.gfx_np.reparentTo(self.parent)
+        self.gfx_np.flatten_light()
+        self.gfx_np.reparent_to(self.parent)
+        self.gfx_np.set_h(self.deg)
         self.gfx_np.set_scale(1.5)
         self.gfx_np.set_pos(0, 0, 1.5)
 

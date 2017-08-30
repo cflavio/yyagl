@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 
-__fields = 'keys joystick sounds color_main color font coll_path ' + \
+__fields = 'keys joystick sounds font coll_path ' + \
     'coll_name car_path phys_file wheel_names road_name model_name ' + \
     'damage_paths wheel_gfx_names particle_path drivers shaders_dev ' + \
     'shaders music_path coll_track_path unmerged merged ghosts ' + \

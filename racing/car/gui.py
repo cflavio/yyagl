@@ -113,23 +113,23 @@ class CarParameters(object):
 
 class CarPanel(object):
 
-    def __init__(self, car_props):
-        self.car_props = car_props
+    def __init__(self, race_props):
+        self.race_props = race_props
         pars = {'scale': .065, 'parent': eng.base.a2dTopRight,
-                'fg': self.car_props.color_main, 'align': TextNode.A_left,
-                'font': FontMgr().load_font(self.car_props.font)}
+                'fg': self.race_props.menu_args.text_fg, 'align': TextNode.A_left,
+                'font': FontMgr().load_font(self.race_props.font)}
         self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
-        lap_str = '1/' + str(self.car_props.laps)
+        lap_str = '1/' + str(self.race_props.laps)
         self.lap_txt = OnscreenText(text=lap_str, pos=(-.24, -.2), **pars)
         self.time_txt = OnscreenText(pos=(-.24, -.3), **pars)
         self.best_txt = OnscreenText(pos=(-.24, -.4), **pars)
         self.ranking_txt = OnscreenText(pos=(-.24, -.5), **pars)
         self.damages_txt = OnscreenText(pos=(-.24, -.6), **pars)
         self.damages_txt['text'] = '-'
-        self.damages_txt['fg'] = self.car_props.color
+        self.damages_txt['fg'] = self.race_props.menu_args.text_bg
         pars = {'scale': .05, 'parent': pars['parent'],
-                'fg': self.car_props.color, 'align': TextNode.A_right,
-                'font': pars['font']}
+                'fg': self.race_props.menu_args.text_bg,
+                'align': TextNode.A_right, 'font': pars['font']}
         self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
         self.lap_lab = OnscreenText(
             text=_('lap:'), pos=(-.3, -.2), **pars)
@@ -150,7 +150,7 @@ class CarPanel(object):
         self.weapon_img.destroy()
 
     def apply_damage(self, reset=False):
-        col = self.car_props.color
+        col = self.race_props.menu_args.text_bg
         if reset:
             self.damages_txt['text'] = '-'
             self.damages_txt['fg'] = col
@@ -184,10 +184,14 @@ class CarGui(Gui):
 class CarPlayerGui(CarGui):
 
     def __init__(self, mdt, car_props):
-        self.car_props = car_props
+        self.race_props = car_props
         CarGui.__init__(self, mdt)
         self.pars = CarParameters(mdt.phys, mdt.logic)
         self.panel = CarPanel(car_props)
+
+    def upd_ranking(self, ranking):
+        r_i = ranking.index(self.mdt.name) + 1
+        self.panel.ranking_txt.setText(str(r_i) + "'")
 
     def apply_damage(self, reset=False):
         self.panel.apply_damage(reset)

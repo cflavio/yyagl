@@ -7,7 +7,7 @@ class MinePhys(Phys):
 
     cnt = 0
 
-    def __init__(self, mdt, car):
+    def __init__(self, mdt, car, cars):
         Phys.__init__(self, mdt)
         self.parent = car.gfx.nodepath
         self.car = car

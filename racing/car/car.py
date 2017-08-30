@@ -34,6 +34,7 @@ class CarFacade(Facade):
         self._fwd_mth_lazy('get_pos', lambda obj: obj.gfx.nodepath.get_pos)
         self._fwd_mth_lazy('get_hpr', lambda obj: obj.gfx.nodepath.get_hpr)
         self._fwd_mth_lazy('closest_wp', lambda obj: obj.logic.closest_wp)
+        self._fwd_mth_lazy('upd_ranking', lambda obj: obj.gui.upd_ranking)
         self._fwd_mth_lazy(
             'get_linear_velocity',
             lambda obj: obj.phys.vehicle.get_chassis().get_linear_velocity)

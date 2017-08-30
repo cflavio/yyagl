@@ -105,21 +105,14 @@ class CarEvent(Event, ComputerProxy):
                 wpn_cls = wpn_classes[i]
         cars = game.cars + [game.player_car]
         part_path = self.props.particle_path
-        if wpn_cls == Rocket:
-            path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, cars, part_path)
-        elif wpn_cls == RearRocket:
-            path = self.props.rocket_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, cars, part_path)
-        elif wpn_cls == Turbo:
-            path = self.props.turbo_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path)
-        elif wpn_cls == RotateAll:
-            path = self.props.rotate_all_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, cars)
-        elif wpn_cls == Mine:
-            path = self.props.mine_path
-            self.mdt.logic.weapon = wpn_cls(self.mdt, path, part_path)
+        wpn2path = {
+            Rocket: self.props.rocket_path,
+            RearRocket: self.props.rocket_path,
+            Turbo: self.props.turbo_path,
+            RotateAll: self.props.rotate_all_path,
+            Mine: self.props.mine_path}
+        path = wpn2path[wpn_cls]
+        self.mdt.logic.weapon = wpn_cls(self.mdt, path, cars, part_path)
         return wpn_cls
 
     def _on_crash(self):

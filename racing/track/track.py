@@ -1,8 +1,8 @@
 from yyagl.gameobject import GameObject
 from yyagl.engine.log import LogMgr
 from yyagl.facade import Facade
-from .gfx import TrackGfx
-from .phys import TrackPhys
+from .gfx import TrackGfx, TrackGfxShader
+from .phys import TrackPhys, TrackPhysDebug
 from .event import TrackEvent
 from .audio import TrackAudio
 
@@ -26,9 +26,11 @@ class Track(GameObject, TrackFacade):
     def __init__(self, race_props):
         LogMgr().log('init track')
         self.rprops = r_p = race_props
+        gfx_cls = TrackGfxShader if r_p.shaders_dev else TrackGfx
+        phys_cls = TrackPhysDebug if self.rprops.show_waypoints else TrackPhys
         init_lst = [
-            [('phys', TrackPhys, [self, r_p]),
-             ('gfx', TrackGfx, [self, r_p])],
+            [('phys', phys_cls, [self, r_p]),
+             ('gfx', gfx_cls, [self, r_p])],
             [('event', TrackEvent, [self, r_p.shaders_dev, r_p.shadow_src])],
             [('audio', TrackAudio, [self, r_p.music_path])]]
         GameObject.__init__(self, init_lst, self.__on_track_loaded)

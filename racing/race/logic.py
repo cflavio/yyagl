@@ -116,6 +116,8 @@ class RaceLogic(Logic):
         self.track.update(self.player_car.get_pos())
         positions = [(car.name, car.get_pos()) for car in self.all_cars]
         self.mdt.gui.update_minimap(positions)
+        if self.mdt.fsm.getCurrentOrNextState() == 'Play':
+            self.player_car.upd_ranking(self.ranking())
 
     def ranking(self):
         cars = [self.player_car] + self.cars

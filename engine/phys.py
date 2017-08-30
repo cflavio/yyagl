@@ -95,8 +95,7 @@ class PhysMgr(PhysFacade):
         (self.__debug_np.show if is_hidden else self.__debug_np.hide)()
 
     @staticmethod
-    def find_geoms(model, name):
-        # no need to be cached
+    def find_geoms(model, name):  # no need to be cached
         geoms = model.find_all_matches('**/+GeomNode')
         is_nm = lambda geom: geom.get_name().startswith(name)
         named_geoms = [geom for geom in geoms if is_nm(geom)]

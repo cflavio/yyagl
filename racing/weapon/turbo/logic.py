@@ -3,7 +3,7 @@ from yyagl.gameobject import Logic
 
 class TurboLogic(Logic):
 
-    def __init__(self, mdt, car):
+    def __init__(self, mdt, car, cars):
         Logic.__init__(self, mdt)
         self.car = car
         self.stored_max_speed = self.stored_engine_acc_frc = \

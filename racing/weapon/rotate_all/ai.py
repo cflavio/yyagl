@@ -4,7 +4,7 @@ from yyagl.gameobject import Ai
 
 class RotateAllAi(Ai):
 
-    def __init__(self, mdt):
+    def __init__(self, mdt, car):
         Ai.__init__(self, mdt)
         self.collect_time = globalClock.get_frame_time()
         self.fire_time = uniform(3, 15)

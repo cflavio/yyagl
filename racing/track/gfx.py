@@ -22,7 +22,7 @@ class TrackGfx(Gfx):
 
     def async_bld(self):
         self.__set_model()
-        self.__set_light()
+        self._set_light()
 
     def __set_model(self):
         LogMgr().log('loading track model')
@@ -74,11 +74,7 @@ class TrackGfx(Gfx):
         self.__actors[-1].node().set_bounds(OmniBoundingVolume())
         self.__actors[-1].node().set_final(True)
 
-    def __set_light(self):
-        if self.rprops.shaders_dev:  # do a class TrackGfxShader
-            eng.set_amb_lgt((.15, .15, .15, 1))
-            eng.set_dir_lgt((.8, .8, .8, 1), (-25, -65, 0))
-            return
+    def _set_light(self):
         ambient_lgt = AmbientLight('ambient light')
         ambient_lgt.set_color((.7, .7, .55, 1))
         self.ambient_np = render.attach_new_node(ambient_lgt)
@@ -101,17 +97,27 @@ class TrackGfx(Gfx):
         else:
             render.set_shader_off()
 
+    def _destroy_lights(self):
+        render.clear_light(self.ambient_np)
+        render.clear_light(self.spot_lgt)
+        self.ambient_np.remove_node()
+        self.spot_lgt.remove_node()
+
     def destroy(self):
         map(lambda act: act.cleanup(), self.__actors)
         self.model.remove_node()
-        if not self.rprops.shaders_dev:
-            render.clear_light(self.ambient_np)
-            render.clear_light(self.spot_lgt)
-            self.ambient_np.remove_node()
-            self.spot_lgt.remove_node()
-        else:  # class TrackGfxShader
-            eng.clear_lights()
+        self._destroy_lights()
         self.__actors = self.__flat_roots = None
         self.signs.destroy()
         self.empty_models = None
         map(loader.cancelRequest, self.loaders)
+
+
+class TrackGfxShader(TrackGfx):
+
+    def _set_light(self):
+        eng.set_amb_lgt((.15, .15, .15, 1))
+        eng.set_dir_lgt((.8, .8, .8, 1), (-25, -65, 0))
+
+    def _destroy_lights(self):
+        eng.clear_lights()
