@@ -128,8 +128,8 @@ class MenuLogic(Logic):
         page.attach_obs(self.on_back)
         page.attach_obs(self.on_push_page)
 
-    def on_push_page(self, page):
-        self.push_page(page)
+    def on_push_page(self, page_code):
+        pass
 
     def on_back(self):
         page = self.pages.pop()
@@ -154,10 +154,11 @@ class MenuFacade(Facade):
 
 class Menu(GameObject, MenuFacade):
     gui_cls = MenuGui
+    logic_cls = MenuLogic
 
     def __init__(self, menu_args):
         comps = [
-            [('gui', self.gui_cls, [self, menu_args])],
-            [('logic', MenuLogic, [self])]]
+            [('logic', self.logic_cls, [self])],
+            [('gui', self.gui_cls, [self, menu_args])]]
         GameObject.__init__(self, comps)
         MenuFacade.__init__(self)

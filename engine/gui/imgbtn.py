@@ -1,7 +1,6 @@
 from panda3d.core import Shader
 from direct.gui.DirectButton import DirectButton
-from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT
-
+from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL
 
 class ImgBtn(DirectButton):
 
@@ -27,3 +26,11 @@ class ImgBtn(DirectButton):
     def _on_exit(self, pos):
         # pos comes from mouse
         self.set_shader_input('col_offset', 0)
+
+    def enable(self):
+        self['state'] = NORMAL
+        self.setShaderInput('enable', 1)
+
+    def disable(self):
+        self['state'] = DISABLED
+        self.setShaderInput('enable', .2)

@@ -1,15 +1,11 @@
 from random import uniform
-from yyagl.gameobject import Ai
+from yyagl.racing.weapon.weapon.ai import WeaponAi
 
 
-class RotateAllAi(Ai):
+class RotateAllAi(WeaponAi):
 
-    def __init__(self, mdt, car):
-        Ai.__init__(self, mdt)
-        self.collect_time = globalClock.get_frame_time()
-        self.fire_time = uniform(3, 15)
+    fire_times = (3, 15)
 
     def update(self):
-        curr_t = globalClock.get_frame_time()
-        is_after_fire = curr_t - self.collect_time > self.fire_time
+        is_after_fire = eng.curr_time - self.collect_time > self.fire_time
         return not self.mdt.logic.has_fired and is_after_fire

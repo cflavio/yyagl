@@ -53,6 +53,11 @@ class PageGui(Gui):
         if self.curr_wdg.on_enter():
             self.enable()
 
+    @property
+    def buttons(self):
+        is_btn = lambda wdg: wdg.__class__ == DirectButton
+        return [wdg for wdg in self.widgets if is_btn(wdg)]
+
     def __dot(self, wdg, direction, start=None):
         start_pos = start if start else self.curr_wdg.get_pos(aspect2d)
         vec = wdg.get_pos(aspect2d) - start_pos

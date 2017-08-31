@@ -1,4 +1,4 @@
-from direct.gui.DirectGuiGlobals import NORMAL
+from direct.gui.DirectGuiGlobals import NORMAL, DISABLED
 
 
 class Widget(object):
@@ -77,3 +77,11 @@ class Widget(object):
             return True
         if self['command'] and self['state'] == NORMAL:
             self['command'](*self['extraArgs'])
+
+    def enable(self):
+        self['state'] = NORMAL
+        self.set_alpha_scale(1)
+
+    def disable(self):
+        self['state'] = DISABLED
+        self.set_alpha_scale(.25)
