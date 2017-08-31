@@ -14,3 +14,4 @@ class Rocket(PhysWeapon):
     logic_cls = RocketLogic
     event_cls = RocketEvent
     ai_cls = RocketAi
+    deg = 180

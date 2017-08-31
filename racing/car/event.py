@@ -103,7 +103,6 @@ class CarEvent(Event, ComputerProxy):
         for i in range(len(wpn_classes)):
             if sum(probs[:i]) <= sel <= sum(probs[:i + 1]):
                 wpn_cls = wpn_classes[i]
-        cars = game.cars + [game.player_car]
         part_path = self.props.particle_path
         wpn2path = {
             Rocket: self.props.rocket_path,
@@ -112,8 +111,12 @@ class CarEvent(Event, ComputerProxy):
             RotateAll: self.props.rotate_all_path,
             Mine: self.props.mine_path}
         path = wpn2path[wpn_cls]
-        self.mdt.logic.weapon = wpn_cls(self.mdt, path, cars, part_path)
+        self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.sprops.car_names, part_path)
+        self.mdt.logic.weapon.attach_obs(self.on_rotate_all)
         return wpn_cls
+
+    def on_rotate_all(self, sender):
+        self.notify('on_rotate_all', sender)
 
     def _on_crash(self):
         if self.mdt.fsm.getCurrentOrNextState() != 'Results':

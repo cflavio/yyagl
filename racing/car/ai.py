@@ -35,10 +35,10 @@ class DebugLines(object):
 
 class AbsAiLogic(ComputerProxy):
 
-    def __init__(self, car, cars, car_name):
+    def __init__(self, car, cars, player_car):
         self.car = car
         self.cars = cars
-        self.car_name = car_name
+        self.player_car = player_car
         self.sector2samples_gnd = {'left': [''], 'center': [''], 'right': ['']}
         self.sector2obsts = {'left': [], 'center': [], 'right': []}
         bnds = car.phys.coll_mesh.get_tight_bounds()  # (lowerleft, upperright)
@@ -66,7 +66,7 @@ class AbsAiLogic(ComputerProxy):
         lookahead_rot = eng.rot_vec(lookahed_vec, deg)
         lookahead_pos = self.car.pos + lookahead_rot
         if self.car.fsm.getCurrentOrNextState() != 'Results' and \
-                self.car_name == game.player_car.name:
+                self.player_car == self.car.name:
             self.debug_lines_gnd.draw(self.car.pos, lookahead_pos)
         return self.car.phys.gnd_name(lookahead_pos)
 
@@ -135,7 +135,7 @@ class AbsAiLogic(ComputerProxy):
             name = hit.get_name()
         self.sector2obsts[direction] += [ObstInfo(name, dist)]
         if self.car.fsm.getCurrentOrNextState() != 'Results' and \
-                self.car_name == game.player_car.name:
+                self.player_car == self.car.name:
             self.debug_lines_obst.draw(start, lookahead_pos)
 
     def destroy(self):
@@ -196,8 +196,8 @@ class CarAi(Ai):
         self.road_name = race_props.road_name
         self.waypoints = car_props.track_waypoints
         self.cars = race_props.cars
-        self.front_logic = FrontAiLogic(self.mdt, self.cars, car_props.name)
-        self.rear_logic = RearAiLogic(self.mdt, self.cars, car_props.name)
+        self.front_logic = FrontAiLogic(self.mdt, self.cars, race_props.player_car_name)
+        self.rear_logic = RearAiLogic(self.mdt, self.cars, race_props.player_car_name)
         self.last_positions = []
         # last 12 positions (a position a second) for respawning if the car
         # can't move

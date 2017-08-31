@@ -51,7 +51,7 @@ class Results(Subject):
                          **pars)]
         self.__buttons = []
 
-        min_time = min(game.player_car.logic.lap_times or [0])
+        min_time = min(lap_times or [0])
         facebook_url = self.rprops.share_urls[0]
         twitter_url = self.rprops.share_urls[1]
         twitter_url = twitter_url.format(time=round(min_time, 2), track=track)

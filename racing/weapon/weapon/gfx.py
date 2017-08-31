@@ -4,11 +4,10 @@ from yyagl.gameobject import Gfx
 
 class WeaponGfx(Gfx):
 
-    def __init__(self, mdt, parent, fpath, deg=0):
+    def __init__(self, mdt, parent, fpath):
         self.gfx_np = None
         self.parent = parent
         self.fpath = fpath
-        self.deg = deg
         Gfx.__init__(self, mdt)
 
     def sync_bld(self):
@@ -16,7 +15,7 @@ class WeaponGfx(Gfx):
         self.gfx_np.loop('anim')
         self.gfx_np.flatten_light()
         self.gfx_np.reparent_to(self.parent)
-        self.gfx_np.set_h(self.deg)
+        self.gfx_np.set_h(self.mdt.deg)
         self.gfx_np.set_scale(1.5)
         self.gfx_np.set_pos(0, 0, 1.5)
 

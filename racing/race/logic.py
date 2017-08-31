@@ -26,7 +26,7 @@ class CarLoaderStrategy(object):
         no_p = car not in player_car_names
         srv_or_sng = Server().is_active or not Client().is_active
         car_cls = AiCar if no_p and srv_or_sng else car_cls
-        game.cars += [CarLoaderStrategy.actual_load(
+        race.logic.cars += [CarLoaderStrategy.actual_load(
             cars, car, r_p, track, race, car_cls, player_car_names, s_p)]
 
     @staticmethod
@@ -57,7 +57,7 @@ class CarPlayerLoaderStrategy(object):
                 car_cls = CarPlayerServer
             if Client().is_active:
                 car_cls = CarPlayerClient
-        game.player_car = CarLoaderStrategy.actual_load(
+        race.logic.player_car = CarLoaderStrategy.actual_load(
             cars, car_name, r_p, track, race, car_cls, player_car_names, s_p)
 
 
@@ -77,19 +77,18 @@ class RaceLogic(Logic):
         PhysMgr().init()
         player_car_names = player_car_names[1::2]
         game.player_car_name = car_name
-        game.track = self.track = Track(r_p)  # remove game.track
-        game.track.attach_obs(self.on_track_loaded)
+        self.track = Track(r_p)
+        self.track.attach_obs(self.on_track_loaded)
         self.load_car = lambda: CarPlayerLoaderStrategy.load(
             r_p, car_name, self.track, self.mdt, player_car_names, self.sprops)
         self.mdt.track = self.track  # facade this
 
     def on_track_loaded(self):
         self.load_car()
-        game.cars = self.cars = []  # remove game's reference
-        self.player_car = game.player_car  # remove
+        self.cars = []
 
     def enter_play(self):
-        game.track.detach_obs(self.on_track_loaded)
+        self.track.detach_obs(self.on_track_loaded)
         self.track.reparent_to(eng.gfx.root)
         self.player_car.reparent()
         map(lambda car: car.reparent(), self.cars)
@@ -102,7 +101,12 @@ class RaceLogic(Logic):
         self.track.play_music()
         map(lambda car: car.reset_car(), self.all_cars)
         map(lambda car: car.start(), self.all_cars)
+        map(lambda car: car.event.attach(self.on_rotate_all), self.all_cars)
         self.mdt.gui.start()
+
+    def on_rotate_all(self, sender):
+        cars = [car for car in self.all_cars if car.name != sender.name]
+        map(lambda car: car.phys.rotate(), cars)
 
     @property
     def all_cars(self):
@@ -147,6 +151,7 @@ class RaceLogic(Logic):
         self.track.stop_music()
         self.player_car.detach_obs(self.mdt.event.on_wrong_way)
         self.track.destroy()
+        map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
         map(lambda car: car.destroy(), self.all_cars)
         PhysMgr().stop()
         eng.clean_gfx()

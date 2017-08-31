@@ -603,6 +603,7 @@ class CarLogic(Logic, ComputerProxy):
         self.weapon.fire()
 
     def on_weapon_destroyed(self):
+        self.weapon.detach_obs(self.mdt.event.on_rotate_all)
         self.weapon.detach_obs(self.on_weapon_destroyed)
         self.weapon = None
 

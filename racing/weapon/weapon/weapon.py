@@ -22,6 +22,7 @@ class Weapon(GameObject, WeaponFacade):
 
     gfx_cls = WeaponGfx
     audio_cls = WeaponAudio
+    deg = 0
 
     def __init__(self, car, path, cars, part_path):
         init_lst = [

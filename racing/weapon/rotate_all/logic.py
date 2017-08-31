@@ -11,8 +11,7 @@ class RotateAllLogic(Logic):
 
     def fire(self):
         self.mdt.audio.sfx.play()
-        self.cars = [car for car in self.cars if car.name != self.car.name]
-        map(lambda car: car.phys.rotate(), self.cars)
+        self.notify('on_rotate_all', self.car)
         self.has_fired = True
         self.mdt.destroy()
 
