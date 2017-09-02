@@ -1,21 +1,17 @@
-from yyagl.gameobject import Logic
+from yyagl.racing.weapon.weapon.logic import WeaponLogic
 
 
-class RearRocketLogic(Logic):
+class RearRocketLogic(WeaponLogic):
 
     def __init__(self, mdt, car, cars):
-        Logic.__init__(self, mdt)
+        WeaponLogic.__init__(self, mdt, car, cars)
         self.tsk = None
-        self.has_fired = False
 
     def fire(self):
+        WeaponLogic.fire(self)
         self.mdt.phys.fire()
-        self.mdt.audio.sfx.play()
         self.tsk = eng.do_later(10, self.mdt.destroy)
-        self.has_fired = True
 
     def destroy(self):
-        if self.tsk:
-            eng.remove_do_later(self.tsk)
-        self.notify('on_weapon_destroyed')
-        Logic.destroy(self)
+        if self.tsk: eng.remove_do_later(self.tsk)
+        WeaponLogic.destroy(self)
