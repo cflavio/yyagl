@@ -131,7 +131,7 @@ class MenuLogic(Logic):
     def on_push_page(self, page_code):
         pass
 
-    def on_back(self):
+    def on_back(self, page_code, args=[]):
         page = self.pages.pop()
         page.detach_obs(self.on_back)
         page.destroy()

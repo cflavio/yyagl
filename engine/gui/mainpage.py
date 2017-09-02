@@ -22,7 +22,7 @@ class MainPageGui(PageGui):
             ('pinterest', 'http://www.pinterest.com/ya2tech'),
             ('tumblr', 'http://ya2tech.tumblr.com'),
             ('feed', 'http://www.ya2.it/feed-following')]
-        menu_args = self.menu.gui.menu_args
+        menu_args = self.props.menu_args
         self.widgets += [
             ImgBtn(
                 parent=eng.base.a2dBottomRight,
@@ -40,7 +40,7 @@ class MainPageGui(PageGui):
             text=_('version: ') + eng.version,
             parent=eng.base.a2dBottomLeft, pos=(.02, .02), scale=.04,
             fg=(.8, .8, .8, 1), align=TextNode.ALeft,
-            font=self.menu.gui.menu_args.font)]
+            font=self.props.menu_args.font)]
 
 
 class MainPage(Page, PageFacade):

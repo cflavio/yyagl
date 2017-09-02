@@ -147,14 +147,14 @@ class PageGui(Gui):
 
     def __bld_back_btn(self):
         self.widgets += [DirectButton(
-            text='', pos=(0, 1, -.8), command=self.__on_back,
+            text='', pos=(0, 1, -.8), command=self._on_back,
             **self.menu_args.btn_args)]
         PageGui.transl_text(self.widgets[-1], 'Back', _('Back'))
         self.widgets[-1]['text'] = self.widgets[-1].transl_text
 
-    def __on_back(self):
+    def _on_back(self):
         self.mdt.event.on_back()
-        self.notify('on_back')
+        self.notify('on_back', self.__class__.__name__)
 
     def show(self):
         map(lambda wdg: wdg.show(), self.widgets)
@@ -188,14 +188,13 @@ class Page(GameObject, PageFacade):
     gui_cls = PageGui
     event_cls = PageEvent
 
-    def __init__(self, menu_args, menu):
+    def __init__(self, menu_args):
         # we should not pass the menu to the page. now we do this since menu's
         # clients attach to the menu for observing its events, but them are
         # fired by pages. maybe the menu should attach clients' methods to the
         # pages when they are pushed.
         PageFacade.__init__(self)
         self.menu_args = menu_args
-        self.menu = menu
         GameObject.__init__(self, self.init_lst)
 
     @property
