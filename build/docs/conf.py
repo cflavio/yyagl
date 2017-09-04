@@ -18,8 +18,9 @@ pygments_style = 'sphinx'
 html_theme = '<htmltheme>'
 html_theme_path = ['.']
 html_theme_options = {'rightsidebar': 'true'}
-html_sidebars = {'*': ['localtoc.html', 'relations.html', 'sourcelink.html',
-                       'searchbox.html', 'ads.html']}
+sidebars_files = ['localtoc', 'relations', 'sourcelink', 'searchbox', 'ads']
+sidebars_files = [name + '.html' for name in sidebars_files]
+html_sidebars = {'*': sidebars_files}
 html_last_updated_fmt = '%b %d, %Y'
 html_show_sphinx = False
 html_show_copyright = False

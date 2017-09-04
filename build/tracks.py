@@ -2,15 +2,21 @@ from os import system, walk
 from sys import executable
 
 
-def bld_tracks(target, source, env):
+def bld_models(target, source, env):
     for root, dnames, fnames in walk(env['MODELS_DIR_PATH']):
-        if not root.startswith('assets/models/tracks'):
-            for fname in fnames:
-                _fname = root + '/' + fname
-                if _fname.endswith('.egg'):
-                    cmd_args = (_fname, _fname[:-3] + 'bam')
-                    system('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args)
+        if not root.startswith(env['TRACKS_DIR_PATH']):
+            for fname in [fname for fname in fnames if fname.endswith('.egg')]:
+                __process_model(root, fname)
     for root, dnames, fnames in walk('assets/models/tracks'):
         for dname in dnames:
-            if root == env['TRACKS_DIR_PATH']:
-                system(executable + ' yyagl/build/process_track.py ' + dname)
+            if root == env['TRACKS_DIR_PATH']: __process_track(dname)
+
+
+def __process_model(root, fname):
+    _fname = root + '/' + fname
+    cmd_args = _fname, _fname[:-3] + 'bam'
+    system('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args)
+
+
+def __process_track(dname):
+    system(executable + ' yyagl/build/process_track.py ' + dname)

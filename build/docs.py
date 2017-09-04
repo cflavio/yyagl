@@ -9,17 +9,16 @@ def bld_docs(target, source, env):
     system('sphinx-apidoc -o %sdocs_apidoc .' % bld_dpath)
     system('sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst' % bld_dpath)
     system('sphinx-build -b html %sdocs_apidoc %sdocs' % ((bld_dpath,) * 2))
-    bld_cmd = 'tar -C {path} -czf {fpath} ./docs'
+    cmd = 'tar -C {path} -czf {fpath} ./docs'
     fpath = docs_fpath.format(dst_dir=bld_dpath, appname=env['APPNAME'],
                               version=branch)
-    system(bld_cmd.format(path=bld_dpath, fpath=fpath))
+    system(cmd.format(path=bld_dpath, fpath=fpath))
     __clean()
 
 
 def __prepare(env):
     curr_dir = dirname(realpath(__file__)) + '/'
     copytree(curr_dir + 'docs', bld_dpath + 'docs_apidoc')
-
     args = ['appname', 'DevName', 'devsite', 'prjsite']
     args = ['-e "s/<%s>/{%s}/"' % ((arg,) * 2) for arg in args]
     cmd_tmpl = 'sed -i.bak %s {dst_path}docs_apidoc/index.rst' % ' '.join(args)

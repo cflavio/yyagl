@@ -27,7 +27,7 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
     tgts = ['win32', 'macosx_10_6_x86_64', 'manylinux1_x86',
             'manylinux1_x86_64']
     dtgt = [win, osx, linux_32, linux_64]
-    deploy_platforms = [tgts[i] for i in range(len(tgts)) if dtgt[i]]
+    deploy_platforms = [pl_str for (pl_str, is_pl) in zip(tgts, dtgt) if is_pl]
     opt_dct = {
         'build_apps': {
             'copy_paths': ['.'],

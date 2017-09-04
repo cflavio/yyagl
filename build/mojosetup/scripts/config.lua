@@ -3,9 +3,7 @@ local function file_exists(name)
     if f~=nil then
         io.close(f)
         return true
-    else
-        return false
-    end
+    else return false end
 end
 
 
@@ -27,11 +25,8 @@ Setup.Package {
     support_uninstall = true,
     preinstall = preinst,
     delete_error_is_fatal = false,
-    recommended_destinations = {
-        MojoSetup.info.homedir,
-        "/opt/games",
-        "/usr/local/games"
-    },
+    recommended_destinations = {MojoSetup.info.homedir, "/opt/games",
+                                "/usr/local/games"},
     Setup.DesktopMenuItem {
         name = "<AppName>",
         genericname = "Videogame",
@@ -45,9 +40,6 @@ Setup.Package {
         required = true,
         bytes = <size>,
         description = "<AppName>",
-        Setup.File {
-            allowoverwrite = true,
-            wildcards = {"*"}
-        }
+        Setup.File {allowoverwrite = true, wildcards = {"*"}}
     }
 }

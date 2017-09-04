@@ -5,18 +5,21 @@ from .build import files
 
 
 def bld_strings(target, source, env):
-    for lng in env['LANGUAGES']:
-        lng_dir = env['LNG'] + lng + '/LC_MESSAGES/'
-        cmd = 'msgfmt -o {lng_dir}{appname}.mo {lng_dir}{appname}.po'
-        system(cmd.format(lng_dir=lng_dir, appname=env['APPNAME']))
+    map(lambda lng: __bld_strings_lng(lng, env), env['LANGUAGES'])
+
+
+def __bld_strings_lng(lng, env):
+    lng_dir = env['LNG'] + lng + '/LC_MESSAGES/'
+    cmd = 'msgfmt -o {lng_dir}{appname}.mo {lng_dir}{appname}.po'
+    system(cmd.format(lng_dir=lng_dir, appname=env['APPNAME']))
 
 
 def bld_tmpl_merge(target, source, env):
     src_files = ' '.join(files(['py'], ['feedparser', 'venv']))
     cmd_tmpl = 'xgettext -d {appname} -L python -o {appname}.pot '
     system(cmd_tmpl.format(appname=env['APPNAME']) + src_files)
-    for lng in env['LANGUAGES']:
-        __bld_tmpl_merge(env['LNG'], lng, env['APPNAME'])
+    lng_dir, appname, langs = env['LNG'], env['APPNAME'], env['LANGUAGES']
+    map(lambda lng: __bld_tmpl_merge(lng_dir, lng, appname), langs)
 
 
 def __bld_tmpl_merge(lng_dir, lng, appname):
@@ -31,14 +34,17 @@ def __prepare(lng_base_dir, lng, appname):
     dst = lng_base_dir + lng + '/LC_MESSAGES/%s.pot' % appname
     move(appname + '.pot', dst)
     lng_dir = lng_base_dir + lng + '/LC_MESSAGES/'
-    for line in ['CHARSET/UTF-8', 'ENCODING/8bit']:
-        cmd_tmpl = "sed 's/{line}/' {lng_dir}{appname}.pot > " + \
-            "{lng_dir}{appname}tmp.po"
-        system(cmd_tmpl.format(line=line, lng_dir=lng_dir, appname=appname))
-        move(lng_dir + appname + 'tmp.po', lng_dir + appname + '.pot')
+    map(lambda line: __fix_line(line, lng_dir, appname), ['CHARSET/UTF-8', 'ENCODING/8bit'])
     if not exists(lng_dir + appname + '.po'):
         copy(lng_dir + appname + '.pot', lng_dir + appname + '.po')
     return lng_dir
+
+
+def __fix_line(line, lng_dir, appname):
+    cmd_tmpl = "sed 's/{line}/' {lng_dir}{appname}.pot > " + \
+        "{lng_dir}{appname}tmp.po"
+    system(cmd_tmpl.format(line=line, lng_dir=lng_dir, appname=appname))
+    move(lng_dir + appname + 'tmp.po', lng_dir + appname + '.pot')
 
 
 def __merge(lng_dir, appname):

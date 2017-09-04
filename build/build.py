@@ -26,49 +26,52 @@ def __version():
         return fver.read().strip() + '-' + exec_cmd('git rev-parse HEAD')[:7]
 
 
-def img_extensions(files_):
+def img_tgt_names(files_):  # list of images' target filenames
     ext = lambda fname: 'png' if fname.endswith('_png.psd') else 'dds'
     return [fname[:fname.rfind('.') + 1] + ext(fname) for fname in files_]
 
 
-def track_files():
+def tracks_tgt_fnames():
     tr_root = 'assets/models/tracks/'
     for _, dnames, _ in walk(tr_root):
         return [tr_root + dname + '/track_all.bam' for dname in dnames]
     return []
+    #return [tr_root + dname + '/track_all.bam' for _, dnames, _ in walk(tr_root) for dname in dnames]
+    # this creates an empty folder assets/models/tracks/tex
 
 
-def set_path(_path):
-    global path
-    path = _path + ('/' if not _path.endswith('/') else '')
-    return path
+def set_path(_bld_path):
+    global bld_path
+    bld_path = _bld_path + ('/' if not _bld_path.endswith('/') else '')
+    return bld_path
 
 
 def files(_extensions, excl_dirs=[]):
-    def files_ext(fnames):
-        return [fname for fname in fnames
-                if any(fname.endswith('.' + ext) for ext in _extensions)]
     return [join(root, fname)
             for root, _, fnames in walk('.')
-            for fname in files_ext(fnames)
-            if not excl_dirs or not
-            any(e_d in root.split('/') for e_d in excl_dirs)]
+            for fname in __files_ext(fnames, _extensions)
+            if not any(e_d in root.split('/') for e_d in excl_dirs)]
+
+
+def __files_ext(fnames, _extensions):
+    return [fname for fname in fnames
+            if any(fname.endswith('.' + ext) for ext in _extensions)]
 
 
 def size(start_dir='.'):
-    return sum(
-        getsize(join(root, fname))
-        for root, _, fnames in walk(start_dir) for fname in fnames)
+    sizes = [getsize(join(root, fname))
+             for root, _, fnames in walk(start_dir) for fname in fnames]
+    return sum(sizes)
 
 
 class TempFile(object):
 
-    def __init__(self, fname, text):
-        self.fname, self.text = fname, text
+    def __init__(self, fname, content):
+        self.fname, self.content = fname, content
 
     def __enter__(self):
         with open(self.fname, 'w') as outfile:
-            outfile.write(self.text)
+            outfile.write(self.content)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         remove(self.fname)

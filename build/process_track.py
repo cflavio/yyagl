@@ -17,23 +17,19 @@ class Props(object):
         self.model_name = 'track'
         self.empty_name = 'Empty'
         self.anim_name = 'Anim'
-        self.track_name = sys.argv[1]
 
 
 class Conf(object):
 
     def __init__(self):
         self.model_path = 'assets/models/tracks/'
-        self.antialiasing = False
-        self.menu_joypad = False
-        self.shaders_dev = False
+        self.antialiasing = self.menu_joypad = self.shaders_dev = \
+            self.python_profiling = self.python_profiling_percall = False
         self.gamma = 1.0
         self.lang = 'en'
         self.lang_domain = 'yorg'
         self.lang_path = 'assets/locale'
         self.volume = 1
-        self.python_profiling = False
-        self.python_profiling_percall = False
 
 
 eng = Engine(Conf())
@@ -44,26 +40,26 @@ class TrackProcesser(object):
     def __init__(self):
         self.__actors = []
         self.__flat_roots = {}
-        self.models_to_load = self.empty_models = self.in_loading = None
+        self.models_to_load = self.loading_models = None
         self.props = Props()
         fpath = self.props.track_dir + '/' + self.props.model_name
-        self.preprocess()
+        self.__egg2bams()
         self.model = eng.load_model(fpath)
         self.__set_submodels()
 
-    def preprocess(self):
+    def __egg2bams(self):
         troot = 'assets/models/tracks/'
         for root, _, filenames in walk(troot + self.props.track_dir):
             for filename in filenames:
                 fname = root + '/' + filename
                 if fname.endswith('.egg'):
-                    cmd_args = (fname, fname[:-3] + 'bam')
+                    cmd_args = fname, fname[:-3] + 'bam'
                     system('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args)
 
     def __set_submodels(self):
         print 'loaded track model'
         for submodel in self.model.getChildren():
-            if not submodel.getName().startswith(self.props.empty_name):
+            if not submodel.get_name().startswith(self.props.empty_name):
                 submodel.flatten_light()
         self.model.hide(BitMask32.bit(0))
         self.__load_empties()
@@ -71,16 +67,13 @@ class TrackProcesser(object):
     def __load_empties(self):
         print 'loading track submodels'
         empty_name = '**/%s*' % self.props.empty_name
-        self.empty_models = self.model.find_all_matches(empty_name)
-
-        def load_models():
-            self.__process_models(list(self.empty_models))
-        e_m = self.empty_models
+        e_m = self.model.find_all_matches(empty_name)
+        load_models = lambda: self.__process_models(list(e_m))
         names = [model.get_name().split('.')[0][5:] for model in e_m]
         self.__preload_models(list(set(list(names))), load_models)
 
     def __preload_models(self, models, callback, model='', time=0):
-        curr_t = globalClock.getFrameTime()
+        curr_t = eng.curr_time
         if model:
             print 'loaded model: %s (%s seconds)' % (model, curr_t - time)
         if not models:
@@ -91,60 +84,53 @@ class TrackProcesser(object):
         if model.endswith(self.props.anim_name):
             anim_path = '%s-%s' % (fpath, self.props.anim_name)
             self.__actors += [Actor(fpath, {'anim': anim_path})]
-            self.__preload_models(models, callback, model, curr_t)
         else:
-            fmod = loader.loadModel(fpath)
-            self.__preload_models(models, callback, fmod, curr_t)
+            model = loader.loadModel(fpath)
+        self.__preload_models(models, callback, model, curr_t)
 
     def __process_models(self, models):
-        empty_name = self.props.empty_name
         for model in models:
-            model_name = model.get_name().split('.')[0][len(empty_name):]
+            model_name = self.__get_model_name(model)
             if not model_name.endswith(self.props.anim_name):
                 self.__process_static(model)
         self.flattening()
 
+    def __get_model_name(self, model):
+        return model.get_name().split('.')[0][len(self.props.empty_name):]
+
     def __process_static(self, model):
-        empty_name = self.props.empty_name
-        model_name = model.get_name().split('.')[0][len(empty_name):]
+        model_name = self.__get_model_name(model)
         if model_name not in self.__flat_roots:
             flat_root = self.model.attach_new_node(model_name)
             self.__flat_roots[model_name] = flat_root
-        model_subname = model.get_name().split('.')[0][len(empty_name):]
-        fpath = '%s/%s' % (self.props.track_dir, model_subname)
+        fpath = '%s/%s' % (self.props.track_dir, model_name)
         loader.loadModel(fpath).reparent_to(model)
         model.reparent_to(self.__flat_roots[model_name])
 
     def flattening(self):
-        print 'track flattening'
         flat_cores = 1  # max(1, multiprocessing.cpu_count() / 2)
-        print 'flattening using %s cores' % flat_cores
-        self.in_loading = []
+        print 'track flattening using %s cores' % flat_cores
+        self.loading_models = []
         self.models_to_load = self.__flat_roots.values()
         [self.__flat_models() for _ in range(flat_cores)]
 
     def __flat_models(self, model='', time=0, nodes=0):
         if model:
             msg_tmpl = 'flattened model: %s (%s seconds, %s nodes)'
-            self.in_loading.remove(model)
-            d_t = round(globalClock.getFrameTime() - time, 2)
+            self.loading_models.remove(model)
+            d_t = round(eng.curr_time - time, 2)
             print msg_tmpl % (model, d_t, nodes)
         if self.models_to_load:
-            mod = self.models_to_load.pop()
-            self.__process_flat_models(mod)
-        elif not self.in_loading:
+            self.__process_flat_models(self.models_to_load.pop())
+        elif not self.loading_models:
             self.end_flattening()
 
-    def __process_flat_models(self, mod):
-        curr_t = globalClock.getFrameTime()
-        node = mod
-        node.clear_model_nodes()
-
-        def process_flat(model, time, nodes):
-            self.__flat_models(model, time, nodes)
-        self.in_loading += [node.get_name()]
-        node.flattenStrong()
-        process_flat(node.get_name(), curr_t, len(node.get_children()))
+    def __process_flat_models(self, model):
+        model.clear_model_nodes()
+        self.loading_models += [model.get_name()]
+        model.flattenStrong()
+        curr_t = eng.curr_time
+        self.__flat_models(model.get_name(), curr_t, len(model.get_children()))
 
     def end_flattening(self):
         print 'writing track_all.bam'

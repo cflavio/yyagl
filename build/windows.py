@@ -6,9 +6,9 @@ from .build import ver, bld_dpath, branch, bld_cmd, InsideDir, TempFile
 from .deployng import bld_ng
 
 
-nsi_src = '''Name {fullName}
-OutFile {outFile}
-InstallDir "$PROGRAMFILES\\{fullName}"
+nsi_src = '''Name {full_name}
+OutFile {out_file}
+InstallDir "$PROGRAMFILES\\{full_name}"
 InstallDirRegKey HKCU "Yorg" ""
 SetCompress auto
 SetCompressor lzma
@@ -17,7 +17,7 @@ ShowUninstDetails nevershow
 InstType "Typical"
 RequestExecutionLevel admin
 Function launch
-  ExecShell "open" "$INSTDIR\\{shortName}.exe"
+  ExecShell "open" "$INSTDIR\\{short_name}.exe"
 FunctionEnd
 !include "MUI2.nsh"
 !define MUI_HEADERIMAGE
@@ -26,8 +26,8 @@ FunctionEnd
 !define MUI_FINISHPAGE_RUN_FUNCTION launch
 !define MUI_FINISHPAGE_RUN_TEXT "Run Yorg"
 Function finishpageaction
-CreateShortcut "$DESKTOP\\{shortName}.lnk" "$INSTDIR\\{shortName}.exe"\
-  "" "$INSTDIR\\{iconFile}"
+CreateShortcut "$DESKTOP\\{short_name}.lnk" "$INSTDIR\\{short_name}.exe"\
+  "" "$INSTDIR\\{icon_file}"
 FunctionEnd
 !define MUI_FINISHPAGE_SHOWREADME ""
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
@@ -48,26 +48,26 @@ Var StartMenuFolder
 !insertmacro MUI_UNPAGE_FINISH
 !insertmacro MUI_LANGUAGE "English"
 Section "" SecCore
-{installFiles}
+{install_files}
 WriteRegStr HKCU "Yorg" "" $INSTDIR
 WriteUninstaller "$INSTDIR\\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\\$StartMenuFolder"
-    CreateShortCut "$SMPROGRAMS\\$StartMenuFolder\\{fullName}.lnk"\
-      "$INSTDIR\\{shortName}.exe" "" "$INSTDIR\\{iconFile}"
+    CreateShortCut "$SMPROGRAMS\\$StartMenuFolder\\{full_name}.lnk"\
+      "$INSTDIR\\{short_name}.exe" "" "$INSTDIR\\{icon_file}"
     CreateShortCut "$SMPROGRAMS\\$StartMenuFolder\\Uninstall.lnk" \
       "$INSTDIR\\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 Section Uninstall
-  Delete "$INSTDIR\\{shortName}.exe"
-  {uninstallFiles}
+  Delete "$INSTDIR\\{short_name}.exe"
+  {uninstall_files}
   Delete "$INSTDIR\\Uninstall.exe"
   RMDir /r "$INSTDIR"
   !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
-  Delete "$DESKTOP\\{shortName}.lnk"
+  Delete "$DESKTOP\\{short_name}.lnk"
   Delete "$SMPROGRAMS\\$StartMenuFolder\\Uninstall.lnk"
-  Delete "$SMPROGRAMS\\$StartMenuFolder\\{fullName}.lnk"
+  Delete "$SMPROGRAMS\\$StartMenuFolder\\{full_name}.lnk"
   RMDir "$SMPROGRAMS\\$StartMenuFolder"
   DeleteRegKey /ifempty HKCU "Yorg"
 SectionEnd'''
@@ -86,8 +86,8 @@ def bld_windows(target, source, env):
         nointernet=internet_switch)
     system(cmd)
     with InsideDir('%swin_i386' % bld_dpath):
-        fname = '{AppName} {version}.exe'.format(
-            AppName=env['APPNAME'].capitalize(), version=ver)
+        fname = '{app_name} {version}.exe'.format(
+            app_name=env['APPNAME'].capitalize(), version=ver)
         system('7z x -owinInstaller %s' % fname.replace(' ', '\\ '))
         remove(fname)
         with InsideDir('winInstaller'):
@@ -128,14 +128,16 @@ def bld_windows(target, source, env):
                 'Delete "$INSTDIR\\%s\\%s"' % (root[2:].replace('/', '\\'),
                                                fnm)
                 for root, dirs, files in walk('.') for fnm in files)
+            out_file_tmpl = '{name}-{version}{int_str}-windows.exe'
+            out_file = out_file_tmpl.format(name=env['APPNAME'],
+                                            version=branch, int_str=int_str)
             nsi_src_inst = nsi_src.format(
-                fullName=env['APPNAME'].capitalize(),
-                outFile='{name}-{version}{int_str}-windows.exe'.format(
-                    name=env['APPNAME'], version=branch, int_str=int_str),
-                shortName=env['APPNAME'],
-                iconFile=env['APPNAME'] + '.ico',
-                installFiles=install_files,
-                uninstallFiles=uninstall_files)
+                full_name=env['APPNAME'].capitalize(),
+                out_file=out_file,
+                short_name=env['APPNAME'],
+                icon_file=env['APPNAME'] + '.ico',
+                install_files=install_files,
+                uninstall_files=uninstall_files)
             with TempFile('installer.nsi', nsi_src_inst):
                 system('makensis installer.nsi')
     src = '{dst_dir}win_i386/winInstaller/{appname}-{version}{int_str}' + \

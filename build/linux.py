@@ -21,13 +21,17 @@ def bld_linux(target, source, env):
     system(cmd)
     start_dir = abspath('.') + '/'
     with InsideDir(bld_dpath + 'linux_' + env['PLATFORM']):
-        __prepare(start_dir, env['PLATFORM'])
-        __bld(env['APPNAME'], start_dir, env['PLATFORM'], ico_fpath)
-        if nointernet:
-            __bld_full_pkg(env['APPNAME'], env['PLATFORM'], ico_fpath,
-                           p3d_fpath, nointernet)
-        __bld_pckgs(env['APPNAME'], env['PLATFORM'], int_str)
+        __do_bld(start_dir, env['APPNAME'], env['PLATFORM'], ico_fpath,
+                 nointernet, p3d_fpath, int_str)
     rmtree(bld_dpath + 'linux_' + env['PLATFORM'])
+
+
+def __do_bld(start_dir, appname, platform, ico_fpath, nointernet, p3d_fpath, int_str):
+    __prepare(start_dir, platform)
+    __bld(appname, start_dir, platform, ico_fpath)
+    if nointernet:
+        __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet)
+    __bld_pckgs(appname, platform, int_str)
 
 
 def __prepare(start_path, platform):
@@ -38,8 +42,7 @@ def __prepare(start_path, platform):
     copytree(curr_path + '../licenses', 'img/data/licenses')
     copy(start_path + 'license.txt', 'img/data/license.txt')
     copy(curr_path + 'mojosetup/mojosetup_' + platform, '.')
-    if not exists(curr_path + 'mojosetup/guis'):
-        return
+    if not exists(curr_path + 'mojosetup/guis'): return
     makedirs('img/guis')
     libfpath = curr_path + 'mojosetup/guis/%s/libmojosetupgui_gtkplus2.so'
     dst_dpath = 'img/guis/libmojosetupgui_gtkplus2.so'
@@ -48,8 +51,7 @@ def __prepare(start_path, platform):
 
 def __bld(appname, start_path, platform, ico_fpath):
     arch = {'i386': 'i686', 'amd64': 'x86_64'}
-    tmpl = 'tar -zxvf %s-%s-1-%s.pkg.tar.gz'
-    system(tmpl % (appname, ver, arch[platform]))
+    system('tar -zxvf %s-%s-1-%s.pkg.tar.gz' % (appname, ver, arch[platform]))
     remove('.PKGINFO')
     move('usr/bin/' + appname, 'img/data/' + appname)
     copy(start_path + ico_fpath % '48', 'img/data/icon.png')
@@ -97,8 +99,7 @@ def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
 
 
 def __bld_pckgs(appname, platform, int_str):
-    with InsideDir('img'):
-        system('zip -9r ../pdata.zip *')
+    with InsideDir('img'): system('zip -9r ../pdata.zip *')
     system('cat pdata.zip >> ./mojosetup_' + platform)
     fdst = '%s-%s%s-linux_%s' % (appname, branch, int_str, platform)
     move('mojosetup_' + platform, fdst)
