@@ -5,7 +5,7 @@ class BonusEvent(Event):
 
     def __init__(self, mdt):
         Event.__init__(self, mdt)
-        eng.attach_obs(self.on_collision)
+        self.eng.attach_obs(self.on_collision)
 
     def on_collision(self, obj, tgt_obj):
         # define "filtered" notification, so a receiver can define a filter for
@@ -16,5 +16,5 @@ class BonusEvent(Event):
             self.mdt.destroy()
 
     def destroy(self):
-        eng.detach_obs(self.on_collision)
+        self.eng.detach_obs(self.on_collision)
         Event.destroy(self)

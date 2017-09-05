@@ -19,10 +19,10 @@ class CarGfx(Gfx, CarGfxFacade):
         self.cprops = car_props
         self.rprops = race_props
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
-        self.nodepath = eng.attach_node(BulletRigidBodyNode('Vehicle'))
+        self.nodepath = self.eng.attach_node(BulletRigidBodyNode('Vehicle'))
         self.skidmark_mgr = SkidmarkMgr(mdt)
         part_path = self.rprops.particle_path
-        eng.particle(part_path, render, render, (0, 1.2, .75), .8)
+        self.eng.particle(part_path, render, render, (0, 1.2, .75), .8)
         self.crash_cnt = 0
         self.last_crash_t = 0
         Gfx.__init__(self, mdt)
@@ -39,7 +39,7 @@ class CarGfx(Gfx, CarGfxFacade):
         self.chassis_np.reparent_to(self.nodepath)
         chas = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
         map(lambda cha: cha.set_depth_offset(-2), chas)
-        map(lambda whl: whl.reparent_to(eng.gfx.root), self.wheels.values())
+        map(lambda whl: whl.reparent_to(self.eng.gfx.root), self.wheels.values())
         # try RigidBodyCombiner for the wheels
         for cha in chas:
             cha.prepare_scene(base.win.get_gsg())
@@ -57,7 +57,7 @@ class CarGfx(Gfx, CarGfxFacade):
 
     def load_wheels(self, chassis_model):
         self.chassis_np = chassis_model
-        load = eng.base.loader.loadModel
+        load = self.eng.base.loader.loadModel
         fpath = self.rprops.wheel_gfx_names.front % self.cprops.name
         rpath = self.rprops.wheel_gfx_names.rear % self.cprops.name
         m_exists = lambda path: exists(path + '.egg') or exists(path + '.bam')
@@ -73,7 +73,7 @@ class CarGfx(Gfx, CarGfxFacade):
     def crash_sfx(self):
         self.crash_cnt += 1
         if self.mdt.phys.prev_speed_ratio < .8 or \
-                eng.curr_time - self.last_crash_t < 5.0 or self.crash_cnt < 2:
+                self.eng.curr_time - self.last_crash_t < 5.0 or self.crash_cnt < 2:
             return False
         # part_path = self.rprops.particle_path
         # node = self.mdt.gfx.nodepath
@@ -99,7 +99,7 @@ class CarGfx(Gfx, CarGfxFacade):
             self.mdt.logic.weapon.reparent(next_chassis)
         self.mdt.phys.apply_damage(reset)
         self.mdt.gui.apply_damage(reset)
-        self.last_crash_t = eng.curr_time
+        self.last_crash_t = self.eng.curr_time
         self.crash_cnt = 0
 
     def destroy(self):

@@ -5,7 +5,7 @@ from ...facade import Facade
 from ..font import FontMgr
 
 
-class MenuArgs(object):
+class MenuArgs(GameObject):
 
     def __init__(self, font, text_fg, text_bg, text_err, text_scale, btn_size,
                  btn_color, background_img, rollover_sfx, click_sfx,
@@ -24,7 +24,7 @@ class MenuArgs(object):
 
     @property
     def font(self):
-        return FontMgr().load_font(self.__font)
+        return self.eng.font_mgr.load_font(self.__font)
 
     @property
     def rollover_sfx(self):

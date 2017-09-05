@@ -3,9 +3,10 @@ from panda3d.core import GeomVertexData, GeomVertexWriter, GeomVertexFormat, \
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
 from direct.interval.LerpInterval import LerpFunc
+from yyagl.gameobject import GameObject
 
 
-class Skidmark(object):
+class Skidmark(GameObject):
 
     def __init__(self, whl_pos, whl_radius, car_h):
         self.radius = whl_radius
@@ -20,7 +21,7 @@ class Skidmark(object):
         geom.add_primitive(self.prim)
         node = GeomNode('gnode')
         node.add_geom(geom)
-        nodepath = eng.gfx.root.attach_new_node(node)
+        nodepath = self.eng.gfx.root.attach_new_node(node)
         nodepath.set_transparency(True)
         nodepath.set_depth_offset(1)
         self.__set_material(nodepath)

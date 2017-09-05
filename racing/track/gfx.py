@@ -25,14 +25,14 @@ class TrackGfx(Gfx):
         self._set_light()
 
     def __set_model(self):
-        LogMgr().log('loading track model')
+        self.eng.log_mgr.log('loading track model')
         ftmpl = 'assets/models/tracks/%s/track_all.bam'
         filename = ftmpl % self.rprops.track_name
         if not exists(filename):
             script_path = executable + ' yyagl/build/process_track.py'
             system(script_path + ' ' + self.rprops.track_name)
-        LogMgr().log('loading ' + filename)
-        eng.load_model(filename, callback=self.end_loading)
+        self.eng.log_mgr.log('loading ' + filename)
+        self.eng.load_model(filename, callback=self.end_loading)
 
     def end_loading(self, model):
         self.model = model
@@ -63,14 +63,14 @@ class TrackGfx(Gfx):
         roots = self.model.find_all_matches('**/%s*' % self.rprops.sign_name)
         self.signs = Signs(roots, self.rprops.sign_cb)
         self.signs.set_signs()
-        self.model.prepare_scene(eng.base.win.get_gsg())
-        self.model.premunge_scene(eng.base.win.get_gsg())
+        self.model.prepare_scene(self.eng.base.win.get_gsg())
+        self.model.premunge_scene(self.eng.base.win.get_gsg())
         Gfx.async_bld(self)
 
     def __set_omni(self, root):
         root.set_tag(self.rprops.omni_tag, 'True')
         a_n = self.__actors[-1].get_name()
-        LogMgr().log('set omni for ' + a_n)
+        self.eng.log_mgr.log('set omni for ' + a_n)
         self.__actors[-1].node().set_bounds(OmniBoundingVolume())
         self.__actors[-1].node().set_final(True)
 
@@ -116,8 +116,8 @@ class TrackGfx(Gfx):
 class TrackGfxShader(TrackGfx):
 
     def _set_light(self):
-        eng.set_amb_lgt((.15, .15, .15, 1))
-        eng.set_dir_lgt((.8, .8, .8, 1), (-25, -65, 0))
+        self.eng.set_amb_lgt((.15, .15, .15, 1))
+        self.eng.set_dir_lgt((.8, .8, .8, 1), (-25, -65, 0))
 
     def _destroy_lights(self):
-        eng.clear_lights()
+        self.eng.clear_lights()

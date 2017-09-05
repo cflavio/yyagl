@@ -1,4 +1,3 @@
-from .shader import ShaderMgr
 from .font import FontMgr
 from ..facade import Facade
 
@@ -15,7 +14,7 @@ class EngineFacade(Facade):
         fwd('init_gfx', lambda obj: obj.gfx.init)
         fwd('clean_gfx', lambda obj: obj.gfx.clean)
         fwd('set_cam_pos', lambda obj: obj.base.camera.set_pos)
-        fwd('load_font', lambda obj: FontMgr().load_font)
+        fwd('load_font', lambda obj: self.eng.font_mgr.load_font)
         fwd('open_browser', lambda obj: obj.gui.open_browser)
         fwd('toggle_pause', lambda obj: obj.pause.logic.toggle)
         fwd('play', lambda obj: obj.audio.play)
@@ -25,8 +24,8 @@ class EngineFacade(Facade):
         fwd('hide_cursor', lambda obj: obj.gui.cursor.hide)
         fwd('hide_standard_cursor', lambda obj: obj.gui.cursor.hide_standard)
         fwd('cursor_top', lambda obj: obj.gui.cursor.cursor_top)
-        fwd('set_amb_lgt', lambda obj: ShaderMgr().set_amb_lgt)
-        fwd('set_dir_lgt', lambda obj: ShaderMgr().set_dir_lgt)
+        fwd('set_amb_lgt', lambda obj: obj.shader_mgr.set_amb_lgt)
+        fwd('set_dir_lgt', lambda obj: obj.shader_mgr.set_dir_lgt)
         fwd('clear_lights', lambda obj: obj.shader_mgr.clear_lights)
         fwd('toggle_shader', lambda obj: obj.shader_mgr.toggle_shader)
         fwd('set_resolution', lambda obj: obj.gui.set_resolution)

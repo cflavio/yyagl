@@ -14,7 +14,7 @@ class TurboLogic(WeaponLogic):
         self.stored_engine_acc_frc = self.car.phys.engine_acc_frc
         self.car.phys.max_speed *= 1.5
         self.car.phys.engine_acc_frc *= 1.5
-        self.destroy_tsk = eng.do_later(5, self.mdt.destroy)
+        self.destroy_tsk = self.eng.do_later(5, self.mdt.destroy)
 
     def destroy(self):
         if self.stored_max_speed is not None:
@@ -22,5 +22,5 @@ class TurboLogic(WeaponLogic):
         if self.stored_engine_acc_frc is not None:
             self.car.phys.engine_acc_frc = self.stored_engine_acc_frc
         if self.stored_engine_acc_frc is not None:
-            eng.remove_do_later(self.destroy_tsk)
+            self.eng.remove_do_later(self.destroy_tsk)
         WeaponLogic.destroy(self)

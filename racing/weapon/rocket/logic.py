@@ -10,8 +10,8 @@ class RocketLogic(WeaponLogic):
     def fire(self):
         WeaponLogic.fire(self)
         self.mdt.phys.fire()
-        self.tsk = eng.do_later(10, self.mdt.destroy)
+        self.tsk = self.eng.do_later(10, self.mdt.destroy)
 
     def destroy(self):
-        if self.tsk: eng.remove_do_later(self.tsk)
+        if self.tsk: self.eng.remove_do_later(self.tsk)
         WeaponLogic.destroy(self)

@@ -59,7 +59,7 @@ class Car(GameObject, CarFacade):
     audio_cls = Audio
 
     def __init__(self, car_props, race_props, season_props):
-        LogMgr().log('init car ' + car_props.name)
+        self.eng.log_mgr.log('init car ' + car_props.name)
         init_lst = [
             [('fsm', self.fsm_cls, [self, car_props, race_props])],
             [('gfx', self.gfx_cls, [self, car_props, race_props]),

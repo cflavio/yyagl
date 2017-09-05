@@ -32,7 +32,7 @@ class PageGui(Gui):
             self.__bld_back_btn()
         self._set_buttons()
         self.transition_enter()
-        eng.cursor_top()
+        self.eng.cursor_top()
 
     def add_widget(self, wdg):
         self.widgets += [wdg]

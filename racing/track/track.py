@@ -24,7 +24,7 @@ class TrackFacade(Facade):
 class Track(GameObject, TrackFacade):
 
     def __init__(self, race_props):
-        LogMgr().log('init track')
+        self.eng.log_mgr.log('init track')
         self.rprops = r_p = race_props
         gfx_cls = TrackGfxShader if r_p.shaders_dev else TrackGfx
         phys_cls = TrackPhysDebug if self.rprops.show_waypoints else TrackPhys

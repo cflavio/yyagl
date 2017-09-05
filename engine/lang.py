@@ -1,20 +1,19 @@
 from os.path import join
 from gettext import install, translation
-from ..singleton import Singleton
+from yyagl.gameobject import GameObject
 
 
-class LangMgr:
-    __metaclass__ = Singleton
+class LangMgr(GameObject):
 
     def __init__(self, lang, lang_domain, lang_path):
         self.curr_lang = lang
         self.domain = lang_domain
-        self.path = join(eng.curr_path, lang_path)
+        self.path = join(self.eng.curr_path, lang_path)
         self.set_lang(lang)
 
     @property
     def lang_codes(self):
-        return [lang[:2].lower() for lang in eng.cfg.languages]
+        return [lang[:2].lower() for lang in self.eng.cfg.languages]
 
     def set_lang(self, lang):
         self.curr_lang = lang

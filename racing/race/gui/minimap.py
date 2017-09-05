@@ -1,13 +1,14 @@
 from direct.gui.OnscreenImage import OnscreenImage
+from yyagl.gameobject import GameObject
 
 
-class Minimap(object):
+class Minimap(GameObject):
 
     def __init__(self, lrtb, track_img, handle_img, col_dct, cars, player_car):
         self.lrtb = lrtb
         self.minimap = OnscreenImage(
             track_img, pos=(-.25, 1, .25), scale=.2,
-            parent=eng.base.a2dBottomRight)
+            parent=self.eng.base.a2dBottomRight)
         self.minimap.set_transparency(True)
         self.minimap.set_alpha_scale(.64)
         self.car_handles = {}
@@ -24,7 +25,7 @@ class Minimap(object):
         scale = .015 if car_name == player_car else .01
         self.car_handles[car_name] = OnscreenImage(
             handle_img, pos=(-.25, 1, .25), scale=scale,
-            parent=eng.base.a2dBottomRight)
+            parent=self.eng.base.a2dBottomRight)
         self.car_handles[car_name].set_color_scale(col_dct[car_name])
 
     def update(self, car_info):

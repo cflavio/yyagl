@@ -49,7 +49,7 @@ class InputBuilderKeyboard(InputBuilder):
 class InputBuilderJoystick(InputBuilder):
 
     def build(self, ai):
-        j_x, j_y, j_a, j_b = JoystickMgr().get_joystick()
+        j_x, j_y, j_a, j_b = self.eng.joystick_mgr.get_joystick()
         if j_b and self.mdt.logic.weapon:
             self.on_fire()
         return {'forward': j_y < -.4, 'rear': j_y > .4 or j_a,
@@ -61,7 +61,7 @@ class CarEvent(Event, ComputerProxy):
     def __init__(self, mdt, race_props, season_props):
         Event.__init__(self, mdt)
         ComputerProxy.__init__(self)
-        eng.attach_obs(self.on_collision)
+        self.eng.attach_obs(self.on_collision)
         self.props = race_props
         self.sprops = season_props
         keys = race_props.keys
@@ -72,7 +72,7 @@ class CarEvent(Event, ComputerProxy):
         self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
 
     def start(self):
-        eng.attach_obs(self.on_frame)
+        self.eng.attach_obs(self.on_frame)
 
     def on_collision(self, obj, tgt_obj):
         if obj != self.mdt.gfx.nodepath.node():
@@ -136,7 +136,7 @@ class CarEvent(Event, ComputerProxy):
         if self.mdt.logic.lap_time_start:
             lap_times += [self.mdt.logic.lap_time]
             self._process_nonstart_goals(1 + len(lap_times), self.mdt.laps)
-        self.mdt.logic.lap_time_start = eng.curr_time
+        self.mdt.logic.lap_time_start = self.eng.curr_time
 
     def _process_nonstart_goals(self, lap_number, laps):
         pass
@@ -144,7 +144,7 @@ class CarEvent(Event, ComputerProxy):
     def process_respawn(self):
         start_wp_n, end_wp_n = self.mdt.logic.last_wp
         self.mdt.gfx.nodepath.set_pos(start_wp_n.get_pos() + (0, 0, 2))
-        wp_vec = eng.norm_vec(Vec3(end_wp_n.get_pos(start_wp_n).xy, 0))
+        wp_vec = self.eng.norm_vec(Vec3(end_wp_n.get_pos(start_wp_n).xy, 0))
         or_h = (wp_vec.xy).signed_angle_deg(Vec2(0, 1))
         self.mdt.gfx.nodepath.set_hpr(-or_h, 0, 0)
         self.mdt.gfx.nodepath.node().set_linear_velocity(0)
@@ -165,13 +165,13 @@ class CarEvent(Event, ComputerProxy):
     def __update_contact_pos(self):
         top = self.mdt.pos + (0, 0, 50)
         bottom = self.mdt.pos + (0, 0, -50)
-        hits = PhysMgr().ray_test_all(top, bottom).get_hits()
+        hits = self.eng.phys_mgr.ray_test_all(top, bottom).get_hits()
         r_n = self.props.road_name
         for hit in [hit for hit in hits if r_n in hit.get_node().get_name()]:
             self.mdt.logic.last_wp = self.mdt.logic.closest_wp()
 
     def destroy(self):
-        map(eng.detach_obs, [self.on_collision, self.on_frame])
+        map(self.eng.detach_obs, [self.on_collision, self.on_frame])
         map(lambda tok: tok.release(), self.toks)
         Event.destroy(self)
         ComputerProxy.destroy(self)
@@ -181,7 +181,7 @@ class CarPlayerEvent(CarEvent):
 
     def __init__(self, mdt, race_props, season_props):
         CarEvent.__init__(self, mdt, race_props, season_props)
-        if not eng.is_runtime:
+        if not self.eng.is_runtime:
             self.accept('f11', self.mdt.gui.pars.toggle)
             self.accept('f8', self.notify, ['on_end_race'])
         state = self.mdt.fsm.getCurrentOrNextState()
@@ -203,7 +203,7 @@ class CarPlayerEvent(CarEvent):
             return
         obj_name = tgt_obj.get_name()
         if any(obj_name.startswith(s) for s in self.props.roads_names):
-            eng.audio.play(self.mdt.audio.landing_sfx)
+            self.eng.audio.play(self.mdt.audio.landing_sfx)
         if obj_name.startswith(self.props.pitstop_name):
             self.mdt.gui.panel.apply_damage(True)
 
@@ -221,13 +221,13 @@ class CarPlayerEvent(CarEvent):
 
     def _process_wall(self):
         CarEvent._process_wall(self)
-        eng.play(self.mdt.audio.crash_sfx)
+        self.eng.play(self.mdt.audio.crash_sfx)
 
     def _process_nonstart_goals(self, lap_number, laps):
         CarEvent._process_nonstart_goals(self, lap_number, laps)
         curr_lap = min(laps, lap_number)
         self.mdt.gui.panel.lap_txt.setText(str(curr_lap)+'/'+str(laps))
-        eng.play(self.mdt.audio.lap_sfx)
+        self.eng.play(self.mdt.audio.lap_sfx)
 
     def _process_end_goal(self):
         self.notify('on_end_race')
@@ -256,7 +256,7 @@ class CarPlayerEvent(CarEvent):
 class CarPlayerEventServer(CarPlayerEvent):
 
     def _process_end_goal(self):
-        Server().send([NetMsgs.end_race])
+        self.eng.server.send([NetMsgs.end_race])
         CarPlayerEvent._process_end_goal(self)
 
 
@@ -264,7 +264,7 @@ class CarPlayerEventClient(CarPlayerEvent):
 
     def __init__(self, mdt):
         CarPlayerEvent.__init__(self, mdt)
-        self.last_sent = eng.curr_time
+        self.last_sent = self.eng.curr_time
 
     def on_frame(self):
         CarPlayerEvent.on_frame(self)
@@ -272,12 +272,12 @@ class CarPlayerEventClient(CarPlayerEvent):
         hpr = self.mdt.gfx.nodepath.get_hpr()
         velocity = self.mdt.phys.vehicle.get_chassis().get_linear_velocity()
         packet = list(chain([NetMsgs.player_info], pos, hpr, velocity))
-        if eng.curr_time - self.last_sent > .2:
-            Client().send(packet)
-            self.last_sent = eng.curr_time
+        if self.eng.curr_time - self.last_sent > .2:
+            self.eng.client.send(packet)
+            self.last_sent = self.eng.curr_time
 
     def _process_end_goal(self):
-        Client().send([NetMsgs.end_race_player])
+        self.eng.client.send([NetMsgs.end_race_player])
         CarPlayerEvent._process_end_goal(self)
 
 

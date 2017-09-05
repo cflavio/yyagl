@@ -1,13 +1,13 @@
 from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
 from panda3d.core import LineSegs, BitMask32
-from yyagl.gameobject import Phys
+from yyagl.gameobject import Phys, GameObject
 from yyagl.engine.log import LogMgr
 from yyagl.engine.phys import PhysMgr
 from yyagl.racing.weapon.bonus.bonus import Bonus
 
 
-class MeshBuilder(object):
+class MeshBuilder(GameObject):
 
     def __init__(self, model, geom_names, is_ghost):
         self.model = model
@@ -18,8 +18,8 @@ class MeshBuilder(object):
             self.__set_mesh(geom_name, is_ghost)
 
     def __set_mesh(self, geom_name, is_ghost):
-        LogMgr().log('setting physics for: ' + geom_name)
-        geoms = PhysMgr().find_geoms(self.model, geom_name)
+        self.eng.log_mgr.log('setting physics for: ' + geom_name)
+        geoms = self.eng.phys_mgr.find_geoms(self.model, geom_name)
         if geoms:
             self._process_meshes(geoms, geom_name, is_ghost)
 
@@ -32,13 +32,13 @@ class MeshBuilder(object):
     def _build(self, shape, geom_name, is_ghost, is_merged):
         if is_ghost:
             ncls = BulletGhostNode
-            meth = PhysMgr().attach_ghost
+            meth = self.eng.phys_mgr.attach_ghost
             lst = self.ghosts
         else:
             ncls = BulletRigidBodyNode
-            meth = PhysMgr().attach_rigid_body
+            meth = self.eng.phys_mgr.attach_rigid_body
             lst = self.rigid_bodies
-        nodepath = eng.attach_node(ncls(geom_name))
+        nodepath = self.eng.attach_node(ncls(geom_name))
         self.nodes += [nodepath]
         nodepath.node().addShape(shape)
         meth(nodepath.node())
@@ -164,15 +164,15 @@ class TrackPhys(Phys):
     def on_bonus_collected(self, bonus):
         bonus.detach_obs(self.on_bonus_collected)
         self.bonuses.remove(bonus)
-        self.generate_tsk += [eng.do_later(20, self.create_bonus, [bonus.pos])]
+        self.generate_tsk += [self.eng.do_later(20, self.create_bonus, [bonus.pos])]
 
     def destroy(self):
         self.model = self.model.remove_node()
         map(lambda chl: chl.remove_node(), self.nodes)
-        map(PhysMgr().remove_rigid_body, self.rigid_bodies)
-        map(PhysMgr().remove_ghost, self.ghosts)
+        map(self.eng.phys_mgr.remove_rigid_body, self.rigid_bodies)
+        map(self.eng.phys_mgr.remove_ghost, self.ghosts)
         map(lambda bon: bon.destroy(), self.bonuses)
-        map(eng.remove_do_later, self.generate_tsk)
+        map(self.eng.remove_do_later, self.generate_tsk)
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
             self.wp2prevs = self.generate_tsk = self.bonuses = None
         if self.rprops.show_waypoints:  # in the drawing class

@@ -1,13 +1,10 @@
 from panda3d.core import QueuedConnectionListener, PointerToConnection, \
     NetAddress
 from .network import AbsNetwork
-from ...singleton import Singleton
 from ..log import LogMgr
 
 
 class Server(AbsNetwork):
-
-    __metaclass__ = Singleton
 
     def __init__(self):
         AbsNetwork.__init__(self)
@@ -24,8 +21,8 @@ class Server(AbsNetwork):
         self.connections = []
         self.tcp_socket = self.c_mgr.open_TCP_server_rendezvous(9099, 1000)
         self.c_listener.add_connection(self.tcp_socket)
-        self.listener_tsk = eng.add_tsk(self.tsk_listener, -39)
-        LogMgr().log('the server is up')
+        self.listener_tsk = self.eng.add_tsk(self.tsk_listener, -39)
+        self.eng.log_mgr.log('the server is up')
 
     def tsk_listener(self, task):
         if not self.c_listener.newConnectionAvailable():
@@ -39,7 +36,7 @@ class Server(AbsNetwork):
         self.c_reader.add_connection(self.connections[-1])
         self.connection_cb(net_address.get_ip_string())
         msg = 'received a connection from ' + net_address.getIpString()
-        LogMgr().log(msg)
+        self.eng.log_mgr.log(msg)
         return task.cont
 
     def _actual_send(self, datagram, receiver):
@@ -54,4 +51,4 @@ class Server(AbsNetwork):
         taskMgr.remove(self.listener_tsk)
         self.c_listener = self.tcp_socket = self.connection_cb = \
             self.listener_tsk = self.connections = None
-        LogMgr().log('the server has been destroyed')
+        self.eng.log_mgr.log('the server has been destroyed')

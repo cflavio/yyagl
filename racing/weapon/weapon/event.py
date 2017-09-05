@@ -5,7 +5,7 @@ class WeaponEvent(Event):
 
     def __init__(self, mdt, particle_path):
         Event.__init__(self, mdt)
-        eng.attach_obs(self.on_collision)
+        self.eng.attach_obs(self.on_collision)
         self.particle_path = particle_path
 
     def _on_coll_success(self):
@@ -18,7 +18,7 @@ class WeaponEvent(Event):
             self.mdt.destroy()
 
     def destroy(self):
-        eng.detach_obs(self.on_collision)
+        self.eng.detach_obs(self.on_collision)
         Event.destroy(self)
 
 

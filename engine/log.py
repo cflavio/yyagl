@@ -5,16 +5,14 @@ from multiprocessing import cpu_count
 from panda3d.core import loadPrcFileData, PandaSystem, Filename
 from panda3d.bullet import get_bullet_version
 from direct.directnotify.DirectNotify import DirectNotify
-from ..singleton import Singleton
+from yyagl.gameobject import GameObject
 
 
-class LogMgrBase(object):
-
-    __metaclass__ = Singleton
+class LogMgrBase(GameObject):
 
     @staticmethod
     def init_cls():
-        return LogMgr if eng.base.win else LogMgrBase
+        return LogMgr if self.eng.base.win else LogMgrBase
 
     def __init__(self):
         self.__notify = DirectNotify().newCategory('ya2')
@@ -29,7 +27,7 @@ class LogMgrBase(object):
         self.__notify.info('{time} {msg}'.format(time=time, msg=msg))
 
     def log_conf(self):
-        self.log('version: ' + eng.logic.version)
+        self.log('version: ' + self.eng.logic.version)
         os_info = (system(), release(), version())
         self.log('operative system: %s %s %s' % os_info)
         self.log('architecture: ' + str(architecture()))
@@ -51,7 +49,7 @@ class LogMgr(LogMgrBase):
 
     def log_conf(self):
         LogMgrBase.log_conf(self)
-        gsg = eng.base.win.get_gsg()
+        gsg = self.eng.base.win.get_gsg()
         self.log(gsg.get_driver_vendor())
         self.log(gsg.get_driver_renderer())
         shad_maj = gsg.get_driver_shader_version_major()
@@ -62,7 +60,7 @@ class LogMgr(LogMgrBase):
         drv_min = gsg.get_driver_version_minor()
         drv = 'driver version: {maj}.{min}'
         self.log(drv.format(maj=drv_maj, min=drv_min))
-        props = eng.base.win.get_properties()
+        props = self.eng.base.win.get_properties()
         self.log('fullscreen: ' + str(props.get_fullscreen()))
         res_x, res_y = props.get_x_size(), props.get_y_size()
         res_tmpl = 'resolution: {res_x}x{res_y}'

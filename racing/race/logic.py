@@ -1,4 +1,4 @@
-from yyagl.gameobject import Logic
+from yyagl.gameobject import Logic, GameObject
 from yyagl.engine.network.server import Server
 from yyagl.engine.network.client import Client
 from yyagl.engine.phys import PhysMgr
@@ -13,7 +13,7 @@ class NetMsgs(object):
     start_race = 1
 
 
-class CarLoaderStrategy(object):
+class CarLoaderStrategy(GameObject):
 
     @staticmethod
     def load(cars, r_p, car_name, track, race, player_car_names, s_p):
@@ -21,10 +21,10 @@ class CarLoaderStrategy(object):
             return race.fsm.demand('Countdown', s_p)
         car = cars.pop(0)
         car_cls = Car
-        if Server().is_active or Client().is_active:
+        if CarLoaderStrategy.eng.server.is_active or CarLoaderStrategy.eng.client.is_active:
             car_cls = NetworkCar  # if car in player_cars else Car
         no_p = car not in player_car_names
-        srv_or_sng = Server().is_active or not Client().is_active
+        srv_or_sng = CarLoaderStrategy.eng.server.is_active or not CarLoaderStrategy.eng.client.is_active
         car_cls = AiCar if no_p and srv_or_sng else car_cls
         race.logic.cars += [CarLoaderStrategy.actual_load(
             cars, car, r_p, track, race, car_cls, player_car_names, s_p)]
@@ -44,7 +44,7 @@ class CarLoaderStrategy(object):
         return car_cls(car_props, r_p, seas_p)
 
 
-class CarPlayerLoaderStrategy(object):
+class CarPlayerLoaderStrategy(GameObject):
 
     @staticmethod
     def load(r_p, car_name, track, race, player_car_names, s_p):
@@ -53,9 +53,9 @@ class CarPlayerLoaderStrategy(object):
             car_cls = AiCarPlayer
         else:
             car_cls = CarPlayer
-            if Server().is_active:
+            if CarPlayerLoaderStrategy.eng.server.is_active:
                 car_cls = CarPlayerServer
-            if Client().is_active:
+            if CarPlayerLoaderStrategy.eng.client.is_active:
                 car_cls = CarPlayerClient
         race.logic.player_car = CarLoaderStrategy.actual_load(
             cars, car_name, r_p, track, race, car_cls, player_car_names, s_p)
@@ -74,7 +74,7 @@ class RaceLogic(Logic):
 
     def load_stuff(self, car_name, player_car_names):
         r_p = self.props
-        PhysMgr().init()
+        self.eng.phys_mgr.init()
         player_car_names = player_car_names[1::2]
         game.player_car_name = car_name
         self.track = Track(r_p)
@@ -89,13 +89,13 @@ class RaceLogic(Logic):
 
     def enter_play(self):
         self.track.detach_obs(self.on_track_loaded)
-        self.track.reparent_to(eng.gfx.root)
+        self.track.reparent_to(self.eng.gfx.root)
         self.player_car.reparent()
         map(lambda car: car.reparent(), self.cars)
 
     def start_play(self):
-        PhysMgr().start()
-        eng.attach_obs(self.on_frame)
+        self.eng.phys_mgr.start()
+        self.eng.attach_obs(self.on_frame)
         self.mdt.event.network_register()
         self.player_car.attach_obs(self.mdt.event.on_wrong_way)
         self.track.play_music()
@@ -153,9 +153,9 @@ class RaceLogic(Logic):
         self.track.destroy()
         map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
         map(lambda car: car.destroy(), self.all_cars)
-        PhysMgr().stop()
-        eng.clean_gfx()
-        eng.detach_obs(self.on_frame)
+        self.eng.phys_mgr.stop()
+        self.eng.clean_gfx()
+        self.eng.detach_obs(self.on_frame)
 
 
 class RaceLogicSinglePlayer(RaceLogic):
@@ -170,20 +170,20 @@ class RaceLogicServer(RaceLogic):
     def enter_play(self):
         RaceLogic.enter_play(self)
         self.ready_clients = []
-        eng.register_server_cb(self.process_srv)
+        self.eng.register_server_cb(self.process_srv)
 
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.client_ready:
             ipaddr = sender.get_address().get_ip_string()
-            eng.log('client ready: ' + ipaddr)
+            self.eng.log('client ready: ' + ipaddr)
             self.ready_clients += [sender]
-            connections = Server().connections
+            connections = self.eng.server.connections
             if all(client in self.ready_clients for client in connections):
                 self.start_play()
-                Server().send([NetMsgs.start_race])
+                self.eng.server.send([NetMsgs.start_race])
 
     def exit_play(self):
-        Server().destroy()
+        self.eng.server.destroy()
         RaceLogic.exit_play(self)
 
 
@@ -191,22 +191,22 @@ class RaceLogicClient(RaceLogic):
 
     def enter_play(self):
         RaceLogic.enter_play(self)
-        eng.register_client_cb(self.process_client)
+        self.eng.register_client_cb(self.process_client)
 
         def send_ready(task):
-            Client().send([NetMsgs.client_ready])
-            eng.log('sent client ready')
+            self.eng.client.send([NetMsgs.client_ready])
+            self.eng.log('sent client ready')
             return task.again
-        self.send_tsk = eng.do_later(.5, send_ready)
+        self.send_tsk = self.eng.do_later(.5, send_ready)
         # the server could not be listen to this event if it is still
         # loading we should do a global protocol, perhaps
 
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.start_race:
-            eng.log('start race')
-            eng.remove_do_later(self.send_tsk)
+            self.eng.log('start race')
+            self.eng.remove_do_later(self.send_tsk)
             self.start_play()
 
     def exit_play(self):
-        Client().destroy()
+        self.eng.client.destroy()
         RaceLogic.exit_play(self)

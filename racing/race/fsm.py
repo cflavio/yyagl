@@ -1,6 +1,5 @@
 from yyagl.gameobject import Fsm
 from yyagl.engine.log import LogMgr
-from yyagl.engine.shader import ShaderMgr
 from yyagl.racing.race.gui.countdown import Countdown
 
 
@@ -18,16 +17,16 @@ class RaceFsm(Fsm):
             'Play': ['Results']}
 
     def enterLoading(self, rprops, sprops, track_name_transl, drivers):
-        LogMgr().log('entering Loading state')
+        self.eng.log_mgr.log('entering Loading state')
         self.menu_args = rprops.menu_args
         self.countdown_sfx = sprops.countdown_sfx
         self.mdt.gui.loading.enter_loading(rprops, sprops, track_name_transl,
                                            drivers)
         args = [rprops.player_car_name, []]
-        eng.do_later(1.0, self.mdt.logic.load_stuff, args)
+        self.eng.do_later(1.0, self.mdt.logic.load_stuff, args)
 
     def exitLoading(self):
-        LogMgr().log('exiting Loading state')
+        self.eng.log_mgr.log('exiting Loading state')
         self.mdt.gui.loading.exit_loading()
         self.mdt.event.notify('on_race_loaded')
         # eng.set_cam_pos((0, 0, 0))
@@ -35,13 +34,13 @@ class RaceFsm(Fsm):
         self.mdt.logic.player_car.attach_obs(self.mdt.event.on_end_race)
 
     def enterCountdown(self, sprops):
-        LogMgr().log('entering Countdown state')
-        eng.hide_cursor()
+        self.eng.log_mgr.log('entering Countdown state')
+        self.eng.hide_cursor()
         self.mdt.event.register_menu()
         self.mdt.logic.enter_play()
         if self.shaders:
-            ShaderMgr().toggle_shader()
-        eng.do_later(sprops.race_start_time,
+            self.eng.shader_mgr.toggle_shader()
+        self.eng.do_later(sprops.race_start_time,
                      self.aux_start_countdown, [sprops.countdown_seconds])
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Countdown'), cars)
@@ -49,7 +48,7 @@ class RaceFsm(Fsm):
     def aux_start_countdown(self, countdown_seconds):
         # i think it's necessary since otherwise panda may use invoking's time
         # so it may be already elapsed.
-        eng.do_later(.5, self.start_countdown, [countdown_seconds])
+        self.eng.do_later(.5, self.start_countdown, [countdown_seconds])
 
     def start_countdown(self, countdown_seconds):
         self.countdown = Countdown(self.countdown_sfx, self.menu_args.font,
@@ -58,21 +57,21 @@ class RaceFsm(Fsm):
                               rename='on_start_race')
 
     def exitCountdown(self):
-        LogMgr().log('exiting Countdown state')
+        self.eng.log_mgr.log('exiting Countdown state')
         self.countdown.destroy()
         # eng.do_later(.5, game.player_car.gfx.apply_damage)
         # eng.do_later(.6, game.player_car.gfx.apply_damage)
         # eng.gfx.print_stats()
 
     def enterPlay(self):
-        LogMgr().log('entering Play state')
+        self.eng.log_mgr.log('entering Play state')
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
         map(lambda car: car.demand('Play'), cars)
 
     @staticmethod
     def exitPlay():
-        LogMgr().log('exiting Play state')
-        eng.show_cursor()
+        RaceFsm.eng.log_mgr.log('exiting Play state')
+        RaceFsm.eng.show_cursor()
 
     def enterResults(self, race_ranking):
         self.mdt.gui.results.show(
@@ -84,4 +83,4 @@ class RaceFsm(Fsm):
     def exitResults(self):
         self.mdt.logic.exit_play()
         if self.shaders:
-            eng.toggle_shader()
+            self.eng.toggle_shader()

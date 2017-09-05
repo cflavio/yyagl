@@ -6,6 +6,8 @@ from .observer import Subject
 
 class Colleague(Subject):
 
+    eng = None
+
     def __init__(self, mdt, *args, **kwargs):
         Subject.__init__(self)
         self.notify_tsk = None
@@ -18,7 +20,7 @@ class Colleague(Subject):
     def _end_async(self, *args, **kwargs):
         self.sync_bld(*args, **kwargs)
         notify_args = 'on_comp_blt', self
-        self.notify_tsk = eng.do_later(.001, self.mdt.notify, notify_args)
+        self.notify_tsk = self.eng.do_later(.001, self.mdt.notify, notify_args)
         # this is necessary to schedule the next component into the next
         # frame otherwise some dependent components may access a non-existent
         # one. think of something better

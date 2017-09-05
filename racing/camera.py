@@ -1,7 +1,8 @@
 from panda3d.core import Vec3, LVector3f
+from yyagl.gameobject import GameObject
 
 
-class Camera(object):
+class Camera(GameObject):
 
     speed = 50
     speed_slow = 20
@@ -69,13 +70,13 @@ class Camera(object):
         #     vec = occl_pos - car_pos
 
         c_i = curr_incr_slow if is_fast else curr_incr
-        cam_pos = eng.base.camera.get_pos()
+        cam_pos = self.eng.base.camera.get_pos()
         new_pos = self.new_val_vec(cam_pos, car_pos + vec, c_i)
         # overwrite camera's position to set the physics
         # new_pos = (car_pos.x + 10, car_pos.y - 5, car_pos.z + 5
         if not is_rolling:
-            eng.base.camera.set_pos(new_pos)
-        eng.base.camera.look_at(car_pos + tgt_vec)
+            self.eng.base.camera.set_pos(new_pos)
+        self.eng.base.camera.look_at(car_pos + tgt_vec)
 
     # def __occlusion_mesh(self, pos, curr_cam_dist_fact):
     #     tgt = self.car.gfx.nodepath.getPos()
@@ -88,12 +89,12 @@ class Camera(object):
 
     @property
     def camera(self):
-        return eng.base.camera
+        return self.eng.base.camera
 
     @staticmethod
     def render_all():  # workaround for premunge_scene in 1.9
-        eng.base.camera.set_pos(0, 0, 10000)
-        eng.base.camera.look_at(0, 0, 0)
+        Camera.eng.base.camera.set_pos(0, 0, 10000)
+        Camera.eng.base.camera.look_at(0, 0, 0)
         track_model = game.logic.season.race.logic.track.gfx.model
         skydome = track_model.find('**/OBJSkydome*')
         skydome and skydome.hide()

@@ -23,8 +23,8 @@ class RaceGui(Gui, RaceGuiFacade):
         self.loading = Loading()
         self.way_txt = OnscreenText(
             '', pos=(.1, .1), scale=.1, fg=r_p.menu_args.text_err,
-            parent=eng.base.a2dBottomLeft, align=TextNode.ALeft,
-            font=FontMgr().load_font(r_p.font))
+            parent=self.eng.base.a2dBottomLeft, align=TextNode.ALeft,
+            font=self.eng.font_mgr.load_font(r_p.font))
         self.minimap = None
         RaceGuiFacade.__init__(self)
 

@@ -2,26 +2,26 @@ from panda3d.core import TextNode, LVector3f
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
-from yyagl.gameobject import Gui
+from yyagl.gameobject import Gui, GameObject
 from yyagl.engine.font import FontMgr
 
 
-class CarParameter(object):
+class CarParameter(GameObject):
 
     def __init__(self, attr_name, init_val, pos, val_range, callback, args=[]):
         self.__callback = callback
         self.__args = args
         self.__lab = OnscreenText(
             text=attr_name, pos=pos, align=TextNode.ARight, fg=(1, 1, 1, 1),
-            parent=eng.base.a2dTopLeft, scale=.06)
+            parent=self.eng.base.a2dTopLeft, scale=.06)
         slider_pos = LVector3f(pos[0], 1, pos[1]) + (.3, 0, .01)
         self.__slider = DirectSlider(
             pos=slider_pos, value=init_val, range=val_range,
-            command=self.__set_attr, parent=eng.base.a2dTopLeft, scale=.24)
+            command=self.__set_attr, parent=self.eng.base.a2dTopLeft, scale=.24)
         txt_pos = LVector3f(pos[0], pos[1], 1) + (.6, 0, 0)
         self.__val = OnscreenText(
             pos=txt_pos, align=TextNode.ALeft, fg=(1, 1, 1, 1),
-            parent=eng.base.a2dTopLeft, scale=.06)
+            parent=self.eng.base.a2dTopLeft, scale=.06)
         self.widgets = [self.__slider, self.__lab, self.__val]
         self.toggle()
 
@@ -105,19 +105,19 @@ class CarParameters(object):
 
     def toggle(self):
         map(lambda par: par.toggle(), self.__pars)
-        (eng.show_cursor if self.__pars[0].is_visible else eng.hide_cursor)()
+        (self.eng.show_cursor if self.__pars[0].is_visible else self.eng.hide_cursor)()
 
     def destroy(self):
         map(lambda wdg: wdg.destroy(), self.__pars)
 
 
-class CarPanel(object):
+class CarPanel(GameObject):
 
     def __init__(self, race_props):
         self.race_props = race_props
-        pars = {'scale': .065, 'parent': eng.base.a2dTopRight,
+        pars = {'scale': .065, 'parent': self.eng.base.a2dTopRight,
                 'fg': self.race_props.menu_args.text_fg, 'align': TextNode.A_left,
-                'font': FontMgr().load_font(self.race_props.font)}
+                'font': self.eng.font_mgr.load_font(self.race_props.font)}
         self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
         lap_str = '1/' + str(self.race_props.laps)
         self.lap_txt = OnscreenText(text=lap_str, pos=(-.24, -.2), **pars)
@@ -143,7 +143,7 @@ class CarPanel(object):
     def set_weapon(self, wpn):
         self.weapon_img = OnscreenImage(
             'assets/images/weapons/%s.png' % wpn,
-            scale=.05, parent=eng.base.a2dTopRight, pos=(-.2, 1, -.69))
+            scale=.05, parent=self.eng.base.a2dTopRight, pos=(-.2, 1, -.69))
         self.weapon_img.set_transparency(True)
 
     def unset_weapon(self):

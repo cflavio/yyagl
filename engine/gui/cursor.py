@@ -1,8 +1,9 @@
 from panda3d.core import WindowProperties
 from direct.gui.OnscreenImage import OnscreenImage
+from yyagl.gameobject import GameObject
 
 
-class MouseCursor(object):
+class MouseCursor(GameObject):
 
     def __init__(self, fpath, scale, hotspot):
         if not fpath:
@@ -14,7 +15,7 @@ class MouseCursor(object):
         self.cursor_img.set_bin('gui-popup', 50)
         self.hotspot_dx = scale[0] * (1 - 2 * hotspot[0])
         self.hotspot_dy = scale[2] * (1 - 2 * hotspot[1])
-        eng.attach_obs(self.on_frame)
+        self.eng.attach_obs(self.on_frame)
 
     @staticmethod
     def __set_standard_cursor(show):

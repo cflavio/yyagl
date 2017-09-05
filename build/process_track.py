@@ -44,7 +44,7 @@ class TrackProcesser(object):
         self.props = Props()
         fpath = self.props.track_dir + '/' + self.props.model_name
         self.__egg2bams()
-        self.model = eng.load_model(fpath)
+        self.model = self.eng.load_model(fpath)
         self.__set_submodels()
 
     def __egg2bams(self):
@@ -73,7 +73,7 @@ class TrackProcesser(object):
         self.__preload_models(list(set(list(names))), load_models)
 
     def __preload_models(self, models, callback, model='', time=0):
-        curr_t = eng.curr_time
+        curr_t = self.eng.curr_time
         if model:
             print 'loaded model: %s (%s seconds)' % (model, curr_t - time)
         if not models:
@@ -118,7 +118,7 @@ class TrackProcesser(object):
         if model:
             msg_tmpl = 'flattened model: %s (%s seconds, %s nodes)'
             self.loading_models.remove(model)
-            d_t = round(eng.curr_time - time, 2)
+            d_t = round(self.eng.curr_time - time, 2)
             print msg_tmpl % (model, d_t, nodes)
         if self.models_to_load:
             self.__process_flat_models(self.models_to_load.pop())
@@ -129,7 +129,7 @@ class TrackProcesser(object):
         model.clear_model_nodes()
         self.loading_models += [model.get_name()]
         model.flattenStrong()
-        curr_t = eng.curr_time
+        curr_t = self.eng.curr_time
         self.__flat_models(model.get_name(), curr_t, len(model.get_children()))
 
     def end_flattening(self):

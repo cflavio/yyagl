@@ -175,7 +175,7 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
     def input2forces(self, car_input):
         phys = self.car.phys
         eng_frc = brake_frc = 0
-        j_x, j_y, j_a, j_b = JoystickMgr().get_joystick()
+        j_x, j_y, j_a, j_b = self.eng.joystick_mgr.get_joystick()
         scale = lambda val: min(1, max(-1, val * 1.2))
         j_x, j_y = scale(j_x), scale(j_y)
         if j_y <= - .1:
@@ -313,7 +313,7 @@ class CarLogic(Logic, ComputerProxy):
     def __get_hits(wp1, wp2):
         return [
             hit.get_node().get_name()
-            for hit in PhysMgr().ray_test_all(
+            for hit in CarLogic.eng.phys_mgr.ray_test_all(
                 wp1.get_pos(), wp2.get_pos()).get_hits()]
 
     @compute_once
@@ -479,9 +479,9 @@ class CarLogic(Logic, ComputerProxy):
         next_wp = may_succ[distances.index(min(distances))]
         if len(self._grid_wps[curr_wp]) >= 2:
             self.alt_jmp_wp = None
-        curr_vec = eng.norm_vec(Vec2(car_np.get_pos(curr_wp).xy))
-        prev_vec = eng.norm_vec(Vec2(car_np.get_pos(prev_wp).xy))
-        next_vec = eng.norm_vec(Vec2(car_np.get_pos(next_wp).xy))
+        curr_vec = self.eng.norm_vec(Vec2(car_np.get_pos(curr_wp).xy))
+        prev_vec = self.eng.norm_vec(Vec2(car_np.get_pos(prev_wp).xy))
+        next_vec = self.eng.norm_vec(Vec2(car_np.get_pos(next_wp).xy))
         prev_angle = prev_vec.signed_angle_deg(curr_vec)
         next_angle = next_vec.signed_angle_deg(curr_vec)
         if min(distances) > 10 and abs(prev_angle) > abs(next_angle):
@@ -545,7 +545,7 @@ class CarLogic(Logic, ComputerProxy):
         if not is_correct:
             skipped = [str(w_p) for w_p in all_wp
                        if w_p not in self.collected_wps]
-            LogMgr().log('skipped waypoints: ' + ', '.join(skipped))
+            self.eng.log_mgr.log('skipped waypoints: ' + ', '.join(skipped))
         return is_correct
 
     @staticmethod
@@ -559,13 +559,13 @@ class CarLogic(Logic, ComputerProxy):
     @property
     def car_vec(self):  # port (or add) this to 3D
         car_rad = deg2Rad(self.mdt.gfx.nodepath.getH())
-        return eng.norm_vec(Vec3(-sin(car_rad), cos(car_rad), 0))
+        return self.eng.norm_vec(Vec3(-sin(car_rad), cos(car_rad), 0))
 
     @property
     def direction(self):
         # car's direction dot current direction
         start_wp, end_wp = self.closest_wp()
-        wp_vec = eng.norm_vec(Vec3(end_wp.getPos(start_wp).xy, 0))
+        wp_vec = self.eng.norm_vec(Vec3(end_wp.getPos(start_wp).xy, 0))
         return self.car_vec.dot(wp_vec)
 
     @property
@@ -622,7 +622,7 @@ class CarPlayerLogic(CarLogic):
         self.camera = Camera(mdt.gfx.nodepath, race_props.camera_vec)
         self.camera.render_all()  # workaround for prepare_scene (panda3d 1.9)
         start_pos = self.start_pos + (0, 0, 10000)
-        eng.do_later(.01, self.camera.camera.set_pos, [start_pos])
+        self.eng.do_later(.01, self.camera.camera.set_pos, [start_pos])
         self.car_positions = []
         self.last_upd_dist_time = 0
         self.is_moving = True

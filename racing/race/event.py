@@ -17,7 +17,7 @@ class RaceEvent(Event):
     def __init__(self, mdt, menu_cls, keys):
         Event.__init__(self, mdt)
         self.menu_cls = menu_cls
-        self.accept(keys.pause, eng.toggle_pause)
+        self.accept(keys.pause, self.eng.toggle_pause)
         self.last_sent = globalClock.get_frame_time()  # for networking
         self.ingame_menu = None
 
@@ -26,7 +26,7 @@ class RaceEvent(Event):
 
     def fire_ingame_menu(self):
         self.ignore('escape-up')
-        eng.show_cursor()
+        self.eng.show_cursor()
         self.ingame_menu = self.menu_cls(self.mdt.logic.sprops.gameprops.menu_args)
         self.ingame_menu.gui.attach(self.on_ingame_back)
         self.ingame_menu.gui.attach(self.on_ingame_exit)
@@ -35,7 +35,7 @@ class RaceEvent(Event):
         self.ingame_menu.gui.detach(self.on_ingame_back)
         self.ingame_menu.gui.detach(self.on_ingame_exit)
         self.register_menu()
-        eng.hide_cursor()
+        self.eng.hide_cursor()
         self.ingame_menu.destroy()
 
     def on_ingame_exit(self):
@@ -75,10 +75,10 @@ class RaceEventServer(RaceEvent):
     def __init__(self, mdt):
         RaceEvent.__init__(self, mdt)
         self.server_info = {}
-        eng.attach_obs(self.on_frame)
+        self.eng.attach_obs(self.on_frame)
 
     def network_register(self):
-        eng.register_server_cb(self.process_srv)
+        self.eng.register_server_cb(self.process_srv)
 
     def on_frame(self):
         if not hasattr(self.mdt.logic, 'player_car') or \
@@ -95,7 +95,7 @@ class RaceEventServer(RaceEvent):
             velocity = car.get_linear_velocity()
             self.server_info[car] = (pos, hpr, velocity)
         if globalClock.get_frame_time() - self.last_sent > .2:
-            Server().send(self.__prepare_game_packet())
+            self.eng.server.send(self.__prepare_game_packet())
             self.last_sent = globalClock.get_frame_time()
 
     @staticmethod
@@ -115,7 +115,7 @@ class RaceEventServer(RaceEvent):
         hpr = (data_lst[4], data_lst[5], data_lst[6])
         velocity = (data_lst[7], data_lst[8], data_lst[9])
         self.server_info[sender] = (pos, hpr, velocity)
-        car_name = eng.car_mapping[sender]
+        car_name = self.eng.car_mapping[sender]
         for car in [car for car in game.cars if car.__class__ == NetworkCar]:
             if car_name in car.path:
                 LerpPosInterval(car.gfx.nodepath, .2, pos).start()
@@ -125,7 +125,7 @@ class RaceEventServer(RaceEvent):
         if data_lst[0] == NetMsgs.player_info:
             self.__process_player_info(data_lst, sender)
         if data_lst[0] == NetMsgs.end_race_player:
-            Server().send([NetMsgs.end_race])
+            self.eng.server.send([NetMsgs.end_race])
             dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0,
                    'phoibe': 0, 'rea': 0, 'iperion': 0, 'teia': 0}
             self.mdt.fsm.demand('Results', dct)
@@ -133,14 +133,14 @@ class RaceEventServer(RaceEvent):
             self.mdt.gui.results.show(dct)
 
     def destroy(self):
-        eng.detach_obs(self.on_frame)
+        self.eng.detach_obs(self.on_frame)
         RaceEvent.destroy(self)
 
 
 class RaceEventClient(RaceEvent):
 
     def network_register(self):
-        eng.register_client_cb(self.process_client)
+        self.eng.register_client_cb(self.process_client)
 
     @staticmethod
     def __process_game_packet(data_lst):

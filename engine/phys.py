@@ -1,5 +1,4 @@
 from panda3d.bullet import BulletWorld, BulletDebugNode
-from ..singleton import Singleton
 from ..facade import Facade
 
 
@@ -27,9 +26,8 @@ class PhysFacade(Facade):
 
 class PhysMgr(PhysFacade):
 
-    __metaclass__ = Singleton
-
-    def __init__(self):
+    def __init__(self, eng):
+        self.eng = eng
         self.collision_objs = []  # objects to be processed
         self.__obj2coll = {}  # obj: [(node, coll_time), ...]
         self.root = None
@@ -47,7 +45,7 @@ class PhysMgr(PhysFacade):
         self.root.set_debug_node(self.__debug_np.node())
 
     def start(self):
-        eng.attach_obs(self.on_frame, 2)
+        self.eng.attach_obs(self.on_frame, 2)
 
     def on_frame(self):
         self.root.do_physics(globalClock.get_dt(), 10, 1/180.0)
@@ -62,7 +60,7 @@ class PhysMgr(PhysFacade):
     def stop(self):
         self.root = None
         self.__debug_np.removeNode()
-        eng.detach_obs(self.on_frame)
+        self.eng.detach_obs(self.on_frame)
 
     def __process_contact(self, obj, node, to_clear):
         if node == obj:
@@ -71,7 +69,7 @@ class PhysMgr(PhysFacade):
         if node in [coll[0] for coll in self.__obj2coll[obj]]:
             return
         self.__obj2coll[obj] += [(node, globalClock.get_frame_time())]
-        eng.event.notify('on_collision', obj, node)
+        self.eng.event.notify('on_collision', obj, node)
 
     def __do_collisions(self):
         to_clear = self.collision_objs[:]

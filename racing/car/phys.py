@@ -24,7 +24,7 @@ class CarPhys(Phys):
         self.__set_phys_node()
         self.__set_vehicle()
         self.__set_wheels()
-        eng.attach_obs(self.on_end_frame)
+        self.eng.attach_obs(self.on_end_frame)
 
     def _load_phys(self):
         fpath = self.rprops.phys_file % self.cprops.name
@@ -51,13 +51,13 @@ class CarPhys(Phys):
             ('roll', self.cprops.name, round(s_r, 2),
              self.cprops.driver_suspensions)]
         for l_i in log_info:
-            LogMgr().log('%s %s: %s (%s)' % l_i)
+            self.eng.log_mgr.log('%s %s: %s (%s)' % l_i)
 
     def __set_collision_mesh(self):
         fpath = self.rprops.coll_path % self.cprops.name
         self.coll_mesh = loader.loadModel(fpath)
         chassis_shape = BulletConvexHullShape()
-        for geom in PhysMgr().find_geoms(self.coll_mesh,
+        for geom in self.eng.phys_mgr.find_geoms(self.coll_mesh,
                                          self.rprops.coll_name):
             chassis_shape.add_geom(geom.node().get_geom(0),
                                    geom.get_transform())
@@ -70,17 +70,17 @@ class CarPhys(Phys):
         self.pnode = self.mdt.gfx.nodepath.node()
         self.pnode.set_mass(self.mass)
         self.pnode.set_deactivation_enabled(False)
-        PhysMgr().attach_rigid_body(self.pnode)
-        PhysMgr().add_collision_obj(self.pnode)
+        self.eng.phys_mgr.attach_rigid_body(self.pnode)
+        self.eng.phys_mgr.add_collision_obj(self.pnode)
 
     def __set_vehicle(self):
-        self.vehicle = BulletVehicle(PhysMgr().root, self.pnode)
+        self.vehicle = BulletVehicle(self.eng.phys_mgr.root, self.pnode)
         self.vehicle.set_coordinate_system(ZUp)
         self.vehicle.set_pitch_control(self.pitch_control)
         tuning = self.vehicle.get_tuning()
         tuning.set_suspension_compression(self.suspension_compression)
         tuning.set_suspension_damping(self.suspension_damping)
-        PhysMgr().attach_vehicle(self.vehicle)
+        self.eng.phys_mgr.attach_vehicle(self.vehicle)
 
     def __set_wheels(self):
         wheels = self.mdt.gfx.wheels
@@ -209,14 +209,14 @@ class CarPhys(Phys):
     @staticmethod
     def gnd_name(pos):
         top, bottom = pos + (0, 0, 20), pos + (0, 0, -20)
-        result = PhysMgr().ray_test_closest(bottom, top)
+        result = CarPhys.eng.phys_mgr.ray_test_closest(bottom, top)
         ground = result.get_node()
         return ground.get_name() if ground else ''
 
     @staticmethod
     def gnd_height(pos):  # this should be a method of the track
         top, bottom = pos + (0, 0, 20), pos + (0, 0, -20)
-        result = PhysMgr().ray_test_closest(bottom, top)
+        result = self.eng.phys_mgr.ray_test_closest(bottom, top)
         hit_pos = result.get_hit_pos()
         return hit_pos.z if hit_pos else None
 
@@ -249,8 +249,8 @@ class CarPhys(Phys):
         self.mdt.logic.applied_torque = True
 
     def destroy(self):
-        eng.detach_obs(self.on_end_frame)
-        PhysMgr().remove_vehicle(self.vehicle)
+        self.eng.detach_obs(self.on_end_frame)
+        self.eng.phys_mgr.remove_vehicle(self.vehicle)
         self.pnode = self.vehicle = self.__finds = self.__track_phys = \
             self.coll_mesh = None
         Phys.destroy(self)

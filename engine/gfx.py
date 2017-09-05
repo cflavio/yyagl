@@ -66,4 +66,4 @@ class EngineGfx(Gfx):
         par.start(parent=parent, renderParent=render_parent)
         par.set_pos(pos)
         args = timeout, lambda par: par.disable(), [par]
-        eng.do_later(*args)
+        self.eng.do_later(*args)

@@ -2,7 +2,6 @@ from panda3d.core import AmbientLight, DirectionalLight, PointLight, \
     Spotlight, LVector4f, LVector3f, Vec3, Shader, Texture, WindowProperties,\
     FrameBufferProperties, GraphicsPipe, GraphicsOutput, NodePath, PandaNode
 from direct.filter.FilterManager import FilterManager
-from ..singleton import Singleton
 
 
 class ShaderSetter(object):
@@ -63,8 +62,6 @@ class ShaderSetterSpotlight(ShaderSetter):
 
 class ShaderMgr(object):
 
-    __metaclass__ = Singleton
-
     def __init__(self, shaders, gamma):
         self.lights = []
         self.gamma = gamma
@@ -113,7 +110,7 @@ class ShaderMgr(object):
 
     def clear_lights(self):
         for lgt in self.lights:
-            eng.base.render.clear_light(lgt)
+            self.eng.base.render.clear_light(lgt)
             lgt.removeNode()
         self.lights = []
 

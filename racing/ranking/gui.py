@@ -17,7 +17,7 @@ class RankingPageGui(PageGui):
         PageGui.__init__(self, mdt, menu)
 
     def bld_page(self):
-        eng.init_gfx()
+        self.eng.init_gfx()
         self.font = self.mdt.menu.gui.menu_args.font
         self.text_fg = self.mdt.menu.gui.menu_args.text_fg
         self.text_bg = self.mdt.menu.gui.menu_args.text_bg
@@ -72,7 +72,7 @@ class RankingMenuGui(Gui):
         menu_args.btn_size = (-8.6, 8.6, -.42, .98)
         self.menu = Menu(menu_args)
         self.rank_page = RankingPage(rprops, sprops, self.menu)
-        eng.do_later(.01, self.menu.push_page, [self.rank_page])
+        self.eng.do_later(.01, self.menu.push_page, [self.rank_page])
 
     def destroy(self):
         self.menu = self.menu.destroy()
@@ -115,10 +115,10 @@ class RankingGui(Gui):
         img = OnscreenImage(
             page.rprops.cars_imgs % car_name,
             pos=(pos_x - .16, 1, top + .02 - i * .16), scale=.074)
-        filtervpath = eng.curr_path + 'yyagl/assets/shaders/filter.vert'
+        filtervpath = RankingGui.eng.curr_path + 'yyagl/assets/shaders/filter.vert'
         with open(filtervpath) as fvs:
             vert = fvs.read()
-        drvfpath = eng.curr_path + 'yyagl/assets/shaders/drv_car.frag'
+        drvfpath = RankingGui.eng.curr_path + 'yyagl/assets/shaders/drv_car.frag'
         with open(drvfpath) as ffs:
             frag = ffs.read()
         shader = Shader.make(Shader.SL_GLSL, vert, frag)

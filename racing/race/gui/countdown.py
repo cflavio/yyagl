@@ -1,9 +1,10 @@
 from direct.gui.OnscreenText import OnscreenText
 from direct.task.Task import Task
 from yyagl.observer import Subject
+from yyagl.gameobject import GameObject
 
 
-class Countdown(Subject):
+class Countdown(GameObject, Subject):
 
     def __init__(self, sfx_path, font, seconds):
         Subject.__init__(self)
@@ -11,7 +12,7 @@ class Countdown(Subject):
         self.__countdown_txt = OnscreenText(
             '', pos=(0, 0), scale=.2, fg=(1, 1, 1, 1), font=font)
         self.__cnt = seconds
-        self.tsk = eng.do_later(1.0, self.process_countdown)
+        self.tsk = self.eng.do_later(1.0, self.process_countdown)
 
     def process_countdown(self):
         if self.__cnt >= 0:
@@ -24,6 +25,6 @@ class Countdown(Subject):
         self.notify('on_start_race')
 
     def destroy(self):
-        self.tsk = eng.remove_do_later(self.tsk)
+        self.tsk = self.eng.remove_do_later(self.tsk)
         self.__countdown_txt.destroy()
         Subject.destroy(self)

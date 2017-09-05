@@ -1,7 +1,7 @@
 from random import uniform
 from collections import namedtuple
 from panda3d.core import Vec3, LineSegs, LPoint3f
-from yyagl.gameobject import Ai
+from yyagl.gameobject import Ai, GameObject
 from yyagl.engine.phys import PhysMgr
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
 
@@ -33,7 +33,7 @@ class DebugLines(object):
         self.clear()
 
 
-class AbsAiLogic(ComputerProxy):
+class AbsAiLogic(ComputerProxy, GameObject):
 
     def __init__(self, car, cars, player_car):
         self.car = car
@@ -59,11 +59,11 @@ class AbsAiLogic(ComputerProxy):
     @property
     @once_a_frame
     def tgt_vec(self):
-        return eng.norm_vec(self.curr_tgt_wp.get_pos() - self.car.pos)
+        return self.eng.norm_vec(self.curr_tgt_wp.get_pos() - self.car.pos)
 
     def lookahead_gnd(self, dist, deg):
         lookahed_vec = self.car_vec * dist
-        lookahead_rot = eng.rot_vec(lookahed_vec, deg)
+        lookahead_rot = self.eng.rot_vec(lookahed_vec, deg)
         lookahead_pos = self.car.pos + lookahead_rot
         if self.car.fsm.getCurrentOrNextState() != 'Results' and \
                 self.player_car == self.car.name:
@@ -120,14 +120,14 @@ class AbsAiLogic(ComputerProxy):
         else:
             offset_y = (self.width_bounds[self.bnd_idx(direction)], 0, 0)
         start = self.car.pos - self.car_vec * .8
-        offset_rot = eng.rot_vec(offset_y, self.car.heading)
+        offset_rot = self.eng.rot_vec(offset_y, self.car.heading)
         start = start + offset_rot + (0, 0, uniform(*self.height_bounds))
         lgt = 4 + 31 * self.car.phys.speed_ratio
         lookahed_vec = self.car_vec * lgt
         deg = uniform(*sector2bounds[direction])
-        lookahead_rot = eng.rot_vec(lookahed_vec, deg)
+        lookahead_rot = self.eng.rot_vec(lookahed_vec, deg)
         lookahead_pos = self.car.pos + lookahead_rot
-        result = PhysMgr().ray_test_closest(start, lookahead_pos,
+        result = self.eng.phys_mgr.ray_test_closest(start, lookahead_pos,
                                             self.car.logic.bitmask)
         hit, dist, name = result.get_node(), 0, ''
         if hit:
@@ -203,7 +203,7 @@ class CarAi(Ai):
         # can't move
         self.last_pos_time = 0  # time of the last sampling pos
         self.last_obst_info = LastObstInfo(None, 0)  # (is_l, is_r), time
-        eng.attach_obs(self.on_frame)
+        self.eng.attach_obs(self.on_frame)
 
     @property
     def curr_logic(self):
@@ -243,9 +243,9 @@ class CarAi(Ai):
     def _eval_respawn(self):
         if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
             return
-        if eng.curr_time - self.last_pos_time < 1:
+        if self.eng.curr_time - self.last_pos_time < 1:
             return
-        self.last_pos_time = eng.curr_time
+        self.last_pos_time = self.eng.curr_time
         self.last_positions += [self.mdt.gfx.nodepath.get_pos()]
         if len(self.last_positions) <= 12:
             return
@@ -295,7 +295,7 @@ class CarAi(Ai):
         return self.curr_logic.car_dot_traj > .8
 
     def left_right(self, obstacles, brake, obstacles_back):
-        if eng.curr_time - self.last_obst_info.time < .05:
+        if self.eng.curr_time - self.last_obst_info.time < .05:
             return self.last_obst_info.direction
         curr_obs = obstacles_back if brake and self.mdt.phys.speed < 10 else \
             obstacles
@@ -376,7 +376,7 @@ class CarAi(Ai):
                             left, right = False, True
             if left or right:
                 self.last_obst_info = LastObstInfo((left, right),
-                                                   eng.curr_time)
+                                                   self.eng.curr_time)
                 return left, right
 
         # evaluate on_road
@@ -454,7 +454,7 @@ class CarAi(Ai):
         return DirKeys(acceleration, left, brake, right)
 
     def destroy(self):
-        eng.detach_obs(self.on_frame)
+        self.eng.detach_obs(self.on_frame)
         map(lambda logic: logic.destroy(), [self.front_logic, self.rear_logic])
         Ai.destroy(self)
 

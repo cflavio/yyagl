@@ -28,7 +28,7 @@ class GameBase(GameObject, GameFacade):  # it doesn't manage the window
         __builtin__.game = self
         Engine(cfg, self.on_end)
         GameObject.__init__(self, init_lst)
-        LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
+        self.eng.lang_mgr = LangMgr(cfg.lang, cfg.lang_domain, cfg.lang_path)
         GameFacade.__init__(self)
         self.logic.on_start()
 
@@ -41,4 +41,4 @@ class Game(GameBase):  # it adds the window
 
     def __init__(self, init_lst, cfg):
         GameBase.__init__(self, init_lst, cfg)
-        eng.base.run()
+        self.eng.base.run()

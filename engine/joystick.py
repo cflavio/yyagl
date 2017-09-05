@@ -1,6 +1,3 @@
-from ..singleton import Singleton
-
-
 def has_pygame():
     try:
         import pygame
@@ -14,10 +11,11 @@ if has_pygame():
     from pygame import joystick
 
 
-class JoystickMgrBase(object):
-    # if there is not pygame
+from yyagl.gameobject import GameObject
 
-    __metaclass__ = Singleton
+
+class JoystickMgrBase(GameObject):
+    # if there is not pygame
 
     @staticmethod
     def build(emul_keyb):
@@ -49,7 +47,7 @@ class JoystickMgr(JoystickMgrBase):
         self.joysticks = [
             joystick.Joystick(idx) for idx in range(joystick.get_count())]
         map(lambda joystick: joystick.init(), self.joysticks)
-        eng.attach_obs(self.on_frame)
+        self.eng.attach_obs(self.on_frame)
 
     def get_joystick(self):
         for _ in pygame.event.get():
@@ -77,7 +75,7 @@ class JoystickMgr(JoystickMgrBase):
         self.old_x, self.old_y, self.old_b0, self.old_b1 = j_x, j_y, btn0, btn1
 
     def destroy(self):
-        eng.detach_obs(self.on_frame)
+        self.eng.detach_obs(self.on_frame)
         joystick.quit()
         pygame.quit()
         self.joysticks = None

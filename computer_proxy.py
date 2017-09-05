@@ -26,7 +26,7 @@ def once_a_frame(function):
 class ComputerProxy(object):
 
     def __init__(self):
-        eng.attach_obs(self.on_start_frame)
+        self.eng.attach_obs(self.on_start_frame)
         # there are issues if the object has another on_start_frame
         self._buffered_vals = {}
         self._buffered_vals_frm = {}
@@ -35,5 +35,5 @@ class ComputerProxy(object):
         self._buffered_vals_frm = {}
 
     def destroy(self):
-        eng.detach_obs(self.on_start_frame)
+        self.eng.detach_obs(self.on_start_frame)
         self._buffered_vals = self._buffered_vals_frm = None

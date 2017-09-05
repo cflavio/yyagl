@@ -6,9 +6,10 @@ from yyagl.racing.race.gui.loading.loadingpage import LoadingPageGui
 from yyagl.racing.ranking.gui import RankingGui
 from yyagl.engine.gui.imgbtn import ImgBtn
 from yyagl.observer import Subject
+from yyagl.gameobject import GameObject
 
 
-class Results(Subject):
+class Results(GameObject, Subject):
 
     def __init__(self, rprops):
         Subject.__init__(self)
@@ -64,7 +65,7 @@ class Results(Subject):
                 scale=.078,
                 pos=(.02 + i*.18, 1, -.79), frameColor=(0, 0, 0, 0),
                 image=self.rprops.share_imgs % site[0],
-                command=eng.open_browser, extraArgs=[site[1]],
+                command=self.eng.open_browser, extraArgs=[site[1]],
                 rolloverSound=self.rprops.menu_args.rollover_sfx,
                 clickSound=self.rprops.menu_args.click_sfx)
             for i, site in enumerate(sites)]

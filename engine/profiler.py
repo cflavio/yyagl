@@ -6,11 +6,8 @@ if not exists('main.pyo'):
     from cProfile import Profile
     from pstats import Stats
     from StringIO import StringIO
-    from ..singleton import Singleton
 
     class Profiler(object):
-
-        __metaclass__ = Singleton
 
         def __init__(self, enabled, percall):
             self.enabled = enabled
@@ -63,11 +60,8 @@ if not exists('main.pyo'):
 
 
 else:
-    from ..singleton import Singleton
 
     class Profiler(object):
-
-        __metaclass__ = Singleton
 
         def __init__(self, enabled, percall):
             pass

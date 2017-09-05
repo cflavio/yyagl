@@ -39,4 +39,4 @@ class GameTests(TestCase):
         game.destroy()
 
     def tearDown(self):
-        eng.destroy()
+        self.eng.destroy()

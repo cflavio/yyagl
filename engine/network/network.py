@@ -2,9 +2,10 @@ from panda3d.core import QueuedConnectionManager, QueuedConnectionReader, \
     ConnectionWriter, NetDatagram
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
+from yyagl.gameobject import GameObject
 
 
-class AbsNetwork(object):
+class AbsNetwork(GameObject):
 
     def __init__(self):
         self.c_mgr = None
@@ -16,7 +17,7 @@ class AbsNetwork(object):
         self.c_mgr = QueuedConnectionManager()
         self.c_reader = QueuedConnectionReader(self.c_mgr, 0)
         self.c_writer = ConnectionWriter(self.c_mgr, 0)
-        eng.attach_obs(self.on_frame, 1)
+        self.eng.attach_obs(self.on_frame, 1)
         self.reader_cb = reader_cb
 
     def send(self, data, receiver=None):
@@ -46,7 +47,7 @@ class AbsNetwork(object):
 
     @property
     def is_active(self):
-        return self.on_frame in [obs[0] for obs in eng.event.observers]
+        return self.on_frame in [obs[0] for obs in self.eng.event.observers]
 
     def destroy(self):
-        eng.detach_obs(self.on_frame)
+        self.eng.detach_obs(self.on_frame)

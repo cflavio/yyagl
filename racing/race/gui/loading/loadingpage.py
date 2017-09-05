@@ -16,7 +16,7 @@ class LoadingPageGui(PageGui):
         PageGui.__init__(self, mdt, menu)
 
     def bld_page(self):
-        eng.init_gfx()
+        self.eng.init_gfx()
         self.font = self.mdt.menu.gui.menu_args.font
         self.text_fg = self.mdt.menu.gui.menu_args.text_fg
         self.text_bg = self.mdt.menu.gui.menu_args.text_bg

@@ -20,13 +20,13 @@ class WeaponPhys(Phys):
         self.n_p.wrt_reparent_to(render)
         launch_dist = self.car.logic.car_vec * self.launch_dist
         self.n_p.set_pos(self.n_p.get_pos() + launch_dist)
-        PhysMgr().attach_rigid_body(self.node)
+        self.eng.phys_mgr.attach_rigid_body(self.node)
         self.mdt.gfx.gfx_np.reparentTo(self.n_p)
         self.mdt.gfx.gfx_np.setPos(0, 0, 0)
 
     def destroy(self):
         if self.node:  # has not been fired
-            PhysMgr().remove_rigid_body(self.node)
+            self.eng.phys_mgr.remove_rigid_body(self.node)
             self.n_p = self.n_p.remove_node()
         self.parent = None
         Phys.destroy(self)
@@ -45,7 +45,7 @@ class RocketWeaponPhys(WeaponPhys):
         for bitn in range(len(self.cars)):
             b_m = b_m | BitMask32.bit(2 + bitn)
         self.n_p.set_collide_mask(b_m)
-        PhysMgr().add_collision_obj(self.node)
+        self.eng.phys_mgr.add_collision_obj(self.node)
         self.rot_mat = Mat4()
         self.rot_mat.set_rotate_mat(self.parent.get_h() + self.rot_deg, (0, 0, 1))
         self.update_tsk = taskMgr.add(self.update_weapon, 'update_weapon')
@@ -58,6 +58,6 @@ class RocketWeaponPhys(WeaponPhys):
         return tsk.again
 
     def destroy(self):
-        if self.node: PhysMgr().remove_collision_obj(self.node)
+        if self.node: self.eng.phys_mgr.remove_collision_obj(self.node)
         if self.update_tsk: self.update_tsk = taskMgr.remove(self.update_tsk)
         WeaponPhys.destroy(self)

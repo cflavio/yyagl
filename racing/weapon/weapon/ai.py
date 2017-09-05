@@ -14,7 +14,7 @@ class WeaponAi(Ai):
 
     @property
     def is_fired_or_before(self):
-        is_before_fire = eng.curr_time - self.collect_time < self.fire_time
+        is_before_fire = self.eng.curr_time - self.collect_time < self.fire_time
         return self.mdt.logic.has_fired or is_before_fire
 
     @property
