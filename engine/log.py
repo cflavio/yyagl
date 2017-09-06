@@ -12,7 +12,7 @@ class LogMgrBase(GameObject):
 
     @staticmethod
     def init_cls():
-        return LogMgr if self.eng.base.win else LogMgrBase
+        return LogMgr if base.win else LogMgrBase
 
     def __init__(self):
         self.__notify = DirectNotify().newCategory('ya2')

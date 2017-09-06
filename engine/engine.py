@@ -38,7 +38,7 @@ class Engine(GameObject, EngineFacade):
         self.client = Client()
         comps = [
             [('logic', EngineLogic, [self, cfg])],
-            [('log_mgr', LogMgr, [])],
+            [('log_mgr', LogMgr.init_cls(), [])],
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
             [('phys_mgr', PhysMgr, [self])],
             [('event', EngineEvent.init_cls(),

@@ -7,6 +7,7 @@ import os
 sys.path.append(os.getcwd())
 from os import walk, system
 from yyagl.engine.engine import Engine
+from yyagl.gameobject import GameObject
 from direct.actor.Actor import Actor
 
 
@@ -35,7 +36,7 @@ class Conf(object):
 eng = Engine(Conf())
 
 
-class TrackProcesser(object):
+class TrackProcesser(GameObject):
 
     def __init__(self):
         self.__actors = []

@@ -216,7 +216,7 @@ class CarPhys(Phys):
     @staticmethod
     def gnd_height(pos):  # this should be a method of the track
         top, bottom = pos + (0, 0, 20), pos + (0, 0, -20)
-        result = self.eng.phys_mgr.ray_test_closest(bottom, top)
+        result = CarPhys.eng.phys_mgr.ray_test_closest(bottom, top)
         hit_pos = result.get_hit_pos()
         return hit_pos.z if hit_pos else None
 
