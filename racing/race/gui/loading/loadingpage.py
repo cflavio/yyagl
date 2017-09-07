@@ -8,9 +8,8 @@ from yyagl.racing.ranking.gui import RankingGui
 
 class LoadingPageGui(PageGui):
 
-    def __init__(self, mdt, menu, rprops, sprops, track_name_transl, drivers):
+    def __init__(self, mdt, menu, rprops, track_name_transl, drivers):
         self.rprops = rprops
-        self.sprops = sprops
         self.track_name_transl = track_name_transl
         self.drivers = drivers
         PageGui.__init__(self, mdt, menu)
@@ -25,8 +24,8 @@ class LoadingPageGui(PageGui):
             text=_('LOADING...'), scale=.2, pos=(0, .78), font=self.font,
             fg=(.75, .75, .75, 1), wordwrap=12)
         track_number = ''
-        if not self.sprops.single_race:
-            track_names = self.sprops.track_names
+        if not self.rprops.season_props.single_race:
+            track_names = self.rprops.season_props.gameprops.season_tracks
             track_num = track_names.index(self.rprops.track_name) + 1
             track_number = ' (%s/%s)' % (track_num, len(track_names))
         track_txt = OnscreenText(
@@ -80,7 +79,7 @@ class LoadingPageGui(PageGui):
         txt = OnscreenText(text=_('Upgrades'), scale=.1, pos=(1.0, -.56),
                            font=self.font, fg=self.text_bg)
         self.add_widget(txt)
-        tuning = game.logic.season.tuning.car2tuning[self.sprops.player_car_name]
+        tuning = game.logic.season.tuning.car2tuning[self.rprops.season_props.player_car_name]
         txt = OnscreenText(
             text=_('engine: +') + str(tuning.f_engine),
             align=TextNode.A_left, scale=.072, pos=(.8, -.7), font=self.font,
@@ -107,12 +106,12 @@ class LoadingPageGui(PageGui):
 
 class LoadingPage(Page):
 
-    def __init__(self, rprops, sprops, menu, track_name_transl, drivers):
+    def __init__(self, rprops, menu, track_name_transl, drivers):
         self.rprops = rprops
         self.menu = menu
         init_lst = [
             [('event', Event, [self])],
-            [('gui', LoadingPageGui, [self, menu, rprops, sprops,
-                                      track_name_transl, drivers])]]
+            [('gui', LoadingPageGui, [self, menu, rprops, track_name_transl,
+                                      drivers])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)

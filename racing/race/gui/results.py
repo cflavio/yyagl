@@ -17,9 +17,9 @@ class Results(GameObject, Subject):
         self.__buttons = []
         self.drivers = self.result_frm = None
         self.rprops = rprops
-        self.font = rprops.menu_args.font
-        self.text_fg = rprops.menu_args.text_fg
-        self.text_bg = rprops.menu_args.text_bg
+        self.font = rprops.season_props.gameprops.menu_args.font
+        self.text_fg = rprops.season_props.gameprops.menu_args.text_fg
+        self.text_bg = rprops.season_props.gameprops.menu_args.text_bg
 
     def show(self, race_ranking, lap_times, drivers):
         track = self.rprops.track_path
@@ -27,8 +27,8 @@ class Results(GameObject, Subject):
         self.result_frm = DirectFrame(
             frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
         laps = len(lap_times)
-        text_bg = self.rprops.menu_args.text_bg
-        pars = {'scale': .1, 'fg': text_bg, 'font': self.rprops.menu_args.font}
+        text_bg = self.rprops.season_props.gameprops.menu_args.text_bg
+        pars = {'scale': .1, 'fg': text_bg, 'font': self.rprops.season_props.gameprops.menu_args.font}
         self.__res_txts = [
             OnscreenText(str(round(lap_times[i], 2)),
                          pos=(0, .52 - .2 * (i + 1)), **pars)
@@ -64,10 +64,10 @@ class Results(GameObject, Subject):
             ImgBtn(
                 scale=.078,
                 pos=(.02 + i*.18, 1, -.79), frameColor=(0, 0, 0, 0),
-                image=self.rprops.share_imgs % site[0],
+                image=self.rprops.season_props.gameprops.menu_args.social_imgs_dpath % site[0],
                 command=self.eng.open_browser, extraArgs=[site[1]],
-                rolloverSound=self.rprops.menu_args.rollover_sfx,
-                clickSound=self.rprops.menu_args.click_sfx)
+                rolloverSound=self.rprops.season_props.gameprops.menu_args.rollover_sfx,
+                clickSound=self.rprops.season_props.gameprops.menu_args.click_sfx)
             for i, site in enumerate(sites)]
 
         def step():
@@ -76,7 +76,7 @@ class Results(GameObject, Subject):
             Subject.destroy(self)
         cont_btn = DirectButton(
             text=_('Continue'), pos=(0, 1, -.6), command=step,
-            **self.rprops.menu_args.btn_args)
+            **self.rprops.season_props.gameprops.menu_args.btn_args)
         self.__buttons += [cont_btn]
 
     def destroy(self):

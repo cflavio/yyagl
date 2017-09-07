@@ -22,17 +22,17 @@ class RaceGui(Gui, RaceGuiFacade):
         self.results = Results(rprops)
         self.loading = Loading()
         self.way_txt = OnscreenText(
-            '', pos=(.1, .1), scale=.1, fg=r_p.menu_args.text_err,
+            '', pos=(.1, .1), scale=.1, fg=r_p.season_props.gameprops.menu_args.text_err,
             parent=self.eng.base.a2dBottomLeft, align=TextNode.ALeft,
-            font=self.eng.font_mgr.load_font(r_p.font))
+            font=self.eng.font_mgr.load_font(r_p.season_props.font))
         self.minimap = None
         RaceGuiFacade.__init__(self)
 
     def start(self):
         self.minimap = Minimap(
             self.mdt.track.lrtb, self.props.minimap_path,
-            self.props.minimap_image, self.props.col_dct, self.props.cars,
-            self.props.player_car_name)
+            self.props.minimap_image, self.props.col_dct, self.props.season_props.car_names,
+            self.props.season_props.player_car_name)
 
     def destroy(self):
         self.results.destroy()

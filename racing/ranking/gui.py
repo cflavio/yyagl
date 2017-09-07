@@ -13,7 +13,7 @@ class RankingPageGui(PageGui):
     def __init__(self, mdt, menu, rprops, sprops):
         self.rprops = rprops
         self.sprops = sprops
-        self.drivers = sprops.drivers
+        self.drivers = sprops.gameprops.drivers
         PageGui.__init__(self, mdt, menu)
 
     def bld_page(self):
@@ -32,8 +32,8 @@ class RankingPageGui(PageGui):
                                                   str(car[1]) + ' %s')
             map(self.add_widget, [txt, img])
         track = self.rprops.track_name
-        ntracks = len(self.sprops.track_names)
-        if self.sprops.track_names.index(track) == ntracks - 1:
+        ntracks = len(self.sprops.gameprops.season_tracks)
+        if self.sprops.gameprops.season_tracks.index(track) == ntracks - 1:
             cont_btn_cmd = game.logic.season.logic.next_race
             cont_btn_ea = []
         else:
@@ -41,7 +41,7 @@ class RankingPageGui(PageGui):
             cont_btn_ea = ['on_ranking_end']
         cont_btn = DirectButton(
             text=_('Continue'), pos=(0, 1, -.8), command=cont_btn_cmd,
-            extraArgs=cont_btn_ea, **self.rprops.menu_args.btn_args)
+            extraArgs=cont_btn_ea, **self.rprops.season_props.gameprops.menu_args.btn_args)
         self.add_widget(cont_btn)
         PageGui.bld_page(self, False)
 
@@ -107,13 +107,13 @@ class RankingGui(Gui):
     def set_drv_txt_img(page, i, car_name, pos_x, top, text):
         idx, drvname, _, _ = next(
             driver for driver in page.drivers if driver[3] == car_name)
-        is_player_car = car_name == page.rprops.player_car_name
+        is_player_car = car_name == page.rprops.season_props.player_car_name
         txt = OnscreenText(
             text=text % drvname, align=TextNode.A_left, scale=.072,
             pos=(pos_x, top - i * .16), font=page.font,
             fg=page.text_fg if is_player_car else page.text_bg)
         img = OnscreenImage(
-            page.rprops.cars_imgs % car_name,
+            page.rprops.season_props.gameprops.cars_img % car_name,
             pos=(pos_x - .16, 1, top + .02 - i * .16), scale=.074)
         filtervpath = RankingGui.eng.curr_path + 'yyagl/assets/shaders/filter.vert'
         with open(filtervpath) as fvs:
@@ -126,7 +126,7 @@ class RankingGui(Gui):
         img.set_transparency(True)
         t_s = TextureStage('ts')
         t_s.set_mode(TextureStage.MDecal)
-        txt_path = page.rprops.drivers_img % idx
+        txt_path = page.rprops.season_props.gameprops.drivers_img.path_sel % idx
         img.set_texture(t_s, loader.loadTexture(txt_path))
         return txt, img
 

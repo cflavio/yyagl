@@ -13,8 +13,8 @@ from .gui import CarGui, CarPlayerGui
 from .ai import CarAi
 
 
-__fields = 'name pos hpr callback race driver_engine driver_tires ' + \
-    'driver_suspensions track_waypoints'
+__fields = 'race_props name pos hpr callback race driver_engine ' + \
+    'driver_tires driver_suspensions track_waypoints'
 
 
 CarProps = namedtuple('CarProps', __fields)
@@ -43,7 +43,7 @@ class CarFacade(Facade):
         self._fwd_prop_lazy('path', lambda obj: obj.gfx.path)
         self._fwd_prop_lazy('laps_num', lambda obj: obj.logic.laps_num)
         self._fwd_prop_lazy('name', lambda obj: obj.logic.cprops.name)
-        self._fwd_prop_lazy('laps', lambda obj: obj.logic.rprops.laps)
+        self._fwd_prop_lazy('laps', lambda obj: obj.logic.cprops.race_props.laps)
         self._fwd_prop_lazy('pos', lambda obj: obj.gfx.nodepath.get_pos())
         self._fwd_prop_lazy('heading', lambda obj: obj.gfx.nodepath.get_h())
 
@@ -58,18 +58,17 @@ class Car(GameObject, CarFacade):
     ai_cls = Ai
     audio_cls = Audio
 
-    def __init__(self, car_props, race_props, season_props):
+    def __init__(self, car_props):
         self.eng.log_mgr.log('init car ' + car_props.name)
         init_lst = [
-            [('fsm', self.fsm_cls, [self, car_props, race_props])],
-            [('gfx', self.gfx_cls, [self, car_props, race_props]),
-             ('phys', self.phys_cls, [self, car_props, race_props,
-                                      season_props]),
-             ('logic', self.logic_cls, [self, car_props, race_props]),
-             ('gui', self.gui_cls, [self, race_props]),
-             ('event', self.event_cls, [self, race_props, season_props]),
-             ('ai', self.ai_cls, [self, car_props, race_props])],
-            [('audio', self.audio_cls, [self, race_props])]]
+            [('fsm', self.fsm_cls, [self, car_props])],
+            [('gfx', self.gfx_cls, [self, car_props]),
+             ('phys', self.phys_cls, [self, car_props]),
+             ('logic', self.logic_cls, [self, car_props]),
+             ('gui', self.gui_cls, [self, car_props.race_props]),
+             ('event', self.event_cls, [self, car_props.race_props]),
+             ('ai', self.ai_cls, [self, car_props])],
+            [('audio', self.audio_cls, [self, car_props.race_props])]]
         GameObject.__init__(self, init_lst, car_props.callback)
         CarFacade.__init__(self)
 

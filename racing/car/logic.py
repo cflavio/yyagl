@@ -202,11 +202,10 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
 
 class CarLogic(Logic, ComputerProxy):
 
-    def __init__(self, mdt, car_props, race_props):
+    def __init__(self, mdt, car_props):
         Logic.__init__(self, mdt)
         ComputerProxy.__init__(self)
         self.cprops = car_props
-        self.rprops = race_props
         self.lap_time_start = 0
         self.last_roll_ok_time = globalClock.get_frame_time()
         self.last_roll_ko_time = globalClock.get_frame_time()
@@ -218,7 +217,7 @@ class CarLogic(Logic, ComputerProxy):
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
         self.input_strat = Input2ForcesStrategy.build(
-            self.__class__ == CarPlayerLogic, race_props.joystick, self.mdt)
+            self.__class__ == CarPlayerLogic, car_props.race_props.joystick, self.mdt)
         self.start_pos = car_props.pos
         self.start_pos_hpr = car_props.hpr
         self.last_ai_wp = None
@@ -390,8 +389,8 @@ class CarLogic(Logic, ComputerProxy):
     @compute_once
     def bitmask(self):
         b_m = BitMask32.bit(0)
-        cars_idx = range(len(self.rprops.cars))
-        cars_idx.remove(self.rprops.cars.index(self.mdt.name))
+        cars_idx = range(len(self.cprops.race_props.season_props.car_names))
+        cars_idx.remove(self.cprops.race_props.season_props.car_names.index(self.mdt.name))
         for bitn in cars_idx:
             b_m = b_m | BitMask32.bit(2 + bitn)
         return b_m
@@ -617,9 +616,9 @@ class CarLogic(Logic, ComputerProxy):
 
 class CarPlayerLogic(CarLogic):
 
-    def __init__(self, mdt, car_props, race_props):
-        CarLogic.__init__(self, mdt, car_props, race_props)
-        self.camera = Camera(mdt.gfx.nodepath, race_props.camera_vec)
+    def __init__(self, mdt, car_props):
+        CarLogic.__init__(self, mdt, car_props)
+        self.camera = Camera(mdt.gfx.nodepath, car_props.race_props.camera_vec)
         self.camera.render_all()  # workaround for prepare_scene (panda3d 1.9)
         start_pos = self.start_pos + (0, 0, 10000)
         self.eng.do_later(.01, self.camera.camera.set_pos, [start_pos])

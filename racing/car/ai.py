@@ -191,13 +191,14 @@ class RearAiLogic(AbsAiLogic):
 
 class CarAi(Ai):
 
-    def __init__(self, mdt, car_props, race_props):
+    def __init__(self, mdt, car_props):
         Ai.__init__(self, mdt)
+        race_props = car_props.race_props
         self.road_name = race_props.road_name
         self.waypoints = car_props.track_waypoints
-        self.cars = race_props.cars
-        self.front_logic = FrontAiLogic(self.mdt, self.cars, race_props.player_car_name)
-        self.rear_logic = RearAiLogic(self.mdt, self.cars, race_props.player_car_name)
+        self.cars = race_props.season_props.car_names
+        self.front_logic = FrontAiLogic(self.mdt, self.cars, race_props.season_props.player_car_name)
+        self.rear_logic = RearAiLogic(self.mdt, self.cars, race_props.season_props.player_car_name)
         self.last_positions = []
         # last 12 positions (a position a second) for respawning if the car
         # can't move

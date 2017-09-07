@@ -8,7 +8,7 @@ from yyagl.engine.phys import PhysMgr
 
 class CarPhys(Phys):
 
-    def __init__(self, mdt, car_props, race_props, season_props):
+    def __init__(self, mdt, car_props):
         Phys.__init__(self, mdt)
         self.pnode = self.vehicle = self.friction_slip = self.__track_phys = \
             self.coll_mesh = self.roll_influence = self.max_speed = None
@@ -17,8 +17,6 @@ class CarPhys(Phys):
         self.__last_drift_time = 0
         self.__finds = {}  # cache for find's results
         self.cprops = car_props
-        self.rprops = race_props
-        self.sprops = season_props
         self._load_phys()
         self.__set_collision_mesh()
         self.__set_phys_node()
@@ -27,7 +25,7 @@ class CarPhys(Phys):
         self.eng.attach_obs(self.on_end_frame)
 
     def _load_phys(self):
-        fpath = self.rprops.phys_file % self.cprops.name
+        fpath = self.cprops.race_props.season_props.gameprops.phys_path % self.cprops.name
         with open(fpath) as phys_file:
             self.cfg = load(phys_file)
 
@@ -54,15 +52,15 @@ class CarPhys(Phys):
             self.eng.log_mgr.log('%s %s: %s (%s)' % l_i)
 
     def __set_collision_mesh(self):
-        fpath = self.rprops.coll_path % self.cprops.name
+        fpath = self.cprops.race_props.coll_path % self.cprops.name
         self.coll_mesh = loader.loadModel(fpath)
         chassis_shape = BulletConvexHullShape()
         for geom in self.eng.phys_mgr.find_geoms(self.coll_mesh,
-                                         self.rprops.coll_name):
+                                         self.cprops.race_props.coll_name):
             chassis_shape.add_geom(geom.node().get_geom(0),
                                    geom.get_transform())
         self.mdt.gfx.nodepath.node().add_shape(chassis_shape)
-        car_idx = self.rprops.cars.index(self.cprops.name)
+        car_idx = self.cprops.race_props.season_props.car_names.index(self.cprops.name)
         mask = BitMask32.bit(1) | BitMask32.bit(2 + car_idx)
         self.mdt.gfx.nodepath.set_collide_mask(mask)
 
@@ -88,15 +86,15 @@ class CarPhys(Phys):
         f_radius = (f_bounds[1][2] - f_bounds[0][2]) / 2.0 + .01
         r_bounds = wheels['rr'].get_tight_bounds()
         r_radius = (r_bounds[1][2] - r_bounds[0][2]) / 2.0 + .01
-        ffr = self.coll_mesh.find('**/' + self.rprops.wheel_names.frontrear.fr)
-        ffl = self.coll_mesh.find('**/' + self.rprops.wheel_names.frontrear.fl)
-        rrr = self.coll_mesh.find('**/' + self.rprops.wheel_names.frontrear.rr)
-        rrl = self.coll_mesh.find('**/' + self.rprops.wheel_names.frontrear.rl)
+        ffr = self.coll_mesh.find('**/' + self.cprops.race_props.wheel_names.frontrear.fr)
+        ffl = self.coll_mesh.find('**/' + self.cprops.race_props.wheel_names.frontrear.fl)
+        rrr = self.coll_mesh.find('**/' + self.cprops.race_props.wheel_names.frontrear.rr)
+        rrl = self.coll_mesh.find('**/' + self.cprops.race_props.wheel_names.frontrear.rl)
         meth = self.coll_mesh.find
-        fr_node = ffr if ffr else meth('**/' + self.rprops.wheel_names.both.fr)
-        fl_node = ffl if ffl else meth('**/' + self.rprops.wheel_names.both.fl)
-        rr_node = rrr if rrr else meth('**/' + self.rprops.wheel_names.both.rr)
-        rl_node = rrl if rrl else meth('**/' + self.rprops.wheel_names.both.rl)
+        fr_node = ffr if ffr else meth('**/' + self.cprops.race_props.wheel_names.both.fr)
+        fl_node = ffl if ffl else meth('**/' + self.cprops.race_props.wheel_names.both.fl)
+        rr_node = rrr if rrr else meth('**/' + self.cprops.race_props.wheel_names.both.rr)
+        rl_node = rrl if rrl else meth('**/' + self.cprops.race_props.wheel_names.both.rl)
         fr_pos = fr_node.get_pos() + (0, 0, f_radius)
         fl_pos = fl_node.get_pos() + (0, 0, f_radius)
         rr_pos = rr_node.get_pos() + (0, 0, r_radius)
@@ -259,16 +257,16 @@ class CarPhys(Phys):
 class CarPlayerPhys(CarPhys):
 
     def get_speed(self):
-        tun_c = 1 + .1 * self.sprops.tuning_engine
+        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_engine
         drv_c = 1 + .01 * self.cprops.driver_engine
         return self.cfg['max_speed'] * tun_c * drv_c
 
     def get_friction(self):
-        tun_c = 1 + .1 * self.sprops.tuning_tires
+        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_tires
         drv_c = 1 + .01 * self.cprops.driver_tires
         return self.cfg['friction_slip'] * tun_c * drv_c
 
     def get_roll_influence(self):
-        tun_c = 1 + .1 * self.sprops.tuning_suspensions
+        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_suspensions
         drv_c = 1 + .01 * self.cprops.driver_suspensions
         return self.cfg['roll_influence'] * tun_c * drv_c

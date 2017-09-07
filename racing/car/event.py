@@ -58,12 +58,11 @@ class InputBuilderJoystick(InputBuilder):
 
 class CarEvent(Event, ComputerProxy):
 
-    def __init__(self, mdt, race_props, season_props):
+    def __init__(self, mdt, race_props):
         Event.__init__(self, mdt)
         ComputerProxy.__init__(self)
         self.eng.attach_obs(self.on_collision)
         self.props = race_props
-        self.sprops = season_props
         keys = race_props.keys
         self.label_events = [
             ('forward', keys.forward), ('left', keys.left),
@@ -111,7 +110,7 @@ class CarEvent(Event, ComputerProxy):
             RotateAll: self.props.rotate_all_path,
             Mine: self.props.mine_path}
         path = wpn2path[wpn_cls]
-        self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.sprops.car_names, part_path)
+        self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.props.season_props.car_names, part_path)
         self.mdt.logic.weapon.attach_obs(self.on_rotate_all)
         return wpn_cls
 
@@ -179,8 +178,8 @@ class CarEvent(Event, ComputerProxy):
 
 class CarPlayerEvent(CarEvent):
 
-    def __init__(self, mdt, race_props, season_props):
-        CarEvent.__init__(self, mdt, race_props, season_props)
+    def __init__(self, mdt, race_props):
+        CarEvent.__init__(self, mdt, race_props)
         if not self.eng.is_runtime:
             self.accept('f11', self.mdt.gui.pars.toggle)
             self.accept('f8', self.notify, ['on_end_race'])
@@ -212,7 +211,7 @@ class CarPlayerEvent(CarEvent):
             self.mdt.gui.panel.unset_weapon()
         wpn_cls = CarEvent.on_bonus(self)
         self.accept(self.props.keys.fire, self.on_fire)
-        self.mdt.gui.panel.set_weapon(self.sprops.wpn2img[wpn_cls.__name__])
+        self.mdt.gui.panel.set_weapon(sef.props.season_props.wpn2img[wpn_cls.__name__])
 
     def on_fire(self):
         self.ignore(self.props.keys.fire)

@@ -116,8 +116,8 @@ class CarPanel(GameObject):
     def __init__(self, race_props):
         self.race_props = race_props
         pars = {'scale': .065, 'parent': self.eng.base.a2dTopRight,
-                'fg': self.race_props.menu_args.text_fg, 'align': TextNode.A_left,
-                'font': self.eng.font_mgr.load_font(self.race_props.font)}
+                'fg': self.race_props.season_props.gameprops.menu_args.text_fg, 'align': TextNode.A_left,
+                'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
         self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
         lap_str = '1/' + str(self.race_props.laps)
         self.lap_txt = OnscreenText(text=lap_str, pos=(-.24, -.2), **pars)
@@ -126,9 +126,9 @@ class CarPanel(GameObject):
         self.ranking_txt = OnscreenText(pos=(-.24, -.5), **pars)
         self.damages_txt = OnscreenText(pos=(-.24, -.6), **pars)
         self.damages_txt['text'] = '-'
-        self.damages_txt['fg'] = self.race_props.menu_args.text_bg
+        self.damages_txt['fg'] = self.race_props.season_props.gameprops.menu_args.text_bg
         pars = {'scale': .05, 'parent': pars['parent'],
-                'fg': self.race_props.menu_args.text_bg,
+                'fg': self.race_props.season_props.gameprops.menu_args.text_bg,
                 'align': TextNode.A_right, 'font': pars['font']}
         self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
         self.lap_lab = OnscreenText(
@@ -150,7 +150,7 @@ class CarPanel(GameObject):
         self.weapon_img.destroy()
 
     def apply_damage(self, reset=False):
-        col = self.race_props.menu_args.text_bg
+        col = self.race_props.season_props.gameprops.menu_args.text_bg
         if reset:
             self.damages_txt['text'] = '-'
             self.damages_txt['fg'] = col

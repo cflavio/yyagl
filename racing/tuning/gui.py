@@ -14,12 +14,12 @@ class TuningGui(Gui):
 
     def show(self):
         self.background = OnscreenImage(
-            self.sprops.background_fpath, scale=(1.77778, 1, 1))
+            self.sprops.gameprops.menu_args.background_img, scale=(1.77778, 1, 1))
         self.background.setBin('background', 10)
         bprops = {'scale': .4, 'command': self.on_btn}
         self.txt = OnscreenText(
             text=_('What do you want to upgrade?'), scale=.1, pos=(0, .76),
-            font=loader.loadFont(self.sprops.font), fg=self.sprops.fg_col)
+            font=loader.loadFont(self.sprops.font), fg=self.sprops.gameprops.menu_args.text_bg)
         self.buttons = [ImgBtn(
             pos=(-1.2, 1, .1), image=self.sprops.tuning_imgs[0],
             extraArgs=['f_engine'], **bprops)]
@@ -34,32 +34,32 @@ class TuningGui(Gui):
             text=_('current upgrades: +') + str(tuning.f_engine),
             scale=.06,
             pos=(-1.53, -.36), font=loader.loadFont(self.sprops.font),
-            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.fg_col)
+            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.gameprops.menu_args.text_bg)
         self.upg2_txt = OnscreenText(
             text=_('current upgrades: +') + str(tuning.f_tires),
             scale=.06,
             pos=(-.35, -.36), font=loader.loadFont(self.sprops.font),
-            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.fg_col)
+            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.gameprops.menu_args.text_bg)
         self.upg3_txt = OnscreenText(
             text=_('current upgrades: +') + str(tuning.f_suspensions),
             scale=.06,
             pos=(.85, -.36), font=loader.loadFont(self.sprops.font),
-            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.fg_col)
+            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.gameprops.menu_args.text_bg)
         self.hint1_txt = OnscreenText(
             text=_("engine: it increases car's maximum speed"),
             scale=.06,
             pos=(-1.53, -.46), font=loader.loadFont(self.sprops.font),
-            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.fg_col)
+            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.gameprops.menu_args.text_bg)
         self.hint2_txt = OnscreenText(
             text=_("tires: they increase car's adherence"),
             scale=.06,
             pos=(-.35, -.46), font=loader.loadFont(self.sprops.font),
-            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.fg_col)
+            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.gameprops.menu_args.text_bg)
         self.hint3_txt = OnscreenText(
             text=_("supensions: they increase car's stability"),
             scale=.06,
             pos=(.85, -.46), font=loader.loadFont(self.sprops.font),
-            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.fg_col)
+            wordwrap=12, align=TextNode.ALeft, fg=self.sprops.gameprops.menu_args.text_bg)
 
     def on_btn(self, val):
         self.notify('on_tuning_sel', val)

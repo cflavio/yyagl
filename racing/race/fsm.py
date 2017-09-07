@@ -16,13 +16,12 @@ class RaceFsm(Fsm):
             'Countdown': ['Play'],
             'Play': ['Results']}
 
-    def enterLoading(self, rprops, sprops, track_name_transl, drivers):
+    def enterLoading(self, rprops, track_name_transl, drivers):
         self.eng.log_mgr.log('entering Loading state')
-        self.menu_args = rprops.menu_args
-        self.countdown_sfx = sprops.countdown_sfx
-        self.mdt.gui.loading.enter_loading(rprops, sprops, track_name_transl,
-                                           drivers)
-        args = [rprops.player_car_name, []]
+        self.menu_args = rprops.season_props.gameprops.menu_args
+        self.countdown_sfx = rprops.season_props.countdown_sfx
+        self.mdt.gui.loading.enter_loading(rprops, track_name_transl, drivers)
+        args = [rprops.season_props.player_car_name, []]
         self.eng.do_later(1.0, self.mdt.logic.load_stuff, args)
 
     def exitLoading(self):
