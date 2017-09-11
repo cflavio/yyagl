@@ -3,6 +3,7 @@ from yyagl.racing.ranking.ranking import Ranking
 from yyagl.racing.tuning.tuning import Tuning
 from yyagl.racing.tuning.logic import TuningCar
 from yyagl.racing.race.race import RaceSinglePlayer, RaceServer, RaceClient
+from yyagl.racing.driver.driver import Driver, DriverProps
 
 
 class SeasonLogic(Logic):
@@ -14,6 +15,20 @@ class SeasonLogic(Logic):
                                s_p.gameprops.menu_args.text_bg)
         self.tuning = Tuning(s_p)
         self.race = None
+
+        self.drivers = s_p.drivers
+        #self.drivers = []
+        #for i, drv in enumerate(s_p.gameprops.drivers):
+            #def get_driver(carname):
+            #    for driver in drivers:
+            #        if driver.car_name == carname:
+            #            return driver
+            #driver = get_driver(car_path)
+            #carname2driver = {}
+            #for driver in drivers:
+            #driver_props = DriverProps(drv.car_id, drv.name, drv.speed, drv.adherence, drv.stability)
+            #carname2driver[driver.car_name] = Driver(driver_props)
+            #self.drivers += [Driver(driver_props)]
 
     def start(self, reset=True):
         if reset:
@@ -29,8 +44,7 @@ class SeasonLogic(Logic):
     def load(self, ranking, tuning, drivers):
         self.ranking.load(ranking)
         self.tuning.load(tuning)
-        new_gp = self.props.gameprops._replace(drivers=drivers)
-        self.props = self.props._replace(gameprops=new_gp)
+        self.props = self.props._replace(drivers=drivers)
 
     def next_race(self):
         track = self.race.track.rprops.track_name
@@ -41,7 +55,7 @@ class SeasonLogic(Logic):
             idx = self.props.gameprops.season_tracks.index(track)
             next_track = self.props.gameprops.season_tracks[idx + 1]
             self.notify('on_season_cont', next_track,
-                        self.props.player_car_name, self.props.gameprops.drivers)
+                        self.props.player_car_name, self.props.drivers)
 
     def create_race_server(self, race_props):
         self.race = RaceServer(race_props)

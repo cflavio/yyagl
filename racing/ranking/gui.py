@@ -13,7 +13,7 @@ class RankingPageGui(PageGui):
     def __init__(self, mdt, menu, rprops, sprops):
         self.rprops = rprops
         self.sprops = sprops
-        self.drivers = sprops.gameprops.drivers
+        self.drivers = sprops.drivers
         PageGui.__init__(self, mdt, menu)
 
     def bld_page(self):
@@ -105,11 +105,11 @@ class RankingGui(Gui):
 
     @staticmethod
     def set_drv_txt_img(page, i, car_name, pos_x, top, text):
-        idx, drvname, _, _ = next(
-            driver for driver in page.drivers if driver[3] == car_name)
+        drv = next(
+            driver for driver in page.drivers if driver.dprops.car_name == car_name)
         is_player_car = car_name == page.rprops.season_props.player_car_name
         txt = OnscreenText(
-            text=text % drvname, align=TextNode.A_left, scale=.072,
+            text=text % drv.logic.dprops.info.name, align=TextNode.A_left, scale=.072,
             pos=(pos_x, top - i * .16), font=page.font,
             fg=page.text_fg if is_player_car else page.text_bg)
         img = OnscreenImage(
@@ -126,7 +126,7 @@ class RankingGui(Gui):
         img.set_transparency(True)
         t_s = TextureStage('ts')
         t_s.set_mode(TextureStage.MDecal)
-        txt_path = page.rprops.season_props.gameprops.drivers_img.path_sel % idx
+        txt_path = page.rprops.season_props.gameprops.drivers_img.path_sel % drv.logic.dprops.info.img_idx
         img.set_texture(t_s, loader.loadTexture(txt_path))
         return txt, img
 

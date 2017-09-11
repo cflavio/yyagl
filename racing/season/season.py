@@ -3,7 +3,7 @@ from yyagl.gameobject import GameObject
 from yyagl.facade import Facade
 from .logic import SeasonLogic
 
-sp_attrs = 'gameprops car_names player_car_name ' + \
+sp_attrs = 'gameprops car_names player_car_name drivers ' + \
     'tuning_imgs font countdown_sfx single_race ' + \
     'wpn2img tuning_engine tuning_tires tuning_suspensions ' + \
     'race_start_time countdown_seconds'
@@ -26,12 +26,12 @@ class SeasonFacade(Facade):
         self._fwd_prop_lazy('race', lambda obj: obj.logic.race)
 
     @property
-    def drivers(self):
-        return self.logic.props.gameprops.drivers
+    def drivers_skills(self):
+        return self.logic.props.gameprops.drivers_skills
 
-    @drivers.setter
-    def drivers(self, val):
-        self.logic.drivers = val
+    @drivers_skills.setter
+    def drivers_skills(self, val):
+        self.logic.drivers_skills = val
 
 
 class Season(GameObject, SeasonFacade):
