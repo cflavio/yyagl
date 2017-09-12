@@ -2,8 +2,6 @@ from yaml import load
 from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape
 from panda3d.core import LPoint3f, BitMask32, Mat4
 from yyagl.gameobject import Phys
-from yyagl.engine.log import LogMgr
-from yyagl.engine.phys import PhysMgr
 
 
 class CarPhys(Phys):
@@ -25,7 +23,8 @@ class CarPhys(Phys):
         self.eng.attach_obs(self.on_end_frame)
 
     def _load_phys(self):
-        fpath = self.cprops.race_props.season_props.gameprops.phys_path % self.cprops.name
+        ppath = self.cprops.race_props.season_props.gameprops.phys_path
+        fpath = ppath % self.cprops.name
         with open(fpath) as phys_file:
             self.cfg = load(phys_file)
 
@@ -55,12 +54,13 @@ class CarPhys(Phys):
         fpath = self.cprops.race_props.coll_path % self.cprops.name
         self.coll_mesh = loader.loadModel(fpath)
         chassis_shape = BulletConvexHullShape()
-        for geom in self.eng.phys_mgr.find_geoms(self.coll_mesh,
-                                         self.cprops.race_props.coll_name):
+        for geom in self.eng.phys_mgr.find_geoms(
+                self.coll_mesh, self.cprops.race_props.coll_name):
             chassis_shape.add_geom(geom.node().get_geom(0),
                                    geom.get_transform())
         self.mdt.gfx.nodepath.node().add_shape(chassis_shape)
-        car_idx = self.cprops.race_props.season_props.car_names.index(self.cprops.name)
+        car_names = self.cprops.race_props.season_props.car_names
+        car_idx = car_names.index(self.cprops.name)
         mask = BitMask32.bit(1) | BitMask32.bit(2 + car_idx)
         self.mdt.gfx.nodepath.set_collide_mask(mask)
 
@@ -86,15 +86,16 @@ class CarPhys(Phys):
         f_radius = (f_bounds[1][2] - f_bounds[0][2]) / 2.0 + .01
         r_bounds = wheels['rr'].get_tight_bounds()
         r_radius = (r_bounds[1][2] - r_bounds[0][2]) / 2.0 + .01
-        ffr = self.coll_mesh.find('**/' + self.cprops.race_props.wheel_names.frontrear.fr)
-        ffl = self.coll_mesh.find('**/' + self.cprops.race_props.wheel_names.frontrear.fl)
-        rrr = self.coll_mesh.find('**/' + self.cprops.race_props.wheel_names.frontrear.rr)
-        rrl = self.coll_mesh.find('**/' + self.cprops.race_props.wheel_names.frontrear.rl)
+        wheel_names = self.cprops.race_props.wheel_names
+        ffr = self.coll_mesh.find('**/' + wheel_names.frontrear.fr)
+        ffl = self.coll_mesh.find('**/' + wheel_names.frontrear.fl)
+        rrr = self.coll_mesh.find('**/' + wheel_names.frontrear.rr)
+        rrl = self.coll_mesh.find('**/' + wheel_names.frontrear.rl)
         meth = self.coll_mesh.find
-        fr_node = ffr if ffr else meth('**/' + self.cprops.race_props.wheel_names.both.fr)
-        fl_node = ffl if ffl else meth('**/' + self.cprops.race_props.wheel_names.both.fl)
-        rr_node = rrr if rrr else meth('**/' + self.cprops.race_props.wheel_names.both.rr)
-        rl_node = rrl if rrl else meth('**/' + self.cprops.race_props.wheel_names.both.rl)
+        fr_node = ffr if ffr else meth('**/' + wheel_names.both.fr)
+        fl_node = ffl if ffl else meth('**/' + wheel_names.both.fl)
+        rr_node = rrr if rrr else meth('**/' + wheel_names.both.rr)
+        rl_node = rrl if rrl else meth('**/' + wheel_names.both.rl)
         fr_pos = fr_node.get_pos() + (0, 0, f_radius)
         fl_pos = fl_node.get_pos() + (0, 0, f_radius)
         rr_pos = rr_node.get_pos() + (0, 0, r_radius)

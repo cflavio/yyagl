@@ -31,6 +31,10 @@ class Race(GameObject, RaceFacade):
         GameObject.__init__(self, init_lst)
         RaceFacade.__init__(self)
 
+    def destroy(self):
+        GameObject.destroy(self)
+        RaceFacade.destroy(self)
+
 
 class RaceSinglePlayer(Race):
     logic_cls = RaceLogicSinglePlayer

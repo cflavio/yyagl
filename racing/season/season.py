@@ -42,6 +42,10 @@ class Season(GameObject, SeasonFacade):
         GameObject.__init__(self, init_lst)
         SeasonFacade.__init__(self)
 
+    def destroy(self):
+        GameObject.destroy(self)
+        SeasonFacade.destroy(self)
+
 
 class SingleRaceSeason(Season):
     pass

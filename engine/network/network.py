@@ -8,6 +8,7 @@ from yyagl.gameobject import GameObject
 class AbsNetwork(GameObject):
 
     def __init__(self):
+        GameObject.__init__(self)
         self.c_mgr = None
         self.c_reader = None
         self.c_writer = None
@@ -51,3 +52,4 @@ class AbsNetwork(GameObject):
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
+        GameObject.destroy(self)

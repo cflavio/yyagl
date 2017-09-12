@@ -1,7 +1,6 @@
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Gui
-from yyagl.engine.font import FontMgr
 from yyagl.facade import Facade
 from .results import Results
 from .loading.loading import Loading
@@ -22,7 +21,8 @@ class RaceGui(Gui, RaceGuiFacade):
         self.results = Results(rprops)
         self.loading = Loading()
         self.way_txt = OnscreenText(
-            '', pos=(.1, .1), scale=.1, fg=r_p.season_props.gameprops.menu_args.text_err,
+            '', pos=(.1, .1), scale=.1,
+            fg=r_p.season_props.gameprops.menu_args.text_err,
             parent=self.eng.base.a2dBottomLeft, align=TextNode.ALeft,
             font=self.eng.font_mgr.load_font(r_p.season_props.font))
         self.minimap = None
@@ -31,7 +31,8 @@ class RaceGui(Gui, RaceGuiFacade):
     def start(self):
         self.minimap = Minimap(
             self.mdt.track.lrtb, self.props.minimap_path,
-            self.props.minimap_image, self.props.col_dct, self.props.season_props.car_names,
+            self.props.minimap_image, self.props.col_dct,
+            self.props.season_props.car_names,
             self.props.season_props.player_car_name)
 
     def destroy(self):

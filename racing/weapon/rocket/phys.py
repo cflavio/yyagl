@@ -1,7 +1,5 @@
-from panda3d.bullet import BulletRigidBodyNode, BulletSphereShape
-from panda3d.core import Mat4, BitMask32
+from panda3d.bullet import BulletSphereShape
 from yyagl.racing.weapon.weapon.phys import RocketWeaponPhys
-from yyagl.engine.phys import PhysMgr
 
 
 class RocketPhys(RocketWeaponPhys):

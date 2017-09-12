@@ -7,14 +7,14 @@ class DriverLoaderStrategy(GameObject):
 
     @staticmethod
     def load(cars, r_p, car_name, track, race, player_car_names, s_p):
-        if not cars:
-            return race.fsm.demand('Countdown', s_p)
+        if not cars: return race.fsm.demand('Countdown', s_p)
+        eng = DriverLoaderStrategy.eng
         car = cars.pop(0)
         car_cls = Car
-        if DriverLoaderStrategy.eng.server.is_active or DriverLoaderStrategy.eng.client.is_active:
+        if eng.server.is_active or eng.client.is_active:
             car_cls = NetworkCar  # if car in player_cars else Car
         no_p = car not in player_car_names
-        srv_or_sng = DriverLoaderStrategy.eng.server.is_active or not DriverLoaderStrategy.eng.client.is_active
+        srv_or_sng = eng.server.is_active or not eng.client.is_active
         car_cls = AiCar if no_p and srv_or_sng else car_cls
         race.logic.cars += [DriverLoaderStrategy.actual_load(
             cars, car, r_p, track, race, car_cls, player_car_names, s_p)]
@@ -30,7 +30,7 @@ class DriverLoaderStrategy(GameObject):
         car_props = CarProps(
             r_p, load_car_name, pos, hpr,
             lambda: DriverLoaderStrategy.load(cars, r_p, load_car_name, track,
-                                           race, player_car_names, seas_p),
+                                              race, player_car_names, seas_p),
             race, drv.dprops.f_engine, drv.dprops.f_tires,
             drv.dprops.f_suspensions, race.track.phys.wp2prevs)
         return car_cls(car_props)

@@ -34,7 +34,8 @@ def __prepare(lng_base_dir, lng, appname):
     dst = lng_base_dir + lng + '/LC_MESSAGES/%s.pot' % appname
     move(appname + '.pot', dst)
     lng_dir = lng_base_dir + lng + '/LC_MESSAGES/'
-    map(lambda line: __fix_line(line, lng_dir, appname), ['CHARSET/UTF-8', 'ENCODING/8bit'])
+    lines_to_fix = ['CHARSET/UTF-8', 'ENCODING/8bit']
+    map(lambda line: __fix_line(line, lng_dir, appname), lines_to_fix)
     if not exists(lng_dir + appname + '.po'):
         copy(lng_dir + appname + '.pot', lng_dir + appname + '.po')
     return lng_dir

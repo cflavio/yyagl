@@ -28,17 +28,19 @@ class CarGfx(Gfx, CarGfxFacade):
         CarGfxFacade.__init__(self)
 
     def async_bld(self):
-        low_dam_fpath = self.cprops.race_props.damage_paths.low % self.cprops.name
+        rprops = self.cprops.race_props
+        low_dam_fpath = rprops.damage_paths.low % self.cprops.name
         self.chassis_np_low = loader.loadModel(low_dam_fpath)
         self.chassis_np_hi = loader.loadModel(low_dam_fpath)
-        fpath = self.cprops.race_props.model_name % self.cprops.name
+        fpath = rprops.model_name % self.cprops.name
         loader.loadModel(fpath, callback=self.load_wheels)
 
     def reparent(self):
         self.chassis_np.reparent_to(self.nodepath)
         chas = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
         map(lambda cha: cha.set_depth_offset(-2), chas)
-        map(lambda whl: whl.reparent_to(self.eng.gfx.root), self.wheels.values())
+        wheels = self.wheels.values()
+        map(lambda whl: whl.reparent_to(self.eng.gfx.root), wheels)
         # try RigidBodyCombiner for the wheels
         for cha in chas:
             cha.prepare_scene(base.win.get_gsg())
@@ -72,7 +74,8 @@ class CarGfx(Gfx, CarGfxFacade):
     def crash_sfx(self):
         self.crash_cnt += 1
         if self.mdt.phys.prev_speed_ratio < .8 or \
-                self.eng.curr_time - self.last_crash_t < 5.0 or self.crash_cnt < 2:
+                self.eng.curr_time - self.last_crash_t < 5.0 or \
+                self.crash_cnt < 2:
             return False
         # part_path = self.cprops.race_props.particle_path
         # node = self.mdt.gfx.nodepath
@@ -135,9 +138,12 @@ class SkidmarkMgr(object):
             self.r_skidmark = Skidmark(fr_pos, radius, heading)
             self.l_skidmark = Skidmark(fl_pos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
-            # whl_radius = self.car.phys.vehicle.get_wheels()[2].get_wheel_radius()
-            # whl_pos_l = self.car.phys.vehicle.get_wheels()[2].get_chassis_connection_point_cs() + (0, -whl_radius, -whl_radius + .05)
-            # whl_pos_r = self.car.phys.vehicle.get_wheels()[3].get_chassis_connection_point_cs() + (0, -whl_radius, -whl_radius + .05)
+            # wheels = self.car.phys.vehicle.get_wheels()
+            # whl_radius = wheels[2].get_wheel_radius()
+            # whl_pos_l = wheels[2].get_chassis_connection_point_cs() + \
+            #     (0, -whl_radius, -whl_radius + .05)
+            # whl_pos_r = wheels[3].get_chassis_connection_point_cs() + \
+            #     (0, -whl_radius, -whl_radius + .05)
             # eng.particle(
             #     'assets/particles/skidmark.ptf', self.car.gfx.nodepath,
             #     self.car.gfx.nodepath, whl_pos_l, 1.2, 'left skidmark')

@@ -5,6 +5,7 @@ from yyagl.gameobject import GameObject
 class Minimap(GameObject):
 
     def __init__(self, lrtb, track_img, handle_img, col_dct, cars, player_car):
+        GameObject.__init__(self)
         self.lrtb = lrtb
         self.minimap = OnscreenImage(
             track_img, pos=(-.25, 1, .25), scale=.2,
@@ -43,3 +44,4 @@ class Minimap(GameObject):
     def destroy(self):
         des = lambda wdg: wdg.destroy()
         map(des, [self.minimap] + self.car_handles.values())
+        GameObject.destroy(self)

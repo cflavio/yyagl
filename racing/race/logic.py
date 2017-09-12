@@ -1,10 +1,5 @@
-from yyagl.gameobject import Logic, GameObject
-from yyagl.engine.network.server import Server
-from yyagl.engine.network.client import Client
-from yyagl.engine.phys import PhysMgr
+from yyagl.gameobject import Logic
 from yyagl.racing.track.track import Track
-from yyagl.racing.car.car import Car, CarProps, CarPlayer, CarPlayerServer, \
-    CarPlayerClient, NetworkCar, AiCar, AiCarPlayer
 from yyagl.racing.driver.logic import DriverPlayerLoaderStrategy
 
 
@@ -34,7 +29,8 @@ class RaceLogic(Logic):
         for driver in self.props.drivers:
             if driver.dprops.car_name == r_p.season_props.player_car_name:
                 self.load_car = lambda: DriverPlayerLoaderStrategy.load(
-                    r_p, car_name, self.track, self.mdt, player_car_names, self.props.season_props)
+                    r_p, car_name, self.track, self.mdt, player_car_names,
+                    self.props.season_props)
         self.mdt.track = self.track  # facade this
 
     def on_track_loaded(self):

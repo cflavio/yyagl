@@ -2,14 +2,13 @@ from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
 from panda3d.core import LineSegs, BitMask32
 from yyagl.gameobject import Phys, GameObject
-from yyagl.engine.log import LogMgr
-from yyagl.engine.phys import PhysMgr
 from yyagl.racing.weapon.bonus.bonus import Bonus
 
 
 class MeshBuilder(GameObject):
 
     def __init__(self, model, geom_names, is_ghost):
+        GameObject.__init__(self)
         self.model = model
         self.rigid_bodies = []
         self.ghosts = []
@@ -49,6 +48,7 @@ class MeshBuilder(GameObject):
 
     def destroy(self):
         self.model = self.rigid_bodies = self.ghosts = self.nodes = None
+        GameObject.destroy(self)
 
 
 class MeshBuilderMerged(MeshBuilder):
@@ -164,7 +164,8 @@ class TrackPhys(Phys):
     def on_bonus_collected(self, bonus):
         bonus.detach_obs(self.on_bonus_collected)
         self.bonuses.remove(bonus)
-        self.generate_tsk += [self.eng.do_later(20, self.create_bonus, [bonus.pos])]
+        self.generate_tsk += [
+            self.eng.do_later(20, self.create_bonus, [bonus.pos])]
 
     def destroy(self):
         self.model = self.model.remove_node()

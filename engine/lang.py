@@ -6,6 +6,7 @@ from yyagl.gameobject import GameObject
 class LangMgr(GameObject):
 
     def __init__(self, lang, lang_domain, lang_path):
+        GameObject.__init__(self)
         self.curr_lang = lang
         self.domain = lang_domain
         self.path = join(self.eng.curr_path, lang_path)

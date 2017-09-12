@@ -1,6 +1,5 @@
-from panda3d.bullet import BulletRigidBodyNode, BulletBoxShape
+from panda3d.bullet import BulletBoxShape
 from yyagl.racing.weapon.weapon.phys import WeaponPhys
-from yyagl.engine.phys import PhysMgr
 
 
 class MinePhys(WeaponPhys):

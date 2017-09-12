@@ -26,3 +26,7 @@ class Ranking(GameObject, RankingFacade):
             [('logic', RankingLogic, [self, car_names])]]
         GameObject.__init__(self, init_lst)
         RankingFacade.__init__(self)
+
+    def destroy(self):
+        GameObject.destroy(self)
+        RankingFacade.destroy(self)

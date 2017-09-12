@@ -1,6 +1,5 @@
 from collections import namedtuple
 from yyagl.gameobject import GameObject, Ai, Audio
-from yyagl.engine.log import LogMgr
 from yyagl.facade import Facade
 from .fsm import CarFsm
 from .gfx import CarGfx, CarPlayerGfx
@@ -43,7 +42,8 @@ class CarFacade(Facade):
         self._fwd_prop_lazy('path', lambda obj: obj.gfx.path)
         self._fwd_prop_lazy('laps_num', lambda obj: obj.logic.laps_num)
         self._fwd_prop_lazy('name', lambda obj: obj.logic.cprops.name)
-        self._fwd_prop_lazy('laps', lambda obj: obj.logic.cprops.race_props.laps)
+        self._fwd_prop_lazy('laps',
+                            lambda obj: obj.logic.cprops.race_props.laps)
         self._fwd_prop_lazy('pos', lambda obj: obj.gfx.nodepath.get_pos())
         self._fwd_prop_lazy('heading', lambda obj: obj.gfx.nodepath.get_h())
 
@@ -71,6 +71,10 @@ class Car(GameObject, CarFacade):
             [('audio', self.audio_cls, [self, car_props.race_props])]]
         GameObject.__init__(self, init_lst, car_props.callback)
         CarFacade.__init__(self)
+
+    def destroy(self):
+        GameObject.destroy(self)
+        CarFacade.destroy(self)
 
 
 class CarPlayer(Car):

@@ -135,9 +135,14 @@ class PauseLogic(Logic):
 class PauseMgr(GameObject, Colleague):
 
     def __init__(self, mdt):
+        GameObject.__init__(self)
         Colleague.__init__(self, mdt)
         self.gui = PauseGui(self)
         self.logic = PauseLogic(self)
 
     def remove_task(self, tsk):
         return self.logic.remove_task(tsk)
+
+    def destroy(self):
+        GameObject.destroy(self)
+        Colleague.destroy(self)

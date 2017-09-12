@@ -18,3 +18,6 @@ class Facade(object):
     def _fwd_prop_lazy(self, prop_name, tgt_prop):
         lprop = lambda self: tgt_prop(self)
         setattr(self.__class__, prop_name, property(lprop))
+
+    def destroy(self):
+        pass

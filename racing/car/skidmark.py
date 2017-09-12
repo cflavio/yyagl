@@ -9,6 +9,7 @@ from yyagl.gameobject import GameObject
 class Skidmark(GameObject):
 
     def __init__(self, whl_pos, whl_radius, car_h):
+        GameObject.__init__(self)
         self.radius = whl_radius
         v_f = GeomVertexFormat.getV3()
         self.vdata = GeomVertexData('skid', v_f, Geom.UHDynamic)
@@ -70,3 +71,4 @@ class Skidmark(GameObject):
 
     def destroy(self):
         self.remove_seq = self.remove_seq.finish()
+        GameObject.destroy(self)

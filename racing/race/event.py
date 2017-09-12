@@ -1,6 +1,5 @@
 from itertools import chain
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
-from yyagl.engine.network.server import Server
 from yyagl.gameobject import Event
 from yyagl.racing.car.ai import CarAi
 
@@ -27,7 +26,8 @@ class RaceEvent(Event):
     def fire_ingame_menu(self):
         self.ignore('escape-up')
         self.eng.show_cursor()
-        self.ingame_menu = self.menu_cls(self.mdt.logic.props.season_props.gameprops.menu_args)
+        self.ingame_menu = self.menu_cls(
+            self.mdt.logic.props.season_props.gameprops.menu_args)
         self.ingame_menu.gui.attach(self.on_ingame_back)
         self.ingame_menu.gui.attach(self.on_ingame_exit)
 

@@ -27,3 +27,7 @@ class Tuning(GameObject, TuningFacade):
             [('logic', TuningLogic, [self, props.car_names])]]
         GameObject.__init__(self, init_lst)
         TuningFacade.__init__(self)
+
+    def destroy(self):
+        GameObject.destroy(self)
+        TuningFacade.destroy(self)

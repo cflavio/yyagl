@@ -1,7 +1,6 @@
-from panda3d.bullet import BulletRigidBodyNode, BulletSphereShape
+from panda3d.bullet import BulletRigidBodyNode
 from panda3d.core import Mat4, BitMask32
 from yyagl.gameobject import Phys
-from yyagl.engine.phys import PhysMgr
 
 
 class WeaponPhys(Phys):
@@ -47,7 +46,8 @@ class RocketWeaponPhys(WeaponPhys):
         self.n_p.set_collide_mask(b_m)
         self.eng.phys_mgr.add_collision_obj(self.node)
         self.rot_mat = Mat4()
-        self.rot_mat.set_rotate_mat(self.parent.get_h() + self.rot_deg, (0, 0, 1))
+        rot_deg = self.parent.get_h() + self.rot_deg
+        self.rot_mat.set_rotate_mat(rot_deg, (0, 0, 1))
         self.update_tsk = taskMgr.add(self.update_weapon, 'update_weapon')
 
     def update_weapon(self, tsk):

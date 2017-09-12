@@ -1,5 +1,4 @@
 from yyagl.gameobject import GameObject
-from yyagl.engine.log import LogMgr
 from yyagl.facade import Facade
 from .gfx import TrackGfx, TrackGfxShader
 from .phys import TrackPhys, TrackPhysDebug
@@ -38,3 +37,7 @@ class Track(GameObject, TrackFacade):
 
     def __on_track_loaded(self):
         self.event.notify('on_track_loaded')
+
+    def destroy(self):
+        GameObject.destroy(self)
+        TrackFacade.destroy(self)

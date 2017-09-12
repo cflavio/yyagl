@@ -1,6 +1,5 @@
-from panda3d.core import TextNode, Shader, TextureStage
+from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
-from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.engine.gui.page import Page, PageGui, PageFacade
 from yyagl.gameobject import GameObject, Event
 from yyagl.racing.ranking.gui import RankingGui
@@ -14,7 +13,7 @@ class LoadingPageGui(PageGui):
         self.drivers = drivers
         PageGui.__init__(self, mdt, menu)
 
-    def bld_page(self):
+    def bld_page(self, back_btn=True):
         self.eng.init_gfx()
         self.font = self.mdt.menu.gui.menu_args.font
         self.text_fg = self.mdt.menu.gui.menu_args.text_fg
@@ -56,7 +55,7 @@ class LoadingPageGui(PageGui):
         self.add_widget(txt)
         for i, car in enumerate(sorted_ranking):
             txt, img = RankingGui.set_drv_txt_img(self, i, car[0], -.2,
-                                                      .22, str(car[1]) + ' %s')
+                                                  .22, str(car[1]) + ' %s')
             map(self.add_widget, [txt, img])
 
     def set_controls(self):
@@ -79,7 +78,8 @@ class LoadingPageGui(PageGui):
         txt = OnscreenText(text=_('Upgrades'), scale=.1, pos=(1.0, -.56),
                            font=self.font, fg=self.text_bg)
         self.add_widget(txt)
-        tuning = game.logic.season.tuning.car2tuning[self.rprops.season_props.player_car_name]
+        tuning = game.logic.season.tuning.car2tuning[
+            self.rprops.season_props.player_car_name]
         txt = OnscreenText(
             text=_('engine: +') + str(tuning.f_engine),
             align=TextNode.A_left, scale=.072, pos=(.8, -.7), font=self.font,
@@ -115,3 +115,8 @@ class LoadingPage(Page):
                                       drivers])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)
+        # call Page's __init__
+
+    def destroy(self):
+        GameObject.destroy(self)
+        PageFacade.destroy(self)

@@ -5,7 +5,6 @@ from panda3d.core import AmbientLight, BitMask32, Spotlight, NodePath, \
     OmniBoundingVolume
 from direct.actor.Actor import Actor
 from yyagl.gameobject import Gfx
-from yyagl.engine.log import LogMgr
 from .signs import Signs
 
 

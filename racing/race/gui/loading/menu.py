@@ -32,4 +32,7 @@ class LoadingMenu(Menu):
             [('gui', LoadingGui, [self, rprops, loading,
                                   track_name_transl, drivers])],
             [('logic', MenuLogic, [self])]]
-        GameObject.__init__(self, init_lst)  # NB doesn't invoke Menu's
+        GameObject.__init__(self, init_lst)  # invoke Menu's __init__
+
+    def destroy(self):
+        GameObject.destroy(self)

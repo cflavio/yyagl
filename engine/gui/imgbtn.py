@@ -2,6 +2,7 @@ from panda3d.core import Shader
 from direct.gui.DirectButton import DirectButton
 from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL
 
+
 class ImgBtn(DirectButton):
 
     def __init__(self, *args, **kwargs):

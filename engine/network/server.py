@@ -1,7 +1,6 @@
 from panda3d.core import QueuedConnectionListener, PointerToConnection, \
     NetAddress
 from .network import AbsNetwork
-from ..log import LogMgr
 
 
 class Server(AbsNetwork):

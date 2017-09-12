@@ -1,7 +1,6 @@
 from sys import path
 from os.path import dirname, realpath
 path.append(dirname(realpath(__file__)) + '/../thirdparty')
-import __builtin__
 from direct.showbase.ShowBase import ShowBase
 from .pause import PauseMgr
 from .profiler import Profiler
@@ -32,7 +31,7 @@ class Engine(GameObject, EngineFacade):
         EngineFacade.__init__(self)
         self.base = EngineShowBase()
         self.shader_mgr = ShaderMgr(cfg.shaders_dev, cfg.gamma)
-        self.profiler = Profiler(cfg.python_profiling, cfg.python_profiling_percall)
+        self.profiler = Profiler(cfg.py_profiling, cfg.py_profiling_percall)
         self.font_mgr = FontMgr()
         self.server = Server()
         self.client = Client()

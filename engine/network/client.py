@@ -1,4 +1,3 @@
-from ..log import LogMgr
 from .network import AbsNetwork
 
 

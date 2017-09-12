@@ -25,7 +25,7 @@ class Conf(object):
     def __init__(self):
         self.model_path = 'assets/models/tracks/'
         self.antialiasing = self.menu_joypad = self.shaders_dev = \
-            self.python_profiling = self.python_profiling_percall = False
+            self.py_profiling = self.py_profiling_percall = False
         self.gamma = 1.0
         self.lang = 'en'
         self.lang_domain = 'yorg'
@@ -39,6 +39,7 @@ eng = Engine(Conf())
 class TrackProcesser(GameObject):
 
     def __init__(self):
+        GameObject.__init__(self)
         self.__actors = []
         self.__flat_roots = {}
         self.models_to_load = self.loading_models = None

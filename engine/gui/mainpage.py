@@ -6,7 +6,7 @@ from .imgbtn import ImgBtn
 
 class MainPageGui(PageGui):
 
-    def bld_page(self):
+    def bld_page(self, back_btn=True):
         self.__bld_social()
         self.__bld_version()
         self._set_buttons()
@@ -47,4 +47,5 @@ class MainPage(Page, PageFacade):
     gui_cls = MainPageGui
 
     def __init__(self):
+        # refactor: call Page.__init__
         PageFacade.__init__(self)

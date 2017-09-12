@@ -1,3 +1,6 @@
+from yyagl.gameobject import GameObject
+
+
 def has_pygame():
     try:
         import pygame
@@ -11,9 +14,6 @@ if has_pygame():
     from pygame import joystick
 
 
-from yyagl.gameobject import GameObject
-
-
 class JoystickMgrBase(GameObject):
     # if there is not pygame
 
@@ -22,6 +22,7 @@ class JoystickMgrBase(GameObject):
         return (JoystickMgr if has_pygame() else JoystickMgrBase)(emul_keyb)
 
     def __init__(self, emulate_keyboard):
+        GameObject.__init__(self)
         self.emulate_keyboard = emulate_keyboard
         self.joysticks = []
         self.old_x = self.old_y = self.old_b0 = self.old_b1 = 0
@@ -35,7 +36,7 @@ class JoystickMgrBase(GameObject):
         return 0, 0, 0, 0
 
     def destroy(self):
-        pass
+        GameObject.destroy(self)
 
 
 class JoystickMgr(JoystickMgrBase):

@@ -10,11 +10,7 @@ from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.racing.weapon.turbo.turbo import Turbo
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
 from yyagl.racing.weapon.mine.mine import Mine
-from yyagl.engine.joystick import JoystickMgr
-from yyagl.engine.phys import PhysMgr
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
-from yyagl.engine.network.client import Client
-from yyagl.engine.network.server import Server
 
 
 Keys = namedtuple('Keys', 'forward rear left right fire respawn pause')
@@ -99,7 +95,7 @@ class CarEvent(Event, ComputerProxy):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
         probs = [.2, .2, .2, .1, .2]
         sel = uniform(0, sum(probs))
-        for i in range(len(wpn_classes)):
+        for i, _ in enumerate(wpn_classes):
             if sum(probs[:i]) <= sel <= sum(probs[:i + 1]):
                 wpn_cls = wpn_classes[i]
         part_path = self.props.particle_path
@@ -110,7 +106,8 @@ class CarEvent(Event, ComputerProxy):
             RotateAll: self.props.rotate_all_path,
             Mine: self.props.mine_path}
         path = wpn2path[wpn_cls]
-        self.mdt.logic.weapon = wpn_cls(self.mdt, path, self.props.season_props.car_names, part_path)
+        self.mdt.logic.weapon = wpn_cls(
+            self.mdt, path, self.props.season_props.car_names, part_path)
         self.mdt.logic.weapon.attach_obs(self.on_rotate_all)
         return wpn_cls
 
@@ -211,7 +208,8 @@ class CarPlayerEvent(CarEvent):
             self.mdt.gui.panel.unset_weapon()
         wpn_cls = CarEvent.on_bonus(self)
         self.accept(self.props.keys.fire, self.on_fire)
-        self.mdt.gui.panel.set_weapon(sef.props.season_props.wpn2img[wpn_cls.__name__])
+        self.mdt.gui.panel.set_weapon(
+            self.props.season_props.wpn2img[wpn_cls.__name__])
 
     def on_fire(self):
         self.ignore(self.props.keys.fire)

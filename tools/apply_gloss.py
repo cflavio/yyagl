@@ -9,11 +9,9 @@ with open(sys.argv[1]) as f_in:
     lines = f_in.readlines()
     for idx, line in enumerate(lines):
         if line.strip() != '<Scalar> envtype { GLOSS }':
-            is_eq_prev = lambda: line.strip() == out_lines[-1].strip()
-            # lazy eval since out_lines is [] at the beginning
             is_scal = line.strip().startswith('<Scalar> alpha-file { ')
-            is_dupl = lambda: is_eq_prev() and is_scal
-            if not idx or not is_dupl():
+            if not idx or not (line.strip() == out_lines[-1].strip()
+                               and is_scal):
                 out_lines += [line.rstrip()]
         else:
             out_lines += [line.rstrip()]

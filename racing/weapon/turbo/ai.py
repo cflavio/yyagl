@@ -1,4 +1,3 @@
-from random import uniform
 from yyagl.racing.weapon.weapon.ai import WeaponAi
 
 

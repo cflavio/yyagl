@@ -24,3 +24,7 @@ class Bonus(GameObject, BonusFacade):
             [('logic', BonusLogic, [self, waypoints])]]
         GameObject.__init__(self, init_lst)
         BonusFacade.__init__(self)
+
+    def destroy(self):
+        GameObject.destroy(self)
+        BonusFacade.destroy(self)

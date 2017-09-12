@@ -16,7 +16,7 @@ class RankingPageGui(PageGui):
         self.drivers = sprops.drivers
         PageGui.__init__(self, mdt, menu)
 
-    def bld_page(self):
+    def bld_page(self, back_btn=True):
         self.eng.init_gfx()
         self.font = self.mdt.menu.gui.menu_args.font
         self.text_fg = self.mdt.menu.gui.menu_args.text_fg
@@ -41,7 +41,8 @@ class RankingPageGui(PageGui):
             cont_btn_ea = ['on_ranking_end']
         cont_btn = DirectButton(
             text=_('Continue'), pos=(0, 1, -.8), command=cont_btn_cmd,
-            extraArgs=cont_btn_ea, **self.rprops.season_props.gameprops.menu_args.btn_args)
+            extraArgs=cont_btn_ea,
+            **self.rprops.season_props.gameprops.menu_args.btn_args)
         self.add_widget(cont_btn)
         PageGui.bld_page(self, False)
 
@@ -56,6 +57,7 @@ class RankingPage(Page):
              ('gui', RankingPageGui, [self, menu, rprops, sprops])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)
+        # invece Page's __init__
 
     def attach_obs(self, mth):
         self.gui.attach_obs(mth)
@@ -63,10 +65,14 @@ class RankingPage(Page):
     def detach_obs(self, mth):
         self.gui.detach_obs(mth)
 
+    def destroy(self):
+        GameObject.destroy(self)
+        PageFacade.destroy(self)
+
 
 class RankingMenuGui(Gui):
 
-    def __init__(self, mdt, rprops, sprops, menu):
+    def __init__(self, mdt, rprops, sprops):
         Gui.__init__(self, mdt)
         menu_args = sprops.gameprops.menu_args
         menu_args.btn_size = (-8.6, 8.6, -.42, .98)
@@ -83,7 +89,7 @@ class RankingMenu(GameObject):
     gui_cls = RankingMenuGui
 
     def __init__(self, rprops, sprops):
-        init_lst = [[('gui', self.gui_cls, [self, rprops, sprops, self])]]
+        init_lst = [[('gui', self.gui_cls, [self, rprops, sprops])]]
         GameObject.__init__(self, init_lst)
 
     def attach_obs(self, mth):
@@ -91,6 +97,9 @@ class RankingMenu(GameObject):
 
     def detach_obs(self, mth):
         self.gui.rank_page.detach_obs(mth)
+
+    def destroy(self):
+        GameObject.destroy(self)
 
 
 class RankingGui(Gui):
@@ -101,24 +110,28 @@ class RankingGui(Gui):
         self.background_path = background_fpath
         self.font = font
         self.fg_col = fg_col
-        self.background = None
+        self.rank_menu = self.background = None
 
     @staticmethod
     def set_drv_txt_img(page, i, car_name, pos_x, top, text):
         drv = next(
-            driver for driver in page.drivers if driver.dprops.car_name == car_name)
+            driver for driver in page.drivers
+            if driver.dprops.car_name == car_name)
         is_player_car = car_name == page.rprops.season_props.player_car_name
         txt = OnscreenText(
-            text=text % drv.logic.dprops.info.name, align=TextNode.A_left, scale=.072,
-            pos=(pos_x, top - i * .16), font=page.font,
+            text=text % drv.logic.dprops.info.name, align=TextNode.A_left,
+            scale=.072, pos=(pos_x, top - i * .16), font=page.font,
             fg=page.text_fg if is_player_car else page.text_bg)
+        gprops = page.rprops.season_props.gameprops
         img = OnscreenImage(
-            page.rprops.season_props.gameprops.cars_img % car_name,
+            gprops.cars_img % car_name,
             pos=(pos_x - .16, 1, top + .02 - i * .16), scale=.074)
-        filtervpath = RankingGui.eng.curr_path + 'yyagl/assets/shaders/filter.vert'
+        filtervpath = RankingGui.eng.curr_path + \
+            'yyagl/assets/shaders/filter.vert'
         with open(filtervpath) as fvs:
             vert = fvs.read()
-        drvfpath = RankingGui.eng.curr_path + 'yyagl/assets/shaders/drv_car.frag'
+        drvfpath = RankingGui.eng.curr_path + \
+            'yyagl/assets/shaders/drv_car.frag'
         with open(drvfpath) as ffs:
             frag = ffs.read()
         shader = Shader.make(Shader.SL_GLSL, vert, frag)
@@ -126,7 +139,7 @@ class RankingGui(Gui):
         img.set_transparency(True)
         t_s = TextureStage('ts')
         t_s.set_mode(TextureStage.MDecal)
-        txt_path = page.rprops.season_props.gameprops.drivers_img.path_sel % drv.logic.dprops.info.img_idx
+        txt_path = gprops.drivers_img.path_sel % drv.logic.dprops.info.img_idx
         img.set_texture(t_s, loader.loadTexture(txt_path))
         return txt, img
 
@@ -144,5 +157,5 @@ class RankingGui(Gui):
 
     def destroy(self):
         self.hide()
-        self.ranking_texts = self.background = None
+        self.rank_menu = self.ranking_texts = self.background = None
         Gui.destroy(self)

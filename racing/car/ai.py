@@ -2,7 +2,6 @@ from random import uniform
 from collections import namedtuple
 from panda3d.core import Vec3, LineSegs, LPoint3f
 from yyagl.gameobject import Ai, GameObject
-from yyagl.engine.phys import PhysMgr
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
 
 
@@ -36,6 +35,7 @@ class DebugLines(object):
 class AbsAiLogic(ComputerProxy, GameObject):
 
     def __init__(self, car, cars, player_car):
+        GameObject.__init__(self)
         self.car = car
         self.cars = cars
         self.player_car = player_car
@@ -128,7 +128,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
         lookahead_rot = self.eng.rot_vec(lookahed_vec, deg)
         lookahead_pos = self.car.pos + lookahead_rot
         result = self.eng.phys_mgr.ray_test_closest(start, lookahead_pos,
-                                            self.car.logic.bitmask)
+                                                    self.car.logic.bitmask)
         hit, dist, name = result.get_node(), 0, ''
         if hit:
             dist = (self.car.pos - result.get_hit_pos()).length()
@@ -143,6 +143,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
         self.debug_lines_gnd.destroy()
         self.debug_lines_obst.destroy()
         ComputerProxy.destroy(self)
+        GameObject.destroy(self)
 
 
 class FrontAiLogic(AbsAiLogic):
@@ -194,11 +195,12 @@ class CarAi(Ai):
     def __init__(self, mdt, car_props):
         Ai.__init__(self, mdt)
         race_props = car_props.race_props
+        player_car_name = race_props.season_props.player_car_name
         self.road_name = race_props.road_name
         self.waypoints = car_props.track_waypoints
         self.cars = race_props.season_props.car_names
-        self.front_logic = FrontAiLogic(self.mdt, self.cars, race_props.season_props.player_car_name)
-        self.rear_logic = RearAiLogic(self.mdt, self.cars, race_props.season_props.player_car_name)
+        self.front_logic = FrontAiLogic(self.mdt, self.cars, player_car_name)
+        self.rear_logic = RearAiLogic(self.mdt, self.cars, player_car_name)
         self.last_positions = []
         # last 12 positions (a position a second) for respawning if the car
         # can't move

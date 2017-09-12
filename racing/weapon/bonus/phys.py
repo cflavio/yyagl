@@ -1,6 +1,5 @@
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
 from yyagl.gameobject import Phys
-from yyagl.engine.phys import PhysMgr
 
 
 class BonusPhys(Phys):

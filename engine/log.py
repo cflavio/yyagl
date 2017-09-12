@@ -15,6 +15,7 @@ class LogMgrBase(GameObject):
         return LogMgr if base.win else LogMgrBase
 
     def __init__(self):
+        GameObject.__init__(self)
         self.__notify = DirectNotify().newCategory('ya2')
         self.log_conf()
 

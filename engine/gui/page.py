@@ -136,7 +136,9 @@ class PageGui(Gui):
 
     @staticmethod
     def transl_text(obj, text_src, text_transl):
-        # text_transl is not used: why are we passing it?
+        # text_transl is not used, anyway we need it since we have this kind of
+        # use: wdg.transl_text('example str', _('example str'))
+        # this allows to change translations on the fly
         obj.text_src_tra = text_src
         obj.__class__.transl_text = property(lambda self: _(self.text_src_tra))
 
@@ -202,3 +204,7 @@ class Page(GameObject, PageFacade):
         return [
             [('event', self.event_cls, [self])],
             [('gui', self.gui_cls, [self, self.menu_args])]]
+
+    def destroy(self):
+        GameObject.destroy(self)
+        PageFacade.destroy(self)

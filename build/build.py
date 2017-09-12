@@ -36,7 +36,8 @@ def tracks_tgt_fnames():
     for _, dnames, _ in walk(tr_root):
         return [tr_root + dname + '/track_all.bam' for dname in dnames]
     return []
-    #return [tr_root + dname + '/track_all.bam' for _, dnames, _ in walk(tr_root) for dname in dnames]
+    # return [tr_root + dname + '/track_all.bam'
+    #         for _, dnames, _ in walk(tr_root) for dname in dnames]
     # this creates an empty folder assets/models/tracks/tex
 
 

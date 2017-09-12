@@ -1,6 +1,5 @@
 from panda3d.core import WindowProperties
 from ...gameobject import Gui
-from ..log import LogMgr
 from .cursor import MouseCursor
 from .browser import Browser
 

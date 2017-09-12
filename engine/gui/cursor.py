@@ -6,8 +6,8 @@ from yyagl.gameobject import GameObject
 class MouseCursor(GameObject):
 
     def __init__(self, fpath, scale, hotspot):
-        if not fpath:
-            return
+        if not fpath: return
+        GameObject.__init__(self)
         self.__set_standard_cursor(False)
         self.cursor_img = OnscreenImage(fpath)
         self.cursor_img.set_transparency(True)
@@ -23,24 +23,19 @@ class MouseCursor(GameObject):
         props.set_cursor_hidden(not show)
         base.win.requestProperties(props)
 
-    def show(self):
-        self.cursor_img.show()
+    def show(self): self.cursor_img.show()
 
-    def show_standard(self):
-        self.__set_standard_cursor(True)
+    def show_standard(self): self.__set_standard_cursor(True)
 
-    def hide(self):
-        self.cursor_img.hide()
+    def hide(self): self.cursor_img.hide()
 
-    def hide_standard(self):
-        self.__set_standard_cursor(False)
+    def hide_standard(self): self.__set_standard_cursor(False)
 
     def cursor_top(self):
         self.cursor_img.reparent_to(self.cursor_img.get_parent())
 
     def on_frame(self):
-        if not base.mouseWatcherNode.hasMouse():
-            return
+        if not base.mouseWatcherNode.hasMouse(): return
         m_x = base.mouseWatcherNode.get_mouse_x()
         m_y = base.mouseWatcherNode.get_mouse_y()
         h_x = m_x * base.getAspectRatio() + self.hotspot_dx

@@ -117,7 +117,7 @@ class GODirector(object):
 class GameObject(Subject):
     __metaclass__ = ABCMeta
 
-    def __init__(self, init_lst=None, callback=None):
+    def __init__(self, init_lst=[], callback=None):
         Subject.__init__(self)
         self.comp_names = self.__comp_lst(init_lst)
         GODirector(self, init_lst, callback)

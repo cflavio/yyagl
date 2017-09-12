@@ -2,17 +2,15 @@ from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.DirectButton import DirectButton
-from yyagl.racing.race.gui.loading.loadingpage import LoadingPageGui
 from yyagl.racing.ranking.gui import RankingGui
 from yyagl.engine.gui.imgbtn import ImgBtn
-from yyagl.observer import Subject
 from yyagl.gameobject import GameObject
 
 
-class Results(GameObject, Subject):
+class Results(GameObject):
 
     def __init__(self, rprops):
-        Subject.__init__(self)
+        GameObject.__init__(self)
         self.__res_txts = []
         self.__buttons = []
         self.drivers = self.result_frm = None
@@ -28,7 +26,8 @@ class Results(GameObject, Subject):
             frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
         laps = len(lap_times)
         text_bg = self.rprops.season_props.gameprops.menu_args.text_bg
-        pars = {'scale': .1, 'fg': text_bg, 'font': self.rprops.season_props.gameprops.menu_args.font}
+        pars = {'scale': .1, 'fg': text_bg,
+                'font': self.rprops.season_props.gameprops.menu_args.font}
         self.__res_txts = [
             OnscreenText(str(round(lap_times[i], 2)),
                          pos=(0, .52 - .2 * (i + 1)), **pars)
@@ -60,20 +59,21 @@ class Results(GameObject, Subject):
         tumblr_url = self.rprops.share_urls[3]
         sites = [('facebook', facebook_url), ('twitter', twitter_url),
                  ('google_plus', plus_url), ('tumblr', tumblr_url)]
+        menu_args= self.rprops.season_props.gameprops.menu_args
         self.__buttons += [
             ImgBtn(
                 scale=.078,
                 pos=(.02 + i*.18, 1, -.79), frameColor=(0, 0, 0, 0),
-                image=self.rprops.season_props.gameprops.menu_args.social_imgs_dpath % site[0],
+                image=menu_args.social_imgs_dpath % site[0],
                 command=self.eng.open_browser, extraArgs=[site[1]],
-                rolloverSound=self.rprops.season_props.gameprops.menu_args.rollover_sfx,
-                clickSound=self.rprops.season_props.gameprops.menu_args.click_sfx)
+                rolloverSound=menu_args.rollover_sfx,
+                clickSound=menu_args.click_sfx)
             for i, site in enumerate(sites)]
 
         def step():
             self.notify('on_race_step', race_ranking)
             self.destroy()
-            Subject.destroy(self)
+            GameObject.destroy(self)
         cont_btn = DirectButton(
             text=_('Continue'), pos=(0, 1, -.6), command=step,
             **self.rprops.season_props.gameprops.menu_args.btn_args)
@@ -87,3 +87,4 @@ class Results(GameObject, Subject):
         map(lambda txt: txt.destroy(), self.__res_txts)
         map(lambda btn: btn.destroy(), self.__buttons)
         self.result_frm.destroy()
+        GameObject.destroy(self)

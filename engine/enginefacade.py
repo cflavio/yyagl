@@ -1,4 +1,3 @@
-from .font import FontMgr
 from ..facade import Facade
 
 

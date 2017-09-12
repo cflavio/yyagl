@@ -13,6 +13,7 @@ class Camera(GameObject):
     look_dist_max = 16
 
     def __init__(self, car_np, cam_vec):
+        GameObject.__init__(self)
         self.car_np = car_np
         self.cam_vec = cam_vec  # eye to look_at
         self.curr_look_dist = 0
@@ -103,4 +104,4 @@ class Camera(GameObject):
         skydome and skydome.show()
 
     def destroy(self):
-        pass
+        GameObject.destroy(self)

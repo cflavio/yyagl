@@ -6,7 +6,7 @@ class Subject(object):
     def attach(self, obs_meth, sort=10, rename='', redirect=None, args=[]):
         if rename:
             obs_meth.__name__ = rename
-        onm = obs_meth if type(obs_meth) == str else obs_meth.__name__
+        onm = obs_meth if isinstance(obs_meth, str) else obs_meth.__name__
         if onm not in self.observers:
             self.observers[onm] = []
         self.observers[onm] += [(obs_meth, sort, redirect, args)]

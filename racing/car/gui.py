@@ -3,12 +3,12 @@ from direct.gui.DirectSlider import DirectSlider
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import Gui, GameObject
-from yyagl.engine.font import FontMgr
 
 
 class CarParameter(GameObject):
 
     def __init__(self, attr_name, init_val, pos, val_range, callback, args=[]):
+        GameObject.__init__(self)
         self.__callback = callback
         self.__args = args
         self.__lab = OnscreenText(
@@ -17,7 +17,8 @@ class CarParameter(GameObject):
         slider_pos = LVector3f(pos[0], 1, pos[1]) + (.3, 0, .01)
         self.__slider = DirectSlider(
             pos=slider_pos, value=init_val, range=val_range,
-            command=self.__set_attr, parent=self.eng.base.a2dTopLeft, scale=.24)
+            command=self.__set_attr, parent=self.eng.base.a2dTopLeft,
+            scale=.24)
         txt_pos = LVector3f(pos[0], pos[1], 1) + (.6, 0, 0)
         self.__val = OnscreenText(
             pos=txt_pos, align=TextNode.ALeft, fg=(1, 1, 1, 1),
@@ -39,6 +40,7 @@ class CarParameter(GameObject):
 
     def destroy(self):
         map(lambda wdg: wdg.destroy(), self.widgets)
+        GameObject.destroy(self)
 
 
 class CarParameters(object):
@@ -60,6 +62,7 @@ class CarParameters(object):
             new_par = CarParameter(
                 par_info[0], getattr(phys, par_info[0]), (.5, -.04 - i * .08),
                 par_info[1], lambda val: setattr(phys, par_info[0], val))
+            # refactor: par_info is a cell var
             self.__pars += [new_par]
         pars_info = [
             ('pitch_control', (-10, 10), phys.vehicle.setPitchControl),
@@ -105,7 +108,8 @@ class CarParameters(object):
 
     def toggle(self):
         map(lambda par: par.toggle(), self.__pars)
-        (self.eng.show_cursor if self.__pars[0].is_visible else self.eng.hide_cursor)()
+        is_visible = self.__pars[0].is_visible
+        (self.eng.show_cursor if is_visible else self.eng.hide_cursor)()
 
     def destroy(self):
         map(lambda wdg: wdg.destroy(), self.__pars)
@@ -114,10 +118,13 @@ class CarParameters(object):
 class CarPanel(GameObject):
 
     def __init__(self, race_props):
+        GameObject.__init__(self)
         self.race_props = race_props
+        sprops = self.race_props.season_props
+        menu_args = sprops.gameprops.menu_args
         pars = {'scale': .065, 'parent': self.eng.base.a2dTopRight,
-                'fg': self.race_props.season_props.gameprops.menu_args.text_fg, 'align': TextNode.A_left,
-                'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
+                'fg': menu_args.text_fg, 'align': TextNode.A_left,
+                'font': self.eng.font_mgr.load_font(sprops.font)}
         self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
         lap_str = '1/' + str(self.race_props.laps)
         self.lap_txt = OnscreenText(text=lap_str, pos=(-.24, -.2), **pars)
@@ -126,9 +133,9 @@ class CarPanel(GameObject):
         self.ranking_txt = OnscreenText(pos=(-.24, -.5), **pars)
         self.damages_txt = OnscreenText(pos=(-.24, -.6), **pars)
         self.damages_txt['text'] = '-'
-        self.damages_txt['fg'] = self.race_props.season_props.gameprops.menu_args.text_bg
+        self.damages_txt['fg'] = menu_args.text_bg
         pars = {'scale': .05, 'parent': pars['parent'],
-                'fg': self.race_props.season_props.gameprops.menu_args.text_bg,
+                'fg': menu_args.text_bg,
                 'align': TextNode.A_right, 'font': pars['font']}
         self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
         self.lap_lab = OnscreenText(

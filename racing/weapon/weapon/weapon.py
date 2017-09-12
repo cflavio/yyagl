@@ -1,11 +1,7 @@
 from yyagl.gameobject import GameObject
 from yyagl.facade import Facade
 from .gfx import WeaponGfx
-from .phys import WeaponPhys
 from .audio import WeaponAudio
-from .logic import WeaponLogic
-from .event import WeaponEvent
-from .ai import WeaponAi
 
 
 class WeaponFacade(Facade):
@@ -33,6 +29,10 @@ class Weapon(GameObject, WeaponFacade):
         GameObject.__init__(self, init_lst)
         WeaponFacade.__init__(self)
 
+    def destroy(self):
+        GameObject.destroy(self)
+        WeaponFacade.destroy(self)
+
 
 class PhysWeapon(Weapon):
 
@@ -46,3 +46,4 @@ class PhysWeapon(Weapon):
             [('ai', self.ai_cls, [self, car])]]
         GameObject.__init__(self, init_lst)
         WeaponFacade.__init__(self)
+        # refactor: call Weapon.__init__

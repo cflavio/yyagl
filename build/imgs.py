@@ -15,7 +15,8 @@ def __bld_img(fname):
     cmd_tmpl = 'convert "%s"[0] -resize %dx%d! "%s"'
     system(cmd_tmpl % (fname, width, height, pngname))
     if pngname.endswith('_png.png'): return
-    cmd = 'nvcompress -bc3 {alpha} -nomips "%s" "%sdds"' % (png, fname[:-3])
+    cmd_tmpl = 'nvcompress -bc3 {alpha} -nomips "%s" "%sdds"'
+    cmd = cmd_tmpl % (pngname, fname[:-3])
     system(cmd.format(alpha='-alpha' if alpha else ''))
     remove(pngname)
 

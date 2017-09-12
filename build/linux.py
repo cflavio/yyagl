@@ -26,7 +26,8 @@ def bld_linux(target, source, env):
     rmtree(bld_dpath + 'linux_' + env['PLATFORM'])
 
 
-def __do_bld(start_dir, appname, platform, ico_fpath, nointernet, p3d_fpath, int_str):
+def __do_bld(start_dir, appname, platform, ico_fpath, nointernet, p3d_fpath,
+             int_str):
     __prepare(start_dir, platform)
     __bld(appname, start_dir, platform, ico_fpath)
     if nointernet:
@@ -81,7 +82,7 @@ def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
             if 'assets/models/tracks/' in fpath and \
                     fpath.endswith('.bam') and not \
                     any(fpath.endswith(concl + '.bam')
-                        for concl in ['/track_all', '/collision', 'Anim']):
+                            for concl in ['/track_all', '/collision', 'Anim']):
                 remove(fpath)
     tmpl = 'pdeploy -o  . {nointernet} -t host_dir=./lib ' + \
         '-t verify_contents=never -n {appname} -N {AppName} -v {version} ' + \

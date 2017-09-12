@@ -24,8 +24,7 @@ def __clean_pylint(pylint_out):
         end_skip = 'RuntimeError: maximum recursion depth exceeded while '
         if any(line.startswith(ev_skip) for ev_skip in [start_skip, end_skip]):
             skipping = line.startswith(start_skip)
-        elif not skipping:
-            clean_output += line + '\n'
+        elif not skipping: clean_output += line + '\n'
     return clean_output
 
 

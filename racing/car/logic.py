@@ -5,9 +5,6 @@ from yyagl.gameobject import Logic
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
-from yyagl.engine.joystick import JoystickMgr
-from yyagl.engine.phys import PhysMgr
-from yyagl.engine.log import LogMgr
 
 
 WPInfo = namedtuple('WPInfo', 'prev next')
@@ -217,7 +214,8 @@ class CarLogic(Logic, ComputerProxy):
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
         self.input_strat = Input2ForcesStrategy.build(
-            self.__class__ == CarPlayerLogic, car_props.race_props.joystick, self.mdt)
+            self.__class__ == CarPlayerLogic, car_props.race_props.joystick,
+            self.mdt)
         self.start_pos = car_props.pos
         self.start_pos_hpr = car_props.hpr
         self.last_ai_wp = None
@@ -354,9 +352,9 @@ class CarLogic(Logic, ComputerProxy):
                 if 'Goal' in hits and 'PitStop' not in hits:
                     goal_wp = next_wp
 
-        def parents(wp):
+        def parents(w_p):
             return [_wp for _wp in self.cprops.track_waypoints
-                    if wp in self.cprops.track_waypoints[_wp]]
+                    if w_p in self.cprops.track_waypoints[_wp]]
         wps = []
         if not goal_wp:
             return wps
@@ -390,7 +388,8 @@ class CarLogic(Logic, ComputerProxy):
     def bitmask(self):
         b_m = BitMask32.bit(0)
         cars_idx = range(len(self.cprops.race_props.season_props.car_names))
-        cars_idx.remove(self.cprops.race_props.season_props.car_names.index(self.mdt.name))
+        cars_idx.remove(
+            self.cprops.race_props.season_props.car_names.index(self.mdt.name))
         for bitn in cars_idx:
             b_m = b_m | BitMask32.bit(2 + bitn)
         return b_m
@@ -446,9 +445,9 @@ class CarLogic(Logic, ComputerProxy):
             if dist_wp > .5 * dist_alt and dist_h_wp > 1.5 * dist_h_alt:
                 curr_wp = self.alt_jmp_wp
                 waypoints[curr_wp] = self._grid_wps[curr_wp]
-        for wp in considered_wps:
-            if curr_wp in wp[1]:
-                waypoints[wp[0]] = wp[1]
+        for cons_wp in considered_wps:
+            if curr_wp in cons_wp[1]:
+                waypoints[cons_wp[0]] = cons_wp[1]
         may_prev = waypoints[curr_wp]
         distances = [self.pt_line_dst(car_np, w_p, curr_wp)
                      for w_p in may_prev]

@@ -5,7 +5,8 @@ from .logic import DriverLogic
 
 
 DriverInfo = namedtuple('DriverInfo', 'img_idx name speed adherence stability')
-DriverProps = namedtuple('DriverProps', 'info car_name f_engine f_tires f_suspensions')
+__fields = 'info car_name f_engine f_tires f_suspensions'
+DriverProps = namedtuple('DriverProps', __fields)
 
 
 class DriverFacade(Facade):
@@ -20,3 +21,7 @@ class Driver(GameObject, DriverFacade):
         init_lst = [[('logic', DriverLogic, [self, driver_props])]]
         GameObject.__init__(self, init_lst)
         DriverFacade.__init__(self)
+
+    def destroy(self):
+        GameObject.destroy(self)
+        DriverFacade.destroy(self)
