@@ -5,17 +5,17 @@ from multiprocessing import cpu_count
 from panda3d.core import loadPrcFileData, PandaSystem, Filename
 from panda3d.bullet import get_bullet_version
 from direct.directnotify.DirectNotify import DirectNotify
-from yyagl.gameobject import GameObject
+from yyagl.gameobject import Colleague
 
 
-class LogMgrBase(GameObject):
+class LogMgrBase(Colleague):
 
     @staticmethod
     def init_cls():
         return LogMgr if base.win else LogMgrBase
 
-    def __init__(self):
-        GameObject.__init__(self)
+    def __init__(self, mdt):
+        Colleague.__init__(self, mdt)
         self.__notify = DirectNotify().newCategory('ya2')
         self.log_conf()
 

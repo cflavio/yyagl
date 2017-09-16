@@ -11,7 +11,7 @@ class Colleague(Subject):
     def __init__(self, mdt, *args, **kwargs):
         Subject.__init__(self)
         self.notify_tsk = None
-        self.mdt = mdt
+        self.mdt = mdt  # refactor: remove it
         self.async_bld(*args, **kwargs)
 
     def async_bld(self, *args, **kwargs):
@@ -21,9 +21,12 @@ class Colleague(Subject):
         self.sync_bld(*args, **kwargs)
         notify_args = 'on_comp_blt', self
         self.notify_tsk = self.eng.do_later(.001, self.mdt.notify, notify_args)
-        # this is necessary to schedule the next component into the next
-        # frame otherwise some dependent components may access a non-existent
-        # one. think of something better
+        # since on_comp_blt is fired from __init__, when it's catched by
+        # GODirector's on_comp_blt, it triggers __process_lst, but since
+        # __init__ it's not finished, __process_lst's setattrs is not
+        # concluded, so the following components don't see the previous one.
+        # maybe it's better to remove this kind of creation process, and use
+        # a more standard one
 
     def sync_bld(self, *args, **kwargs):
         pass
@@ -42,53 +45,45 @@ class Fsm(FSM, Colleague):
         Colleague.__init__(self, mdt)
 
     def destroy(self):
-        if self.state:
-            self.cleanup()
+        if self.state: self.cleanup()
         Colleague.destroy(self)
 
 
 class Event(Colleague, DirectObject):
 
     def destroy(self):
-        Colleague.destroy(self)
         self.ignoreAll()
+        Colleague.destroy(self)
 
 
-class Audio(Colleague):
-    pass
+class Audio(Colleague): pass
 
 
-class Ai(Colleague):
-    pass
+class Ai(Colleague): pass
 
 
-class Gfx(Colleague):
-    pass
+class Gfx(Colleague): pass
 
 
-class Gui(Colleague):
-    pass
+class Gui(Colleague): pass
 
 
-class Logic(Colleague):
-    pass
+class Logic(Colleague): pass
 
 
-class Phys(Colleague):
-    pass
+class Phys(Colleague): pass
 
 
 class GODirector(object):
 
-    def __init__(self, tgt_obj, init_lst, callback):
+    def __init__(self, tgt_obj, init_lst, end_cb):
         self.__obj = tgt_obj
         tgt_obj.attach(self.on_comp_blt)
-        self.callback = callback
+        self.end_cb = end_cb
         self.completed = [False for _ in init_lst]
         self.pending = {}
         self.__init_lst = init_lst
-        for idx in range(len(init_lst)):
-            self.__process_lst(tgt_obj, idx)
+        for idx, _ in enumerate(init_lst): self.__process_lst(tgt_obj, idx)
 
     def __process_lst(self, obj, idx):
         if not self.__init_lst[idx]:
@@ -105,31 +100,29 @@ class GODirector(object):
     def end_lst(self, idx):
         self.completed[idx] = True
         if all(self.completed):
-            if self.callback:
-                self.callback()
+            if self.end_cb: self.end_cb()
             self.destroy()
 
     def destroy(self):
         self.__obj.detach(self.on_comp_blt)
-        self.__obj = self.callback = self.__init_lst = None
+        self.__obj = self.end_cb = self.__init_lst = None
 
 
 class GameObject(Subject):
     __metaclass__ = ABCMeta
 
-    def __init__(self, init_lst=[], callback=None):
+    def __init__(self, init_lst=[], end_cb=None):
         Subject.__init__(self)
         self.comp_names = self.__comp_lst(init_lst)
-        GODirector(self, init_lst, callback)
+        GODirector(self, init_lst, end_cb)
 
     def __comp_lst(self, init_lst):
-        if not init_lst:
-            return []
+        if not init_lst: return []
+        return self.__process_elm(init_lst[0]) + self.__comp_lst(init_lst[1:])
 
-        def process_elm(elm):
-            return [elm[0]] if isinstance(elm, tuple) else self.__comp_lst(elm)
-        return process_elm(init_lst[0]) + self.__comp_lst(init_lst[1:])
+    def __process_elm(self, elm):
+        return [elm[0]] if isinstance(elm, tuple) else self.__comp_lst(elm)
 
     def destroy(self):
-        Subject.destroy(self)
         map(lambda cmp: getattr(self, cmp).destroy(), self.comp_names)
+        Subject.destroy(self)

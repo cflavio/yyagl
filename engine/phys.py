@@ -1,4 +1,5 @@
 from panda3d.bullet import BulletWorld, BulletDebugNode
+from yyagl.gameobject import Colleague
 from ..facade import Facade
 
 
@@ -24,10 +25,10 @@ class PhysFacade(Facade):
             return self.root.rayTestClosest(top, bottom)
 
 
-class PhysMgr(PhysFacade):
+class PhysMgr(Colleague, PhysFacade):
 
-    def __init__(self, eng):
-        self.eng = eng
+    def __init__(self, mdt):
+        Colleague.__init__(self, mdt)
         self.collision_objs = []  # objects to be processed
         self.__obj2coll = {}  # obj: [(node, coll_time), ...]
         self.root = None
