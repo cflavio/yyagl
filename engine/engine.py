@@ -15,6 +15,7 @@ from .gui.gui import EngineGui
 from .logic import EngineLogic
 from .event import EngineEvent
 from .audio import EngineAudio
+from .lang import LangMgr
 from ..gameobject import GameObject, Colleague
 from .enginefacade import EngineFacade
 
@@ -44,7 +45,9 @@ class Engine(GameObject, EngineFacade):
               [self, cfg.menu_joypad, on_end_cb])],
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self, cfg.volume])],
-            [('pause', PauseMgr, [self])]]
+            [('pause', PauseMgr, [self])],
+            [('lang_mgr', LangMgr, (cfg.lang, cfg.lang_domain, cfg.lang_path))]]
+
         GameObject.__init__(self, comps)
 
     def destroy(self):

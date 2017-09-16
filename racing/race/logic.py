@@ -23,7 +23,6 @@ class RaceLogic(Logic):
         r_p = self.props
         self.eng.phys_mgr.init()
         player_car_names = player_car_names[1::2]
-        game.player_car_name = car_name
         self.track = Track(r_p)
         self.track.attach_obs(self.on_track_loaded)
         for driver in self.props.drivers:
@@ -48,6 +47,7 @@ class RaceLogic(Logic):
         self.eng.attach_obs(self.on_frame)
         self.mdt.event.network_register()
         self.player_car.attach_obs(self.mdt.event.on_wrong_way)
+        self.player_car.logic.camera.render_all(self.track.gfx.model)  # workaround for prepare_scene (panda3d 1.9)
         self.track.play_music()
         map(lambda car: car.reset_car(), self.all_cars)
         map(lambda car: car.start(), self.all_cars)

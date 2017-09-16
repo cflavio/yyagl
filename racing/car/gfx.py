@@ -122,7 +122,8 @@ class CarGfx(Gfx, CarGfxFacade):
     def destroy(self):
         meshes = [self.nodepath, self.chassis_np] + self.wheels.values()
         map(lambda mesh: mesh.remove_node(), meshes)
-        self.wheels = None
+        map(lambda dec: dec.destroy(), self.decorators)
+        self.wheels = self.decorators = None
         self.skidmark_mgr.destroy()
         Gfx.destroy(self)
 
@@ -172,5 +173,4 @@ class SkidmarkMgr(object):
 
     def destroy(self):
         map(lambda skd: skd.destroy(), self.skidmarks)
-        map(lambda dec: dec.destroy(), self.decorators)
-        self.car = self.skidmarks = self.decorators = None
+        self.car = self.skidmarks = None

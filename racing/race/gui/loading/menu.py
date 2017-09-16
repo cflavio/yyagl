@@ -8,7 +8,7 @@ from .loadingpage import LoadingPage
 class LoadingGui(Gui):
 
     def __init__(self, mdt, rprops, loading, track_name_transl,
-                 drivers):
+                 drivers, ranking, tuning):
         Gui.__init__(self, mdt)
         pbackground = 'assets/images/loading/%s%s.jpg'
         pbackground = pbackground % (rprops.track_name, randint(1, 4))
@@ -17,7 +17,7 @@ class LoadingGui(Gui):
         self.menu = Menu(menu_args)
         self.menu.loading = loading
         self.menu.push_page(LoadingPage(
-            rprops, self.menu, track_name_transl, drivers))
+            rprops, self.menu, track_name_transl, drivers, ranking, tuning))
 
     def destroy(self):
         self.menu = self.menu.destroy()
@@ -27,10 +27,10 @@ class LoadingGui(Gui):
 class LoadingMenu(Menu):
     # move to game's code
 
-    def __init__(self, rprops, loading, track_name_transl, drivers):
+    def __init__(self, rprops, loading, track_name_transl, drivers, ranking, tuning):
         init_lst = [
             [('gui', LoadingGui, [self, rprops, loading,
-                                  track_name_transl, drivers])],
+                                  track_name_transl, drivers, ranking, tuning])],
             [('logic', MenuLogic, [self])]]
         GameObject.__init__(self, init_lst)  # invoke Menu's __init__
 

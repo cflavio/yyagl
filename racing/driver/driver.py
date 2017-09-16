@@ -13,6 +13,7 @@ class DriverFacade(Facade):
 
     def __init__(self):
         self._fwd_prop_lazy('dprops', lambda obj: obj.logic.dprops)
+        self._fwd_mth_lazy('to_dct', lambda obj: obj.logic.to_dct)
 
 
 class Driver(GameObject, DriverFacade):

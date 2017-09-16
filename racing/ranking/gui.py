@@ -10,10 +10,11 @@ from yyagl.engine.gui.menu import Menu
 
 class RankingPageGui(PageGui):
 
-    def __init__(self, mdt, menu, rprops, sprops):
+    def __init__(self, mdt, menu, rprops, sprops, ranking):
         self.rprops = rprops
         self.sprops = sprops
         self.drivers = sprops.drivers
+        self.ranking = ranking
         PageGui.__init__(self, mdt, menu)
 
     def bld_page(self, back_btn=True):
@@ -22,7 +23,7 @@ class RankingPageGui(PageGui):
         self.text_fg = self.mdt.menu.gui.menu_args.text_fg
         self.text_bg = self.mdt.menu.gui.menu_args.text_bg
         self.text_err = self.mdt.menu.gui.menu_args.text_err
-        items = game.logic.season.ranking.carname2points.items()
+        items = self.ranking.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = OnscreenText(text=_('Ranking'), scale=.1, pos=(0, .76),
                            font=self.font, fg=self.text_bg)
@@ -34,8 +35,8 @@ class RankingPageGui(PageGui):
         track = self.rprops.track_name
         ntracks = len(self.sprops.gameprops.season_tracks)
         if self.sprops.gameprops.season_tracks.index(track) == ntracks - 1:
-            cont_btn_cmd = game.logic.season.logic.next_race
-            cont_btn_ea = []
+            cont_btn_cmd = self.notify
+            cont_btn_ea = ['on_ranking_next_race']
         else:
             cont_btn_cmd = self.notify
             cont_btn_ea = ['on_ranking_end']
@@ -49,12 +50,12 @@ class RankingPageGui(PageGui):
 
 class RankingPage(Page):
 
-    def __init__(self, rprops, sprops, menu):
+    def __init__(self, rprops, sprops, menu, ranking):
         self.rprops = rprops
         self.menu = menu
         init_lst = [
             [('event', PageEvent, [self]),
-             ('gui', RankingPageGui, [self, menu, rprops, sprops])]]
+             ('gui', RankingPageGui, [self, menu, rprops, sprops, ranking])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)
         # invece Page's __init__
@@ -72,12 +73,12 @@ class RankingPage(Page):
 
 class RankingMenuGui(Gui):
 
-    def __init__(self, mdt, rprops, sprops):
+    def __init__(self, mdt, rprops, sprops, ranking):
         Gui.__init__(self, mdt)
         menu_args = sprops.gameprops.menu_args
         menu_args.btn_size = (-8.6, 8.6, -.42, .98)
         self.menu = Menu(menu_args)
-        self.rank_page = RankingPage(rprops, sprops, self.menu)
+        self.rank_page = RankingPage(rprops, sprops, self.menu, ranking)
         self.eng.do_later(.01, self.menu.push_page, [self.rank_page])
 
     def destroy(self):
@@ -88,8 +89,8 @@ class RankingMenuGui(Gui):
 class RankingMenu(GameObject):
     gui_cls = RankingMenuGui
 
-    def __init__(self, rprops, sprops):
-        init_lst = [[('gui', self.gui_cls, [self, rprops, sprops])]]
+    def __init__(self, rprops, sprops, ranking):
+        init_lst = [[('gui', self.gui_cls, [self, rprops, sprops, ranking])]]
         GameObject.__init__(self, init_lst)
 
     def attach_obs(self, mth):
@@ -143,8 +144,8 @@ class RankingGui(Gui):
         img.set_texture(t_s, loader.loadTexture(txt_path))
         return txt, img
 
-    def show(self, rprops, sprops):
-        self.rank_menu = RankingMenu(rprops, sprops)
+    def show(self, rprops, sprops, ranking):
+        self.rank_menu = RankingMenu(rprops, sprops, ranking)
 
     def hide(self):
         self.rank_menu.destroy()

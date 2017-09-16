@@ -618,7 +618,6 @@ class CarPlayerLogic(CarLogic):
     def __init__(self, mdt, car_props):
         CarLogic.__init__(self, mdt, car_props)
         self.camera = Camera(mdt.gfx.nodepath, car_props.race_props.camera_vec)
-        self.camera.render_all()  # workaround for prepare_scene (panda3d 1.9)
         start_pos = self.start_pos + (0, 0, 10000)
         self.eng.do_later(.01, self.camera.camera.set_pos, [start_pos])
         self.car_positions = []

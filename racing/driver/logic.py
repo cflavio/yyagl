@@ -58,3 +58,16 @@ class DriverLogic(Logic):
     def __init__(self, mdt, driver_props):
         Logic.__init__(self, mdt)
         self.dprops = driver_props
+
+    def to_dct(self):
+        dct = {
+            'img_idx': self.dprops.info.img_idx,
+            'name': self.dprops.info.name,
+            'speed': self.dprops.info.speed,
+            'adherence': self.dprops.info.adherence,
+            'stability': self.dprops.info.stability,
+            'car_name': self.dprops.car_name,
+            'f_engine': self.dprops.f_engine,
+            'f_tires': self.dprops.f_tires,
+            'f_suspensions': self.dprops.f_suspensions}
+        return dct

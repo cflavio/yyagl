@@ -7,10 +7,12 @@ from yyagl.racing.ranking.gui import RankingGui
 
 class LoadingPageGui(PageGui):
 
-    def __init__(self, mdt, menu, rprops, track_name_transl, drivers):
+    def __init__(self, mdt, menu, rprops, track_name_transl, drivers, ranking, tuning):
         self.rprops = rprops
         self.track_name_transl = track_name_transl
         self.drivers = drivers
+        self.ranking = ranking
+        self.tuning = tuning
         PageGui.__init__(self, mdt, menu)
 
     def bld_page(self, back_btn=True):
@@ -48,7 +50,7 @@ class LoadingPageGui(PageGui):
             map(self.add_widget, [txt, img])
 
     def set_ranking(self):
-        items = game.logic.season.ranking.carname2points.items()
+        items = self.ranking.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = OnscreenText(text=_('Ranking'), scale=.1, pos=(0, .38),
                            font=self.font, fg=self.text_bg)
@@ -78,7 +80,7 @@ class LoadingPageGui(PageGui):
         txt = OnscreenText(text=_('Upgrades'), scale=.1, pos=(1.0, -.56),
                            font=self.font, fg=self.text_bg)
         self.add_widget(txt)
-        tuning = game.logic.season.tuning.car2tuning[
+        tuning = self.tuning.car2tuning[
             self.rprops.season_props.player_car_name]
         txt = OnscreenText(
             text=_('engine: +') + str(tuning.f_engine),
@@ -106,13 +108,13 @@ class LoadingPageGui(PageGui):
 
 class LoadingPage(Page):
 
-    def __init__(self, rprops, menu, track_name_transl, drivers):
+    def __init__(self, rprops, menu, track_name_transl, drivers, ranking, tuning):
         self.rprops = rprops
         self.menu = menu
         init_lst = [
             [('event', Event, [self])],
             [('gui', LoadingPageGui, [self, menu, rprops, track_name_transl,
-                                      drivers])]]
+                                      drivers, ranking, tuning])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)
         # call Page's __init__

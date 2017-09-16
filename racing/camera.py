@@ -93,10 +93,9 @@ class Camera(GameObject):
         return self.eng.base.camera
 
     @staticmethod
-    def render_all():  # workaround for premunge_scene in 1.9
+    def render_all(track_model):  # workaround for premunge_scene in 1.9
         Camera.eng.base.camera.set_pos(0, 0, 10000)
         Camera.eng.base.camera.look_at(0, 0, 0)
-        track_model = game.logic.season.race.logic.track.gfx.model
         skydome = track_model.find('**/OBJSkydome*')
         skydome and skydome.hide()
         base.graphicsEngine.render_frame()

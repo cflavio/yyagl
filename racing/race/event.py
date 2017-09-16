@@ -83,13 +83,13 @@ class RaceEventServer(RaceEvent):
     def on_frame(self):
         if not hasattr(self.mdt.logic, 'player_car') or \
                 not hasattr(self.mdt.logic.player_car, 'phys') or \
-                any([not hasattr(car, 'phys') for car in game.cars]):
+                any([not hasattr(car, 'phys') for car in self.mdt.logic.cars]):
             return  # still loading; attach when the race has started
         pos = self.mdt.logic.player_car.get_pos()
         hpr = self.mdt.logic.player_car.get_hpr()
         velocity = self.mdt.logic.player_car.get_linear_velocity()
         self.server_info['server'] = (pos, hpr, velocity)
-        for car in [_car for _car in game.cars if _car.ai_cls == CarAi]:
+        for car in [_car for _car in self.mdt.logic.cars if _car.ai_cls == CarAi]:
             pos = car.get_pos()
             hpr = car.get_hpr()
             velocity = car.get_linear_velocity()
@@ -101,7 +101,7 @@ class RaceEventServer(RaceEvent):
     @staticmethod
     def __prepare_game_packet():
         packet = [NetMsgs.game_packet]
-        for car in [game.player_car] + game.cars:
+        for car in [self.mdt.logic.player_car] + self.mdt.logic.cars:
             name = car.gfx.path
             pos = car.gfx.nodepath.get_pos()
             hpr = car.gfx.nodepath.get_hpr()
@@ -116,7 +116,7 @@ class RaceEventServer(RaceEvent):
         velocity = (data_lst[7], data_lst[8], data_lst[9])
         self.server_info[sender] = (pos, hpr, velocity)
         car_name = self.eng.car_mapping[sender]
-        for car in [car for car in game.cars if car.__class__ == NetworkCar]:
+        for car in [car for car in self.mdt.logic.cars if car.__class__ == NetworkCar]:
             if car_name in car.path:
                 LerpPosInterval(car.gfx.nodepath, .2, pos).start()
                 LerpHprInterval(car.gfx.nodepath, .2, hpr).start()
