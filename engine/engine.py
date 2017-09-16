@@ -27,7 +27,7 @@ class EngineShowBase(ShowBase):
 
 class Engine(GameObject, EngineFacade):
 
-    def __init__(self, cfg=None, on_end_cb=None):
+    def __init__(self, cfg=None):
         Colleague.eng = GameObject.eng = self
         EngineFacade.__init__(self)
         self.base = EngineShowBase()
@@ -42,7 +42,7 @@ class Engine(GameObject, EngineFacade):
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
             [('phys_mgr', PhysMgr, [self])],
             [('event', EngineEvent.init_cls(),
-              [self, cfg.menu_joypad, on_end_cb])],
+              [self, cfg.menu_joypad])],
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self, cfg.volume])],
             [('pause', PauseMgr, [self])],

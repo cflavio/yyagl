@@ -9,16 +9,14 @@ class EngineEventBase(Event):
     def init_cls():
         return EngineEvent if base.win else EngineEventBase
 
-    def __init__(self, mdt, emulate_keyboard, on_end_cb):
+    def __init__(self, mdt, emulate_keyboard):
         Event.__init__(self, mdt)
-        self.on_end_cb = on_end_cb
         self.accept('window-closed', self.__on_end)
         taskMgr.add(self.__on_frame, 'on frame')
         JoystickMgr.build(emulate_keyboard)
 
     def __on_end(self):
         self.eng.base.closeWindow(self.eng.base.win)
-        self.on_end_cb()
         sys.exit()
 
     def __on_frame(self, task):
@@ -34,6 +32,6 @@ class EngineEventBase(Event):
 
 class EngineEvent(EngineEventBase):
 
-    def __init__(self, mdt, emulate_keyboard, on_end_cb):
-        EngineEventBase.__init__(self, mdt, emulate_keyboard, on_end_cb)
+    def __init__(self, mdt, emulate_keyboard):
+        EngineEventBase.__init__(self, mdt, emulate_keyboard)
         self.eng.base.win.setCloseRequestEvent('window-closed')
