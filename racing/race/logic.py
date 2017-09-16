@@ -57,6 +57,7 @@ class RaceLogic(Logic):
     def on_rotate_all(self, sender):
         cars = [car for car in self.all_cars if car.name != sender.name]
         map(lambda car: car.phys.rotate(), cars)
+        map(lambda car: car.gfx.set_decorator('rotate_all'), cars)
 
     @property
     def all_cars(self):

@@ -78,6 +78,7 @@ class CarEvent(Event, ComputerProxy):
         if obj_name.startswith(self.props.pitstop_name):
             self.mdt.phys.apply_damage(True)
             self.mdt.gfx.apply_damage(True)
+            self.mdt.gfx.set_decorator('pitstop')
         if obj_name.startswith(self.props.goal_name):
             self._process_goal()
         obst_names = [self.props.wall_name, 'Vehicle']

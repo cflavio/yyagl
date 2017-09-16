@@ -3,6 +3,7 @@ from panda3d.bullet import BulletRigidBodyNode
 from yyagl.gameobject import Gfx
 from yyagl.facade import Facade
 from .skidmark import Skidmark
+from .decorator import Decorator
 
 
 class CarGfxFacade(Facade):
@@ -24,8 +25,22 @@ class CarGfx(Gfx, CarGfxFacade):
         self.eng.particle(part_path, render, render, (0, 1.2, .75), .8)
         self.crash_cnt = 0
         self.last_crash_t = 0
+        self.decorators = []
         Gfx.__init__(self, mdt)
         CarGfxFacade.__init__(self)
+
+    def set_decorator(self, dec_code):
+        deccode2info = {
+            'pitstop': ('PitStop/PitStopAnim', 5.0),
+            'rotate_all': ('RotateAllHit/RotateAllHitAnim', 3.0)}
+        info = deccode2info[dec_code]
+        fpath = 'assets/models/misc/' + info[0]
+        self.decorators += [Decorator(fpath, self.nodepath)]
+        self.eng.do_later(info[1], self.unset_decorator, [self.decorators[-1]])
+
+    def unset_decorator(self, dec):
+        self.decorators.remove(dec)
+        dec.destroy()
 
     def async_bld(self):
         rprops = self.cprops.race_props
@@ -157,4 +172,5 @@ class SkidmarkMgr(object):
 
     def destroy(self):
         map(lambda skd: skd.destroy(), self.skidmarks)
-        self.car = self.skidmarks = None
+        map(lambda dec: dec.destroy(), self.decorators)
+        self.car = self.skidmarks = self.decorators = None
