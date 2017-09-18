@@ -10,7 +10,6 @@ out vec4 lightclip;
 uniform mat4 p3d_ModelViewProjectionMatrix;
 uniform mat4 p3d_ModelViewMatrix;
 uniform mat3 p3d_NormalMatrix;
-uniform vec4 mspos_light;
 uniform mat4 trans_model_to_clip_of_light;
 
 float saturate(float v) { return clamp(v, .0, 1.0); }

@@ -124,7 +124,7 @@ class ShaderMgr(object):
         final_quad = self.filter_mgr.renderSceneInto(colortex=rendered_scene)
         with open('yyagl/assets/shaders/filter.vert') as fvfilter:
             fvert = fvfilter.read()
-        with open('yyagl/assets/shaders/filter.frag') as fffilter:
+        with open('yyagl/assets/shaders/sobel_filter.frag') as fffilter:
             ffrag = fffilter.read()
         filter_quad.set_shader(Shader.make(Shader.SLGLSL, fvert, ffrag))
         filter_quad.set_shader_input('in_tex', rendered_scene)

@@ -3,9 +3,8 @@ from os import system, walk
 from sys import executable
 
 
-for root, dirnames, filenames in walk('assets/models'):
-    for filename in filenames:
-        fname = root + '/' + filename
-        if fname.endswith('.egg'):
-            system('egg-trans -nv 30 -o %s %s' % (fname, fname))
-            system(executable + ' yyagl/tools/apply_gloss.py ' + fname)
+for root, _, fnames in walk('assets/models'):
+    for fname in [fname for fname in fnames if fname.endswith('.egg')]:
+        _fname = root + '/' + fname
+        system('egg-trans -nv 30 -o %s %s' % (_fname, _fname))
+        system(executable + ' yyagl/tools/apply_gloss.py ' + _fname)
