@@ -11,6 +11,9 @@ class CarFsm(Fsm):
                                    'Countdown': ['Play'], 'Play': ['Results']}
         self.cprops = car_props
 
+    def enterPlay(self):
+        self.mdt.audio.on_play()
+
     def enterResults(self):
         state = self.getCurrentOrNextState()
         has_j = self.mdt.event.props.joystick

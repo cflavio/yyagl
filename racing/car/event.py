@@ -192,7 +192,8 @@ class CarPlayerEvent(CarEvent):
             self.mdt.fsm.getCurrentOrNextState() == 'Countdown',
             self.mdt.logic.is_rotating)
         self.mdt.audio.update(self.mdt.logic.is_skidmarking,
-                              self.mdt.phys.speed_ratio)
+                              self.mdt.phys.speed_ratio,
+                              self._get_input())
 
     def on_collision(self, obj, tgt_obj):
         CarEvent.on_collision(self, obj, tgt_obj)

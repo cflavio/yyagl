@@ -7,7 +7,7 @@ from .phys import CarPhys, CarPlayerPhys
 from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
     CarPlayerEventClient, CarNetworkEvent, CarAiEvent, CarAiPlayerEvent
 from .logic import CarLogic, CarPlayerLogic
-from .audio import CarAudio
+from .audio import CarAudio, CarPlayerAudio
 from .gui import CarGui, CarPlayerGui
 from .ai import CarAi
 
@@ -56,7 +56,7 @@ class Car(GameObject, CarFacade):
     event_cls = CarEvent
     logic_cls = CarLogic
     ai_cls = Ai
-    audio_cls = Audio
+    audio_cls = CarAudio
 
     def __init__(self, car_props):
         self.eng.log_mgr.log('init car ' + car_props.name)
@@ -79,7 +79,7 @@ class Car(GameObject, CarFacade):
 
 class CarPlayer(Car):
     event_cls = CarPlayerEvent
-    audio_cls = CarAudio
+    audio_cls = CarPlayerAudio
     gui_cls = CarPlayerGui
     logic_cls = CarPlayerLogic
     phys_cls = CarPlayerPhys
@@ -88,14 +88,14 @@ class CarPlayer(Car):
 
 class CarPlayerServer(Car):
     event_cls = CarPlayerEventServer
-    audio_cls = CarAudio
+    audio_cls = CarPlayerAudio
     gui_cls = CarGui
     logic_cls = CarPlayerLogic
 
 
 class CarPlayerClient(Car):
     event_cls = CarPlayerEventClient
-    audio_cls = CarAudio
+    audio_cls = CarPlayerAudio
     gui_cls = CarGui
     logic_cls = CarPlayerLogic
 
