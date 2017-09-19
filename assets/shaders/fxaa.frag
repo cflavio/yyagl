@@ -1,7 +1,9 @@
 #version 130
 
-uniform sampler2D in_tex;
 in vec4 texcoord;
+in vec2 win_size;
+in vec2 rcp_frame;
+uniform sampler2D in_tex;
 
 #define fxaa_reduce_min (1.0 / 128.0)
 #define fxaa_int2 ivec2
@@ -12,8 +14,6 @@ in vec4 texcoord;
 void main() {
     float span_max = 2.0;
     float reduce_mul = 1.0 / 16.0;
-    vec2 win_size = textureSize(in_tex, 0).xy;
-    vec2 rcp_frame = vec2(1.0 / win_size.x, 1.0 / win_size.y);
 
     vec2 tzw = texcoord.zw;
     vec3 rgb_nw = fxaa_tex_lod0(in_tex, tzw).xyz;
@@ -47,14 +47,12 @@ void main() {
     dir = min(fxaa_float2(span_max, span_max), max_d) * rcp_frame.xy;
 
     vec3 c0 = fxaa_tex_lod0(in_tex, texcoord.xy + dir * (1.0 / 3.0 - .5)).xyz;
-    vec3 c1 = fxaa_tex_lod0(in_tex, texcoord.xy + dir * (2.0 / 3.0 - 0.5)).xyz;
+    vec3 c1 = fxaa_tex_lod0(in_tex, texcoord.xy + dir * (2.0 / 3.0 - .5)).xyz;
     vec3 rgb_a = (1.0 / 2.0) * (c0 + c1);
-    vec3 c2 = fxaa_tex_lod0(in_tex, texcoord.xy + dir * (.0 / 3.0 - 0.5)).xyz;
-    vec3 c3 = fxaa_tex_lod0(in_tex, texcoord.xy + dir * (3.0 / 3.0 - 0.5)).xyz;
+    vec3 c2 = fxaa_tex_lod0(in_tex, texcoord.xy + dir * (.0 / 3.0 - .5)).xyz;
+    vec3 c3 = fxaa_tex_lod0(in_tex, texcoord.xy + dir * (3.0 / 3.0 - .5)).xyz;
     vec3 rgb_b = rgb_a * (1.0 / 2.0) + (1.0 / 4.0) * (c2 + c3);
     float luma_b = dot(rgb_b, luma);
-    if((luma_b < luma_min) || (luma_b > luma_max))
-        gl_FragColor = vec4(rgb_a, 1.0);
-    else
-        gl_FragColor = vec4(rgb_b, 1.0);
+    vec3 col = ((luma_b < luma_min) || (luma_b > luma_max)) ? rgb_a : rgb_b;
+    gl_FragColor = vec4(col, 1.0);
 }

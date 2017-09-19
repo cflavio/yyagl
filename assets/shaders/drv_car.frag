@@ -4,7 +4,7 @@ uniform sampler2D p3d_Texture0;
 uniform sampler2D p3d_Texture1;
 
 void main() {
-    float dist_l = texcoord.x;
+    float dist_l = texcoord.x;  // panda3d 1.10: include common with imgbtn
     float dist_r = 1 - texcoord.x;
     float dist_u = texcoord.y;
     float dist_b = 1 - texcoord.y;

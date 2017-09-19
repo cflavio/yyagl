@@ -1,9 +1,11 @@
 #version 130
-in vec2 p3d_MultiTexCoord0;
 in vec4 p3d_Vertex;
+in vec2 p3d_MultiTexCoord0;
 uniform mat4 p3d_ModelViewProjectionMatrix;
 uniform sampler2D in_tex;
 out vec4 texcoord;
+out vec2 win_size;
+out vec2 rcp_frame;
 
 void main() {
     float subpix_shift = 1.0 / 8.0;
