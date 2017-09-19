@@ -7,8 +7,8 @@ class Camera(GameObject):
     speed = 50
     speed_slow = 20
     speed_fast = 5000
-    dist_min = 36
-    dist_max = 72
+    dist_min = 24
+    dist_max = 48
     look_dist_min = 2
     look_dist_max = 16
 
@@ -19,6 +19,8 @@ class Camera(GameObject):
         self.curr_look_dist = 0
         self.curr_speed_ratio = 0
         self.fwd_car_vec = LVector3f(0, 0, 0)
+        self.curr_dist = 0
+        self.curr_h = 0
 
     @staticmethod
     def new_val(val, tgt, incr):
@@ -47,46 +49,39 @@ class Camera(GameObject):
             curr_incr_slow = self.speed_fast * globalClock.get_dt()
         dist_diff = self.dist_max - self.dist_min
         look_dist_diff = self.look_dist_max - self.look_dist_min
-
         fwd_car_vec = render.get_relative_vector(self.car_np, Vec3(0, 1, 0))
         fwd_car_vec.normalize()
-        fwd_vec = LVector3f(*self.cam_vec)
-        fwd_vec.normalize()
         fwd_incr = (.05 if is_rotating else .5) * globalClock.get_dt()
         self.fwd_car_vec = self.new_val_vec(self.fwd_car_vec, fwd_car_vec,
                                             fwd_incr)
+        dincr = 10.0 * globalClock.getDt()
+        self.curr_dist = self.new_val(
+            self.curr_dist, self.dist_min + dist_diff * self.curr_speed_ratio,
+            dincr)
+        car_h = self.car_np.get_h() + 90
+        degincr = 64.0 * globalClock.getDt()
+        self.curr_h = self.new_val(self.curr_h, car_h, degincr)
+        back_car_vec = Vec3(1, 0, 0)
+        back_car_vec = self.eng.rot_vec(back_car_vec, self.curr_h)
+        back_car_vec.normalize()
+        back_car_vec = -back_car_vec * self.curr_dist
+        back_car_vec += (0, 0,
+                         self.dist_min + dist_diff * self.curr_speed_ratio)
+        back_incr = (.05 if is_rotating else 25.0) * globalClock.get_dt()
         car_pos = self.car_np.get_pos()
-        vec = -fwd_vec * (self.dist_min + dist_diff * self.curr_speed_ratio)
         l_d_speed = self.look_dist_min + look_dist_diff * self.curr_speed_ratio
         l_d = 0 if is_rolling else l_d_speed
         self.curr_look_dist = self.new_val(self.curr_look_dist, l_d,
                                            curr_incr_slow)
         tgt_vec = self.fwd_car_vec * self.curr_look_dist
-
-        # curr_cam_pos = car_pos + vec + (0, 0, delta_pos_z)
-        # curr_cam_dist_fact = self.dist_min + dist_diff * speed_ratio
-        # curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
-        # if curr_occl:
-        #     occl_pos = curr_occl.getHitPos()
-        #     vec = occl_pos - car_pos
-
         c_i = curr_incr_slow if is_fast else curr_incr
         cam_pos = self.eng.base.camera.get_pos()
-        new_pos = self.new_val_vec(cam_pos, car_pos + vec, c_i)
+        new_pos = self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
         # overwrite camera's position to set the physics
         # new_pos = (car_pos.x + 10, car_pos.y - 5, car_pos.z + 5
         if not is_rolling:
             self.eng.base.camera.set_pos(new_pos)
         self.eng.base.camera.look_at(car_pos + tgt_vec)
-
-    # def __occlusion_mesh(self, pos, curr_cam_dist_fact):
-    #     tgt = self.car.gfx.nodepath.getPos()
-    #     occl = eng.phys.world_phys.rayTestClosest(pos, tgt)
-    #     if not occl.hasHit():
-    #         return
-    #     occl_n = occl.getNode().getName()
-    #     if occl_n not in ['Vehicle', 'Goal'] and curr_cam_dist_fact > .1:
-    #         return occl
 
     @property
     def camera(self):
