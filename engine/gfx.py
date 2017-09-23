@@ -4,6 +4,7 @@ from panda3d.core import get_model_path, LightRampAttrib, PandaNode, \
 from direct.particles.ParticleEffect import ParticleEffect
 from direct.filter.CommonFilters import CommonFilters
 from ..gameobject import Gfx
+from .particle import Particle
 
 
 class EngineGfx(Gfx):
@@ -53,17 +54,5 @@ class EngineGfx(Gfx):
         print '\n\n#####\nrender.ls()'
         self.mdt.base.render.ls()
 
-    def particle(self, path, parent, render_parent, pos, timeout, alias=''):
-        # alias for instancing multiple times the same particle
-        # particles are really slow, so we don't cleanup them
-        if path not in self.part2eff and alias not in self.part2eff:
-            par = ParticleEffect()
-            par.loadConfig(path)
-            self.part2eff[alias or path] = par
-            par.start(parent=parent, renderParent=render_parent)
-            par.disable()
-        par = self.part2eff[alias or path]
-        par.start(parent=parent, renderParent=render_parent)
-        par.set_pos(pos)
-        args = timeout, lambda par: par.disable(), [par]
-        self.eng.do_later(*args)
+    def particle(self, parent, pos, hpr, color, tot_time):
+        Particle(parent, pos, hpr, color, tot_time)

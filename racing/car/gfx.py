@@ -1,6 +1,6 @@
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
-from yyagl.gameobject import Gfx
+from yyagl.gameobject import Gfx, GameObject
 from yyagl.facade import Facade
 from .skidmark import Skidmark
 from .decorator import Decorator
@@ -22,7 +22,7 @@ class CarGfx(Gfx, CarGfxFacade):
         self.nodepath = self.eng.attach_node(BulletRigidBodyNode('Vehicle'))
         self.skidmark_mgr = SkidmarkMgr(mdt)
         part_path = self.cprops.race_props.particle_path
-        self.eng.particle(part_path, render, render, (0, 1.2, .75), .8)
+        self.eng.particle(render, (0, 1.2, .75), (0, 0, 0), (1, .4, .1, 1), .8)
         self.crash_cnt = 0
         self.last_crash_t = 0
         self.decorators = []
@@ -92,11 +92,9 @@ class CarGfx(Gfx, CarGfxFacade):
                 self.eng.curr_time - self.last_crash_t < 5.0 or \
                 self.crash_cnt < 2:
             return False
-        # part_path = self.cprops.race_props.particle_path
-        # node = self.mdt.gfx.nodepath
-        # eng.particle(part_path, render, render,
-        #              node.get_pos(render) + (0, 1.2, .75), .8)
-        # particles are too slow
+        self.eng.particle(
+            render, self.nodepath.get_pos(render) + (0, 1.2, .75), (0, 0, 0),
+            (1, .4, .1, 1), .8)
         self.apply_damage()
         return True
 
@@ -135,9 +133,10 @@ class CarPlayerGfx(CarGfx):
             self.mdt.audio.crash_high_speed_sfx.play()
 
 
-class SkidmarkMgr(object):
+class SkidmarkMgr(GameObject):
 
     def __init__(self, car):
+        GameObject.__init__(self)
         self.l_skidmark = self.r_skidmark = None
         self.skidmarks = []
         self.car = car
@@ -154,19 +153,16 @@ class SkidmarkMgr(object):
             self.r_skidmark = Skidmark(fr_pos, radius, heading)
             self.l_skidmark = Skidmark(fl_pos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
-            # wheels = self.car.phys.vehicle.get_wheels()
-            # whl_radius = wheels[2].get_wheel_radius()
-            # whl_pos_l = wheels[2].get_chassis_connection_point_cs() + \
-            #     (0, -whl_radius, -whl_radius + .05)
-            # whl_pos_r = wheels[3].get_chassis_connection_point_cs() + \
-            #     (0, -whl_radius, -whl_radius + .05)
-            # eng.particle(
-            #     'assets/particles/skidmark.ptf', self.car.gfx.nodepath,
-            #     self.car.gfx.nodepath, whl_pos_l, 1.2, 'left skidmark')
-            # eng.particle(
-            #     'assets/particles/skidmark.ptf', self.car.gfx.nodepath,
-            #     self.car.gfx.nodepath, whl_pos_r, 1.2, 'right skidmark')
-            # particles are too slow
+            wheels = self.car.phys.vehicle.get_wheels()
+            whl_radius = wheels[2].get_wheel_radius()
+            whl_pos_l = wheels[2].get_chassis_connection_point_cs() + \
+                (0, -whl_radius, -whl_radius + .05)
+            whl_pos_r = wheels[3].get_chassis_connection_point_cs() + \
+                (0, -whl_radius, -whl_radius + .05)
+            self.eng.particle(self.car.gfx.nodepath, whl_pos_l, (0, 60, 0),
+                              (.5, .5, .5, 1), 1.2)
+            self.eng.particle(self.car.gfx.nodepath, whl_pos_r, (0, 60, 0),
+                              (.5, .5, .5, 1), 1.2)
 
     def on_no_skidmarking(self):
         self.l_skidmark = self.r_skidmark = None
@@ -174,3 +170,4 @@ class SkidmarkMgr(object):
     def destroy(self):
         map(lambda skd: skd.destroy(), self.skidmarks)
         self.car = self.skidmarks = None
+        GameObject.destroy(self)
