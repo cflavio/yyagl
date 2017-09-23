@@ -1,3 +1,4 @@
+from os.path import exists
 from panda3d.core import Mat4
 from ..gameobject import Logic
 from .configuration import Cfg
@@ -12,6 +13,7 @@ class EngineLogic(Logic):
     @property
     def version(self):
         if not self.eng.base.appRunner:
+            if not exists('assets/version.txt'): return '-'
             with open('assets/version.txt') as fver:
                 return fver.read().strip() + '-source'
         package = self.eng.base.appRunner.p3dInfo.FirstChildElement('package')

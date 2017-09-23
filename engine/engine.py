@@ -18,6 +18,7 @@ from .audio import EngineAudio
 from .lang import LangMgr
 from ..gameobject import GameObject, Colleague
 from .enginefacade import EngineFacade
+from .configuration import Cfg
 
 
 class EngineShowBase(ShowBase):
@@ -31,6 +32,7 @@ class Engine(GameObject, EngineFacade):
         Colleague.eng = GameObject.eng = self
         EngineFacade.__init__(self)
         self.base = EngineShowBase()
+        if not cfg: cfg = Cfg()
         self.shader_mgr = ShaderMgr(cfg.shaders_dev, cfg.gamma)
         self.profiler = Profiler(cfg.py_profiling, cfg.py_profiling_percall)
         self.font_mgr = FontMgr()
