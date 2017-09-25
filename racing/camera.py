@@ -58,13 +58,7 @@ class Camera(GameObject):
         self.curr_dist = self.new_val(
             self.curr_dist, self.dist_min + dist_diff * self.curr_speed_ratio,
             dincr)
-        car_h = self.car_np.get_h() + 90
-        degincr = 64.0 * globalClock.getDt()
-        self.curr_h = self.new_val(self.curr_h, car_h, degincr)
-        back_car_vec = Vec3(1, 0, 0)
-        back_car_vec = self.eng.rot_vec(back_car_vec, self.curr_h)
-        back_car_vec.normalize()
-        back_car_vec = -back_car_vec * self.curr_dist
+        back_car_vec = -fwd_car_vec * self.curr_dist
         back_car_vec += (0, 0,
                          self.dist_min + dist_diff * self.curr_speed_ratio)
         back_incr = (.05 if is_rotating else 25.0) * globalClock.get_dt()
