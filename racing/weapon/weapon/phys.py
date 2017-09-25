@@ -12,7 +12,7 @@ class WeaponPhys(Phys):
 
     def fire(self):
         self.node = BulletRigidBodyNode(self.coll_name)
-        self.node.set_mass(10000)
+        self.node.set_mass(50)
         self.node.add_shape(self.coll_mesh_cls(.5))
         self.n_p = self.parent.attach_new_node(self.node)
         self.n_p.set_pos(0, 0, self.joint_z)

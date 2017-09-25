@@ -23,6 +23,8 @@ class Input2ForcesStrategy(object):
         self.car = car
         self.drift = DriftingForce(car)
         self.start_left_t = self.start_right_t = None
+        self.curr_clamp = 0
+        self.tgt_clamp = 0
 
     @property
     def steering_inc(self):
@@ -32,12 +34,22 @@ class Input2ForcesStrategy(object):
     def steering_dec(self):
         return globalClock.get_dt() * self.car.phys.steering_dec
 
+    @staticmethod
+    def new_val(val, tgt, incr, decr):
+        beyond = abs(val - tgt) < incr
+        next_val = lambda: val + (incr if tgt > val else  -decr)
+        return tgt if beyond else next_val()
+
     @property
     def steering_clamp(self):
         phys = self.car.phys
         speed_ratio = phys.speed_ratio
         steering_range = phys.steering_min_speed - phys.steering_max_speed
-        return phys.steering_min_speed - speed_ratio * steering_range
+        clamp_incr_speed = globalClock.get_dt() * (8 if phys.lin_vel > 5 else 200)
+        clamp_decr_speed = globalClock.get_dt() * 20
+        self.tgt_clamp = phys.steering_min_speed - speed_ratio * steering_range
+        self.curr_clamp = self.new_val(self.curr_clamp, self.tgt_clamp, clamp_incr_speed, clamp_decr_speed)
+        return self.curr_clamp
 
     def get_eng_frc(self, eng_frc):
         m_s = self.car.phys.max_speed
@@ -56,7 +68,7 @@ class DriftingForce(object):
 
     def process(self, eng_frc, input_dct):
         phys = self.car.phys
-        if phys.speed < 10:
+        if phys.lin_vel < 10:
             return eng_frc
         since_drifting = globalClock.get_frame_time() - phys.last_drift_time
         drift_eng_effect_time = 2.5
@@ -89,7 +101,7 @@ class DriftingForce(object):
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
         car_vec_right = rot_mat_right.xformVec(car_vec)
 
-        max_intensity = 20000.0
+        max_intensity = 10000.0
         drift_inertia_effect_time = 4.0
         drift_inertia_fact_timed = max(
             .0, 1.0 - since_drifting / drift_inertia_effect_time)
@@ -134,7 +146,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
             brake_frc = phys.brake_frc
         if car_input.forward and not car_input.rear:
             eng_frc = phys.engine_acc_frc
-            eng_frc *= 1 + .2 * max(min(1, (phys.speed - 80) / - 80), 0)
+            eng_frc *= 1 + .2 * max(min(1, (phys.lin_vel - 80) / - 80), 0)
             # accelerate more when < 80 Km/h
         if car_input.rear and not car_input.forward:
             eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
@@ -163,7 +175,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
             else:
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
-        eng_frc = self.drift.process(eng_frc, car_input)
+        #eng_frc = self.drift.process(eng_frc, car_input)
         return self.get_eng_frc(eng_frc), brake_frc, self._steering
 
 

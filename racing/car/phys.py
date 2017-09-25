@@ -135,6 +135,10 @@ class CarPhys(Phys):
         return proj_frc.length()
 
     @property
+    def lin_vel(self):
+        return self.vehicle.get_chassis().get_linear_velocity().length() * 3.6
+
+    @property
     def is_flying(self):  # no need to be cached
         rays = [whl.get_raycast_info() for whl in self.vehicle.get_wheels()]
         return not any(ray.is_in_contact() for ray in rays)
@@ -173,8 +177,10 @@ class CarPhys(Phys):
         self.vehicle.set_steering_value(steering, 1)
         self.vehicle.apply_engine_force(eng_frc, 2)
         self.vehicle.apply_engine_force(eng_frc, 3)
-        self.vehicle.set_brake(brake_frc, 2)
-        self.vehicle.set_brake(brake_frc, 3)
+        self.vehicle.set_brake(.85 * brake_frc, 2)
+        self.vehicle.set_brake(.85 * brake_frc, 3)
+        self.vehicle.set_brake(.15 * brake_frc, 0)
+        self.vehicle.set_brake(.15 * brake_frc, 1)
 
     def update_car_props(self):
         speeds = map(self.__update_whl_props, self.vehicle.get_wheels())
@@ -244,7 +250,7 @@ class CarPhys(Phys):
             1 + .01 * self.cprops.driver_suspensions)
 
     def rotate(self):
-        self.pnode.apply_torque((0, 0, 900000))
+        self.pnode.apply_torque((0, 0, 80000))
         self.mdt.logic.applied_torque = True
 
     def destroy(self):

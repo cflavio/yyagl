@@ -39,7 +39,7 @@ class PhysMgr(Colleague, PhysFacade):
         self.collision_objs = []
         self.__obj2coll = {}
         self.root = BulletWorld()
-        self.root.setGravity((0, 0, -9.81))
+        self.root.setGravity((0, 0, -7.81))
         debug_node = BulletDebugNode('Debug')
         debug_node.show_bounding_boxes(True)
         self.__debug_np = render.attach_new_node(debug_node)
