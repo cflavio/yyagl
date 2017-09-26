@@ -39,13 +39,14 @@ class RaceAudioUpdate(AbsAudioUpdate):
             self.brake_sfx.play()
         elif not is_skidmarking and is_brk_playing:
             self.brake_sfx.stop()
-        gear_thresholds = [0, .25, .6]
+        gear_thresholds = [0, .3, .6, .8, .9]
         thr = max(gtr for gtr in gear_thresholds if speed_ratio >= gtr)
         idx = gear_thresholds.index(thr)
         up = 1 if idx == len(gear_thresholds) - 1 else gear_thresholds[idx + 1]
         gear_ratio = (speed_ratio - thr) / (up - thr)
-        self.engine_sfx.set_volume(max(.4, abs(speed_ratio)))
-        self.engine_sfx.set_play_rate(max(.4, abs(gear_ratio)))
+        self.engine_sfx.set_volume(.4 + .6 * speed_ratio)
+        play_rate = speed_ratio - .1 + .2 * gear_ratio
+        self.engine_sfx.set_play_rate(max(.1, abs(play_rate)))
 
 
 class CarAudio(Audio):

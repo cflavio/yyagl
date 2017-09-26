@@ -172,6 +172,10 @@ class CarPhys(Phys):
     def speed_ratio(self):
         return max(0, min(1.0, self.speed / self.max_speed))
 
+    @property
+    def lin_vel_ratio(self):
+        return max(0, min(1.0, self.lin_vel / self.max_speed))
+
     def set_forces(self, eng_frc, brake_frc, steering):
         self.vehicle.set_steering_value(steering, 0)
         self.vehicle.set_steering_value(steering, 1)
