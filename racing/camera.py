@@ -4,7 +4,7 @@ from yyagl.gameobject import GameObject
 
 class Camera(GameObject):
 
-    speed = 50
+    speed = 35
     speed_slow = 20
     speed_fast = 5000
     dist_min = 24
