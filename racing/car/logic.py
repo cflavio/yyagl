@@ -54,11 +54,8 @@ class Input2ForcesStrategy(object):
     def get_eng_frc(self, eng_frc):
         m_s = self.car.phys.max_speed
         actual_max_speed = m_s * self.car.phys.curr_speed_mul
-        if self.car.phys.speed / actual_max_speed < .99:
-            return eng_frc
-        tot = .01 * actual_max_speed
-        d_s = (actual_max_speed - self.car.phys.speed) / tot
-        return eng_frc * max(-.1, min(1, d_s))  # -.1: from turbo to normal
+        eng_frc = eng_frc * (1.05 - self.car.phys.lin_vel / actual_max_speed)
+        return eng_frc
 
 
 class DriftingForce(object):
@@ -146,8 +143,6 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
             brake_frc = phys.brake_frc
         if car_input.forward and not car_input.rear:
             eng_frc = phys.engine_acc_frc
-            eng_frc *= 1 + .2 * max(min(1, (phys.lin_vel - 80) / - 80), 0)
-            # accelerate more when < 80 Km/h
         if car_input.rear and not car_input.forward:
             eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
             brake_frc = phys.brake_frc
