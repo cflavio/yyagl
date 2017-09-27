@@ -41,6 +41,7 @@ class Particle(GameObject):
     rate = .0001
     _buffered_vel = []
     _buffered_rates = []
+    _vdata = None
 
     def __init__(self, parent, pos, hpr, color, tot_time):
         GameObject.__init__(self)
@@ -55,12 +56,15 @@ class Particle(GameObject):
         format = GeomVertexFormat()
         format.add_array(array)
         format = GeomVertexFormat.register_format(format)
-        vdata = GeomVertexData('info', format, Geom.UHStatic)
-        vdata.set_num_rows(1)
-        vertex = GeomVertexWriter(vdata, 'init_vel')
-        map(lambda vtx: vertex.add_data3f(*vtx), self.__init_velocities())
-        start_time = GeomVertexWriter(vdata, 'start_particle_time')
-        map(lambda vtx: start_time.add_data3f(*vtx), self.__init_rates())
+        if not self._vdata:
+            vdata = GeomVertexData('info', format, Geom.UHStatic)
+            vdata.set_num_rows(1)
+            vertex = GeomVertexWriter(vdata, 'init_vel')
+            map(lambda vtx: vertex.add_data3f(*vtx), self.__init_velocities())
+            start_time = GeomVertexWriter(vdata, 'start_particle_time')
+            map(lambda vtx: start_time.add_data3f(*vtx), self.__init_rates())
+            Particle._vdata = vdata
+        vdata = self._vdata
         prim = GeomPoints(Geom.UH_static)
         prim.add_next_vertices(self.num_particles)
         geom = Geom(vdata)

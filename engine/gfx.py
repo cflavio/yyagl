@@ -55,4 +55,4 @@ class EngineGfx(Gfx):
         self.mdt.base.render.ls()
 
     def particle(self, parent, pos, hpr, color, tot_time):
-        pass  # Particle(parent, pos, hpr, color, tot_time)
+        Particle(parent, pos, hpr, color, tot_time)
