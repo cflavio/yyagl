@@ -10,6 +10,27 @@ LastObstInfo = namedtuple('LastObstInfo', 'direction time')
 DirKeys = namedtuple('DirKeys', 'forward left rear right')
 
 
+class CarAiPoller(object):
+
+    def __init__(self):
+        self.idx = 0
+
+    def set_cars(self, cars):
+        self.cars = cars
+
+    def tick(self):
+        if not self.cars: return
+        self.idx = (self.idx + 1) % len(self.cars)
+
+    @property
+    def current(self):
+        if not hasattr(self, 'cars'): return 0
+        return self.cars[self.idx]
+
+    def destroy(self):
+        self.cars = None
+
+
 class DebugLines(object):
 
     def __init__(self, color):
@@ -190,14 +211,16 @@ class RearAiLogic(AbsAiLogic):
         pass
 
 
-class CarAi(Ai):
+class CarAi(Ai, ComputerProxy):
 
     def __init__(self, mdt, car_props):
         Ai.__init__(self, mdt)
+        ComputerProxy.__init__(self)
         race_props = car_props.race_props
         player_car_name = race_props.season_props.player_car_name
         self.road_name = race_props.road_name
         self.waypoints = car_props.track_waypoints
+        self.ai_poller = car_props.ai_poller
         self.cars = race_props.season_props.car_names
         self.front_logic = FrontAiLogic(self.mdt, self.cars, player_car_name)
         self.rear_logic = RearAiLogic(self.mdt, self.cars, player_car_name)
@@ -231,6 +254,7 @@ class CarAi(Ai):
         return len([smp for smp in samples if smp.startswith(self.road_name)])
 
     def on_frame(self):
+        if self.ai_poller.current != self.mdt.name: return
         self._eval_respawn()
         for logic in [self.front_logic, self.rear_logic]:
             logic.debug_lines_gnd.clear()
@@ -425,6 +449,7 @@ class CarAi(Ai):
                 right = False
         return left, right
 
+    @once_a_frame
     def get_input(self):
         # import time; time.sleep(.01)
         # if self.mdt.name == game.player_car.name:
@@ -460,6 +485,7 @@ class CarAi(Ai):
         self.eng.detach_obs(self.on_frame)
         map(lambda logic: logic.destroy(), [self.front_logic, self.rear_logic])
         Ai.destroy(self)
+        ComputerProxy.destroy(self)
 
 
 class CarResultsAi(CarAi):

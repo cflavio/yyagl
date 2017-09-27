@@ -1,5 +1,7 @@
 from yyagl.gameobject import Logic
 from yyagl.racing.track.track import Track
+from yyagl.racing.car.ai import CarAiPoller
+from yyagl.racing.car.car import AiCar
 from yyagl.racing.driver.logic import DriverPlayerLoaderStrategy
 
 
@@ -18,6 +20,7 @@ class RaceLogic(Logic):
             self.load_car = None
         self.props = rprops
         Logic.__init__(self, mdt)
+        self.ai_poller = CarAiPoller()
 
     def load_stuff(self, car_name, player_car_names):
         r_p = self.props
@@ -29,7 +32,7 @@ class RaceLogic(Logic):
             if driver.dprops.car_name == r_p.season_props.player_car_name:
                 self.load_car = lambda: DriverPlayerLoaderStrategy.load(
                     r_p, car_name, self.track, self.mdt, player_car_names,
-                    self.props.season_props)
+                    self.props.season_props, self.ai_poller)
         self.mdt.track = self.track  # facade this
 
     def on_track_loaded(self):
@@ -53,6 +56,7 @@ class RaceLogic(Logic):
         map(lambda car: car.start(), self.all_cars)
         map(lambda car: car.event.attach(self.on_rotate_all), self.all_cars)
         self.mdt.gui.start()
+        self.ai_poller.set_cars([car.name for car in self.all_cars if car.__class__ == AiCar])
 
     def on_rotate_all(self, sender):
         cars = [car for car in self.all_cars if car.name != sender.name]
@@ -68,6 +72,7 @@ class RaceLogic(Logic):
         return self.cars
 
     def on_frame(self):
+        self.ai_poller.tick()
         self.track.update(self.player_car.get_pos())
         positions = [(car.name, car.get_pos()) for car in self.all_cars]
         self.mdt.gui.update_minimap(positions)
@@ -104,6 +109,7 @@ class RaceLogic(Logic):
         self.track.destroy()
         map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
         map(lambda car: car.destroy(), self.all_cars)
+        self.ai_poller.destroy()
         self.eng.phys_mgr.stop()
         self.eng.clean_gfx()
         self.eng.detach_obs(self.on_frame)

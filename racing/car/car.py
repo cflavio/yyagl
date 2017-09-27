@@ -13,7 +13,7 @@ from .ai import CarAi
 
 
 __fields = 'race_props name pos hpr callback race driver_engine ' + \
-    'driver_tires driver_suspensions track_waypoints'
+    'driver_tires driver_suspensions track_waypoints ai_poller'
 
 
 CarProps = namedtuple('CarProps', __fields)

@@ -6,7 +6,7 @@ from yyagl.racing.car.car import Car, CarProps, CarPlayer, CarPlayerServer, \
 class DriverLoaderStrategy(GameObject):
 
     @staticmethod
-    def load(cars, r_p, car_name, track, race, player_car_names, s_p):
+    def load(cars, r_p, car_name, track, race, player_car_names, s_p, aipoller):
         if not cars: return race.fsm.demand('Countdown', s_p)
         eng = DriverLoaderStrategy.eng
         car = cars.pop(0)
@@ -17,11 +17,11 @@ class DriverLoaderStrategy(GameObject):
         srv_or_sng = eng.server.is_active or not eng.client.is_active
         car_cls = AiCar if no_p and srv_or_sng else car_cls
         race.logic.cars += [DriverLoaderStrategy.actual_load(
-            cars, car, r_p, track, race, car_cls, player_car_names, s_p)]
+            cars, car, r_p, track, race, car_cls, player_car_names, s_p, aipoller)]
 
     @staticmethod
     def actual_load(cars, load_car_name, r_p, track, race, car_cls,
-                    player_car_names, seas_p):
+                    player_car_names, seas_p, aipoller):
         for _drv in r_p.drivers:
             if _drv.dprops.car_name == load_car_name:
                 drv = _drv
@@ -30,16 +30,16 @@ class DriverLoaderStrategy(GameObject):
         car_props = CarProps(
             r_p, load_car_name, pos, hpr,
             lambda: DriverLoaderStrategy.load(cars, r_p, load_car_name, track,
-                                              race, player_car_names, seas_p),
+                                              race, player_car_names, seas_p, aipoller),
             race, drv.dprops.f_engine, drv.dprops.f_tires,
-            drv.dprops.f_suspensions, race.track.phys.wp2prevs)
+            drv.dprops.f_suspensions, race.track.phys.wp2prevs, aipoller)
         return car_cls(car_props)
 
 
 class DriverPlayerLoaderStrategy(GameObject):
 
     @staticmethod
-    def load(r_p, car_name, track, race, player_car_names, s_p):
+    def load(r_p, car_name, track, race, player_car_names, s_p, aipoller):
         cars = [car for car in r_p.season_props.car_names if car != car_name]
         if r_p.a_i:
             car_cls = AiCarPlayer
@@ -50,7 +50,7 @@ class DriverPlayerLoaderStrategy(GameObject):
             if DriverPlayerLoaderStrategy.eng.client.is_active:
                 car_cls = CarPlayerClient
         race.logic.player_car = DriverLoaderStrategy.actual_load(
-            cars, car_name, r_p, track, race, car_cls, player_car_names, s_p)
+            cars, car_name, r_p, track, race, car_cls, player_car_names, s_p, aipoller)
 
 
 class DriverLogic(Logic):
