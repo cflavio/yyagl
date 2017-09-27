@@ -1,7 +1,6 @@
 from os.path import exists
 from panda3d.core import get_model_path, LightRampAttrib, PandaNode, \
     NodePath, AntialiasAttrib
-from direct.particles.ParticleEffect import ParticleEffect
 from direct.filter.CommonFilters import CommonFilters
 from ..gameobject import Gfx
 from .particle import Particle
@@ -54,5 +53,6 @@ class EngineGfx(Gfx):
         print '\n\n#####\nrender.ls()'
         self.mdt.base.render.ls()
 
-    def particle(self, parent, pos, hpr, color, tot_time):
+    @staticmethod
+    def particle(parent, pos, hpr, color, tot_time):
         Particle(parent, pos, hpr, color, tot_time)

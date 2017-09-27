@@ -45,6 +45,7 @@ class Particle(GameObject):
 
     def __init__(self, parent, pos, hpr, color, tot_time):
         GameObject.__init__(self)
+        self.__np = None
         self.__set_nodepath(parent, pos, hpr)
         self.__set_shader(color, tot_time)
         self.destroy_tsk = self.eng.do_later(tot_time, self.destroy)
@@ -53,11 +54,11 @@ class Particle(GameObject):
         array = GeomVertexArrayFormat()
         array.add_column('init_vel', 3, Geom.NTFloat32, Geom.CPoint)
         array.add_column('start_particle_time', 3, Geom.NTFloat32, Geom.CPoint)
-        format = GeomVertexFormat()
-        format.add_array(array)
-        format = GeomVertexFormat.register_format(format)
+        _format = GeomVertexFormat()
+        _format.add_array(array)
+        _format = GeomVertexFormat.register_format(_format)
         if not self._vdata:
-            vdata = GeomVertexData('info', format, Geom.UHStatic)
+            vdata = GeomVertexData('info', _format, Geom.UHStatic)
             vdata.set_num_rows(1)
             vertex = GeomVertexWriter(vdata, 'init_vel')
             map(lambda vtx: vertex.add_data3f(*vtx), self.__init_velocities())
@@ -86,16 +87,16 @@ class Particle(GameObject):
 
     def __init_velocities(self):
         if not self._buffered_vel:
-            for i in range(self.num_particles):
+            for _ in range(self.num_particles):
                 theta = uniform(0, pi / 6)
                 phi = uniform(0, 2 * pi)
-                v = Vec3(
+                vec = Vec3(
                     sin(theta) * cos(phi),
                     sin(theta) * sin(phi),
                     cos(theta))
                 velocity = uniform(3.25, 4.5)
-                v = v * velocity
-                self._buffered_vel += [(v.x, v.y, v.z)]
+                vec = vec * velocity
+                self._buffered_vel += [(vec.x, vec.y, vec.z)]
         return self._buffered_vel
 
     def __init_rates(self):

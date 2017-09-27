@@ -48,7 +48,8 @@ class Engine(GameObject, EngineFacade):
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self, cfg.volume])],
             [('pause', PauseMgr, [self])],
-            [('lang_mgr', LangMgr, (cfg.lang, cfg.lang_domain, cfg.lang_path))]]
+            [('lang_mgr', LangMgr, (cfg.lang, cfg.lang_domain,
+                                    cfg.lang_path))]]
 
         GameObject.__init__(self, comps)
 
