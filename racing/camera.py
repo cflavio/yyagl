@@ -4,7 +4,8 @@ from yyagl.gameobject import GameObject
 
 class Camera(GameObject):
 
-    speed = 35
+    speed = 50
+    inertia_dist = 15
     speed_slow = 20
     speed_fast = 5000
     dist_min = 24
@@ -21,6 +22,11 @@ class Camera(GameObject):
         self.fwd_car_vec = LVector3f(0, 0, 0)
         self.curr_dist = 0
         self.curr_h = 0
+
+    def curr_speed(self, pos, tgt):
+        dist = (tgt - pos).length()
+        inertia_fact = max(0, min(1, dist / self.inertia_dist)) if dist else 0
+        return self.speed * inertia_fact
 
     @staticmethod
     def new_val(val, tgt, incr):
@@ -43,10 +49,6 @@ class Camera(GameObject):
     def update(self, speed_ratio, is_rolling, is_fast, is_rotating):
         self.curr_speed_ratio = self.new_val(
             self.curr_speed_ratio, speed_ratio, 1 * globalClock.get_dt())
-        curr_incr = self.speed * globalClock.get_dt()
-        curr_incr_slow = self.speed_slow * globalClock.get_dt()
-        if is_fast:
-            curr_incr_slow = self.speed_fast * globalClock.get_dt()
         dist_diff = self.dist_max - self.dist_min
         look_dist_diff = self.look_dist_max - self.look_dist_min
         fwd_car_vec = render.get_relative_vector(self.car_np, Vec3(0, 1, 0))
@@ -65,11 +67,15 @@ class Camera(GameObject):
         car_pos = self.car_np.get_pos()
         l_d_speed = self.look_dist_min + look_dist_diff * self.curr_speed_ratio
         l_d = 0 if is_rolling else l_d_speed
+        cam_pos = self.eng.base.camera.get_pos()
+        curr_incr = self.curr_speed(cam_pos, car_pos + back_car_vec) * globalClock.get_dt()
+        curr_incr_slow = self.speed_slow * globalClock.get_dt()
+        if is_fast:
+            curr_incr_slow = self.speed_fast * globalClock.get_dt()
         self.curr_look_dist = self.new_val(self.curr_look_dist, l_d,
                                            curr_incr_slow)
         tgt_vec = self.fwd_car_vec * self.curr_look_dist
         c_i = curr_incr_slow if is_fast else curr_incr
-        cam_pos = self.eng.base.camera.get_pos()
         new_pos = self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
         # overwrite camera's position to set the physics
         # new_pos = (car_pos.x + 10, car_pos.y - 5, car_pos.z + 5
