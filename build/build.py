@@ -47,11 +47,12 @@ def set_path(_bld_path):
     return bld_path
 
 
-def files(_extensions, excl_dirs=[]):
+def files(_extensions, excl_dirs=[], excl_ends_with=[]):
     return [join(root, fname)
             for root, _, fnames in walk('.')
             for fname in __files_ext(fnames, _extensions)
-            if not any(e_d in root.split('/') for e_d in excl_dirs)]
+            if not any(e_d in root.split('/') for e_d in excl_dirs) and
+            not any(fname.endswith(e_e) for e_e in excl_ends_with)]
 
 
 def __files_ext(fnames, _extensions):

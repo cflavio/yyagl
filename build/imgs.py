@@ -9,16 +9,16 @@ def bld_images(target, source, env):
 def __bld_img(fname):
     pngname = fname[:-3] + 'png'
     alpha, size = __get_img_alpha_and_size(fname)
-    sizes = [2**i for i in range(0, 12)]
-    floor_pow = lambda img_sz: max([siz for siz in sizes if siz <= img_sz])
-    width, height = map(floor_pow, size)
-    cmd_tmpl = 'convert "%s"[0] -resize %dx%d! "%s"'
-    system(cmd_tmpl % (fname, width, height, pngname))
-    if pngname.endswith('_png.png'): return
+    if pngname.endswith('_png.png'):
+        sizes = [2**i for i in range(0, 12)]
+        floor_pow = lambda img_sz: max([siz for siz in sizes if siz <= img_sz])
+        width, height = map(floor_pow, size)
+        cmd_tmpl = 'convert "%s"[0] -resize %dx%d! "%s"'
+        system(cmd_tmpl % (fname, width, height, pngname))
+        return
     cmd_tmpl = 'nvcompress -bc3 {alpha} -nomips "%s" "%sdds"'
-    cmd = cmd_tmpl % (pngname, fname[:-3])
+    cmd = cmd_tmpl % (fname, fname[:-3])
     system(cmd.format(alpha='-alpha' if alpha else ''))
-    remove(pngname)
 
 
 def __get_img_alpha_and_size(fname):

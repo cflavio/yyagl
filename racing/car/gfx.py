@@ -21,8 +21,6 @@ class CarGfx(Gfx, CarGfxFacade):
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
         self.nodepath = self.eng.attach_node(BulletRigidBodyNode('Vehicle'))
         self.skidmark_mgr = SkidmarkMgr(mdt)
-        part_path = self.cprops.race_props.particle_path
-        self.eng.particle(render, (0, 1.2, .75), (0, 0, 0), (1, .4, .1, 1), .8)
         self.crash_cnt = 0
         self.last_crash_t = 0
         self.decorators = []

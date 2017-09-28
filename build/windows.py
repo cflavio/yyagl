@@ -107,8 +107,7 @@ def bld_windows(target, source, env):
                     if any(fname.endswith('.' + ext) for ext in rm_ext):
                         remove(fname)
                     rm_ext = ['png', 'jpg']
-                    is_ext = any(fname.endswith('.' + ext) for ext in rm_ext)
-                    if 'assets/models/' in fname and is_ext:
+                    if any(fname.endswith('.' + ext) for ext in rm_ext):
                         remove(fname)
                     is_track = 'assets/models/tracks/' in fname
                     is_bam = fname.endswith('.bam')

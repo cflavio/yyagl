@@ -43,8 +43,7 @@ class EngineFacade(Facade):
 
     @staticmethod
     def do_later(time, meth, args=[]):
-        return taskMgr.doMethodLater(time, lambda tsk: meth(*args),
-                                     meth.__name__)
+        return taskMgr.doMethodLater(time, lambda meth, args: meth(*args), meth.__name__, [meth, args])
 
     def remove_do_later(self, tsk):
         self.pause.remove_task(tsk)

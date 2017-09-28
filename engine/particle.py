@@ -57,7 +57,7 @@ class Particle(GameObject):
         _format = GeomVertexFormat()
         _format.add_array(array)
         _format = GeomVertexFormat.register_format(_format)
-        if not self._vdata:
+        if not self._vdata:  #TODO: use python buffer protocol in place of this
             vdata = GeomVertexData('info', _format, Geom.UHStatic)
             vdata.set_num_rows(1)
             vertex = GeomVertexWriter(vdata, 'init_vel')

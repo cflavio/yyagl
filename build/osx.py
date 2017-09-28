@@ -26,9 +26,7 @@ def bld_osx(target, source, env):
             rm_ext = ['psd', 'po', 'pot', 'egg']
             if any(fname.endswith('.' + ext) for ext in rm_ext):
                 remove(fname)
-            rm_ext = ['png', 'jpg']
-            is_mod = 'assets/models/' in fname
-            if is_mod and any(fname.endswith('.' + ext) for ext in rm_ext):
+            if any(fname.endswith('.' + ext) for ext in ['png', 'jpg']):
                 remove(fname)
             is_track = 'assets/models/tracks/' in fname
             is_bam = fname.endswith('.bam')

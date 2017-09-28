@@ -10,7 +10,7 @@ class LoadingGui(Gui):
     def __init__(self, mdt, rprops, loading, track_name_transl,
                  drivers, ranking, tuning):
         Gui.__init__(self, mdt)
-        pbackground = 'assets/images/loading/%s%s.jpg'
+        pbackground = 'assets/images/loading/%s%s.dds'
         pbackground = pbackground % (rprops.track_name, randint(1, 4))
         menu_args = deepcopy(rprops.season_props.gameprops.menu_args)
         menu_args.background_img = pbackground

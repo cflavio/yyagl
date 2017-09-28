@@ -75,9 +75,7 @@ def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
             rm_ext = ['psd', 'po', 'pot', 'egg']
             if any(fpath.endswith('.' + ext) for ext in rm_ext):
                 remove(fpath)
-            rm_ext = ['png', 'jpg']
-            is_ext = any(fpath.endswith('.' + ext) for ext in rm_ext)
-            if 'assets/models/' in fpath and is_ext:
+            if any(fpath.endswith('.' + ext) for ext in ['png', 'jpg']):
                 remove(fpath)
             if 'assets/models/tracks/' in fpath and \
                     fpath.endswith('.bam') and not \
