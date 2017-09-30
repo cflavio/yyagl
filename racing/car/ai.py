@@ -60,6 +60,8 @@ class AbsAiLogic(ComputerProxy, GameObject):
         self.car = car
         self.cars = cars
         self.player_car = player_car
+        self._sectors = ['center', 'left', 'right']
+        self._curr_sector = 0  # i.e. center
         self.sector2samples_gnd = {'left': [''], 'center': [''], 'right': ['']}
         self.sector2obsts = {'left': [], 'center': [], 'right': []}
         bnds = car.phys.coll_mesh.get_tight_bounds()  # (lowerleft, upperright)
@@ -132,7 +134,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
     def _update_obst(self, direction):
         nsam = 0 if self.car.phys.speed >= 5 else 10
         if len(self.sector2obsts[direction]) > nsam:
-            self.sector2obsts[direction].pop(0)
+            del self.sector2obsts[direction][:-(nsam - 2)]
         lat_sector_deg = 40 - 35 * self.car.phys.speed_ratio
         sector2bounds = {'left': (0, lat_sector_deg), 'center': (0, 0),
                          'right': (-lat_sector_deg, 0)}
@@ -259,7 +261,8 @@ class CarAi(Ai, ComputerProxy):
         for logic in [self.front_logic, self.rear_logic]:
             logic.debug_lines_gnd.clear()
             logic.debug_lines_obst.clear()
-        directions = ['center', 'left', 'right']
+        directions = [self.front_logic._sectors[self.front_logic._curr_sector]]
+        self.front_logic._curr_sector = (self.front_logic._curr_sector + 1) % 3
         map(self.front_logic._update_gnd, directions)
         self.front_logic.clear()
         map(self.front_logic._update_obst, directions)
