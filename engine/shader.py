@@ -1,6 +1,7 @@
 from panda3d.core import AmbientLight, DirectionalLight, PointLight, \
     Spotlight, LVector4f, LVector3f, Vec3, Shader, Texture, WindowProperties,\
-    FrameBufferProperties, GraphicsPipe, GraphicsOutput, NodePath, PandaNode
+    FrameBufferProperties, GraphicsPipe, GraphicsOutput, NodePath, PandaNode, \
+    TextureStage, TexMatrixAttrib
 from direct.filter.FilterManager import FilterManager
 
 
@@ -186,6 +187,7 @@ class ShaderMgr(object):
         # setShaderInput('vec3argname', PTALVecBase3(((0, 0, 0), (1, 1, 1))))
         render.set_shader(Shader.make(Shader.SLGLSL, vert, frag))
         render.set_shader_input('num_lights', len(self.lights))
+        self.set_shader_pars(render)
         map(lambda lgt: self.set_lgt_args(*lgt), enumerate(self.lights))
         mci.setShader(Shader.make(Shader.SLGLSL, vert, frag))
         base.cam.node().set_initial_state(mci.getState())
@@ -200,6 +202,27 @@ class ShaderMgr(object):
             render.set_shader_auto()
             return
         self.apply()
+
+    def set_shader_pars(self, model):
+        texture_stages = model.find_all_texture_stages()
+        model.set_shader_input('gloss_slot', 0)
+        model.set_shader_input('detail_slot', 0)
+        model.set_shader_input('detail_scale', (1, 1))
+        for ts in texture_stages:
+            if ts.getSort() == 0: continue
+            self.__set_slots(ts, model, 1 if ts.getSort() == 10 else 2)
+
+    def __set_slots(self, ts, model, slot):
+        if ts.getMode() == TextureStage.MGloss:
+            model.set_shader_input('gloss_slot', slot)
+        else:
+            model.set_shader_input('detail_slot', slot)
+            geom_np = model.find_all_matches('**/+GeomNode')[0]
+            state = geom_np.node().get_geom_state(0)
+            attrib = state.get_attrib(TexMatrixAttrib.get_class_type())
+            if attrib:
+                scale = attrib.get_transform(ts).get_scale()
+                model.set_shader_input('detail_scale', scale)
 
     def destroy(self):
         self.clear_lights()

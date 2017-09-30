@@ -6,8 +6,13 @@ in vec4 lightclip;
 in vec4 shadowcoord;
 out vec4 p3d_FragColor;
 uniform sampler2D p3d_Texture0;
+uniform sampler2D p3d_Texture1;
+uniform sampler2D p3d_Texture2;
 uniform sampler2DShadow depthmap;
 uniform int num_lights;
+uniform int gloss_slot;
+uniform int detail_slot;
+uniform vec3 detail_scale;
 const int toon_levels = 4;
 const float toon_scale_factor = 1.0 / toon_levels;
 
@@ -78,11 +83,19 @@ void main() {
     vec3 spec = vec3(.0);
     vec3 amb_diff_i;
     vec3 spec_i;
-    vec4 tex_col = texture(p3d_Texture0, texcoord);
+    vec4 diff_col = texture(p3d_Texture0, texcoord);
+    vec4 detail_col = vec4(1.0);
+    vec4 gloss_col = vec4(1.0);
+    vec2 detail_coord = texcoord * detail_scale.xy;
+    if (gloss_slot == 1) gloss_col = texture(p3d_Texture1, texcoord);
+    if (gloss_slot == 2) gloss_col = texture(p3d_Texture2, texcoord);
+    if (detail_slot == 1) detail_col = texture(p3d_Texture1, detail_coord);
+    if (detail_slot == 2) detail_col = texture(p3d_Texture2, detail_coord);
+    vec4 tex_col = diff_col * detail_col;
     for (int i=0; i < num_lights; i++) {
         toon(i, amb_diff_i, spec_i);
         amb_diff += amb_diff_i;
-        spec += spec_i;
+        spec += spec_i * vec3(gloss_col);
     }
     vec3 circleoffs = vec3(lightclip.xy / lightclip.w, 0);
     float falloff = saturate(1.0 - dot(circleoffs, circleoffs));
