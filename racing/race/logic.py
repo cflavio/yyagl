@@ -56,7 +56,9 @@ class RaceLogic(Logic):
         map(lambda car: car.start(), self.all_cars)
         map(lambda car: car.event.attach(self.on_rotate_all), self.all_cars)
         self.mdt.gui.start()
-        self.ai_poller.set_cars([car.name for car in self.all_cars if car.__class__ == AiCar])
+        ai_cars = [car.name for car in self.all_cars if car.__class__ == AiCar]
+        if self.props.a_i: ai_cars += [self.player_car.name]
+        self.ai_poller.set_cars(ai_cars)
 
     def on_rotate_all(self, sender):
         cars = [car for car in self.all_cars if car.name != sender.name]
