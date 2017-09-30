@@ -47,7 +47,7 @@ def __prepare(start_path, platform):
     makedirs('img/guis')
     libfpath = curr_path + 'mojosetup/guis/%s/libmojosetupgui_gtkplus2.so'
     dst_dpath = 'img/guis/libmojosetupgui_gtkplus2.so'
-    copy(start_path + libfpath % platform, dst_dpath)
+    copy(libfpath % platform, dst_dpath)
 
 
 def __bld(appname, start_path, platform, ico_fpath):
