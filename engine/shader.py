@@ -217,12 +217,16 @@ class ShaderMgr(object):
             model.set_shader_input('gloss_slot', slot)
         else:
             model.set_shader_input('detail_slot', slot)
-            geom_np = model.find_all_matches('**/+GeomNode')[0]
-            state = geom_np.node().get_geom_state(0)
-            attrib = state.get_attrib(TexMatrixAttrib.get_class_type())
-            if attrib:
-                scale = attrib.get_transform(ts).get_scale()
-                model.set_shader_input('detail_scale', scale)
+            attrib_type = TexMatrixAttrib.get_class_type()
+            for geom_np in model.find_all_matches('**/+GeomNode'):
+                geom_node = geom_np.node()
+                for i in range(geom_node.get_num_geoms()):
+                    state = geom_node.get_geom_state(i)
+                    if state.has_attrib(attrib_type):
+                        attrib = state.get_attrib(attrib_type)
+                        for j in range(attrib.get_num_stages()):
+                            scale = attrib.get_transform(attrib.get_stage(j)).get_scale()
+                            model.set_shader_input('detail_scale', scale)
 
     def destroy(self):
         self.clear_lights()
