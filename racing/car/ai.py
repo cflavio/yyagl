@@ -24,7 +24,7 @@ class CarAiPoller(object):
 
     @property
     def current(self):
-        if not hasattr(self, 'cars'): return 0
+        if not hasattr(self, 'cars') or not self.cars: return 0
         return self.cars[self.idx]
 
     def destroy(self):
