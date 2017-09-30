@@ -84,30 +84,11 @@ class AbsAiLogic(ComputerProxy, GameObject):
     def tgt_vec(self):
         return self.eng.norm_vec(self.curr_tgt_wp.get_pos() - self.car.pos)
 
-    def lookahead_gnd(self, dist, deg):
-        lookahed_vec = self.car_vec * dist
-        lookahead_rot = self.eng.rot_vec(lookahed_vec, deg)
-        lookahead_pos = self.car.pos + lookahead_rot
-        if self.car.fsm.getCurrentOrNextState() != 'Results' and \
-                self.player_car == self.car.name:
-            self.debug_lines_gnd.draw(self.car.pos, lookahead_pos)
-        return self.car.phys.gnd_name(lookahead_pos)
-
-    def _update_gnd(self, direction):  # direction in left, center, right
+    def _update_gnd(self, direction, hit_res):  # direction in left, center, right
+        if not hit_res: return
         if len(self.sector2samples_gnd[direction]) > 0:
             self.sector2samples_gnd[direction].pop(0)
-        speed_ratio = self.car.phys.speed_ratio
-        center_deg = 10 - 5 * speed_ratio
-        # central sector's bound to sample into
-        lateral_deg = 60 - 55 * speed_ratio
-        sector_bounds = {'left': (center_deg, lateral_deg),
-                         'center': (-center_deg, center_deg),
-                         'right': (-lateral_deg, -center_deg)}
-        deg = uniform(*sector_bounds[direction])
-        vec_lgt = uniform(9 + 6 * speed_ratio,
-                          4 + 29 * speed_ratio)
-        self.sector2samples_gnd[direction] += [
-            self.lookahead_gnd(vec_lgt, deg)]
+        self.sector2samples_gnd[direction] += [hit_res[0][0]]
 
     def get_obstacles(self):
         left_samples = [smp for smp in self.sector2obsts['left'] if smp.dist]
@@ -131,10 +112,13 @@ class AbsAiLogic(ComputerProxy, GameObject):
                 if smp.name == 'Vehicle':
                     self.sector2obsts[direction].remove(smp)
 
-    def _update_obst(self, direction):
+    def _update_obst(self, direction, hit_res):
         nsam = 0 if self.car.phys.speed >= 5 else 10
         if len(self.sector2obsts[direction]) > nsam:
             del self.sector2obsts[direction][:-(nsam - 2)]
+        if hit_res: self.sector2obsts[direction] += [ObstInfo(*hit_res[0])]
+
+    def hit_res(self, direction):
         lat_sector_deg = 40 - 35 * self.car.phys.speed_ratio
         sector2bounds = {'left': (0, lat_sector_deg), 'center': (0, 0),
                          'right': (-lat_sector_deg, 0)}
@@ -144,22 +128,24 @@ class AbsAiLogic(ComputerProxy, GameObject):
             offset_y = (self.width_bounds[self.bnd_idx(direction)], 0, 0)
         start = self.car.pos - self.car_vec * .8
         offset_rot = self.eng.rot_vec(offset_y, self.car.heading)
-        start = start + offset_rot + (0, 0, uniform(*self.height_bounds))
-        lgt = 4 + 31 * self.car.phys.speed_ratio
+        half = (self.height_bounds[0] + self.height_bounds[1]) / 4
+        start = start + offset_rot + (0, 0, uniform(half, self.height_bounds[1]))
+        lgt = 4 + 41 * self.car.phys.speed_ratio
         lookahed_vec = self.car_vec * lgt
         deg = uniform(*sector2bounds[direction])
         lookahead_rot = self.eng.rot_vec(lookahed_vec, deg)
-        lookahead_pos = self.car.pos + lookahead_rot
-        result = self.eng.phys_mgr.ray_test_closest(start, lookahead_pos,
-                                                    self.car.logic.bitmask)
-        hit, dist, name = result.get_node(), 0, ''
-        if hit:
-            dist = (self.car.pos - result.get_hit_pos()).length()
-            name = hit.get_name()
-        self.sector2obsts[direction] += [ObstInfo(name, dist)]
+        lookahead_pos = self.car.pos + lookahead_rot + (0, 0, self.height_bounds[0] - 2)
+        hit_res = self.eng.phys_mgr.ray_test_all(start, lookahead_pos, self.car.logic.bitmask)
+        result = []
+        for hit in hit_res.get_hits():
+            result += [(hit.get_node().get_name(), (start - hit.get_hit_pos()).length())]
+        result = sorted(result, key=lambda elm: elm[1])
         if self.car.fsm.getCurrentOrNextState() != 'Results' and \
                 self.player_car == self.car.name:
             self.debug_lines_obst.draw(start, lookahead_pos)
+        road_res = [res for res in result if any(road_n in res[0] for road_n in ['Road', 'Offroad'])][:1]
+        obs_res = [res for res in result if not any(road_n in res[0] for road_n in ['Road', 'Offroad'])][:1]
+        return road_res, obs_res
 
     def destroy(self):
         self.car = None
@@ -263,12 +249,14 @@ class CarAi(Ai, ComputerProxy):
             logic.debug_lines_obst.clear()
         directions = [self.front_logic._sectors[self.front_logic._curr_sector]]
         self.front_logic._curr_sector = (self.front_logic._curr_sector + 1) % 3
-        map(self.front_logic._update_gnd, directions)
+        hit_res = self.front_logic.hit_res(directions[0])
+        self.front_logic._update_gnd(directions[0], hit_res[0])
         self.front_logic.clear()
-        map(self.front_logic._update_obst, directions)
+        self.front_logic._update_obst(directions[0], hit_res[1])
         if self.mdt.phys.speed < 10 or self.mdt.logic.has_rear_weapon:
-            map(self.rear_logic._update_gnd, directions)
-            map(self.rear_logic._update_obst, directions)
+            hit_res = self.rear_logic.hit_res(directions[0])
+            self.rear_logic._update_gnd(directions[0], hit_res[0])
+            self.rear_logic._update_obst(directions[0], hit_res[1])
 
     def _eval_respawn(self):
         if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:

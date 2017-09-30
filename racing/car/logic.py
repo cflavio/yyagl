@@ -393,7 +393,7 @@ class CarLogic(Logic, ComputerProxy):
     @property
     @compute_once
     def bitmask(self):
-        b_m = BitMask32.bit(0)
+        b_m = BitMask32.bit(0) | BitMask32.bit(1)
         cars_idx = range(len(self.cprops.race_props.season_props.car_names))
         cars_idx.remove(
             self.cprops.race_props.season_props.car_names.index(self.mdt.name))

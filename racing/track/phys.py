@@ -43,8 +43,10 @@ class MeshBuilder(GameObject):
         meth(nodepath.node())
         lst += [nodepath.node()]
         nodepath.node().notify_collisions(True)
-        if is_ghost or not is_merged:
-            nodepath.set_collide_mask(BitMask32.bit(1))
+        if not is_merged:
+            nodepath.set_collide_mask(BitMask32.bit(1) | BitMask32.bit(15))
+        if is_ghost:
+            nodepath.set_collide_mask(BitMask32.bit(16))
 
     def destroy(self):
         self.model = self.rigid_bodies = self.ghosts = self.nodes = None

@@ -61,7 +61,7 @@ class CarPhys(Phys):
         self.mdt.gfx.nodepath.node().add_shape(chassis_shape)
         car_names = self.cprops.race_props.season_props.car_names
         car_idx = car_names.index(self.cprops.name)
-        mask = BitMask32.bit(1) | BitMask32.bit(2 + car_idx)
+        mask = BitMask32.bit(2 + car_idx) | BitMask32.bit(16) | BitMask32.bit(15)
         self.mdt.gfx.nodepath.set_collide_mask(mask)
 
     def __set_phys_node(self):
