@@ -8,8 +8,8 @@ class TurboLogic(WeaponLogic):
         self.stored_max_speed = self.stored_engine_acc_frc = \
             self.destroy_tsk = None
 
-    def fire(self):
-        WeaponLogic.fire(self)
+    def fire(self, sfx):
+        WeaponLogic.fire(self, sfx)
         self.stored_max_speed = self.car.phys.max_speed
         self.stored_engine_acc_frc = self.car.phys.engine_acc_frc
         self.car.phys.max_speed *= 1.5

@@ -605,7 +605,7 @@ class CarLogic(Logic, ComputerProxy):
 
     def fire(self):
         self.weapon.attach_obs(self.on_weapon_destroyed)
-        self.weapon.fire()
+        self.weapon.fire(False)
 
     def on_weapon_destroyed(self):
         self.weapon.detach_obs(self.mdt.event.on_rotate_all)
@@ -661,6 +661,10 @@ class CarPlayerLogic(CarLogic):
             self.mdt.gui.panel.speed_txt.setText(str(int(self.mdt.phys.speed)))
         self.__check_wrong_way()
         self._update_dist()
+
+    def fire(self):
+        self.weapon.attach_obs(self.on_weapon_destroyed)
+        self.weapon.fire(True)
 
     def __check_wrong_way(self):
         if self.cprops.track_waypoints:

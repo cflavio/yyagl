@@ -9,8 +9,8 @@ class WeaponLogic(Logic):
         self.cars = cars
         self.has_fired = False
 
-    def fire(self):
-        self.mdt.audio.sfx.play()
+    def fire(self, sfx):
+        if sfx: self.mdt.audio.sfx.play()
         self.has_fired = True
 
     def destroy(self):

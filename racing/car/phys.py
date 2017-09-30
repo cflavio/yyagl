@@ -281,3 +281,7 @@ class CarPlayerPhys(CarPhys):
         tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_suspensions
         drv_c = 1 + .01 * self.cprops.driver_suspensions
         return self.cfg['roll_influence'] * tun_c * drv_c
+
+    def rotate(self):
+        CarPhys.rotate(self)
+        self.eng.play(self.mdt.audio.rotate_all_hit_sfx)

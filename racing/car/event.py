@@ -78,7 +78,6 @@ class CarEvent(Event, ComputerProxy):
         if obj_name.startswith(self.props.pitstop_name):
             self.mdt.phys.apply_damage(True)
             self.mdt.gfx.apply_damage(True)
-            self.mdt.gfx.set_decorator('pitstop')
         if obj_name.startswith(self.props.goal_name):
             self._process_goal()
         obst_names = [self.props.wall_name, 'Vehicle']
@@ -204,6 +203,10 @@ class CarPlayerEvent(CarEvent):
             self.eng.audio.play(self.mdt.audio.landing_sfx)
         if obj_name.startswith(self.props.pitstop_name):
             self.mdt.gui.panel.apply_damage(True)
+            self.mdt.gfx.set_decorator('pitstop')
+            self.eng.play(self.mdt.audio.pitstop_sfx)
+        if 'Rocket' in obj_name:
+            self.eng.audio.play(self.mdt.audio.rocket_hit_sfx)
 
     def on_bonus(self):
         if self.mdt.logic.weapon:

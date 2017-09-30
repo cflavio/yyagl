@@ -7,8 +7,8 @@ class MineLogic(WeaponLogic):
         WeaponLogic.__init__(self, mdt, car, cars)
         self.tsk = None
 
-    def fire(self):
-        WeaponLogic.fire(self)
+    def fire(self, sfx):
+        WeaponLogic.fire(self, sfx)
         self.mdt.phys.fire()
         self.tsk = self.eng.do_later(30, self.mdt.destroy)
 
