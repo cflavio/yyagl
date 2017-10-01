@@ -2,6 +2,7 @@ from sys import path
 from os.path import dirname, realpath
 path.append(dirname(realpath(__file__)) + '/../thirdparty')
 from direct.showbase.ShowBase import ShowBase
+from ..library.builder import LibraryBuilder
 from .pause import PauseMgr
 from .profiler import Profiler
 from .shader import ShaderMgr
@@ -29,6 +30,7 @@ class EngineShowBase(ShowBase):
 class Engine(GameObject, EngineFacade):
 
     def __init__(self, cfg=None):
+        self.lib = LibraryBuilder.build()
         Colleague.eng = GameObject.eng = self
         EngineFacade.__init__(self)
         self.base = EngineShowBase()
