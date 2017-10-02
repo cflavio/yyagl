@@ -1,10 +1,11 @@
 from math import sin, cos
 from collections import namedtuple
-from panda3d.core import Vec3, Vec2, deg2Rad, LPoint3f, Mat4, BitMask32
+from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32
 from yyagl.gameobject import Logic
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
+from yyagl.engine.vec import Vec2, Vec
 
 
 WPInfo = namedtuple('WPInfo', 'prev next')
@@ -484,9 +485,9 @@ class CarLogic(Logic, ComputerProxy):
         next_wp = may_succ[distances.index(min(distances))]
         if len(self._grid_wps[curr_wp]) >= 2:
             self.alt_jmp_wp = None
-        curr_vec = self.eng.norm_vec(Vec2(car_np.get_pos(curr_wp).xy))
-        prev_vec = self.eng.norm_vec(Vec2(car_np.get_pos(prev_wp).xy))
-        next_vec = self.eng.norm_vec(Vec2(car_np.get_pos(next_wp).xy))
+        curr_vec = Vec2(*car_np.get_pos(curr_wp).xy).normalize()
+        prev_vec = Vec2(*car_np.get_pos(prev_wp).xy).normalize()
+        next_vec = Vec2(*car_np.get_pos(next_wp).xy).normalize()
         prev_angle = prev_vec.signed_angle_deg(curr_vec)
         next_angle = next_vec.signed_angle_deg(curr_vec)
         if min(distances) > 10 and abs(prev_angle) > abs(next_angle):
@@ -564,13 +565,13 @@ class CarLogic(Logic, ComputerProxy):
     @property
     def car_vec(self):  # port (or add) this to 3D
         car_rad = deg2Rad(self.mdt.gfx.nodepath.getH())
-        return self.eng.norm_vec(Vec3(-sin(car_rad), cos(car_rad), 0))
+        return Vec(-sin(car_rad), cos(car_rad), 0).normalize()
 
     @property
     def direction(self):
         # car's direction dot current direction
         start_wp, end_wp = self.closest_wp()
-        wp_vec = self.eng.norm_vec(Vec3(end_wp.getPos(start_wp).xy, 0))
+        wp_vec = Vec(end_wp.getPos(start_wp).x, end_wp.getPos(start_wp).y, 0).normalize()
         return self.car_vec.dot(wp_vec)
 
     @property

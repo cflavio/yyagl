@@ -27,17 +27,6 @@ class EngineLogic(Logic):
         return self.mdt.lib.curr_path + '/' \
             if self.is_runtime else ''
 
-    @staticmethod
-    def norm_vec(vec):
-        vec.normalize()
-        return vec
-
-    @staticmethod
-    def rot_vec(vec, deg):
-        rot_mat = Mat4()
-        rot_mat.setRotateMat(deg, (0, 0, 1))
-        return rot_mat.xform_vec(vec)
-
     def destroy(self):
         self.cfg = None
         Logic.destroy(self)

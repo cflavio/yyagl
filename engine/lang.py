@@ -5,11 +5,11 @@ from yyagl.gameobject import GameObject
 
 class LangMgr(GameObject):
 
-    def __init__(self, lang, lang_domain, lang_path):
+    def __init__(self, lang, domain, dpath):
         GameObject.__init__(self)
-        self.curr_lang = lang
-        self.domain = lang_domain
-        self.path = join(self.eng.curr_path, lang_path)
+        self.lang = lang
+        self.domain = domain
+        self.dpath = join(self.eng.curr_path, dpath)
         self.set_lang(lang)
 
     @property
@@ -17,8 +17,8 @@ class LangMgr(GameObject):
         return [lang[:2].lower() for lang in self.eng.cfg.languages]
 
     def set_lang(self, lang):
-        self.curr_lang = lang
+        self.lang = lang
         try:
-            translation(self.domain, self.path, [lang]).install(unicode=1)
-        except IOError:  # english
-            install(self.domain, self.path, unicode=1)
+            translation(self.domain, self.dpath, [lang]).install(unicode=1)
+        except IOError:  # english translation is already in the code
+            install(self.domain, self.dpath, unicode=1)

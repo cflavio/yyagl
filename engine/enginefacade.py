@@ -29,8 +29,6 @@ class EngineFacade(Facade):
         fwd('toggle_shader', lambda obj: obj.shader_mgr.toggle_shader)
         fwd('set_resolution', lambda obj: obj.gui.set_resolution)
         fwd('toggle_fullscreen', lambda obj: obj.gui.toggle_fullscreen)
-        fwd('norm_vec', lambda obj: obj.logic.norm_vec)
-        fwd('rot_vec', lambda obj: obj.logic.rot_vec)
         self._fwd_prop_lazy('version', lambda obj: obj.logic.version)
         self._fwd_prop_lazy('curr_path', lambda obj: obj.logic.curr_path)
         self._fwd_prop_lazy('cfg', lambda obj: obj.logic.cfg)

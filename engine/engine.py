@@ -4,7 +4,7 @@ path.append(dirname(realpath(__file__)) + '/../thirdparty')
 from direct.showbase.ShowBase import ShowBase
 from ..library.builder import LibraryBuilder
 from .pause import PauseMgr
-from .profiler import Profiler
+from .profiler import AbsProfiler
 from .shader import ShaderMgr
 from .log import LogMgr
 from .font import FontMgr
@@ -36,7 +36,7 @@ class Engine(GameObject, EngineFacade):
         self.base = EngineShowBase()
         if not cfg: cfg = Cfg()
         self.shader_mgr = ShaderMgr(cfg.shaders_dev, cfg.gamma)
-        self.profiler = Profiler(cfg.py_profiling, cfg.py_profiling_percall)
+        self.profiler = AbsProfiler.build(cfg.py_profiling_percall)
         self.font_mgr = FontMgr()
         self.server = Server()
         self.client = Client()

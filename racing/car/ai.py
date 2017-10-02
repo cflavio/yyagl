@@ -3,6 +3,7 @@ from collections import namedtuple
 from panda3d.core import Vec3, LineSegs, LPoint3f
 from yyagl.gameobject import Ai, GameObject
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
+from yyagl.engine.vec import Vec
 
 
 ObstInfo = namedtuple('ObstInfo', 'name dist')
@@ -82,7 +83,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
     @property
     @once_a_frame
     def tgt_vec(self):
-        return self.eng.norm_vec(self.curr_tgt_wp.get_pos() - self.car.pos)
+        return Vec(*(self.curr_tgt_wp.get_pos() - self.car.pos)).normalize()
 
     def _update_gnd(self, direction, hit_res):  # direction in left, center, right
         if not hit_res: return
@@ -123,18 +124,18 @@ class AbsAiLogic(ComputerProxy, GameObject):
         sector2bounds = {'left': (0, lat_sector_deg), 'center': (0, 0),
                          'right': (-lat_sector_deg, 0)}
         if direction == 'center':
-            offset_y = (uniform(*self.width_bounds), 0, 0)
+            offset_y = Vec(uniform(*self.width_bounds), 0, 0)
         else:
-            offset_y = (self.width_bounds[self.bnd_idx(direction)], 0, 0)
-        start = self.car.pos - self.car_vec * .8
-        offset_rot = self.eng.rot_vec(offset_y, self.car.heading)
+            offset_y = Vec(self.width_bounds[self.bnd_idx(direction)], 0, 0)
+        start = Vec(*(self.car.pos - self.car_vec * .8))
+        offset_y.rotate(self.car.heading)
         half = (self.height_bounds[0] + self.height_bounds[1]) / 4
-        start = start + offset_rot + (0, 0, uniform(half, self.height_bounds[1]))
+        start = start + offset_y + (0, 0, uniform(half, self.height_bounds[1]))
         lgt = 4 + 41 * self.car.phys.speed_ratio
-        lookahed_vec = self.car_vec * lgt
+        lookahed_vec = Vec(*(self.car_vec * lgt))
         deg = uniform(*sector2bounds[direction])
-        lookahead_rot = self.eng.rot_vec(lookahed_vec, deg)
-        lookahead_pos = self.car.pos + lookahead_rot + (0, 0, self.height_bounds[0] - 2)
+        lookahed_vec.rotate(deg)
+        lookahead_pos = Vec(*(self.car.pos)) + lookahed_vec + (0, 0, self.height_bounds[0] - 2)
         hit_res = self.eng.phys_mgr.ray_test_all(start, lookahead_pos, self.car.logic.bitmask)
         result = []
         for hit in hit_res.get_hits():

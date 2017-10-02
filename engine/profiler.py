@@ -1,76 +1,68 @@
-# refactor it. since cProfile is not picked by packp3d i should manage that.
 from os.path import exists
 
 
-if not exists('main.pyo'):
+if not exists('main.pyo'):  # we don't deploy cProfile
     from cProfile import Profile
     from pstats import Stats
     from StringIO import StringIO
 
-    class Profiler(object):
 
-        def __init__(self, enabled, percall):
-            self.enabled = enabled
-            self.percall = percall
-            self.is_profiling = False
-            if not enabled:
-                return
-            self.prof = Profile()
-            self.stats = None
+class AbsProfiler(object):
 
-        def enable(self):
-            if not self.enabled:
-                return
-            self.prof.enable()
-            self.is_profiling = True
+    @staticmethod
+    def build(percall):
+        prof_cls = AbsProfiler
+        if not exists('main.pyo'):
+            prof_cls = PerCallProfiler if percall else Profiler
+        return prof_cls(percall)
 
-        def disable(self):
-            if not self.enabled:
-                return
-            self.prof.disable()
-            self.is_profiling = False
+    def __init__(self, percall): pass
 
-        def toggle(self):
-            if not self.enabled:
-                return
-            if not self.is_profiling:
-                self.enable()
-            else:
-                self.disable()
-                self.printstats()
+    def printstats(self): pass
 
-        def printstats(self):
-            self.prof.disable()
-            sio = StringIO()
-            self.stats = Stats(self.prof, stream=sio).sort_stats('cumulative')
-            if not self.enabled:
-                return
-            self.stats.print_stats()
-            if not self.percall:
-                print sio.getvalue()
-            else:
-                lines = sio.getvalue().split('\n')
-                out_lines = lines[:5]
-                lines = lines[5:]
-                lines = [line.split() for line in lines]
-                lines = [line for line in lines if line]
-                lines = reversed(sorted(lines, key=lambda line: line[4]))
-                lines = ['\t'.join(line) for line in lines]
-                print '\n'.join(out_lines + lines)
+    def toggle(self): pass
 
 
-else:
+class Profiler(AbsProfiler):
 
-    class Profiler(object):
+    def __init__(self, percall):
+        self.percall = percall
+        self.is_profiling = False  # we can't infer from cProfile
+        self.prof = Profile()
+        self.stats = None
 
-        def __init__(self, enabled, percall):
-            pass
+    def toggle(self):
+        if not self.is_profiling: self.__enable()
+        else:
+            self.__disable()
+            self.printstats()
 
-        def enable(self):
-            pass
+    def __enable(self):
+        self.prof.enable()
+        self.is_profiling = True
 
-        def disable(self):
-            pass
+    def __disable(self):
+        self.prof.disable()
+        self.is_profiling = False
 
-        def printstats(self):
-            pass
+    def printstats(self):
+        self.prof.disable()
+        sio = StringIO()
+        self.stats = Stats(self.prof, stream=sio).sort_stats('cumulative')
+        self.stats.print_stats()
+        self._print_lines(sio)
+
+    def _print_lines(self, sio):
+        print sio.getvalue()
+
+
+class PerCallProfiler(Profiler):
+
+    def _print_lines(self, sio):
+        lines = sio.getvalue().split('\n')
+        header_lines = lines[:5]
+        content_lines = [line.split() for line in lines[5:] if line]
+        sorted_lines = reversed(sorted(content_lines, key=lambda line: line[4]))
+        # line[4] is the percall value
+        joined_lines = ['\t'.join(line) for line in sorted_lines]
+        print '\n'.join(header_lines + joined_lines)

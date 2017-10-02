@@ -11,6 +11,7 @@ from yyagl.racing.weapon.turbo.turbo import Turbo
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
 from yyagl.racing.weapon.mine.mine import Mine
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
+from yyagl.engine.vec import Vec
 
 
 Keys = namedtuple('Keys', 'forward rear left right fire respawn pause')
@@ -140,7 +141,7 @@ class CarEvent(Event, ComputerProxy):
     def process_respawn(self):
         start_wp_n, end_wp_n = self.mdt.logic.last_wp
         self.mdt.gfx.nodepath.set_pos(start_wp_n.get_pos() + (0, 0, 2))
-        wp_vec = self.eng.norm_vec(Vec3(end_wp_n.get_pos(start_wp_n).xy, 0))
+        wp_vec = Vec(end_wp_n.get_pos(start_wp_n).x, end_wp_n.get_pos(start_wp_n).y, 0).normalize()
         or_h = (wp_vec.xy).signed_angle_deg(Vec2(0, 1))
         self.mdt.gfx.nodepath.set_hpr(-or_h, 0, 0)
         self.mdt.gfx.nodepath.node().set_linear_velocity(0)

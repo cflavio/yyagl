@@ -25,7 +25,7 @@ class Conf(object):
     def __init__(self):
         self.model_path = 'assets/models/tracks/'
         self.antialiasing = self.menu_joypad = self.shaders_dev = \
-            self.py_profiling = self.py_profiling_percall = False
+            self.py_profiling_percall = False
         self.gamma = 1.0
         self.lang = 'en'
         self.lang_domain = 'yorg'

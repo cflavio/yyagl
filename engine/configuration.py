@@ -7,13 +7,12 @@ class Cfg(object):
     def __init__(
             self, fps=False, win_size='1280 720', win_orig=None,
             win_title='Ya2', fullscreen=False, sync_video=True,
-            antialiasing=False, profiling=False, py_profiling=False,
-            py_profiling_percall=False, mt_render=False,
-            model_path='assets/models', lang='en', lang_path='assets/locale',
-            lang_domain='ya2_game', languages=['English', 'Italiano'],
-            shaders_dev=False, gamma=1.0, menu_joypad=True,
-            cursor_hidden=False, cursor_path='', cursor_scale=(1, 1, 1),
-            cursor_hotspot=(0, 0), volume=1):
+            antialiasing=False, profiling=False, py_profiling_percall=False,
+            mt_render=False, model_path='assets/models', lang='en',
+            lang_path='assets/locale', lang_domain='ya2_game',
+            languages=['English', 'Italiano'], shaders_dev=False, gamma=1.0,
+            menu_joypad=True, cursor_hidden=False, cursor_path='',
+            cursor_scale=(1, 1, 1), cursor_hotspot=(0, 0), volume=1):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title
@@ -23,7 +22,6 @@ class Cfg(object):
         self.antialiasing = antialiasing
         self.multithreaded_render = mt_render
         self.profiling = profiling
-        self.py_profiling = py_profiling
         self.py_profiling_percall = py_profiling_percall
         self.model_path = model_path
         self.lang = lang
