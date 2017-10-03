@@ -5,14 +5,14 @@ class EngineFacade(Facade):
 
     def __init__(self):
         # lambdas are for lazy evaluation (they may not exist)
-        fwd = self._fwd_mth_lazy
+        fwd = self._fwd_mth
         fwd('attach_obs', lambda obj: obj.event.attach)
         fwd('detach_obs', lambda obj: obj.event.detach)
         fwd('attach_node', lambda obj: obj.gfx.root.attachNewNode)
         fwd('particle', lambda obj: obj.gfx.particle)
         fwd('init_gfx', lambda obj: obj.gfx.init)
         fwd('clean_gfx', lambda obj: obj.gfx.clean)
-        fwd('set_cam_pos', lambda obj: obj.base.camera.set_pos)
+        fwd('set_cam_pos', lambda obj: base.camera.set_pos)
         fwd('load_font', lambda obj: self.eng.font_mgr.load_font)
         fwd('open_browser', lambda obj: obj.gui.open_browser)
         fwd('toggle_pause', lambda obj: obj.pause.logic.toggle)
@@ -29,27 +29,23 @@ class EngineFacade(Facade):
         fwd('toggle_shader', lambda obj: obj.shader_mgr.toggle_shader)
         fwd('set_resolution', lambda obj: obj.gui.set_resolution)
         fwd('toggle_fullscreen', lambda obj: obj.gui.toggle_fullscreen)
-        self._fwd_prop_lazy('version', lambda obj: obj.logic.version)
-        self._fwd_prop_lazy('curr_path', lambda obj: obj.logic.curr_path)
-        self._fwd_prop_lazy('cfg', lambda obj: obj.logic.cfg)
-        self._fwd_prop_lazy('is_runtime', lambda obj: obj.logic.is_runtime)
-        self._fwd_prop_lazy('languages', lambda obj: obj.logic.cfg.languages)
-        self._fwd_prop_lazy('resolutions', lambda obj: obj.gui.resolutions)
-        self._fwd_prop_lazy('closest_res', lambda obj: obj.gui.closest_res)
-        self._fwd_prop_lazy('curr_time',
+        fwd('send', lambda obj: obj.lib.send)
+        fwd('do_later', lambda obj: obj.lib.do_later)
+        fwd('add_task', lambda obj: obj.lib.add_task)
+        self._fwd_prop('version', lambda obj: obj.logic.version)
+        self._fwd_prop('curr_path', lambda obj: obj.logic.curr_path)
+        self._fwd_prop('cfg', lambda obj: obj.logic.cfg)
+        self._fwd_prop('is_runtime', lambda obj: obj.logic.is_runtime)
+        self._fwd_prop('languages', lambda obj: obj.logic.cfg.languages)
+        self._fwd_prop('resolutions', lambda obj: obj.gui.resolutions)
+        self._fwd_prop('closest_res', lambda obj: obj.gui.closest_res)
+        self._fwd_prop('joystick_mgr', lambda obj: obj.event.joystick_mgr)
+        self._fwd_prop('curr_time',
                             lambda obj: globalClock.get_frame_time())
-
-    @staticmethod
-    def do_later(time, meth, args=[]):
-        return taskMgr.doMethodLater(time, lambda meth, args: meth(*args), meth.__name__, [meth, args])
 
     def remove_do_later(self, tsk):
         self.pause.remove_task(tsk)
-        return taskMgr.remove(tsk)
-
-    @staticmethod
-    def add_tsk(meth, priority):
-        return taskMgr.add(meth, meth.__name__, priority)
+        return self.lib.remove_task(tsk)
 
     def load_model(self, filename, callback=None, extra_args=[]):
         args = {'callback': callback, 'extraArgs': extra_args}

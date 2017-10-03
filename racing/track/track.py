@@ -9,15 +9,15 @@ from .audio import TrackAudio
 class TrackFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('get_start_pos', self.phys.get_start_pos)
-        self._fwd_mth('play_music', self.audio.music.play)
-        self._fwd_mth('stop_music', self.audio.music.stop)
-        self._fwd_mth('update', self.event.update)
-        self._fwd_mth('attach_obs', self.event.attach)
-        self._fwd_mth('detach_obs', self.event.detach)
-        self._fwd_mth_lazy('reparent_to',
+        self._fwd_mth('get_start_pos', lambda obj: obj.phys.get_start_pos)
+        self._fwd_mth('play_music', lambda obj: obj.audio.music.play)
+        self._fwd_mth('stop_music', lambda obj: obj.audio.music.stop)
+        self._fwd_mth('update', lambda obj: obj.event.update)
+        self._fwd_mth('attach_obs', lambda obj: obj.event.attach)
+        self._fwd_mth('detach_obs', lambda obj: obj.event.detach)
+        self._fwd_mth('reparent_to',
                            lambda obj: obj.gfx.model.reparent_to)
-        self._fwd_prop('lrtb', self.phys.lrtb)
+        self._fwd_prop('lrtb', lambda obj: obj.phys.lrtb)
 
 
 class Track(GameObject, TrackFacade):

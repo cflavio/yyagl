@@ -1,7 +1,7 @@
 from sys import path
 from os.path import dirname, realpath
 path.append(dirname(realpath(__file__)) + '/../thirdparty')
-from direct.showbase.ShowBase import ShowBase
+
 from ..library.builder import LibraryBuilder
 from .pause import PauseMgr
 from .profiler import AbsProfiler
@@ -22,21 +22,19 @@ from .enginefacade import EngineFacade
 from .configuration import Cfg
 
 
-class EngineShowBase(ShowBase):
-
-    pass
 
 
 class Engine(GameObject, EngineFacade):
 
     def __init__(self, cfg=None):
         self.lib = LibraryBuilder.build()
+        self.lib.configure()
+        self.lib.init()
         Colleague.eng = GameObject.eng = self
         EngineFacade.__init__(self)
-        self.base = EngineShowBase()
-        if not cfg: cfg = Cfg()
+        cfg = cfg or Cfg()  # use a default conf if not provided
         self.shader_mgr = ShaderMgr(cfg.shaders_dev, cfg.gamma)
-        self.profiler = AbsProfiler.build(cfg.py_profiling_percall)
+        self.profiler = AbsProfiler.build(cfg.pyprof_percall)
         self.font_mgr = FontMgr()
         self.server = Server()
         self.client = Client()
@@ -45,16 +43,23 @@ class Engine(GameObject, EngineFacade):
             [('log_mgr', LogMgr.init_cls(), [self])],
             [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
             [('phys_mgr', PhysMgr, [self])],
-            [('event', EngineEvent.init_cls(),
-              [self, cfg.menu_joypad])],
+            [('event', EngineEvent, [self, cfg.menu_joypad])],
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self, cfg.volume])],
             [('pause', PauseMgr, [self])],
             [('lang_mgr', LangMgr, (cfg.lang, cfg.lang_domain,
                                     cfg.lang_path))]]
-
         GameObject.__init__(self, comps)
 
     def destroy(self):
         GameObject.destroy(self)
-        self.base.destroy()
+        EngineFacade.destroy(self)
+        self.lib.destroy()
+        self.shader_mgr.destroy()
+        self.profiler.destroy()
+        self.font_mgr.destroy()
+        self.server.destroy()
+        self.client.destroy()
+        self.lib = self.shader_mgr = self.profiler = self.font_mgr = \
+            self.server = self.client = None
+        base.destroy()

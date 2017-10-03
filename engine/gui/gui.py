@@ -12,7 +12,7 @@ class EngineGuiBase(Gui):
 
     def __init__(self, mdt):
         Gui.__init__(self, mdt)
-        mdt.base.disableMouse()
+        base.disableMouse()
 
     @staticmethod
     def open_browser(url):
@@ -20,7 +20,7 @@ class EngineGuiBase(Gui):
 
     @property
     def resolutions(self):
-        d_i = self.eng.base.pipe.get_display_information()
+        d_i = base.pipe.get_display_information()
 
         def res(idx):
             return d_i.get_display_mode_width(idx), \
@@ -31,7 +31,7 @@ class EngineGuiBase(Gui):
 
     @property
     def resolution(self):
-        win_prop = self.eng.base.win.get_properties()
+        win_prop = base.win.get_properties()
         return win_prop.get_x_size(), win_prop.get_y_size()
 
     @property
@@ -56,7 +56,7 @@ class EngineGuiBase(Gui):
     def toggle_fullscreen(self):
         self.set_resolution(self.closest_res)
         props = WindowProperties()
-        props.set_fullscreen(not self.eng.base.win.is_fullscreen())
+        props.set_fullscreen(not base.win.is_fullscreen())
         base.win.request_properties(props)
 
 
@@ -77,6 +77,6 @@ class EngineGui(EngineGuiBase):
         props.set_size(res)
         if fullscreen:
             props.set_fullscreen(True)
-        self.eng.base.win.request_properties(props)
+        base.win.request_properties(props)
         if check:
             self.eng.do_later(3.0, self.set_resolution_check, [res])

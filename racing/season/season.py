@@ -13,17 +13,17 @@ SeasonProps = namedtuple('SeasonProps', sp_attrs)
 class SeasonFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('attach_obs', self.logic.attach)
-        self._fwd_mth('detach_obs', self.logic.detach)
-        self._fwd_mth('start', self.logic.start)
-        self._fwd_mth('load', self.logic.load)
-        self._fwd_mth('create_race_server', self.logic.create_race_server)
-        self._fwd_mth('create_race_client', self.logic.create_race_client)
-        self._fwd_mth('create_race', self.logic.create_race)
-        self._fwd_prop('ranking', self.logic.ranking)
-        self._fwd_prop('tuning', self.logic.tuning)
-        self._fwd_prop_lazy('props', lambda obj: obj.logic.props)
-        self._fwd_prop_lazy('race', lambda obj: obj.logic.race)
+        self._fwd_mth('attach_obs', lambda obj: obj.logic.attach)
+        self._fwd_mth('detach_obs', lambda obj: obj.logic.detach)
+        self._fwd_mth('start', lambda obj: obj.logic.start)
+        self._fwd_mth('load', lambda obj: obj.logic.load)
+        self._fwd_mth('create_race_server', lambda obj: obj.logic.create_race_server)
+        self._fwd_mth('create_race_client', lambda obj: obj.logic.create_race_client)
+        self._fwd_mth('create_race', lambda obj: obj.logic.create_race)
+        self._fwd_prop('ranking', lambda obj: obj.logic.ranking)
+        self._fwd_prop('tuning', lambda obj: obj.logic.tuning)
+        self._fwd_prop('props', lambda obj: obj.logic.props)
+        self._fwd_prop('race', lambda obj: obj.logic.race)
 
     @property
     def drivers_skills(self):

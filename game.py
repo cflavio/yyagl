@@ -13,7 +13,7 @@ class GameLogic(Logic):
 class GameFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth_lazy('demand', lambda obj: obj.fsm.demand)
+        self._fwd_mth('demand', lambda obj: obj.fsm.demand)
 
 
 class GameBase(GameObject, GameFacade):  # it doesn't manage the window
@@ -34,4 +34,4 @@ class Game(GameBase):  # it adds the window
 
     def run(self):
         self.logic.on_start()
-        self.eng.base.run()
+        base.run()

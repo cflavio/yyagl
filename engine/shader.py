@@ -111,7 +111,7 @@ class ShaderMgr(object):
 
     def clear_lights(self):
         for lgt in self.lights:
-            self.eng.base.render.clear_light(lgt)
+            base.render.clear_light(lgt)
             lgt.removeNode()
         self.lights = []
 

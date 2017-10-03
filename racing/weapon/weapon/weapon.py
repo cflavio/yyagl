@@ -7,11 +7,11 @@ from .audio import WeaponAudio
 class WeaponFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('attach_obs', self.logic.attach)
-        self._fwd_mth('detach_obs', self.logic.detach)
-        self._fwd_mth('fire', self.logic.fire)
-        self._fwd_mth('ai_fire', self.ai.update)
-        self._fwd_mth('reparent', self.gfx.reparent)
+        self._fwd_mth('attach_obs', lambda obj: obj.logic.attach)
+        self._fwd_mth('detach_obs', lambda obj: obj.logic.detach)
+        self._fwd_mth('fire', lambda obj: obj.logic.fire)
+        self._fwd_mth('ai_fire', lambda obj: obj.ai.update)
+        self._fwd_mth('reparent', lambda obj: obj.gfx.reparent)
 
 
 class Weapon(GameObject, WeaponFacade):

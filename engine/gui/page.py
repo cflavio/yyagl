@@ -180,10 +180,10 @@ class PageEvent(Event):
 class PageFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth_lazy('show', lambda obj: obj.gui.show)
-        self._fwd_mth_lazy('hide', lambda obj: obj.gui.hide)
-        self._fwd_mth_lazy('attach_obs', lambda obj: obj.gui.attach)
-        self._fwd_mth_lazy('detach_obs', lambda obj: obj.gui.detach)
+        self._fwd_mth('show', lambda obj: obj.gui.show)
+        self._fwd_mth('hide', lambda obj: obj.gui.hide)
+        self._fwd_mth('attach_obs', lambda obj: obj.gui.attach)
+        self._fwd_mth('detach_obs', lambda obj: obj.gui.detach)
 
 
 class Page(GameObject, PageFacade):

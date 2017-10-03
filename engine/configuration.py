@@ -7,7 +7,7 @@ class Cfg(object):
     def __init__(
             self, fps=False, win_size='1280 720', win_orig=None,
             win_title='Ya2', fullscreen=False, sync_video=True,
-            antialiasing=False, profiling=False, py_profiling_percall=False,
+            antialiasing=False, profiling=False, pyprof_percall=False,
             mt_render=False, model_path='assets/models', lang='en',
             lang_path='assets/locale', lang_domain='ya2_game',
             languages=['English', 'Italiano'], shaders_dev=False, gamma=1.0,
@@ -22,7 +22,7 @@ class Cfg(object):
         self.antialiasing = antialiasing
         self.multithreaded_render = mt_render
         self.profiling = profiling
-        self.py_profiling_percall = py_profiling_percall
+        self.pyprof_percall = pyprof_percall
         self.model_path = model_path
         self.lang = lang
         self.lang_path = lang_path
@@ -69,4 +69,3 @@ class Cfg(object):
             self.__set('pstats-tasks', 1)
             self.__set('gl-finish', 1)
             self.__set('pstats-host', '127.0.0.1')
-        LogMgr.configure()

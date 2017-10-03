@@ -15,7 +15,7 @@ class EngineGfx(Gfx):
             root_dir = base.appRunner.p3dFilename.get_dirname()
             get_model_path().append_directory(root_dir + '/' + model_path)
             get_model_path().append_directory(root_dir)
-        mdt.base.enableParticles()
+        base.enableParticles()
         render.set_shader_auto()
         render.set_two_sided(True)
         if antialiasing:
@@ -45,13 +45,13 @@ class EngineGfx(Gfx):
 
     def print_stats(self):
         print '\n\n#####\nrender2d.analyze()'
-        self.mdt.base.render2d.analyze()
+        base.render2d.analyze()
         print '\n\n#####\nrender.analyze()'
-        self.mdt.base.render.analyze()
+        base.render.analyze()
         print '\n\n#####\nrender2d.ls()'
-        self.mdt.base.render2d.ls()
+        base.render2d.ls()
         print '\n\n#####\nrender.ls()'
-        self.mdt.base.render.ls()
+        base.render.ls()
 
     @staticmethod
     def particle(parent, pos, hpr, color, tot_time):

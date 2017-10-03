@@ -11,9 +11,9 @@ from .fsm import RaceFsm
 class RaceFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('attach_obs', self.event.attach)
-        self._fwd_mth('detach_obs', self.event.detach)
-        self._fwd_prop('results', self.gui.results)
+        self._fwd_mth('attach_obs', lambda obj: obj.event.attach)
+        self._fwd_mth('detach_obs', lambda obj: obj.event.detach)
+        self._fwd_prop('results', lambda obj: obj.gui.results)
 
 
 class Race(GameObject, RaceFacade):

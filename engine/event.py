@@ -3,35 +3,19 @@ from ..gameobject import Event
 from .joystick import JoystickMgr
 
 
-class EngineEventBase(Event):
-
-    @staticmethod
-    def init_cls():
-        return EngineEvent if base.win else EngineEventBase
+class EngineEvent(Event):
 
     def __init__(self, mdt, emulate_keyboard):
         Event.__init__(self, mdt)
-        self.accept('window-closed', self.__on_end)
-        taskMgr.add(self.__on_frame, 'on frame')
-        JoystickMgr.build(emulate_keyboard)
-
-    def __on_end(self):
-        self.eng.base.closeWindow(self.eng.base.win)
-        sys.exit()
+        self.eng.add_task(self.__on_frame)
+        self.joystick_mgr = JoystickMgr(emulate_keyboard)
 
     def __on_frame(self, task):
         self.notify('on_start_frame')
         self.notify('on_frame')
         self.notify('on_end_frame')
-        return task.cont
+        return self.eng.lib.task_cont
 
     def destroy(self):
-        self.eng.joystick_mgr.destroy()
+        self.joystick_mgr.destroy()
         Event.destroy(self)
-
-
-class EngineEvent(EngineEventBase):
-
-    def __init__(self, mdt, emulate_keyboard):
-        EngineEventBase.__init__(self, mdt, emulate_keyboard)
-        self.eng.base.win.setCloseRequestEvent('window-closed')

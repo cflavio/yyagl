@@ -67,7 +67,7 @@ class Camera(GameObject):
         car_pos = self.car_np.get_pos()
         l_d_speed = self.look_dist_min + look_dist_diff * self.curr_speed_ratio
         l_d = 0 if is_rolling else l_d_speed
-        cam_pos = self.eng.base.camera.get_pos()
+        cam_pos = base.camera.get_pos()
         curr_incr = self.curr_speed(cam_pos, car_pos + back_car_vec) * globalClock.get_dt()
         curr_incr_slow = self.speed_slow * globalClock.get_dt()
         if is_fast:
@@ -79,18 +79,16 @@ class Camera(GameObject):
         new_pos = self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
         # overwrite camera's position to set the physics
         # new_pos = (car_pos.x + 10, car_pos.y - 5, car_pos.z + 5
-        if not is_rolling:
-            self.eng.base.camera.set_pos(new_pos)
-        self.eng.base.camera.look_at(car_pos + tgt_vec)
+        if not is_rolling: base.camera.set_pos(new_pos)
+        base.camera.look_at(car_pos + tgt_vec)
 
     @property
-    def camera(self):
-        return self.eng.base.camera
+    def camera(self): return base.camera
 
     @staticmethod
     def render_all(track_model):  # workaround for premunge_scene in 1.9
-        Camera.eng.base.camera.set_pos(0, 0, 10000)
-        Camera.eng.base.camera.look_at(0, 0, 0)
+        base.camera.set_pos(0, 0, 10000)
+        base.camera.look_at(0, 0, 0)
         skydome = track_model.find('**/OBJSkydome*')
         skydome and skydome.hide()
         base.graphicsEngine.render_frame()

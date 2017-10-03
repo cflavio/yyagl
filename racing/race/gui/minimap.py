@@ -9,7 +9,7 @@ class Minimap(GameObject):
         self.lrtb = lrtb
         self.minimap = OnscreenImage(
             track_img, pos=(-.25, 1, .25), scale=.2,
-            parent=self.eng.base.a2dBottomRight)
+            parent=base.a2dBottomRight)
         self.minimap.set_transparency(True)
         self.minimap.set_alpha_scale(.64)
         self.car_handles = {}
@@ -26,7 +26,7 @@ class Minimap(GameObject):
         scale = .015 if car_name == player_car else .01
         self.car_handles[car_name] = OnscreenImage(
             handle_img, pos=(-.25, 1, .25), scale=scale,
-            parent=self.eng.base.a2dBottomRight)
+            parent=base.a2dBottomRight)
         self.car_handles[car_name].set_color_scale(col_dct[car_name])
 
     def update(self, car_info):

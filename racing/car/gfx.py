@@ -9,8 +9,8 @@ from .decorator import Decorator
 class CarGfxFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('on_skidmarking', self.skidmark_mgr.on_skidmarking)
-        self._fwd_mth('on_no_skidmarking', self.skidmark_mgr.on_no_skidmarking)
+        self._fwd_mth('on_skidmarking', lambda obj: obj.skidmark_mgr.on_skidmarking)
+        self._fwd_mth('on_no_skidmarking', lambda obj: obj.skidmark_mgr.on_no_skidmarking)
 
 
 class CarGfx(Gfx, CarGfxFacade):
@@ -74,7 +74,7 @@ class CarGfx(Gfx, CarGfxFacade):
 
     def load_wheels(self, chassis_model):
         self.chassis_np = chassis_model
-        load = self.eng.base.loader.loadModel
+        load = base.loader.loadModel
         gprops = self.cprops.race_props.season_props.gameprops
         fpath = gprops.wheel_gfx_names.front % self.cprops.name
         rpath = gprops.wheel_gfx_names.rear % self.cprops.name

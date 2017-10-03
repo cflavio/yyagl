@@ -62,8 +62,8 @@ class TrackGfx(Gfx):
         roots = self.model.find_all_matches('**/%s*' % self.rprops.sign_name)
         self.signs = Signs(roots, self.rprops.sign_cb)
         self.signs.set_signs()
-        self.model.prepare_scene(self.eng.base.win.get_gsg())
-        self.model.premunge_scene(self.eng.base.win.get_gsg())
+        self.model.prepare_scene(base.win.get_gsg())
+        self.model.premunge_scene(base.win.get_gsg())
         Gfx.async_bld(self)
 
     def __set_omni(self, root):

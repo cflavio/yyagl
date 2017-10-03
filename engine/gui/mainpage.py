@@ -25,7 +25,7 @@ class MainPageGui(PageGui):
         menu_args = self.props.gameprops.menu_args
         self.widgets += [
             ImgBtn(
-                parent=self.eng.base.a2dBottomRight,
+                parent=base.a2dBottomRight,
                 scale=.06,
                 pos=(-1.0 + i*.15, 1, .1),
                 frameColor=(1, 1, 1, 1),
@@ -38,7 +38,7 @@ class MainPageGui(PageGui):
     def __bld_version(self):
         self.widgets += [OnscreenText(
             text=_('version: ') + self.eng.version,
-            parent=self.eng.base.a2dBottomLeft, pos=(.02, .02), scale=.04,
+            parent=base.a2dBottomLeft, pos=(.02, .02), scale=.04,
             fg=(.8, .8, .8, 1), align=TextNode.ALeft,
             font=self.props.gameprops.menu_args.font)]
 

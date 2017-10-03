@@ -6,7 +6,7 @@ from ..facade import Facade
 class PhysFacade(Facade):
 
     def __init__(self):
-        fwd = self._fwd_mth_lazy
+        fwd = self._fwd_mth
         fwd('attach_rigid_body', lambda obj: obj.root.attachRigidBody)
         fwd('remove_rigid_body', lambda obj: obj.root.removeRigidBody)
         fwd('attach_ghost', lambda obj: obj.root.attachGhost)

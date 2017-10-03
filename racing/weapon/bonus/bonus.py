@@ -9,9 +9,9 @@ from .logic import BonusLogic
 class BonusFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('attach_obs', self.event.attach)
-        self._fwd_mth('detach_obs', self.event.detach)
-        self._fwd_prop('pos', self.phys.pos)
+        self._fwd_mth('attach_obs', lambda obj: obj.event.attach)
+        self._fwd_mth('detach_obs', lambda obj: obj.event.detach)
+        self._fwd_prop('pos', lambda obj: obj.phys.pos)
 
 
 class Bonus(GameObject, BonusFacade):

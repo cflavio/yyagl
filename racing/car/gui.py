@@ -13,16 +13,16 @@ class CarParameter(GameObject):
         self.__args = args
         self.__lab = OnscreenText(
             text=attr_name, pos=pos, align=TextNode.ARight, fg=(1, 1, 1, 1),
-            parent=self.eng.base.a2dTopLeft, scale=.06)
+            parent=base.a2dTopLeft, scale=.06)
         slider_pos = LVector3f(pos[0], 1, pos[1]) + (.3, 0, .01)
         self.__slider = DirectSlider(
             pos=slider_pos, value=init_val, range=val_range,
-            command=self.__set_attr, parent=self.eng.base.a2dTopLeft,
+            command=self.__set_attr, parent=base.a2dTopLeft,
             scale=.24)
         txt_pos = LVector3f(pos[0], pos[1], 1) + (.6, 0, 0)
         self.__val = OnscreenText(
             pos=txt_pos, align=TextNode.ALeft, fg=(1, 1, 1, 1),
-            parent=self.eng.base.a2dTopLeft, scale=.06)
+            parent=base.a2dTopLeft, scale=.06)
         self.widgets = [self.__slider, self.__lab, self.__val]
         self.toggle()
 
@@ -122,7 +122,7 @@ class CarPanel(GameObject):
         self.race_props = race_props
         sprops = self.race_props.season_props
         menu_args = sprops.gameprops.menu_args
-        pars = {'scale': .065, 'parent': self.eng.base.a2dTopRight,
+        pars = {'scale': .065, 'parent': base.a2dTopRight,
                 'fg': menu_args.text_fg, 'align': TextNode.A_left,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
         self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
@@ -150,7 +150,7 @@ class CarPanel(GameObject):
     def set_weapon(self, wpn):
         self.weapon_img = OnscreenImage(
             'assets/images/weapons/%s.dds' % wpn,
-            scale=.05, parent=self.eng.base.a2dTopRight, pos=(-.2, 1, -.69))
+            scale=.05, parent=base.a2dTopRight, pos=(-.2, 1, -.69))
         self.weapon_img.set_transparency(True)
 
     def unset_weapon(self):

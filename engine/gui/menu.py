@@ -147,9 +147,9 @@ class MenuLogic(Logic):
 class MenuFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('push_page', self.logic.push_page)
-        self._fwd_mth('attach_obs', self.gui.attach)
-        self._fwd_mth('detach_obs', self.gui.detach)
+        self._fwd_mth('push_page', lambda obj: obj.logic.push_page)
+        self._fwd_mth('attach_obs', lambda obj: obj.gui.attach)
+        self._fwd_mth('detach_obs', lambda obj: obj.gui.detach)
 
 
 class Menu(GameObject, MenuFacade):

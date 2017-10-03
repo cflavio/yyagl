@@ -10,7 +10,7 @@ from .minimap import Minimap
 class RaceGuiFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth_lazy('update_minimap', lambda obj: obj.minimap.update)
+        self._fwd_mth('update_minimap', lambda obj: obj.minimap.update)
 
 
 class RaceGui(Gui, RaceGuiFacade):
@@ -23,7 +23,7 @@ class RaceGui(Gui, RaceGuiFacade):
         self.way_txt = OnscreenText(
             '', pos=(.1, .1), scale=.1,
             fg=r_p.season_props.gameprops.menu_args.text_err,
-            parent=self.eng.base.a2dBottomLeft, align=TextNode.ALeft,
+            parent=base.a2dBottomLeft, align=TextNode.ALeft,
             font=self.eng.font_mgr.load_font(r_p.season_props.font))
         self.minimap = None
         RaceGuiFacade.__init__(self)
