@@ -203,13 +203,13 @@ class CarPlayerEvent(CarEvent):
             return
         obj_name = tgt_obj.get_name()
         if any(obj_name.startswith(s) for s in self.props.roads_names):
-            self.eng.audio.play(self.mdt.audio.landing_sfx)
+            self.mdt.audio.landing_sfx.play()
         if obj_name.startswith(self.props.pitstop_name):
             self.mdt.gui.panel.apply_damage(True)
             self.mdt.gfx.set_decorator('pitstop')
-            self.eng.play(self.mdt.audio.pitstop_sfx)
+            self.mdt.audio.pitstop_sfx.play()
         if 'Rocket' in obj_name:
-            self.eng.audio.play(self.mdt.audio.rocket_hit_sfx)
+            self.mdt.audio.rocket_hit_sfx.play()
 
     def on_bonus(self):
         if self.mdt.logic.weapon:
@@ -226,13 +226,13 @@ class CarPlayerEvent(CarEvent):
 
     def _process_wall(self):
         CarEvent._process_wall(self)
-        self.eng.play(self.mdt.audio.crash_sfx)
+        self.mdt.audio.crash_sfx.play()
 
     def _process_nonstart_goals(self, lap_number, laps):
         CarEvent._process_nonstart_goals(self, lap_number, laps)
         curr_lap = min(laps, lap_number)
         self.mdt.gui.panel.lap_txt.setText(str(curr_lap)+'/'+str(laps))
-        self.eng.play(self.mdt.audio.lap_sfx)
+        self.mdt.audio.lap_sfx.play()
 
     def _process_end_goal(self):
         self.notify('on_end_race')

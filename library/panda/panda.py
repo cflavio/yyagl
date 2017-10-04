@@ -53,7 +53,7 @@ class LibraryPanda3D(Library, DirectObject):
         self.__init_fonts(green, red)
 
     def __init_win(self):
-        base.win.set_close_request_event('window-closed')
+        if base.win: base.win.set_close_request_event('window-closed')
         self.accept('window-closed', self.__on_end)
 
     def __init_fonts(self, green=(.2, .8, .2, 1), red=(.8, .2, .2, 1)):
@@ -101,3 +101,5 @@ class LibraryPanda3D(Library, DirectObject):
     def fullscreen(self): return base.win.get_properties().get_fullscreen()
 
     def resolution(self): return base.win.get_properties().get_x_size(), base.win.get_properties().get_y_size()
+
+    def set_volume(self, vol): return base.sfxManagerList[0].set_volume(vol)

@@ -53,3 +53,5 @@ class Library(object):
     def fullscreen(self): pass
 
     def resolution(self): pass
+
+    def set_volume(self, vol): pass

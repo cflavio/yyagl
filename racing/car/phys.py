@@ -284,4 +284,4 @@ class CarPlayerPhys(CarPhys):
 
     def rotate(self):
         CarPhys.rotate(self)
-        self.eng.play(self.mdt.audio.rotate_all_hit_sfx)
+        self.mdt.audio.rotate_all_hit_sfx.play()

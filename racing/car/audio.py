@@ -1,6 +1,7 @@
 from collections import namedtuple
-from panda3d.core import AudioSound
+from panda3d.core import AudioSound as PAudioSound
 from yyagl.gameobject import Audio
+from yyagl.engine.audio import AudioSound
 
 
 __sounds = 'engine brake crash crash_hs lap landing pitstop rocket_fired ' + \
@@ -38,7 +39,7 @@ class CountDownAudioUpdate(AbsAudioUpdate):
 class RaceAudioUpdate(AbsAudioUpdate):
 
     def update(self, is_skidmarking, speed_ratio, input):
-        is_brk_playing = self.brake_sfx.status() == AudioSound.PLAYING
+        is_brk_playing = self.brake_sfx.is_playing()
         if is_skidmarking and not is_brk_playing:
             self.brake_sfx.play()
         elif not is_skidmarking and is_brk_playing:
@@ -62,18 +63,19 @@ class CarPlayerAudio(CarAudio):
 
     def __init__(self, mdt, props):
         CarAudio.__init__(self, mdt)
-        self.engine_sfx = loader.loadSfx(props.sounds.engine)
-        self.brake_sfx = loader.loadSfx(props.sounds.brake)
-        self.crash_sfx = loader.loadSfx(props.sounds.crash)
-        self.crash_high_speed_sfx = loader.loadSfx(props.sounds.crash_hs)
-        self.lap_sfx = loader.loadSfx(props.sounds.lap)
-        self.landing_sfx = loader.loadSfx(props.sounds.landing)
-        self.pitstop_sfx = loader.loadSfx(props.sounds.pitstop)
-        self.rocket_fired_sfx = loader.loadSfx(props.sounds.rocket_fired)
-        self.rocket_hit_sfx = loader.loadSfx(props.sounds.rocket_hit)
-        self.turbo_sfx = loader.loadSfx(props.sounds.turbo)
-        self.rotate_all_fired_sfx = loader.loadSfx(props.sounds.rotate_all_fired)
-        self.rotate_all_hit_sfx = loader.loadSfx(props.sounds.rotate_all_hit)
+        print AudioSound
+        self.engine_sfx = AudioSound(props.sounds.engine)
+        self.brake_sfx = AudioSound(props.sounds.brake)
+        self.crash_sfx = AudioSound(props.sounds.crash)
+        self.crash_high_speed_sfx = AudioSound(props.sounds.crash_hs)
+        self.lap_sfx = AudioSound(props.sounds.lap)
+        self.landing_sfx = AudioSound(props.sounds.landing)
+        self.pitstop_sfx = AudioSound(props.sounds.pitstop)
+        self.rocket_fired_sfx = AudioSound(props.sounds.rocket_fired)
+        self.rocket_hit_sfx = AudioSound(props.sounds.rocket_hit)
+        self.turbo_sfx = AudioSound(props.sounds.turbo)
+        self.rotate_all_fired_sfx = AudioSound(props.sounds.rotate_all_fired)
+        self.rotate_all_hit_sfx = AudioSound(props.sounds.rotate_all_hit)
         map(lambda sfx: sfx.set_loop(True), [self.engine_sfx, self.brake_sfx])
         self.engine_sfx.set_volume(0)
         self.engine_sfx.play()

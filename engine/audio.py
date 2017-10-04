@@ -1,5 +1,8 @@
-from panda3d.core import AudioSound
 from ..gameobject import Audio
+from yyagl.library.panda.audio import PandaAudioSound
+
+
+AudioSound = PandaAudioSound
 
 
 class EngineAudio(Audio):
@@ -8,10 +11,4 @@ class EngineAudio(Audio):
         Audio.__init__(self, mdt)
         self.set_volume(vol)
 
-    @staticmethod
-    def play(snd):
-        snd.status() != AudioSound.PLAYING and snd.play()
-
-    @staticmethod
-    def set_volume(vol):
-        base.sfxManagerList[0].set_volume(vol)
+    def set_volume(self, vol): self.eng.lib.set_volume(vol)
