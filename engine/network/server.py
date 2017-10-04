@@ -20,7 +20,7 @@ class Server(AbsNetwork):
         self.connections = []
         self.tcp_socket = self.c_mgr.open_TCP_server_rendezvous(9099, 1000)
         self.c_listener.add_connection(self.tcp_socket)
-        self.listener_tsk = self.eng.add_tsk(self.tsk_listener, -39)
+        self.listener_tsk = self.eng.add_task(self.tsk_listener, -39)
         self.eng.log_mgr.log('the server is up')
 
     def tsk_listener(self, task):
