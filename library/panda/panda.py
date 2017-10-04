@@ -54,6 +54,7 @@ class LibraryPanda3D(Library, DirectObject):
 
     def __init_win(self):
         if base.win: base.win.set_close_request_event('window-closed')
+        # not headless
         self.accept('window-closed', self.__on_end)
 
     def __init_fonts(self, green=(.2, .8, .2, 1), red=(.8, .2, .2, 1)):
