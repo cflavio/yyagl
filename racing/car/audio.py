@@ -63,7 +63,6 @@ class CarPlayerAudio(CarAudio):
 
     def __init__(self, mdt, props):
         CarAudio.__init__(self, mdt)
-        print AudioSound
         self.engine_sfx = AudioSound(props.sounds.engine)
         self.brake_sfx = AudioSound(props.sounds.brake)
         self.crash_sfx = AudioSound(props.sounds.crash)

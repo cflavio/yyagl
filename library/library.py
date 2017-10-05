@@ -16,6 +16,8 @@ class Library(object):
 
     def send(self, msg): pass
 
+    def last_frame_dt(self): pass
+
     def do_later(self, time, mth, args=[]): pass
 
     def add_task(self, mth, priority=0): pass
@@ -55,3 +57,6 @@ class Library(object):
     def resolution(self): pass
 
     def set_volume(self, vol): pass
+
+    @staticmethod
+    def find_geoms(model, name): pass

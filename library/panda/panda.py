@@ -24,6 +24,8 @@ class LibraryPanda3D(Library, DirectObject):
     def runtime(self):
         return base.appRunner
 
+    def last_frame_dt(self): return globalClock.get_dt()
+
     @property
     def build_version(self):
         package = base.appRunner.p3dInfo.FirstChildElement('package')
@@ -104,3 +106,10 @@ class LibraryPanda3D(Library, DirectObject):
     def resolution(self): return base.win.get_properties().get_x_size(), base.win.get_properties().get_y_size()
 
     def set_volume(self, vol): return base.sfxManagerList[0].set_volume(vol)
+
+    @staticmethod
+    def find_geoms(model, name):  # no need to be cached
+        geoms = model.find_all_matches('**/+GeomNode')
+        is_nm = lambda geom: geom.get_name().startswith(name)
+        named_geoms = [geom for geom in geoms if is_nm(geom)]
+        return [ng for ng in named_geoms if name in ng.get_name()]

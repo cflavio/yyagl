@@ -54,7 +54,7 @@ class CarPhys(Phys):
         fpath = self.cprops.race_props.coll_path % self.cprops.name
         self.coll_mesh = loader.loadModel(fpath)
         chassis_shape = BulletConvexHullShape()
-        for geom in self.eng.phys_mgr.find_geoms(
+        for geom in self.eng.lib.find_geoms(
                 self.coll_mesh, self.cprops.race_props.coll_name):
             chassis_shape.add_geom(geom.node().get_geom(0),
                                    geom.get_transform())
@@ -72,7 +72,7 @@ class CarPhys(Phys):
         self.eng.phys_mgr.add_collision_obj(self.pnode)
 
     def __set_vehicle(self):
-        self.vehicle = BulletVehicle(self.eng.phys_mgr.root, self.pnode)
+        self.vehicle = BulletVehicle(self.eng.phys_mgr.root.wld, self.pnode)
         self.vehicle.set_coordinate_system(ZUp)
         self.vehicle.set_pitch_control(self.pitch_control)
         tuning = self.vehicle.get_tuning()

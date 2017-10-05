@@ -18,7 +18,7 @@ class MeshBuilder(GameObject):
 
     def __set_mesh(self, geom_name, is_ghost):
         self.eng.log_mgr.log('setting physics for: ' + geom_name)
-        geoms = self.eng.phys_mgr.find_geoms(self.model, geom_name)
+        geoms = self.eng.lib.find_geoms(self.model, geom_name)
         if geoms:
             self._process_meshes(geoms, geom_name, is_ghost)
 
