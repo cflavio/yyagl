@@ -8,7 +8,7 @@ class JoystickMgr(GameObject):
         GameObject.__init__(self)
         self.emulate_keyboard = emulate_keyboard
         self.old_x = self.old_y = self.old_b0 = self.old_b1 = 0
-        self.joystick_lib = JoystickMgrLib()
+        self.joystick_lib = JoystickMgrLib.build()
         self.joystick_lib.init_joystick()
         self.eng.do_later(.01, self.eng.attach_obs, [self.on_frame])
         # eng.event doesn't exist
