@@ -55,7 +55,7 @@ class PageGui(Gui):
 
     @property
     def buttons(self):
-        is_btn = lambda wdg: wdg.__class__ == DirectButton
+        is_btn = lambda wdg: DirectButton in getmro(wdg.__class__)
         return [wdg for wdg in self.widgets if is_btn(wdg)]
 
     def __dot(self, wdg, direction, start=None):
