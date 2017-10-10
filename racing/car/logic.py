@@ -564,14 +564,14 @@ class CarLogic(Logic, ComputerProxy):
 
     @property
     def car_vec(self):  # port (or add) this to 3D
-        car_rad = deg2Rad(self.mdt.gfx.nodepath.getH())
+        car_rad = deg2Rad(self.mdt.gfx.nodepath.get_h())
         return Vec(-sin(car_rad), cos(car_rad), 0).normalize()
 
     @property
     def direction(self):
         # car's direction dot current direction
         start_wp, end_wp = self.closest_wp()
-        wp_vec = Vec(end_wp.getPos(start_wp).x, end_wp.getPos(start_wp).y, 0).normalize()
+        wp_vec = Vec(end_wp.get_pos(start_wp).x, end_wp.get_pos(start_wp).y, 0).normalize()
         return self.car_vec.dot(wp_vec)
 
     @property

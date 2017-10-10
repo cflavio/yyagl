@@ -1,39 +1,30 @@
-from os.path import exists
 from panda3d.core import get_model_path, LightRampAttrib, PandaNode, \
     NodePath, AntialiasAttrib
 from direct.filter.CommonFilters import CommonFilters
 from ..gameobject import Gfx
 from .particle import Particle
+from yyagl.library.panda.gfx import PandaGfxMgr
+
+
+GfxMgr = PandaGfxMgr
 
 
 class EngineGfx(Gfx):
 
     def __init__(self, mdt, model_path, antialiasing):
         Gfx.__init__(self, mdt)
-        get_model_path().append_directory(model_path)
-        if base.appRunner:
-            root_dir = base.appRunner.p3dFilename.get_dirname()
-            get_model_path().append_directory(root_dir + '/' + model_path)
-            get_model_path().append_directory(root_dir)
-        base.enableParticles()
-        render.set_shader_auto()
-        render.set_two_sided(True)
-        if antialiasing:
-            render.set_antialias(AntialiasAttrib.MAuto)
+        self.gfx_mgr = GfxMgr()
+        self.gfx_mgr.init(model_path, antialiasing)
         self.root = None
         self.part2eff = {}
 
     def init(self):
-        self.root = render.attachNewNode('world')
+        self.root = self.gfx_mgr.root.attach_node('world')
 
-    def clean(self):
-        self.root.removeNode()
+    def clean(self): self.root.remove_node()
 
-    @staticmethod
-    def load_model(*args, **kwargs):
-        if exists(args[0] + '.bam'):
-            args[0] += '.bam'
-        return loader.loadModel(*args, **kwargs)
+    def load_model(self, filename, callback=None, extra_args=[], anim=None):
+        return self.gfx_mgr.load_model(filename, callback, extra_args, anim)
 
     @staticmethod
     def set_toon():

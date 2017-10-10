@@ -109,7 +109,7 @@ class LibraryPanda3D(Library, DirectObject):
 
     @staticmethod
     def find_geoms(model, name):  # no need to be cached
-        geoms = model.find_all_matches('**/+GeomNode')
+        geoms = model.node.find_all_matches('**/+GeomNode')
         is_nm = lambda geom: geom.get_name().startswith(name)
         named_geoms = [geom for geom in geoms if is_nm(geom)]
         return [ng for ng in named_geoms if name in ng.get_name()]

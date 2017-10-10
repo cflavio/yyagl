@@ -11,13 +11,13 @@ class WeaponGfx(Gfx):
         Gfx.__init__(self, mdt)
 
     def sync_bld(self):
-        self.gfx_np = Actor(self.fpath, {'anim': self.fpath + '-Anim'})
+        self.gfx_np = self.eng.load_model(self.fpath, anim={'anim': self.fpath + '-Anim'})
         self.gfx_np.loop('anim')
-        self.gfx_np.flatten_light()
+        #self.gfx_np.flatten_light()
         self.gfx_np.reparent_to(self.parent)
         self.gfx_np.set_h(self.mdt.deg)
         self.gfx_np.set_scale(1.5)
-        self.gfx_np.set_pos(0, 0, 1.5)
+        self.gfx_np.set_pos((0, 0, 1.5))
 
     def reparent(self, parent):
         self.gfx_np.reparent_to(parent)

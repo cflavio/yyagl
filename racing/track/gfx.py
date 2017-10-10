@@ -31,7 +31,7 @@ class TrackGfx(Gfx):
             script_path = executable + ' yyagl/build/process_track.py'
             system(script_path + ' ' + self.rprops.track_name)
         self.eng.log_mgr.log('loading ' + filename)
-        self.eng.load_model(filename, callback=self.end_loading)
+        self.eng.gfx.gfx_mgr.load_model(filename, callback=self.end_loading)
 
     def end_loading(self, model):
         self.model = model
@@ -62,8 +62,8 @@ class TrackGfx(Gfx):
         roots = self.model.find_all_matches('**/%s*' % self.rprops.sign_name)
         self.signs = Signs(roots, self.rprops.sign_cb)
         self.signs.set_signs()
-        self.model.prepare_scene(base.win.get_gsg())
-        self.model.premunge_scene(base.win.get_gsg())
+        self.model.prepare_scene()
+        self.model.premunge_scene()
         Gfx.async_bld(self)
 
     def __set_omni(self, root):

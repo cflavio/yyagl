@@ -73,17 +73,17 @@ class Particle(GameObject):
         geom.set_bounds(OmniBoundingVolume())
         node = GeomNode('gnode')
         node.add_geom(geom)
-        self.__np = parent.attach_new_node(node)
+        self.__np = parent.attach_node(node)
         self.__np.set_transparency(True)
-        self.__np.setBin('fixed', 0)
+        self.__np.node.setBin('fixed', 0)
         self.__np.set_pos(pos)
         self.__np.set_hpr(hpr)
 
     def __set_shader(self, color, tot_time):
-        self.__np.set_shader(Shader.make(Shader.SL_GLSL, vert, frag))
-        self.__np.set_shader_input('color', color)
-        self.__np.set_shader_input('start_time', globalClock.get_frame_time())
-        self.__np.set_shader_input('tot_time', tot_time)
+        self.__np.node.set_shader(Shader.make(Shader.SL_GLSL, vert, frag))
+        self.__np.node.set_shader_input('color', color)
+        self.__np.node.set_shader_input('start_time', globalClock.get_frame_time())
+        self.__np.node.set_shader_input('tot_time', tot_time)
 
     def __init_velocities(self):
         if not self._buffered_vel:

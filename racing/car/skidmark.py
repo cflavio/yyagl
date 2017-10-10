@@ -22,11 +22,11 @@ class Skidmark(GameObject):
         geom.add_primitive(self.prim)
         node = GeomNode('gnode')
         node.add_geom(geom)
-        nodepath = self.eng.gfx.root.attach_new_node(node)
+        nodepath = self.eng.gfx.root.attach_node(node)
         nodepath.set_transparency(True)
         nodepath.set_depth_offset(1)
         self.__set_material(nodepath)
-        nodepath.node().set_bounds(OmniBoundingVolume())
+        nodepath.get_node().set_bounds(OmniBoundingVolume())
         self.add_vertices(whl_radius, car_h)
         self.add_vertices(whl_radius, car_h)
 
@@ -50,7 +50,7 @@ class Skidmark(GameObject):
         mat.set_diffuse((.35, .35, .35, .5))
         mat.set_specular((.35, .35, .35, .5))
         mat.set_shininess(12.5)
-        nodepath.set_material(mat, 1)
+        nodepath.set_material(mat)
 
     def add_vertices(self, whl_radius, car_h):
         base_pos = self.last_pos + (0, 0, -whl_radius + .05)

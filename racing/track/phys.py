@@ -39,10 +39,10 @@ class MeshBuilder(GameObject):
             lst = self.rigid_bodies
         nodepath = self.eng.attach_node(ncls(geom_name))
         self.nodes += [nodepath]
-        nodepath.node().addShape(shape)
-        meth(nodepath.node())
-        lst += [nodepath.node()]
-        nodepath.node().notify_collisions(True)
+        nodepath.add_shape(shape)
+        meth(nodepath.get_node())
+        lst += [nodepath.get_node()]
+        nodepath.get_node().notify_collisions(True)
         if not is_merged:
             nodepath.set_collide_mask(BitMask32.bit(1) | BitMask32.bit(15))
         if is_ghost:
@@ -61,7 +61,7 @@ class MeshBuilderMerged(MeshBuilder):
     def _add_geoms(self, geoms, mesh, geom_name):
         for geom in geoms:
             for _geom in [g.decompose() for g in geom.node().get_geoms()]:
-                mesh.add_geom(_geom, False, geom.get_transform(self.model))
+                mesh.add_geom(_geom, False, geom.get_transform(self.model.node))
         return geom_name
 
 
@@ -73,7 +73,7 @@ class MeshBuilderUnmerged(MeshBuilder):
 
     def _add_geoms(self, geoms, mesh, geom_name):
         for _geom in [g.decompose() for g in geoms.node().get_geoms()]:
-            mesh.addGeom(_geom, False, geoms.get_transform(self.model))
+            mesh.addGeom(_geom, False, geoms.get_transform(self.model.node))
         return geoms.get_name()
 
 
@@ -91,11 +91,12 @@ class TrackPhys(Phys):
         Phys.__init__(self, mdt)
 
     def sync_bld(self):
-        self.model = loader.loadModel(self.rprops.coll_track_path)
+        self.model = self.eng.load_model(self.rprops.coll_track_path)
         builders = [
             MeshBuilderUnmerged(self.model, self.rprops.unmerged, False),
             MeshBuilderMerged(self.model, self.rprops.merged, False),
-            MeshBuilderMerged(self.model, self.rprops.ghosts, True)]
+            MeshBuilderMerged(self.model, self.rprops.ghosts, True)
+            ]
         for bld in builders:
             self.nodes += bld.nodes
             self.ghosts += bld.ghosts
@@ -120,7 +121,7 @@ class TrackPhys(Phys):
             # do a proper wp class
             w_p.set_python_tag('weapon_boxes', [])
             wpstr = '**/' + wp_info.wp_name
-            prevs = w_p.getTag(wp_info.prev_name).split(',')
+            prevs = w_p.get_tag(wp_info.prev_name).split(',')
             lst_wp = [wp_root.find(wpstr + idx) for idx in prevs]
             self.wp2prevs[w_p] = lst_wp
         self.redraw_wps()
@@ -155,8 +156,8 @@ class TrackPhys(Phys):
 
     @property
     def lrtb(self):
-        return self.corners[0].getX(), self.corners[1].getX(), \
-            self.corners[0].getY(), self.corners[3].getY()
+        return self.corners[0].get_x(), self.corners[1].get_x(), \
+            self.corners[0].get_y(), self.corners[3].get_y()
 
     def create_bonus(self, pos):
         prs = self.rprops

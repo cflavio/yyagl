@@ -8,7 +8,7 @@ class EngineFacade(Facade):
         fwd = self._fwd_mth
         fwd('attach_obs', lambda obj: obj.event.attach)
         fwd('detach_obs', lambda obj: obj.event.detach)
-        fwd('attach_node', lambda obj: obj.gfx.root.attachNewNode)
+        fwd('attach_node', lambda obj: obj.gfx.root.attach_node)
         fwd('particle', lambda obj: obj.gfx.particle)
         fwd('init_gfx', lambda obj: obj.gfx.init)
         fwd('clean_gfx', lambda obj: obj.gfx.clean)
@@ -47,6 +47,5 @@ class EngineFacade(Facade):
         self.pause.remove_task(tsk)
         return self.lib.remove_task(tsk)
 
-    def load_model(self, filename, callback=None, extra_args=[]):
-        args = {'callback': callback, 'extraArgs': extra_args}
-        return self.gfx.load_model(filename, **(args if callback else {}))
+    def load_model(self, filename, callback=None, extra_args=[], anim=None):
+        return self.gfx.load_model(filename, callback, extra_args, anim)

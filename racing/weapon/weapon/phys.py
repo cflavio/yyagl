@@ -14,14 +14,14 @@ class WeaponPhys(Phys):
         self.node = BulletRigidBodyNode(self.coll_name)
         self.node.set_mass(50)
         self.node.add_shape(self.coll_mesh_cls(.5))
-        self.n_p = self.parent.attach_new_node(self.node)
-        self.n_p.set_pos(0, 0, self.joint_z)
-        self.n_p.wrt_reparent_to(render)
+        self.n_p = self.parent.attach_node(self.node)
+        self.n_p.set_pos((0, 0, self.joint_z))
+        self.n_p.wrt_reparent_to(self.eng.gfx.root)
         launch_dist = self.car.logic.car_vec * self.launch_dist
         self.n_p.set_pos(self.n_p.get_pos() + launch_dist)
         self.eng.phys_mgr.attach_rigid_body(self.node)
-        self.mdt.gfx.gfx_np.reparentTo(self.n_p)
-        self.mdt.gfx.gfx_np.setPos(0, 0, 0)
+        self.mdt.gfx.gfx_np.reparent_to(self.n_p)
+        self.mdt.gfx.gfx_np.set_pos((0, 0, 0))
 
     def destroy(self):
         if self.node:  # has not been fired
@@ -54,7 +54,7 @@ class RocketWeaponPhys(WeaponPhys):
         self.node.set_linear_velocity(self.rot_mat.xform_vec((0, 60, 0)))
         node_pos = self.n_p.get_pos()
         height = self.car.phys.gnd_height(node_pos)
-        self.n_p.set_pos(node_pos[0], node_pos[1], height + .8)
+        self.n_p.set_pos((node_pos[0], node_pos[1], height + .8))
         return tsk.again
 
     def destroy(self):

@@ -20,7 +20,7 @@ class Signs(object):
         self.sign_cb(self.renders[i])
         t_s = TextureStage('ts')
         t_s.setMode(TextureStage.MDecal)
-        sign.setTexture(t_s, self.buffers[i].get_texture())
+        sign.set_texture(t_s, self.buffers[i].get_texture())
 
     def __set_render_to_texture(self):
         buf = base.win.make_texture_buffer('result buffer', 256, 256)

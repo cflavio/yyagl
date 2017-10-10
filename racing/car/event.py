@@ -73,7 +73,7 @@ class CarEvent(Event, ComputerProxy):
         self.eng.attach_obs(self.on_frame)
 
     def on_collision(self, obj, tgt_obj):
-        if obj != self.mdt.gfx.nodepath.node():
+        if obj != self.mdt.gfx.nodepath.get_node():
             return
         obj_name = tgt_obj.get_name()
         if obj_name.startswith(self.props.respawn_name):
@@ -145,9 +145,9 @@ class CarEvent(Event, ComputerProxy):
         self.mdt.gfx.nodepath.set_pos(start_wp_n.get_pos() + (0, 0, 2))
         wp_vec = Vec(end_wp_n.get_pos(start_wp_n).x, end_wp_n.get_pos(start_wp_n).y, 0).normalize()
         or_h = (wp_vec.xy).signed_angle_deg(Vec2(0, 1))
-        self.mdt.gfx.nodepath.set_hpr(-or_h, 0, 0)
-        self.mdt.gfx.nodepath.node().set_linear_velocity(0)
-        self.mdt.gfx.nodepath.node().set_angular_velocity(0)
+        self.mdt.gfx.nodepath.set_hpr((-or_h, 0, 0))
+        self.mdt.gfx.nodepath.get_node().set_linear_velocity(0)
+        self.mdt.gfx.nodepath.get_node().set_angular_velocity(0)
 
     def on_frame(self):
         _input = self._get_input()
@@ -199,7 +199,7 @@ class CarPlayerEvent(CarEvent):
 
     def on_collision(self, obj, tgt_obj):
         CarEvent.on_collision(self, obj, tgt_obj)
-        if obj != self.mdt.gfx.nodepath.node():
+        if obj != self.mdt.gfx.nodepath.get_node():
             return
         obj_name = tgt_obj.get_name()
         if any(obj_name.startswith(s) for s in self.props.roads_names):

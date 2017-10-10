@@ -52,20 +52,20 @@ class CarPhys(Phys):
 
     def __set_collision_mesh(self):
         fpath = self.cprops.race_props.coll_path % self.cprops.name
-        self.coll_mesh = loader.loadModel(fpath)
+        self.coll_mesh = self.eng.load_model(fpath)
         chassis_shape = BulletConvexHullShape()
         for geom in self.eng.lib.find_geoms(
                 self.coll_mesh, self.cprops.race_props.coll_name):
             chassis_shape.add_geom(geom.node().get_geom(0),
                                    geom.get_transform())
-        self.mdt.gfx.nodepath.node().add_shape(chassis_shape)
+        self.mdt.gfx.nodepath.get_node().add_shape(chassis_shape)
         car_names = self.cprops.race_props.season_props.car_names
         car_idx = car_names.index(self.cprops.name)
         mask = BitMask32.bit(2 + car_idx) | BitMask32.bit(16) | BitMask32.bit(15)
         self.mdt.gfx.nodepath.set_collide_mask(mask)
 
     def __set_phys_node(self):
-        self.pnode = self.mdt.gfx.nodepath.node()
+        self.pnode = self.mdt.gfx.nodepath.get_node()
         self.pnode.set_mass(self.mass)
         self.pnode.set_deactivation_enabled(False)
         self.eng.phys_mgr.attach_rigid_body(self.pnode)
@@ -106,7 +106,7 @@ class CarPhys(Phys):
             (rr_pos, False, wheels['rr'], r_radius),
             (rl_pos, False, wheels['rl'], r_radius)]
         for (pos, front, nodepath, radius) in wheels_info:
-            self.__add_wheel(pos, front, nodepath.node(), radius)
+            self.__add_wheel(pos, front, nodepath.get_node(), radius)
 
     def __add_wheel(self, pos, is_front, node, radius):
         whl = self.vehicle.create_wheel()
@@ -196,7 +196,7 @@ class CarPhys(Phys):
     def __update_whl_props(self, whl):
         contact_pt = whl.get_raycast_info().getContactPointWs()
         gnd_name = self.gnd_name(contact_pt)
-        if not gnd_name:
+        if not gnd_name or gnd_name == 'Vehicle':
             return
         if gnd_name not in self.__finds:
             gnd = self.cprops.race.track.phys.model.find('**/' + gnd_name)

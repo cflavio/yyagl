@@ -9,8 +9,8 @@ class WeaponEvent(Event):
         self.particle_path = particle_path
 
     def _on_coll_success(self):
-        pos = self.mdt.gfx.gfx_np.get_pos(render) + (0, 0, .5)
-        self.eng.particle(render, pos, (0, 0, 0), (1, .4, .1, 1), .8)
+        pos = self.mdt.gfx.gfx_np.get_pos(self.eng.gfx.root) + (0, 0, .5)
+        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), (1, .4, .1, 1), .8)
         self.mdt.destroy()
 
     def _eval_wall_coll(self, tgt_obj, obj):

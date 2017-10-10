@@ -45,10 +45,10 @@ class CarGfx(Gfx, CarGfxFacade):
         gprops = self.cprops.race_props.season_props.gameprops
         low_dam_fpath = gprops.damage_paths.low % self.cprops.name
         hi_dam_fpath = gprops.damage_paths.hi % self.cprops.name
-        self.chassis_np_low = loader.loadModel(low_dam_fpath)
-        self.chassis_np_hi = loader.loadModel(hi_dam_fpath)
+        self.chassis_np_low = self.eng.load_model(low_dam_fpath)
+        self.chassis_np_hi = self.eng.load_model(hi_dam_fpath)
         fpath = gprops.model_name % self.cprops.name
-        chassis = loader.loadModel(fpath)
+        chassis = self.eng.load_model(fpath)
         self.load_wheels(chassis)
 
     def reparent(self):
@@ -59,8 +59,8 @@ class CarGfx(Gfx, CarGfxFacade):
         map(lambda whl: whl.reparent_to(self.eng.gfx.root), wheels)
         # try RigidBodyCombiner for the wheels
         for cha in chas:
-            cha.prepare_scene(base.win.get_gsg())
-            cha.premunge_scene(base.win.get_gsg())
+            cha.prepare_scene()
+            cha.premunge_scene()
         taskMgr.add(self.preload_tsk, 'preload')
         self.cnt = 2
 
@@ -74,7 +74,7 @@ class CarGfx(Gfx, CarGfxFacade):
 
     def load_wheels(self, chassis_model):
         self.chassis_np = chassis_model
-        load = base.loader.loadModel
+        load = self.eng.load_model
         gprops = self.cprops.race_props.season_props.gameprops
         fpath = gprops.wheel_gfx_names.front % self.cprops.name
         rpath = gprops.wheel_gfx_names.rear % self.cprops.name
@@ -95,7 +95,7 @@ class CarGfx(Gfx, CarGfxFacade):
                 self.crash_cnt < 2:
             return False
         self.eng.particle(
-            render, self.nodepath.get_pos(render) + (0, 1.2, .75), (0, 0, 0),
+            self.eng.gfx.root, self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75), (0, 0, 0),
             (1, .4, .1, 1), .8)
         self.apply_damage()
         return True
@@ -144,8 +144,8 @@ class SkidmarkMgr(GameObject):
         self.car = car
 
     def on_skidmarking(self):
-        fr_pos = self.car.gfx.wheels['fr'].get_pos(render)
-        fl_pos = self.car.gfx.wheels['fl'].get_pos(render)
+        fr_pos = self.car.gfx.wheels['fr'].get_pos(self.eng.gfx.root)
+        fl_pos = self.car.gfx.wheels['fl'].get_pos(self.eng.gfx.root)
         heading = self.car.gfx.nodepath.get_h()
         if self.r_skidmark:
             self.r_skidmark.update(fr_pos, heading)

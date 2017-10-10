@@ -51,7 +51,7 @@ class Camera(GameObject):
             self.curr_speed_ratio, speed_ratio, 1 * globalClock.get_dt())
         dist_diff = self.dist_max - self.dist_min
         look_dist_diff = self.look_dist_max - self.look_dist_min
-        fwd_car_vec = render.get_relative_vector(self.car_np, Vec3(0, 1, 0))
+        fwd_car_vec = self.eng.gfx.root.get_relative_vector(self.car_np, Vec3(0, 1, 0))
         fwd_car_vec.normalize()
         fwd_incr = (.05 if is_rotating else .5) * globalClock.get_dt()
         self.fwd_car_vec = self.new_val_vec(self.fwd_car_vec, fwd_car_vec,

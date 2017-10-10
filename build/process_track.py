@@ -60,7 +60,7 @@ class TrackProcesser(GameObject):
 
     def __set_submodels(self):
         print 'loaded track model'
-        for submodel in self.model.getChildren():
+        for submodel in self.model.get_children():
             if not submodel.get_name().startswith(self.props.empty_name):
                 submodel.flatten_light()
         self.model.hide(BitMask32.bit(0))
@@ -103,10 +103,10 @@ class TrackProcesser(GameObject):
     def __process_static(self, model):
         model_name = self.__get_model_name(model)
         if model_name not in self.__flat_roots:
-            flat_root = self.model.attach_new_node(model_name)
+            flat_root = self.model.attach_node(model_name)
             self.__flat_roots[model_name] = flat_root
         fpath = '%s/%s' % (self.props.track_dir, model_name)
-        loader.loadModel(fpath).reparent_to(model)
+        self.eng.load_model(fpath).reparent_to(model)
         model.reparent_to(self.__flat_roots[model_name])
 
     def flattening(self):
@@ -130,7 +130,7 @@ class TrackProcesser(GameObject):
     def __process_flat_models(self, model):
         model.clear_model_nodes()
         self.loading_models += [model.get_name()]
-        model.flattenStrong()
+        model.flatten_strong()
         curr_t = self.eng.curr_time
         self.__flat_models(model.get_name(), curr_t, len(model.get_children()))
 
