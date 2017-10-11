@@ -27,22 +27,9 @@ class EngineGfx(Gfx):
         return self.gfx_mgr.load_model(filename, callback, extra_args, anim)
 
     @staticmethod
-    def set_toon():
-        tempnode = NodePath(PandaNode('temp node'))
-        tempnode.setAttrib(LightRampAttrib.make_single_threshold(.5, .4))
-        tempnode.set_shader_auto()
-        base.cam.node().set_initial_state(tempnode.get_state())
-        CommonFilters(base.win, base.cam).setCartoonInk(separation=1)
+    def set_toon(): self.gfx_mgr.set_toon()
 
-    def print_stats(self):
-        print '\n\n#####\nrender2d.analyze()'
-        base.render2d.analyze()
-        print '\n\n#####\nrender.analyze()'
-        base.render.analyze()
-        print '\n\n#####\nrender2d.ls()'
-        base.render2d.ls()
-        print '\n\n#####\nrender.ls()'
-        base.render.ls()
+    def print_stats(self): self.gfx_mgr.print_stats()
 
     @staticmethod
     def particle(parent, pos, hpr, color, tot_time):
