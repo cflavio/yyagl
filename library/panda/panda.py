@@ -1,4 +1,5 @@
 import sys
+from os.path import exists
 from panda3d.core import loadPrcFileData, Texture, TextPropertiesManager, \
     TextProperties, PandaSystem, Filename
 from panda3d.bullet import get_bullet_version
@@ -15,14 +16,11 @@ class LibShowBase(ShowBase): pass
 class LibraryPanda3D(Library, DirectObject):
 
     task_cont = Task.cont
+    runtime = not exists('main.py')
 
     @staticmethod
     def configure():
         loadPrcFileData('', 'notify-level-ya2 info')
-
-    @property
-    def runtime(self):
-        return base.appRunner
 
     def last_frame_dt(self): return globalClock.get_dt()
 

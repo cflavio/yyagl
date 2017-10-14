@@ -65,11 +65,11 @@ class EngineGui(EngineGuiBase):
     def __init__(self, mdt):
         EngineGuiBase.__init__(self, mdt)
         cfg = self.eng.logic.cfg
-        resol = cfg.win_size.split()
+        resol = cfg.gui_cfg.win_size.split()
         res = tuple(int(size) for size in resol)
-        self.set_resolution(res, fullscreen=cfg.fullscreen)
-        self.cursor = MouseCursor(cfg.cursor_path, cfg.cursor_scale,
-                                  cfg.cursor_hotspot)
+        self.set_resolution(res, fullscreen=cfg.gui_cfg.fullscreen)
+        self.cursor = MouseCursor(cfg.cursor_cfg.cursor_path, cfg.cursor_cfg.cursor_scale,
+                                  cfg.cursor_cfg.cursor_hotspot)
 
     def set_resolution(self, res, check=True, fullscreen=None):
         self.eng.log_mgr.log('setting resolution ' + str(res))

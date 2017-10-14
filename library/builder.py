@@ -7,5 +7,7 @@ import yyagl.engine.vec as _vec
 
 class LibraryBuilder(object):
 
+    cls = LibraryPanda3D
+
     @staticmethod
     def build(): return LibraryPanda3D()

@@ -33,22 +33,22 @@ class Engine(GameObject, EngineFacade):
         Colleague.eng = GameObject.eng = self
         EngineFacade.__init__(self)
         cfg = cfg or Cfg()  # use a default conf if not provided
-        self.shader_mgr = ShaderMgr(cfg.shaders_dev, cfg.gamma)
-        self.profiler = AbsProfiler.build(cfg.pyprof_percall)
+        self.shader_mgr = ShaderMgr(cfg.dev_cfg.shaders_dev, cfg.dev_cfg.gamma)
+        self.profiler = AbsProfiler.build(cfg.profiling_cfg.pyprof_percall)
         self.font_mgr = FontMgr()
         self.server = Server()
         self.client = Client()
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr.init_cls(), [self])],
-            [('gfx', EngineGfx, [self, cfg.model_path, cfg.antialiasing])],
+            [('gfx', EngineGfx, [self, cfg.dev_cfg.model_path, cfg.gui_cfg.antialiasing])],
             [('phys_mgr', PhysMgr, [self])],
-            [('event', EngineEvent, [self, cfg.menu_joypad])],
+            [('event', EngineEvent, [self, cfg.dev_cfg.menu_joypad])],
             [('gui', EngineGui.init_cls(), [self])],
-            [('audio', EngineAudio, [self, cfg.volume])],
+            [('audio', EngineAudio, [self, cfg.gui_cfg.volume])],
             [('pause', PauseMgr, [self])],
-            [('lang_mgr', LangMgr, (cfg.lang, cfg.lang_domain,
-                                    cfg.lang_path))]]
+            [('lang_mgr', LangMgr, (cfg.lang_cfg.lang, cfg.lang_cfg.lang_domain,
+                                    cfg.lang_cfg.lang_path))]]
         GameObject.__init__(self, comps)
 
     def destroy(self):
