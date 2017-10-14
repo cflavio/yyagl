@@ -66,7 +66,12 @@ class PhysMgr(Colleague, PhysFacade):
         # identical collisions are ignored for .25 seconds
         for obj in self.collision_objs:
             if obj not in self.__obj2coll: self.__obj2coll[obj] = []
-            for contact in self.root.get_contacts(obj):
+            # for contact in self.root.get_contacts(obj):
+            # this doesn't work in 1.9, the following works
+            # odd, this doesn't work too
+            # for contact in self.root.wld.contact_test(obj).get_contacts():
+            result = self.root.wld.contact_test(obj)
+            for contact in result.get_contacts():
                 self.__process_contact(obj, contact.get_node0(), to_clear)
                 self.__process_contact(obj, contact.get_node1(), to_clear)
         for obj in to_clear:
