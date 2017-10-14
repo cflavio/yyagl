@@ -20,17 +20,44 @@ class Props(object):
         self.anim_name = 'Anim'
 
 
-class Conf(object):
+class GuiCfg(object):
 
     def __init__(self):
-        self.model_path = 'assets/models/tracks/'
-        self.antialiasing = self.menu_joypad = self.shaders_dev = \
-            self.pyprof_percall = False
-        self.gamma = 1.0
+        self.antialiasing = False
+        self.volume = 1
+
+
+class ProfilingCfg(object):
+
+    def __init__(self):
+        self.pyprof_percall = False
+
+
+class LangCfg(object):
+
+    def __init__(self):
         self.lang = 'en'
         self.lang_domain = 'yorg'
         self.lang_path = 'assets/locale'
-        self.volume = 1
+
+
+class DevCfg(object):
+
+    def __init__(self, model_path='assets/models', shaders_dev=False,
+                 gamma=1.0, menu_joypad=True):
+        self.model_path = 'assets/models/tracks/'
+        self.shaders_dev = False
+        self.gamma = 1.0
+        self.menu_joypad = False
+
+
+class Conf(object):
+
+    def __init__(self):
+        self.gui_cfg = GuiCfg()
+        self.profiling_cfg = ProfilingCfg()
+        self.lang_cfg = LangCfg()
+        self.dev_cfg = DevCfg()
 
 
 eng = Engine(Conf())
