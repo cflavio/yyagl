@@ -1,5 +1,5 @@
 from os.path import exists
-from panda3d.core import get_model_path
+from panda3d.core import get_model_path, AntialiasAttrib
 from direct.actor.Actor import Actor
 from ..gfx import GfxMgr, Node
 
