@@ -196,7 +196,7 @@ class CarPhys(Phys):
     def __update_whl_props(self, whl):
         contact_pt = whl.get_raycast_info().getContactPointWs()
         gnd_name = self.gnd_name(contact_pt)
-        if not gnd_name or gnd_name == 'Vehicle':
+        if not gnd_name or gnd_name in ['Vehicle', 'Wall']:
             return
         if gnd_name not in self.__finds:
             gnd = self.cprops.race.track.phys.model.find('**/' + gnd_name)
