@@ -1,4 +1,4 @@
-from math import sin, cos
+from math import sin, cos, pi
 from collections import namedtuple
 from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32
 from yyagl.gameobject import Logic
@@ -41,14 +41,15 @@ class Input2ForcesStrategy(object):
         next_val = lambda: val + (incr if tgt > val else  -decr)
         return tgt if beyond else next_val()
 
-    @property
-    def steering_clamp(self):
+    def steering_clamp(self, is_drifting):
+        if is_drifting: return self.curr_clamp
         phys = self.car.phys
-        speed_ratio = phys.speed_ratio
+        speed_ratio = phys.lin_vel_ratio
         steering_range = phys.steering_min_speed - phys.steering_max_speed
         clamp_incr_speed = globalClock.get_dt() * (8 if phys.lin_vel > 5 else 200)
         clamp_decr_speed = globalClock.get_dt() * 20
-        self.tgt_clamp = phys.steering_min_speed - speed_ratio * steering_range
+        k = sin(speed_ratio * pi / 2)
+        self.tgt_clamp = phys.steering_min_speed - k * steering_range
         self.curr_clamp = self.new_val(self.curr_clamp, self.tgt_clamp, clamp_incr_speed, clamp_decr_speed)
         return self.curr_clamp
 
@@ -63,79 +64,66 @@ class DriftingForce(object):
 
     def __init__(self, car):
         self.car = car
+        self.vel_start = 0
 
-    def process(self, eng_frc, input_dct):
+    def process(self, input_dct):
         phys = self.car.phys
-        if phys.lin_vel < 10:
-            return eng_frc
-        since_drifting = globalClock.get_frame_time() - phys.last_drift_time
-        drift_eng_effect_time = 2.5
-        drift_eng_fact_per_time = 1 - since_drifting / drift_eng_effect_time
-        drift_eng_multiplier = 1.4
-        drift_eng_fact = max(0, drift_eng_multiplier * drift_eng_fact_per_time)
-        eng_frc = eng_frc + drift_eng_fact * eng_frc
-
-        drift_fric_effect_time = 1.6
-        drift_fric_fact_timed = max(
-            0, 1 - since_drifting / drift_fric_effect_time)
-        drift_fric_fact = drift_fric_fact_timed * max(1, phys.lateral_force)
-        for whl in phys.vehicle.get_wheels():
-            fric = phys.friction_slip
-            drift_front = .0016
-            drift_back = .0024
-            if whl.is_front_wheel():  # and phys.is_drifting:
-                whl.setFrictionSlip(
-                    fric - fric * drift_front * drift_fric_fact)
-            elif not whl.is_front_wheel():  # and phys.is_drifting:
-                whl.setFrictionSlip(fric - fric * drift_back * drift_fric_fact)
-            else:
-                whl.setFrictionSlip(fric)
-
+        if phys.lin_vel < 10: return
         car_vec = self.car.logic.car_vec
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
         car_vec_left = rot_mat_left.xformVec(car_vec)
+
+        rot_mat_drift_left = Mat4()
+        rot_mat_drift_left.setRotateMat(45 if input_dct.forward else 90, (0, 0, 1))
+        drift_vec_left = rot_mat_drift_left.xformVec(car_vec)
+
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
         car_vec_right = rot_mat_right.xformVec(car_vec)
 
-        max_intensity = 10000.0
-        drift_inertia_effect_time = 4.0
-        drift_inertia_fact_timed = max(
-            .0, 1.0 - since_drifting / drift_inertia_effect_time)
-        max_intensity *= 1.0 - drift_inertia_fact_timed
-        intensity = drift_inertia_fact_timed * max_intensity
-        if input_dct.left or input_dct.right or input_dct.forward:
-            vel = phys.vehicle.get_chassis().get_linear_velocity()
-            vel.normalize()
-            direction = vel
-            if input_dct.forward:
-                act_vec = car_vec
-                if input_dct.left:
-                    if car_vec_left.dot(vel) > 0:
-                        act_vec = car_vec * .5 + car_vec_left * .5
-                if input_dct.right:
-                    if car_vec_right.dot(vel) > 0:
-                        act_vec = car_vec * .5 + car_vec_right * .5
-            else:
-                act_vec = car_vec
-                if input_dct.left:
-                    if car_vec_left.dot(vel) > 0:
-                        act_vec = car_vec_left
-                if input_dct.right:
-                    if car_vec_right.dot(vel) > 0:
-                        act_vec = car_vec_right
-            direction = act_vec * (1 - drift_inertia_fact_timed) + \
-                vel * drift_inertia_fact_timed
-            phys.pnode.apply_central_force(direction * intensity)
-        return eng_frc
+        rot_mat_drift_right = Mat4()
+        rot_mat_drift_right.setRotateMat(-45 if input_dct.forward else 90, (0, 0, 1))
+        drift_vec_right = rot_mat_drift_right.xformVec(car_vec)
+
+        max_intensity = 5000.0
+        intensity = 0
+
+        vel = phys.vehicle.get_chassis().get_linear_velocity()
+        vel.normalize()
+
+        car_dot_vel_l = car_vec_left.dot(vel)
+        car_dot_vel_r = car_vec_right.dot(vel)
+        car_dot_vel = max(car_dot_vel_l, car_dot_vel_r)
+
+        if car_dot_vel > .1 and not self.vel_start:
+            self.vel_start = phys.vehicle.get_chassis().get_linear_velocity().length()
+        elif car_dot_vel <= .1:
+            self.vel_start = 0
+            return
+
+        vel_fact = self.vel_start - phys.vehicle.get_chassis().get_linear_velocity().length()
+        vel_fact /= phys.max_speed
+        vel_fact = min(1, max(0, vel_fact))
+        if input_dct.left:
+            if car_dot_vel_l > 0:
+                intensity = max_intensity * car_dot_vel_l * vel_fact
+                direction = drift_vec_left
+        if  input_dct.right:
+            if car_dot_vel_r > 0:
+                intensity = max_intensity * car_dot_vel_r * vel_fact
+                direction = drift_vec_right
+        for whl in phys.vehicle.get_wheels():
+            if not whl.is_front_wheel():
+                whl.setFrictionSlip(whl.getFrictionSlip() * (1 + car_dot_vel_l * vel_fact * .002))
+        if intensity: phys.pnode.apply_central_force(direction * intensity)
 
 
 class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
 
     turn_time = .1  # after this time the steering is at its max value
 
-    def input2forces(self, car_input, joystick_mgr):
+    def input2forces(self, car_input, joystick_mgr, is_drifting):
         phys = self.car.phys
         eng_frc = brake_frc = 0
         f_t = globalClock.get_frame_time()
@@ -154,7 +142,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
                 self.start_left_t = f_t
             steer_fact = min(1, (f_t - self.start_left_t) / self.turn_time)
             self._steering += self.steering_inc * steer_fact
-            self._steering = min(self._steering, self.steering_clamp)
+            self._steering = min(self._steering, self.steering_clamp(is_drifting))
         else:
             self.start_left_t = None
         if car_input.right:
@@ -162,7 +150,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
                 self.start_right_t = globalClock.getFrameTime()
             steer_fact = min(1, (f_t - self.start_right_t) / self.turn_time)
             self._steering -= self.steering_inc * steer_fact
-            self._steering = max(self._steering, -self.steering_clamp)
+            self._steering = max(self._steering, -self.steering_clamp(is_drifting))
         else:
             self.start_right_t = None
         if not car_input.left and not car_input.right:
@@ -171,13 +159,13 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
             else:
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
-        #eng_frc = self.drift.process(eng_frc, car_input)
+        self.drift.process(car_input)
         return self.get_eng_frc(eng_frc), brake_frc, self._steering
 
 
 class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
 
-    def input2forces(self, car_input, joystick_mgr):
+    def input2forces(self, car_input, joystick_mgr, is_drifting):
         phys = self.car.phys
         eng_frc = brake_frc = 0
         j_x, j_y, j_a, j_b = joystick_mgr.get_joystick()
@@ -192,10 +180,10 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
             brake_frc = phys.eng_brk_frc
         if j_x < -.1:
             self._steering += self.steering_inc * abs(j_x)
-            self._steering = min(self._steering, self.steering_clamp)
+            self._steering = min(self._steering, self.steering_clamp(is_drifting))
         if j_x > .1:
             self._steering -= self.steering_inc * j_x
-            self._steering = max(self._steering, -self.steering_clamp)
+            self._steering = max(self._steering, -self.steering_clamp(is_drifting))
         if -.1 < j_x < .1:
             if abs(self._steering) <= self.steering_dec:
                 self._steering = 0
@@ -237,7 +225,7 @@ class CarLogic(Logic, ComputerProxy):
 
     def update(self, input2forces):
         phys = self.mdt.phys
-        eng_f, brake_f, steering = self.input_strat.input2forces(input2forces, self.eng.joystick_mgr)
+        eng_f, brake_f, steering = self.input_strat.input2forces(input2forces, self.eng.joystick_mgr, self.is_drifting)
         phys.set_forces(eng_f, brake_f, steering)
         self.__update_roll_info()
         gfx = self.mdt.gfx
@@ -257,6 +245,22 @@ class CarLogic(Logic, ComputerProxy):
         self.mdt.gfx.nodepath.set_hpr(self.start_pos_hpr)
         wheels = self.mdt.phys.vehicle.get_wheels()
         map(lambda whl: whl.set_rotation(0), wheels)
+
+    @property
+    def is_drifting(self):
+        car_vec = self.car_vec
+        rot_mat_left = Mat4()
+        rot_mat_left.setRotateMat(90, (0, 0, 1))
+        car_vec_left = rot_mat_left.xformVec(car_vec)
+        rot_mat_right = Mat4()
+        rot_mat_right.setRotateMat(-90, (0, 0, 1))
+        car_vec_right = rot_mat_right.xformVec(car_vec)
+        vel = self.mdt.phys.vehicle.get_chassis().get_linear_velocity()
+        vel.normalize()
+        car_dot_vel_l = car_vec_left.dot(vel)
+        car_dot_vel_r = car_vec_right.dot(vel)
+        car_dot_vel = max(car_dot_vel_l, car_dot_vel_r)
+        return car_dot_vel > .1
 
     @property
     def pitstop_wps(self):
