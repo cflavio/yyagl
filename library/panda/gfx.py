@@ -26,14 +26,14 @@ class PandaGfxMgr(GfxMgr):
         return self.callbacks[fpath](PandaNode(model))
 
     def load_model(self, filename, callback=None, extra_args=[], anim=None):
-        if exists(filename + '.bam'): filename = filename + '.bam'
+        ext = '.bam' if exists(filename + '.bam') else ''
         if anim:
-            return PandaNode(Actor(filename, {'anim': filename + '-Anim'}))
+            return PandaNode(Actor(filename + ext, {'anim': filename + '-Anim' + ext}))
         elif callback:
-            self.callbacks[filename] = callback
-            return loader.loadModel(filename, callback = self._intermediate_cb, extraArgs=extra_args + [filename])
+            self.callbacks[filename + ext] = callback
+            return loader.loadModel(filename + ext, callback = self._intermediate_cb, extraArgs=extra_args + [filename + ext])
         else:
-            return PandaNode(loader.loadModel(filename))
+            return PandaNode(loader.loadModel(filename + ext))
 
     @staticmethod
     def set_toon():
