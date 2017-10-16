@@ -75,12 +75,26 @@ class Camera(GameObject):
         self.curr_look_dist = self.new_val(self.curr_look_dist, l_d,
                                            curr_incr_slow)
         tgt_vec = self.fwd_car_vec * self.curr_look_dist
+
+        curr_cam_pos = car_pos + back_car_vec
+        curr_cam_dist_fact = self.dist_min + dist_diff * speed_ratio
+        curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
+        if curr_occl: back_car_vec = curr_occl.get_hit_pos() - car_pos
+
         c_i = curr_incr_slow if is_fast else curr_incr
+        if curr_occl: c_i *= 1000
         new_pos = self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
         # overwrite camera's position to set the physics
         # new_pos = (car_pos.x + 10, car_pos.y - 5, car_pos.z + 5
         if not is_rolling: base.camera.set_pos(new_pos)
         base.camera.look_at(car_pos + tgt_vec)
+
+    def __occlusion_mesh(self, cam_pos, curr_cam_dist_fact):
+        occl_res = self.eng.phys_mgr.ray_test_all(self.car_np.get_pos(), cam_pos)
+        for occl in occl_res.get_hits():
+            occl_n = occl.get_node().get_name()
+            if occl_n not in ['Vehicle', 'Goal', 'Respawn'] and curr_cam_dist_fact > .1:
+                return occl
 
     @property
     def camera(self): return base.camera

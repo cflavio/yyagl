@@ -44,6 +44,10 @@ class BulletPhysWorld(PhysWorld):
 
     def get_contacts(self, node): return [BulletContact(contact) for contact in self.wld.contact_test(node).get_contacts()]
 
+    def toggle_debug(self):
+        is_hidden = self.__debug_np.is_hidden()
+        (self.__debug_np.show if is_hidden else self.__debug_np.hide)()
+
 
 class BulletContact(Contact):
 

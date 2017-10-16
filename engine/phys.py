@@ -90,5 +90,4 @@ class PhysMgr(Colleague, PhysFacade):
         self.eng.event.notify('on_collision', obj, node)
 
     def toggle_debug(self):
-        is_hidden = self.__debug_np.is_hidden()
-        (self.__debug_np.show if is_hidden else self.__debug_np.hide)()
+        self.root.toggle_debug()
