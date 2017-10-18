@@ -28,7 +28,7 @@ class CountDownAudioUpdate(AbsAudioUpdate):
         AbsAudioUpdate.__init__(self, engine_sfx, brake_sfx)
         self.curr_eng_ratio = 0
 
-    def update(self, is_skidmarking, speed_ratio, input):
+    def update(self, is_skidmarking, speed_ratio, input, is_drifting):
         incr = 1.0 * globalClock.getDt()
         self.curr_eng_ratio += incr if input.forward else -incr
         self.curr_eng_ratio = min(1, max(0, self.curr_eng_ratio))
@@ -38,8 +38,14 @@ class CountDownAudioUpdate(AbsAudioUpdate):
 
 class RaceAudioUpdate(AbsAudioUpdate):
 
-    def update(self, is_skidmarking, speed_ratio, input):
+    def update(self, is_skidmarking, speed_ratio, input, is_drifting):
         is_brk_playing = self.brake_sfx.is_playing()
+        if speed_ratio > .4:
+            is_skidmarking = is_skidmarking or is_drifting
+        if is_drifting and not is_skidmarking and speed_ratio > .4:
+            self.brake_sfx.set_volume((speed_ratio - .4) / .8)
+        else:
+            self.brake_sfx.set_volume(1)
         if is_skidmarking and not is_brk_playing:
             self.brake_sfx.play()
         elif not is_skidmarking and is_brk_playing:
@@ -84,8 +90,8 @@ class CarPlayerAudio(CarAudio):
         self.update_state.destroy()
         self.update_state = RaceAudioUpdate(self.engine_sfx, self.brake_sfx)
 
-    def update(self, is_skidmarking, speed_ratio, input):
-        self.update_state.update(is_skidmarking, speed_ratio, input)
+    def update(self, is_skidmarking, speed_ratio, input, is_drifting):
+        self.update_state.update(is_skidmarking, speed_ratio, input, is_drifting)
 
     def destroy(self):
         self.update_state.destroy()

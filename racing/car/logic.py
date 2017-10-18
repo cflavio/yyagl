@@ -42,12 +42,12 @@ class Input2ForcesStrategy(object):
         return tgt if beyond else next_val()
 
     def steering_clamp(self, is_drifting):
-        if is_drifting: return self.curr_clamp
         phys = self.car.phys
         speed_ratio = phys.lin_vel_ratio
         steering_range = phys.steering_min_speed - phys.steering_max_speed
-        clamp_incr_speed = globalClock.get_dt() * (8 if phys.lin_vel > 5 else 200)
-        clamp_decr_speed = globalClock.get_dt() * 20
+        clamp_incr_speed = globalClock.get_dt() * 16
+        clamp_decr_speed = globalClock.get_dt() * 32
+        if is_drifting: speed_ratio *= .5
         k = sin(speed_ratio * pi / 2)
         self.tgt_clamp = phys.steering_min_speed - k * steering_range
         self.curr_clamp = self.new_val(self.curr_clamp, self.tgt_clamp, clamp_incr_speed, clamp_decr_speed)
