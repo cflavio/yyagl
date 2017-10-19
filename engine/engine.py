@@ -26,6 +26,8 @@ from .configuration import Cfg
 
 class Engine(GameObject, EngineFacade):
 
+    network_priority = -39
+
     def __init__(self, cfg=None):
         self.lib = LibraryBuilder.build()
         self.lib.configure()

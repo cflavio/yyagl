@@ -32,6 +32,8 @@ class EngineFacade(Facade):
         fwd('send', lambda obj: obj.lib.send)
         fwd('do_later', lambda obj: obj.lib.do_later)
         fwd('add_task', lambda obj: obj.lib.add_task)
+        fwd('remove_task', lambda obj: obj.lib.remove_task)
+        fwd('log', lambda obj: obj.log_mgr.log)
         self._fwd_prop('version', lambda obj: obj.logic.version)
         self._fwd_prop('curr_path', lambda obj: obj.logic.curr_path)
         self._fwd_prop('cfg', lambda obj: obj.logic.cfg)

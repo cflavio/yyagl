@@ -1,53 +1,49 @@
-from panda3d.core import QueuedConnectionListener, PointerToConnection, \
-    NetAddress
 from .network import AbsNetwork
+from yyagl.library.panda.network import PandaConnectionListener
+
+
+ConnectionListener = PandaConnectionListener
 
 
 class Server(AbsNetwork):
 
     def __init__(self):
         AbsNetwork.__init__(self)
-        self.c_listener = None
-        self.tcp_socket = None
-        self.connection_cb = None
-        self.listener_tsk = None
+        self.conn_listener = self.tcp_socket = self.conn_cb = \
+            self.listener_task = None
         self.connections = []
 
-    def start(self, reader_cb, connection_cb):
-        AbsNetwork.start(self, reader_cb)
-        self.connection_cb = connection_cb
-        self.c_listener = QueuedConnectionListener(self.c_mgr, 0)
+    def start(self, read_cb, conn_cb):
+        AbsNetwork.start(self, read_cb)
+        self.conn_cb = conn_cb
+        self.conn_listener = ConnectionListener(self.c_mgr)
         self.connections = []
-        self.tcp_socket = self.c_mgr.open_TCP_server_rendezvous(9099, 1000)
-        self.c_listener.add_connection(self.tcp_socket)
-        self.listener_tsk = self.eng.add_task(self.tsk_listener, -39)
-        self.eng.log_mgr.log('the server is up')
+        self.tcp_socket = self.c_mgr.open_TCP_server_rendezvous(port=9099, backlog=1000)
+        self.conn_listener.add_conn(self.tcp_socket)
+        self.listener_task = self.eng.add_task(self.task_listener, self.eng.network_priority)
+        self.eng.log('the server is up')
 
-    def tsk_listener(self, task):
-        if not self.c_listener.newConnectionAvailable():
-            return task.cont
-        net_address = NetAddress()
-        new_connection = PointerToConnection()
-        args = PointerToConnection(), net_address, new_connection
-        if not self.c_listener.get_new_connection(*args):
-            return task.cont
-        self.connections.append(new_connection.p())
+    def task_listener(self, task):
+        if not self.conn_listener.conn_avail(): return task.cont
+        conn, addr = self.conn_listener.get_conn()
+        if not conn: return task.cont
+        self.connections += [conn]
         self.c_reader.add_connection(self.connections[-1])
-        self.connection_cb(net_address.get_ip_string())
-        msg = 'received a connection from ' + net_address.getIpString()
-        self.eng.log_mgr.log(msg)
+        self.conn_cb(addr)
+        msg = 'received a connection from ' + addr
+        self.eng.log(msg)
         return task.cont
 
-    def _actual_send(self, datagram, receiver):
-        dests = [cln for cln in self.connections if cln == receiver] \
-            if receiver else self.connections
+    def _actual_send(self, datagram, receiver=None):
+        receivers = [cln for cln in self.connections if cln == receiver]
+        dests = receivers if receiver else self.connections
         map(lambda cln: self.c_writer.send(datagram, cln), dests)
 
     def destroy(self):
         AbsNetwork.destroy(self)
         map(self.c_reader.remove_connection, self.connections)
         self.c_mgr.close_connection(self.tcp_socket)
-        taskMgr.remove(self.listener_tsk)
-        self.c_listener = self.tcp_socket = self.connection_cb = \
-            self.listener_tsk = self.connections = None
-        self.eng.log_mgr.log('the server has been destroyed')
+        self.eng.remove_task(self.listener_task)
+        self.conn_listener = self.tcp_socket = self.conn_cb = \
+            self.listener_task = self.connections = None
+        self.eng.log('the server has been destroyed')
