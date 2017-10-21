@@ -3,48 +3,56 @@ from panda3d.core import QueuedConnectionManager, QueuedConnectionReader, \
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from yyagl.gameobject import GameObject
+from yyagl.library.panda.network import PandaConnectionMgr, \
+    PandaConnectionReader, PandaConnectionWriter, PandaWriteDatagram, \
+    PandaDatagramIterator
+
+
+ConnectionMgr = PandaConnectionMgr
+ConnectionReader = PandaConnectionReader
+ConnectionWriter = PandaConnectionWriter
+WriteDatagram = PandaWriteDatagram
+DatagramIterator = PandaDatagramIterator
 
 
 class AbsNetwork(GameObject):
 
     def __init__(self):
         GameObject.__init__(self)
-        self.c_mgr = None
-        self.c_reader = None
-        self.c_writer = None
-        self.reader_cb = None
+        self.conn_mgr = None
+        self.conn_reader = None
+        self.conn_writer = None
+        self.read_cb = None
 
-    def start(self, reader_cb):
-        self.c_mgr = QueuedConnectionManager()
-        self.c_reader = QueuedConnectionReader(self.c_mgr, 0)
-        self.c_writer = ConnectionWriter(self.c_mgr, 0)
+    def start(self, read_cb):
+        self.conn_mgr = ConnectionMgr()
+        self.conn_reader = ConnectionReader(self.conn_mgr)
+        self.conn_writer = ConnectionWriter(self.conn_mgr)
         self.eng.attach_obs(self.on_frame, 1)
-        self.reader_cb = reader_cb
+        self.read_cb = read_cb
 
-    def send(self, data, receiver=None):
-        datagram = PyDatagram()
+    def send(self, data_lst, receiver=None):
+        datagram = WriteDatagram()
         types = {bool: 'B', int: 'I', float: 'F', str: 'S'}
-        datagram.add_string(''.join(types[type(part)] for part in data))
-        meths = {
-            bool: datagram.add_bool, int: datagram.add_int64,
-            float: datagram.add_float64, str: datagram.add_string}
-        map(lambda part: meths[type(part)](part), data)
+        datagram.add_string(''.join(types[type(part)] for part in data_lst))
+        type2mth = {
+            bool: datagram.add_bool, int: datagram.add_int,
+            float: datagram.add_float, str: datagram.add_string}
+        map(lambda data: type2mth[type(data)](data), data_lst)
         self._actual_send(datagram, receiver)
 
     def on_frame(self):
-        if not self.c_reader.data_available():
-            return
-        datagram = NetDatagram()
-        if not self.c_reader.get_data(datagram):
-            return
-        _iter = PyDatagramIterator(datagram)
-        meths = {'B': _iter.get_bool, 'I': _iter.get_int64,
-                 'F': _iter.get_float64, 'S': _iter.get_string}
-        msg = [meths[c]() for c in _iter.get_string()]
-        self.reader_cb(msg, datagram.get_connection())
+        if not self.conn_reader.data_available(): return
+        datagram = self.conn_reader.get()
+        if not datagram: return
+        _iter = DatagramIterator(datagram)
+        char2mth = {'B': _iter.get_bool, 'I': _iter.get_int,
+                 'F': _iter.get_float, 'S': _iter.get_string}
+        msg = [char2mth[c]() for c in _iter.get_string()]
+        self.read_cb(msg, datagram.get_connection())
 
     def register_cb(self, callback):
-        self.reader_cb = callback
+        self.read_cb = callback
 
     @property
     def is_active(self):
@@ -52,4 +60,7 @@ class AbsNetwork(GameObject):
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
+        self.conn_reader.destroy()
+        self.conn_writer.destroy()
+        self.conn_mgr = self.conn_reader = self.conn_writer = None
         GameObject.destroy(self)

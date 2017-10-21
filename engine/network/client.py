@@ -11,19 +11,19 @@ class Client(AbsNetwork):
         AbsNetwork.__init__(self)
         self.conn = None
 
-    def start(self, reader_cb, server_address):
-        AbsNetwork.start(self, reader_cb)
-        args = server_address, 9099, 3000
-        self.conn = self.c_mgr.open_TCP_client_connection(*args)
-        if not self.conn:
-            raise ClientError
-        self.c_reader.add_connection(self.conn)
-        self.eng.log_mgr.log('the client is up')
+    def start(self, read_cb, srv_addr):
+        AbsNetwork.start(self, read_cb)
+        self.conn = self.conn_mgr.open_TCP_client_connection(
+            hostname=srv_addr, port=9099, timeout_ms=3000)
+        if not self.conn: raise ClientError
+        self.conn_reader.add_conn(self.conn)
+        self.eng.log('the client is up')
 
-    def _actual_send(self, datagram, receiver):
-        self.c_writer.send(datagram, self.conn)
+    def _actual_send(self, datagram, receiver=None):
+        self.conn_writer.send(datagram, self.conn)
 
     def destroy(self):
+        self.conn_mgr.close_connection(self.conn)
+        self.conn = None
+        self.eng.log('the client has been destroyed')
         AbsNetwork.destroy(self)
-        self.c_mgr.close_connection(self.conn)
-        self.eng.log_mgr.log('the client has been destroyed')

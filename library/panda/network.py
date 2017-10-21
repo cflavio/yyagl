@@ -1,11 +1,16 @@
-from panda3d.core import QueuedConnectionListener, PointerToConnection, NetAddress
-from ..network import ConnectionListener
+from panda3d.core import QueuedConnectionListener, QueuedConnectionManager, \
+    QueuedConnectionReader, ConnectionWriter as P3DConnectionWriter, \
+    NetDatagram, PointerToConnection, NetAddress
+from direct.distributed.PyDatagram import PyDatagram
+from direct.distributed.PyDatagramIterator import PyDatagramIterator
+from ..network import ConnectionListener, ConnectionMgr, ConnectionReader, \
+    ConnectionWriter, WriteDatagram, DatagramIterator
 
 
 class PandaConnectionListener(ConnectionListener):
 
     def __init__(self, conn_mgr):
-        self.conn_listener = QueuedConnectionListener(conn_mgr, num_threads=0)
+        self.conn_listener = QueuedConnectionListener(conn_mgr.conn_mgr, num_threads=0)
 
     def add_conn(self, tcp_socket):
         return self.conn_listener.add_connection(tcp_socket)
@@ -19,3 +24,74 @@ class PandaConnectionListener(ConnectionListener):
             rendezvous=PointerToConnection(), address=addr, new_connection=new_conn)
         if not conn: return
         return new_conn.p(), addr.get_ip_string()
+
+
+class PandaConnectionMgr(ConnectionMgr):
+
+    def __init__(self): self.conn_mgr = QueuedConnectionManager()
+
+    def open_TCP_server_rendezvous(self, port, backlog):
+        return self.conn_mgr.open_TCP_server_rendezvous(port, backlog)
+
+    def open_TCP_client_connection(self, hostname, port, timeout_ms):
+        return self.conn_mgr.open_TCP_client_connection(hostname, port,
+                                                        timeout_ms)
+
+
+class PandaConnectionReader(ConnectionReader):
+
+    def __init__(self, conn_mgr):
+        self.conn_reader = QueuedConnectionReader(conn_mgr.conn_mgr, num_threads=0)
+
+    def data_available(self): return self.conn_reader.data_available()
+
+    def add_conn(self, conn): self.conn_reader.add_connection(conn)
+
+    def get(self):
+        datagram = NetDatagram()
+        if self.conn_reader.get_data(datagram): return datagram
+
+    def destroy(self):
+        self.conn_reader.shutdown()
+        self.conn_reader = None
+
+
+class PandaConnectionWriter(ConnectionWriter):
+
+    def __init__(self, conn_mgr):
+        self.conn_writer = P3DConnectionWriter(conn_mgr.conn_mgr, num_threads=0)
+
+    def send(self, msg, dst):
+        return self.conn_writer.send(msg.datagram, dst)
+
+    def destroy(self):
+        self.conn_writer.shutdown()
+        self.conn_writer = None
+
+
+class PandaWriteDatagram(WriteDatagram):
+
+    def __init__(self):
+        self.datagram = PyDatagram()
+
+    def add_bool(self, val): self.datagram.add_bool(val)
+
+    def add_int(self, val): self.datagram.add_int64(val)
+
+    def add_float(self, val): self.datagram.add_float64(val)
+
+    def add_string(self, val): self.datagram.add_string(val)
+
+
+class PandaDatagramIterator(DatagramIterator):
+
+    def __init__(self, datagram):
+        self._iter = PyDatagramIterator(datagram)
+
+    def get_bool(self): return self._iter.get_bool()
+
+    def get_int(self): return self._iter.get_int64()
+
+    def get_float(self): return self._iter.get_float64()
+
+    def get_string(self): return self._iter.get_string()
