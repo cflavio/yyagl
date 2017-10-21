@@ -129,7 +129,7 @@ class RaceLogicServer(RaceLogic):
     def enter_play(self):
         RaceLogic.enter_play(self)
         self.ready_clients = []
-        self.eng.register_server_cb(self.process_srv)
+        self.eng.server.register_cb(self.process_srv)
 
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.client_ready:
@@ -150,13 +150,13 @@ class RaceLogicClient(RaceLogic):
 
     def enter_play(self):
         RaceLogic.enter_play(self)
-        self.eng.register_client_cb(self.process_client)
+        self.eng.client.register_cb(self.process_client)
 
         def send_ready(task):
             self.eng.client.send([NetMsgs.client_ready])
             self.eng.log('sent client ready')
             return task.again
-        self.send_tsk = self.eng.do_later(.5, send_ready)
+        self.send_tsk = taskMgr.doMethodLater(.5, send_ready, 'send ready')
         # the server could not be listen to this event if it is still
         # loading we should do a global protocol, perhaps
 

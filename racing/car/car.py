@@ -88,14 +88,14 @@ class CarPlayer(Car):
 class CarPlayerServer(Car):
     event_cls = CarPlayerEventServer
     audio_cls = CarPlayerAudio
-    gui_cls = CarGui
+    gui_cls = CarPlayerGui
     logic_cls = CarPlayerLogic
 
 
 class CarPlayerClient(Car):
     event_cls = CarPlayerEventClient
     audio_cls = CarPlayerAudio
-    gui_cls = CarGui
+    gui_cls = CarPlayerGui
     logic_cls = CarPlayerLogic
 
 

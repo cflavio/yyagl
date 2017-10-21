@@ -126,7 +126,7 @@ class CarGfx(Gfx, CarGfxFacade):
         map(lambda dec: dec.destroy(), self.decorators)
         self.wheels = self.decorators = None
         self.skidmark_mgr.destroy()
-        if self.dec_tsk: self.dec_tsk = self.eng.remove_tsk(self.dec_tsk)
+        if self.dec_tsk: self.dec_tsk = self.eng.remove_task(self.dec_tsk)
         Gfx.destroy(self)
 
 

@@ -268,8 +268,8 @@ class CarPlayerEventServer(CarPlayerEvent):
 
 class CarPlayerEventClient(CarPlayerEvent):
 
-    def __init__(self, mdt):
-        CarPlayerEvent.__init__(self, mdt)
+    def __init__(self, mdt, race_props):
+        CarPlayerEvent.__init__(self, mdt, race_props)
         self.last_sent = self.eng.curr_time
 
     def on_frame(self):
@@ -291,7 +291,7 @@ class CarNetworkEvent(CarEvent):
 
     @once_a_frame
     def _get_input(self):
-        return {key: False for key in ['forward', 'left', 'rear', 'right']}
+        return DirKeys(False, False, False, False)
 
 
 class CarAiEvent(CarEvent):

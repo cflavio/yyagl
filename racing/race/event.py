@@ -72,13 +72,13 @@ class RaceEvent(Event):
 
 class RaceEventServer(RaceEvent):
 
-    def __init__(self, mdt):
-        RaceEvent.__init__(self, mdt)
+    def __init__(self, mdt, menu_cls, keys):
+        RaceEvent.__init__(self, mdt, menu_cls, keys)
         self.server_info = {}
         self.eng.attach_obs(self.on_frame)
 
     def network_register(self):
-        self.eng.register_server_cb(self.process_srv)
+        self.eng.server.register_cb(self.process_srv)
 
     def on_frame(self):
         if not hasattr(self.mdt.logic, 'player_car') or \
@@ -98,11 +98,10 @@ class RaceEventServer(RaceEvent):
             self.eng.server.send(self.__prepare_game_packet())
             self.last_sent = globalClock.get_frame_time()
 
-    @staticmethod
-    def __prepare_game_packet():
+    def __prepare_game_packet(self):
         packet = [NetMsgs.game_packet]
         for car in [self.mdt.logic.player_car] + self.mdt.logic.cars:
-            name = car.gfx.path
+            name = car.name
             pos = car.gfx.nodepath.get_pos()
             hpr = car.gfx.nodepath.get_hpr()
             velocity = car.phys.vehicle.getChassis().get_linear_velocity()
@@ -110,7 +109,7 @@ class RaceEventServer(RaceEvent):
         return packet
 
     def __process_player_info(self, data_lst, sender):
-        from racing.car.car import NetworkCar
+        from yyagl.racing.car.car import NetworkCar
         pos = (data_lst[1], data_lst[2], data_lst[3])
         hpr = (data_lst[4], data_lst[5], data_lst[6])
         velocity = (data_lst[7], data_lst[8], data_lst[9])
@@ -140,22 +139,20 @@ class RaceEventServer(RaceEvent):
 class RaceEventClient(RaceEvent):
 
     def network_register(self):
-        self.eng.register_client_cb(self.process_client)
+        self.eng.client.register_cb(self.process_client)
 
-    @staticmethod
-    def __process_game_packet(data_lst):
-        pass
-        # from racing.car.car import NetworkCar
-        # for i in range(1, len(data_lst), 10):
-        #     car_name = data_lst[i]
-        #     car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
-        #     car_hpr = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
-        #     cars = self.mdt.logic.cars
-        #     netcars = [car for car in cars if car.__class__ == NetworkCar]
-        #     for car in netcars:
-        #         if car_name in car.path:
-        #             LerpPosInterval(car.gfx.nodepath, .2, car_pos).start()
-        #             LerpHprInterval(car.gfx.nodepath, .2, car_hpr).start()
+    def __process_game_packet(self, data_lst):
+        from yyagl.racing.car.car import NetworkCar
+        for i in range(1, len(data_lst), 10):
+            car_name = data_lst[i]
+            car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
+            car_hpr = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
+            cars = self.mdt.logic.cars
+            netcars = [car for car in cars if car.__class__ == NetworkCar]
+            for car in netcars:
+                if car_name in car.name:
+                    LerpPosInterval(car.gfx.nodepath.node, .2, car_pos).start()
+                    LerpHprInterval(car.gfx.nodepath.node, .2, car_hpr).start()
 
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.game_packet:
