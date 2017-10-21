@@ -109,10 +109,22 @@ class DriftingForce(object):
             if car_dot_vel_l > 0:
                 intensity = max_intensity * car_dot_vel_l * vel_fact
                 direction = drift_vec_left
-        if  input_dct.right:
+            elif car_dot_vel_r > 0:
+                intensity = max_intensity * car_dot_vel_r * vel_fact
+                direction = drift_vec_right
+        elif  input_dct.right:
             if car_dot_vel_r > 0:
                 intensity = max_intensity * car_dot_vel_r * vel_fact
                 direction = drift_vec_right
+            elif car_dot_vel_l > 0:
+                intensity = max_intensity * car_dot_vel_l * vel_fact
+                direction = drift_vec_left
+        elif  input_dct.forward:
+            if car_dot_vel_l > 0:
+                intensity = max_intensity * car_dot_vel_l * vel_fact
+            if car_dot_vel_r > 0:
+                intensity = max_intensity * car_dot_vel_r * vel_fact
+            direction = car_vec
         for whl in phys.vehicle.get_wheels():
             if not whl.is_front_wheel():
                 whl.setFrictionSlip(whl.getFrictionSlip() * (1 + car_dot_vel_l * vel_fact * .002))
