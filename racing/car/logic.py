@@ -86,7 +86,7 @@ class DriftingForce(object):
         rot_mat_drift_right.setRotateMat(-45 if input_dct.forward else 90, (0, 0, 1))
         drift_vec_right = rot_mat_drift_right.xformVec(car_vec)
 
-        max_intensity = 5000.0
+        max_intensity = 10000.0
         intensity = 0
 
         vel = phys.vehicle.get_chassis().get_linear_velocity()
