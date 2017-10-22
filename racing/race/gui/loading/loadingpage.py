@@ -1,5 +1,6 @@
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
+from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.engine.gui.page import Page, PageGui, PageFacade
 from yyagl.gameobject import GameObject, Event
 from yyagl.racing.ranking.gui import RankingGui
@@ -33,12 +34,20 @@ class LoadingPageGui(PageGui):
             text=_('track: ') + self.track_name_transl + track_number,
             scale=.08, pos=(0, .62), font=self.font, fg=self.text_bg,
             wordwrap=12)
+        self.set_wld_img()
         self.set_grid()
         self.set_ranking()
         self.set_controls()
         self.set_upgrades()
         map(self.add_widget, [self.load_txt, track_txt])
         PageGui.bld_page(self, False)
+
+    def set_wld_img(self):
+        self.wld_img = OnscreenImage(
+            'assets/images/loading/%s.dds' % self.rprops.track_name,
+            pos=(-.25, 1, -.25), scale=.24, parent=base.a2dTopRight)
+        self.wld_img.set_transparency(True)
+        self.add_widget(self.wld_img)
 
     def set_grid(self):
         txt = OnscreenText(text=_('Starting grid'), scale=.1, pos=(-1.0, .38),
