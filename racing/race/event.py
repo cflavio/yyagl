@@ -116,9 +116,9 @@ class RaceEventServer(RaceEvent):
         self.server_info[sender] = (pos, hpr, velocity)
         car_name = self.eng.car_mapping[sender]
         for car in [car for car in self.mdt.logic.cars if car.__class__ == NetworkCar]:
-            if car_name in car.path:
-                LerpPosInterval(car.gfx.nodepath, .2, pos).start()
-                LerpHprInterval(car.gfx.nodepath, .2, hpr).start()
+            if car_name in car.name:
+                LerpPosInterval(car.gfx.nodepath.node, .2, pos).start()
+                LerpHprInterval(car.gfx.nodepath.node, .2, hpr).start()
 
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.player_info:

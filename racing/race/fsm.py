@@ -21,7 +21,7 @@ class RaceFsm(Fsm):
         self.countdown_sfx = rprops.season_props.countdown_sfx
         self.mdt.gui.loading.enter_loading(rprops, track_name_transl, drivers,
                                            ranking, tuning)
-        args = [rprops.season_props.player_car_name, []]
+        args = [rprops.season_props.player_car_name, rprops.season_props.player_car_names]
         self.eng.do_later(1.0, self.mdt.logic.load_stuff, args)
 
     def exitLoading(self):

@@ -25,7 +25,7 @@ class RaceLogic(Logic):
     def load_stuff(self, car_name, player_car_names):
         r_p = self.props
         self.eng.phys_mgr.reset()
-        player_car_names = player_car_names[1::2]
+        #player_car_names = player_car_names[1::2]
         self.track = Track(r_p)
         self.track.attach_obs(self.on_track_loaded)
         for driver in self.props.drivers:
