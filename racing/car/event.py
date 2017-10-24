@@ -196,7 +196,8 @@ class CarPlayerEvent(CarEvent):
         self.mdt.audio.update(self.mdt.logic.is_skidmarking,
                               self.mdt.phys.lin_vel_ratio,
                               self._get_input(),
-                              self.mdt.logic.is_drifting)
+                              self.mdt.logic.is_drifting,
+                              self.mdt.phys.is_flying)
 
     def on_collision(self, obj, tgt_obj):
         CarEvent.on_collision(self, obj, tgt_obj)
