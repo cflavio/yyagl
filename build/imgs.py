@@ -1,4 +1,5 @@
 from os import system, remove
+from sys import executable
 from .build import exec_cmd
 
 
@@ -16,9 +17,17 @@ def __bld_img(fname):
         cmd_tmpl = 'convert "%s"[0] -resize %dx%d! "%s"'
         system(cmd_tmpl % (fname, width, height, pngname))
         return
-    cmd_tmpl = 'nvcompress -bc3 {alpha} -nomips "%s" "%sdds"'
-    cmd = cmd_tmpl % (fname, fname[:-3])
-    system(cmd.format(alpha='-alpha' if alpha else ''))
+    if fname.endswith('psd'):
+        cmd_tmpl = 'convert "%s"[0] "%s"'
+        system(cmd_tmpl % (fname, fname[:-3] + 'png'))
+        fname = fname[:-3] + 'png'
+        system(executable + ' ./yyagl/build/img2txo.py "%s"' % fname)
+        remove(fname)
+        return
+    #cmd_tmpl = 'nvcompress -bc3 {alpha} -nomips "%s" "%sdds"'
+    #cmd = cmd_tmpl % (fname, fname[:-3])
+    #system(cmd.format(alpha='-alpha' if alpha else ''))
+    system(executable + ' ./yyagl/build/img2txo.py "%s"' % fname)
 
 
 def __get_img_alpha_and_size(fname):

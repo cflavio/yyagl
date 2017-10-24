@@ -149,7 +149,7 @@ class CarPanel(GameObject):
 
     def set_weapon(self, wpn):
         self.weapon_img = OnscreenImage(
-            'assets/images/weapons/%s.dds' % wpn,
+            'assets/images/weapons/%s.txo' % wpn,
             scale=.05, parent=base.a2dTopRight, pos=(-.2, 1, -.69))
         self.weapon_img.set_transparency(True)
 

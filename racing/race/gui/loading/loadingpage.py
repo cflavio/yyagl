@@ -44,7 +44,7 @@ class LoadingPageGui(PageGui):
 
     def set_wld_img(self):
         self.wld_img = OnscreenImage(
-            'assets/images/loading/%s.dds' % self.rprops.track_name,
+            'assets/images/loading/%s.txo' % self.rprops.track_name,
             pos=(-.25, 1, -.25), scale=.24, parent=base.a2dTopRight)
         self.wld_img.set_transparency(True)
         self.add_widget(self.wld_img)

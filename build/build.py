@@ -27,7 +27,7 @@ def __version():
 
 
 def img_tgt_names(files_):  # list of images' target filenames
-    ext = lambda fname: 'png' if fname.endswith('_png.psd') else 'dds'
+    ext = lambda fname: 'png' if fname.endswith('_png.psd') else 'txo'
     return [fname[:fname.rfind('.') + 1] + ext(fname) for fname in files_]
 
 
@@ -109,5 +109,5 @@ devinfo_fpath = '{dst_dir}{appname}-%s-devinfo.tar.gz' % branch
 test_fpath = '{dst_dir}{appname}-%s-tests.tar.gz' % branch
 docs_fpath = '{dst_dir}{appname}-%s-docs.tar.gz' % branch
 pdf_fpath = '{dst_dir}{appname}-%s-code.tar.gz' % branch
-extensions = ['txt', 'ttf', 'dds', 'egg', 'ogg', 'py', 'lua', 'rst', 'pdef',
+extensions = ['txt', 'ttf', 'txo', 'egg', 'ogg', 'py', 'lua', 'rst', 'pdef',
               'mo', 'bam']
