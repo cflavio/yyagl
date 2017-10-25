@@ -1,37 +1,15 @@
 from os import system, remove
 from sys import executable
-from .build import exec_cmd
+from build import exec_cmd
+from mtprocesser import MultithreadedProcesser
 
 
 def bld_images(target, source, env):
-    map(__bld_img, [str(src) for src in source])
+    mp_mgr = MultithreadedProcesser()
+    map(__bld_img, [(str(src), mp_mgr) for src in source])
+    output = mp_mgr.run()
 
 
-def __bld_img(fname):
-    pngname = fname[:-3] + 'png'
-    alpha, size = __get_img_alpha_and_size(fname)
-    if pngname.endswith('_png.png'):
-        sizes = [2**i for i in range(0, 12)]
-        floor_pow = lambda img_sz: max([siz for siz in sizes if siz <= img_sz])
-        width, height = map(floor_pow, size)
-        cmd_tmpl = 'convert "%s"[0] -resize %dx%d! "%s"'
-        system(cmd_tmpl % (fname, width, height, pngname))
-        return
-    if fname.endswith('psd'):
-        cmd_tmpl = 'convert "%s"[0] "%s"'
-        system(cmd_tmpl % (fname, fname[:-3] + 'png'))
-        fname = fname[:-3] + 'png'
-        system(executable + ' ./yyagl/build/img2txo.py "%s"' % fname)
-        remove(fname)
-        return
-    #cmd_tmpl = 'nvcompress -bc3 {alpha} -nomips "%s" "%sdds"'
-    #cmd = cmd_tmpl % (fname, fname[:-3])
-    #system(cmd.format(alpha='-alpha' if alpha else ''))
-    system(executable + ' ./yyagl/build/img2txo.py "%s"' % fname)
-
-
-def __get_img_alpha_and_size(fname):
-    alpha = exec_cmd('identify -verbose "%s" | grep alpha' % fname).strip()
-    geom = exec_cmd('identify -verbose "%s" | grep Geometry' % fname)
-    dim_split = lambda _geom: _geom.split()[1].split('+')[0].split('x')
-    return alpha, [int(dim) for dim in dim_split(geom)]
+def __bld_img(fname_mp_mgr):
+    fname, mp_mgr = fname_mp_mgr
+    mp_mgr.add(executable + ' ./yyagl/build/img2txo.py "%s"' % fname)

@@ -202,6 +202,9 @@ class CarPhys(Phys):
             gnd = self.cprops.race.track.phys.model.find('**/' + gnd_name)
             self.__finds[gnd_name] = gnd
         gfx_node = self.__finds[gnd_name]
+        if not gfx_node:
+            print 'ground error', gnd_name
+            return
         if gfx_node.has_tag('friction'):
             fric = float(gfx_node.get_tag('friction'))
             whl.setFrictionSlip(self.friction_slip * fric)

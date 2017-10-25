@@ -48,7 +48,9 @@ textured_egg = '''
   }}'''
 
 textured_egg = textured_egg.format(texture=argv[1])
-with open('dummy.egg', 'w') as dummyegg: dummyegg.write(textured_egg)
-system('egg2bam -txo -mipmap -ctex dummy.egg -o dummy.bam')
-remove('dummy.egg')
-remove('dummy.bam')
+nameid = argv[1].replace('/', '_')
+dummyname = 'dummy_' + nameid
+with open(dummyname + '.egg', 'w') as dummyegg: dummyegg.write(textured_egg)
+system('egg2bam -txo -mipmap -ctex %s.egg -o %s.bam' % (dummyname, dummyname))
+remove(dummyname + '.egg')
+remove(dummyname + '.bam')

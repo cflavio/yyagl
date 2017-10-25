@@ -6,9 +6,11 @@ import sys
 import os
 sys.path.append(os.getcwd())
 from os import walk, system
+from os.path import getsize
 from yyagl.engine.engine import Engine
 from yyagl.gameobject import GameObject
 from direct.actor.Actor import Actor
+from yyagl.build.mtprocesser import MultithreadedProcesser
 
 
 class Props(object):
@@ -78,12 +80,17 @@ class TrackProcesser(GameObject):
 
     def __egg2bams(self):
         troot = 'assets/models/tracks/'
+        mp_mgr = MultithreadedProcesser()
+        cmds = []
         for root, _, filenames in walk(troot + self.props.track_dir):
             for filename in filenames:
                 fname = root + '/' + filename
                 if fname.endswith('.egg'):
                     cmd_args = fname, fname[:-3] + 'bam'
-                    system('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args)
+                    cmds += [('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args, getsize(fname))]
+        cmds = reversed(sorted(cmds, key=lambda pair: pair[1]))
+        map(mp_mgr.add, [cmd[0] for cmd in cmds])
+        mp_mgr.run()
 
     def __set_submodels(self):
         print 'loaded track model'
