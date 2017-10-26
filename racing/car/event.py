@@ -90,7 +90,7 @@ class CarEvent(Event, ComputerProxy):
             self.on_bonus()
         weapons = ['Mine']
         if any(obj_name.startswith(wpn_name) for wpn_name in weapons):
-            self.mdt.phys.pnode.apply_central_force((0, 0, 30000))
+            self.mdt.phys.pnode.apply_central_force((0, 0, 45000))
 
     def on_bonus(self):
         if self.mdt.logic.weapon:

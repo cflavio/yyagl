@@ -31,7 +31,7 @@ class PandaGfxMgr(GfxMgr):
             return PandaNode(Actor(filename + ext, {'anim': filename + '-Anim' + ext}))
         elif callback:
             self.callbacks[filename + ext] = callback
-            return loader.loadModel(filename + ext, callback = self._intermediate_cb, extraArgs=extra_args + [filename + ext])
+            return loader.loadModel(filename + ext, callback=self._intermediate_cb, extraArgs=extra_args + [filename + ext])
         else:
             return PandaNode(loader.loadModel(filename + ext))
 

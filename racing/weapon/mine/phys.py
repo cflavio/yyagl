@@ -7,6 +7,7 @@ class MinePhys(WeaponPhys):
     cnt = 0
     coll_mesh_cls = BulletBoxShape
     joint_z = .5
+    gfx_dz = -.45
     launch_dist = -2.5
 
     def __init__(self, mdt, car, cars):

@@ -50,6 +50,10 @@ Var StartMenuFolder
 Section "" SecCore
 {install_files}
 WriteRegStr HKCU "Yorg" "" $INSTDIR
+WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg" \
+                 "DisplayName" "Yorg"
+WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg" \
+                 "UninstallString" "$\"$INSTDIR\Uninstall.exe$\""
 WriteUninstaller "$INSTDIR\\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\\$StartMenuFolder"
@@ -70,6 +74,7 @@ Section Uninstall
   Delete "$SMPROGRAMS\\$StartMenuFolder\\{full_name}.lnk"
   RMDir "$SMPROGRAMS\\$StartMenuFolder"
   DeleteRegKey /ifempty HKCU "Yorg"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg"
 SectionEnd'''
 
 

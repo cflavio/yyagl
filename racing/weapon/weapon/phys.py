@@ -21,7 +21,7 @@ class WeaponPhys(Phys):
         self.n_p.set_pos(self.n_p.get_pos() + launch_dist)
         self.eng.phys_mgr.attach_rigid_body(self.node)
         self.mdt.gfx.gfx_np.reparent_to(self.n_p)
-        self.mdt.gfx.gfx_np.set_pos((0, 0, 0))
+        self.mdt.gfx.gfx_np.set_pos((0, 0, self.gfx_dz))
 
     def destroy(self):
         if self.node:  # has not been fired
@@ -51,6 +51,16 @@ class RocketWeaponPhys(WeaponPhys):
         self.update_tsk = taskMgr.add(self.update_weapon, 'update_weapon')
 
     def update_weapon(self, tsk):
+        if not self.n_p: return
+        # hotfix: it may happen that
+        # node_pos = self.n_p.get_pos()  <- self.n_p is None
+        # we should give priorities to tasks, e.g. run on_frame after these ones
+        # Traceback (most recent call last):
+        #   File "C:\buildslave\rtdist-windows-i386\build\built\direct\p3d\AppRunner.py", line 596, in run
+        #   File "C:\buildslave\rtdist-windows-i386\build\built\direct\task\Task.py", line 513, in run
+        #   File "C:\buildslave\rtdist-windows-i386\build\built\direct\task\Task.py", line 470, in step
+        #   File "yyagl/racing/weapon/weapon/phys.py", line 55, in update_weapon
+        # AttributeError: 'NoneType' object has no attribute 'get_pos'
         self.node.set_linear_velocity(self.rot_mat.xform_vec((0, 60, 0)))
         node_pos = self.n_p.get_pos()
         height = self.car.phys.gnd_height(node_pos)
