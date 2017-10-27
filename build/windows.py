@@ -53,7 +53,7 @@ WriteRegStr HKCU "Yorg" "" $INSTDIR
 WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg" \
                  "DisplayName" "Yorg"
 WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg" \
-                 "UninstallString" "$\"$INSTDIR\Uninstall.exe$\""
+                 "UninstallString" '"$INSTDIR\Uninstall.exe"'
 WriteUninstaller "$INSTDIR\\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\\$StartMenuFolder"
