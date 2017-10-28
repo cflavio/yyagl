@@ -24,7 +24,7 @@ class CarGfx(Gfx, CarGfxFacade):
         self.crash_cnt = 0
         self.last_crash_t = 0
         self.decorators = []
-        self.dec_tsk = None
+        self.dec_tsk = []
         Gfx.__init__(self, mdt)
         CarGfxFacade.__init__(self)
         self.load()
@@ -36,7 +36,7 @@ class CarGfx(Gfx, CarGfxFacade):
         info = deccode2info[dec_code]
         fpath = 'assets/models/misc/' + info[0]
         self.decorators += [Decorator(fpath, self.nodepath)]
-        self.dec_tsk = self.eng.do_later(info[1], self.unset_decorator, [self.decorators[-1]])
+        self.dec_tsk += [self.eng.do_later(info[1], self.unset_decorator, [self.decorators[-1]])]
 
     def unset_decorator(self, dec):
         self.decorators.remove(dec)
@@ -126,7 +126,7 @@ class CarGfx(Gfx, CarGfxFacade):
         map(lambda dec: dec.destroy(), self.decorators)
         self.wheels = self.decorators = None
         self.skidmark_mgr.destroy()
-        if self.dec_tsk: self.dec_tsk = self.eng.remove_task(self.dec_tsk)
+        map(self.eng.remove_task, self.dec_tsk)
         Gfx.destroy(self)
 
 
