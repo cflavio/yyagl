@@ -219,6 +219,7 @@ class CarLogic(Logic, ComputerProxy):
         self.__grid_wps = {}
         self.collected_wps = []  # for validating laps
         self.weapon = None
+        self.fired_weapons = []
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
         self.input_strat = Input2ForcesStrategy.build(
@@ -623,8 +624,12 @@ class CarLogic(Logic, ComputerProxy):
     def fire(self):
         self.weapon.attach_obs(self.on_weapon_destroyed)
         self.weapon.fire(False)
+        self.fired_weapons += [self.weapon]
+        self.weapon = None
 
-    def on_weapon_destroyed(self):
+    def on_weapon_destroyed(self, wpn):
+        if wpn in self.fired_weapons: self.fired_weapons.remove(wpn)
+        if wpn != self.weapon: return
         self.weapon.detach_obs(self.mdt.event.on_rotate_all)
         self.weapon.detach_obs(self.on_weapon_destroyed)
         self.weapon = None
@@ -633,6 +638,8 @@ class CarLogic(Logic, ComputerProxy):
         self.camera = None
         if self.weapon:
             self.weapon = self.weapon.destroy()
+        map(lambda wpn: wpn.destroy(), self.fired_weapons)
+        self.fired_weapons = []
         Logic.destroy(self)
         ComputerProxy.destroy(self)
 
@@ -682,6 +689,8 @@ class CarPlayerLogic(CarLogic):
     def fire(self):
         self.weapon.attach_obs(self.on_weapon_destroyed)
         self.weapon.fire(True)
+        self.fired_weapons += [self.weapon]
+        self.weapon = None
 
     def __check_wrong_way(self):
         if self.cprops.track_waypoints:

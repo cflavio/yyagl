@@ -15,5 +15,5 @@ class WeaponLogic(Logic):
 
     def destroy(self):
         self.car = self.cars = None
-        self.notify('on_weapon_destroyed')
+        self.notify('on_weapon_destroyed', self.mdt)
         Logic.destroy(self)
