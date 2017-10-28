@@ -1,4 +1,4 @@
-from os import system, makedirs
+from os import system, makedirs, remove
 from os.path import exists
 from shutil import move, copy
 from .build import files
@@ -16,10 +16,11 @@ def __bld_strings_lng(lng, env):
 
 def bld_tmpl_merge(target, source, env):
     src_files = ' '.join(files(['py'], ['feedparser', 'venv']))
-    cmd_tmpl = 'xgettext -d {appname} -L python -o {appname}.pot '
-    system(cmd_tmpl.format(appname=env['APPNAME']) + src_files)
     lng_dir, appname, langs = env['LNG'], env['APPNAME'], env['LANGUAGES']
+    cmd_tmpl = 'xgettext -d {appname} -L python -o {appname}.pot '
+    system(cmd_tmpl.format(lng_dir=lng_dir, appname=env['APPNAME']) + src_files)
     map(lambda lng: __bld_tmpl_merge(lng_dir, lng, appname), langs)
+    remove(appname + '.pot')
 
 
 def __bld_tmpl_merge(lng_dir, lng, appname):
@@ -32,7 +33,7 @@ def __prepare(lng_base_dir, lng, appname):
     if not exists(lng_base_dir + lng + '/LC_MESSAGES'):
         makedirs(lng_base_dir + lng + '/LC_MESSAGES')
     dst = lng_base_dir + lng + '/LC_MESSAGES/%s.pot' % appname
-    move(appname + '.pot', dst)
+    copy(appname + '.pot', dst)
     lng_dir = lng_base_dir + lng + '/LC_MESSAGES/'
     lines_to_fix = ['CHARSET/UTF-8', 'ENCODING/8bit']
     map(lambda line: __fix_line(line, lng_dir, appname), lines_to_fix)
