@@ -17,6 +17,7 @@ class Props(object):
 
     def __init__(self):
         self.track_dir = sys.argv[1]
+        self.cores = int(sys.argv[2]) if len(sys.argv) >= 3 else 0
         self.model_name = 'track'
         self.empty_name = 'Empty'
         self.anim_name = 'Anim'
@@ -80,7 +81,7 @@ class TrackProcesser(GameObject):
 
     def __egg2bams(self):
         troot = 'assets/models/tracks/'
-        mp_mgr = MultithreadedProcesser()
+        mp_mgr = MultithreadedProcesser(self.props.cores)
         cmds = []
         for root, _, filenames in walk(troot + self.props.track_dir):
             for filename in filenames:

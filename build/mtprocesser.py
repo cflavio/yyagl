@@ -23,10 +23,10 @@ class Processer(Thread):
 
 class MultithreadedProcesser(object):
 
-    def __init__(self):
+    def __init__(self, cores):
         try: self.cores = cpu_count()
         except NotImplementedError: self.cores = 1
-        self.cores = self.cores / 2 + 1
+        self.cores = cores if cores else self.cores / 4 + 1
         self.cmd_lst = []
 
     def add(self, cmd):
