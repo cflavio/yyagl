@@ -41,10 +41,14 @@ class RocketWeaponPhys(WeaponPhys):
     def fire(self):
         WeaponPhys.fire(self)
         b_m = BitMask32.bit(0)
-        for bitn in range(len(self.cars)):
+        cars_idx = range(len(self.car.logic.cprops.race_props.season_props.car_names))
+        cars_idx.remove(
+            self.car.logic.cprops.race_props.season_props.car_names.index(self.car.name))
+        for bitn in cars_idx:
             b_m = b_m | BitMask32.bit(2 + bitn)
         self.n_p.set_collide_mask(b_m)
         self.eng.phys_mgr.add_collision_obj(self.node)
+        self.node.set_python_tag('car', self.mdt.logic.car)
         self.rot_mat = Mat4()
         rot_deg = self.parent.get_h() + self.rot_deg
         self.rot_mat.set_rotate_mat(rot_deg, (0, 0, 1))

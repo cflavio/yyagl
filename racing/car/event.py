@@ -211,7 +211,8 @@ class CarPlayerEvent(CarEvent):
             self.mdt.gfx.set_decorator('pitstop')
             self.mdt.audio.pitstop_sfx.play()
         if 'Rocket' in obj_name:
-            self.mdt.audio.rocket_hit_sfx.play()
+            if obj != tgt_obj.get_python_tag('car').phys.pnode:
+                self.mdt.audio.rocket_hit_sfx.play()
 
     def on_bonus(self):
         if self.mdt.logic.weapon:

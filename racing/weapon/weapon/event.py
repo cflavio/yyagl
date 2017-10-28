@@ -27,7 +27,8 @@ class RocketWeaponEvent(WeaponEvent):
     def on_collision(self, obj, tgt_obj):
         pnode = self.mdt.phys.node
         if tgt_obj.get_name() == self.wpn_name and tgt_obj == pnode:
-            obj.apply_central_force((0, 0, 30000))
-            self.mdt.logic.notify('on_hit', obj)
-            self._on_coll_success()
+            if obj.get_name() != 'Vehicle' or obj != self.mdt.logic.car.phys.pnode:
+                obj.apply_central_force((0, 0, 30000))
+                self.mdt.logic.notify('on_hit', obj)
+                self._on_coll_success()
         self._eval_wall_coll(tgt_obj, obj)
