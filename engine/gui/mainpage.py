@@ -21,7 +21,7 @@ class MainPageGui(PageGui):
              'http://www.youtube.com/user/ya2games?sub_confirmation=1'),
             ('pinterest', 'http://www.pinterest.com/ya2tech'),
             ('tumblr', 'http://ya2tech.tumblr.com'),
-            ('feed', 'http://www.ya2.it/feed-following')]
+            ('feed', 'http://www.ya2.it/pages/feed-following.html')]
         menu_args = self.props.gameprops.menu_args
         self.widgets += [
             ImgBtn(
