@@ -27,6 +27,7 @@ class MultithreadedProcesser(object):
         try: self.cores = cpu_count()
         except NotImplementedError: self.cores = 1
         self.cores = cores if cores else self.cores / 4 + 1
+        print 'mt-processer: using %s cores' % self.cores
         self.cmd_lst = []
 
     def add(self, cmd):
