@@ -636,9 +636,9 @@ class CarLogic(Logic, ComputerProxy):
 
     def destroy(self):
         self.camera = None
-        if self.weapon:
-            self.weapon = self.weapon.destroy()
-        map(lambda wpn: wpn.destroy(), self.fired_weapons)
+        if self.weapon: self.weapon = self.weapon.destroy()
+        f_wpn = [wpn for wpn in self.fired_weapons if wpn]
+        map(lambda wpn: wpn.destroy(), f_wpn)
         self.fired_weapons = []
         Logic.destroy(self)
         ComputerProxy.destroy(self)

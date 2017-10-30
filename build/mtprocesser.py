@@ -21,6 +21,17 @@ class Processer(Thread):
             system(cmd)
 
 
+class ProcesserNoThreaded:
+
+    def __init__(self, cmd_lst):
+        self.cmd_lst = cmd_lst
+
+    def run(self):
+        for cmd in self.cmd_lst:
+            print cmd
+            system(cmd)
+
+
 class MultithreadedProcesser(object):
 
     def __init__(self, cores):
@@ -34,11 +45,14 @@ class MultithreadedProcesser(object):
         self.cmd_lst += [cmd]
 
     def run(self):
-        threads = []
-        lock = RLock()
-        for i in range(self.cores):
-            threads += [Processer(self.cmd_lst, lock)]
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
+        if self.cores != 1:
+            threads = []
+            lock = RLock()
+            for i in range(self.cores):
+                threads += [Processer(self.cmd_lst, lock)]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+        else:
+            ProcesserNoThreaded(self.cmd_lst).run()

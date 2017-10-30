@@ -54,6 +54,11 @@ class RocketWeaponPhys(WeaponPhys):
         self.rot_mat.set_rotate_mat(rot_deg, (0, 0, 1))
         self.update_tsk = taskMgr.add(self.update_weapon, 'update_weapon')
 
+    def __new_val(self, val, tgt, incr):
+        if abs(val - tgt) <= incr:
+            return tgt
+        return val + incr if tgt > val else val - incr
+
     def update_weapon(self, tsk):
         if not self.n_p: return
         # hotfix: it may happen that
@@ -67,8 +72,9 @@ class RocketWeaponPhys(WeaponPhys):
         # AttributeError: 'NoneType' object has no attribute 'get_pos'
         self.node.set_linear_velocity(self.rot_mat.xform_vec((0, 60, 0)))
         node_pos = self.n_p.get_pos()
-        height = self.car.phys.gnd_height(node_pos)
-        self.n_p.set_pos((node_pos[0], node_pos[1], height + .8))
+        height = self.car.phys.gnd_height(node_pos) + .8
+        new_height = self.__new_val(node_pos[2], height, globalClock.getDt() * 4.0)
+        self.n_p.set_pos((node_pos[0], node_pos[1], new_height))
         return tsk.again
 
     def destroy(self):

@@ -15,7 +15,7 @@ class MouseCursor(GameObject):
         self.cursor_img.set_bin('gui-popup', 50)
         self.hotspot_dx = scale[0] * (1 - 2 * hotspot[0])
         self.hotspot_dy = scale[2] * (1 - 2 * hotspot[1])
-        self.eng.attach_obs(self.on_frame)
+        self.eng.attach_obs(self.on_frame_unpausable)
 
     @staticmethod
     def __set_standard_cursor(show):
@@ -34,7 +34,7 @@ class MouseCursor(GameObject):
     def cursor_top(self):
         self.cursor_img.reparent_to(self.cursor_img.get_parent())
 
-    def on_frame(self):
+    def on_frame_unpausable(self):
         if not base.mouseWatcherNode.hasMouse(): return
         m_x = base.mouseWatcherNode.get_mouse_x()
         m_y = base.mouseWatcherNode.get_mouse_y()
