@@ -1,3 +1,4 @@
+from random import choice
 from yyagl.gameobject import Event
 
 
@@ -28,7 +29,10 @@ class RocketWeaponEvent(WeaponEvent):
         pnode = self.mdt.phys.node
         if tgt_obj.get_name() == self.wpn_name and tgt_obj == pnode:
             if obj.get_name() != 'Vehicle' or obj != self.mdt.logic.car.phys.pnode:
-                obj.apply_central_force((0, 0, 30000))
+                int_lat = 10000
+                int_rot = 20000
+                obj.apply_central_force((choice([-int_lat, int_lat]), choice([-int_lat, int_lat]), 96000))
+                obj.apply_torque((0, 0, choice([-int_rot, int_rot])))
                 self.mdt.logic.notify('on_hit', obj)
                 self._on_coll_success()
         self._eval_wall_coll(tgt_obj, obj)

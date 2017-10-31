@@ -115,10 +115,12 @@ class RankingGui(Gui):
 
     @staticmethod
     def set_drv_txt_img(page, i, car_name, pos_x, top, text):
+        RankingGui.eng.log_mgr.log('drivers: ' + str([drv.dprops for drv in page.drivers]))
         drv = next(
             driver for driver in page.drivers
             if driver.dprops.car_name == car_name)
         is_player_car = car_name == page.rprops.season_props.player_car_name
+        RankingGui.eng.log_mgr.log('%s %s %s %s' % (text % drv.logic.dprops.info.name, car_name, drv.logic.dprops.info.img_idx, is_player_car))
         txt = OnscreenText(
             text=text % drv.logic.dprops.info.name, align=TextNode.A_left,
             scale=.072, pos=(pos_x, top - i * .16), font=page.font,

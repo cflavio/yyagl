@@ -1,5 +1,5 @@
 from collections import namedtuple
-from random import uniform
+from random import uniform, choice
 from itertools import chain
 from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
@@ -90,7 +90,10 @@ class CarEvent(Event, ComputerProxy):
             self.on_bonus()
         weapons = ['Mine']
         if any(obj_name.startswith(wpn_name) for wpn_name in weapons):
-            self.mdt.phys.pnode.apply_central_force((0, 0, 96000))
+            int_lat = 10000
+            int_rot = 20000
+            self.mdt.phys.pnode.apply_central_force((choice([-int_lat, int_lat]), choice([-int_lat, int_lat]), 96000))
+            self.mdt.phys.pnode.apply_torque((0, 0, choice([-int_rot, int_rot])))
 
     def on_bonus(self):
         if self.mdt.logic.weapon:
