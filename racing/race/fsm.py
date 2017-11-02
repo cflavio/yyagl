@@ -60,8 +60,8 @@ class RaceFsm(Fsm):
     def exitCountdown(self):
         self.eng.log_mgr.log('exiting Countdown state')
         if self.countdown: self.countdown.destroy()
-        self.eng.remove_task(self.launch_tsk)
-        if self.aux_launch_tsk: self.eng.remove_task(self.aux_launch_tsk)
+        self.eng.remove_do_later(self.launch_tsk)
+        if self.aux_launch_tsk: self.eng.remove_do_later(self.aux_launch_tsk)
         # eng.do_later(.5, game.player_car.gfx.apply_damage)
         # eng.do_later(.6, game.player_car.gfx.apply_damage)
         # eng.gfx.print_stats()
