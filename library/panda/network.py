@@ -37,6 +37,9 @@ class PandaConnectionMgr(ConnectionMgr):
         return self.conn_mgr.open_TCP_client_connection(hostname, port,
                                                         timeout_ms)
 
+    def open_UDP_connection(self, port):
+        return self.conn_mgr.open_UDP_connection(port)
+
 
 class PandaConnectionReader(ConnectionReader):
 
@@ -61,8 +64,11 @@ class PandaConnectionWriter(ConnectionWriter):
     def __init__(self, conn_mgr):
         self.conn_writer = P3DConnectionWriter(conn_mgr.conn_mgr, num_threads=0)
 
-    def send(self, msg, dst):
-        return self.conn_writer.send(msg.datagram, dst)
+    def send(self, msg, dst, addr=None):
+        if addr is None: return self.conn_writer.send(msg.datagram, dst)
+        else:
+            return self.conn_writer.send(datagram=msg.datagram,
+                                         connection=dst, address=addr)
 
     def destroy(self):
         self.conn_writer.shutdown()

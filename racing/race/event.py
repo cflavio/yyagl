@@ -95,7 +95,7 @@ class RaceEventServer(RaceEvent):
             velocity = car.get_linear_velocity()
             self.server_info[car] = (pos, hpr, velocity)
         if globalClock.get_frame_time() - self.last_sent > .2:
-            self.eng.server.send(self.__prepare_game_packet())
+            self.eng.server.send_udp(self.__prepare_game_packet())
             self.last_sent = globalClock.get_frame_time()
 
     def __prepare_game_packet(self):
@@ -114,7 +114,7 @@ class RaceEventServer(RaceEvent):
         hpr = (data_lst[4], data_lst[5], data_lst[6])
         velocity = (data_lst[7], data_lst[8], data_lst[9])
         self.server_info[sender] = (pos, hpr, velocity)
-        car_name = self.eng.car_mapping[sender]
+        car_name = self.eng.car_mapping[data_lst[-1]]
         for car in [car for car in self.mdt.logic.cars if car.__class__ == NetworkCar]:
             if car_name in car.name:
                 LerpPosInterval(car.gfx.nodepath.node, .2, pos).start()
@@ -143,7 +143,7 @@ class RaceEventClient(RaceEvent):
 
     def __process_game_packet(self, data_lst):
         from yyagl.racing.car.car import NetworkCar
-        for i in range(1, len(data_lst), 10):
+        for i in range(1, len(data_lst) - 1, 10):
             car_name = data_lst[i]
             car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
             car_hpr = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])

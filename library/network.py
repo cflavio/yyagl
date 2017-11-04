@@ -17,6 +17,8 @@ class ConnectionMgr(object):
 
     def open_TCP_client_connection(self, hostname, port, timeout_ms): pass
 
+    def open_UDP_connection(self, port): pass
+
 
 class ConnectionReader(object):
 

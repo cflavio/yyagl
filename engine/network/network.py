@@ -1,5 +1,5 @@
 from panda3d.core import QueuedConnectionManager, QueuedConnectionReader, \
-    ConnectionWriter, NetDatagram
+    ConnectionWriter, NetDatagram, NetAddress
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 from yyagl.gameobject import GameObject
@@ -28,6 +28,9 @@ class AbsNetwork(GameObject):
         self.conn_mgr = ConnectionMgr()
         self.conn_reader = ConnectionReader(self.conn_mgr)
         self.conn_writer = ConnectionWriter(self.conn_mgr)
+        self.conn_udp = self.conn_mgr.open_UDP_connection(self.receive_port)
+        if not self.conn_udp: raise ClientError
+        self.conn_reader.add_conn(self.conn_udp)
         self.eng.attach_obs(self.on_frame, 1)
         self.read_cb = read_cb
 
@@ -40,6 +43,23 @@ class AbsNetwork(GameObject):
             float: datagram.add_float, str: datagram.add_string}
         map(lambda data: type2mth[type(data)](data), data_lst)
         self._actual_send(datagram, receiver)
+
+    def _actual_send_udp(self, datagram, receiver=None):
+        addr = NetAddress()
+        addr.set_host('127.0.0.1', self.send_port)
+        self.conn_writer.send(datagram, self.conn_udp, addr)
+
+    def send_udp(self, data_lst, receiver=None):
+        datagram = WriteDatagram()
+        my_addr = self.my_addr if hasattr(self, 'my_addr') else 'server'
+        data_lst = data_lst + [my_addr]
+        types = {bool: 'B', int: 'I', float: 'F', str: 'S'}
+        datagram.add_string(''.join(types[type(part)] for part in data_lst))
+        type2mth = {
+            bool: datagram.add_bool, int: datagram.add_int,
+            float: datagram.add_float, str: datagram.add_string}
+        map(lambda data: type2mth[type(data)](data), data_lst)
+        self._actual_send_udp(datagram, receiver)
 
     def on_frame(self):
         if not self.conn_reader.data_available(): return

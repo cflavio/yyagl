@@ -7,6 +7,9 @@ ConnectionListener = PandaConnectionListener
 
 class Server(AbsNetwork):
 
+    send_port = 9098
+    receive_port = 9099
+
     def __init__(self):
         AbsNetwork.__init__(self)
         self.conn_listener = self.tcp_socket = self.conn_cb = \
