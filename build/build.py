@@ -27,7 +27,7 @@ def __version():
 
 
 def img_tgt_names(files_):  # list of images' target filenames
-    ext = lambda fname: 'png' if fname.endswith('_png.psd') else 'txo'
+    ext = lambda fname: 'png' if fname.endswith('_png.png') else 'txo'
     return [fname[:fname.rfind('.') + 1] + ext(fname) for fname in files_]
 
 
