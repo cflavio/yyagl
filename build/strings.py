@@ -19,7 +19,7 @@ def bld_tmpl_merge(target, source, env):
     lng_dir, appname, langs = env['LNG'], env['APPNAME'], env['LANGUAGES']
     cmd_tmpl = 'xgettext -d {appname} -L python -o {appname}.pot '
     system(cmd_tmpl.format(lng_dir=lng_dir, appname=env['APPNAME']) + src_files)
-    map(lambda lng: __bld_tmpl_merge(lng_dir, lng, appname), langs)
+    __bld_tmpl_merge(lng_dir, env['LNG_CODE'], appname)
     remove(appname + '.pot')
 
 
@@ -35,9 +35,9 @@ def __prepare(lng_base_dir, lng, appname):
     dst = lng_base_dir + lng + '/LC_MESSAGES/%s.pot' % appname
     copy(appname + '.pot', dst)
     lng_dir = lng_base_dir + lng + '/LC_MESSAGES/'
-    lines_to_fix = ['CHARSET/UTF-8', 'ENCODING/8bit']
-    map(lambda line: __fix_line(line, lng_dir, appname), lines_to_fix)
     if not exists(lng_dir + appname + '.po'):
+        lines_to_fix = ['CHARSET/UTF-8', 'ENCODING/8bit']
+        map(lambda line: __fix_line(line, lng_dir, appname), lines_to_fix)
         copy(lng_dir + appname + '.pot', lng_dir + appname + '.po')
     return lng_dir
 
