@@ -27,8 +27,8 @@ def __version():
 
 
 def img_tgt_names(files_):  # list of images' target filenames
-    ext = lambda fname: 'png' if fname.endswith('_png.png') else 'txo'
-    return [fname[:fname.rfind('.') + 1] + ext(fname) for fname in files_]
+    #ext = lambda fname: 'png' if fname.endswith('_png.png') else 'txo'
+    return [fname[:fname.rfind('.') + 1] + 'txo' for fname in files_]
 
 
 def tracks_tgt_fnames():
@@ -101,7 +101,7 @@ win_fpath = '{dst_dir}{appname}-%s-windows.exe' % branch
 osx_fpath = '{dst_dir}{appname}-%s-osx.zip' % branch
 linux_fpath = '{dst_dir}{appname}-%s-linux_{platform}' % branch
 win_noint_fpath = '{dst_dir}{appname}-%s-nointernet-windows.exe' % branch
-osx_noint_fpath = '{dst_dir}{appname}-%s-nointernet-osx.zip' % branch
+osx_noint_fpath = '{dst_dir}{appname}-%s-nointernet-osx.tar.xz' % branch
 linux_noint_tmpl = '{dst_dir}{appname}-%s-nointernet-linux_{platform}'
 linux_noint_fpath = linux_noint_tmpl % branch
 src_fpath = '{dst_dir}{appname}-%s-src.tar.gz' % branch

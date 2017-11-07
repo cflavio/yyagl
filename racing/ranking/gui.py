@@ -37,9 +37,6 @@ class RankingPageGui(PageGui):
         if self.sprops.gameprops.season_tracks.index(track) == ntracks - 1:
             cont_btn_cmd = self.notify
             cont_btn_ea = ['on_ranking_next_race']
-        else:
-            cont_btn_cmd = self.notify
-            cont_btn_ea = ['on_ranking_end']
             img = OnscreenImage(
                 'assets/images/gui/trophy.txo', parent=base.a2dRightCenter,
                 pos=(-.58, 1, 0), scale=.55)
@@ -50,6 +47,9 @@ class RankingPageGui(PageGui):
                 parent=base.a2dLeftCenter)
             txt.set_r(-79)
             map(self.add_widget, [txt, img])
+        else:
+            cont_btn_cmd = self.notify
+            cont_btn_ea = ['on_ranking_end']
         cont_btn = DirectButton(
             text=_('Continue'), pos=(0, 1, -.8), command=cont_btn_cmd,
             extraArgs=cont_btn_ea,
