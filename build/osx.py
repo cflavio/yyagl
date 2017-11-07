@@ -35,9 +35,9 @@ def bld_osx(target, source, env):
             if is_track and is_bam and not is_no_conv:
                 remove(fname)
     fname = '{AppName}.app'
-    pkg = '{appname}-{version}{internet_str}-osx.zip'
-    tmpl_args = (bld_dpath, pkg, fname)
-    tmpl = 'cd %sosx_i386 && zip -r ../%s %s && cd ../..' % tmpl_args
+    pkg = '{appname}-{version}{internet_str}-osx.tar.xz'
+    tmpl_args = (bld_dpath, fname, pkg)
+    tmpl = 'cd %sosx_i386 && tar -cv %s | xz > ../%s && cd ../..' % tmpl_args
     cmd = tmpl.format(
         AppName=env['APPNAME'].capitalize(), appname=env['APPNAME'],
         version=branch, internet_str=internet_str)
