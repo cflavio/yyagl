@@ -1,0 +1,35 @@
+@startuml
+Yorg o-- Season
+Season o-- Ranking
+Season o-- Race
+Race o-- Track
+Race o-- RaceProps
+Track o-- Bonus
+Season o-- SeasonProps
+Season o-- Driver
+Driver o-- Car
+note on link #white: in order to\nchange cars
+Car o-- Weapon
+Car o-- CarProps
+CarProps o-- RaceProps
+RaceProps o-- SeasonProps
+SeasonProps o-- GameProps
+
+class Ranking
+note left #white: computed\nconsidering\ndriver.points
+
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+skinparam classAttributeIconSize 0
+class Driver {
+ -skills
+ -tuning
+}
+
+hide members
+show Driver fields
+@enduml
