@@ -19,7 +19,8 @@ def bld_tmpl_merge(target, source, env):
     lng_dir, appname, langs = env['LNG'], env['APPNAME'], env['LANGUAGES']
     cmd_tmpl = 'xgettext -d {appname} -L python -o {appname}.pot '
     system(cmd_tmpl.format(lng_dir=lng_dir, appname=env['APPNAME']) + src_files)
-    __bld_tmpl_merge(lng_dir, env['LNG_CODE'], appname)
+    lng_code = str(target[0])[len(lng_dir):].split('/')[0]
+    __bld_tmpl_merge(lng_dir, lng_code, appname)
     remove(appname + '.pot')
 
 

@@ -27,7 +27,8 @@ class RaceEvent(Event):
         self.ignore('escape-up')
         self.eng.show_cursor()
         self.ingame_menu = self.menu_cls(
-            self.mdt.logic.props.season_props.gameprops.menu_args)
+            self.mdt.logic.props.season_props.gameprops.menu_args,
+            self.mdt.logic.props.keys)
         self.ingame_menu.gui.attach(self.on_ingame_back)
         self.ingame_menu.gui.attach(self.on_ingame_exit)
 
