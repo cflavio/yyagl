@@ -9,8 +9,8 @@ end
 
 local function preinst()
     if file_exists(MojoSetup.destination.."/.mojosetup/mojosetup") then
-        MojoSetup.fatal([[You are attempting to overwrite an existing folder; 
-if you have a previous installation then uninstall it before installing this 
+        MojoSetup.fatal([[You are attempting to overwrite an existing folder;
+if you have a previous installation then uninstall it before installing this
 new one.]])
     end
 end
@@ -40,6 +40,6 @@ Setup.Package {
         required = true,
         bytes = <size>,
         description = "<AppName>",
-        Setup.File {allowoverwrite = true, wildcards = {"*"}}
+        Setup.File { source = "base:///pdata.tar.xz" }
     }
 }
