@@ -1,6 +1,7 @@
 from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
-from panda3d.core import LineSegs, BitMask32
+from panda3d.core import LineSegs, BitMask32, Point2, Point3
+from direct.gui.OnscreenText import OnscreenText
 from yyagl.gameobject import Phys, GameObject
 from yyagl.racing.weapon.bonus.bonus import Bonus
 
@@ -79,8 +80,7 @@ class MeshBuilderUnmerged(MeshBuilder):
 
 class TrackPhys(Phys):
 
-    def __init__(
-            self, mdt, race_props):
+    def __init__(self, mdt, race_props):
         self.corners = self.model = self.wp2prevs = self.wp_np = None
         self.bonuses = []
         self.rigid_bodies = []
@@ -127,6 +127,9 @@ class TrackPhys(Phys):
         self.redraw_wps()
 
     def redraw_wps(self):
+        pass
+
+    def set_curr_wp(self, wp):
         pass
 
     def __set_weapons(self):
@@ -186,6 +189,32 @@ class TrackPhys(Phys):
 
 class TrackPhysDebug(TrackPhys):
 
+    def __init__(self, mdt, race_props):
+        TrackPhys.__init__(self, mdt, race_props)
+        self.curr_wp = ''
+        self.wp2txt = {}
+        for wp in self.wp2prevs.keys():
+            self.wp2txt[wp] = OnscreenText(wp.get_name()[8:], fg=(1, 1, 1, 1), scale=.08)
+        self.eng.attach_obs(self.on_frame)
+
+    def __2d_pos(self, node):
+        p3d = base.cam.get_relative_point(node.node, Point3(0, 0, 0))
+        p2d = Point2()
+        return p2d if base.camLens.project(p3d, p2d) else None
+
+    def set_curr_wp(self, wp):
+        self.curr_wp = wp.get_name()[8:]
+
+    def on_frame(self):
+        for wp in self.wp2prevs.keys():
+            pos2d = self.__2d_pos(wp)
+            if pos2d:
+                self.wp2txt[wp].show()
+                self.wp2txt[wp].setPos(1.7777 * pos2d[0] + .02, pos2d[1] + .02)
+                self.wp2txt[wp]['fg'] = (1, 0, 0, 1) if wp.get_name()[8:] == self.curr_wp else (1, 1, 1, 1)
+            else:
+                self.wp2txt[wp].hide()
+
     def redraw_wps(self):
         if not self.wp2prevs:
             # it may be invoked on track's destruction
@@ -199,3 +228,7 @@ class TrackPhysDebug(TrackPhys):
                 segs.drawTo(dest.get_pos())
         segs_node = segs.create()
         self.wp_np = render.attach_new_node(segs_node)
+
+    def destroy(self):
+        self.eng.detach_obs(self.on_frame)
+        TrackPhys.destroy(self)

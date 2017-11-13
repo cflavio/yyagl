@@ -222,8 +222,10 @@ class CarAi(Ai, ComputerProxy):
 
     @property
     def curr_logic(self):
-        nonneg_speed = self.mdt.phys.speed >= 0
-        return self.front_logic if nonneg_speed else self.rear_logic
+        obst = list(self.front_logic.get_obstacles())
+        if self.mdt.phys.speed < 20 and obst[0].name and obst[0].dist < 4:
+            return self.rear_logic
+        return self.front_logic
 
     def __eval_gnd(self):
         ratio_road = lambda samples: float(

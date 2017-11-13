@@ -1,4 +1,4 @@
-from panda3d.core import TextNode, LVector3f
+from panda3d.core import TextNode, LVector3f, TextNode
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
@@ -182,6 +182,35 @@ class CarPanel(GameObject):
             self.weapon_img.destroy()
 
 
+class CarAIPanel(GameObject):
+
+    def __init__(self):
+        GameObject.__init__(self)
+        self.curr_logic = ''
+        self.curr_wp = ''
+        self.curr_car_dot_traj = ''
+        self.curr_obsts = []
+        self.curr_obsts_back = []
+        self.curr_input = None
+        self.wp_txt = OnscreenText(text='', pos=(-1.74, .5), scale=.06, fg=(1, 1, 1, 1), align=TextNode.A_left)
+
+    def update(self):
+        txt = 'current logic: ' + self.curr_logic.split('AiLogic')[0]
+        txt += '\ncurrent wp: ' + self.curr_wp
+        txt += '\ncar dot traj: %s' % self.curr_car_dot_traj
+        txt += '\nobst center: %s (%s)' % (self.curr_obsts[0].name, round(self.curr_obsts[0].dist, 2))
+        txt += '\nobst left: %s (%s)' % (self.curr_obsts[1].name, round(self.curr_obsts[1].dist, 2))
+        txt += '\nobst right: %s (%s)' % (self.curr_obsts[2].name, round(self.curr_obsts[2].dist, 2))
+        txt += '\nobst center back: %s (%s)' % (self.curr_obsts_back[0].name, round(self.curr_obsts_back[0].dist, 2))
+        txt += '\nobst left back: %s (%s)' % (self.curr_obsts_back[1].name, round(self.curr_obsts_back[1].dist, 2))
+        txt += '\nobst right back: %s (%s)' % (self.curr_obsts_back[2].name, round(self.curr_obsts_back[2].dist, 2))
+        txt += '\nforward: %s' % self.curr_input.forward
+        txt += '\nbrake: %s' % self.curr_input.rear
+        txt += '\nleft: %s' % self.curr_input.left
+        txt += '\nright: %s' % self.curr_input.right
+        self.wp_txt['text'] = txt
+
+
 class CarGui(Gui):
 
     def apply_damage(self, reset=False):
@@ -195,10 +224,14 @@ class CarPlayerGui(CarGui):
         CarGui.__init__(self, mdt)
         self.pars = CarParameters(mdt.phys, mdt.logic)
         self.panel = CarPanel(car_props)
+        self.ai_panel = CarAIPanel()
 
     def upd_ranking(self, ranking):
         r_i = ranking.index(self.mdt.name) + 1
         self.panel.ranking_txt.setText(str(r_i) + "'")
+
+    def upd_ai(self):
+        self.ai_panel.update()
 
     def apply_damage(self, reset=False):
         self.panel.apply_damage(reset)
