@@ -28,7 +28,7 @@ class AbsNetwork(GameObject):
         self.conn_mgr = ConnectionMgr()
         self.conn_reader = ConnectionReader(self.conn_mgr)
         self.conn_writer = ConnectionWriter(self.conn_mgr)
-        self.conn_udp = self.conn_mgr.open_UDP_connection(self.receive_port)
+        self.conn_udp = self.conn_mgr.open_UDP_connection(9099)
         if not self.conn_udp: raise ClientError
         self.conn_reader.add_conn(self.conn_udp)
         self.eng.attach_obs(self.on_frame, 1)
@@ -46,7 +46,7 @@ class AbsNetwork(GameObject):
 
     def _actual_send_udp(self, datagram, receiver=None):
         addr = NetAddress()
-        addr.set_host('127.0.0.1', self.send_port)
+        addr.set_host(receiver, 9099)
         self.conn_writer.send(datagram, self.conn_udp, addr)
 
     def send_udp(self, data_lst, receiver=None):

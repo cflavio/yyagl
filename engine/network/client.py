@@ -7,9 +7,6 @@ class ClientError(Exception):
 
 class Client(AbsNetwork):
 
-    send_port = 9099
-    receive_port = 9098
-
     def __init__(self):
         AbsNetwork.__init__(self)
         self.conn = None
@@ -17,12 +14,16 @@ class Client(AbsNetwork):
 
     def start(self, read_cb, srv_addr):
         AbsNetwork.start(self, read_cb)
+        self.srv_addr = srv_addr
         self.conn = self.conn_mgr.open_TCP_client_connection(
             hostname=srv_addr, port=9099, timeout_ms=3000)
         if not self.conn: raise ClientError
         self.my_addr = self.conn.get_address().get_ip_string() + ':' + str(self.conn.get_address().get_port())
         self.conn_reader.add_conn(self.conn)
         self.eng.log('the client is up')
+
+    def send_udp(self, data_lst, receiver=None):
+        AbsNetwork.send_udp(self, data_lst, receiver if receiver else self.srv_addr)
 
     def _actual_send(self, datagram, receiver=None):
         self.conn_writer.send(datagram, self.conn)

@@ -5,10 +5,10 @@ from yyagl.racing.car.ai import CarAi
 
 
 class NetMsgs(object):
-    game_packet = 0
-    player_info = 1
-    end_race_player = 2
-    end_race = 3
+    game_packet = 200
+    player_info = 201
+    end_race_player = 202
+    end_race = 203
 
 
 class RaceEvent(Event):
@@ -96,7 +96,8 @@ class RaceEventServer(RaceEvent):
             velocity = car.get_linear_velocity()
             self.server_info[car] = (pos, hpr, velocity)
         if globalClock.get_frame_time() - self.last_sent > .2:
-            self.eng.server.send_udp(self.__prepare_game_packet())
+            for conn, addr in self.eng.server.connections:
+                self.eng.server.send_udp(self.__prepare_game_packet(), addr)
             self.last_sent = globalClock.get_frame_time()
 
     def __prepare_game_packet(self):

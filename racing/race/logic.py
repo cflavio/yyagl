@@ -7,8 +7,8 @@ from yyagl.racing.driver.logic import DriverPlayerLoaderStrategy
 
 class NetMsgs(object):
 
-    client_ready = 0
-    start_race = 1
+    client_ready = 100
+    start_race = 101
 
 
 class RaceLogic(Logic):
@@ -136,7 +136,7 @@ class RaceLogicServer(RaceLogic):
             ipaddr = sender.get_address().get_ip_string()
             self.eng.log('client ready: ' + ipaddr)
             self.ready_clients += [sender]
-            connections = self.eng.server.connections
+            connections = [conn[0] for conn in self.eng.server.connections]
             if all(client in self.ready_clients for client in connections):
                 self.start_play()
                 self.eng.server.send([NetMsgs.start_race])
