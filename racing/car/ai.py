@@ -114,7 +114,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
                     self.sector2obsts[direction].remove(smp)
 
     def _update_obst(self, direction, hit_res):
-        nsam = 0 if self.car.phys.speed >= 5 else 10
+        nsam = 0  # 0 if self.car.phys.speed >= 5 else 10
         if len(self.sector2obsts[direction]) > nsam:
             del self.sector2obsts[direction][:-(nsam - 2)]
         if hit_res: self.sector2obsts[direction] += [ObstInfo(*hit_res[0])]
