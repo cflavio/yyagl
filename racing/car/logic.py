@@ -87,7 +87,9 @@ class DriftingForce(object):
         drift_vec_right = rot_mat_drift_right.xformVec(car_vec)
 
         max_intensity = 10000.0
+        max_intensity_torque = 5000.0
         intensity = 0
+        intensity_torque = 0
 
         vel = phys.vehicle.get_chassis().get_linear_velocity()
         vel.normalize()
@@ -105,21 +107,24 @@ class DriftingForce(object):
         vel_fact = self.vel_start - phys.vehicle.get_chassis().get_linear_velocity().length()
         vel_fact /= phys.max_speed
         vel_fact = min(1, max(0, vel_fact))
+
         if input_dct.left:
             if car_dot_vel_l > 0:
                 intensity = max_intensity * car_dot_vel_l * vel_fact
                 direction = drift_vec_left
+                intensity_torque = max_intensity_torque * car_dot_vel_l * vel_fact
             elif car_dot_vel_r > 0:
                 intensity = max_intensity * car_dot_vel_r * vel_fact
                 direction = drift_vec_right
-        elif  input_dct.right:
+        elif input_dct.right:
             if car_dot_vel_r > 0:
                 intensity = max_intensity * car_dot_vel_r * vel_fact
                 direction = drift_vec_right
+                intensity_torque = - max_intensity_torque * car_dot_vel_r * vel_fact
             elif car_dot_vel_l > 0:
                 intensity = max_intensity * car_dot_vel_l * vel_fact
                 direction = drift_vec_left
-        elif  input_dct.forward:
+        elif input_dct.forward:
             if car_dot_vel_l > 0:
                 intensity = max_intensity * car_dot_vel_l * vel_fact
             if car_dot_vel_r > 0:
@@ -129,6 +134,8 @@ class DriftingForce(object):
             if not whl.is_front_wheel():
                 whl.setFrictionSlip(whl.getFrictionSlip() * (1 + car_dot_vel_l * vel_fact * .002))
         if intensity: phys.pnode.apply_central_force(direction * intensity)
+        if intensity_torque:
+            phys.pnode.apply_torque((0, 0, intensity_torque))
 
 
 class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
