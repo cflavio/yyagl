@@ -15,6 +15,10 @@ WriteDatagram = PandaWriteDatagram
 DatagramIterator = PandaDatagramIterator
 
 
+class NetworkError(Exception):
+    pass
+
+
 class AbsNetwork(GameObject):
 
     def __init__(self):
@@ -29,7 +33,7 @@ class AbsNetwork(GameObject):
         self.conn_reader = ConnectionReader(self.conn_mgr)
         self.conn_writer = ConnectionWriter(self.conn_mgr)
         self.conn_udp = self.conn_mgr.open_UDP_connection(9099)
-        if not self.conn_udp: raise ClientError
+        if not self.conn_udp: raise NetworkError
         self.conn_reader.add_conn(self.conn_udp)
         self.eng.attach_obs(self.on_frame, 1)
         self.read_cb = read_cb

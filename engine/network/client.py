@@ -1,8 +1,4 @@
-from .network import AbsNetwork
-
-
-class ClientError(Exception):
-    pass
+from .network import AbsNetwork, NetworkError
 
 
 class Client(AbsNetwork):
@@ -17,7 +13,7 @@ class Client(AbsNetwork):
         self.srv_addr = srv_addr
         self.conn = self.conn_mgr.open_TCP_client_connection(
             hostname=srv_addr, port=9099, timeout_ms=3000)
-        if not self.conn: raise ClientError
+        if not self.conn: raise NetworkError
         self.my_addr = self.conn.get_address().get_ip_string() + ':' + str(self.conn.get_address().get_port())
         self.conn_reader.add_conn(self.conn)
         self.eng.log('the client is up')
