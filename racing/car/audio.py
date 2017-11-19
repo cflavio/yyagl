@@ -95,5 +95,11 @@ class CarPlayerAudio(CarAudio):
 
     def destroy(self):
         self.update_state.destroy()
-        self.engine_sfx.stop()
+        effects = [
+            self.engine_sfx, self.brake_sfx, self.crash_sfx,
+            self.crash_high_speed_sfx, self.lap_sfx, self.landing_sfx,
+            self.pitstop_sfx, self.rocket_fired_sfx, self.rocket_hit_sfx,
+            self.turbo_sfx, self.rotate_all_fired_sfx,
+            self.rotate_all_hit_sfx]
+        map(lambda sfx: sfx.stop(), effects)
         Audio.destroy(self)
