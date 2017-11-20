@@ -48,7 +48,7 @@ class RaceAudioUpdate(AbsAudioUpdate):
             self.brake_sfx.set_volume(1)
         if is_skidmarking and not is_brk_playing and not is_flying and not is_rolling:
             self.brake_sfx.play()
-        elif not is_skidmarking and is_brk_playing:
+        elif is_brk_playing and (not is_skidmarking or (is_flying or is_rolling)):
             self.brake_sfx.stop()
         gear_thresholds = [0, .3, .6, .8, .9]
         thr = max(gtr for gtr in gear_thresholds if speed_ratio >= gtr)
