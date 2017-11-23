@@ -1,5 +1,7 @@
 from itertools import chain
+from panda3d.core import Vec3
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
+from direct.interval.IntervalGlobal import LerpFunc
 from yyagl.gameobject import Event
 from yyagl.racing.car.ai import CarAi
 
@@ -66,6 +68,14 @@ class RaceEvent(Event):
         race_ranking = {car: point for car, point in zipped}
         self.mdt.fsm.demand('Results', race_ranking)
 
+    @staticmethod
+    def _rotate_car(t, node, start_vec, end_vec):
+        interp_vec = Vec3(
+            start_vec[0] * (1 - t) + end_vec[0] * t,
+            start_vec[1] * (1 - t) + end_vec[1] * t,
+            start_vec[2] * (1 - t) + end_vec[2] * t)
+        node.look_at(node.get_pos() + interp_vec)
+
     def destroy(self):
         map(self.ignore, ['escape-up', 'p-up'])
         Event.destroy(self)
@@ -87,14 +97,14 @@ class RaceEventServer(RaceEvent):
                 any([not hasattr(car, 'phys') for car in self.mdt.logic.cars]):
             return  # still loading; attach when the race has started
         pos = self.mdt.logic.player_car.get_pos()
-        hpr = self.mdt.logic.player_car.get_hpr()
+        fwd = render.get_relative_vector(self.mdt.logic.player_car.gfx.nodepath.node, Vec3(0, 1, 0))
         velocity = self.mdt.logic.player_car.get_linear_velocity()
-        self.server_info['server'] = (pos, hpr, velocity)
+        self.server_info['server'] = (pos, fwd, velocity)
         for car in [_car for _car in self.mdt.logic.cars if _car.ai_cls == CarAi]:
             pos = car.get_pos()
-            hpr = car.get_hpr()
+            fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
             velocity = car.get_linear_velocity()
-            self.server_info[car] = (pos, hpr, velocity)
+            self.server_info[car] = (pos, fwd, velocity)
         if globalClock.get_frame_time() - self.last_sent > .2:
             for conn, addr in self.eng.server.connections:
                 self.eng.server.send_udp(self.__prepare_game_packet(), addr)
@@ -105,22 +115,27 @@ class RaceEventServer(RaceEvent):
         for car in [self.mdt.logic.player_car] + self.mdt.logic.cars:
             name = car.name
             pos = car.gfx.nodepath.get_pos()
-            hpr = car.gfx.nodepath.get_hpr()
+            fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
             velocity = car.phys.vehicle.getChassis().get_linear_velocity()
-            packet += chain([name], pos, hpr, velocity)
+            packet += chain([name], pos, fwd, velocity)
         return packet
 
     def __process_player_info(self, data_lst, sender):
         from yyagl.racing.car.car import NetworkCar
         pos = (data_lst[1], data_lst[2], data_lst[3])
-        hpr = (data_lst[4], data_lst[5], data_lst[6])
+        fwd = (data_lst[4], data_lst[5], data_lst[6])
         velocity = (data_lst[7], data_lst[8], data_lst[9])
-        self.server_info[sender] = (pos, hpr, velocity)
+        self.server_info[sender] = (pos, fwd, velocity)
         car_name = self.eng.car_mapping[data_lst[-1]]
         for car in [car for car in self.mdt.logic.cars if car.__class__ == NetworkCar]:
             if car_name in car.name:
                 LerpPosInterval(car.gfx.nodepath.node, .2, pos).start()
-                LerpHprInterval(car.gfx.nodepath.node, .2, hpr).start()
+                fwd_start = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
+                LerpFunc(self._rotate_car,
+                         fromData=0,
+                         toData=1,
+                         duration=.2,
+                         extraArgs=[car.gfx.nodepath.node, fwd_start, fwd]).start()
 
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.player_info:
@@ -148,13 +163,18 @@ class RaceEventClient(RaceEvent):
         for i in range(1, len(data_lst) - 1, 10):
             car_name = data_lst[i]
             car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
-            car_hpr = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
+            car_fwd = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
             cars = self.mdt.logic.cars
             netcars = [car for car in cars if car.__class__ == NetworkCar]
             for car in netcars:
                 if car_name in car.name:
                     LerpPosInterval(car.gfx.nodepath.node, .2, car_pos).start()
-                    LerpHprInterval(car.gfx.nodepath.node, .2, car_hpr).start()
+                    fwd_start = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
+                    LerpFunc(self._rotate_car,
+                         fromData=0,
+                         toData=1,
+                         duration=.2,
+                         extraArgs=[car.gfx.nodepath.node, fwd_start, car_fwd]).start()
 
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.game_packet:

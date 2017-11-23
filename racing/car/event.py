@@ -280,9 +280,9 @@ class CarPlayerEventClient(CarPlayerEvent):
     def on_frame(self):
         CarPlayerEvent.on_frame(self)
         pos = self.mdt.pos
-        hpr = self.mdt.gfx.nodepath.get_hpr()
+        fwd = render.get_relative_vector(self.mdt.gfx.nodepath.node, Vec3(0, 1, 0))
         velocity = self.mdt.phys.vehicle.get_chassis().get_linear_velocity()
-        packet = list(chain([NetMsgs.player_info], pos, hpr, velocity))
+        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity))
         if self.eng.curr_time - self.last_sent > .2:
             self.eng.client.send_udp(packet)
             self.last_sent = self.eng.curr_time
