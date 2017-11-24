@@ -48,12 +48,13 @@ class CursorCfg(object):
 class DevCfg(object):
 
     def __init__(self, mt_render=False, model_path='assets/models',
-            shaders_dev=False, gamma=1.0, menu_joypad=True):
+            shaders_dev=False, gamma=1.0, menu_joypad=True, verbose=''):
         self.multithreaded_render = mt_render  # multithreaded rendering
         self.model_path = model_path
         self.shaders_dev = shaders_dev
         self.gamma = gamma
         self.menu_joypad = menu_joypad
+        self.verbose = verbose
 
 
 class Cfg(object):
@@ -100,4 +101,13 @@ class Cfg(object):
                 ('pstats-tasks', 1),
                 ('gl-finish', 1),
                 ('pstats-host', '127.0.0.1')]
+        for verb in self.dev_cfg.verbose.split(';'):
+            if not verb: continue
+            verb_el = verb.strip().split()
+            if verb_el[0] == 'direct':
+                cfginfo += [
+                    ('default-directnotify-level', verb_el[1])]
+            else:
+                cfginfo += [
+                    ('notify-level-' + verb_el[0], verb_el[1])]
         map(lambda args: self.__set(*args), cfginfo)
