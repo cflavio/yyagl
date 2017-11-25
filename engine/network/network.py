@@ -21,6 +21,8 @@ class NetworkError(Exception):
 
 class AbsNetwork(GameObject):
 
+    rate = .1
+
     def __init__(self):
         GameObject.__init__(self)
         self.conn_mgr = None

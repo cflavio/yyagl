@@ -105,7 +105,7 @@ class RaceEventServer(RaceEvent):
             fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
             velocity = car.get_linear_velocity()
             self.server_info[car] = (pos, fwd, velocity)
-        if globalClock.get_frame_time() - self.last_sent > .2:
+        if globalClock.get_frame_time() - self.last_sent > self.eng.server.rate:
             for conn, addr in self.eng.server.connections:
                 self.eng.server.send_udp(self.__prepare_game_packet(), addr)
             self.last_sent = globalClock.get_frame_time()
@@ -134,7 +134,7 @@ class RaceEventServer(RaceEvent):
                 LerpFunc(self._rotate_car,
                          fromData=0,
                          toData=1,
-                         duration=.2,
+                         duration=self.eng.server.rate,
                          extraArgs=[car.gfx.nodepath.node, fwd_start, fwd]).start()
 
     def process_srv(self, data_lst, sender):
@@ -173,7 +173,7 @@ class RaceEventClient(RaceEvent):
                     LerpFunc(self._rotate_car,
                          fromData=0,
                          toData=1,
-                         duration=.2,
+                         duration=self.eng.client.rate,
                          extraArgs=[car.gfx.nodepath.node, fwd_start, car_fwd]).start()
 
     def process_client(self, data_lst, sender):
