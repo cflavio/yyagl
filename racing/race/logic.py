@@ -32,8 +32,11 @@ class RaceLogic(Logic):
             if driver.dprops.car_name == r_p.season_props.player_car_name:
                 self.load_car = lambda: DriverPlayerLoaderStrategy.load(
                     r_p, car_name, self.track, self.mdt, player_car_names,
-                    self.props.season_props, self.ai_poller)
+                    self.props.season_props, self.ai_poller, self._on_loaded)
         self.mdt.track = self.track  # facade this
+
+    def _on_loaded(self):
+        self.mdt.fsm.demand('Countdown', self.props.season_props)
 
     def on_track_loaded(self):
         self.load_car()
@@ -126,10 +129,15 @@ class RaceLogicSinglePlayer(RaceLogic):
 
 class RaceLogicServer(RaceLogic):
 
-    def enter_play(self):
-        RaceLogic.enter_play(self)
+    def __init__(self, mdt, rprops):
+        RaceLogic.__init__(self, mdt, rprops)
+        self._loaded = False
         self.ready_clients = []
         self.eng.server.register_cb(self.process_srv)
+
+    def _on_loaded(self):
+        self._loaded = True
+        self.process_srv([None], None)
 
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.client_ready:
@@ -137,7 +145,8 @@ class RaceLogicServer(RaceLogic):
             self.eng.log('client ready: ' + ipaddr)
             self.ready_clients += [sender]
             connections = [conn[0] for conn in self.eng.server.connections]
-            if all(client in self.ready_clients for client in connections):
+            if all(client in self.ready_clients for client in connections) and self._loaded:
+                self.mdt.fsm.demand('Countdown', self.props.season_props)
                 self.start_play()
                 self.eng.server.send([NetMsgs.start_race])
 
@@ -148,8 +157,7 @@ class RaceLogicServer(RaceLogic):
 
 class RaceLogicClient(RaceLogic):
 
-    def enter_play(self):
-        RaceLogic.enter_play(self)
+    def _on_loaded(self):
         self.eng.client.register_cb(self.process_client)
 
         def send_ready(task):
@@ -164,6 +172,7 @@ class RaceLogicClient(RaceLogic):
         if data_lst[0] == NetMsgs.start_race:
             self.eng.log('start race')
             self.eng.remove_do_later(self.send_tsk)
+            self.mdt.fsm.demand('Countdown', self.props.season_props)
             self.start_play()
 
     def exit_play(self):
