@@ -8,7 +8,7 @@ from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
     CarPlayerEventClient, CarNetworkEvent, CarAiEvent, CarAiPlayerEvent
 from .logic import CarLogic, CarPlayerLogic
 from .audio import CarAudio, CarPlayerAudio
-from .gui import CarGui, CarPlayerGui
+from .gui import CarGui, CarPlayerGui, CarNetworkGui
 from .ai import CarAi
 
 
@@ -101,6 +101,7 @@ class CarPlayerClient(Car):
 
 class NetworkCar(Car):
     event_cls = CarNetworkEvent
+    gui_cls = CarNetworkGui
 
 
 class AiCar(Car):

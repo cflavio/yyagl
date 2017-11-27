@@ -1,4 +1,4 @@
-from panda3d.core import TextNode, LVector3f
+from panda3d.core import TextNode, LVector3f, Point2, Point3
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
@@ -206,3 +206,37 @@ class CarPlayerGui(CarGui):
     def destroy(self):
         map(lambda wdg: wdg.destroy(), [self.pars, self.panel])
         Gui.destroy(self)
+
+
+class CarNetworkGui(CarGui):
+
+    def __init__(self, mdt, car_props):
+        self.race_props = car_props
+        CarGui.__init__(self, mdt)
+        for drv in self.race_props.drivers:
+            if drv.dprops.car_name == self.mdt.name:
+                name = drv.dprops.info.name
+        sprops = self.race_props.season_props
+        menu_args = sprops.gameprops.menu_args
+        pars = {'scale': .04, 'fg': menu_args.text_bg,
+                'font': self.eng.font_mgr.load_font(sprops.font)}
+        self.name_txt = OnscreenText(name, **pars)
+        self.eng.attach_obs(self.on_frame)
+
+    def __2d_pos(self, node):
+        p3d = base.cam.get_relative_point(node.node, Point3(0, 0, 0))
+        p2d = Point2()
+        return p2d if base.camLens.project(p3d, p2d) else None
+
+    def on_frame(self):
+        pos = self.__2d_pos(self.mdt.gfx.nodepath)
+        if pos:
+            self.name_txt.show()
+            self.name_txt.set_pos((pos[0], 1, pos[1] + .16))
+        else:
+            self.name_txt.hide()
+
+    def destroy(self):
+        self.name_txt.destroy()
+        self.eng.detach_obs(self.on_frame)
+        CarGui.destroy(self)

@@ -44,6 +44,7 @@ class RaceFsm(Fsm):
             [sprops.countdown_seconds])
         self.aux_launch_tsk = None
         cars = [self.mdt.logic.player_car] + self.mdt.logic.cars
+        map(lambda car: car.reset_car(), cars)
         map(lambda car: car.demand('Countdown'), cars)
 
     def aux_start_countdown(self, countdown_seconds):
