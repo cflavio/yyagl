@@ -81,6 +81,7 @@ class CarEvent(Event, ComputerProxy):
         if obj_name.startswith(self.props.pitstop_name):
             self.mdt.phys.apply_damage(True)
             self.mdt.gfx.apply_damage(True)
+            self.mdt.event.on_damage(0)
         if obj_name.startswith(self.props.goal_name):
             self._process_goal()
         obst_names = [self.props.wall_name, 'Vehicle']
@@ -171,6 +172,9 @@ class CarEvent(Event, ComputerProxy):
         r_n = self.props.road_name
         for hit in [hit for hit in hits if r_n in hit.get_node().get_name()]:
             self.mdt.logic.last_wp = self.mdt.logic.closest_wp()
+
+    def on_damage(self, level):
+        pass
 
     def destroy(self):
         map(self.eng.detach_obs, [self.on_collision, self.on_frame])
@@ -270,6 +274,10 @@ class CarPlayerEventServer(CarPlayerEvent):
         self.eng.server.send([NetMsgs.end_race])
         CarPlayerEvent._process_end_goal(self)
 
+    def on_damage(self, level):
+        CarPlayerEvent.on_damage(self, level)
+        self.eng.server.send([NetMsgs.damage, self.mdt.name, level])
+
 
 class CarPlayerEventClient(CarPlayerEvent):
 
@@ -286,6 +294,10 @@ class CarPlayerEventClient(CarPlayerEvent):
         if self.eng.curr_time - self.last_sent > self.eng.client.rate:
             self.eng.client.send_udp(packet)
             self.last_sent = self.eng.curr_time
+
+    def on_damage(self, level):
+        CarPlayerEvent.on_damage(self, level)
+        self.eng.client.send([NetMsgs.damage, self.mdt.name, level])
 
     def _process_end_goal(self):
         self.eng.client.send([NetMsgs.end_race_player])
@@ -304,6 +316,11 @@ class CarAiEvent(CarEvent):
     @once_a_frame
     def _get_input(self):
         return self.mdt.ai.get_input()
+
+    def on_damage(self, level):
+        CarPlayerEvent.on_damage(self, level)
+        if self.eng.server:
+            self.eng.server.send([NetMsgs.damage, self.mdt.name, level])
 
 
 class CarAiPlayerEvent(CarAiEvent, CarPlayerEvent):

@@ -99,6 +99,13 @@ class CarGfx(Gfx, CarGfxFacade):
             self.eng.gfx.root, self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75), (0, 0, 0),
             (1, .4, .1, 1), .8)
         self.apply_damage()
+        level = 0
+        curr_chassis = self.nodepath.get_children()[0]
+        if self.chassis_np_low.get_name() in curr_chassis.get_name():
+            level = 1
+        if self.chassis_np_hi.get_name() in curr_chassis.get_name():
+            level = 2
+        self.mdt.event.on_damage(level)
         return True
 
     def apply_damage(self, reset=False):

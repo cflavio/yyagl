@@ -634,6 +634,20 @@ class CarLogic(Logic, ComputerProxy):
         self.weapon.detach_obs(self.on_weapon_destroyed)
         self.weapon = None
 
+    def set_damage(self, level):
+        curr_chassis = self.mdt.gfx.nodepath.get_children()[0]
+        curr_level = 0
+        if self.mdt.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+            curr_level = 1
+        elif self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+            curr_level = 2
+        if level == 0:
+            self.mdt.gfx.apply_damage(True)
+        elif level == 1 and curr_level == 0:
+            self.mdt.gfx.apply_damage()
+        elif level == 2 and curr_level == 1:
+            self.mdt.gfx.apply_damage()
+
     def destroy(self):
         self.camera = None
         if self.weapon: self.weapon = self.weapon.destroy()
