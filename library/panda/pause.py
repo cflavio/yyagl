@@ -52,7 +52,7 @@ class PandaPause(Pause):
         self.__paused_tasks = []
         is_tsk = lambda tsk: tsk and hasattr(tsk, 'getFunction')
         tasks = [tsk for tsk in taskMgr.getTasks() if is_tsk(tsk)]
-        tasks = [tsk for tsk in tasks if tsk.get_task_chain() != 'unpausable']
+        # tasks = [tsk for tsk in tasks if tsk.get_task_chain() != 'unpausable']  # doesn't work on 1.9.2
         map(self.__process_task, tasks)
         for tsk in [_tsk for _tsk in taskMgr.getDoLaters()if is_tsk(_tsk)]:
             self.__paused_tasks += [tsk]

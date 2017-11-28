@@ -8,8 +8,11 @@ class EngineEvent(Event):
     def __init__(self, mdt, emulate_keyboard):
         Event.__init__(self, mdt)
         self.eng.add_task(self.__on_frame)
-        taskMgr.setupTaskChain('unpausable')
-        taskMgr.add(self.__on_frame_unpausable, 'unpausable', taskChain='unpausable')
+
+        # doesn't work on 1.9.2
+        #taskMgr.setupTaskChain('unpausable')
+        #taskMgr.add(self.__on_frame_unpausable, 'unpausable', taskChain='unpausable')
+
         self.joystick_mgr = JoystickMgr(emulate_keyboard)
 
     def __on_frame(self, task):
