@@ -10,8 +10,9 @@ class NetMsgs(object):
     game_packet = 200
     player_info = 201
     damage = 202
-    end_race_player = 203
-    end_race = 204
+    weapon = 203
+    end_race_player = 204
+    end_race = 205
 
 
 class RaceEvent(Event):
@@ -147,11 +148,22 @@ class RaceEventServer(RaceEvent):
                 car.logic.set_damage(data_lst[2])
         self.eng.server.send(data_lst)
 
+    def __process_weapon(self, data_lst, sender):
+        from yyagl.racing.car.car import NetworkCar
+        cars = self.mdt.logic.cars
+        netcars = [car for car in cars if car.__class__ == NetworkCar]
+        for car in netcars:
+            if data_lst[1] in car.name:
+                car.event.set_weapon(data_lst[2])
+        self.eng.server.send(data_lst)
+
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.player_info:
             self.__process_player_info(data_lst, sender)
         if data_lst[0] == NetMsgs.damage:
             self.__process_damage(data_lst, sender)
+        if data_lst[0] == NetMsgs.weapon:
+            self.__process_weapon(data_lst, sender)
         if data_lst[0] == NetMsgs.end_race_player:
             self.eng.server.send([NetMsgs.end_race])
             dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0,
@@ -188,19 +200,21 @@ class RaceEventClient(RaceEvent):
                          duration=self.eng.client.rate,
                          extraArgs=[car.gfx.nodepath.node, fwd_start, car_fwd]).start()
 
-    def __process_damage(self, data_lst):
+    def __process_weapon(self, data_lst):
         from yyagl.racing.car.car import NetworkCar
         cars = self.mdt.logic.cars
         netcars = [car for car in cars if car.__class__ == NetworkCar]
         for car in netcars:
             if data_lst[1] in car.name:
-                car.logic.set_damage(data_lst[2])
+                car.event.set_weapon(data_lst[2])
 
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.game_packet:
             self.__process_game_packet(data_lst)
         if data_lst[0] == NetMsgs.damage:
             self.__process_damage(data_lst)
+        if data_lst[0] == NetMsgs.weapon:
+            self.__process_weapon(data_lst)
         if data_lst[0] == NetMsgs.end_race:
             if self.mdt.fsm.get_current_or_next_state() != 'Results':
                 # forward the actual ranking
