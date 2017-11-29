@@ -163,6 +163,7 @@ class TrackPhys(Phys):
             self.corners[0].get_y(), self.corners[3].get_y()
 
     def create_bonus(self, pos):
+        self.eng.log('created bonus', True)
         prs = self.rprops
         self.bonuses += [Bonus(pos, prs.bonus_model, prs.bonus_suff, self)]
         self.bonuses[-1].attach_obs(self.on_bonus_collected)
@@ -172,6 +173,7 @@ class TrackPhys(Phys):
         self.bonuses.remove(bonus)
         self.generate_tsk += [
             self.eng.do_later(20, self.create_bonus, [bonus.pos])]
+        self.eng.log('created task for bonus', True)
 
     def destroy(self):
         self.model = self.model.remove_node()
@@ -179,7 +181,9 @@ class TrackPhys(Phys):
         map(self.eng.phys_mgr.remove_rigid_body, self.rigid_bodies)
         map(self.eng.phys_mgr.remove_ghost, self.ghosts)
         map(lambda bon: bon.destroy(), self.bonuses)
+        self.eng.log_tasks()
         map(self.eng.remove_do_later, self.generate_tsk)
+        self.eng.log_tasks()
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
             self.wp2prevs = self.generate_tsk = self.bonuses = None
         if self.rprops.show_waypoints:  # in the drawing class
