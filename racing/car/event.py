@@ -277,17 +277,6 @@ class CarPlayerEventServer(CarPlayerEvent):
         self.eng.server.send([NetMsgs.end_race])
         CarPlayerEvent._process_end_goal(self)
 
-    def on_damage(self, level):
-        CarPlayerEvent.on_damage(self, level)
-        self.eng.server.send([NetMsgs.damage, self.mdt.name, level])
-
-    def on_bonus(self):
-        cls = CarPlayerEvent.on_bonus(self)
-        wpncode = {
-            Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
-            RotateAll: 'rotateall', Mine: 'mine'}[cls]
-        self.eng.server.send([NetMsgs.weapon, self.mdt.name, wpncode])
-
 
 class CarPlayerEventClient(CarPlayerEvent):
 
@@ -300,21 +289,21 @@ class CarPlayerEventClient(CarPlayerEvent):
         pos = self.mdt.pos
         fwd = render.get_relative_vector(self.mdt.gfx.nodepath.node, Vec3(0, 1, 0))
         velocity = self.mdt.phys.vehicle.get_chassis().get_linear_velocity()
-        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity))
+        level = 0
+        curr_chassis = self.mdt.gfx.nodepath.get_children()[0]
+        if self.mdt.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+            level = 1
+        if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+            level = 2
+        wpn = ''
+        if self.mdt.logic.weapon:
+            wpn = {
+                Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
+                RotateAll: 'rotateall', Mine: 'mine'}[self.mdt.logic.weapon.__class__]
+        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, [level], [wpn]))
         if self.eng.curr_time - self.last_sent > self.eng.client.rate:
             self.eng.client.send_udp(packet)
             self.last_sent = self.eng.curr_time
-
-    def on_damage(self, level):
-        CarPlayerEvent.on_damage(self, level)
-        self.eng.client.send([NetMsgs.damage, self.mdt.name, level])
-
-    def on_bonus(self):
-        cls = CarPlayerEvent.on_bonus(self)
-        wpncode = {
-            Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
-            RotateAll: 'rotateall', Mine: 'mine'}[cls]
-        self.eng.client.send([NetMsgs.weapon, self.mdt.name, wpncode])
 
     def _process_end_goal(self):
         self.eng.client.send([NetMsgs.end_race_player])
@@ -330,11 +319,15 @@ class CarNetworkEvent(CarEvent):
     def on_bonus(self):
         pass
 
-    def set_weapon(self, wpn_code):
-        wpncode2cls = {
-            'rocket': Rocket, 'rearrocket': RearRocket, 'turbo': Turbo,
-            'rotateall': RotateAll, 'mine': Mine}
-        CarEvent.on_bonus(self, wpncode2cls[wpn_code])
+    def set_weapon(self, wpn_cls):
+        #if wpn_code:
+        #    wpncode2cls = {
+        #        'rocket': Rocket, 'rearrocket': RearRocket, 'turbo': Turbo,
+        #        'rotateall': RotateAll, 'mine': Mine}
+        #    wpn_cls = wpncode2cls[wpn_code]
+        #else:
+        #    wpn_cls = None
+        CarEvent.on_bonus(self, wpn_cls)
 
 
 class CarAiEvent(CarEvent):
@@ -342,11 +335,6 @@ class CarAiEvent(CarEvent):
     @once_a_frame
     def _get_input(self):
         return self.mdt.ai.get_input()
-
-    def on_damage(self, level):
-        CarPlayerEvent.on_damage(self, level)
-        if self.eng.server:
-            self.eng.server.send([NetMsgs.damage, self.mdt.name, level])
 
 
 class CarAiPlayerEvent(CarAiEvent, CarPlayerEvent):

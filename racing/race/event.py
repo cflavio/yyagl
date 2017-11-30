@@ -4,15 +4,18 @@ from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
 from yyagl.gameobject import Event
 from yyagl.racing.car.ai import CarAi
+from yyagl.racing.weapon.rocket.rocket import Rocket
+from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
+from yyagl.racing.weapon.turbo.turbo import Turbo
+from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
+from yyagl.racing.weapon.mine.mine import Mine
 
 
 class NetMsgs(object):
     game_packet = 200
     player_info = 201
-    damage = 202
-    weapon = 203
-    end_race_player = 204
-    end_race = 205
+    end_race_player = 202
+    end_race = 203
 
 
 class RaceEvent(Event):
@@ -119,7 +122,23 @@ class RaceEventServer(RaceEvent):
             pos = car.gfx.nodepath.get_pos()
             fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
             velocity = car.phys.vehicle.getChassis().get_linear_velocity()
-            packet += chain([name], pos, fwd, velocity)
+            level = 0
+            nodes = car.gfx.nodepath.get_children()
+            if len(nodes):
+                curr_chassis = nodes[0]
+                if car.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+                    level = 1
+                if car.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+                    level = 2
+            else:  # still loading cars
+                level = 0
+            if car.logic.weapon:
+                wpn = {
+                    Rocket: 'rocket', RearRocket: 'rearrocket',
+                    Turbo: 'turbo', RotateAll: 'rotateall', Mine: 'mine'}[car.logic.weapon.__class__]
+            else:
+                wpn = ''
+            packet += chain([name], pos, fwd, velocity, [level], [wpn])
         return packet
 
     def __process_player_info(self, data_lst, sender):
@@ -127,7 +146,9 @@ class RaceEventServer(RaceEvent):
         pos = (data_lst[1], data_lst[2], data_lst[3])
         fwd = (data_lst[4], data_lst[5], data_lst[6])
         velocity = (data_lst[7], data_lst[8], data_lst[9])
-        self.server_info[sender] = (pos, fwd, velocity)
+        level = data_lst[10]
+        weapon = data_lst[11]
+        self.server_info[sender] = (pos, fwd, velocity, level, weapon)
         car_name = self.eng.car_mapping[data_lst[-1]]
         for car in [car for car in self.mdt.logic.cars if car.__class__ == NetworkCar]:
             if car_name in car.name:
@@ -138,32 +159,26 @@ class RaceEventServer(RaceEvent):
                          toData=1,
                          duration=self.eng.server.rate,
                          extraArgs=[car.gfx.nodepath.node, fwd_start, fwd]).start()
-
-    def __process_damage(self, data_lst, sender):
-        from yyagl.racing.car.car import NetworkCar
-        cars = self.mdt.logic.cars
-        netcars = [car for car in cars if car.__class__ == NetworkCar]
-        for car in netcars:
-            if data_lst[1] in car.name:
-                car.logic.set_damage(data_lst[2])
-        self.eng.server.send(data_lst)
-
-    def __process_weapon(self, data_lst, sender):
-        from yyagl.racing.car.car import NetworkCar
-        cars = self.mdt.logic.cars
-        netcars = [car for car in cars if car.__class__ == NetworkCar]
-        for car in netcars:
-            if data_lst[1] in car.name:
-                car.event.set_weapon(data_lst[2])
-        self.eng.server.send(data_lst)
+                curr_level = 0
+                curr_chassis = car.gfx.nodepath.get_children()[0]
+                if car.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+                    curr_level = 1
+                if car.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+                    curr_level = 2
+                if curr_level != level:
+                    car.logic.set_damage(level)
+                if weapon:
+                    wpn = {
+                        'rocket': Rocket, 'rearrocket': RearRocket,
+                        'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine}[weapon]
+                    if car.logic.weapon.__class__ != wpn:
+                        car.event.set_weapon(wpn)
+                else:
+                    wpn = None
 
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.player_info:
             self.__process_player_info(data_lst, sender)
-        if data_lst[0] == NetMsgs.damage:
-            self.__process_damage(data_lst, sender)
-        if data_lst[0] == NetMsgs.weapon:
-            self.__process_weapon(data_lst, sender)
         if data_lst[0] == NetMsgs.end_race_player:
             self.eng.server.send([NetMsgs.end_race])
             dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0,
@@ -184,10 +199,13 @@ class RaceEventClient(RaceEvent):
 
     def __process_game_packet(self, data_lst):
         from yyagl.racing.car.car import NetworkCar
-        for i in range(1, len(data_lst) - 1, 10):
+        for i in range(1, len(data_lst) - 1, 12):
             car_name = data_lst[i]
             car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
             car_fwd = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
+            car_vel = (data_lst[i + 7], data_lst[i + 8], data_lst[i + 9])
+            car_level = data_lst[i + 10]
+            car_weapon = data_lst[i + 11]
             cars = self.mdt.logic.cars
             netcars = [car for car in cars if car.__class__ == NetworkCar]
             for car in netcars:
@@ -199,22 +217,24 @@ class RaceEventClient(RaceEvent):
                          toData=1,
                          duration=self.eng.client.rate,
                          extraArgs=[car.gfx.nodepath.node, fwd_start, car_fwd]).start()
-
-    def __process_weapon(self, data_lst):
-        from yyagl.racing.car.car import NetworkCar
-        cars = self.mdt.logic.cars
-        netcars = [car for car in cars if car.__class__ == NetworkCar]
-        for car in netcars:
-            if data_lst[1] in car.name:
-                car.event.set_weapon(data_lst[2])
+                    curr_level = 0
+                    curr_chassis = car.gfx.nodepath.get_children()[0]
+                    if car.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+                        curr_level = 1
+                    if car.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+                        curr_level = 2
+                    if curr_level != car_level:
+                        car.logic.set_damage(car_level)
+                    if car_weapon:
+                        wpn = {
+                            'rocket': Rocket, 'rearrocket': RearRocket,
+                            'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine}[car_weapon]
+                        if car.logic.weapon.__class__ != wpn:
+                            car.event.set_weapon(wpn)
 
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.game_packet:
             self.__process_game_packet(data_lst)
-        if data_lst[0] == NetMsgs.damage:
-            self.__process_damage(data_lst)
-        if data_lst[0] == NetMsgs.weapon:
-            self.__process_weapon(data_lst)
         if data_lst[0] == NetMsgs.end_race:
             if self.mdt.fsm.get_current_or_next_state() != 'Results':
                 # forward the actual ranking
