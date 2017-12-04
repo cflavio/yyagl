@@ -7,7 +7,7 @@ class GuiCfg(object):
 
     def __init__(self, fps=False, win_size='1280 720', win_orig=None,
             win_title='yyagl', fullscreen=False, sync_video=None,
-            antialiasing=False, volume=1):
+            antialiasing=False, shaders=True, volume=1):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title
@@ -15,6 +15,7 @@ class GuiCfg(object):
         self.fullscreen = fullscreen
         self.sync_video = LibraryBuilder.cls.runtime if sync_video is None else sync_video
         self.antialiasing = antialiasing
+        self.shaders = shaders
         self.volume = volume
 
 

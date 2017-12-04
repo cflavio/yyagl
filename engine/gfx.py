@@ -17,6 +17,10 @@ class EngineGfx(Gfx):
         self.gfx_mgr.init(model_path, antialiasing)
         self.root = None
         self.part2eff = {}
+        if self.mdt.cfg.gui_cfg.shaders:
+            #self.set_toon()
+            self.set_bloom()
+            self.set_blur()
 
     def init(self):
         self.root = self.gfx_mgr.root.attach_node('world')
@@ -26,8 +30,11 @@ class EngineGfx(Gfx):
     def load_model(self, filename, callback=None, extra_args=[], anim=None):
         return self.gfx_mgr.load_model(filename, callback, extra_args, anim)
 
-    @staticmethod
-    def set_toon(): self.gfx_mgr.set_toon()
+    def set_toon(self): self.gfx_mgr.set_toon()
+
+    def set_bloom(self): self.gfx_mgr.set_bloom()
+
+    def set_blur(self): self.gfx_mgr.set_blur()
 
     def print_stats(self): self.gfx_mgr.print_stats()
 

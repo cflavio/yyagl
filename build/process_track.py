@@ -27,6 +27,7 @@ class GuiCfg(object):
 
     def __init__(self):
         self.antialiasing = False
+        self.shaders = False
         self.volume = 1
 
 

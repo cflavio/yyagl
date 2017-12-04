@@ -1,5 +1,6 @@
 from os.path import exists
-from panda3d.core import get_model_path, AntialiasAttrib
+from panda3d.core import get_model_path, AntialiasAttrib, NodePath, PandaNode as P3DNode, LightRampAttrib
+from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from ..gfx import GfxMgr, Node
 
@@ -10,8 +11,7 @@ class PandaGfxMgr(GfxMgr):
         self.root = PandaNode(render)
         self.callbacks = {}
 
-    @staticmethod
-    def init(model_path, antialiasing):
+    def init(self, model_path, antialiasing):
         get_model_path().append_directory(model_path)
         if base.appRunner:
             root_dir = base.appRunner.p3dFilename.get_dirname()
@@ -21,6 +21,7 @@ class PandaGfxMgr(GfxMgr):
         render.set_two_sided(True)
         if antialiasing:
             render.set_antialias(AntialiasAttrib.MAuto)
+        self.filters = CommonFilters(base.win, base.cam)
 
     def _intermediate_cb(self, model, fpath):
         return self.callbacks[fpath](PandaNode(model))
@@ -35,13 +36,18 @@ class PandaGfxMgr(GfxMgr):
         else:
             return PandaNode(loader.loadModel(filename + ext))
 
-    @staticmethod
-    def set_toon():
-        tempnode = NodePath(PandaNode('temp node'))
+    def set_toon(self):
+        tempnode = NodePath(P3DNode('temp node'))
         tempnode.set_attrib(LightRampAttrib.make_single_threshold(.5, .4))
         tempnode.set_shader_auto()
         base.cam.node().set_initial_state(tempnode.get_state())
-        CommonFilters(base.win, base.cam).set_cartoon_ink(separation=1)
+        self.filters.set_cartoon_ink(separation=1)
+
+    def set_bloom(self):
+        self.filters.set_bloom()
+
+    def set_blur(self):
+        self.filters.set_blur_sharpen(.5)
 
     def print_stats(self):
         print '\n\n#####\nrender2d.analyze()'
