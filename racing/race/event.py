@@ -174,6 +174,8 @@ class RaceEventServer(RaceEvent):
                     if car.logic.weapon.__class__ != wpn:
                         car.event.set_weapon(wpn)
                 else:
+                    if car.logic.weapon:
+                        car.event.unset_weapon()
                     wpn = None
 
     def process_srv(self, data_lst, sender):
@@ -231,6 +233,9 @@ class RaceEventClient(RaceEvent):
                             'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine}[car_weapon]
                         if car.logic.weapon.__class__ != wpn:
                             car.event.set_weapon(wpn)
+                    else:
+                        if car.logic.weapon:
+                            car.event.unset_weapon()
 
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.game_packet:

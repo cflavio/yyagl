@@ -330,6 +330,10 @@ class CarNetworkEvent(CarEvent):
         #    wpn_cls = None
         CarEvent.on_bonus(self, wpn_cls)
 
+    def unset_weapon(self):
+        self.mdt.logic.weapon.destroy()
+        self.mdt.logic.weapon = None
+
 
 class CarAiEvent(CarEvent):
 
