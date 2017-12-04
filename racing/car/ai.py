@@ -114,7 +114,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
                     self.sector2obsts[direction].remove(smp)
 
     def _update_obst(self, direction, hit_res):
-        nsam = 0 if self.car.phys.speed >= 5 else 10
+        nsam = 0  # 0 if self.car.phys.speed >= 5 else 10
         if len(self.sector2obsts[direction]) > nsam:
             del self.sector2obsts[direction][:-(nsam - 2)]
         if hit_res: self.sector2obsts[direction] += [ObstInfo(*hit_res[0])]
@@ -222,8 +222,10 @@ class CarAi(Ai, ComputerProxy):
 
     @property
     def curr_logic(self):
-        nonneg_speed = self.mdt.phys.speed >= 0
-        return self.front_logic if nonneg_speed else self.rear_logic
+        obst = list(self.front_logic.get_obstacles())
+        if self.mdt.phys.speed < 20 and obst[0].name and obst[0].dist < 4:
+            return self.rear_logic
+        return self.front_logic
 
     def __eval_gnd(self):
         ratio_road = lambda samples: float(
