@@ -81,8 +81,18 @@ class RaceLogic(Logic):
         self.track.update(self.player_car.get_pos())
         positions = [(car.name, car.get_pos()) for car in self.all_cars]
         self.mdt.gui.update_minimap(positions)
+        if self.props.a_i:
+            self.track.phys.set_curr_wp(self.player_car.ai.curr_logic.curr_tgt_wp)
         if self.mdt.fsm.getCurrentOrNextState() == 'Play':
             self.player_car.upd_ranking(self.ranking())
+            if self.props.a_i:
+                self.player_car.gui.ai_panel.curr_wp = self.player_car.ai.curr_logic.curr_tgt_wp.get_name()[8:]
+                self.player_car.gui.ai_panel.curr_logic = self.player_car.ai.curr_logic.__class__.__name__
+                self.player_car.gui.ai_panel.curr_car_dot_traj = round(self.player_car.ai.curr_logic.car_dot_traj, 3)
+                self.player_car.gui.ai_panel.curr_obsts = self.player_car.ai.front_logic.get_obstacles()
+                self.player_car.gui.ai_panel.curr_obsts_back = self.player_car.ai.rear_logic.get_obstacles()
+                self.player_car.gui.ai_panel.curr_input = self.player_car.ai.get_input()
+                self.player_car.gui.upd_ai()
 
     def ranking(self):
         cars = [self.player_car] + self.cars

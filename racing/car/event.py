@@ -206,7 +206,8 @@ class CarPlayerEvent(CarEvent):
                               self.mdt.phys.lin_vel_ratio,
                               self._get_input(),
                               self.mdt.logic.is_drifting,
-                              self.mdt.phys.is_flying)
+                              self.mdt.phys.is_flying,
+                              self.mdt.logic.is_rolling)
 
     def on_collision(self, obj, tgt_obj):
         CarEvent.on_collision(self, obj, tgt_obj)

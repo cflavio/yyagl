@@ -15,7 +15,8 @@ class LogMgrBase(Colleague):  # headless log manager
         Colleague.__init__(self, mdt)
         self.log_cfg()
 
-    def log(self, msg):
+    def log(self, msg, verbose=False):
+        if verbose and not self.eng.cfg.dev_cfg.verbose_log: return
         time = datetime.now().strftime("%H:%M:%S")
         self.eng.lib.log('{time} {msg}'.format(time=time, msg=msg))
 
@@ -37,6 +38,10 @@ class LogMgrBase(Colleague):  # headless log manager
         messages += ['bullet version: ' + str(self.eng.lib.phys_version())]
         messages += ['appdata: ' + str(self.eng.lib.user_appdata_dir())]
         map(self.log, messages)
+
+    def log_tasks(self):
+        self.log('tasks: %s' % taskMgr.getAllTasks())
+        self.log('do-laters: %s' % taskMgr.getDoLaters())
 
 
 class LogMgr(LogMgrBase):
