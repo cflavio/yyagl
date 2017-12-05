@@ -11,10 +11,10 @@ GfxMgr = PandaGfxMgr
 
 class EngineGfx(Gfx):
 
-    def __init__(self, mdt, model_path, antialiasing):
+    def __init__(self, mdt, model_path, antialiasing, shaders):
         Gfx.__init__(self, mdt)
         self.gfx_mgr = GfxMgr()
-        self.gfx_mgr.init(model_path, antialiasing)
+        self.gfx_mgr.init(model_path, antialiasing, shaders)
         self.root = None
         self.part2eff = {}
         if self.mdt.cfg.gui_cfg.shaders:

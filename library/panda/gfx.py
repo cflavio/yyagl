@@ -11,7 +11,7 @@ class PandaGfxMgr(GfxMgr):
         self.root = PandaNode(render)
         self.callbacks = {}
 
-    def init(self, model_path, antialiasing):
+    def init(self, model_path, antialiasing, shaders):
         get_model_path().append_directory(model_path)
         if base.appRunner:
             root_dir = base.appRunner.p3dFilename.get_dirname()
@@ -21,7 +21,8 @@ class PandaGfxMgr(GfxMgr):
         render.set_two_sided(True)
         if antialiasing:
             render.set_antialias(AntialiasAttrib.MAuto)
-        self.filters = CommonFilters(base.win, base.cam)
+        if shaders:
+            self.filters = CommonFilters(base.win, base.cam)
 
     def _intermediate_cb(self, model, fpath):
         return self.callbacks[fpath](PandaNode(model))
@@ -44,10 +45,10 @@ class PandaGfxMgr(GfxMgr):
         self.filters.set_cartoon_ink(separation=1)
 
     def set_bloom(self):
-        self.filters.set_bloom()
+        self.filters.setBloom()
 
     def set_blur(self):
-        self.filters.set_blur_sharpen(.5)
+        self.filters.setBlurSharpen(.5)
 
     def print_stats(self):
         print '\n\n#####\nrender2d.analyze()'
