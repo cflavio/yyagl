@@ -1,3 +1,4 @@
+from math import cos, pi
 from panda3d.core import Vec3, LVector3f
 from yyagl.gameobject import GameObject
 
@@ -24,9 +25,14 @@ class Camera(GameObject):
         self.curr_h = 0
         self.car = car
 
+    def ease(self, val):
+        if val <= 0: return 0
+        elif val >= 1: return 1
+        else: return 1 - cos(val * pi)
+
     def curr_speed(self, pos, tgt):
         dist = (tgt - pos).length()
-        inertia_fact = max(0, min(1, dist / self.inertia_dist)) if dist else 0
+        inertia_fact = max(0, min(1, self.ease(dist / self.inertia_dist))) if dist else 0
         return self.speed * inertia_fact
 
     @staticmethod
