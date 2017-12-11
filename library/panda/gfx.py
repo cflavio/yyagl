@@ -45,7 +45,14 @@ class PandaGfxMgr(GfxMgr):
         self.filters.set_cartoon_ink(separation=1)
 
     def set_bloom(self):
-        self.filters.setBloom()
+        self.filters.setBloom(
+            blend=(.3, .4, .3, 0),  # default: (.3, .4, .3, 0)
+            mintrigger=.6,  # default: .6
+            maxtrigger=1.0,  # default: 1.0
+            desat=.6,  # default: .6
+            intensity=1.0,  # default: 1.0
+            size='medium'  # default: 'medium' ('small', 'medium', 'large')
+        )
 
     def set_blur(self):
         self.filters.setBlurSharpen(.5)
