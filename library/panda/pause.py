@@ -96,3 +96,5 @@ class PandaPause(Pause):
         map(lambda ival: ival.resume(), self.__paused_ivals)
         map(self.__resume_tsk, self.__paused_tasks)
         return self.is_paused
+
+    def destroy(self): pass

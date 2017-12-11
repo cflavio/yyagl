@@ -12,6 +12,7 @@ from .phys import PhysMgr
 from .gfx import EngineGfx
 from .network.server import Server
 from .network.client import Client
+from .network.xmpp import XMPP
 from .gui.gui import EngineGui
 from .logic import EngineLogic
 from .event import EngineEvent
@@ -28,10 +29,10 @@ class Engine(GameObject, EngineFacade):
 
     network_priority = -39
 
-    def __init__(self, cfg=None):
+    def __init__(self, cfg=None, end_cb=None):
         self.lib = LibraryBuilder.build()
         self.lib.configure()
-        self.lib.init()
+        self.lib.init(end_cb=end_cb)
         Colleague.eng = GameObject.eng = self
         EngineFacade.__init__(self)
         cfg = cfg or Cfg()  # use a default conf if not provided
@@ -40,6 +41,7 @@ class Engine(GameObject, EngineFacade):
         self.font_mgr = FontMgr()
         self.server = Server()
         self.client = Client()
+        self.xmpp = XMPP()
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr.init_cls(), [self])],
@@ -62,6 +64,7 @@ class Engine(GameObject, EngineFacade):
         self.font_mgr.destroy()
         self.server.destroy()
         self.client.destroy()
+        self.xmpp.destroy()
         self.lib = self.shader_mgr = self.profiler = self.font_mgr = \
             self.server = self.client = None
         base.destroy()

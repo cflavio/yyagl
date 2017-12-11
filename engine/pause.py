@@ -43,7 +43,7 @@ class PauseLogic(Logic):
         (self.resume if self._pause.is_paused else self.pause)()
 
     def destroy(self):
-        self.pause.destroy()
+        self._pause.destroy()
         Logic.destroy(self)
 
 

@@ -10,6 +10,8 @@ path.insert(0, '')
 class <AppName>(p3d):
     require('panda3d', 'bullet', 'morepy', 'models', 'openal', 'pygame')
     config(start_dir='<appname>', version='<version>', display_name='<AppName>')
+    dir('<yyaglpath>/thirdparty/dns', 'dns')
+    dir('<yyaglpath>/thirdparty/sleekxmpp', 'sleekxmpp')
     dir('<yyaglpath>/thirdparty/yaml', 'yaml')
     file('<yyaglpath>/thirdparty/feedparser.py', 'feedparser.py')
     for root, _, fnames in walk('assets'):

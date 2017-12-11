@@ -46,8 +46,9 @@ class LibraryPanda3D(Library, DirectObject):
     def remove_task(self, tsk):
         return taskMgr.remove(tsk)
 
-    def init(self, green=(.2, .8, .2, 1), red=(.8, .2, .2, 1)):
+    def init(self, green=(.2, .8, .2, 1), red=(.8, .2, .2, 1), end_cb=None):
         LibShowBase()
+        self.__end_cb = end_cb
         self.__notify = DirectNotify().newCategory('ya2')
         self.__init_win()
         self.__init_fonts(green, red)
@@ -66,6 +67,7 @@ class LibraryPanda3D(Library, DirectObject):
 
     def __on_end(self):
         base.closeWindow(base.win)
+        if self.__end_cb: self.__end_cb()
         sys.exit()
 
     def load_font(self, fpath, outline=True):

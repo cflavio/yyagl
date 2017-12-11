@@ -23,6 +23,8 @@ class PygameJoystickMgrBase(object):  # if there is not pygame
     @staticmethod
     def has_support(): return has_pygame()
 
+    def destroy(self): pass
+
 
 class PygameJoystickMgr(PygameJoystickMgrBase):
 
@@ -45,4 +47,4 @@ class PygameJoystickMgr(PygameJoystickMgrBase):
         joystick.quit()
         pygame.quit()
         self.joysticks = None
-        JoystickMgrBase.destroy(self)
+        PygameJoystickMgrBase.destroy(self)

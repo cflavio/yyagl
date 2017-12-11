@@ -21,13 +21,15 @@ class GameBase(GameObject, GameFacade):  # it doesn't manage the window
 
     def __init__(self, init_lst, cfg):
         GameFacade.__init__(self)
-        self.eng = Engine(cfg)
+        self.eng = Engine(cfg, self.destroy)
         GameObject.__init__(self, init_lst)
 
     def destroy(self):
         GameFacade.destroy(self)
         GameObject.destroy(self)
-        self.eng = self.eng.destroy()
+        #self.eng = self.eng.destroy()
+        # it crashes
+        self.eng.xmpp.destroy()
 
 
 class Game(GameBase):  # it adds the window
