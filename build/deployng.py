@@ -4,14 +4,18 @@ from sys import executable
 from shutil import rmtree
 
 
-requirements = '''
---extra-index-url https://archive.panda3d.org/branches/deploy-ng/
---pre panda3d'''
+prereq = '''
+sleekxmpp==1.3.1
+'''
 
+requirements = '''
+--pre --extra-index-url https://archive.panda3d.org/branches/deploy-ng
+panda3d'''
 
 excl_patterns = ['build/*', 'built/*', 'setup.py', 'requirements.txt', '*.swp',
-              'SConstruct', 'venv/*', '.git*', '*.pyc']
-
+                 'SConstruct', 'venv/*', '.git*', '*.pyc', 'options.yml']
+incl_patterns = ['*.txo', '*.txt', '*.ttf', '*.bam', '*.vert', '*.frag', '*.yml']
+plugins = ['pandagl', 'p3openal_audio']
 
 setuppy = '''
 from setuptools import setup
@@ -30,11 +34,20 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
     opt_dct = {
         'build_apps': {
             'exclude_patterns': excl_patterns,
+            'include_patterns': incl_patterns,
+            'plugins': plugins,
             'gui_apps': {appname + '_app': 'main.py'},
             'platforms': deploy_platforms}}
     with open('bsetup.py', 'w') as f_setup:
         f_setup.write(setuppy % (appname, opt_dct))
     with open('requirements.txt', 'w') as f_req:
+        f_req.write(prereq)
+    system('pip install -r requirements.txt')
+    system('sed -i "/from xml.etree import cElementTree as ET/c\\from xml.etree import ElementTree as ET" venv/lib/python2.7/site-packages/sleekxmpp/xmlstream/stanzabase.py')
+    system('''sed -i "/datetime\.strptime('1970-01-01 12:00:00', \\"%Y-%m-%d %H:%M:%S\\")/c\\#datetime\.strptime('1970-01-01 12:00:00', \\"%Y-%m-%d %H:%M:%S\\")" venv/lib/python2.7/site-packages/sleekxmpp/xmlstream/cert.py''')
+    # NB only in virtualenv and only as a temporary workaround
+    with open('requirements.txt', 'w') as f_req:
         f_req.write(requirements)
-    system(executable + ' bsetup.py bdist_apps')
+    system('python bsetup.py bdist_apps')  # we don't use executable but
+                                           # venv's one
     map(remove, ['bsetup.py', 'requirements.txt'])

@@ -1,5 +1,6 @@
 import sys
 from os.path import exists
+from os import getcwd
 from panda3d.core import loadPrcFileData, Texture, TextPropertiesManager, \
     TextProperties, PandaSystem, Filename
 from panda3d.bullet import get_bullet_version
@@ -26,14 +27,20 @@ class LibraryPanda3D(Library, DirectObject):
 
     @property
     def build_version(self):
-        package = base.appRunner.p3dInfo.FirstChildElement('package')
-        #  first_child_element not in panda3d.core.TiXmlDocument
-        return package.Attribute('version')
-        #  attribute not in panda3d.core.TiXmlDocument
+        if base.appRunner:
+            package = base.appRunner.p3dInfo.FirstChildElement('package')
+            #  first_child_element not in panda3d.core.TiXmlDocument
+            return package.Attribute('version')
+            #  attribute not in panda3d.core.TiXmlDocument
+        else:
+            return 'deploy-ng'
 
     @property
     def curr_path(self):
-        return base.appRunner.p3dFilename.get_dirname()
+        if base.appRunner:
+            return base.appRunner.p3dFilename.get_dirname()
+        else:
+            return getcwd()
 
     def send(self, msg): return messenger.send(msg)
 

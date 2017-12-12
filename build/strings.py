@@ -17,7 +17,7 @@ def __bld_mo(lng, lng_code, env):
 
 
 def bld_pot(target, source, env):
-    src_files = ' '.join(files(['py'], ['feedparser', 'venv']))
+    src_files = ' '.join(files(['py'], ['feedparser', 'venv', 'thirdparty']))
     lng_dir, appname = env['LNG'], env['APPNAME']
     cmd_tmpl = 'xgettext -d {appname} -L python -o assets/po/{appname}.pot '
     system(cmd_tmpl.format(lng_dir=lng_dir, appname=env['APPNAME']) + src_files)
