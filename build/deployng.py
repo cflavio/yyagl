@@ -1,4 +1,4 @@
-from os import system, remove
+from os import system, remove, rename, chdir
 from os.path import exists
 from sys import executable
 from shutil import rmtree
@@ -27,7 +27,7 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
     #     'https://archive.panda3d.org/branches/deploy-ng --upgrade')
     if exists('build/__whl_cache__'):
         rmtree('build/__whl_cache__')
-    tgts = ['win32', 'macosx_10_6_x86_64', 'manylinux1_x86',
+    tgts = ['win32', 'macosx_10_6_x86_64', 'manylinux1_i686',
             'manylinux1_x86_64']
     dtgt = [win, osx, linux_32, linux_64]
     deploy_platforms = [pl_str for (pl_str, is_pl) in zip(tgts, dtgt) if is_pl]
@@ -51,3 +51,23 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
     system('python bsetup.py bdist_apps')  # we don't use executable but
                                            # venv's one
     map(remove, ['bsetup.py', 'requirements.txt'])
+    chdir('build')
+    for platf in deploy_platforms:
+        platf2desc = {
+            'win32': 'windows',
+            'macosx_10_6_x86_64': 'osx',
+            'manylinux1_i686': 'linux_32',
+            'manylinux1_x86_64': 'linux_64'}
+        desc = platf2desc[platf]
+        rename(platf, 'yorg')
+        system('tar cfJ yorg-ng-%s.tar.xz yorg' % desc)
+        rmtree('yorg')
+        platf2suff = {
+            'win32': 'zip',
+            'macosx_10_6_x86_64': 'zip',
+            'manylinux1_i686': 'tar.gz',
+            'manylinux1_x86_64': 'tar.gz'
+        }
+        remove('yorg-0.0.0_%s.%s' % (platf, platf2suff[platf]))
+    rmtree('__whl_cache__')
+    chdir('..')

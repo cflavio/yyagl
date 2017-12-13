@@ -8,7 +8,8 @@ from .deployng import bld_ng
 
 def bld_linux(target, source, env):
     if env['DEPLOYNG']:
-        bld_ng(env['APPNAME'], linux_64=True)
+        bld_ng(env['APPNAME'], linux_32=env['PLATFORM'] == 'i386',
+               linux_64=env['PLATFORM'] == 'amd64')
         return
     ico_fpath = env['ICO_FPATH']
     nointernet = '-s' if env['NOINTERNET'] else ''
