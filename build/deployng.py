@@ -6,6 +6,7 @@ from shutil import rmtree
 
 prereq = '''
 sleekxmpp==1.3.1
+psutil
 '''
 
 requirements = '''
@@ -37,7 +38,8 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
             'include_patterns': incl_patterns,
             'plugins': plugins,
             'gui_apps': {appname + '_app': 'main.py'},
-            'platforms': deploy_platforms}}
+            'platforms': deploy_platforms,
+            'include_modules': {'yorg': ['psutil']}}}
     with open('bsetup.py', 'w') as f_setup:
         f_setup.write(setuppy % (appname, opt_dct))
     with open('requirements.txt', 'w') as f_req:

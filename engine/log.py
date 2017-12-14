@@ -33,6 +33,9 @@ class LogMgrBase(Colleague):  # headless log manager
         except NotImplementedError:  # on Windows
             messages += ['cores: not implemented']
         lib_ver = self.eng.lib.lib_version()
+        if lib_ver.startswith('1.10'):
+            import psutil
+            messages += ['memory: %s GB' % round(psutil.virtual_memory().total / (1000000000.0), 2)]
         lib_commit = self.eng.lib.lib_commit()
         messages += ['panda version: %s %s' % (lib_ver, lib_commit)]
         messages += ['bullet version: ' + str(self.eng.lib.phys_version())]

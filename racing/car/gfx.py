@@ -4,6 +4,11 @@ from yyagl.gameobject import Gfx, GameObject
 from yyagl.facade import Facade
 from .skidmark import Skidmark
 from .decorator import Decorator
+from yyagl.racing.weapon.rocket.rocket import Rocket
+from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
+from yyagl.racing.weapon.turbo.turbo import Turbo
+from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
+from yyagl.racing.weapon.mine.mine import Mine
 
 
 class CarGfxFacade(Facade):
@@ -63,15 +68,18 @@ class CarGfx(Gfx, CarGfxFacade):
             cha.prepare_scene()
             cha.premunge_scene()
         taskMgr.add(self.preload_tsk, 'preload')
-        self.cnt = 2
+        self.cnt = 5
 
     def preload_tsk(self, tsk):
+        wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
         if self.cnt:
             self.apply_damage()
+            self.mdt.event.on_bonus(wpn_classes[self.cnt - 1])
             self.cnt -= 1
             return tsk.again
         else:
             self.apply_damage(True)
+            self.mdt.event.on_bonus('remove')
 
     def load_wheels(self, chassis_model):
         self.chassis_np = chassis_model

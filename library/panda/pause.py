@@ -4,6 +4,7 @@ from sys import modules
 from direct.task import Task
 from direct.interval.IntervalGlobal import ivalMgr
 from yyagl.library.pause import Pause
+from yyagl.library.panda.panda import LibraryPanda3D
 
 
 class PandaPause(Pause):
@@ -52,7 +53,8 @@ class PandaPause(Pause):
         self.__paused_tasks = []
         is_tsk = lambda tsk: tsk and hasattr(tsk, 'getFunction')
         tasks = [tsk for tsk in taskMgr.getTasks() if is_tsk(tsk)]
-        # tasks = [tsk for tsk in tasks if tsk.get_task_chain() != 'unpausable']  # doesn't work on 1.9.2
+        if LibraryPanda3D.lib_version().startswith('1.10'):
+            tasks = [tsk for tsk in tasks if tsk.get_task_chain() != 'unpausable']
         map(self.__process_task, tasks)
         for tsk in [_tsk for _tsk in taskMgr.getDoLaters()if is_tsk(_tsk)]:
             self.__paused_tasks += [tsk]

@@ -16,7 +16,8 @@ class MouseCursor(GameObject):
         self.hotspot_dx = scale[0] * (1 - 2 * hotspot[0])
         self.hotspot_dy = scale[2] * (1 - 2 * hotspot[1])
         self.eng.attach_obs(self.on_frame)
-        #self.eng.attach_obs(self.on_frame_unpausable)  # doesn't work on 1.9.2
+        if self.eng.lib.lib_version().startswith('1.10'):
+            self.eng.attach_obs(self.on_frame_unpausable)
 
     @staticmethod
     def __set_standard_cursor(show):

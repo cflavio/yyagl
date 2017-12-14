@@ -86,7 +86,8 @@ class LibraryPanda3D(Library, DirectObject):
 
     def log(self, msg): self.__notify.info(msg)
 
-    def lib_version(self): return PandaSystem.get_version_string()
+    @staticmethod
+    def lib_version(): return PandaSystem.get_version_string()
 
     def lib_commit(self): return PandaSystem.get_git_commit()
 

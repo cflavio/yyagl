@@ -99,6 +99,9 @@ class CarEvent(Event, ComputerProxy):
     def on_bonus(self, cls=None):
         if self.mdt.logic.weapon:
             self.mdt.logic.weapon.destroy()
+        if cls == 'remove':
+            self.mdt.logic.weapon = None
+            return
         if cls: wpn_cls = cls
         else:
             wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
@@ -224,10 +227,11 @@ class CarPlayerEvent(CarEvent):
             if obj != tgt_obj.get_python_tag('car').phys.pnode:
                 self.mdt.audio.rocket_hit_sfx.play()
 
-    def on_bonus(self):
+    def on_bonus(self, wpn_cls=None):
         if self.mdt.logic.weapon:
             self.mdt.gui.panel.unset_weapon()
-        wpn_cls = CarEvent.on_bonus(self)
+        wpn_cls = CarEvent.on_bonus(self, wpn_cls)
+        if not wpn_cls: return  # if removing
         self.accept(self.props.keys.fire, self.on_fire)
         self.mdt.gui.panel.set_weapon(
             self.props.season_props.wpn2img[wpn_cls.__name__])
