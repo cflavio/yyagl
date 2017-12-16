@@ -39,15 +39,12 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
             'plugins': plugins,
             'gui_apps': {appname + '_app': 'main.py'},
             'platforms': deploy_platforms,
-            'include_modules': {'yorg': ['psutil']}}}
+            'include_modules': {'*': ['psutil', 'xml.etree.ElementTree', '_strptime']}}}
     with open('bsetup.py', 'w') as f_setup:
         f_setup.write(setuppy % (appname, opt_dct))
     with open('requirements.txt', 'w') as f_req:
         f_req.write(prereq)
     system('pip install -r requirements.txt')
-    system('sed -i "/from xml.etree import cElementTree as ET/c\\from xml.etree import ElementTree as ET" venv/lib/python2.7/site-packages/sleekxmpp/xmlstream/stanzabase.py')
-    system('''sed -i "/datetime\.strptime('1970-01-01 12:00:00', \\"%Y-%m-%d %H:%M:%S\\")/c\\#datetime\.strptime('1970-01-01 12:00:00', \\"%Y-%m-%d %H:%M:%S\\")" venv/lib/python2.7/site-packages/sleekxmpp/xmlstream/cert.py''')
-    # NB only in virtualenv and only as a temporary workaround
     with open('requirements.txt', 'w') as f_req:
         f_req.write(requirements)
     system('python bsetup.py bdist_apps')  # we don't use executable but

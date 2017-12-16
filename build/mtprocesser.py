@@ -1,3 +1,4 @@
+from datetime import datetime
 from multiprocessing import cpu_count
 from subprocess import Popen, PIPE
 from threading import Thread, RLock
@@ -17,7 +18,7 @@ class Processer(Thread):
                 if not self.cmd_lst:
                     return
                 cmd = self.cmd_lst.pop(0)
-            print cmd
+            print datetime.now().strftime("%H:%M:%S"), cmd
             system(cmd)
 
 
@@ -28,7 +29,7 @@ class ProcesserNoThreaded:
 
     def run(self):
         for cmd in self.cmd_lst:
-            print cmd
+            print datetime.now().strftime("%H:%M:%S"), cmd
             system(cmd)
 
 
