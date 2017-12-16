@@ -321,7 +321,7 @@ class CarNetworkEvent(CarEvent):
     def _get_input(self):
         return DirKeys(False, False, False, False)
 
-    def on_bonus(self):
+    def on_bonus(self, wpn_cls=None):
         pass
 
     def set_weapon(self, wpn_cls):

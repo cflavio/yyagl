@@ -42,11 +42,12 @@ class AbsNetwork(GameObject):
 
     def send(self, data_lst, receiver=None):
         datagram = WriteDatagram()
-        types = {bool: 'B', int: 'I', float: 'F', str: 'S'}
+        types = {bool: 'B', int: 'I', float: 'F', str: 'S', unicode: 'S'}
         datagram.add_string(''.join(types[type(part)] for part in data_lst))
         type2mth = {
             bool: datagram.add_bool, int: datagram.add_int,
-            float: datagram.add_float, str: datagram.add_string}
+            float: datagram.add_float, str: datagram.add_string,
+            unicode: datagram.add_string}
         map(lambda data: type2mth[type(data)](data), data_lst)
         self._actual_send(datagram, receiver)
 

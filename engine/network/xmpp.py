@@ -1,6 +1,10 @@
 import logging
-from sleekxmpp import ClientXMPP
-from sleekxmpp.exceptions import IqError, IqTimeout
+try:
+    from sleekxmpp import ClientXMPP
+except ImportError:  # sleekxmpp requires openssl 1.0.2
+    print 'OpenSSL 1.0.2 not detected'
+    class ClientXMPP:
+        def __init__(self, jid, password): pass
 
 
 class XMPP(object):
