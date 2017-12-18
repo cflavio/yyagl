@@ -12,28 +12,30 @@ class XMPP(object):
     def __init__(self):
         self.xmpp = None
 
-    def start(self, usr, pwd):
+    def start(self, usr, pwd, on_ok, on_fail):
         logging.basicConfig(level=logging.DEBUG,
                             format='%(levelname)-8s %(message)s')
-        self.xmpp = EchoBot(usr, pwd)
-        self.xmpp.connect()
-        self.xmpp.process()
+        self.xmpp = EchoBot(usr, pwd, on_ok, on_fail)
+        if self.xmpp.connect(): self.xmpp.process()
 
     def destroy(self):
-        if self.xmpp:
-            self.xmpp.disconnect()
+        if self.xmpp: self.xmpp.disconnect()
+        self.xmpp = None
 
 
 class EchoBot(ClientXMPP):
 
-    def __init__(self, jid, password):
+    def __init__(self, jid, password, on_ok, on_ko):
         ClientXMPP.__init__(self, jid, password)
-        self.add_event_handler("session_start", self.session_start)
-        self.add_event_handler("message", self.message)
+        self.on_ok = on_ok
+        self.add_event_handler('session_start', self.session_start)
+        self.add_event_handler('message', self.message)
+        self.add_event_handler('failed_auth', on_ko)
 
     def session_start(self, event):
         self.send_presence()
         self.get_roster()
+        self.on_ok()
 
     def message(self, msg):
         if msg['type'] in ('chat', 'normal'):

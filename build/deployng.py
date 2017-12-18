@@ -7,6 +7,7 @@ from shutil import rmtree
 prereq = '''
 sleekxmpp==1.3.1
 psutil
+keyring
 '''
 
 requirements = '''
@@ -39,7 +40,7 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
             'plugins': plugins,
             'gui_apps': {appname + '_app': 'main.py'},
             'platforms': deploy_platforms,
-            'include_modules': {'*': ['psutil', 'xml.etree.ElementTree', '_strptime']}}}
+            'include_modules': {'*': ['keyring.backends.*']}}}
     with open('bsetup.py', 'w') as f_setup:
         f_setup.write(setuppy % (appname, opt_dct))
     with open('requirements.txt', 'w') as f_req:
