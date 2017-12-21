@@ -71,6 +71,9 @@ class LibraryPanda3D(Library, DirectObject):
             props = TextProperties()
             props.set_text_color(col)
             tp_mgr.set_properties(namecol, props)
+        tp_small = TextProperties()
+        tp_small.set_text_scale(.46)
+        tp_mgr.set_properties('small', tp_small)
 
     def __on_end(self):
         base.closeWindow(base.win)

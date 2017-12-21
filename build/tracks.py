@@ -1,5 +1,4 @@
 from os import system, walk
-from sys import executable
 from .mtprocesser import MultithreadedProcesser
 
 
@@ -22,4 +21,8 @@ def __process_model(root, fname, mp_mgr):
 
 
 def __process_track(dname, cores):
-    system(executable + ' yyagl/build/process_track.py %s %s' % (dname, cores))
+    system('python yyagl/build/process_track.py %s %s' % (dname, cores))
+    # we don't use sys.executable in place of python since we need to
+    # dynamically detect the "current" python i.e. otherwise it would pick
+    # the "wrong" python in buildbot and use an old panda version, and it
+    # fails with models built with the new egg2bam

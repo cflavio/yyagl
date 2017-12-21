@@ -1,5 +1,6 @@
 from sleekxmpp.jid import JID
 import logging
+from yyagl.observer import Subject
 
 
 try:
@@ -16,15 +17,17 @@ except ImportError:  # sleekxmpp requires openssl 1.0.2
         def disconnect(self): pass
 
 
-class XMPP(object):
+class XMPP(Subject):
 
     def __init__(self):
+        Subject.__init__(self)
         self.xmpp = None
+        self.users = []
 
     def start(self, usr, pwd, on_ok, on_fail):
         logging.basicConfig(level=logging.DEBUG,
                             format='%(levelname)-8s %(message)s')
-        self.xmpp = YorgClient(usr, pwd, on_ok, on_fail)
+        self.xmpp = YorgClient(usr, pwd, on_ok, on_fail, self)
         self.xmpp.register_plugin('xep_0030') # Service Discovery
         self.xmpp.register_plugin('xep_0004') # Data Forms
         self.xmpp.register_plugin('xep_0060') # PubSub
@@ -34,16 +37,19 @@ class XMPP(object):
     def send_connected(self):
         self.xmpp.send_connected()
 
-    def destroy(self):
+    def disconnect(self):
         if self.xmpp: self.xmpp.disconnect()
+        self.xmpp.destroy()
         self.xmpp = None
 
 
 class YorgClient(ClientXMPP):
 
-    def __init__(self, jid, password, on_ok, on_ko):
+    def __init__(self, jid, password, on_ok, on_ko, xmpp):
+        self.xmpp = xmpp
         ClientXMPP.__init__(self, jid, password)
         self.on_ok = on_ok
+        self.on_ko = on_ko
         self.add_event_handler('session_start', self.session_start)
         self.add_event_handler('failed_auth', on_ko)
         self.add_event_handler('message', self.on_message)
@@ -54,8 +60,23 @@ class YorgClient(ClientXMPP):
         self.on_ok()
 
     def on_message(self, msg):
+        self.xmpp.users = []
         for line in msg['body'].split():
-            print JID(line).bare
+            if JID(line).bare != self.boundjid.bare:
+                self.xmpp.users += [line]
+
+        # generate some random users for development
+        for n in range(50):
+            from random import choice
+            from string import ascii_lowercase
+            nn = ''
+            for i in range(choice(range(5, 16))):
+                for j in choice(ascii_lowercase):
+                    nn += j
+            self.xmpp.users += [nn]
+
+        self.xmpp.users += [self.boundjid.bare]
+        self.xmpp.notify('on_users')
 
     def send_connected(self):
         self.send_presence(
@@ -66,3 +87,8 @@ class YorgClient(ClientXMPP):
             mto='ya2_yorg@jabb3r.org',
             mtype='chat',
             mbody='connected')
+
+    def destroy(self):
+        self.del_event_handler('session_start', self.session_start)
+        self.del_event_handler('failed_auth', self.on_ko)
+        self.del_event_handler('message', self.on_message)

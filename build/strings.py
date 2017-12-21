@@ -7,7 +7,7 @@ from .build import files
 def bld_mo(target, source, env):
     lng_dir_code, appname = env['LNG'], env['APPNAME']
     lng_code = str(target[0])[len(lng_dir_code):].split('/')[0]
-    map(lambda lng: __bld_mo(lng, lng, env), env['LANGUAGES'])
+    __bld_mo(lng_code, lng_code, env)
 
 
 def __bld_mo(lng, lng_code, env):

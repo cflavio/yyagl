@@ -23,11 +23,12 @@ class MainPageGui(PageGui):
             ('tumblr', 'http://ya2tech.tumblr.com'),
             ('feed', 'http://www.ya2.it/pages/feed-following.html')]
         menu_args = self.props.gameprops.menu_args
+        left = (len(sites) - 1) / 2.0 * .15
         self.widgets += [
             ImgBtn(
-                parent=base.a2dBottomRight,
+                parent=base.a2dBottomCenter,
                 scale=.06,
-                pos=(-1.0 + i*.15, 1, .1),
+                pos=(-left + i*.15, 1, .1),
                 frameColor=(1, 1, 1, 1),
                 frameTexture=menu_args.social_imgs_dpath % site[0],
                 command=self.eng.open_browser,
