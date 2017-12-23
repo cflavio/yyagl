@@ -38,9 +38,13 @@ class XMPP(Subject):
         self.xmpp.send_connected()
 
     def disconnect(self):
-        if self.xmpp: self.xmpp.disconnect()
-        self.xmpp.destroy()
-        self.xmpp = None
+        if self.xmpp:
+            self.xmpp.disconnect()
+            self.xmpp = self.xmpp.destroy()
+
+    def destroy(self):
+        self.disconnect()
+        Subject.destroy(self)
 
 
 class YorgClient(ClientXMPP):
@@ -66,7 +70,7 @@ class YorgClient(ClientXMPP):
                 self.xmpp.users += [line]
 
         # generate some random users for development
-        for n in range(50):
+        for n in range(40):
             from random import choice
             from string import ascii_lowercase
             nn = ''
