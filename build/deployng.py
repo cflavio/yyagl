@@ -48,6 +48,7 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
     system('pip install -r requirements.txt')
     with open('requirements.txt', 'w') as f_req:
         f_req.write(requirements)
+    system('pip install -r requirements.txt')
     system('python bsetup.py bdist_apps')  # we don't use executable but
                                            # venv's one
     map(remove, ['bsetup.py', 'requirements.txt'])
