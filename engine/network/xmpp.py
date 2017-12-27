@@ -1,10 +1,10 @@
-from sleekxmpp.jid import JID
 import logging
 from yyagl.observer import Subject
 
 
 try:
     from sleekxmpp import ClientXMPP
+    from sleekxmpp.jid import JID
 except ImportError:  # sleekxmpp requires openssl 1.0.2
     print 'OpenSSL 1.0.2 not detected'
     class ClientXMPP:
