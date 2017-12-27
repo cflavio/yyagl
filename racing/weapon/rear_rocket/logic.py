@@ -1,4 +1,4 @@
-from yyagl.racing.weapon.weapon.logic import WeaponLogic
+from yyagl.racing.weapon.weapon.logic import WeaponLogic, WeaponLogicNetwork
 
 
 class RearRocketLogic(WeaponLogic):
@@ -15,3 +15,6 @@ class RearRocketLogic(WeaponLogic):
     def destroy(self):
         if self.tsk: self.eng.remove_do_later(self.tsk)
         WeaponLogic.destroy(self)
+
+
+class RearRocketLogicNetwork(WeaponLogicNetwork, RearRocketLogic): pass

@@ -9,6 +9,9 @@ class WeaponLogic(Logic):
         self.cars = cars
         self.has_fired = False
 
+    def update_props(self, pos, fwd):
+        pass
+
     def fire(self, sfx):
         if sfx: self.mdt.audio.sfx.play()
         self.has_fired = True
@@ -17,3 +20,10 @@ class WeaponLogic(Logic):
         self.car = self.cars = None
         self.notify('on_weapon_destroyed', self.mdt)
         Logic.destroy(self)
+
+
+class WeaponLogicNetwork(WeaponLogic):
+
+    def update_props(self, pos, fwd):
+        if pos == (0, 0, 0) and fwd == (0, 0, 0): return
+        self.mdt.gfx.update_props(pos, fwd)

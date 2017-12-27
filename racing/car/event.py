@@ -5,8 +5,8 @@ from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import Event
 from yyagl.racing.race.event import NetMsgs
-from yyagl.racing.weapon.rocket.rocket import Rocket
-from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
+from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
+from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNetwork
 from yyagl.racing.weapon.turbo.turbo import Turbo
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
 from yyagl.racing.weapon.mine.mine import Mine
@@ -113,7 +113,9 @@ class CarEvent(Event, ComputerProxy):
         part_path = self.props.particle_path
         wpn2path = {
             Rocket: self.props.rocket_path,
+            RocketNetwork: self.props.rocket_path,
             RearRocket: self.props.rocket_path,
+            RearRocketNetwork: self.props.rocket_path,
             Turbo: self.props.turbo_path,
             RotateAll: self.props.rotate_all_path,
             Mine: self.props.mine_path}
@@ -301,11 +303,17 @@ class CarPlayerEventClient(CarPlayerEvent):
         if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
             level = 2
         wpn = ''
-        if self.mdt.logic.weapon:
+        wpn_pos = (0, 0, 0)
+        wpn_fwd = (0, 0, 0)
+        if self.mdt.logic.weapon or self.mdt.logic.fired_weapons:
+            curr_wpn = self.mdt.logic.weapon
+            if not curr_wpn: curr_wpn = self.mdt.logic.fired_weapons[0]
             wpn = {
                 Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
-                RotateAll: 'rotateall', Mine: 'mine'}[self.mdt.logic.weapon.__class__]
-        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, [level], [wpn]))
+                RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
+            wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
+            wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
+        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, [level], [wpn], wpn_pos, wpn_fwd))
         if self.eng.curr_time - self.last_sent > self.eng.client.rate:
             self.eng.client.send_udp(packet)
             self.last_sent = self.eng.curr_time

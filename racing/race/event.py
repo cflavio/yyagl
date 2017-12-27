@@ -4,8 +4,8 @@ from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
 from yyagl.gameobject import Event
 from yyagl.racing.car.ai import CarAi
-from yyagl.racing.weapon.rocket.rocket import Rocket
-from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
+from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
+from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNetwork
 from yyagl.racing.weapon.turbo.turbo import Turbo
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
 from yyagl.racing.weapon.mine.mine import Mine
@@ -132,13 +132,20 @@ class RaceEventServer(RaceEvent):
                     level = 2
             else:  # still loading cars
                 level = 0
-            if car.logic.weapon:
+            wpn_pos = (0, 0, 0)
+            wpn_fwd = (0, 0, 0)
+            if car.logic.weapon or car.logic.fired_weapons:
+                curr_wpn = car.logic.weapon
+                if not curr_wpn: curr_wpn = car.logic.fired_weapons[0]
                 wpn = {
-                    Rocket: 'rocket', RearRocket: 'rearrocket',
-                    Turbo: 'turbo', RotateAll: 'rotateall', Mine: 'mine'}[car.logic.weapon.__class__]
+                    Rocket: 'rocket', RocketNetwork: 'rocket', RearRocket: 'rearrocket', RearRocketNetwork: 'rearrocket',
+                    Turbo: 'turbo', RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
+                if curr_wpn.logic.has_fired:
+                    wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
+                    wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
             else:
                 wpn = ''
-            packet += chain([name], pos, fwd, velocity, [level], [wpn])
+            packet += chain([name], pos, fwd, velocity, [level], [wpn], wpn_pos, wpn_fwd)
         return packet
 
     def __process_player_info(self, data_lst, sender):
@@ -148,6 +155,8 @@ class RaceEventServer(RaceEvent):
         velocity = (data_lst[7], data_lst[8], data_lst[9])
         level = data_lst[10]
         weapon = data_lst[11]
+        wpn_pos = (data_lst[12], data_lst[13], data_lst[14])
+        wpn_fwd = (data_lst[15], data_lst[16], data_lst[17])
         self.server_info[sender] = (pos, fwd, velocity, level, weapon)
         car_name = self.eng.car_mapping[data_lst[-1]]
         for car in [car for car in self.mdt.logic.cars if car.__class__ == NetworkCar]:
@@ -169,10 +178,11 @@ class RaceEventServer(RaceEvent):
                     car.logic.set_damage(level)
                 if weapon:
                     wpn = {
-                        'rocket': Rocket, 'rearrocket': RearRocket,
+                        'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
                         'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine}[weapon]
                     if car.logic.weapon.__class__ != wpn:
                         car.event.set_weapon(wpn)
+                    car.logic.weapon.update_props(wpn_pos, wpn_fwd)
                 else:
                     if car.logic.weapon:
                         if car.logic.weapon.__class__ == RotateAll:
@@ -204,18 +214,20 @@ class RaceEventClient(RaceEvent):
 
     def __process_game_packet(self, data_lst):
         from yyagl.racing.car.car import NetworkCar
-        for i in range(1, len(data_lst) - 1, 12):
+        for i in range(1, len(data_lst) - 1, 18):
             car_name = data_lst[i]
             car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
             car_fwd = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
             car_vel = (data_lst[i + 7], data_lst[i + 8], data_lst[i + 9])
             car_level = data_lst[i + 10]
             car_weapon = data_lst[i + 11]
+            car_wpn_pos = (data_lst[i + 12], data_lst[i + 13], data_lst[i + 14])
+            car_wpn_fwd = (data_lst[i + 15], data_lst[i + 16], data_lst[i + 17])
             cars = self.mdt.logic.cars
             netcars = [car for car in cars if car.__class__ == NetworkCar]
             for car in netcars:
                 if car_name in car.name:
-                    LerpPosInterval(car.gfx.nodepath.node, .2, car_pos).start()
+                    LerpPosInterval(car.gfx.nodepath.node, self.eng.client.rate, car_pos).start()
                     fwd_start = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
                     LerpFunc(self._rotate_car,
                          fromData=0,
@@ -232,10 +244,11 @@ class RaceEventClient(RaceEvent):
                         car.logic.set_damage(car_level)
                     if car_weapon:
                         wpn = {
-                            'rocket': Rocket, 'rearrocket': RearRocket,
+                            'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
                             'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine}[car_weapon]
                         if car.logic.weapon.__class__ != wpn:
                             car.event.set_weapon(wpn)
+                        car.logic.weapon.update_props(car_wpn_pos, car_wpn_fwd)
                     else:
                         if car.logic.weapon:
                             if car.logic.weapon.__class__ == RotateAll:
