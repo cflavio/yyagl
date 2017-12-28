@@ -1,3 +1,4 @@
+from threading import Lock
 import logging
 from yyagl.observer import Subject
 
@@ -15,6 +16,26 @@ except ImportError:  # sleekxmpp requires openssl 1.0.2
         def send_presence(self, pfrom, pto): pass
         def send_message(self, mfrom, mto, mtype, mbody): pass
         def disconnect(self): pass
+
+
+class CallbackMux():
+    # this is a sort of "multiplexer" i.e. it manages callbacks from threads
+    # and redirect them to the main thread (this prevents deadlocks)
+
+    def __init__(self):
+        self.lock = Lock()
+        self.callbacks = []
+        taskMgr.add(self.process_callbacks, 'processing callbacks')
+
+    def add_cb(self, func, args):
+        with self.lock: self.callbacks += [(func, args)]
+
+    def process_callbacks(self, task):
+        with self.lock:
+            callbacks = self.callbacks[:]
+            self.callbacks = []
+        for func, args in callbacks: func(*args)
+        return task.cont
 
 
 class XMPP(Subject):
@@ -54,9 +75,15 @@ class YorgClient(ClientXMPP):
         ClientXMPP.__init__(self, jid, password)
         self.on_ok = on_ok
         self.on_ko = on_ko
-        self.add_event_handler('session_start', self.session_start)
-        self.add_event_handler('failed_auth', on_ko)
-        self.add_event_handler('message', self.on_message)
+        self.cb_mux = CallbackMux()
+        self.add_event_handler('session_start', lambda msg: self.dispatch_msg('session_start', msg))
+        self.add_event_handler('failed_auth', lambda msg: self.dispatch_msg('failed_auth', msg))
+        self.add_event_handler('message', lambda msg: self.dispatch_msg('message', msg))
+
+    def dispatch_msg(self, code, msg):
+        if code == 'session_start': self.session_start(msg)
+        if code == 'failed_auth': self.on_ko(msg)
+        if code == 'message': self.on_message(msg)
 
     def session_start(self, event):
         self.send_presence()
