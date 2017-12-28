@@ -1,4 +1,4 @@
-from yyagl.racing.weapon.weapon.logic import WeaponLogic
+from yyagl.racing.weapon.weapon.logic import WeaponLogic, WeaponLogicNetwork
 
 
 class MineLogic(WeaponLogic):
@@ -15,3 +15,6 @@ class MineLogic(WeaponLogic):
     def destroy(self):
         if self.tsk: self.eng.remove_do_later(self.tsk)
         WeaponLogic.destroy(self)
+
+
+class MineLogicNetwork(WeaponLogicNetwork, MineLogic): pass

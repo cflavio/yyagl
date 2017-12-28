@@ -9,7 +9,7 @@ from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNetwork
 from yyagl.racing.weapon.turbo.turbo import Turbo
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
-from yyagl.racing.weapon.mine.mine import Mine
+from yyagl.racing.weapon.mine.mine import Mine, MineNetwork
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
 from yyagl.engine.vec import Vec
 
@@ -118,7 +118,8 @@ class CarEvent(Event, ComputerProxy):
             RearRocketNetwork: self.props.rocket_path,
             Turbo: self.props.turbo_path,
             RotateAll: self.props.rotate_all_path,
-            Mine: self.props.mine_path}
+            Mine: self.props.mine_path,
+            MineNetwork: self.props.mine_path}
         path = wpn2path[wpn_cls]
         self.mdt.logic.weapon = wpn_cls(
             self.mdt, path, self.props.season_props.car_names, part_path)

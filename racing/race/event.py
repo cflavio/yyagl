@@ -8,7 +8,7 @@ from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNetwork
 from yyagl.racing.weapon.turbo.turbo import Turbo
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
-from yyagl.racing.weapon.mine.mine import Mine
+from yyagl.racing.weapon.mine.mine import Mine, MineNetwork
 
 
 class NetMsgs(object):
@@ -139,7 +139,7 @@ class RaceEventServer(RaceEvent):
                 if not curr_wpn: curr_wpn = car.logic.fired_weapons[0]
                 wpn = {
                     Rocket: 'rocket', RocketNetwork: 'rocket', RearRocket: 'rearrocket', RearRocketNetwork: 'rearrocket',
-                    Turbo: 'turbo', RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
+                    Turbo: 'turbo', RotateAll: 'rotateall', Mine: 'mine', MineNetwork: 'mine'}[curr_wpn.__class__]
                 if curr_wpn.logic.has_fired:
                     wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
                     wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
@@ -179,7 +179,7 @@ class RaceEventServer(RaceEvent):
                 if weapon:
                     wpn = {
                         'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
-                        'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine}[weapon]
+                        'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine, 'mine': MineNetwork}[weapon]
                     if car.logic.weapon.__class__ != wpn:
                         car.event.set_weapon(wpn)
                     car.logic.weapon.update_props(wpn_pos, wpn_fwd)
@@ -245,7 +245,7 @@ class RaceEventClient(RaceEvent):
                     if car_weapon:
                         wpn = {
                             'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
-                            'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine}[car_weapon]
+                            'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine, 'mine': MineNetwork}[car_weapon]
                         if car.logic.weapon.__class__ != wpn:
                             car.event.set_weapon(wpn)
                         car.logic.weapon.update_props(car_wpn_pos, car_wpn_fwd)
