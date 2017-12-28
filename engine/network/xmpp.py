@@ -81,9 +81,9 @@ class YorgClient(ClientXMPP):
         self.add_event_handler('message', lambda msg: self.dispatch_msg('message', msg))
 
     def dispatch_msg(self, code, msg):
-        if code == 'session_start': self.session_start(msg)
-        if code == 'failed_auth': self.on_ko(msg)
-        if code == 'message': self.on_message(msg)
+        if code == 'session_start': self.cb_mux.add_cb(self.session_start, [msg])
+        if code == 'failed_auth': self.cb_mux.add_cb(self.on_ko, [msg])
+        if code == 'message': self.cb_mux.add_cb(self.on_message, [msg])
 
     def session_start(self, event):
         self.send_presence()
