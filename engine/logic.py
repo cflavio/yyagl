@@ -15,7 +15,10 @@ class VersionChecker(GameObject, ComputerProxy):
 
     @compute_once
     def is_uptodate(self):
-        ver = urlopen('http://ya2.it/yorg_version.txt').read()
+        try:
+            ver = urlopen('http://ya2.it/yorg_version.txt').read()
+        except IOError:
+            return False
         major, minor, build = ver.split('.')
         major, minor, build = int(major), int(minor), int(build)
         curr_ver = self.eng.version
