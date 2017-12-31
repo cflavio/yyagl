@@ -67,6 +67,7 @@ class CarGfx(Gfx, CarGfxFacade):
         for cha in chas:
             cha.prepare_scene()
             cha.premunge_scene()
+        self.on_skidmarking()
         taskMgr.add(self.preload_tsk, 'preload')
         self.cnt = 5
 
