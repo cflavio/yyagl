@@ -3,6 +3,7 @@ from .mtprocesser import MultithreadedProcesser
 
 
 def bld_models(target, source, env):
+    system('pip install psutil')
     mp_mgr = MultithreadedProcesser(env['CORES'])
     for root, dnames, fnames in walk(env['MODELS_DIR_PATH']):
         if not root.startswith(env['TRACKS_DIR_PATH']):
