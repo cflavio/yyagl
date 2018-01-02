@@ -633,6 +633,10 @@ class CarLogic(Logic, ComputerProxy):
         self.weapon.fire(False)
         self.fired_weapons += [self.weapon]
         self.weapon = None
+        self.fired_weapons = [wpn for wpn in self.fired_weapons if wpn]
+
+    def unset_fired_weapon(self, wpn):
+        self.fired_weapons.remove(wpn)
 
     def on_weapon_destroyed(self, wpn):
         if wpn in self.fired_weapons: self.fired_weapons.remove(wpn)
@@ -712,6 +716,7 @@ class CarPlayerLogic(CarLogic):
         self.weapon.fire(True)
         self.fired_weapons += [self.weapon]
         self.weapon = None
+        self.fired_weapons = [wpn for wpn in self.fired_weapons if wpn]
 
     def __check_wrong_way(self):
         if self.cprops.track_waypoints:

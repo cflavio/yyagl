@@ -11,6 +11,7 @@ class WeaponFacade(Facade):
         self._fwd_mth('detach_obs', lambda obj: obj.logic.detach)
         self._fwd_mth('fire', lambda obj: obj.logic.fire)
         self._fwd_mth('update_props', lambda obj: obj.logic.update_props)
+        self._fwd_mth('update_fired_props', lambda obj: obj.logic.update_fired_props)
         self._fwd_mth('ai_fire', lambda obj: obj.ai.update)
         self._fwd_mth('reparent', lambda obj: obj.gfx.reparent)
 

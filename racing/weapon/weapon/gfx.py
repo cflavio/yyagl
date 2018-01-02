@@ -1,4 +1,4 @@
-from panda3d.core import Vec3
+from panda3d.core import Vec3, NodePath
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
 from direct.actor.Actor import Actor
@@ -14,6 +14,9 @@ class WeaponGfx(Gfx):
         Gfx.__init__(self, mdt)
 
     def update_props(self, pos, fwd):
+        pass
+
+    def update_fired_props(self, pos, fwd):
         pass
 
     def sync_bld(self):
@@ -44,7 +47,25 @@ class WeaponGfxNetwork(WeaponGfx):
     def update_props(self, pos, fwd):
         if pos == (0, 0, 0) and fwd == (0, 0, 0): return
         wpn_np = self.gfx_np.node
+        old_pos = wpn_np.get_pos(render)
         self.gfx_np.node.reparent_to(render)
+        wpn_np.set_pos(old_pos)
+        self.ipos = LerpPosInterval(wpn_np, self.eng.client.rate, pos)
+        self.ipos.start()
+        fwd_start = render.get_relative_vector(wpn_np, Vec3(0, 1, 0))
+        self.ifwd = LerpFunc(self._rotate_wpn,
+                             fromData=0,
+                             toData=1,
+                             duration=self.eng.client.rate,
+                             extraArgs=[wpn_np, fwd_start, fwd])
+        self.ifwd.start()
+
+    def update_fired_props(self, pos, fwd):
+        if pos == (0, 0, 0) and fwd == (0, 0, 0): return
+        wpn_np = self.gfx_np.node
+        old_pos = wpn_np.get_pos(render)
+        self.gfx_np.node.reparent_to(render)
+        wpn_np.set_pos(old_pos)
         self.ipos = LerpPosInterval(wpn_np, self.eng.client.rate, pos)
         self.ipos.start()
         fwd_start = render.get_relative_vector(wpn_np, Vec3(0, 1, 0))

@@ -1,5 +1,5 @@
 from itertools import chain
-from panda3d.core import Vec3
+from panda3d.core import Vec3, LPoint3f, NodePath
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
 from yyagl.gameobject import Event
@@ -132,20 +132,27 @@ class RaceEventServer(RaceEvent):
                     level = 2
             else:  # still loading cars
                 level = 0
+            wpn = ''
             wpn_pos = (0, 0, 0)
             wpn_fwd = (0, 0, 0)
-            if car.logic.weapon or car.logic.fired_weapons:
+            if car.logic.weapon:
                 curr_wpn = car.logic.weapon
-                if not curr_wpn: curr_wpn = car.logic.fired_weapons[0]
                 wpn = {
                     Rocket: 'rocket', RocketNetwork: 'rocket', RearRocket: 'rearrocket', RearRocketNetwork: 'rearrocket',
                     Turbo: 'turbo', RotateAll: 'rotateall', Mine: 'mine', MineNetwork: 'mine'}[curr_wpn.__class__]
                 if curr_wpn.logic.has_fired:
                     wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
                     wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
-            else:
-                wpn = ''
             packet += chain([name], pos, fwd, velocity, [level], [wpn], wpn_pos, wpn_fwd)
+            packet += [len(car.logic.fired_weapons)]
+            for i in range(len(car.logic.fired_weapons)):
+                curr_wpn = car.logic.fired_weapons[i]
+                wpn = {
+                    Rocket: 'rocket', RocketNetwork: 'rocket', RearRocket: 'rearrocket', RearRocketNetwork: 'rearrocket', Turbo: 'turbo',
+                    RotateAll: 'rotateall', Mine: 'mine', MineNetwork: 'mine'}[curr_wpn.__class__]
+                wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
+                wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
+                packet += chain([wpn], wpn_pos, wpn_fwd)
         return packet
 
     def __process_player_info(self, data_lst, sender):
@@ -157,11 +164,19 @@ class RaceEventServer(RaceEvent):
         weapon = data_lst[11]
         wpn_pos = (data_lst[12], data_lst[13], data_lst[14])
         wpn_fwd = (data_lst[15], data_lst[16], data_lst[17])
+        fired_weapons = []
+        for i in range(data_lst[18]):
+            start = 19 + i * 7
+            fired_weapons += [[
+                data_lst[start],
+                (data_lst[start + 1], data_lst[start + 2], data_lst[start + 3]),
+                (data_lst[start + 4], data_lst[start + 5], data_lst[start + 6])
+            ]]
         self.server_info[sender] = (pos, fwd, velocity, level, weapon)
         car_name = self.eng.car_mapping[data_lst[-1]]
         for car in [car for car in self.mdt.logic.cars if car.__class__ == NetworkCar]:
             if car_name in car.name:
-                LerpPosInterval(car.gfx.nodepath.node, .2, pos).start()
+                LerpPosInterval(car.gfx.nodepath.node, self.eng.server.rate, pos).start()
                 fwd_start = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
                 LerpFunc(self._rotate_car,
                          fromData=0,
@@ -176,10 +191,21 @@ class RaceEventServer(RaceEvent):
                     curr_level = 2
                 if curr_level != level:
                     car.logic.set_damage(level)
+                for wpn_chunk in fired_weapons:
+                    wpn_code, wpn_pos, wpn_fwd = wpn_chunk
+                    wpn = {
+                        'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
+                        'turbo': Turbo, 'rotateall': RotateAll, 'mine': MineNetwork}[wpn_code]
+                    curr_wpn = self.__lookup_wpn(car, wpn, wpn_pos, wpn_fwd)
+                    if not curr_wpn:
+                        car.event.set_fired_weapon(wpn, wpn_pos, wpn_fwd)
+                    else:
+                        curr_wpn.update_fired_props(wpn_pos, wpn_fwd)
+                self.__clean_fired_weapons(car, fired_weapons)
                 if weapon:
                     wpn = {
                         'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
-                        'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine, 'mine': MineNetwork}[weapon]
+                        'turbo': Turbo, 'rotateall': RotateAll, 'mine': MineNetwork}[weapon]
                     if car.logic.weapon.__class__ != wpn:
                         car.event.set_weapon(wpn)
                     car.logic.weapon.update_props(wpn_pos, wpn_fwd)
@@ -190,6 +216,26 @@ class RaceEventServer(RaceEvent):
                             car.logic.weapon = None
                         else: car.event.unset_weapon()
                     wpn = None
+
+    def __lookup_wpn(self, car, wpn, wpn_pos, wpn_fwd):
+        cls_wpns = [_wpn for _wpn in car.logic.fired_weapons if _wpn.__class__ == wpn]
+        tmp_np = NodePath('')
+        tmp_np.set_pos(wpn_pos)
+        distances = [(_wpn, _wpn.gfx.gfx_np.node.get_distance(tmp_np)) for _wpn in cls_wpns]
+        sorted_distances = sorted(distances, key=lambda val: val[1])
+        if sorted_distances and sorted_distances[0][1] < 10: return sorted_distances[0][0]
+
+    def __clean_fired_weapons(self, car, fired_weapons):
+        found_wpn = []
+        for wpn_chunk in fired_weapons:
+            wpn_code, wpn_pos, wpn_fwd = wpn_chunk
+            wpn = {
+                'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
+                'turbo': Turbo, 'rotateall': RotateAll, 'mine': MineNetwork}[wpn_code]
+            found_wpn += [self.__lookup_wpn(car, wpn, wpn_pos, wpn_fwd)]
+        notfound_wpn = [wpn for wpn in car.logic.fired_weapons if wpn not in found_wpn]
+        for wpn in notfound_wpn:
+            car.event.unset_fired_weapon(wpn)
 
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.player_info:
@@ -214,15 +260,25 @@ class RaceEventClient(RaceEvent):
 
     def __process_game_packet(self, data_lst):
         from yyagl.racing.car.car import NetworkCar
-        for i in range(1, len(data_lst) - 1, 18):
-            car_name = data_lst[i]
-            car_pos = (data_lst[i + 1], data_lst[i + 2], data_lst[i + 3])
-            car_fwd = (data_lst[i + 4], data_lst[i + 5], data_lst[i + 6])
-            car_vel = (data_lst[i + 7], data_lst[i + 8], data_lst[i + 9])
-            car_level = data_lst[i + 10]
-            car_weapon = data_lst[i + 11]
-            car_wpn_pos = (data_lst[i + 12], data_lst[i + 13], data_lst[i + 14])
-            car_wpn_fwd = (data_lst[i + 15], data_lst[i + 16], data_lst[i + 17])
+        data_lst = data_lst[1:]
+        while len(data_lst) > 1:
+            car_name = data_lst[0]
+            car_pos = (data_lst[1], data_lst[2], data_lst[3])
+            car_fwd = (data_lst[4], data_lst[5], data_lst[6])
+            car_vel = (data_lst[7], data_lst[8], data_lst[9])
+            car_level = data_lst[10]
+            car_weapon = data_lst[11]
+            car_wpn_pos = (data_lst[12], data_lst[13], data_lst[14])
+            car_wpn_fwd = (data_lst[15], data_lst[16], data_lst[17])
+            fired_weapons = []
+            for i in range(data_lst[18]):
+                start = 19 + i * 7
+                fired_weapons += [[
+                    data_lst[start],
+                    (data_lst[start + 1], data_lst[start + 2], data_lst[start + 3]),
+                    (data_lst[start + 4], data_lst[start + 5], data_lst[start + 6])
+                ]]
+            data_lst = data_lst[19 + data_lst[18] * 7:]
             cars = self.mdt.logic.cars
             netcars = [car for car in cars if car.__class__ == NetworkCar]
             for car in netcars:
@@ -242,10 +298,21 @@ class RaceEventClient(RaceEvent):
                         curr_level = 2
                     if curr_level != car_level:
                         car.logic.set_damage(car_level)
+                    for wpn_chunk in fired_weapons:
+                        wpn_code, wpn_pos, wpn_fwd = wpn_chunk
+                        wpn = {
+                            'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
+                            'turbo': Turbo, 'rotateall': RotateAll, 'mine': MineNetwork}[wpn_code]
+                        curr_wpn = self.__lookup_wpn(car, wpn, wpn_pos, wpn_fwd)
+                        if not curr_wpn:
+                            car.event.set_fired_weapon(wpn, wpn_pos, wpn_fwd)
+                        else:
+                            curr_wpn.update_fired_props(wpn_pos, wpn_fwd)
+                    self.__clean_fired_weapons(car, fired_weapons)
                     if car_weapon:
                         wpn = {
                             'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
-                            'turbo': Turbo, 'rotateall': RotateAll, 'mine': Mine, 'mine': MineNetwork}[car_weapon]
+                            'turbo': Turbo, 'rotateall': RotateAll, 'mine': MineNetwork}[car_weapon]
                         if car.logic.weapon.__class__ != wpn:
                             car.event.set_weapon(wpn)
                         car.logic.weapon.update_props(car_wpn_pos, car_wpn_fwd)
@@ -255,6 +322,26 @@ class RaceEventClient(RaceEvent):
                                 car.logic.weapon.fire(True)
                                 car.logic.weapon = None
                             else: car.event.unset_weapon()
+
+    def __lookup_wpn(self, car, wpn, wpn_pos, wpn_fwd):
+        cls_wpns = [_wpn for _wpn in car.logic.fired_weapons if _wpn.__class__ == wpn]
+        tmp_np = NodePath('')
+        tmp_np.set_pos(wpn_pos)
+        distances = [(_wpn, _wpn.gfx.gfx_np.node.get_distance(tmp_np)) for _wpn in cls_wpns]
+        sorted_distances = sorted(distances, key=lambda val: val[1])
+        if sorted_distances and sorted_distances[0][1] < 10: return sorted_distances[0][0]
+
+    def __clean_fired_weapons(self, car, fired_weapons):
+        found_wpn = []
+        for wpn_chunk in fired_weapons:
+            wpn_code, wpn_pos, wpn_fwd = wpn_chunk
+            wpn = {
+                'rocket': RocketNetwork, 'rearrocket': RearRocketNetwork,
+                'turbo': Turbo, 'rotateall': RotateAll, 'mine': MineNetwork}[wpn_code]
+            found_wpn += [self.__lookup_wpn(car, wpn, wpn_pos, wpn_fwd)]
+        notfound_wpn = [wpn for wpn in car.logic.fired_weapons if wpn not in found_wpn]
+        for wpn in notfound_wpn:
+            car.event.unset_fired_weapon(wpn)
 
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.game_packet:

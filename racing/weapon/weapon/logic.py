@@ -27,3 +27,7 @@ class WeaponLogicNetwork(WeaponLogic):
     def update_props(self, pos, fwd):
         if pos == (0, 0, 0) and fwd == (0, 0, 0): return
         self.mdt.gfx.update_props(pos, fwd)
+
+    def update_fired_props(self, pos, fwd):
+        if pos == (0, 0, 0) and fwd == (0, 0, 0): return
+        self.mdt.gfx.update_fired_props(pos, fwd)

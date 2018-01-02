@@ -101,6 +101,7 @@ class CarEvent(Event, ComputerProxy):
             self.mdt.logic.weapon.destroy()
         if cls == 'remove':
             self.mdt.logic.weapon = None
+            self.ignore(self.props.keys.fire)
             return
         if cls: wpn_cls = cls
         else:
@@ -244,6 +245,7 @@ class CarPlayerEvent(CarEvent):
         self.ignore(self.props.keys.fire)
         self.mdt.logic.fire()
         self.mdt.gui.panel.unset_weapon()
+        self.ignore(self.props.keys.fire)
 
     def _process_wall(self):
         CarEvent._process_wall(self)
@@ -306,15 +308,23 @@ class CarPlayerEventClient(CarPlayerEvent):
         wpn = ''
         wpn_pos = (0, 0, 0)
         wpn_fwd = (0, 0, 0)
-        if self.mdt.logic.weapon or self.mdt.logic.fired_weapons:
+        if self.mdt.logic.weapon:
             curr_wpn = self.mdt.logic.weapon
-            if not curr_wpn: curr_wpn = self.mdt.logic.fired_weapons[0]
             wpn = {
                 Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
                 RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
             wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
         packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, [level], [wpn], wpn_pos, wpn_fwd))
+        packet += [len(self.mdt.logic.fired_weapons)]
+        for i in range(len(self.mdt.logic.fired_weapons)):
+            curr_wpn = self.mdt.logic.fired_weapons[i]
+            wpn = {
+                Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
+                RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
+            wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
+            wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
+            packet += chain([wpn], wpn_pos, wpn_fwd)
         if self.eng.curr_time - self.last_sent > self.eng.client.rate:
             self.eng.client.send_udp(packet)
             self.last_sent = self.eng.curr_time
@@ -332,6 +342,12 @@ class CarNetworkEvent(CarEvent):
 
     def on_bonus(self, wpn_cls=None):
         pass
+
+    def set_fired_weapon(self, wpn_cls, wpn_pos, wpn_fwd):
+        self.mdt.logic.fire()
+
+    def unset_fired_weapon(self, wpn):
+        self.mdt.logic.unset_fired_weapon(wpn)
 
     def set_weapon(self, wpn_cls):
         #if wpn_code:
