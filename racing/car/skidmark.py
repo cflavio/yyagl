@@ -12,17 +12,17 @@ class Skidmark(GameObject):
         GameObject.__init__(self)
         self.radius = whl_radius
         v_f = GeomVertexFormat.getV3()
-        self.vdata = GeomVertexData('skid', v_f, Geom.UHDynamic)
-        self.vdata.set_num_rows(1)
-        self.vwriter = GeomVertexWriter(self.vdata, 'vertex')
-        self.prim = GeomTriangles(Geom.UHStatic)
+        vdata = GeomVertexData('skid', v_f, Geom.UHDynamic)
+        vdata.set_num_rows(1)
+        self.vwriter = GeomVertexWriter(vdata, 'vertex')
+        prim = GeomTriangles(Geom.UHStatic)
         self.vtx_cnt = 1
         self.last_pos = whl_pos
-        geom = Geom(self.vdata)
-        geom.add_primitive(self.prim)
-        node = GeomNode('gnode')
-        node.add_geom(geom)
-        nodepath = self.eng.gfx.root.attach_node(node)
+        geom = Geom(vdata)
+        geom.add_primitive(prim)
+        self.node = GeomNode('gnode')
+        self.node.add_geom(geom)
+        nodepath = self.eng.gfx.root.attach_node(self.node)
         nodepath.set_transparency(True)
         nodepath.set_depth_offset(1)
         self.__set_material(nodepath)
@@ -59,9 +59,10 @@ class Skidmark(GameObject):
         self.vwriter.add_data3f(base_pos + rot_mat.xform_vec((-.12, 0, 0)))
         self.vwriter.add_data3f(base_pos + rot_mat.xform_vec((.12, 0, 0)))
         cnt = self.vtx_cnt
+        prim = self.node.modify_geom(0).modify_primitive(0)
         if cnt >= 3:
-            self.prim.add_vertices(cnt - 3, cnt - 2, cnt - 1)
-            self.prim.add_vertices(cnt - 2, cnt, cnt - 1)
+            prim.add_vertices(cnt - 3, cnt - 2, cnt - 1)
+            prim.add_vertices(cnt - 2, cnt, cnt - 1)
         self.vtx_cnt += 2
 
     def update(self, whl_pos, car_h):
