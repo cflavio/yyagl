@@ -13,8 +13,6 @@ class Skidmark(GameObject):
         self.radius = whl_radius
         v_f = GeomVertexFormat.getV3()
         vdata = GeomVertexData('skid', v_f, Geom.UHDynamic)
-        vdata.set_num_rows(1)
-        self.vwriter = GeomVertexWriter(vdata, 'vertex')
         prim = GeomTriangles(Geom.UHStatic)
         self.vtx_cnt = 1
         self.last_pos = whl_pos
@@ -56,8 +54,11 @@ class Skidmark(GameObject):
         base_pos = self.last_pos + (0, 0, -whl_radius + .05)
         rot_mat = Mat4()
         rot_mat.set_rotate_mat(car_h, (0, 0, 1))
-        self.vwriter.add_data3f(base_pos + rot_mat.xform_vec((-.12, 0, 0)))
-        self.vwriter.add_data3f(base_pos + rot_mat.xform_vec((.12, 0, 0)))
+        vdata = self.node.modify_geom(0).modify_vertex_data()
+        vwriter = GeomVertexWriter(vdata, 'vertex')
+        vwriter.set_row(vdata.get_num_rows())
+        vwriter.add_data3f(base_pos + rot_mat.xform_vec((-.12, 0, 0)))
+        vwriter.add_data3f(base_pos + rot_mat.xform_vec((.12, 0, 0)))
         cnt = self.vtx_cnt
         prim = self.node.modify_geom(0).modify_primitive(0)
         if cnt >= 3:
