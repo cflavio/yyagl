@@ -2,6 +2,7 @@ from panda3d.core import TextNode, Shader, TextureStage
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectButton import DirectButton
 from direct.gui.OnscreenImage import OnscreenImage
+from yyagl.library.panda.shader import load_shader
 from yyagl.gameobject import Gui
 from yyagl.engine.gui.page import Page, PageGui, PageEvent, PageFacade
 from yyagl.gameobject import GameObject
@@ -147,8 +148,9 @@ class RankingGui(Gui):
             'yyagl/assets/shaders/drv_car.frag'
         with open(drvfpath) as ffs:
             frag = ffs.read()
-        shader = Shader.make(Shader.SL_GLSL, vert, frag)
-        img.set_shader(shader)
+        shader = load_shader(vert, frag)
+        if shader:
+            img.set_shader(shader)
         img.set_transparency(True)
         t_s = TextureStage('ts')
         t_s.set_mode(TextureStage.MDecal)

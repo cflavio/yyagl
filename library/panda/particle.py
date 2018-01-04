@@ -3,6 +3,7 @@ from random import uniform
 from panda3d.core import GeomVertexArrayFormat, Geom, GeomVertexFormat, \
     GeomVertexData, GeomVertexWriter, GeomPoints, OmniBoundingVolume, \
     GeomNode, Shader, Vec3
+from yyagl.library.panda.shader import load_shader
 
 
 class PandaParticle(object):
@@ -60,7 +61,9 @@ class PandaParticle(object):
 
     @staticmethod
     def set_shader(np, color, tot_time):
-        np.node.set_shader(Shader.load(Shader.SL_GLSL, 'yyagl/assets/shaders/particle.vert', 'yyagl/assets/shaders/particle.frag'))
+        shader = load_shader('yyagl/assets/shaders/particle.vert', 'yyagl/assets/shaders/particle.frag')
+        if not shader: return
+        np.node.set_shader(shader)
         np.node.set_shader_input('color', color)
         np.node.set_shader_input('start_time', globalClock.get_frame_time())
         np.node.set_shader_input('tot_time', tot_time)

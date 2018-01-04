@@ -1,9 +1,16 @@
+from os.path import isfile
 from panda3d.core import AmbientLight, DirectionalLight, PointLight, \
     Spotlight, LVector4f, LVector3f, Vec3, Shader, Texture, WindowProperties,\
     FrameBufferProperties, GraphicsPipe, GraphicsOutput, NodePath, PandaNode, \
     TextureStage, TexMatrixAttrib
 from direct.filter.FilterManager import FilterManager
 from ..shader import LibShaderMgr
+
+
+def load_shader(vert, frag):
+    if isfile(vert) and isfile(frag):
+        return Shader.load(Shader.SLGLSL, vert, frag)
+    else: return Shader.make(Shader.SLGLSL, vert, frag)
 
 
 class PandaShaderMgr(LibShaderMgr):
@@ -78,7 +85,7 @@ class PandaShaderMgr(LibShaderMgr):
             fvert = vfile.read()
         with open('yyagl/assets/shaders/%s.frag' % fshad) as ffile:
             ffrag = ffile.read()
-        return Shader.make(Shader.SLGLSL, fvert, ffrag)
+        return load_shader(fvert, ffrag)
 
     def apply(self):
         winprops = WindowProperties.size(2048, 2048)
@@ -132,7 +139,7 @@ class PandaShaderMgr(LibShaderMgr):
         with open('yyagl/assets/shaders/main.frag') as ffrag:
             frag = ffrag.read()
         frag = frag.replace('<LIGHTS>', str(len(self.lights)))
-        return Shader.make(Shader.SLGLSL, vert, frag)
+        return load_shader(vert, frag)
 
     def toggle_shader(self):
         if render.get_shader():

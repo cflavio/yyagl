@@ -1,6 +1,7 @@
 from panda3d.core import Shader
 from direct.gui.DirectButton import DirectButton
 from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL
+from yyagl.library.panda.shader import load_shader
 
 
 class ImgBtn(DirectButton):
@@ -10,11 +11,12 @@ class ImgBtn(DirectButton):
         self['frameSize'] = (-1, 1, -1, 1)
         self['relief'] = FLAT
         shader_path = 'yyagl/assets/shaders/'
-        shader = Shader.load(Shader.SL_GLSL, shader_path + 'filter.vert',
+        shader = load_shader(shader_path + 'filter.vert',
                              shader_path + 'imgbtn.frag')
-        self.set_shader(shader)
-        self.set_shader_input('col_offset', 0)
-        self.set_shader_input('enable', 1)
+        if shader:
+            self.set_shader(shader)
+            self.set_shader_input('col_offset', 0)
+            self.set_shader_input('enable', 1)
         self.set_transparency(True)
         self.bind(ENTER, self._on_enter)
         self.bind(EXIT, self._on_exit)
