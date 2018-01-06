@@ -149,7 +149,7 @@ class PageGui(Gui):
 
     def __bld_back_btn(self):
         self.widgets += [DirectButton(
-            text='', pos=(0, 1, -.8), command=self._on_back,
+            text='', pos=(-.2, 1, -.8), command=self._on_back,
             **self.menu_args.btn_args)]
         PageGui.transl_text(self.widgets[-1], 'Back', _('Back'))
         self.widgets[-1]['text'] = self.widgets[-1].transl_text

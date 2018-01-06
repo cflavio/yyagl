@@ -38,6 +38,14 @@ class CallbackMux():
         return task.cont
 
 
+class User(object):
+
+    def __init__(self, name_full, is_supporter):
+        self.name_full = name_full
+        self.name = JID(name_full).bare
+        self.is_supporter = is_supporter
+
+
 class XMPP(Subject):
 
     def __init__(self):
@@ -92,21 +100,12 @@ class YorgClient(ClientXMPP):
 
     def on_message(self, msg):
         self.xmpp.users = []
+        i_am_supporter = False  # first time the user isn't here
         for line in msg['body'].split():
-            if JID(line).bare != self.boundjid.bare:
-                self.xmpp.users += [line]
-
-        # generate some random users for development
-        for n in range(40):
-            from random import choice
-            from string import ascii_lowercase
-            nn = ''
-            for i in range(choice(range(5, 16))):
-                for j in choice(ascii_lowercase):
-                    nn += j
-            self.xmpp.users += [nn]
-
-        self.xmpp.users += [self.boundjid.bare]
+            if JID(line[1:]).bare != self.boundjid.bare:
+                self.xmpp.users += [User(line[1:], int(line[0]))]
+            else: i_am_supporter = int(line[0])
+        self.xmpp.users += [User(self.boundjid.bare, i_am_supporter)]
         self.xmpp.notify('on_users')
 
     def send_connected(self):
