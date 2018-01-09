@@ -68,7 +68,8 @@ class XMPP(Subject):
 
     def disconnect(self):
         if self.xmpp:
-            self.xmpp.disconnect()
+            self.xmpp.send_disconnect()
+            self.xmpp.disconnect(wait=True)
             self.xmpp = self.xmpp.destroy()
 
     def destroy(self):
@@ -97,8 +98,21 @@ class YorgClient(ClientXMPP):
         self.send_presence()
         self.get_roster()
         self.on_ok()
+        taskMgr.doMethodLater(10.0, self.keep_alive, 'keep alive')
 
     def on_message(self, msg):
+        if msg['subject'] == 'list_users':
+            return self.on_list_users(msg)
+        if msg['subject'] == 'user_connected':
+            self.xmpp.users += [User(msg['body'][1:], int(msg['body'][0]))]
+            return self.xmpp.notify('on_user_connected', msg['body'])
+        if msg['subject'] == 'user_disconnected':
+            for user in self.xmpp.users:
+                if user.name_full == msg['body']:
+                    self.xmpp.users.remove(user)
+            return self.xmpp.notify('on_user_disconnected', msg['body'])
+
+    def on_list_users(self, msg):
         self.xmpp.users = []
         i_am_supporter = False  # first time the user isn't here
         for line in msg['body'].split():
@@ -116,7 +130,31 @@ class YorgClient(ClientXMPP):
             mfrom=self.boundjid.full,
             mto='ya2_yorg@jabb3r.org',
             mtype='chat',
+            msubject='connected',
             mbody='connected')
+        self.send_message(
+            mfrom=self.boundjid.full,
+            mto='ya2_yorg@jabb3r.org',
+            mtype='chat',
+            msubject='list_users',
+            mbody='list_users')
+
+    def send_disconnect(self):
+        self.send_message(
+            mfrom=self.boundjid.full,
+            mto='ya2_yorg@jabb3r.org',
+            mtype='chat',
+            msubject='disconnected',
+            mbody='disconnected')
+
+    def keep_alive(self, task):
+        self.send_message(
+            mfrom=self.boundjid.full,
+            mto='ya2_yorg@jabb3r.org',
+            mtype='chat',
+            msubject='keep_alive',
+            mbody='keep_alive')
+        return task.again
 
     def destroy(self):
         self.del_event_handler('session_start', self.session_start)
