@@ -61,6 +61,8 @@ class XMPP(Subject):
         self.xmpp.register_plugin('xep_0004') # Data Forms
         self.xmpp.register_plugin('xep_0060') # PubSub
         self.xmpp.register_plugin('xep_0199') # XMPP Ping
+        #self.xmpp.auto_authorize = False
+        self.xmpp.auto_subscribe = False
         if self.xmpp.connect(): self.xmpp.process()
 
     def send_connected(self):
@@ -71,6 +73,13 @@ class XMPP(Subject):
             self.xmpp.send_disconnect()
             self.xmpp.disconnect(wait=True)
             self.xmpp = self.xmpp.destroy()
+
+    @property
+    def friends(self):
+        return self.xmpp.friends
+
+    def is_friend(self, name):
+        return name in self.xmpp.friends
 
     def destroy(self):
         self.disconnect()
@@ -97,8 +106,14 @@ class YorgClient(ClientXMPP):
     def session_start(self, event):
         self.send_presence()
         self.get_roster()
+        print self.client_roster
         self.on_ok()
         taskMgr.doMethodLater(10.0, self.keep_alive, 'keep alive')
+
+    @property
+    def friends(self):
+        friends = [friend for friend in self.client_roster if self.client_roster[friend]['subscription']=='both']
+        return friends
 
     def on_message(self, msg):
         if msg['subject'] == 'list_users':
