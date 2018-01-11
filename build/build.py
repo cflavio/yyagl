@@ -1,5 +1,5 @@
 from os import walk, chdir, getcwd, remove
-from os.path import join, getsize
+from os.path import join, getsize, exists
 from subprocess import Popen, PIPE
 
 
@@ -22,8 +22,11 @@ def __branch():
 
 
 def __version():
-    with open('assets/version.txt') as fver:
-        return fver.read().strip() + '-' + exec_cmd('git rev-parse HEAD')[:7]
+    pref = ''
+    if exists('assets/version.txt'):
+        with open('assets/version.txt') as fver:
+            pref = fver.read().strip() + '-'
+    return pref + exec_cmd('git rev-parse HEAD')[:7]
 
 
 def img_tgt_names(files_):  # list of images' target filenames
