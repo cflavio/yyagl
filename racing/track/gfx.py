@@ -53,7 +53,6 @@ class TrackGfx(Gfx):
             anim_path = '%s-%s' % (path, self.rprops.anim_name)
             self.__actors += [Actor(path, {'anim': anim_path})]
             self.__actors[-1].loop('anim')
-            self.__actors[-1].setPlayRate(.5, 'anim')
             self.__actors[-1].reparent_to(cloned_root)
             has_omni = model.has_tag(self.rprops.omni_tag)
             if has_omni and model.get_tag(self.rprops.omni_tag):
