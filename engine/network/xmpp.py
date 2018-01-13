@@ -1,6 +1,6 @@
 from threading import Lock
-import logging
 from yyagl.observer import Subject
+import logging
 
 
 try:
@@ -40,10 +40,16 @@ class CallbackMux():
 
 class User(object):
 
-    def __init__(self, name_full, is_supporter):
+    def __init__(self, name_full, is_supporter, is_in_yorg, xmpp):
         self.name_full = name_full
         self.name = JID(name_full).bare
         self.is_supporter = is_supporter
+        self.is_in_yorg = is_in_yorg
+        self.xmpp = xmpp
+
+    @property
+    def is_friend(self):
+        return self.name in self.xmpp.friends
 
 
 class XMPP(Subject):
@@ -97,29 +103,65 @@ class YorgClient(ClientXMPP):
         self.add_event_handler('session_start', lambda msg: self.dispatch_msg('session_start', msg))
         self.add_event_handler('failed_auth', lambda msg: self.dispatch_msg('failed_auth', msg))
         self.add_event_handler('message', lambda msg: self.dispatch_msg('message', msg))
+        self.add_event_handler('presence_subscribe', lambda msg: self.dispatch_msg('subscribe', msg))
+        self.add_event_handler('presence_subscribed', lambda msg: self.dispatch_msg('subscribed', msg))
+        self.add_event_handler('presence_available', lambda msg: self.dispatch_msg('presence_available', msg))
+        self.add_event_handler('presence_unavailable', lambda msg: self.dispatch_msg('presence_unavailable', msg))
 
     def dispatch_msg(self, code, msg):
         if code == 'session_start': self.cb_mux.add_cb(self.session_start, [msg])
         if code == 'failed_auth': self.cb_mux.add_cb(self.on_ko, [msg])
         if code == 'message': self.cb_mux.add_cb(self.on_message, [msg])
+        if code == 'subscribe': self.cb_mux.add_cb(self.on_subscribe, [msg])
+        if code == 'subscribed': self.cb_mux.add_cb(self.on_subscribed, [msg])
+        if code == 'presence_available': self.cb_mux.add_cb(self.on_presence_available, [msg])
+        if code == 'presence_unavailable': self.cb_mux.add_cb(self.on_presence_unavailable, [msg])
+
 
     def session_start(self, event):
         self.send_presence()
         self.get_roster()
-        print self.client_roster
+        logging.info(self.client_roster)
         self.on_ok()
         taskMgr.doMethodLater(10.0, self.keep_alive, 'keep alive')
 
     @property
     def friends(self):
-        friends = [friend for friend in self.client_roster if self.client_roster[friend]['subscription']=='both']
+        friends = self.client_roster.keys()
         return friends
+
+    def on_subscribe(self, msg):
+        #self.client_roster.subscribe(msg['from'])
+        self.xmpp.notify('on_user_subscribe', msg['from'])
+        #if msg['from'] not in self.client_roster:
+        #    self.send_presence(pto=msg['from'], ptype='subscribe')
+        logging.info('subscribe ' + str(self.client_roster))
+        self.xmpp.notify('on_users')
+
+    def on_subscribed(self, msg):
+        #self.client_roster.subscribe(msg['from'])
+        #self.client_roster[msg['from']].save()
+        #self.send_presence(pto=msg['from'])
+        logging.info('subscribed ' + str(self.client_roster))
+
+
+    def on_presence_available(self, msg):
+        self.xmpp.users += [User(msg['from'], 0, False, self.xmpp)]
+        self.sort_users()
+        self.xmpp.notify('on_presence_available', msg)
+
+    def on_presence_unavailable(self, msg):
+        usr = [_usr for _usr in self.xmpp.users if _usr.name==msg['from'].bare]
+        if usr:  # we receive unavailable for nonlogged users at the beginning
+            self.xmpp.users.remove(usr[0])
+        self.xmpp.notify('on_presence_unavailable', msg)
 
     def on_message(self, msg):
         if msg['subject'] == 'list_users':
             return self.on_list_users(msg)
         if msg['subject'] == 'user_connected':
-            self.xmpp.users += [User(msg['body'][1:], int(msg['body'][0]))]
+            self.xmpp.users += [User(msg['body'][1:], int(msg['body'][0]), True, self.xmpp)]
+            self.sort_users()
             return self.xmpp.notify('on_user_connected', msg['body'])
         if msg['subject'] == 'user_disconnected':
             for user in self.xmpp.users:
@@ -129,13 +171,18 @@ class YorgClient(ClientXMPP):
 
     def on_list_users(self, msg):
         self.xmpp.users = []
-        i_am_supporter = False  # first time the user isn't here
-        for line in msg['body'].split():
-            if JID(line[1:]).bare != self.boundjid.bare:
-                self.xmpp.users += [User(line[1:], int(line[0]))]
-            else: i_am_supporter = int(line[0])
-        self.xmpp.users += [User(self.boundjid.bare, i_am_supporter)]
+        self.xmpp.users = [User(line[1:], int(line[0]), True, self.xmpp) for line in msg['body'].split()]
+        roster_users = [name for name in self.xmpp.xmpp.client_roster.keys() if self.xmpp.xmpp.client_roster[name] in ['to', 'both']]
+        for user in ['ya2_yorg@jabb3r.org', self.boundjid.bare]:
+            if user in roster_users: roster_users.remove(user)
+        out_users = [usr for usr in roster_users if usr not in [_usr.name for _usr in self.xmpp.users]]
+        self.xmpp.users += [User(usr, 0, False, self.xmpp) for usr in out_users]
+        self.sort_users()
         self.xmpp.notify('on_users')
+
+    def sort_users(self):
+        sortusr = lambda usr: (usr.name == self.boundjid.bare, not usr.is_in_yorg, not usr.is_friend, not usr.is_supporter, usr.name)
+        self.xmpp.users = sorted(self.xmpp.users, key=sortusr)
 
     def send_connected(self):
         self.send_presence(
