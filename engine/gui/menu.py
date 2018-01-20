@@ -128,6 +128,9 @@ class MenuLogic(Logic):
         page.attach_obs(self.on_back)
         page.attach_obs(self.on_push_page)
 
+    def enable(self, val):
+        (self.pages[-1].disable if val else self.pages[-1].enable)()
+
     def on_push_page(self, page_code, args=[]):
         pass
 
@@ -150,6 +153,7 @@ class MenuFacade(Facade):
         self._fwd_mth('push_page', lambda obj: obj.logic.push_page)
         self._fwd_mth('attach_obs', lambda obj: obj.gui.attach)
         self._fwd_mth('detach_obs', lambda obj: obj.gui.detach)
+        self._fwd_mth('enable', lambda obj: obj.logic.enable)
 
 
 class Menu(GameObject, MenuFacade):

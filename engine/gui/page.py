@@ -122,6 +122,13 @@ class PageGui(Gui):
         self.mdt.event.accept('arrow_down-up', self.on_arrow, [(0, 0, -1)])
         self.mdt.event.accept('enter-up', self.on_enter)
 
+    def disable(self):
+        self.mdt.event.ignore('arrow_left-up')
+        self.mdt.event.ignore('arrow_right-up')
+        self.mdt.event.ignore('arrow_up-up')
+        self.mdt.event.ignore('arrow_down-up')
+        self.mdt.event.ignore('enter-up')
+
     def transition_exit(self, destroy=True):
         for wdg in self.widgets:
             pos = wdg.get_pos()
@@ -182,6 +189,8 @@ class PageFacade(Facade):
     def __init__(self):
         self._fwd_mth('show', lambda obj: obj.gui.show)
         self._fwd_mth('hide', lambda obj: obj.gui.hide)
+        self._fwd_mth('enable', lambda obj: obj.gui.enable)
+        self._fwd_mth('disable', lambda obj: obj.gui.disable)
         self._fwd_mth('attach_obs', lambda obj: obj.gui.attach)
         self._fwd_mth('detach_obs', lambda obj: obj.gui.detach)
 

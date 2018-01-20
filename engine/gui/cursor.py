@@ -44,7 +44,7 @@ class MouseCursor(GameObject):
         self.cursor_img.set_pos(h_x, 0, m_y - self.hotspot_dy)
 
     def on_frame(self):
-        if not self.eng.pause.logic._pause.is_paused: self.__on_frame()
+        if not self.eng.pause.is_paused: self.__on_frame()
 
     def on_frame_unpausable(self):
-        if self.eng.pause.logic._pause.is_paused: self.__on_frame()
+        if self.eng.pause.is_paused: self.__on_frame()

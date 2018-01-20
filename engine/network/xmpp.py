@@ -68,7 +68,7 @@ class XMPP(Subject):
         self.xmpp.register_plugin('xep_0060') # PubSub
         self.xmpp.register_plugin('xep_0199') # XMPP Ping
         #self.xmpp.auto_authorize = False
-        self.xmpp.auto_subscribe = False
+        #self.xmpp.auto_subscribe = False
         if self.xmpp.connect(): self.xmpp.process()
 
     def send_connected(self):
@@ -117,7 +117,6 @@ class YorgClient(ClientXMPP):
         if code == 'presence_available': self.cb_mux.add_cb(self.on_presence_available, [msg])
         if code == 'presence_unavailable': self.cb_mux.add_cb(self.on_presence_unavailable, [msg])
 
-
     def session_start(self, event):
         self.send_presence()
         self.get_roster()
@@ -144,7 +143,6 @@ class YorgClient(ClientXMPP):
         #self.send_presence(pto=msg['from'])
         logging.info('subscribed ' + str(self.client_roster))
 
-
     def on_presence_available(self, msg):
         self.xmpp.users += [User(msg['from'], 0, False, self.xmpp)]
         self.sort_users()
@@ -168,6 +166,8 @@ class YorgClient(ClientXMPP):
                 if user.name_full == msg['body']:
                     self.xmpp.users.remove(user)
             return self.xmpp.notify('on_user_disconnected', msg['body'])
+        if msg['subject'] == 'chat':
+            return self.xmpp.notify('on_msg', msg)
 
     def on_list_users(self, msg):
         self.xmpp.users = []

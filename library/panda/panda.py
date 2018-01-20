@@ -74,6 +74,9 @@ class LibraryPanda3D(Library, DirectObject):
         tp_small = TextProperties()
         tp_small.set_text_scale(.46)
         tp_mgr.set_properties('small', tp_small)
+        tp_italic = TextProperties()
+        tp_italic.set_slant(.2)
+        tp_mgr.set_properties('italic', tp_italic)
 
     def __on_end(self):
         base.closeWindow(base.win)

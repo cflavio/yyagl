@@ -1,4 +1,3 @@
-from panda3d.core import Shader
 from direct.gui.DirectButton import DirectButton
 from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL
 from yyagl.library.panda.shader import load_shader
