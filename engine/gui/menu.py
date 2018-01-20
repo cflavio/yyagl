@@ -7,13 +7,13 @@ from ...library.gui import Img
 
 class MenuArgs(GameObject):
 
-    def __init__(self, font, text_fg, text_bg, text_err, text_scale, btn_size,
-                 btn_color, background_img, rollover_sfx, click_sfx,
+    def __init__(self, font, text_active, text_normal, text_err, text_scale,
+                 btn_size, btn_color, background_img, rollover_sfx, click_sfx,
                  social_imgs_dpath):
         GameObject.__init__(self)
         self.__font = font
-        self.text_fg = text_fg
-        self.text_bg = text_bg
+        self.text_active = text_active
+        self.text_normal = text_normal
         self.text_err = text_err
         self.text_scale = text_scale
         self.btn_size = btn_size
@@ -40,7 +40,7 @@ class MenuArgs(GameObject):
         return {
             'scale': self.text_scale,
             'text_font': self.font,
-            'text_fg': self.text_fg,
+            'text_fg': self.text_active,
             'frameColor': self.btn_color,
             'frameSize': self.btn_size,
             'rolloverSound': self.rollover_sfx,
@@ -56,13 +56,13 @@ class MenuArgs(GameObject):
     def label_args(self):
         return {
             'scale': self.text_scale,
-            'text_fg': self.text_fg,
+            'text_fg': self.text_normal,
             'text_font': self.font,
             'frameColor': (1, 1, 1, 0)}
 
     @property
     def option_args(self):
-        tfg = self.text_fg
+        tfg = self.text_active
         return {
             'scale': self.text_scale,
             'text_font': self.font,
@@ -84,7 +84,7 @@ class MenuArgs(GameObject):
         return {
             'scale': self.text_scale,
             'text_font': self.font,
-            'text_fg': self.text_fg,
+            'text_fg': self.text_active,
             'frameColor': self.btn_color,
             'rolloverSound': self.rollover_sfx,
             'clickSound': self.click_sfx}
@@ -93,7 +93,7 @@ class MenuArgs(GameObject):
     def text_args(self):
         return {
             'scale': self.text_scale,
-            'fg': self.text_fg,
+            'fg': self.text_normal,
             'font': self.font}
 
 
@@ -124,8 +124,7 @@ class MenuLogic(Logic):
             if len(self.pages) > 1:
                 self.pages[-1].detach_obs(self.on_back)
         self.pages += [page]
-        page.attach_obs(self.on_back)
-        page.attach_obs(self.on_push_page)
+        map(page.attach_obs, [self.on_back, self.on_push_page])
 
     def enable(self, val):
         (self.pages[-1].disable if val else self.pages[-1].enable)()
@@ -141,18 +140,20 @@ class MenuLogic(Logic):
         self.pages[-1].attach_obs(self.on_back)
 
     def destroy(self):
-        Logic.destroy(self)
         map(lambda page: page.destroy(), self.pages)
         self.pages = None
+        Logic.destroy(self)
 
 
 class MenuFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('push_page', lambda obj: obj.logic.push_page)
-        self._fwd_mth('attach_obs', lambda obj: obj.gui.attach)
-        self._fwd_mth('detach_obs', lambda obj: obj.gui.detach)
-        self._fwd_mth('enable', lambda obj: obj.logic.enable)
+        fwd_mths = [
+            ('push_page', lambda obj: obj.logic.push_page),
+            ('attach_obs', lambda obj: obj.gui.attach),
+            ('detach_obs', lambda obj: obj.gui.detach),
+            ('enable', lambda obj: obj.logic.enable)]
+        map(lambda args: self._fwd_mth(*args), fwd_mths)
 
 
 class Menu(GameObject, MenuFacade):

@@ -123,7 +123,7 @@ class CarPanel(GameObject):
         sprops = self.race_props.season_props
         menu_args = sprops.gameprops.menu_args
         pars = {'scale': .065, 'parent': base.a2dTopRight,
-                'fg': menu_args.text_fg, 'align': TextNode.A_left,
+                'fg': menu_args.text_active, 'align': TextNode.A_left,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
         self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
         lap_str = '1/' + str(self.race_props.laps)
@@ -133,9 +133,9 @@ class CarPanel(GameObject):
         self.ranking_txt = OnscreenText(pos=(-.24, -.5), **pars)
         self.damages_txt = OnscreenText(pos=(-.24, -.6), **pars)
         self.damages_txt['text'] = '-'
-        self.damages_txt['fg'] = menu_args.text_bg
+        self.damages_txt['fg'] = menu_args.text_normal
         pars = {'scale': .05, 'parent': pars['parent'],
-                'fg': menu_args.text_bg,
+                'fg': menu_args.text_normal,
                 'align': TextNode.A_right, 'font': pars['font']}
         self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
         self.lap_lab = OnscreenText(
@@ -157,7 +157,7 @@ class CarPanel(GameObject):
         self.weapon_img.destroy()
 
     def apply_damage(self, reset=False):
-        col = self.race_props.season_props.gameprops.menu_args.text_bg
+        col = self.race_props.season_props.gameprops.menu_args.text_normal
         if reset:
             self.damages_txt['text'] = '-'
             self.damages_txt['fg'] = col
@@ -251,7 +251,7 @@ class CarNetworkGui(CarGui):
                 name = drv.dprops.info.name
         sprops = self.race_props.season_props
         menu_args = sprops.gameprops.menu_args
-        pars = {'scale': .04, 'fg': menu_args.text_bg,
+        pars = {'scale': .04, 'fg': menu_args.text_normal,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
         self.name_txt = OnscreenText(name, **pars)
         self.eng.attach_obs(self.on_frame)

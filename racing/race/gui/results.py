@@ -16,8 +16,8 @@ class Results(GameObject):
         self.drivers = self.result_frm = None
         self.rprops = rprops
         self.font = rprops.season_props.gameprops.menu_args.font
-        self.text_fg = rprops.season_props.gameprops.menu_args.text_fg
-        self.text_bg = rprops.season_props.gameprops.menu_args.text_bg
+        self.text_fg = rprops.season_props.gameprops.menu_args.text_active
+        self.text_bg = rprops.season_props.gameprops.menu_args.text_normal
 
     def show(self, race_ranking, lap_times, drivers):
         track = self.rprops.track_path
@@ -25,7 +25,7 @@ class Results(GameObject):
         self.result_frm = DirectFrame(
             frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
         laps = len(lap_times)
-        text_bg = self.rprops.season_props.gameprops.menu_args.text_bg
+        text_bg = self.rprops.season_props.gameprops.menu_args.text_normal
         pars = {'scale': .1, 'fg': text_bg,
                 'font': self.rprops.season_props.gameprops.menu_args.font}
         self.__res_txts = [

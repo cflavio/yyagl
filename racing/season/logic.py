@@ -11,7 +11,7 @@ class SeasonLogic(Logic):
         self.props = s_p = season_props
         self.ranking = Ranking(
             s_p.car_names, s_p.gameprops.menu_args.background_img, s_p.font,
-            s_p.gameprops.menu_args.text_bg)
+            s_p.gameprops.menu_args.text_normal)
         self.tuning = Tuning(s_p)
         self.race = None
         self.drivers = s_p.drivers
