@@ -1,0 +1,2 @@
+class IImg(object):
+    pass

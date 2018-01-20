@@ -2,6 +2,7 @@ from direct.gui.DirectGuiGlobals import FLAT
 from direct.gui.OnscreenImage import OnscreenImage
 from ...gameobject import Gui, Logic, GameObject
 from ...facade import Facade
+from ...library.gui import Img
 
 
 class MenuArgs(GameObject):
@@ -102,15 +103,13 @@ class MenuGui(Gui):
         Gui.__init__(self, mdt)
         self.menu_args = menu_args
         self.background = None
-        if self.menu_args.background_img:
-            self.background = OnscreenImage(
-                scale=(1.77778, 1, 1.0), image=self.menu_args.background_img)
-            self.background.setBin('background', 10)
+        if not self.menu_args.background_img: return
+        self.background = Img(self.menu_args.background_img, (1.77778, 1, 1.0),
+                              is_background=True)
 
     def destroy(self):
         Gui.destroy(self)
-        if self.background:
-            self.background.destroy()
+        if self.background: self.background.destroy()
 
 
 class MenuLogic(Logic):
