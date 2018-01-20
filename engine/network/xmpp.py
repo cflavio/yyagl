@@ -76,8 +76,7 @@ class XMPP(Subject):
 
     def disconnect(self):
         if self.xmpp:
-            self.xmpp.send_disconnect()
-            self.xmpp.disconnect(wait=True)
+            self.xmpp.disconnect()
             self.xmpp = self.xmpp.destroy()
 
     @property
@@ -96,6 +95,7 @@ class YorgClient(ClientXMPP):
 
     def __init__(self, jid, password, on_ok, on_ko, xmpp):
         self.xmpp = xmpp
+        self.presences_sent = []
         ClientXMPP.__init__(self, jid, password)
         self.on_ok = on_ok
         self.on_ko = on_ko
@@ -122,7 +122,6 @@ class YorgClient(ClientXMPP):
         self.get_roster()
         logging.info(self.client_roster)
         self.on_ok()
-        taskMgr.doMethodLater(10.0, self.keep_alive, 'keep alive')
 
     @property
     def friends(self):
@@ -130,22 +129,22 @@ class YorgClient(ClientXMPP):
         return friends
 
     def on_subscribe(self, msg):
-        #self.client_roster.subscribe(msg['from'])
         self.xmpp.notify('on_user_subscribe', msg['from'])
-        #if msg['from'] not in self.client_roster:
-        #    self.send_presence(pto=msg['from'], ptype='subscribe')
         logging.info('subscribe ' + str(self.client_roster))
         self.xmpp.notify('on_users')
 
     def on_subscribed(self, msg):
-        #self.client_roster.subscribe(msg['from'])
-        #self.client_roster[msg['from']].save()
-        #self.send_presence(pto=msg['from'])
         logging.info('subscribed ' + str(self.client_roster))
 
     def on_presence_available(self, msg):
-        self.xmpp.users += [User(msg['from'], 0, False, self.xmpp)]
+        if str(msg['from']) not in [usr.name_full for usr in self.xmpp.users]:
+            self.xmpp.users += [User(msg['from'], 0, False, self.xmpp)]
         self.sort_users()
+        if msg['from'].bare != self.xmpp.xmpp.boundjid.bare and msg['from'] not in self.presences_sent:
+            self.presences_sent += [msg['from']]
+            self.xmpp.xmpp.send_presence(
+                pfrom=self.xmpp.xmpp.boundjid.full,
+                pto=msg['from'])
         self.xmpp.notify('on_presence_available', msg)
 
     def on_presence_unavailable(self, msg):
@@ -157,15 +156,8 @@ class YorgClient(ClientXMPP):
     def on_message(self, msg):
         if msg['subject'] == 'list_users':
             return self.on_list_users(msg)
-        if msg['subject'] == 'user_connected':
-            self.xmpp.users += [User(msg['body'][1:], int(msg['body'][0]), True, self.xmpp)]
-            self.sort_users()
-            return self.xmpp.notify('on_user_connected', msg['body'])
-        if msg['subject'] == 'user_disconnected':
-            for user in self.xmpp.users:
-                if user.name_full == msg['body']:
-                    self.xmpp.users.remove(user)
-            return self.xmpp.notify('on_user_disconnected', msg['body'])
+        if msg['subject'] == 'answer_full':
+            return self.on_answer_full(msg)
         if msg['subject'] == 'chat':
             return self.xmpp.notify('on_msg', msg)
 
@@ -177,6 +169,13 @@ class YorgClient(ClientXMPP):
             if user in roster_users: roster_users.remove(user)
         out_users = [usr for usr in roster_users if usr not in [_usr.name for _usr in self.xmpp.users]]
         self.xmpp.users += [User(usr, 0, False, self.xmpp) for usr in out_users]
+        filter_names = ['ya2_yorg@jabb3r.org', self.boundjid.bare]
+        presence_users = [usr.name_full for usr in self.xmpp.users if usr.name not in filter_names]
+        for usr in presence_users:
+            self.xmpp.xmpp.send_presence(
+                pfrom=self.xmpp.xmpp.boundjid.full,
+                pto=usr)
+
         self.sort_users()
         self.xmpp.notify('on_users')
 
@@ -192,31 +191,19 @@ class YorgClient(ClientXMPP):
             mfrom=self.boundjid.full,
             mto='ya2_yorg@jabb3r.org',
             mtype='chat',
-            msubject='connected',
-            mbody='connected')
+            msubject='query_full',
+            mbody='query_full')
+
+    def on_answer_full(self, msg):
+        self.send_presence(
+            pfrom=self.boundjid.full,
+            pto=msg['from'])
         self.send_message(
             mfrom=self.boundjid.full,
             mto='ya2_yorg@jabb3r.org',
             mtype='chat',
             msubject='list_users',
             mbody='list_users')
-
-    def send_disconnect(self):
-        self.send_message(
-            mfrom=self.boundjid.full,
-            mto='ya2_yorg@jabb3r.org',
-            mtype='chat',
-            msubject='disconnected',
-            mbody='disconnected')
-
-    def keep_alive(self, task):
-        self.send_message(
-            mfrom=self.boundjid.full,
-            mto='ya2_yorg@jabb3r.org',
-            mtype='chat',
-            msubject='keep_alive',
-            mbody='keep_alive')
-        return task.again
 
     def destroy(self):
         self.del_event_handler('session_start', self.session_start)
