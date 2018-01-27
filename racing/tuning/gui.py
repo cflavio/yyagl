@@ -1,14 +1,14 @@
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.OnscreenText import OnscreenText
-from yyagl.gameobject import Gui
+from yyagl.gameobject import GuiColleague
 from yyagl.engine.gui.imgbtn import ImgBtn
 from panda3d.core import TextNode
 
 
-class TuningGui(Gui):
+class TuningGui(GuiColleague):
 
     def __init__(self, mdt, sprops):
-        Gui.__init__(self, mdt)
+        GuiColleague.__init__(self, mdt)
         self.buttons = self.background = None
         self.sprops = sprops
         self.txt = self.upg1_txt = self.upg2_txt = self.upg3_txt = \

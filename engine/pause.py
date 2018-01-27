@@ -1,14 +1,14 @@
 from direct.gui.DirectFrame import DirectFrame
-from ..gameobject import Gui, Logic, GameObject, Colleague
+from ..gameobject import GuiColleague, LogicColleague, GameObject, Colleague
 from ..facade import Facade
 from yyagl.library.panda.pause import PandaPause
 LibPause = PandaPause
 
 
-class PauseGui(Gui):
+class PauseGui(GuiColleague):
 
     def __init__(self, mdt):
-        Gui.__init__(self, mdt)
+        GuiColleague.__init__(self, mdt)
         self.pause_frm = None
 
     def toggle(self, show_frm=True):
@@ -21,13 +21,13 @@ class PauseGui(Gui):
 
     def destroy(self):
         if self.pause_frm: self.pause_frm = self.pause_frm.destroy()
-        Gui.destroy(self)
+        GuiColleague.destroy(self)
 
 
-class PauseLogic(Logic):
+class PauseLogic(LogicColleague):
 
     def __init__(self, mdt):
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         self._pause = LibPause()
 
     def remove_task(self, tsk):
@@ -45,7 +45,7 @@ class PauseLogic(Logic):
 
     def destroy(self):
         self._pause.destroy()
-        Logic.destroy(self)
+        LogicColleague.destroy(self)
 
 
 class PauseFacade(Facade):

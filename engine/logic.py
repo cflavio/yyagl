@@ -1,7 +1,7 @@
 from urllib import urlopen
 from os.path import exists
 from panda3d.core import Mat4
-from ..gameobject import Logic
+from ..gameobject import LogicColleague
 from .configuration import Cfg
 from yyagl.gameobject import GameObject
 from yyagl.computer_proxy import ComputerProxy, compute_once
@@ -33,10 +33,10 @@ class VersionChecker(GameObject, ComputerProxy):
         #ComputerProxy.destroy(self)  # raises an exception
 
 
-class EngineLogic(Logic):
+class EngineLogic(LogicColleague):
 
     def __init__(self, mdt, cfg=None):
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         self.cfg = cfg or Cfg()  # use a default conf if not provided
 
     @property
@@ -58,4 +58,4 @@ class EngineLogic(Logic):
 
     def destroy(self):
         self.cfg = None
-        Logic.destroy(self)
+        LogicColleague.destroy(self)

@@ -3,7 +3,7 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectButton import DirectButton
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.library.panda.shader import load_shader
-from yyagl.gameobject import Gui
+from yyagl.gameobject import GuiColleague
 from yyagl.engine.gui.page import Page, PageGui, PageEvent, PageFacade
 from yyagl.gameobject import GameObject
 from yyagl.engine.gui.menu import Menu
@@ -82,10 +82,10 @@ class RankingPage(Page):
         PageFacade.destroy(self)
 
 
-class RankingMenuGui(Gui):
+class RankingMenuGui(GuiColleague):
 
     def __init__(self, mdt, rprops, sprops, ranking):
-        Gui.__init__(self, mdt)
+        GuiColleague.__init__(self, mdt)
         menu_args = sprops.gameprops.menu_args
         menu_args.btn_size = (-8.6, 8.6, -.42, .98)
         self.menu = Menu(menu_args)
@@ -94,7 +94,7 @@ class RankingMenuGui(Gui):
 
     def destroy(self):
         self.menu = self.menu.destroy()
-        Gui.destroy(self)
+        GuiColleague.destroy(self)
 
 
 class RankingMenu(GameObject):
@@ -114,10 +114,10 @@ class RankingMenu(GameObject):
         GameObject.destroy(self)
 
 
-class RankingGui(Gui):
+class RankingGui(GuiColleague):
 
     def __init__(self, mdt, background_fpath, font, fg_col):
-        Gui.__init__(self, mdt)
+        GuiColleague.__init__(self, mdt)
         self.ranking_texts = []
         self.background_path = background_fpath
         self.font = font
@@ -173,4 +173,4 @@ class RankingGui(Gui):
     def destroy(self):
         self.hide()
         self.rank_menu = self.ranking_texts = self.background = None
-        Gui.destroy(self)
+        GuiColleague.destroy(self)

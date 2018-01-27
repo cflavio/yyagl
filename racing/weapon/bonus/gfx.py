@@ -1,15 +1,15 @@
 from direct.actor.Actor import Actor
-from yyagl.gameobject import Gfx
+from yyagl.gameobject import GfxColleague
 
 
-class BonusGfx(Gfx):
+class BonusGfx(GfxColleague):
 
     def __init__(self, mdt, pos, model_path, anim_suff):
         self.model = None
         self.pos = pos
         self.model_path = model_path
         self.anim_suff = anim_suff
-        Gfx.__init__(self, mdt)
+        GfxColleague.__init__(self, mdt)
 
     def sync_bld(self):
         path = self.model_path
@@ -22,4 +22,4 @@ class BonusGfx(Gfx):
     def destroy(self):
         self.model.cleanup()
         self.model = self.model.remove_node()
-        Gfx.destroy(self)
+        GfxColleague.destroy(self)

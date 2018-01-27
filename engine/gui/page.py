@@ -9,16 +9,16 @@ from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.DirectEntry import DirectEntry
-from ...gameobject import GameObject, Gui, Event
+from ...gameobject import GameObject, GuiColleague, EventColleague
 from ...facade import Facade
 from .imgbtn import ImgBtn
 from .widget import Widget
 
 
-class PageGui(Gui):
+class PageGui(GuiColleague):
 
     def __init__(self, mdt, menu_args):
-        Gui.__init__(self, mdt)
+        GuiColleague.__init__(self, mdt)
         self.menu_args = menu_args
         self.widgets = []
         self.bld_page()
@@ -178,7 +178,7 @@ class PageGui(Gui):
         self.transition_exit()
 
 
-class PageEvent(Event):
+class PageEvent(EventColleague):
 
     def on_back(self):
         pass

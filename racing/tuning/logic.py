@@ -1,4 +1,4 @@
-from yyagl.gameobject import Logic
+from yyagl.gameobject import LogicColleague
 
 
 class TuningCar(object):
@@ -9,10 +9,10 @@ class TuningCar(object):
         self.f_suspensions = f_suspensions
 
 
-class TuningLogic(Logic):
+class TuningLogic(LogicColleague):
 
     def __init__(self, mdt, car_names):
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         self.car_names = car_names
         self.car2tuning = {}
         self.reset()

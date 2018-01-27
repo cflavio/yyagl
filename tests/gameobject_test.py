@@ -3,8 +3,8 @@ from panda3d.core import loadPrcFileData
 from unittest import TestCase
 
 from racing.game.engine.engine import Engine
-from racing.game.gameobject import Ai, Audio, Event, Fsm, GameObject, Gfx, Gui, \
-    Logic, Phys, Colleague
+from racing.game.gameobject import AiColleague, AudioColleague, EventColleague, FsmColleague, GameObject, GfxColleague, GuiColleague, \
+    LogicColleague, PhysColleague, Colleague
 
 
 class AiTests(TestCase):
@@ -19,8 +19,8 @@ class AiTests(TestCase):
     def test_init(self):
         self.engine = Engine()
         game_obj = GameObject()
-        ai = Ai(game_obj)
-        self.assertIsInstance(ai, Ai)
+        ai = AiColleague(game_obj)
+        self.assertIsInstance(ai, AiColleague)
 
 
 class AudioTests(TestCase):
@@ -35,8 +35,8 @@ class AudioTests(TestCase):
     def test_init(self):
         self.engine = Engine()
         game_obj = GameObject()
-        audio = Audio(game_obj)
-        self.assertIsInstance(audio, Audio)
+        audio = AudioColleague(game_obj)
+        self.assertIsInstance(audio, AudioColleague)
 
 
 class ColleagueTests(TestCase):
@@ -67,8 +67,8 @@ class EventTests(TestCase):
     def test_init(self):
         self.engine = Engine()
         game_obj = GameObject()
-        event = Event(game_obj)
-        self.assertIsInstance(event, Event)
+        event = EventColleague(game_obj)
+        self.assertIsInstance(event, EventColleague)
 
 
 class FsmTests(TestCase):
@@ -83,8 +83,8 @@ class FsmTests(TestCase):
     def test_init(self):
         self.engine = Engine()
         game_obj = GameObject()
-        fsm = Fsm(game_obj)
-        self.assertIsInstance(fsm, Fsm)
+        fsm = FsmColleague(game_obj)
+        self.assertIsInstance(fsm, FsmColleague)
 
 
 class GfxTests(TestCase):
@@ -99,8 +99,8 @@ class GfxTests(TestCase):
     def test_init(self):
         self.engine = Engine()
         game_obj = GameObject()
-        gfx = Gfx(game_obj)
-        self.assertIsInstance(gfx, Gfx)
+        gfx = GfxColleague(game_obj)
+        self.assertIsInstance(gfx, GfxColleague)
 
 
 class GuiTests(TestCase):
@@ -115,8 +115,8 @@ class GuiTests(TestCase):
     def test_init(self):
         self.engine = Engine()
         game_obj = GameObject()
-        gui = Gui(game_obj)
-        self.assertIsInstance(gui, Gui)
+        gui = GuiColleague(game_obj)
+        self.assertIsInstance(gui, GuiColleague)
 
 
 class LogicTests(TestCase):
@@ -131,8 +131,8 @@ class LogicTests(TestCase):
     def test_init(self):
         self.engine = Engine()
         game_obj = GameObject()
-        logic = Logic(game_obj)
-        self.assertIsInstance(logic, Logic)
+        logic = LogicColleague(game_obj)
+        self.assertIsInstance(logic, LogicColleague)
 
 
 class PhysicsTests(TestCase):
@@ -147,8 +147,8 @@ class PhysicsTests(TestCase):
     def test_init(self):
         self.engine = Engine()
         game_obj = GameObject()
-        phys = Phys(game_obj)
-        self.assertIsInstance(phys, Phys)
+        phys = PhysColleague(game_obj)
+        self.assertIsInstance(phys, PhysColleague)
 
 
 class GameObjectTests(TestCase):
@@ -160,14 +160,14 @@ class GameObjectTests(TestCase):
     def tearDown(self):
         self.engine.destroy()
 
-    @patch.object(Gfx, 'destroy')
-    @patch.object(Gui, 'destroy')
-    @patch.object(Logic, 'destroy')
-    @patch.object(Audio, 'destroy')
-    @patch.object(Phys, 'destroy')
-    @patch.object(Ai, 'destroy')
-    @patch.object(Event, 'destroy')
-    @patch.object(Fsm, 'destroy')
+    @patch.object(GfxColleague, 'destroy')
+    @patch.object(GuiColleague, 'destroy')
+    @patch.object(LogicColleague, 'destroy')
+    @patch.object(AudioColleague, 'destroy')
+    @patch.object(PhysColleague, 'destroy')
+    @patch.object(AiColleague, 'destroy')
+    @patch.object(EventColleague, 'destroy')
+    @patch.object(FsmColleague, 'destroy')
     def test_init(
             self, mock_fsm_destroy, mock_event_destroy, mock_ai_destroy,
             mock_phys_destroy, mock_audio_destroy, mock_logic_destroy,

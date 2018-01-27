@@ -1,11 +1,11 @@
 import __builtin__
 from abc import ABCMeta
-from .gameobject import Logic, GameObject
+from .gameobject import LogicColleague, GameObject
 from .engine.engine import Engine
 from .facade import Facade
 
 
-class GameLogic(Logic):
+class GameLogic(LogicColleague):
 
     def on_start(self): pass
 

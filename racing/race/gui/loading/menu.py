@@ -1,15 +1,15 @@
 from random import randint
 from copy import deepcopy
-from yyagl.gameobject import GameObject, Gui
+from yyagl.gameobject import GameObject, GuiColleague
 from yyagl.engine.gui.menu import Menu, MenuLogic
 from .loadingpage import LoadingPage
 
 
-class LoadingGui(Gui):
+class LoadingGui(GuiColleague):
 
     def __init__(self, mdt, rprops, loading, track_name_transl,
                  drivers, ranking, tuning):
-        Gui.__init__(self, mdt)
+        GuiColleague.__init__(self, mdt)
         pbackground = 'assets/images/loading/%s%s.txo'
         pbackground = pbackground % (rprops.track_name, randint(1, 4))
         menu_args = deepcopy(rprops.season_props.gameprops.menu_args)
@@ -21,7 +21,7 @@ class LoadingGui(Gui):
 
     def destroy(self):
         self.menu = self.menu.destroy()
-        Gui.destroy(self)
+        GuiColleague.destroy(self)
 
 
 class LoadingMenu(Menu):

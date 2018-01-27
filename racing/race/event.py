@@ -2,7 +2,7 @@ from itertools import chain
 from panda3d.core import Vec3, LPoint3f, NodePath
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
-from yyagl.gameobject import Event
+from yyagl.gameobject import EventColleague
 from yyagl.racing.car.ai import CarAi
 from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNetwork
@@ -18,10 +18,10 @@ class NetMsgs(object):
     end_race = 203
 
 
-class RaceEvent(Event):
+class RaceEvent(EventColleague):
 
     def __init__(self, mdt, menu_cls, keys):
-        Event.__init__(self, mdt)
+        EventColleague.__init__(self, mdt)
         self.menu_cls = menu_cls
         self.accept(keys.pause, self.eng.toggle_pause)
         self.last_sent = globalClock.get_frame_time()  # for networking
@@ -83,7 +83,7 @@ class RaceEvent(Event):
 
     def destroy(self):
         map(self.ignore, ['escape-up', 'p-up'])
-        Event.destroy(self)
+        EventColleague.destroy(self)
 
 
 class RaceEventServer(RaceEvent):

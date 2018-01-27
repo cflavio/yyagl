@@ -1,4 +1,4 @@
-from yyagl.gameobject import Logic, GameObject
+from yyagl.gameobject import LogicColleague, GameObject
 from yyagl.racing.car.car import Car, CarProps, CarPlayer, CarPlayerServer, \
     CarPlayerClient, NetworkCar, AiCar, AiCarPlayer
 
@@ -53,10 +53,10 @@ class DriverPlayerLoaderStrategy(GameObject):
             cars, car_name, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb)
 
 
-class DriverLogic(Logic):
+class DriverLogic(LogicColleague):
 
     def __init__(self, mdt, driver_props):
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         self.dprops = driver_props
 
     def to_dct(self):

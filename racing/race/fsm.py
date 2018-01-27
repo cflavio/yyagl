@@ -1,15 +1,15 @@
-from yyagl.gameobject import Fsm
+from yyagl.gameobject import FsmColleague
 from yyagl.racing.race.gui.countdown import Countdown
 
 
-class RaceFsm(Fsm):
+class RaceFsm(FsmColleague):
 
     def __init__(self, mdt, shaders):
         self.countdown = None
         self.shaders = shaders
         self.menu_args = None
         self.countdown_sfx = None
-        Fsm.__init__(self, mdt)
+        FsmColleague.__init__(self, mdt)
         self.defaultTransitions = {
             'Loading': ['Countdown'],
             'Countdown': ['Play'],

@@ -1,6 +1,6 @@
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
-from yyagl.gameobject import Gfx, GameObject
+from yyagl.gameobject import GfxColleague, GameObject
 from yyagl.facade import Facade
 from .skidmark import Skidmark
 from .decorator import Decorator
@@ -18,7 +18,7 @@ class CarGfxFacade(Facade):
         self._fwd_mth('on_no_skidmarking', lambda obj: obj.skidmark_mgr.on_no_skidmarking)
 
 
-class CarGfx(Gfx, CarGfxFacade):
+class CarGfx(GfxColleague, CarGfxFacade):
 
     def __init__(self, mdt, car_props):
         self.chassis_np = self.cnt = None
@@ -30,7 +30,7 @@ class CarGfx(Gfx, CarGfxFacade):
         self.last_crash_t = 0
         self.decorators = []
         self.dec_tsk = []
-        Gfx.__init__(self, mdt)
+        GfxColleague.__init__(self, mdt)
         CarGfxFacade.__init__(self)
         self.load()
 
@@ -96,7 +96,7 @@ class CarGfx(Gfx, CarGfxFacade):
         self.wheels['fl'] = load(front_path)
         self.wheels['rr'] = load(rear_path)
         self.wheels['rl'] = load(rear_path)
-        Gfx._end_async(self)
+        GfxColleague._end_async(self)
 
     def crash_sfx(self):
         self.crash_cnt += 1
@@ -143,7 +143,7 @@ class CarGfx(Gfx, CarGfxFacade):
         self.wheels = self.decorators = None
         self.skidmark_mgr.destroy()
         map(self.eng.remove_do_later, self.dec_tsk)
-        Gfx.destroy(self)
+        GfxColleague.destroy(self)
 
 
 class CarPlayerGfx(CarGfx):

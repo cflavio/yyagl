@@ -2,7 +2,7 @@ from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.engine.gui.page import Page, PageGui, PageFacade
-from yyagl.gameobject import GameObject, Event
+from yyagl.gameobject import GameObject, EventColleague
 from yyagl.racing.ranking.gui import RankingGui
 
 
@@ -121,7 +121,7 @@ class LoadingPage(Page):
         self.rprops = rprops
         self.menu = menu
         init_lst = [
-            [('event', Event, [self])],
+            [('event', EventColleague, [self])],
             [('gui', LoadingPageGui, [self, menu, rprops, track_name_transl,
                                       drivers, ranking, tuning])]]
         GameObject.__init__(self, init_lst)

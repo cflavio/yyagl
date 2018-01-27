@@ -1,10 +1,10 @@
-from yyagl.gameobject import Event
+from yyagl.gameobject import EventColleague
 
 
-class BonusEvent(Event):
+class BonusEvent(EventColleague):
 
     def __init__(self, mdt):
-        Event.__init__(self, mdt)
+        EventColleague.__init__(self, mdt)
         self.eng.attach_obs(self.on_collision)
 
     def on_collision(self, obj, tgt_obj):
@@ -17,4 +17,4 @@ class BonusEvent(Event):
 
     def destroy(self):
         self.eng.detach_obs(self.on_collision)
-        Event.destroy(self)
+        EventColleague.destroy(self)

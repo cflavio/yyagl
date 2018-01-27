@@ -2,16 +2,16 @@ from panda3d.core import Vec3, NodePath
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
 from direct.actor.Actor import Actor
-from yyagl.gameobject import Gfx
+from yyagl.gameobject import GfxColleague
 
 
-class WeaponGfx(Gfx):
+class WeaponGfx(GfxColleague):
 
     def __init__(self, mdt, parent, fpath):
         self.gfx_np = None
         self.parent = parent
         self.fpath = fpath
-        Gfx.__init__(self, mdt)
+        GfxColleague.__init__(self, mdt)
 
     def update_props(self, pos, fwd):
         pass
@@ -34,7 +34,7 @@ class WeaponGfx(Gfx):
     def destroy(self):
         self.gfx_np.cleanup()
         self.parent = self.gfx_np = self.gfx_np.remove_node()
-        Gfx.destroy(self)
+        GfxColleague.destroy(self)
 
 
 class WeaponGfxNetwork(WeaponGfx):

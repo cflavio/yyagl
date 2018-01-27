@@ -1,9 +1,9 @@
-from yyagl.gameobject import Audio
+from yyagl.gameobject import AudioColleague
 
 
-class TrackAudio(Audio):
+class TrackAudio(AudioColleague):
 
     def __init__(self, mdt, music_fpath):
-        Audio.__init__(self, mdt)
+        AudioColleague.__init__(self, mdt)
         self.music = loader.loadSfx(music_fpath)
         self.music.set_loop(True)

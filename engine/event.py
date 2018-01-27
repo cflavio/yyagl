@@ -1,12 +1,12 @@
 import sys
-from ..gameobject import Event
+from ..gameobject import EventColleague
 from .joystick import JoystickMgr
 
 
-class EngineEvent(Event):
+class EngineEvent(EventColleague):
 
     def __init__(self, mdt, emulate_keyboard):
-        Event.__init__(self, mdt)
+        EventColleague.__init__(self, mdt)
         self.eng.add_task(self.__on_frame)
 
         if self.eng.lib.lib_version().startswith('1.10'):
@@ -27,4 +27,4 @@ class EngineEvent(Event):
 
     def destroy(self):
         self.joystick_mgr.destroy()
-        Event.destroy(self)
+        EventColleague.destroy(self)

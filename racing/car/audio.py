@@ -1,6 +1,6 @@
 from collections import namedtuple
 from panda3d.core import AudioSound as PAudioSound
-from yyagl.gameobject import Audio
+from yyagl.gameobject import AudioColleague
 from yyagl.engine.audio import AudioSound
 
 
@@ -60,7 +60,7 @@ class RaceAudioUpdate(AbsAudioUpdate):
         self.engine_sfx.set_play_rate(max(.1, abs(play_rate)))
 
 
-class CarAudio(Audio):
+class CarAudio(AudioColleague):
 
     def on_play(self): pass
 
@@ -102,4 +102,4 @@ class CarPlayerAudio(CarAudio):
             self.turbo_sfx, self.rotate_all_fired_sfx,
             self.rotate_all_hit_sfx]
         map(lambda sfx: sfx.stop(), effects)
-        Audio.destroy(self)
+        AudioColleague.destroy(self)

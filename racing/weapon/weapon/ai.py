@@ -1,13 +1,13 @@
 from random import uniform
-from yyagl.gameobject import Ai
+from yyagl.gameobject import AiColleague
 
 
-class WeaponAi(Ai):
+class WeaponAi(AiColleague):
 
     fire_times = (2, 5)
 
     def __init__(self, mdt, car):
-        Ai.__init__(self, mdt)
+        AiColleague.__init__(self, mdt)
         self.collect_time = globalClock.get_frame_time()
         self.car = car
         self.fire_time = uniform(*self.fire_times)

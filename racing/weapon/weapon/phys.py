@@ -1,12 +1,12 @@
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.core import Mat4, BitMask32
-from yyagl.gameobject import Phys
+from yyagl.gameobject import PhysColleague
 
 
-class WeaponPhys(Phys):
+class WeaponPhys(PhysColleague):
 
     def __init__(self, mdt, car, cars):
-        Phys.__init__(self, mdt)
+        PhysColleague.__init__(self, mdt)
         self.parent, self.car, self.cars = car.gfx.nodepath, car, cars
         self.n_p = self.node = None
 
@@ -28,7 +28,7 @@ class WeaponPhys(Phys):
             self.eng.phys_mgr.remove_rigid_body(self.node)
             self.n_p = self.n_p.remove_node()
         self.parent = None
-        Phys.destroy(self)
+        PhysColleague.destroy(self)
 
 
 class RocketWeaponPhys(WeaponPhys):

@@ -1,17 +1,17 @@
 from panda3d.core import WindowProperties
-from ...gameobject import Gui
+from ...gameobject import GuiColleague
 from .cursor import MouseCursor
 from .browser import Browser
 
 
-class EngineGuiBase(Gui):
+class EngineGuiBase(GuiColleague):
 
     @staticmethod
     def init_cls():
         return EngineGui if base.win else EngineGuiBase
 
     def __init__(self, mdt):
-        Gui.__init__(self, mdt)
+        GuiColleague.__init__(self, mdt)
         base.disableMouse()
 
     @staticmethod

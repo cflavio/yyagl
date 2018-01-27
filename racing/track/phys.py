@@ -2,7 +2,7 @@ from panda3d.bullet import BulletRigidBodyNode, BulletTriangleMesh, \
     BulletTriangleMeshShape, BulletGhostNode
 from panda3d.core import LineSegs, BitMask32, Point2, Point3
 from direct.gui.OnscreenText import OnscreenText
-from yyagl.gameobject import Phys, GameObject
+from yyagl.gameobject import PhysColleague, GameObject
 from yyagl.racing.weapon.bonus.bonus import Bonus
 
 
@@ -78,7 +78,7 @@ class MeshBuilderUnmerged(MeshBuilder):
         return geoms.get_name()
 
 
-class TrackPhys(Phys):
+class TrackPhys(PhysColleague):
 
     def __init__(self, mdt, race_props):
         self.corners = self.model = self.wp2prevs = self.wp_np = None
@@ -88,7 +88,7 @@ class TrackPhys(Phys):
         self.nodes = []
         self.generate_tsk = []
         self.rprops = race_props
-        Phys.__init__(self, mdt)
+        PhysColleague.__init__(self, mdt)
 
     def sync_bld(self):
         self.model = self.eng.load_model(self.rprops.coll_track_path)

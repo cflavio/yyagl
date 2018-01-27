@@ -3,7 +3,7 @@ from random import uniform, choice
 from itertools import chain
 from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
-from yyagl.gameobject import Event
+from yyagl.gameobject import EventColleague
 from yyagl.racing.race.event import NetMsgs
 from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNetwork
@@ -55,10 +55,10 @@ class InputBuilderJoystick(InputBuilder):
         return DirKeys(*[inp[key] for key in keys])
 
 
-class CarEvent(Event, ComputerProxy):
+class CarEvent(EventColleague, ComputerProxy):
 
     def __init__(self, mdt, race_props):
-        Event.__init__(self, mdt)
+        EventColleague.__init__(self, mdt)
         ComputerProxy.__init__(self)
         self.eng.attach_obs(self.on_collision)
         self.props = race_props
@@ -188,7 +188,7 @@ class CarEvent(Event, ComputerProxy):
     def destroy(self):
         map(self.eng.detach_obs, [self.on_collision, self.on_frame])
         map(lambda tok: tok.release(), self.toks)
-        Event.destroy(self)
+        EventColleague.destroy(self)
         ComputerProxy.destroy(self)
 
 

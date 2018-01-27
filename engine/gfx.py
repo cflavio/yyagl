@@ -1,7 +1,7 @@
 from panda3d.core import get_model_path, LightRampAttrib, PandaNode, \
     NodePath, AntialiasAttrib
 from direct.filter.CommonFilters import CommonFilters
-from ..gameobject import Gfx
+from ..gameobject import GfxColleague
 from .particle import Particle
 from yyagl.library.panda.gfx import PandaGfxMgr
 
@@ -9,10 +9,10 @@ from yyagl.library.panda.gfx import PandaGfxMgr
 GfxMgr = PandaGfxMgr
 
 
-class EngineGfx(Gfx):
+class EngineGfx(GfxColleague):
 
     def __init__(self, mdt, model_path, antialiasing, shaders):
-        Gfx.__init__(self, mdt)
+        GfxColleague.__init__(self, mdt)
         self.gfx_mgr = GfxMgr()
         self.gfx_mgr.init(model_path, antialiasing, shaders)
         self.root = None

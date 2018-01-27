@@ -1,11 +1,11 @@
 from panda3d.core import LPoint3f
-from yyagl.gameobject import Event
+from yyagl.gameobject import EventColleague
 
 
-class TrackEvent(Event):
+class TrackEvent(EventColleague):
 
     def __init__(self, mdt, shaders, shadow_src):
-        Event.__init__(self, mdt)
+        EventColleague.__init__(self, mdt)
         self.shaders = shaders
         self.shadow_src = shadow_src
 

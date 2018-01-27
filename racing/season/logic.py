@@ -1,13 +1,13 @@
-from yyagl.gameobject import Logic
+from yyagl.gameobject import LogicColleague
 from yyagl.racing.ranking.ranking import Ranking
 from yyagl.racing.tuning.tuning import Tuning
 from yyagl.racing.race.race import RaceSinglePlayer, RaceServer, RaceClient
 
 
-class SeasonLogic(Logic):
+class SeasonLogic(LogicColleague):
 
     def __init__(self, mdt, season_props):
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         self.props = s_p = season_props
         self.ranking = Ranking(
             s_p.car_names, s_p.gameprops.menu_args.background_img, s_p.font,
@@ -55,4 +55,4 @@ class SeasonLogic(Logic):
     def destroy(self):
         self.tuning.detach_obs(self.on_tuning_sel)
         self.props = self.ranking = self.tuning = self.race = None
-        Logic.destroy(self)
+        LogicColleague.destroy(self)

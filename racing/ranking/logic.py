@@ -1,10 +1,10 @@
-from yyagl.gameobject import Logic
+from yyagl.gameobject import LogicColleague
 
 
-class RankingLogic(Logic):
+class RankingLogic(LogicColleague):
 
     def __init__(self, mdt, car_names):
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         self.carname2points = {}
         self.car_names = car_names
         self.reset()

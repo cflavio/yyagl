@@ -1,12 +1,12 @@
-from yyagl.gameobject import Fsm
+from yyagl.gameobject import FsmColleague
 from yyagl.racing.car.ai import CarResultsAi
 from .event import InputBuilder
 
 
-class CarFsm(Fsm):
+class CarFsm(FsmColleague):
 
     def __init__(self, mdt, car_props):
-        Fsm.__init__(self, mdt)
+        FsmColleague.__init__(self, mdt)
         self.defaultTransitions = {'Loading': ['Countdown'],
                                    'Countdown': ['Play'], 'Play': ['Results']}
         self.cprops = car_props

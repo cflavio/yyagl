@@ -1,4 +1,4 @@
-from yyagl.gameobject import Logic
+from yyagl.gameobject import LogicColleague
 from yyagl.racing.track.track import Track
 from yyagl.racing.car.ai import CarAiPoller
 from yyagl.racing.car.car import AiCar
@@ -11,7 +11,7 @@ class NetMsgs(object):
     start_race = 101
 
 
-class RaceLogic(Logic):
+class RaceLogic(LogicColleague):
 
     def __init__(self, mdt, rprops):
         self.load_txt = self.cam_tsk = self.cam_node = self.send_tsk = \
@@ -19,7 +19,7 @@ class RaceLogic(Logic):
             self.curr_load_txt = self.track = self.cars = self.player_car = \
             self.load_car = None
         self.props = rprops
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         self.ai_poller = CarAiPoller()
 
     def load_stuff(self, car_name, player_car_names):

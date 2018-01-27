@@ -5,8 +5,8 @@ from unittest import TestCase
 from racing.game.engine.engine import Engine
 from racing.game.engine.configuration import Cfg
 from racing.game.game import GameLogic, Game
-from racing.game.gameobject import GameObject, Fsm, Gfx, Phys, Gui, Audio, \
-    Ai, Event
+from racing.game.gameobject import GameObject, FsmColleague, GfxColleague, PhysColleague, GuiColleague, AudioColleague, \
+    AiColleague, EventColleague
 
 
 class LogicTests(TestCase):
@@ -33,7 +33,7 @@ class GameTests(TestCase):
 
     def test_init(self):
         conf = Cfg()
-        classes = [Fsm, Gfx, Phys, Gui, GameLogic, Audio, Ai, Event]
+        classes = [FsmColleague, GfxColleague, PhysColleague, GuiColleague, GameLogic, AudioColleague, AiColleague, EventColleague]
         game = Game(classes, conf)
         self.assertIsInstance(game, Game)
         game.destroy()

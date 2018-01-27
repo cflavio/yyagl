@@ -1,14 +1,14 @@
 from panda3d.core import BitMask32
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
-from yyagl.gameobject import Phys
+from yyagl.gameobject import PhysColleague
 
 
-class BonusPhys(Phys):
+class BonusPhys(PhysColleague):
 
     def __init__(self, mdt, pos):
         self.pos = pos
         self.ghost = None
-        Phys.__init__(self, mdt)
+        PhysColleague.__init__(self, mdt)
 
     def sync_bld(self):
         self.ghost = BulletGhostNode('Bonus')
@@ -20,4 +20,4 @@ class BonusPhys(Phys):
 
     def destroy(self):
         self.ghost = self.eng.phys_mgr.remove_ghost(self.ghost)
-        Phys.destroy(self)
+        PhysColleague.destroy(self)

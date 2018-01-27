@@ -1,6 +1,6 @@
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
-from yyagl.gameobject import Gui
+from yyagl.gameobject import GuiColleague
 from yyagl.facade import Facade
 from .results import Results
 from .loading.loading import Loading
@@ -13,10 +13,10 @@ class RaceGuiFacade(Facade):
         self._fwd_mth('update_minimap', lambda obj: obj.minimap.update)
 
 
-class RaceGui(Gui, RaceGuiFacade):
+class RaceGui(GuiColleague, RaceGuiFacade):
 
     def __init__(self, mdt, rprops):
-        Gui.__init__(self, mdt)
+        GuiColleague.__init__(self, mdt)
         r_p = self.props = rprops
         self.results = Results(rprops)
         self.loading = Loading()
@@ -39,4 +39,4 @@ class RaceGui(Gui, RaceGuiFacade):
         self.results.destroy()
         self.way_txt.destroy()
         self.minimap.destroy()
-        Gui.destroy(self)
+        GuiColleague.destroy(self)

@@ -1,10 +1,10 @@
-from yyagl.gameobject import Logic
+from yyagl.gameobject import LogicColleague
 
 
-class BonusLogic(Logic):
+class BonusLogic(LogicColleague):
 
     def __init__(self, mdt, track_phys):
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         self.track_phys = track_phys
         pos = self.mdt.gfx.model.get_pos()
         wp_info = [
@@ -28,4 +28,4 @@ class BonusLogic(Logic):
             cwp.set_pos(cwp.get_python_tag('initial_pos'))
         self.track_phys.redraw_wps()
         self.track_phys = self.closest_wp = None
-        Logic.destroy(self)
+        LogicColleague.destroy(self)

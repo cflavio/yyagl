@@ -1,7 +1,7 @@
 from math import sin, cos, pi
 from collections import namedtuple
 from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32
-from yyagl.gameobject import Logic
+from yyagl.gameobject import LogicColleague
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
@@ -212,10 +212,10 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
         return self.get_eng_frc(eng_frc), brake_frc, self._steering
 
 
-class CarLogic(Logic, ComputerProxy):
+class CarLogic(LogicColleague, ComputerProxy):
 
     def __init__(self, mdt, car_props):
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         ComputerProxy.__init__(self)
         self.cprops = car_props
         self.lap_time_start = 0
@@ -665,7 +665,7 @@ class CarLogic(Logic, ComputerProxy):
         f_wpn = [wpn for wpn in self.fired_weapons if wpn]
         map(lambda wpn: wpn.destroy(), f_wpn)
         self.fired_weapons = []
-        Logic.destroy(self)
+        LogicColleague.destroy(self)
         ComputerProxy.destroy(self)
 
 

@@ -1,5 +1,5 @@
 from collections import namedtuple
-from yyagl.gameobject import GameObject, Ai, Audio
+from yyagl.gameobject import GameObject, AiColleague, AudioColleague
 from yyagl.facade import Facade
 from .fsm import CarFsm
 from .gfx import CarGfx, CarPlayerGfx
@@ -54,7 +54,7 @@ class Car(GameObject, CarFacade):
     phys_cls = CarPhys
     event_cls = CarEvent
     logic_cls = CarLogic
-    ai_cls = Ai
+    ai_cls = AiColleague
     audio_cls = CarAudio
 
     def __init__(self, car_props):

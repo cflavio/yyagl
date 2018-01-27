@@ -4,11 +4,11 @@ from sys import executable
 from panda3d.core import AmbientLight, BitMask32, Spotlight, NodePath, \
     OmniBoundingVolume
 from direct.actor.Actor import Actor
-from yyagl.gameobject import Gfx
+from yyagl.gameobject import GfxColleague
 from .signs import Signs
 
 
-class TrackGfx(Gfx):
+class TrackGfx(GfxColleague):
 
     def __init__(self, mdt, race_props):
         self.ambient_np = self.spot_lgt = self.model = self.empty_models = \
@@ -17,7 +17,7 @@ class TrackGfx(Gfx):
         self.__actors = []
         self.__flat_roots = {}
         self.rprops = race_props
-        Gfx.__init__(self, mdt)
+        GfxColleague.__init__(self, mdt)
 
     def async_bld(self):
         self.__set_model()
@@ -63,7 +63,7 @@ class TrackGfx(Gfx):
         self.signs.set_signs()
         self.model.prepare_scene()
         self.model.premunge_scene()
-        Gfx.async_bld(self)
+        GfxColleague.async_bld(self)
 
     def __set_omni(self, root):
         root.set_tag(self.rprops.omni_tag, 'True')

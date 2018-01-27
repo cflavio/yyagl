@@ -1,6 +1,6 @@
 from direct.gui.DirectGuiGlobals import FLAT
 from direct.gui.OnscreenImage import OnscreenImage
-from ...gameobject import Gui, Logic, GameObject
+from ...gameobject import GuiColleague, LogicColleague, GameObject
 from ...facade import Facade
 from ...library.gui import Img
 
@@ -97,10 +97,10 @@ class MenuArgs(GameObject):
             'font': self.font}
 
 
-class MenuGui(Gui):
+class MenuGui(GuiColleague):
 
     def __init__(self, mdt, menu_args):
-        Gui.__init__(self, mdt)
+        GuiColleague.__init__(self, mdt)
         self.menu_args = menu_args
         self.background = None
         if not self.menu_args.background_img: return
@@ -108,14 +108,14 @@ class MenuGui(Gui):
                               is_background=True)
 
     def destroy(self):
-        Gui.destroy(self)
+        GuiColleague.destroy(self)
         if self.background: self.background.destroy()
 
 
-class MenuLogic(Logic):
+class MenuLogic(LogicColleague):
 
     def __init__(self, mdt):
-        Logic.__init__(self, mdt)
+        LogicColleague.__init__(self, mdt)
         self.pages = []
 
     def push_page(self, page):
@@ -142,7 +142,7 @@ class MenuLogic(Logic):
     def destroy(self):
         map(lambda page: page.destroy(), self.pages)
         self.pages = None
-        Logic.destroy(self)
+        LogicColleague.destroy(self)
 
 
 class MenuFacade(Facade):

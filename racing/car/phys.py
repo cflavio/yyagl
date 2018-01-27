@@ -1,13 +1,13 @@
 from yaml import load
 from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape
 from panda3d.core import LPoint3f, BitMask32, Mat4
-from yyagl.gameobject import Phys
+from yyagl.gameobject import PhysColleague
 
 
-class CarPhys(Phys):
+class CarPhys(PhysColleague):
 
     def __init__(self, mdt, car_props):
-        Phys.__init__(self, mdt)
+        PhysColleague.__init__(self, mdt)
         self.pnode = self.vehicle = self.friction_slip = self.__track_phys = \
             self.coll_mesh = self.roll_influence = self.max_speed = None
         self.curr_speed_mul = 1.0
@@ -265,7 +265,7 @@ class CarPhys(Phys):
         self.eng.phys_mgr.remove_vehicle(self.vehicle)
         self.pnode = self.vehicle = self.__finds = self.__track_phys = \
             self.coll_mesh = None
-        Phys.destroy(self)
+        PhysColleague.destroy(self)
 
 
 class CarPlayerPhys(CarPhys):

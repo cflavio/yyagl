@@ -38,7 +38,7 @@ class Colleague(Subject):
         Subject.destroy(self)
 
 
-class Fsm(FSM, Colleague):
+class FsmColleague(FSM, Colleague):
 
     def __init__(self, mdt):
         FSM.__init__(self, self.__class__.__name__)
@@ -49,29 +49,29 @@ class Fsm(FSM, Colleague):
         Colleague.destroy(self)
 
 
-class Event(Colleague, DirectObject):
+class EventColleague(Colleague, DirectObject):
 
     def destroy(self):
         self.ignoreAll()
         Colleague.destroy(self)
 
 
-class Audio(Colleague): pass
+class AudioColleague(Colleague): pass
 
 
-class Ai(Colleague): pass
+class AiColleague(Colleague): pass
 
 
-class Gfx(Colleague): pass
+class GfxColleague(Colleague): pass
 
 
-class Gui(Colleague): pass
+class GuiColleague(Colleague): pass
 
 
-class Logic(Colleague): pass
+class LogicColleague(Colleague): pass
 
 
-class Phys(Colleague): pass
+class PhysColleague(Colleague): pass
 
 
 class GODirector(object):
@@ -115,6 +115,8 @@ class GameObject(Subject):
         Subject.__init__(self)
         self.comp_names = self.__comp_lst(init_lst)
         GODirector(self, init_lst, end_cb)
+        # in Panda 1.10 change the approach: use async/await in place
+        # of this
 
     def __comp_lst(self, init_lst):
         if not init_lst: return []

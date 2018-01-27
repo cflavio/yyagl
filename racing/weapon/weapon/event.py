@@ -1,11 +1,11 @@
 from random import choice
-from yyagl.gameobject import Event
+from yyagl.gameobject import EventColleague
 
 
-class WeaponEvent(Event):
+class WeaponEvent(EventColleague):
 
     def __init__(self, mdt, particle_path):
-        Event.__init__(self, mdt)
+        EventColleague.__init__(self, mdt)
         self.eng.attach_obs(self.on_collision)
         self.particle_path = particle_path
 
@@ -20,7 +20,7 @@ class WeaponEvent(Event):
 
     def destroy(self):
         self.eng.detach_obs(self.on_collision)
-        Event.destroy(self)
+        EventColleague.destroy(self)
 
 
 class RocketWeaponEvent(WeaponEvent):

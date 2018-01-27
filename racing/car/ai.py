@@ -1,7 +1,7 @@
 from random import uniform
 from collections import namedtuple
 from panda3d.core import Vec3, LineSegs, LPoint3f
-from yyagl.gameobject import Ai, GameObject
+from yyagl.gameobject import AiColleague, GameObject
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
 from yyagl.engine.vec import Vec
 
@@ -200,10 +200,10 @@ class RearAiLogic(AbsAiLogic):
         pass
 
 
-class CarAi(Ai, ComputerProxy):
+class CarAi(AiColleague, ComputerProxy):
 
     def __init__(self, mdt, car_props):
-        Ai.__init__(self, mdt)
+        AiColleague.__init__(self, mdt)
         ComputerProxy.__init__(self)
         race_props = car_props.race_props
         player_car_name = race_props.season_props.player_car_name
@@ -478,7 +478,7 @@ class CarAi(Ai, ComputerProxy):
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
         map(lambda logic: logic.destroy(), [self.front_logic, self.rear_logic])
-        Ai.destroy(self)
+        AiColleague.destroy(self)
         ComputerProxy.destroy(self)
 
 

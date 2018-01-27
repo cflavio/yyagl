@@ -2,7 +2,7 @@ from panda3d.core import TextNode, LVector3f, Point2, Point3, TextNode
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
-from yyagl.gameobject import Gui, GameObject
+from yyagl.gameobject import GuiColleague, GameObject
 
 
 class CarParameter(GameObject):
@@ -211,7 +211,7 @@ class CarAIPanel(GameObject):
         self.wp_txt['text'] = txt
 
 
-class CarGui(Gui):
+class CarGui(GuiColleague):
 
     def apply_damage(self, reset=False):
         pass
@@ -238,7 +238,7 @@ class CarPlayerGui(CarGui):
 
     def destroy(self):
         map(lambda wdg: wdg.destroy(), [self.pars, self.panel])
-        Gui.destroy(self)
+        GuiColleague.destroy(self)
 
 
 class CarNetworkGui(CarGui):
