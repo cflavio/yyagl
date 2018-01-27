@@ -6,4 +6,4 @@ class RotateAllLogic(WeaponLogic):
     def fire(self, sfx):
         WeaponLogic.fire(self, sfx)
         self.notify('on_rotate_all', self.car)
-        self.mdt.destroy()
+        self.mediator.destroy()

@@ -11,8 +11,8 @@ class LogMgrBase(Colleague):  # headless log manager
     def init_cls():
         return LogMgr if base.win else LogMgrBase
 
-    def __init__(self, mdt):
-        Colleague.__init__(self, mdt)
+    def __init__(self, mediator):
+        Colleague.__init__(self, mediator)
         self.log_cfg()
 
     def log(self, msg, verbose=False):

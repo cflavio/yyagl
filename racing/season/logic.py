@@ -6,8 +6,8 @@ from yyagl.racing.race.race import RaceSinglePlayer, RaceServer, RaceClient
 
 class SeasonLogic(LogicColleague):
 
-    def __init__(self, mdt, season_props):
-        LogicColleague.__init__(self, mdt)
+    def __init__(self, mediator, season_props):
+        LogicColleague.__init__(self, mediator)
         self.props = s_p = season_props
         self.ranking = Ranking(
             s_p.car_names, s_p.gameprops.menu_args.background_img, s_p.font,

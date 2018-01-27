@@ -7,8 +7,8 @@ from panda3d.core import TextNode
 
 class TuningGui(GuiColleague):
 
-    def __init__(self, mdt, sprops):
-        GuiColleague.__init__(self, mdt)
+    def __init__(self, mediator, sprops):
+        GuiColleague.__init__(self, mediator)
         self.buttons = self.background = None
         self.sprops = sprops
         self.txt = self.upg1_txt = self.upg2_txt = self.upg3_txt = \
@@ -33,7 +33,7 @@ class TuningGui(GuiColleague):
         self.buttons += [ImgBtn(
             pos=(1.2, 1, .1), image=self.sprops.tuning_imgs[2],
             extraArgs=['f_suspensions'], **bprops)]
-        tuning = self.mdt.car2tuning[self.sprops.player_car_name]
+        tuning = self.mediator.car2tuning[self.sprops.player_car_name]
         self.upg1_txt = OnscreenText(
             text=_('current upgrades: +') + str(tuning.f_engine),
             scale=.06,

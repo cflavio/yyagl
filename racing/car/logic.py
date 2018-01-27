@@ -214,8 +214,8 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
 
 class CarLogic(LogicColleague, ComputerProxy):
 
-    def __init__(self, mdt, car_props):
-        LogicColleague.__init__(self, mdt)
+    def __init__(self, mediator, car_props):
+        LogicColleague.__init__(self, mediator)
         ComputerProxy.__init__(self)
         self.cprops = car_props
         self.lap_time_start = 0
@@ -231,7 +231,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         self._grid_wps = self._pitstop_wps = None
         self.input_strat = Input2ForcesStrategy.build(
             self.__class__ == CarPlayerLogic, car_props.race_props.joystick,
-            self.mdt)
+            self.mediator)
         self.start_pos = car_props.pos
         self.start_pos_hpr = car_props.hpr
         self.last_ai_wp = None
@@ -244,26 +244,26 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.alt_jmp_wp = None
 
     def update(self, input2forces):
-        phys = self.mdt.phys
+        phys = self.mediator.phys
         eng_f, brake_f, steering = self.input_strat.input2forces(input2forces, self.eng.joystick_mgr, self.is_drifting)
         phys.set_forces(eng_f, brake_f, steering)
         self.__update_roll_info()
-        gfx = self.mdt.gfx
+        gfx = self.mediator.gfx
         is_skid = self.is_skidmarking
         gfx.on_skidmarking() if is_skid else gfx.on_no_skidmarking()
 
     def __update_roll_info(self):
-        status = 'ok' if -45 <= self.mdt.gfx.nodepath.get_r() < 45 else 'ko'
+        status = 'ok' if -45 <= self.mediator.gfx.nodepath.get_r() < 45 else 'ko'
         curr_t = globalClock.get_frame_time()
         setattr(self, 'last_roll_%s_time' % status, curr_t)
 
     def reset_car(self):
-        if self.mdt.fsm.getCurrentOrNextState() in ['Off', 'Loading']:
-            self.mdt.gfx.nodepath.set_z(self.start_pos[2] + 1.2)
-        self.mdt.gfx.nodepath.set_x(self.start_pos[0])
-        self.mdt.gfx.nodepath.set_y(self.start_pos[1])
-        self.mdt.gfx.nodepath.set_hpr(self.start_pos_hpr)
-        wheels = self.mdt.phys.vehicle.get_wheels()
+        if self.mediator.fsm.getCurrentOrNextState() in ['Off', 'Loading']:
+            self.mediator.gfx.nodepath.set_z(self.start_pos[2] + 1.2)
+        self.mediator.gfx.nodepath.set_x(self.start_pos[0])
+        self.mediator.gfx.nodepath.set_y(self.start_pos[1])
+        self.mediator.gfx.nodepath.set_hpr(self.start_pos_hpr)
+        wheels = self.mediator.phys.vehicle.get_wheels()
         map(lambda whl: whl.set_rotation(0), wheels)
 
     @property
@@ -275,7 +275,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
         car_vec_right = rot_mat_right.xformVec(car_vec)
-        vel = self.mdt.phys.vehicle.get_chassis().get_linear_velocity()
+        vel = self.mediator.phys.vehicle.get_chassis().get_linear_velocity()
         vel.normalize()
         car_dot_vel_l = car_vec_left.dot(vel)
         car_dot_vel_r = car_vec_right.dot(vel)
@@ -406,9 +406,9 @@ class CarLogic(LogicColleague, ComputerProxy):
         return wps
 
     def __log_wp_info(self, curr_chassis, curr_wp, closest_wps, waypoints):
-        print self.mdt.name
-        print self.mdt.gfx.chassis_np_hi.get_name(), curr_chassis.get_name()
-        print len(self.mdt.logic.lap_times), self.mdt.laps - 1
+        print self.mediator.name
+        print self.mediator.gfx.chassis_np_hi.get_name(), curr_chassis.get_name()
+        print len(self.mediator.logic.lap_times), self.mediator.laps - 1
         print self.last_ai_wp, '\n', curr_wp, '\n', closest_wps
         import pprint
         to_print = [waypoints, self._pitstop_wps, self._grid_wps,
@@ -421,19 +421,19 @@ class CarLogic(LogicColleague, ComputerProxy):
         b_m = BitMask32.bit(0) | BitMask32.bit(1)
         cars_idx = range(len(self.cprops.race_props.season_props.car_names))
         cars_idx.remove(
-            self.cprops.race_props.season_props.car_names.index(self.mdt.name))
+            self.cprops.race_props.season_props.car_names.index(self.mediator.name))
         for bitn in cars_idx:
             b_m = b_m | BitMask32.bit(2 + bitn)
         return b_m
 
     @property
     def has_rear_weapon(self):
-        return self.mdt.logic.weapon and \
-            self.mdt.logic.weapon.__class__ == RearRocket
+        return self.mediator.logic.weapon and \
+            self.mediator.logic.weapon.__class__ == RearRocket
 
     @property
     def curr_chassis(self):
-        return self.mdt.gfx.nodepath.get_children()[0]
+        return self.mediator.gfx.nodepath.get_children()[0]
 
     @property
     def curr_chassis_name(self):
@@ -441,7 +441,7 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @property
     def hi_chassis_name(self):
-        return self.mdt.gfx.chassis_np_hi.get_name()
+        return self.mediator.gfx.chassis_np_hi.get_name()
 
     @once_a_frame
     def closest_wp(self):
@@ -451,8 +451,8 @@ class CarLogic(LogicColleague, ComputerProxy):
             closest_wps = [self.last_ai_wp] + \
                 w2p[self.last_ai_wp] + \
                 [wp for wp in w2p if self.last_ai_wp in w2p[wp]]
-        not_last = len(self.mdt.logic.lap_times) < self.mdt.laps - 1
-        car_np = self.mdt.gfx.nodepath
+        not_last = len(self.mediator.logic.lap_times) < self.mediator.laps - 1
+        car_np = self.mediator.gfx.nodepath
         distances = [car_np.get_distance(wp) for wp in closest_wps]
         curr_wp = closest_wps[distances.index(min(distances))]
         self._pitstop_wps = self.nogrid_wps(curr_wp)
@@ -490,7 +490,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         may_succ = [w_p for w_p in waypoints if curr_wp in waypoints[w_p]]
         if len(may_succ) >= 2:
             if any(wp.has_tag('jump') for wp in may_succ):
-                cha_name = self.mdt.gfx.chassis_np.get_name()
+                cha_name = self.mediator.gfx.chassis_np.get_name()
                 if cha_name in self.curr_chassis_name:
                     may_succ = [wp for wp in may_succ if wp.has_tag('jump')]
                     if not self.alt_jmp_wp:
@@ -588,7 +588,7 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @property
     def car_vec(self):  # port (or add) this to 3D
-        car_rad = deg2Rad(self.mdt.gfx.nodepath.get_h())
+        car_rad = deg2Rad(self.mediator.gfx.nodepath.get_h())
         return Vec(-sin(car_rad), cos(car_rad), 0).normalize()
 
     @property
@@ -609,15 +609,15 @@ class CarLogic(LogicColleague, ComputerProxy):
     @property
     def is_rotating(self):
         if self.applied_torque and \
-                self.mdt.phys.pnode.get_angular_velocity().length() < .5:
+                self.mediator.phys.pnode.get_angular_velocity().length() < .5:
             self.applied_torque = False
         return self.applied_torque
 
     @property
     def is_skidmarking(self):
-        hspeed = self.mdt.phys.speed > 50.0
-        flying = self.mdt.phys.is_flying
-        input_dct = self.mdt.event._get_input()
+        hspeed = self.mediator.phys.speed > 50.0
+        flying = self.mediator.phys.is_flying
+        input_dct = self.mediator.event._get_input()
         return input_dct.rear and hspeed and not flying
 
     @property
@@ -641,23 +641,23 @@ class CarLogic(LogicColleague, ComputerProxy):
     def on_weapon_destroyed(self, wpn):
         if wpn in self.fired_weapons: self.fired_weapons.remove(wpn)
         if wpn != self.weapon: return
-        self.weapon.detach_obs(self.mdt.event.on_rotate_all)
+        self.weapon.detach_obs(self.mediator.event.on_rotate_all)
         self.weapon.detach_obs(self.on_weapon_destroyed)
         self.weapon = None
 
     def set_damage(self, level):
-        curr_chassis = self.mdt.gfx.nodepath.get_children()[0]
+        curr_chassis = self.mediator.gfx.nodepath.get_children()[0]
         curr_level = 0
-        if self.mdt.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+        if self.mediator.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
             curr_level = 1
-        elif self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+        elif self.mediator.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
             curr_level = 2
         if level == 0:
-            self.mdt.gfx.apply_damage(True)
+            self.mediator.gfx.apply_damage(True)
         elif level == 1 and curr_level == 0:
-            self.mdt.gfx.apply_damage()
+            self.mediator.gfx.apply_damage()
         elif level == 2 and curr_level == 1:
-            self.mdt.gfx.apply_damage()
+            self.mediator.gfx.apply_damage()
 
     def destroy(self):
         self.camera = None
@@ -671,9 +671,9 @@ class CarLogic(LogicColleague, ComputerProxy):
 
 class CarPlayerLogic(CarLogic):
 
-    def __init__(self, mdt, car_props):
-        CarLogic.__init__(self, mdt, car_props)
-        self.camera = Camera(mdt.gfx.nodepath, car_props.race_props.camera_vec, self.mdt)
+    def __init__(self, mediator, car_props):
+        CarLogic.__init__(self, mediator, car_props)
+        self.camera = Camera(mediator.gfx.nodepath, car_props.race_props.camera_vec, self.mediator)
         start_pos = self.start_pos + (0, 0, 10000)
         self.eng.do_later(.01, self.camera.camera.set_pos, [start_pos])
         self.car_positions = []
@@ -681,13 +681,13 @@ class CarPlayerLogic(CarLogic):
         self.is_moving = True
 
     def _update_dist(self):
-        if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
+        if self.mediator.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
             return
         curr_time = globalClock.get_frame_time()
         if curr_time - self.last_upd_dist_time < 1:
             return
         self.last_upd_dist_time = curr_time
-        self.car_positions += [self.mdt.gfx.nodepath.get_pos()]
+        self.car_positions += [self.mediator.gfx.nodepath.get_pos()]
         if len(self.car_positions) <= 12:
             return
         self.car_positions.pop(0)
@@ -700,14 +700,14 @@ class CarPlayerLogic(CarLogic):
 
     def update(self, input_dct):
         CarLogic.update(self, input_dct)
-        if self.mdt.fsm.getCurrentOrNextState() == 'Results':
+        if self.mediator.fsm.getCurrentOrNextState() == 'Results':
             return
         if self.lap_time_start:
             f_t = globalClock.get_frame_time()
             d_t = round(f_t - self.lap_time_start, 2)
-            self.mdt.gui.panel.time_txt.setText(str(d_t))
+            self.mediator.gui.panel.time_txt.setText(str(d_t))
         if self.lap_time_start:
-            self.mdt.gui.panel.speed_txt.setText(str(int(self.mdt.phys.speed)))
+            self.mediator.gui.panel.speed_txt.setText(str(int(self.mediator.phys.speed)))
         self.__check_wrong_way()
         self._update_dist()
 
@@ -721,4 +721,4 @@ class CarPlayerLogic(CarLogic):
     def __check_wrong_way(self):
         if self.cprops.track_waypoints:
             way_str = _('wrong way') if self.direction < -.6 else ''
-            self.mdt.event.notify('on_wrong_way', way_str)
+            self.mediator.event.notify('on_wrong_way', way_str)

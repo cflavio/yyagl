@@ -99,8 +99,8 @@ class MenuArgs(GameObject):
 
 class MenuGui(GuiColleague):
 
-    def __init__(self, mdt, menu_args):
-        GuiColleague.__init__(self, mdt)
+    def __init__(self, mediator, menu_args):
+        GuiColleague.__init__(self, mediator)
         self.menu_args = menu_args
         self.background = None
         if not self.menu_args.background_img: return
@@ -114,8 +114,8 @@ class MenuGui(GuiColleague):
 
 class MenuLogic(LogicColleague):
 
-    def __init__(self, mdt):
-        LogicColleague.__init__(self, mdt)
+    def __init__(self, mediator):
+        LogicColleague.__init__(self, mediator)
         self.pages = []
 
     def push_page(self, page):

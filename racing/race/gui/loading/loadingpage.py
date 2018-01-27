@@ -8,20 +8,20 @@ from yyagl.racing.ranking.gui import RankingGui
 
 class LoadingPageGui(PageGui):
 
-    def __init__(self, mdt, menu, rprops, track_name_transl, drivers, ranking, tuning):
+    def __init__(self, mediator, menu, rprops, track_name_transl, drivers, ranking, tuning):
         self.rprops = rprops
         self.track_name_transl = track_name_transl
         self.drivers = drivers
         self.ranking = ranking
         self.tuning = tuning
-        PageGui.__init__(self, mdt, menu)
+        PageGui.__init__(self, mediator, menu)
 
     def bld_page(self, back_btn=True):
         self.eng.init_gfx()
-        self.font = self.mdt.menu.gui.menu_args.font
-        self.text_fg = self.mdt.menu.gui.menu_args.text_active
-        self.text_bg = self.mdt.menu.gui.menu_args.text_normal
-        self.text_err = self.mdt.menu.gui.menu_args.text_err
+        self.font = self.mediator.menu.gui.menu_args.font
+        self.text_fg = self.mediator.menu.gui.menu_args.text_active
+        self.text_bg = self.mediator.menu.gui.menu_args.text_normal
+        self.text_err = self.mediator.menu.gui.menu_args.text_err
         self.load_txt = OnscreenText(
             text=_('LOADING...'), scale=.2, pos=(0, .78), font=self.font,
             fg=(.75, .75, .75, 1), wordwrap=12)

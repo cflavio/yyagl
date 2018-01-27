@@ -3,8 +3,8 @@ from yyagl.gameobject import LogicColleague
 
 class WeaponLogic(LogicColleague):
 
-    def __init__(self, mdt, car, cars):
-        LogicColleague.__init__(self, mdt)
+    def __init__(self, mediator, car, cars):
+        LogicColleague.__init__(self, mediator)
         self.car = car
         self.cars = cars
         self.has_fired = False
@@ -13,12 +13,12 @@ class WeaponLogic(LogicColleague):
         pass
 
     def fire(self, sfx):
-        if sfx: self.mdt.audio.sfx.play()
+        if sfx: self.mediator.audio.sfx.play()
         self.has_fired = True
 
     def destroy(self):
         self.car = self.cars = None
-        self.notify('on_weapon_destroyed', self.mdt)
+        self.notify('on_weapon_destroyed', self.mediator)
         LogicColleague.destroy(self)
 
 
@@ -26,8 +26,8 @@ class WeaponLogicNetwork(WeaponLogic):
 
     def update_props(self, pos, fwd):
         if pos == (0, 0, 0) and fwd == (0, 0, 0): return
-        self.mdt.gfx.update_props(pos, fwd)
+        self.mediator.gfx.update_props(pos, fwd)
 
     def update_fired_props(self, pos, fwd):
         if pos == (0, 0, 0) and fwd == (0, 0, 0): return
-        self.mdt.gfx.update_fired_props(pos, fwd)
+        self.mediator.gfx.update_fired_props(pos, fwd)

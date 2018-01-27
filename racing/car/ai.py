@@ -202,8 +202,8 @@ class RearAiLogic(AbsAiLogic):
 
 class CarAi(AiColleague, ComputerProxy):
 
-    def __init__(self, mdt, car_props):
-        AiColleague.__init__(self, mdt)
+    def __init__(self, mediator, car_props):
+        AiColleague.__init__(self, mediator)
         ComputerProxy.__init__(self)
         race_props = car_props.race_props
         player_car_name = race_props.season_props.player_car_name
@@ -211,8 +211,8 @@ class CarAi(AiColleague, ComputerProxy):
         self.waypoints = car_props.track_waypoints
         self.ai_poller = car_props.ai_poller
         self.cars = race_props.season_props.car_names
-        self.front_logic = FrontAiLogic(self.mdt, self.cars, player_car_name)
-        self.rear_logic = RearAiLogic(self.mdt, self.cars, player_car_name)
+        self.front_logic = FrontAiLogic(self.mediator, self.cars, player_car_name)
+        self.rear_logic = RearAiLogic(self.mediator, self.cars, player_car_name)
         self.last_positions = []
         # last 12 positions (a position a second) for respawning if the car
         # can't move
@@ -223,7 +223,7 @@ class CarAi(AiColleague, ComputerProxy):
     @property
     def curr_logic(self):
         obst = list(self.front_logic.get_obstacles())
-        if self.mdt.phys.speed < 20 and obst[0].name and obst[0].dist < 4:
+        if self.mediator.phys.speed < 20 and obst[0].name and obst[0].dist < 4:
             return self.rear_logic
         return self.front_logic
 
@@ -245,7 +245,7 @@ class CarAi(AiColleague, ComputerProxy):
         return len([smp for smp in samples if smp.startswith(self.road_name)])
 
     def on_frame(self):
-        if self.ai_poller.current != self.mdt.name: return
+        if self.ai_poller.current != self.mediator.name: return
         self._eval_respawn()
         for logic in [self.front_logic, self.rear_logic]:
             logic.debug_lines_gnd.clear()
@@ -256,18 +256,18 @@ class CarAi(AiColleague, ComputerProxy):
         self.front_logic._update_gnd(directions[0], hit_res[0])
         self.front_logic.clear()
         self.front_logic._update_obst(directions[0], hit_res[1])
-        if self.mdt.phys.speed < 10 or self.mdt.logic.has_rear_weapon:
+        if self.mediator.phys.speed < 10 or self.mediator.logic.has_rear_weapon:
             hit_res = self.rear_logic.hit_res(directions[0])
             self.rear_logic._update_gnd(directions[0], hit_res[0])
             self.rear_logic._update_obst(directions[0], hit_res[1])
 
     def _eval_respawn(self):
-        if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
+        if self.mediator.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
             return
         if self.eng.curr_time - self.last_pos_time < 1:
             return
         self.last_pos_time = self.eng.curr_time
-        self.last_positions += [self.mdt.gfx.nodepath.get_pos()]
+        self.last_positions += [self.mediator.gfx.nodepath.get_pos()]
         if len(self.last_positions) <= 12:
             return
         self.last_positions.pop(0)
@@ -278,7 +278,7 @@ class CarAi(AiColleague, ComputerProxy):
         center = LPoint3f(center_x, center_y, center_z)
         if all((pos - center).length() < 6 for pos in self.last_positions):
             self.last_positions = []
-            self.mdt.event.process_respawn()
+            self.mediator.event.process_respawn()
 
     def brake(self, obstacles, obstacles_back):
         closest_center, closest_left, closest_right = obstacles
@@ -286,7 +286,7 @@ class CarAi(AiColleague, ComputerProxy):
         dist_thr_c = 4 if closest_center.name == 'Vehicle' else 8
         dist_thr_l = 4 if closest_left.name == 'Vehicle' else 8
         dist_thr_r = 4 if closest_right.name == 'Vehicle' else 8
-        if self.mdt.phys.speed < 0:
+        if self.mediator.phys.speed < 0:
             is_closer_c = closest_center.dist < dist_thr_c
             is_closer_l = closest_left.dist < dist_thr_l
             is_closer_r = closest_right.dist < dist_thr_r
@@ -295,21 +295,21 @@ class CarAi(AiColleague, ComputerProxy):
                 return True
         else:
             dist_thr = 1 if closest_center.name == 'Vehicle' else 5
-            dist_thr_c = 3 + dist_thr * self.mdt.phys.speed_ratio
+            dist_thr_c = 3 + dist_thr * self.mediator.phys.speed_ratio
             if closest_center.dist < dist_thr_c and closest_center_b.dist > 2:
                 return True
-        if self.mdt.phys.speed < 40:
+        if self.mediator.phys.speed < 40:
             return False
         return self.curr_logic.car_dot_traj < .4
 
     @property
     def is_on_road(self):
-        grounds = self.mdt.phys.gnd_names
+        grounds = self.mediator.phys.gnd_names
         return all(name.startswith(self.road_name) for name in grounds)
 
     @property
     def acceleration(self):
-        if self.mdt.phys.speed < 40:
+        if self.mediator.phys.speed < 40:
             return True
         if not self.is_on_road:
             return False
@@ -318,12 +318,12 @@ class CarAi(AiColleague, ComputerProxy):
     def left_right(self, obstacles, brake, obstacles_back):
         if self.eng.curr_time - self.last_obst_info.time < .05:
             return self.last_obst_info.direction
-        curr_obs = obstacles_back if brake and self.mdt.phys.speed < 10 else \
+        curr_obs = obstacles_back if brake and self.mediator.phys.speed < 10 else \
             obstacles
         closest_center, closest_left, closest_right = curr_obs
-        thr_far = 4 + self.mdt.phys.speed_ratio * 8
-        thr_close = 2 + self.mdt.phys.speed_ratio * 2
-        if brake and self.mdt.phys.speed < 10:
+        thr_far = 4 + self.mediator.phys.speed_ratio * 8
+        thr_close = 2 + self.mediator.phys.speed_ratio * 2
+        if brake and self.mediator.phys.speed < 10:
             thr_far = 12
             thr_close = 4
         obst_center = closest_center.dist < thr_far
@@ -336,7 +336,7 @@ class CarAi(AiColleague, ComputerProxy):
         obst_right_back = closest_right.dist < thr_far
         has_obst_left_back = closest_left.dist < thr_close
         has_obst_right_back = closest_right.dist < thr_close
-        car_vec = self.mdt.logic.car_vec
+        car_vec = self.mediator.logic.car_vec
         tgt = Vec3(self.curr_logic.tgt_vec.x, self.curr_logic.tgt_vec.y, 0)
         tgt_x_car = tgt.cross(Vec3(car_vec.x, car_vec.y, 0))
         dot_res = tgt_x_car.dot(Vec3(0, 0, 1))
@@ -344,7 +344,7 @@ class CarAi(AiColleague, ComputerProxy):
         # evaluate backward
         if self.curr_logic.car_dot_traj < -.2:
             left, right = dot_res < 0, dot_res >= 0
-            if brake and self.mdt.phys.speed < 10:
+            if brake and self.mediator.phys.speed < 10:
                 left = left and not has_obst_left_back
                 right = right and not has_obst_right_back
                 if left or right:
@@ -356,7 +356,7 @@ class CarAi(AiColleague, ComputerProxy):
                     return left, right
 
         # evaluate obstacles
-        if brake and self.mdt.phys.speed < 10:
+        if brake and self.mediator.phys.speed < 10:
             curr_obs_center = obst_center_back
             curr_obs_left = obst_left_back
             curr_obs_right = obst_right_back
@@ -369,7 +369,7 @@ class CarAi(AiColleague, ComputerProxy):
             curr_has_obs_left = has_obst_left
             curr_has_obs_right = has_obst_right
         if curr_obs_left or curr_obs_right or curr_obs_center:
-            if brake and self.mdt.phys.speed < 10:
+            if brake and self.mediator.phys.speed < 10:
                 left, right = False, False
                 if curr_obs_center:
                     left, right = not curr_obs_right, not curr_obs_left
@@ -403,18 +403,18 @@ class CarAi(AiColleague, ComputerProxy):
         # evaluate on_road
         gnd_dir = self.__eval_gnd()
         if gnd_dir == 'left':
-            if brake and self.mdt.phys.speed < 10 and not curr_has_obs_left:
+            if brake and self.mediator.phys.speed < 10 and not curr_has_obs_left:
                 return False, True
-            elif brake and self.mdt.phys.speed < 10 and not curr_has_obs_right:
+            elif brake and self.mediator.phys.speed < 10 and not curr_has_obs_right:
                 return True, False
             elif not brake and not curr_has_obs_left:
                 return True, False
             elif not brake and not curr_has_obs_right:
                 return False, True
         elif gnd_dir == 'right':
-            if brake and self.mdt.phys.speed < 10 and not curr_has_obs_left:
+            if brake and self.mediator.phys.speed < 10 and not curr_has_obs_left:
                 return True, False
-            elif brake and self.mdt.phys.speed < 10 and not curr_has_obs_right:
+            elif brake and self.mediator.phys.speed < 10 and not curr_has_obs_right:
                 return False, True
             elif not brake and not curr_has_obs_left:
                 return False, True
@@ -422,16 +422,16 @@ class CarAi(AiColleague, ComputerProxy):
                 return True, False
 
         # evaluate waypoints
-        # if self.mdt.name == game.player_car.name:
+        # if self.mediator.name == game.player_car.name:
         #     print 'dot', self.curr_logic.car_dot_traj
         if abs(self.curr_logic.car_dot_traj) > .98:
             return False, False
         car_vec = self.curr_logic.car_vec
-        if brake and self.mdt.phys.speed < 10:
+        if brake and self.mediator.phys.speed < 10:
             left, right = dot_res >= 0, dot_res < 0
         else:
             left, right = dot_res < 0, dot_res >= 0
-        if brake and self.mdt.phys.speed < 10:
+        if brake and self.mediator.phys.speed < 10:
             if left and curr_has_obs_right:
                 left = False
             if right and curr_has_obs_left:
@@ -446,33 +446,33 @@ class CarAi(AiColleague, ComputerProxy):
     @once_a_frame
     def get_input(self):
         # import time; time.sleep(.01)
-        # if self.mdt.name == game.player_car.name:
+        # if self.mediator.name == game.player_car.name:
         #     print 'dot_prod', self.car_dot_traj
-        # if self.mdt.name == game.player_car.name:
-        #     print 'speed', self.mdt.phys.speed
+        # if self.mediator.name == game.player_car.name:
+        #     print 'speed', self.mediator.phys.speed
         obstacles = list(self.front_logic.get_obstacles())
-        # if self.mdt.name == game.player_car.name:
+        # if self.mediator.name == game.player_car.name:
         #     print 'obstacles', obstacles
         obstacles_back = list(self.rear_logic.get_obstacles())
-        # if self.mdt.name == game.player_car.name:
+        # if self.mediator.name == game.player_car.name:
         #     print 'obstacles_back', obstacles_back
         brake = self.brake(obstacles, obstacles_back)
-        # if self.mdt.name == game.player_car.name:
+        # if self.mediator.name == game.player_car.name:
         #    print 'brake', brake
         acceleration = False if brake else self.acceleration
-        # if self.mdt.name == game.player_car.name:
+        # if self.mediator.name == game.player_car.name:
         #     print 'acceleration', acceleration
         left, right = self.left_right(obstacles, brake, obstacles_back)
-        # if self.mdt.name == game.player_car.name:
+        # if self.mediator.name == game.player_car.name:
         #     print 'left, right', left, right
-        # if self.mdt.name == game.player_car.name:
+        # if self.mediator.name == game.player_car.name:
         #     print self.__eval_gnd()
-        # if self.mdt.name == game.player_car.name:
+        # if self.mediator.name == game.player_car.name:
         #     print left, right, brake, acceleration, self.__eval_gnd(), \
-        #         self.front_logic.car_dot_traj, self.mdt.phys.speed, \
+        #         self.front_logic.car_dot_traj, self.mediator.phys.speed, \
         #         obstacles, obstacles_back
-        if self.mdt.logic.weapon and self.mdt.logic.weapon.ai_fire():
-            self.mdt.logic.fire()
+        if self.mediator.logic.weapon and self.mediator.logic.weapon.ai_fire():
+            self.mediator.logic.fire()
         return DirKeys(acceleration, left, brake, right)
 
     def destroy(self):

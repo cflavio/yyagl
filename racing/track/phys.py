@@ -80,7 +80,7 @@ class MeshBuilderUnmerged(MeshBuilder):
 
 class TrackPhys(PhysColleague):
 
-    def __init__(self, mdt, race_props):
+    def __init__(self, mediator, race_props):
         self.corners = self.model = self.wp2prevs = self.wp_np = None
         self.bonuses = []
         self.rigid_bodies = []
@@ -88,7 +88,7 @@ class TrackPhys(PhysColleague):
         self.nodes = []
         self.generate_tsk = []
         self.rprops = race_props
-        PhysColleague.__init__(self, mdt)
+        PhysColleague.__init__(self, mediator)
 
     def sync_bld(self):
         self.model = self.eng.load_model(self.rprops.coll_track_path)
@@ -193,8 +193,8 @@ class TrackPhys(PhysColleague):
 
 class TrackPhysDebug(TrackPhys):
 
-    def __init__(self, mdt, race_props):
-        TrackPhys.__init__(self, mdt, race_props)
+    def __init__(self, mediator, race_props):
+        TrackPhys.__init__(self, mediator, race_props)
         self.curr_wp = ''
         self.wp2txt = {}
         for wp in self.wp2prevs.keys():

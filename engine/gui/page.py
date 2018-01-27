@@ -17,8 +17,8 @@ from .widget import Widget
 
 class PageGui(GuiColleague):
 
-    def __init__(self, mdt, menu_args):
-        GuiColleague.__init__(self, mdt)
+    def __init__(self, mediator, menu_args):
+        GuiColleague.__init__(self, mediator)
         self.menu_args = menu_args
         self.widgets = []
         self.bld_page()
@@ -116,18 +116,18 @@ class PageGui(GuiColleague):
         self.enable()
 
     def enable(self):
-        self.mdt.event.accept('arrow_left-up', self.on_arrow, [(-1, 0, 0)])
-        self.mdt.event.accept('arrow_right-up', self.on_arrow, [(1, 0, 0)])
-        self.mdt.event.accept('arrow_up-up', self.on_arrow, [(0, 0, 1)])
-        self.mdt.event.accept('arrow_down-up', self.on_arrow, [(0, 0, -1)])
-        self.mdt.event.accept('enter-up', self.on_enter)
+        self.mediator.event.accept('arrow_left-up', self.on_arrow, [(-1, 0, 0)])
+        self.mediator.event.accept('arrow_right-up', self.on_arrow, [(1, 0, 0)])
+        self.mediator.event.accept('arrow_up-up', self.on_arrow, [(0, 0, 1)])
+        self.mediator.event.accept('arrow_down-up', self.on_arrow, [(0, 0, -1)])
+        self.mediator.event.accept('enter-up', self.on_enter)
 
     def disable(self):
-        self.mdt.event.ignore('arrow_left-up')
-        self.mdt.event.ignore('arrow_right-up')
-        self.mdt.event.ignore('arrow_up-up')
-        self.mdt.event.ignore('arrow_down-up')
-        self.mdt.event.ignore('enter-up')
+        self.mediator.event.ignore('arrow_left-up')
+        self.mediator.event.ignore('arrow_right-up')
+        self.mediator.event.ignore('arrow_up-up')
+        self.mediator.event.ignore('arrow_down-up')
+        self.mediator.event.ignore('enter-up')
 
     def transition_exit(self, destroy=True):
         for wdg in self.widgets:
@@ -162,7 +162,7 @@ class PageGui(GuiColleague):
         self.widgets[-1]['text'] = self.widgets[-1].transl_text
 
     def _on_back(self):
-        self.mdt.event.on_back()
+        self.mediator.event.on_back()
         self.notify('on_back', self.__class__.__name__)
 
     def show(self):
@@ -171,7 +171,7 @@ class PageGui(GuiColleague):
 
     def hide(self):
         self.transition_exit(False)
-        self.mdt.event.ignoreAll()
+        self.mediator.event.ignoreAll()
 
     def destroy(self):
         self.menu_args = None

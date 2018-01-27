@@ -11,13 +11,13 @@ GfxMgr = PandaGfxMgr
 
 class EngineGfx(GfxColleague):
 
-    def __init__(self, mdt, model_path, antialiasing, shaders):
-        GfxColleague.__init__(self, mdt)
+    def __init__(self, mediator, model_path, antialiasing, shaders):
+        GfxColleague.__init__(self, mediator)
         self.gfx_mgr = GfxMgr()
         self.gfx_mgr.init(model_path, antialiasing, shaders)
         self.root = None
         self.part2eff = {}
-        if self.mdt.cfg.gui_cfg.shaders:
+        if self.mediator.cfg.gui_cfg.shaders:
             #self.set_toon()
             self.set_bloom()
             self.set_blur()

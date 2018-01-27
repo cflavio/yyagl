@@ -13,13 +13,13 @@ class NetMsgs(object):
 
 class RaceLogic(LogicColleague):
 
-    def __init__(self, mdt, rprops):
+    def __init__(self, mediator, rprops):
         self.load_txt = self.cam_tsk = self.cam_node = self.send_tsk = \
             self.cam_pivot = self.ready_clients = self.preview = \
             self.curr_load_txt = self.track = self.cars = self.player_car = \
             self.load_car = None
         self.props = rprops
-        LogicColleague.__init__(self, mdt)
+        LogicColleague.__init__(self, mediator)
         self.ai_poller = CarAiPoller()
 
     def load_stuff(self, car_name, player_car_names):
@@ -31,12 +31,12 @@ class RaceLogic(LogicColleague):
         for driver in self.props.drivers:
             if driver.dprops.car_name == r_p.season_props.player_car_name:
                 self.load_car = lambda: DriverPlayerLoaderStrategy.load(
-                    r_p, car_name, self.track, self.mdt, player_car_names,
+                    r_p, car_name, self.track, self.mediator, player_car_names,
                     self.props.season_props, self.ai_poller, self._on_loaded)
-        self.mdt.track = self.track  # facade this
+        self.mediator.track = self.track  # facade this
 
     def _on_loaded(self):
-        self.mdt.fsm.demand('Countdown', self.props.season_props)
+        self.mediator.fsm.demand('Countdown', self.props.season_props)
 
     def on_track_loaded(self):
         self.load_car()
@@ -51,14 +51,14 @@ class RaceLogic(LogicColleague):
     def start_play(self):
         self.eng.phys_mgr.start()
         self.eng.attach_obs(self.on_frame)
-        self.mdt.event.network_register()
-        self.player_car.attach_obs(self.mdt.event.on_wrong_way)
+        self.mediator.event.network_register()
+        self.player_car.attach_obs(self.mediator.event.on_wrong_way)
         self.player_car.logic.camera.render_all(self.track.gfx.model)  # workaround for prepare_scene (panda3d 1.9)
         self.track.play_music()
         map(lambda car: car.reset_car(), self.all_cars)
         map(lambda car: car.start(), self.all_cars)
         map(lambda car: car.event.attach(self.on_rotate_all), self.all_cars)
-        self.mdt.gui.start()
+        self.mediator.gui.start()
         ai_cars = [car.name for car in self.all_cars if car.__class__ == AiCar]
         if self.props.a_i: ai_cars += [self.player_car.name]
         self.ai_poller.set_cars(ai_cars)
@@ -80,10 +80,10 @@ class RaceLogic(LogicColleague):
         self.ai_poller.tick()
         self.track.update(self.player_car.get_pos())
         positions = [(car.name, car.get_pos()) for car in self.all_cars]
-        self.mdt.gui.update_minimap(positions)
+        self.mediator.gui.update_minimap(positions)
         if self.props.a_i:
             self.track.phys.set_curr_wp(self.player_car.ai.curr_logic.curr_tgt_wp)
-        if self.mdt.fsm.getCurrentOrNextState() == 'Play':
+        if self.mediator.fsm.getCurrentOrNextState() == 'Play':
             self.player_car.upd_ranking(self.ranking())
             if self.props.a_i:
                 self.player_car.gui.ai_panel.curr_wp = self.player_car.ai.curr_logic.curr_tgt_wp.get_name()[8:]
@@ -120,7 +120,7 @@ class RaceLogic(LogicColleague):
 
     def exit_play(self):
         self.track.stop_music()
-        self.player_car.detach_obs(self.mdt.event.on_wrong_way)
+        self.player_car.detach_obs(self.mediator.event.on_wrong_way)
         self.track.destroy()
         map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
         map(lambda car: car.destroy(), self.all_cars)
@@ -139,8 +139,8 @@ class RaceLogicSinglePlayer(RaceLogic):
 
 class RaceLogicServer(RaceLogic):
 
-    def __init__(self, mdt, rprops):
-        RaceLogic.__init__(self, mdt, rprops)
+    def __init__(self, mediator, rprops):
+        RaceLogic.__init__(self, mediator, rprops)
         self._loaded = False
         self.ready_clients = []
         self.eng.server.register_cb(self.process_srv)
@@ -156,7 +156,7 @@ class RaceLogicServer(RaceLogic):
             self.ready_clients += [sender]
             connections = [conn[0] for conn in self.eng.server.connections]
             if all(client in self.ready_clients for client in connections) and self._loaded:
-                self.mdt.fsm.demand('Countdown', self.props.season_props)
+                self.mediator.fsm.demand('Countdown', self.props.season_props)
                 self.start_play()
                 self.eng.server.send([NetMsgs.start_race])
 
@@ -182,7 +182,7 @@ class RaceLogicClient(RaceLogic):
         if data_lst[0] == NetMsgs.start_race:
             self.eng.log('start race')
             self.eng.remove_do_later(self.send_tsk)
-            self.mdt.fsm.demand('Countdown', self.props.season_props)
+            self.mediator.fsm.demand('Countdown', self.props.season_props)
             self.start_play()
 
     def exit_play(self):

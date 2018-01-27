@@ -35,8 +35,8 @@ class VersionChecker(GameObject, ComputerProxy):
 
 class EngineLogic(LogicColleague):
 
-    def __init__(self, mdt, cfg=None):
-        LogicColleague.__init__(self, mdt)
+    def __init__(self, mediator, cfg=None):
+        LogicColleague.__init__(self, mediator)
         self.cfg = cfg or Cfg()  # use a default conf if not provided
 
     @property
@@ -45,15 +45,15 @@ class EngineLogic(LogicColleague):
             if not exists('assets/version.txt'): return '-'
             with open('assets/version.txt') as fver:
                 return fver.read().strip() + '-source'
-        return self.mdt.lib.build_version
+        return self.mediator.lib.build_version
 
     @property
     def is_runtime(self):
-        return self.mdt.lib.runtime
+        return self.mediator.lib.runtime
 
     @property
     def curr_path(self):
-        return self.mdt.lib.curr_path + '/' \
+        return self.mediator.lib.curr_path + '/' \
             if self.is_runtime else ''
 
     def destroy(self):

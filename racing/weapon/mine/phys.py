@@ -10,7 +10,7 @@ class MinePhys(WeaponPhys):
     gfx_dz = -.45
     launch_dist = -2.5
 
-    def __init__(self, mdt, car, cars):
-        WeaponPhys.__init__(self, mdt, car, cars)
+    def __init__(self, mediator, car, cars):
+        WeaponPhys.__init__(self, mediator, car, cars)
         MinePhys.cnt += 1
         self.coll_name = 'Mine' + str(MinePhys.cnt)

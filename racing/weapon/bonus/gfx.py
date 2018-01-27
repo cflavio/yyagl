@@ -4,12 +4,12 @@ from yyagl.gameobject import GfxColleague
 
 class BonusGfx(GfxColleague):
 
-    def __init__(self, mdt, pos, model_path, anim_suff):
+    def __init__(self, mediator, pos, model_path, anim_suff):
         self.model = None
         self.pos = pos
         self.model_path = model_path
         self.anim_suff = anim_suff
-        GfxColleague.__init__(self, mdt)
+        GfxColleague.__init__(self, mediator)
 
     def sync_bld(self):
         path = self.model_path

@@ -8,10 +8,10 @@ class Colleague(Subject):
 
     eng = None
 
-    def __init__(self, mdt, *args, **kwargs):
+    def __init__(self, mediator, *args, **kwargs):
         Subject.__init__(self)
         self.notify_tsk = None
-        self.mdt = mdt  # refactor: remove it
+        self.mediator = mediator  # refactor: remove it
         self.async_bld(*args, **kwargs)
 
     def async_bld(self, *args, **kwargs):
@@ -20,7 +20,7 @@ class Colleague(Subject):
     def _end_async(self, *args, **kwargs):
         self.sync_bld(*args, **kwargs)
         notify_args = 'on_comp_blt', self
-        self.notify_tsk = self.eng.do_later(.001, self.mdt.notify, notify_args)
+        self.notify_tsk = self.eng.do_later(.001, self.mediator.notify, notify_args)
         # since on_comp_blt is fired from __init__, when it's catched by
         # GODirector's on_comp_blt, it triggers __process_lst, but since
         # __init__ it's not finished, __process_lst's setattrs is not
@@ -34,15 +34,15 @@ class Colleague(Subject):
     def destroy(self):
         if self.notify_tsk:
             taskMgr.remove(self.notify_tsk)
-        self.mdt = self.notify_tsk = None
+        self.mediator = self.notify_tsk = None
         Subject.destroy(self)
 
 
 class FsmColleague(FSM, Colleague):
 
-    def __init__(self, mdt):
+    def __init__(self, mediator):
         FSM.__init__(self, self.__class__.__name__)
-        Colleague.__init__(self, mdt)
+        Colleague.__init__(self, mediator)
 
     def destroy(self):
         if self.state: self.cleanup()
@@ -95,7 +95,7 @@ class GODirector(object):
         setattr(obj, attr_name, cls(*arguments))
 
     def on_comp_blt(self, obj):
-        self.__process_lst(obj.mdt, self.pending[obj.__class__.__name__])
+        self.__process_lst(obj.mediator, self.pending[obj.__class__.__name__])
 
     def end_lst(self, idx):
         self.completed[idx] = True

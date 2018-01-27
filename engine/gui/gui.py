@@ -10,8 +10,8 @@ class EngineGuiBase(GuiColleague):
     def init_cls():
         return EngineGui if base.win else EngineGuiBase
 
-    def __init__(self, mdt):
-        GuiColleague.__init__(self, mdt)
+    def __init__(self, mediator):
+        GuiColleague.__init__(self, mediator)
         base.disableMouse()
 
     @staticmethod
@@ -62,8 +62,8 @@ class EngineGuiBase(GuiColleague):
 
 class EngineGui(EngineGuiBase):
 
-    def __init__(self, mdt):
-        EngineGuiBase.__init__(self, mdt)
+    def __init__(self, mediator):
+        EngineGuiBase.__init__(self, mediator)
         cfg = self.eng.logic.cfg
         resol = cfg.gui_cfg.win_size.split()
         res = tuple(int(size) for size in resol)

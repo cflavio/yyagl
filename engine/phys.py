@@ -25,8 +25,8 @@ class PhysFacade(Facade):
 
 class PhysMgr(Colleague, PhysFacade):
 
-    def __init__(self, mdt):
-        Colleague.__init__(self, mdt)
+    def __init__(self, mediator):
+        Colleague.__init__(self, mediator)
         self.collision_objs = []  # objects to be processed
         self.__obj2coll = {}  # {obj: [(node, coll_time), ...], ...}
         self.root = None

@@ -5,10 +5,10 @@ from yyagl.gameobject import PhysColleague
 
 class BonusPhys(PhysColleague):
 
-    def __init__(self, mdt, pos):
+    def __init__(self, mediator, pos):
         self.pos = pos
         self.ghost = None
-        PhysColleague.__init__(self, mdt)
+        PhysColleague.__init__(self, mediator)
 
     def sync_bld(self):
         self.ghost = BulletGhostNode('Bonus')

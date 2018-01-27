@@ -5,8 +5,8 @@ from yyagl.gameobject import PhysColleague
 
 class WeaponPhys(PhysColleague):
 
-    def __init__(self, mdt, car, cars):
-        PhysColleague.__init__(self, mdt)
+    def __init__(self, mediator, car, cars):
+        PhysColleague.__init__(self, mediator)
         self.parent, self.car, self.cars = car.gfx.nodepath, car, cars
         self.n_p = self.node = None
 
@@ -20,8 +20,8 @@ class WeaponPhys(PhysColleague):
         launch_dist = self.car.logic.car_vec * self.launch_dist
         self.n_p.set_pos(self.n_p.get_pos() + launch_dist)
         self.eng.phys_mgr.attach_rigid_body(self.node)
-        self.mdt.gfx.gfx_np.reparent_to(self.n_p)
-        self.mdt.gfx.gfx_np.set_pos((0, 0, self.gfx_dz))
+        self.mediator.gfx.gfx_np.reparent_to(self.n_p)
+        self.mediator.gfx.gfx_np.set_pos((0, 0, self.gfx_dz))
 
     def destroy(self):
         if self.node:  # has not been fired
@@ -33,8 +33,8 @@ class WeaponPhys(PhysColleague):
 
 class RocketWeaponPhys(WeaponPhys):
 
-    def __init__(self, mdt, car, cars):
-        WeaponPhys.__init__(self, mdt, car, cars)
+    def __init__(self, mediator, car, cars):
+        WeaponPhys.__init__(self, mediator, car, cars)
         self.update_tsk = self.rot_mat = None
         self.coll_name = self.rocket_coll_name
 
@@ -48,7 +48,7 @@ class RocketWeaponPhys(WeaponPhys):
             b_m = b_m | BitMask32.bit(2 + bitn)
         self.n_p.set_collide_mask(b_m)
         self.eng.phys_mgr.add_collision_obj(self.node)
-        self.node.set_python_tag('car', self.mdt.logic.car)
+        self.node.set_python_tag('car', self.mediator.logic.car)
         self.rot_mat = Mat4()
         rot_deg = self.parent.get_h() + self.rot_deg
         self.rot_mat.set_rotate_mat(rot_deg, (0, 0, 1))

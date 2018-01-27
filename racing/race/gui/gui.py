@@ -15,8 +15,8 @@ class RaceGuiFacade(Facade):
 
 class RaceGui(GuiColleague, RaceGuiFacade):
 
-    def __init__(self, mdt, rprops):
-        GuiColleague.__init__(self, mdt)
+    def __init__(self, mediator, rprops):
+        GuiColleague.__init__(self, mediator)
         r_p = self.props = rprops
         self.results = Results(rprops)
         self.loading = Loading()
@@ -30,7 +30,7 @@ class RaceGui(GuiColleague, RaceGuiFacade):
 
     def start(self):
         self.minimap = Minimap(
-            self.mdt.track.lrtb, self.props.minimap_path,
+            self.mediator.track.lrtb, self.props.minimap_path,
             self.props.minimap_image, self.props.col_dct,
             self.props.season_props.car_names,
             self.props.season_props.player_car_name)

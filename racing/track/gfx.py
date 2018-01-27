@@ -10,14 +10,14 @@ from .signs import Signs
 
 class TrackGfx(GfxColleague):
 
-    def __init__(self, mdt, race_props):
+    def __init__(self, mediator, race_props):
         self.ambient_np = self.spot_lgt = self.model = self.empty_models = \
             self.signs = None
         self.loaders = []
         self.__actors = []
         self.__flat_roots = {}
         self.rprops = race_props
-        GfxColleague.__init__(self, mdt)
+        GfxColleague.__init__(self, mediator)
 
     def async_bld(self):
         self.__set_model()

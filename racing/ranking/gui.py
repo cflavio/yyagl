@@ -11,19 +11,19 @@ from yyagl.engine.gui.menu import Menu
 
 class RankingPageGui(PageGui):
 
-    def __init__(self, mdt, menu, rprops, sprops, ranking):
+    def __init__(self, mediator, menu, rprops, sprops, ranking):
         self.rprops = rprops
         self.sprops = sprops
         self.drivers = sprops.drivers
         self.ranking = ranking
-        PageGui.__init__(self, mdt, menu)
+        PageGui.__init__(self, mediator, menu)
 
     def bld_page(self, back_btn=True):
         self.eng.init_gfx()
-        self.font = self.mdt.menu.gui.menu_args.font
-        self.text_fg = self.mdt.menu.gui.menu_args.text_active
-        self.text_bg = self.mdt.menu.gui.menu_args.text_normal
-        self.text_err = self.mdt.menu.gui.menu_args.text_err
+        self.font = self.mediator.menu.gui.menu_args.font
+        self.text_fg = self.mediator.menu.gui.menu_args.text_active
+        self.text_bg = self.mediator.menu.gui.menu_args.text_normal
+        self.text_err = self.mediator.menu.gui.menu_args.text_err
         items = self.ranking.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = OnscreenText(text=_('Ranking'), scale=.1, pos=(0, .76),
@@ -84,8 +84,8 @@ class RankingPage(Page):
 
 class RankingMenuGui(GuiColleague):
 
-    def __init__(self, mdt, rprops, sprops, ranking):
-        GuiColleague.__init__(self, mdt)
+    def __init__(self, mediator, rprops, sprops, ranking):
+        GuiColleague.__init__(self, mediator)
         menu_args = sprops.gameprops.menu_args
         menu_args.btn_size = (-8.6, 8.6, -.42, .98)
         self.menu = Menu(menu_args)
@@ -116,8 +116,8 @@ class RankingMenu(GameObject):
 
 class RankingGui(GuiColleague):
 
-    def __init__(self, mdt, background_fpath, font, fg_col):
-        GuiColleague.__init__(self, mdt)
+    def __init__(self, mediator, background_fpath, font, fg_col):
+        GuiColleague.__init__(self, mediator)
         self.ranking_texts = []
         self.background_path = background_fpath
         self.font = font

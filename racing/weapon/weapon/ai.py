@@ -6,8 +6,8 @@ class WeaponAi(AiColleague):
 
     fire_times = (2, 5)
 
-    def __init__(self, mdt, car):
-        AiColleague.__init__(self, mdt)
+    def __init__(self, mediator, car):
+        AiColleague.__init__(self, mediator)
         self.collect_time = globalClock.get_frame_time()
         self.car = car
         self.fire_time = uniform(*self.fire_times)
@@ -15,7 +15,7 @@ class WeaponAi(AiColleague):
     @property
     def is_fired_or_before(self):
         before_fire = self.eng.curr_time - self.collect_time < self.fire_time
-        return self.mdt.logic.has_fired or before_fire
+        return self.mediator.logic.has_fired or before_fire
 
     @property
     def obstacles(self):

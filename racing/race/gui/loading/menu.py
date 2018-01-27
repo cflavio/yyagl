@@ -7,9 +7,9 @@ from .loadingpage import LoadingPage
 
 class LoadingGui(GuiColleague):
 
-    def __init__(self, mdt, rprops, loading, track_name_transl,
+    def __init__(self, mediator, rprops, loading, track_name_transl,
                  drivers, ranking, tuning):
-        GuiColleague.__init__(self, mdt)
+        GuiColleague.__init__(self, mediator)
         pbackground = 'assets/images/loading/%s%s.txo'
         pbackground = pbackground % (rprops.track_name, randint(1, 4))
         menu_args = deepcopy(rprops.season_props.gameprops.menu_args)

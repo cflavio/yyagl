@@ -6,8 +6,8 @@ from yyagl.gameobject import PhysColleague
 
 class CarPhys(PhysColleague):
 
-    def __init__(self, mdt, car_props):
-        PhysColleague.__init__(self, mdt)
+    def __init__(self, mediator, car_props):
+        PhysColleague.__init__(self, mediator)
         self.pnode = self.vehicle = self.friction_slip = self.__track_phys = \
             self.coll_mesh = self.roll_influence = self.max_speed = None
         self.curr_speed_mul = 1.0
@@ -58,14 +58,14 @@ class CarPhys(PhysColleague):
                 self.coll_mesh, self.cprops.race_props.coll_name):
             chassis_shape.add_geom(geom.node().get_geom(0),
                                    geom.get_transform())
-        self.mdt.gfx.nodepath.get_node().add_shape(chassis_shape)
+        self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape)
         car_names = self.cprops.race_props.season_props.car_names
         car_idx = car_names.index(self.cprops.name)
         mask = BitMask32.bit(2 + car_idx) | BitMask32.bit(16) | BitMask32.bit(15)
-        self.mdt.gfx.nodepath.set_collide_mask(mask)
+        self.mediator.gfx.nodepath.set_collide_mask(mask)
 
     def __set_phys_node(self):
-        self.pnode = self.mdt.gfx.nodepath.get_node()
+        self.pnode = self.mediator.gfx.nodepath.get_node()
         self.pnode.set_mass(self.mass)
         self.pnode.set_deactivation_enabled(False)
         self.eng.phys_mgr.attach_rigid_body(self.pnode)
@@ -81,7 +81,7 @@ class CarPhys(PhysColleague):
         self.eng.phys_mgr.attach_vehicle(self.vehicle)
 
     def __set_wheels(self):
-        wheels = self.mdt.gfx.wheels
+        wheels = self.mediator.gfx.wheels
         f_bounds = wheels['fr'].get_tight_bounds()
         f_radius = (f_bounds[1][2] - f_bounds[0][2]) / 2.0 + .01
         r_bounds = wheels['rr'].get_tight_bounds()
@@ -130,7 +130,7 @@ class CarPhys(PhysColleague):
         vel = self.vehicle.get_chassis().get_linear_velocity()
         rot_mat = Mat4()
         rot_mat.setRotateMat(-90, (0, 0, 1))
-        car_lat = rot_mat.xformVec(self.mdt.logic.car_vec)
+        car_lat = rot_mat.xformVec(self.mediator.logic.car_vec)
         proj_frc = vel.project(car_lat)
         return proj_frc.length()
 
@@ -164,7 +164,7 @@ class CarPhys(PhysColleague):
 
     @property
     def speed(self):
-        if self.mdt.fsm.getCurrentOrNextState() == 'Countdown':
+        if self.mediator.fsm.getCurrentOrNextState() == 'Countdown':
             return 0  # getCurrentSpeedKmHour returns odd values otherwise
         return self.vehicle.get_current_speed_km_hour()
 
@@ -258,7 +258,7 @@ class CarPhys(PhysColleague):
 
     def rotate(self):
         self.pnode.apply_torque((0, 0, 80000))
-        self.mdt.logic.applied_torque = True
+        self.mediator.logic.applied_torque = True
 
     def destroy(self):
         self.eng.detach_obs(self.on_end_frame)
@@ -287,4 +287,4 @@ class CarPlayerPhys(CarPhys):
 
     def rotate(self):
         CarPhys.rotate(self)
-        self.mdt.audio.rotate_all_hit_sfx.play()
+        self.mediator.audio.rotate_all_hit_sfx.play()

@@ -7,11 +7,11 @@ from yyagl.gameobject import GfxColleague
 
 class WeaponGfx(GfxColleague):
 
-    def __init__(self, mdt, parent, fpath):
+    def __init__(self, mediator, parent, fpath):
         self.gfx_np = None
         self.parent = parent
         self.fpath = fpath
-        GfxColleague.__init__(self, mdt)
+        GfxColleague.__init__(self, mediator)
 
     def update_props(self, pos, fwd):
         pass
@@ -24,7 +24,7 @@ class WeaponGfx(GfxColleague):
         self.gfx_np.loop('anim')
         #self.gfx_np.flatten_light()
         self.gfx_np.reparent_to(self.parent)
-        self.gfx_np.set_h(self.mdt.deg)
+        self.gfx_np.set_h(self.mediator.deg)
         self.gfx_np.set_scale(1.5)
         self.gfx_np.set_pos((0, 0, 1.5))
 
@@ -39,8 +39,8 @@ class WeaponGfx(GfxColleague):
 
 class WeaponGfxNetwork(WeaponGfx):
 
-    def __init__(self, mdt, car, cars):
-        WeaponGfx.__init__(self, mdt, car, cars)
+    def __init__(self, mediator, car, cars):
+        WeaponGfx.__init__(self, mediator, car, cars)
         self.ipos = None
         self.ifwd = None
 

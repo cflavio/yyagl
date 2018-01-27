@@ -219,15 +219,15 @@ class CarGui(GuiColleague):
 
 class CarPlayerGui(CarGui):
 
-    def __init__(self, mdt, car_props):
+    def __init__(self, mediator, car_props):
         self.race_props = car_props
-        CarGui.__init__(self, mdt)
-        self.pars = CarParameters(mdt.phys, mdt.logic)
+        CarGui.__init__(self, mediator)
+        self.pars = CarParameters(mediator.phys, mediator.logic)
         self.panel = CarPanel(car_props)
         self.ai_panel = CarAIPanel()
 
     def upd_ranking(self, ranking):
-        r_i = ranking.index(self.mdt.name) + 1
+        r_i = ranking.index(self.mediator.name) + 1
         self.panel.ranking_txt.setText(str(r_i) + "'")
 
     def upd_ai(self):
@@ -243,11 +243,11 @@ class CarPlayerGui(CarGui):
 
 class CarNetworkGui(CarGui):
 
-    def __init__(self, mdt, car_props):
+    def __init__(self, mediator, car_props):
         self.race_props = car_props
-        CarGui.__init__(self, mdt)
+        CarGui.__init__(self, mediator)
         for drv in self.race_props.drivers:
-            if drv.dprops.car_name == self.mdt.name:
+            if drv.dprops.car_name == self.mediator.name:
                 name = drv.dprops.info.name
         sprops = self.race_props.season_props
         menu_args = sprops.gameprops.menu_args
@@ -262,7 +262,7 @@ class CarNetworkGui(CarGui):
         return p2d if base.camLens.project(p3d, p2d) else None
 
     def on_frame(self):
-        pos = self.__2d_pos(self.mdt.gfx.nodepath)
+        pos = self.__2d_pos(self.mediator.gfx.nodepath)
         if pos:
             self.name_txt.show()
             self.name_txt.set_pos((pos[0], 1, pos[1] + .16))

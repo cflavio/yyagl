@@ -5,8 +5,8 @@ from .joystick import JoystickMgr
 
 class EngineEvent(EventColleague):
 
-    def __init__(self, mdt, emulate_keyboard):
-        EventColleague.__init__(self, mdt)
+    def __init__(self, mediator, emulate_keyboard):
+        EventColleague.__init__(self, mediator)
         self.eng.add_task(self.__on_frame)
 
         if self.eng.lib.lib_version().startswith('1.10'):

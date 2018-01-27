@@ -67,8 +67,8 @@ class CarAudio(AudioColleague):
 
 class CarPlayerAudio(CarAudio):
 
-    def __init__(self, mdt, props):
-        CarAudio.__init__(self, mdt)
+    def __init__(self, mediator, props):
+        CarAudio.__init__(self, mediator)
         self.engine_sfx = AudioSound(props.sounds.engine)
         self.brake_sfx = AudioSound(props.sounds.brake)
         self.crash_sfx = AudioSound(props.sounds.crash)

@@ -20,17 +20,17 @@ class CarGfxFacade(Facade):
 
 class CarGfx(GfxColleague, CarGfxFacade):
 
-    def __init__(self, mdt, car_props):
+    def __init__(self, mediator, car_props):
         self.chassis_np = self.cnt = None
         self.cprops = car_props
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
         self.nodepath = self.eng.attach_node(BulletRigidBodyNode('Vehicle'))
-        self.skidmark_mgr = SkidmarkMgr(mdt)
+        self.skidmark_mgr = SkidmarkMgr(mediator)
         self.crash_cnt = 0
         self.last_crash_t = 0
         self.decorators = []
         self.dec_tsk = []
-        GfxColleague.__init__(self, mdt)
+        GfxColleague.__init__(self, mediator)
         CarGfxFacade.__init__(self)
         self.load()
 
@@ -75,12 +75,12 @@ class CarGfx(GfxColleague, CarGfxFacade):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
         if self.cnt:
             self.apply_damage()
-            self.mdt.event.on_bonus(wpn_classes[self.cnt - 1])
+            self.mediator.event.on_bonus(wpn_classes[self.cnt - 1])
             self.cnt -= 1
             return tsk.again
         else:
             self.apply_damage(True)
-            self.mdt.event.on_bonus('remove')
+            self.mediator.event.on_bonus('remove')
 
     def load_wheels(self, chassis_model):
         self.chassis_np = chassis_model
@@ -100,7 +100,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
 
     def crash_sfx(self):
         self.crash_cnt += 1
-        if self.mdt.phys.prev_speed_ratio < .8 or \
+        if self.mediator.phys.prev_speed_ratio < .8 or \
                 self.eng.curr_time - self.last_crash_t < 5.0 or \
                 self.crash_cnt < 2:
             return False
@@ -114,7 +114,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
             level = 1
         if self.chassis_np_hi.get_name() in curr_chassis.get_name():
             level = 2
-        self.mdt.event.on_damage(level)
+        self.mediator.event.on_damage(level)
         return True
 
     def apply_damage(self, reset=False):
@@ -129,10 +129,10 @@ class CarGfx(GfxColleague, CarGfxFacade):
             next_chassis = self.chassis_np_low
         curr_chassis.remove_node()
         next_chassis.reparent_to(self.nodepath)
-        if self.mdt.logic.weapon:
-            self.mdt.logic.weapon.reparent(next_chassis)
-        self.mdt.phys.apply_damage(reset)
-        self.mdt.gui.apply_damage(reset)
+        if self.mediator.logic.weapon:
+            self.mediator.logic.weapon.reparent(next_chassis)
+        self.mediator.phys.apply_damage(reset)
+        self.mediator.gui.apply_damage(reset)
         self.last_crash_t = self.eng.curr_time
         self.crash_cnt = 0
 
@@ -150,7 +150,7 @@ class CarPlayerGfx(CarGfx):
 
     def crash_sfx(self):
         if CarGfx.crash_sfx(self):
-            self.mdt.audio.crash_high_speed_sfx.play()
+            self.mediator.audio.crash_high_speed_sfx.play()
 
 
 class SkidmarkMgr(GameObject):

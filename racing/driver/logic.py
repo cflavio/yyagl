@@ -55,8 +55,8 @@ class DriverPlayerLoaderStrategy(GameObject):
 
 class DriverLogic(LogicColleague):
 
-    def __init__(self, mdt, driver_props):
-        LogicColleague.__init__(self, mdt)
+    def __init__(self, mediator, driver_props):
+        LogicColleague.__init__(self, mediator)
         self.dprops = driver_props
 
     def to_dct(self):

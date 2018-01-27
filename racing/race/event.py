@@ -20,8 +20,8 @@ class NetMsgs(object):
 
 class RaceEvent(EventColleague):
 
-    def __init__(self, mdt, menu_cls, keys):
-        EventColleague.__init__(self, mdt)
+    def __init__(self, mediator, menu_cls, keys):
+        EventColleague.__init__(self, mediator)
         self.menu_cls = menu_cls
         self.accept(keys.pause, self.eng.toggle_pause)
         self.last_sent = globalClock.get_frame_time()  # for networking
@@ -34,8 +34,8 @@ class RaceEvent(EventColleague):
         self.ignore('escape-up')
         self.eng.show_cursor()
         self.ingame_menu = self.menu_cls(
-            self.mdt.logic.props.season_props.gameprops.menu_args,
-            self.mdt.logic.props.keys)
+            self.mediator.logic.props.season_props.gameprops.menu_args,
+            self.mediator.logic.props.keys)
         self.ingame_menu.gui.attach(self.on_ingame_back)
         self.ingame_menu.gui.attach(self.on_ingame_exit)
 
@@ -49,8 +49,8 @@ class RaceEvent(EventColleague):
     def on_ingame_exit(self):
         self.ingame_menu.gui.detach(self.on_ingame_back)
         self.ingame_menu.gui.detach(self.on_ingame_exit)
-        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
-            self.mdt.logic.exit_play()
+        if self.mediator.fsm.getCurrentOrNextState() != 'Results':
+            self.mediator.logic.exit_play()
         self.ingame_menu.destroy()
         self.notify('on_ingame_exit_confirm')
 
@@ -59,19 +59,19 @@ class RaceEvent(EventColleague):
 
     def on_wrong_way(self, way_str):
         if way_str:
-            self.mdt.gui.way_txt.setText(way_str)
-        elif not self.mdt.logic.player_car.logic.is_moving:
-            respawn_key = self.mdt.logic.props.keys.respawn
+            self.mediator.gui.way_txt.setText(way_str)
+        elif not self.mediator.logic.player_car.logic.is_moving:
+            respawn_key = self.mediator.logic.props.keys.respawn
             txt = _('press %s to respawn') % respawn_key
-            self.mdt.gui.way_txt.setText(txt)
+            self.mediator.gui.way_txt.setText(txt)
         else:
-            self.mdt.gui.way_txt.setText('')
+            self.mediator.gui.way_txt.setText('')
 
     def on_end_race(self):
         points = [10, 8, 6, 4, 3, 2, 1, 0]
-        zipped = zip(self.mdt.logic.race_ranking(), points)
+        zipped = zip(self.mediator.logic.race_ranking(), points)
         race_ranking = {car: point for car, point in zipped}
-        self.mdt.fsm.demand('Results', race_ranking)
+        self.mediator.fsm.demand('Results', race_ranking)
 
     @staticmethod
     def _rotate_car(t, node, start_vec, end_vec):
@@ -88,8 +88,8 @@ class RaceEvent(EventColleague):
 
 class RaceEventServer(RaceEvent):
 
-    def __init__(self, mdt, menu_cls, keys):
-        RaceEvent.__init__(self, mdt, menu_cls, keys)
+    def __init__(self, mediator, menu_cls, keys):
+        RaceEvent.__init__(self, mediator, menu_cls, keys)
         self.server_info = {}
         self.eng.attach_obs(self.on_frame)
 
@@ -97,15 +97,15 @@ class RaceEventServer(RaceEvent):
         self.eng.server.register_cb(self.process_srv)
 
     def on_frame(self):
-        if not hasattr(self.mdt.logic, 'player_car') or \
-                not hasattr(self.mdt.logic.player_car, 'phys') or \
-                any([not hasattr(car, 'phys') for car in self.mdt.logic.cars]):
+        if not hasattr(self.mediator.logic, 'player_car') or \
+                not hasattr(self.mediator.logic.player_car, 'phys') or \
+                any([not hasattr(car, 'phys') for car in self.mediator.logic.cars]):
             return  # still loading; attach when the race has started
-        pos = self.mdt.logic.player_car.get_pos()
-        fwd = render.get_relative_vector(self.mdt.logic.player_car.gfx.nodepath.node, Vec3(0, 1, 0))
-        velocity = self.mdt.logic.player_car.get_linear_velocity()
+        pos = self.mediator.logic.player_car.get_pos()
+        fwd = render.get_relative_vector(self.mediator.logic.player_car.gfx.nodepath.node, Vec3(0, 1, 0))
+        velocity = self.mediator.logic.player_car.get_linear_velocity()
         self.server_info['server'] = (pos, fwd, velocity)
-        for car in [_car for _car in self.mdt.logic.cars if _car.ai_cls == CarAi]:
+        for car in [_car for _car in self.mediator.logic.cars if _car.ai_cls == CarAi]:
             pos = car.get_pos()
             fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
             velocity = car.get_linear_velocity()
@@ -117,7 +117,7 @@ class RaceEventServer(RaceEvent):
 
     def __prepare_game_packet(self):
         packet = [NetMsgs.game_packet]
-        for car in [self.mdt.logic.player_car] + self.mdt.logic.cars:
+        for car in [self.mediator.logic.player_car] + self.mediator.logic.cars:
             name = car.name
             pos = car.gfx.nodepath.get_pos()
             fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
@@ -174,7 +174,7 @@ class RaceEventServer(RaceEvent):
             ]]
         self.server_info[sender] = (pos, fwd, velocity, level, weapon)
         car_name = self.eng.car_mapping[data_lst[-1]]
-        for car in [car for car in self.mdt.logic.cars if car.__class__ == NetworkCar]:
+        for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
             if car_name in car.name:
                 LerpPosInterval(car.gfx.nodepath.node, self.eng.server.rate, pos).start()
                 fwd_start = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
@@ -244,9 +244,9 @@ class RaceEventServer(RaceEvent):
             self.eng.server.send([NetMsgs.end_race])
             dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0,
                    'phoibe': 0, 'rea': 0, 'iperion': 0, 'teia': 0}
-            self.mdt.fsm.demand('Results', dct)
+            self.mediator.fsm.demand('Results', dct)
             # forward the actual ranking
-            self.mdt.gui.results.show(dct)
+            self.mediator.gui.results.show(dct)
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
@@ -279,7 +279,7 @@ class RaceEventClient(RaceEvent):
                     (data_lst[start + 4], data_lst[start + 5], data_lst[start + 6])
                 ]]
             data_lst = data_lst[19 + data_lst[18] * 7:]
-            cars = self.mdt.logic.cars
+            cars = self.mediator.logic.cars
             netcars = [car for car in cars if car.__class__ == NetworkCar]
             for car in netcars:
                 if car_name in car.name:
@@ -347,8 +347,8 @@ class RaceEventClient(RaceEvent):
         if data_lst[0] == NetMsgs.game_packet:
             self.__process_game_packet(data_lst)
         if data_lst[0] == NetMsgs.end_race:
-            if self.mdt.fsm.get_current_or_next_state() != 'Results':
+            if self.mediator.fsm.get_current_or_next_state() != 'Results':
                 # forward the actual ranking
                 dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0,
                        'phoibe': 0, 'rea': 0, 'iperion': 0, 'teia': 0}
-                self.mdt.fsm.demand('Results', dct)
+                self.mediator.fsm.demand('Results', dct)

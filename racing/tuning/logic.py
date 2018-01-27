@@ -11,8 +11,8 @@ class TuningCar(object):
 
 class TuningLogic(LogicColleague):
 
-    def __init__(self, mdt, car_names):
-        LogicColleague.__init__(self, mdt)
+    def __init__(self, mediator, car_names):
+        LogicColleague.__init__(self, mediator)
         self.car_names = car_names
         self.car2tuning = {}
         self.reset()

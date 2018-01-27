@@ -47,7 +47,7 @@ class InputBuilderJoystick(InputBuilder):
 
     def build(self, ai, joystick_mgr):
         j_x, j_y, j_a, j_b = joystick_mgr.get_joystick()
-        if j_b and self.mdt.logic.weapon:
+        if j_b and self.mediator.logic.weapon:
             self.on_fire()
         inp = {'forward': j_y < -.4, 'rear': j_y > .4 or j_a,
                'left': j_x < -.4, 'right': j_x > .4}
@@ -57,8 +57,8 @@ class InputBuilderJoystick(InputBuilder):
 
 class CarEvent(EventColleague, ComputerProxy):
 
-    def __init__(self, mdt, race_props):
-        EventColleague.__init__(self, mdt)
+    def __init__(self, mediator, race_props):
+        EventColleague.__init__(self, mediator)
         ComputerProxy.__init__(self)
         self.eng.attach_obs(self.on_collision)
         self.props = race_props
@@ -73,15 +73,15 @@ class CarEvent(EventColleague, ComputerProxy):
         self.eng.attach_obs(self.on_frame)
 
     def on_collision(self, obj, tgt_obj):
-        if obj != self.mdt.gfx.nodepath.get_node():
+        if obj != self.mediator.gfx.nodepath.get_node():
             return
         obj_name = tgt_obj.get_name()
         if obj_name.startswith(self.props.respawn_name):
             self.process_respawn()
         if obj_name.startswith(self.props.pitstop_name):
-            self.mdt.phys.apply_damage(True)
-            self.mdt.gfx.apply_damage(True)
-            self.mdt.event.on_damage(0)
+            self.mediator.phys.apply_damage(True)
+            self.mediator.gfx.apply_damage(True)
+            self.mediator.event.on_damage(0)
         if obj_name.startswith(self.props.goal_name):
             self._process_goal()
         obst_names = [self.props.wall_name, 'Vehicle']
@@ -93,14 +93,14 @@ class CarEvent(EventColleague, ComputerProxy):
         if any(obj_name.startswith(wpn_name) for wpn_name in weapons):
             int_lat = 10000
             int_rot = 20000
-            self.mdt.phys.pnode.apply_central_force((choice([-int_lat, int_lat]), choice([-int_lat, int_lat]), 96000))
-            self.mdt.phys.pnode.apply_torque((0, 0, choice([-int_rot, int_rot])))
+            self.mediator.phys.pnode.apply_central_force((choice([-int_lat, int_lat]), choice([-int_lat, int_lat]), 96000))
+            self.mediator.phys.pnode.apply_torque((0, 0, choice([-int_rot, int_rot])))
 
     def on_bonus(self, cls=None):
-        if self.mdt.logic.weapon:
-            self.mdt.logic.weapon.destroy()
+        if self.mediator.logic.weapon:
+            self.mediator.logic.weapon.destroy()
         if cls == 'remove':
-            self.mdt.logic.weapon = None
+            self.mediator.logic.weapon = None
             self.ignore(self.props.keys.fire)
             return
         if cls: wpn_cls = cls
@@ -122,65 +122,65 @@ class CarEvent(EventColleague, ComputerProxy):
             Mine: self.props.mine_path,
             MineNetwork: self.props.mine_path}
         path = wpn2path[wpn_cls]
-        self.mdt.logic.weapon = wpn_cls(
-            self.mdt, path, self.props.season_props.car_names, part_path)
-        self.mdt.logic.weapon.attach_obs(self.on_rotate_all)
+        self.mediator.logic.weapon = wpn_cls(
+            self.mediator, path, self.props.season_props.car_names, part_path)
+        self.mediator.logic.weapon.attach_obs(self.on_rotate_all)
         return wpn_cls
 
     def on_rotate_all(self, sender):
         self.notify('on_rotate_all', sender)
 
     def _on_crash(self):
-        if self.mdt.fsm.getCurrentOrNextState() != 'Results':
-            self.mdt.gfx.crash_sfx()
+        if self.mediator.fsm.getCurrentOrNextState() != 'Results':
+            self.mediator.gfx.crash_sfx()
 
     def _process_wall(self):
         self._on_crash()
 
     def _process_goal(self):
-        is_res = self.mdt.fsm.getCurrentOrNextState() == 'Results'
-        has_started = self.mdt.logic.lap_time_start
-        is_corr = self.mdt.logic.correct_lap
+        is_res = self.mediator.fsm.getCurrentOrNextState() == 'Results'
+        has_started = self.mediator.logic.lap_time_start
+        is_corr = self.mediator.logic.correct_lap
         if is_res or has_started and not is_corr:
             return
-        self.mdt.logic.reset_waypoints()
-        lap_times = self.mdt.logic.lap_times
-        if self.mdt.logic.lap_time_start:
-            lap_times += [self.mdt.logic.lap_time]
-            self._process_nonstart_goals(1 + len(lap_times), self.mdt.laps)
-        self.mdt.logic.lap_time_start = self.eng.curr_time
+        self.mediator.logic.reset_waypoints()
+        lap_times = self.mediator.logic.lap_times
+        if self.mediator.logic.lap_time_start:
+            lap_times += [self.mediator.logic.lap_time]
+            self._process_nonstart_goals(1 + len(lap_times), self.mediator.laps)
+        self.mediator.logic.lap_time_start = self.eng.curr_time
 
     def _process_nonstart_goals(self, lap_number, laps):
         pass
 
     def process_respawn(self):
-        start_wp_n, end_wp_n = self.mdt.logic.last_wp
-        self.mdt.gfx.nodepath.set_pos(start_wp_n.get_pos() + (0, 0, 2))
+        start_wp_n, end_wp_n = self.mediator.logic.last_wp
+        self.mediator.gfx.nodepath.set_pos(start_wp_n.get_pos() + (0, 0, 2))
         wp_vec = Vec(end_wp_n.get_pos(start_wp_n).x, end_wp_n.get_pos(start_wp_n).y, 0).normalize()
         or_h = (wp_vec.xy).signed_angle_deg(Vec2(0, 1))
-        self.mdt.gfx.nodepath.set_hpr((-or_h, 0, 0))
-        self.mdt.gfx.nodepath.get_node().set_linear_velocity(0)
-        self.mdt.gfx.nodepath.get_node().set_angular_velocity(0)
+        self.mediator.gfx.nodepath.set_hpr((-or_h, 0, 0))
+        self.mediator.gfx.nodepath.get_node().set_linear_velocity(0)
+        self.mediator.gfx.nodepath.get_node().set_angular_velocity(0)
 
     def on_frame(self):
         _input = self._get_input()
-        if self.mdt.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
+        if self.mediator.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
             _input = DirKeys(*[False for _ in range(4)])
-            self.mdt.logic.reset_car()
+            self.mediator.logic.reset_car()
         self.__update_contact_pos()
-        self.mdt.phys.update_car_props()
-        self.mdt.logic.update_waypoints()
-        self.mdt.logic.update(_input)
-        if self.mdt.logic.is_upside_down:
-            self.mdt.gfx.nodepath.set_r(0)
+        self.mediator.phys.update_car_props()
+        self.mediator.logic.update_waypoints()
+        self.mediator.logic.update(_input)
+        if self.mediator.logic.is_upside_down:
+            self.mediator.gfx.nodepath.set_r(0)
 
     def __update_contact_pos(self):
-        top = self.mdt.pos + (0, 0, 50)
-        bottom = self.mdt.pos + (0, 0, -50)
+        top = self.mediator.pos + (0, 0, 50)
+        bottom = self.mediator.pos + (0, 0, -50)
         hits = self.eng.phys_mgr.ray_test_all(top, bottom).get_hits()
         r_n = self.props.road_name
         for hit in [hit for hit in hits if r_n in hit.get_node().get_name()]:
-            self.mdt.logic.last_wp = self.mdt.logic.closest_wp()
+            self.mediator.logic.last_wp = self.mediator.logic.closest_wp()
 
     def on_damage(self, level):
         pass
@@ -194,86 +194,86 @@ class CarEvent(EventColleague, ComputerProxy):
 
 class CarPlayerEvent(CarEvent):
 
-    def __init__(self, mdt, race_props):
-        CarEvent.__init__(self, mdt, race_props)
+    def __init__(self, mediator, race_props):
+        CarEvent.__init__(self, mediator, race_props)
         if not self.eng.is_runtime:
-            self.accept('f11', self.mdt.gui.pars.toggle)
+            self.accept('f11', self.mediator.gui.pars.toggle)
             self.accept('f8', self.notify, ['on_end_race'])
-        state = self.mdt.fsm.getCurrentOrNextState()
+        state = self.mediator.fsm.getCurrentOrNextState()
         self.input_bld = InputBuilder.create(state, race_props.joystick)
         self.accept(self.props.keys.respawn, self.process_respawn)
 
     def on_frame(self):
         CarEvent.on_frame(self)
-        self.mdt.logic.camera.update(
-            self.mdt.phys.speed_ratio, self.mdt.logic.is_rolling,
-            self.mdt.fsm.getCurrentOrNextState() == 'Countdown',
-            self.mdt.logic.is_rotating)
-        self.mdt.audio.update(self.mdt.logic.is_skidmarking,
-                              self.mdt.phys.lin_vel_ratio,
+        self.mediator.logic.camera.update(
+            self.mediator.phys.speed_ratio, self.mediator.logic.is_rolling,
+            self.mediator.fsm.getCurrentOrNextState() == 'Countdown',
+            self.mediator.logic.is_rotating)
+        self.mediator.audio.update(self.mediator.logic.is_skidmarking,
+                              self.mediator.phys.lin_vel_ratio,
                               self._get_input(),
-                              self.mdt.logic.is_drifting,
-                              self.mdt.phys.is_flying,
-                              self.mdt.logic.is_rolling)
+                              self.mediator.logic.is_drifting,
+                              self.mediator.phys.is_flying,
+                              self.mediator.logic.is_rolling)
 
     def on_collision(self, obj, tgt_obj):
         CarEvent.on_collision(self, obj, tgt_obj)
-        if obj != self.mdt.gfx.nodepath.get_node():
+        if obj != self.mediator.gfx.nodepath.get_node():
             return
         obj_name = tgt_obj.get_name()
         if any(obj_name.startswith(s) for s in self.props.roads_names):
-            self.mdt.audio.landing_sfx.play()
+            self.mediator.audio.landing_sfx.play()
         if obj_name.startswith(self.props.pitstop_name):
-            self.mdt.gui.panel.apply_damage(True)
-            self.mdt.gfx.set_decorator('pitstop')
-            self.mdt.audio.pitstop_sfx.play()
+            self.mediator.gui.panel.apply_damage(True)
+            self.mediator.gfx.set_decorator('pitstop')
+            self.mediator.audio.pitstop_sfx.play()
         if 'Rocket' in obj_name:
             if obj != tgt_obj.get_python_tag('car').phys.pnode:
-                self.mdt.audio.rocket_hit_sfx.play()
+                self.mediator.audio.rocket_hit_sfx.play()
 
     def on_bonus(self, wpn_cls=None):
-        if self.mdt.logic.weapon:
-            self.mdt.gui.panel.unset_weapon()
+        if self.mediator.logic.weapon:
+            self.mediator.gui.panel.unset_weapon()
         wpn_cls = CarEvent.on_bonus(self, wpn_cls)
         if not wpn_cls: return  # if removing
         self.accept(self.props.keys.fire, self.on_fire)
-        self.mdt.gui.panel.set_weapon(
+        self.mediator.gui.panel.set_weapon(
             self.props.season_props.wpn2img[wpn_cls.__name__])
         return wpn_cls
 
     def on_fire(self):
         self.ignore(self.props.keys.fire)
-        self.mdt.logic.fire()
-        self.mdt.gui.panel.unset_weapon()
+        self.mediator.logic.fire()
+        self.mediator.gui.panel.unset_weapon()
         self.ignore(self.props.keys.fire)
 
     def _process_wall(self):
         CarEvent._process_wall(self)
-        self.mdt.audio.crash_sfx.play()
+        self.mediator.audio.crash_sfx.play()
 
     def _process_nonstart_goals(self, lap_number, laps):
         CarEvent._process_nonstart_goals(self, lap_number, laps)
         curr_lap = min(laps, lap_number)
-        self.mdt.gui.panel.lap_txt.setText(str(curr_lap)+'/'+str(laps))
-        self.mdt.audio.lap_sfx.play()
+        self.mediator.gui.panel.lap_txt.setText(str(curr_lap)+'/'+str(laps))
+        self.mediator.audio.lap_sfx.play()
 
     def _process_end_goal(self):
         self.notify('on_end_race')
 
     def _process_goal(self):
         CarEvent._process_goal(self)
-        lap_times = self.mdt.logic.lap_times
-        is_best = not lap_times or min(lap_times) > self.mdt.logic.lap_time
-        if self.mdt.logic.lap_time_start and (not lap_times or is_best):
-            self.mdt.gui.panel.best_txt.setText(
-                self.mdt.gui.panel.time_txt.getText())
-        if len(lap_times) == self.mdt.laps:
+        lap_times = self.mediator.logic.lap_times
+        is_best = not lap_times or min(lap_times) > self.mediator.logic.lap_time
+        if self.mediator.logic.lap_time_start and (not lap_times or is_best):
+            self.mediator.gui.panel.best_txt.setText(
+                self.mediator.gui.panel.time_txt.getText())
+        if len(lap_times) == self.mediator.laps:
             self._process_end_goal()
         # self.on_bonus()  # to test weapons
 
     @once_a_frame
     def _get_input(self):
-        return self.input_bld.build(self.mdt.ai, self.eng.joystick_mgr)
+        return self.input_bld.build(self.mediator.ai, self.eng.joystick_mgr)
 
     def destroy(self):
         evts = ['f11', 'f8', self.props.keys.fire, self.props.keys.respawn]
@@ -290,35 +290,35 @@ class CarPlayerEventServer(CarPlayerEvent):
 
 class CarPlayerEventClient(CarPlayerEvent):
 
-    def __init__(self, mdt, race_props):
-        CarPlayerEvent.__init__(self, mdt, race_props)
+    def __init__(self, mediator, race_props):
+        CarPlayerEvent.__init__(self, mediator, race_props)
         self.last_sent = self.eng.curr_time
 
     def on_frame(self):
         CarPlayerEvent.on_frame(self)
-        pos = self.mdt.pos
-        fwd = render.get_relative_vector(self.mdt.gfx.nodepath.node, Vec3(0, 1, 0))
-        velocity = self.mdt.phys.vehicle.get_chassis().get_linear_velocity()
+        pos = self.mediator.pos
+        fwd = render.get_relative_vector(self.mediator.gfx.nodepath.node, Vec3(0, 1, 0))
+        velocity = self.mediator.phys.vehicle.get_chassis().get_linear_velocity()
         level = 0
-        curr_chassis = self.mdt.gfx.nodepath.get_children()[0]
-        if self.mdt.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+        curr_chassis = self.mediator.gfx.nodepath.get_children()[0]
+        if self.mediator.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
             level = 1
-        if self.mdt.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+        if self.mediator.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
             level = 2
         wpn = ''
         wpn_pos = (0, 0, 0)
         wpn_fwd = (0, 0, 0)
-        if self.mdt.logic.weapon:
-            curr_wpn = self.mdt.logic.weapon
+        if self.mediator.logic.weapon:
+            curr_wpn = self.mediator.logic.weapon
             wpn = {
                 Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
                 RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
             wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
         packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, [level], [wpn], wpn_pos, wpn_fwd))
-        packet += [len(self.mdt.logic.fired_weapons)]
-        for i in range(len(self.mdt.logic.fired_weapons)):
-            curr_wpn = self.mdt.logic.fired_weapons[i]
+        packet += [len(self.mediator.logic.fired_weapons)]
+        for i in range(len(self.mediator.logic.fired_weapons)):
+            curr_wpn = self.mediator.logic.fired_weapons[i]
             wpn = {
                 Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
                 RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
@@ -344,10 +344,10 @@ class CarNetworkEvent(CarEvent):
         pass
 
     def set_fired_weapon(self, wpn_cls, wpn_pos, wpn_fwd):
-        self.mdt.logic.fire()
+        self.mediator.logic.fire()
 
     def unset_fired_weapon(self, wpn):
-        self.mdt.logic.unset_fired_weapon(wpn)
+        self.mediator.logic.unset_fired_weapon(wpn)
 
     def set_weapon(self, wpn_cls):
         #if wpn_code:
@@ -360,15 +360,15 @@ class CarNetworkEvent(CarEvent):
         CarEvent.on_bonus(self, wpn_cls)
 
     def unset_weapon(self):
-        self.mdt.logic.weapon.destroy()
-        self.mdt.logic.weapon = None
+        self.mediator.logic.weapon.destroy()
+        self.mediator.logic.weapon = None
 
 
 class CarAiEvent(CarEvent):
 
     @once_a_frame
     def _get_input(self):
-        return self.mdt.ai.get_input()
+        return self.mediator.ai.get_input()
 
 
 class CarAiPlayerEvent(CarAiEvent, CarPlayerEvent):
