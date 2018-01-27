@@ -56,36 +56,34 @@ class XMPP(Subject):
 
     def __init__(self):
         Subject.__init__(self)
-        self.xmpp = None
+        self.client = None
         self.users = []
 
     def start(self, usr, pwd, on_ok, on_fail):
         logging.basicConfig(level=logging.DEBUG,
                             format='%(levelname)-8s %(message)s')
-        self.xmpp = YorgClient(usr, pwd, on_ok, on_fail, self)
-        self.xmpp.register_plugin('xep_0030') # Service Discovery
-        self.xmpp.register_plugin('xep_0004') # Data Forms
-        self.xmpp.register_plugin('xep_0060') # PubSub
-        self.xmpp.register_plugin('xep_0199') # XMPP Ping
-        self.xmpp.register_plugin('xep_0045') # Multi-User Chat
-        #self.xmpp.auto_authorize = False
-        #self.xmpp.auto_subscribe = False
-        if self.xmpp.connect(): self.xmpp.process()
+        self.client = YorgClient(usr, pwd, on_ok, on_fail, self)
+        self.client.register_plugin('xep_0030') # Service Discovery
+        self.client.register_plugin('xep_0004') # Data Forms
+        self.client.register_plugin('xep_0060') # PubSub
+        self.client.register_plugin('xep_0199') # XMPP Ping
+        self.client.register_plugin('xep_0045') # Multi-User Chat
+        if self.client.connect(): self.client.process()
 
     def send_connected(self):
-        self.xmpp.send_connected()
+        self.client.send_connected()
 
     def disconnect(self):
-        if self.xmpp:
-            self.xmpp.disconnect()
-            self.xmpp = self.xmpp.destroy()
+        if self.client:
+            self.client.disconnect()
+            self.client = self.client.destroy()
 
     @property
     def friends(self):
-        return self.xmpp.friends
+        return self.client.friends
 
     def is_friend(self, name):
-        return name in self.xmpp.friends
+        return name in self.client.friends
 
     def destroy(self):
         self.disconnect()
@@ -125,10 +123,10 @@ class YorgClient(ClientXMPP):
         self.get_roster()
         logging.info(self.client_roster)
         self.on_ok()
-        res = self['xep_0030'].get_items(jid=self.xmpp.xmpp.boundjid.server, iterator=True)
+        res = self['xep_0030'].get_items(jid=self.xmpp.client.boundjid.server, iterator=True)
         for itm in res['disco_items']:
             if 'conference' in itm['jid']:
-                self.xmpp.xmpp.conf_srv = itm['jid']
+                self.xmpp.client.conf_srv = itm['jid']
 
     @property
     def friends(self):
@@ -144,15 +142,23 @@ class YorgClient(ClientXMPP):
         logging.info('subscribed ' + str(self.client_roster))
 
     def on_presence_available(self, msg):
+        _from = str(msg['from'])
+        res = JID(msg['from'].resource)
+        room = str(JID(msg['muc']['room']).bare)
+        nick = str(msg['muc']['nick'])
+        is_user = nick == res.user + '@' + res.server
+        if _from == room + '/' + nick and is_user:
+            print nick + ' is online in the room ' + room
+            return
         if str(msg['from']) not in [usr.name_full for usr in self.xmpp.users]:
             self.xmpp.users += [User(msg['from'], 0, True, self.xmpp)]
             # TODO: create with is_in_yorg == False and use a stanza for
             # setting is_in_yorg = True
         self.sort_users()
-        if msg['from'].bare != self.xmpp.xmpp.boundjid.bare and msg['from'] not in self.presences_sent:
+        if msg['from'].bare != self.xmpp.client.boundjid.bare and msg['from'] not in self.presences_sent:
             self.presences_sent += [msg['from']]
-            self.xmpp.xmpp.send_presence(
-                pfrom=self.xmpp.xmpp.boundjid.full,
+            self.xmpp.client.send_presence(
+                pfrom=self.xmpp.client.boundjid.full,
                 pto=msg['from'])
         self.xmpp.notify('on_presence_available', msg)
 
@@ -173,13 +179,13 @@ class YorgClient(ClientXMPP):
             return self.xmpp.notify('on_invite_chat', msg)
 
     def on_groupchat_message(self, msg):
-        if msg['mucnick'] != self.xmpp.xmpp.boundjid.bare:
+        if msg['mucnick'] != self.xmpp.client.boundjid.bare:
             return self.xmpp.notify('on_groupchat_msg', msg)
 
     def on_list_users(self, msg):
         self.xmpp.users = []
         self.xmpp.users = [User(line[1:], int(line[0]), True, self.xmpp) for line in msg['body'].split()]
-        roster_users = [name for name in self.xmpp.xmpp.client_roster.keys() if self.xmpp.xmpp.client_roster[name] in ['to', 'both']]
+        roster_users = [name for name in self.xmpp.client.client_roster.keys() if self.xmpp.client.client_roster[name] in ['to', 'both']]
         for user in ['ya2_yorg@jabb3r.org', self.boundjid.bare]:
             if user in roster_users: roster_users.remove(user)
         out_users = [usr for usr in roster_users if usr not in [_usr.name for _usr in self.xmpp.users]]
@@ -188,8 +194,8 @@ class YorgClient(ClientXMPP):
         presence_users = [usr.name_full for usr in self.xmpp.users if usr.name not in filter_names]
         for usr in presence_users:
             if usr not in self.presences_sent:
-                self.xmpp.xmpp.send_presence(
-                    pfrom=self.xmpp.xmpp.boundjid.full,
+                self.xmpp.client.send_presence(
+                    pfrom=self.xmpp.client.boundjid.full,
                     pto=usr)
 
         self.sort_users()
