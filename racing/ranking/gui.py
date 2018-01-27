@@ -18,7 +18,7 @@ class RankingPageGui(PageGui):
         self.ranking = ranking
         PageGui.__init__(self, mediator, menu)
 
-    def bld_page(self, back_btn=True):
+    def build(self, back_btn=True):
         self.eng.init_gfx()
         self.font = self.mediator.menu.gui.menu_args.font
         self.text_fg = self.mediator.menu.gui.menu_args.text_active
@@ -28,11 +28,11 @@ class RankingPageGui(PageGui):
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = OnscreenText(text=_('Ranking'), scale=.1, pos=(0, .76),
                            font=self.font, fg=self.text_bg)
-        self.add_widget(txt)
+        self.add_widgets([txt])
         for i, car in enumerate(sorted_ranking):
             txt, img = RankingGui.set_drv_txt_img(self, i, car[0], 0, .52,
                                                   str(car[1]) + ' %s')
-            map(self.add_widget, [txt, img])
+            self.add_widgets([txt, img])
         track = self.rprops.track_name
         ntracks = len(self.sprops.gameprops.season_tracks)
         if self.sprops.gameprops.season_tracks.index(track) == ntracks - 1:
@@ -47,7 +47,7 @@ class RankingPageGui(PageGui):
                 pos=(0, -.3), font=loader.loadFont(self.sprops.font),
                 parent=base.a2dLeftCenter)
             txt.set_r(-79)
-            map(self.add_widget, [txt, img])
+            self.add_widgets([txt, img])
         else:
             cont_btn_cmd = self.notify
             cont_btn_ea = ['on_ranking_end']
@@ -55,8 +55,8 @@ class RankingPageGui(PageGui):
             text=_('Continue'), pos=(0, 1, -.8), command=cont_btn_cmd,
             extraArgs=cont_btn_ea,
             **self.rprops.season_props.gameprops.menu_args.btn_args)
-        self.add_widget(cont_btn)
-        PageGui.bld_page(self, False)
+        self.add_widgets([cont_btn])
+        PageGui.build(self, False)
 
 
 class RankingPage(Page):

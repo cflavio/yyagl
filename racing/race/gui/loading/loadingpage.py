@@ -16,7 +16,7 @@ class LoadingPageGui(PageGui):
         self.tuning = tuning
         PageGui.__init__(self, mediator, menu)
 
-    def bld_page(self, back_btn=True):
+    def build(self, back_btn=True):
         self.eng.init_gfx()
         self.font = self.mediator.menu.gui.menu_args.font
         self.text_fg = self.mediator.menu.gui.menu_args.text_active
@@ -39,44 +39,44 @@ class LoadingPageGui(PageGui):
         self.set_ranking()
         self.set_controls()
         self.set_upgrades()
-        map(self.add_widget, [self.load_txt, track_txt])
-        PageGui.bld_page(self, False)
+        self.add_widgets([self.load_txt, track_txt])
+        PageGui.build(self, False)
 
     def set_wld_img(self):
         self.wld_img = OnscreenImage(
             'assets/images/loading/%s.txo' % self.rprops.track_name,
             pos=(-.25, 1, -.25), scale=.24, parent=base.a2dTopRight)
         self.wld_img.set_transparency(True)
-        self.add_widget(self.wld_img)
+        self.add_widgets([self.wld_img])
 
     def set_grid(self):
         txt = OnscreenText(text=_('Starting grid'), scale=.1, pos=(-1.0, .38),
                            font=self.font, fg=self.text_bg)
-        self.add_widget(txt)
+        self.add_widgets([txt])
         for i, car_name in enumerate(self.rprops.grid):
             pars = i, car_name, -1.28, .22, str(i + 1) + '. %s'
             txt, img = RankingGui.set_drv_txt_img(self, *pars)
-            map(self.add_widget, [txt, img])
+            self.add_widgets([txt, img])
 
     def set_ranking(self):
         items = self.ranking.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = OnscreenText(text=_('Ranking'), scale=.1, pos=(0, .38),
                            font=self.font, fg=self.text_bg)
-        self.add_widget(txt)
+        self.add_widgets([txt])
         for i, car in enumerate(sorted_ranking):
             txt, img = RankingGui.set_drv_txt_img(self, i, car[0], -.2,
                                                   .22, str(car[1]) + ' %s')
-            map(self.add_widget, [txt, img])
+            self.add_widgets([txt, img])
 
     def set_controls(self):
         txt = OnscreenText(text=_('Controls'), scale=.1, pos=(1.0, .38),
                            font=self.font, fg=self.text_bg)
-        self.add_widget(txt)
+        self.add_widgets([txt])
         if self.rprops.joystick:
             txt = OnscreenText(text=_('joypad'), scale=.08, pos=(1.0, .22),
                                font=self.font, fg=self.text_bg)
-            self.add_widget(txt)
+            self.add_widgets([txt])
             return
         self.__cmd_label(_('accelerate'), 'forward', .22)
         self.__cmd_label(_('brake/reverse'), 'rear', .12)
@@ -88,7 +88,7 @@ class LoadingPageGui(PageGui):
     def set_upgrades(self):
         txt = OnscreenText(text=_('Upgrades'), scale=.1, pos=(1.0, -.56),
                            font=self.font, fg=self.text_bg)
-        self.add_widget(txt)
+        self.add_widgets([txt])
         tuning = self.tuning.car2tuning[
             self.rprops.season_props.player_car_name]
         txt = OnscreenText(

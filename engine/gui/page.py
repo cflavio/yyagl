@@ -21,37 +21,33 @@ class PageGui(GuiColleague):
         GuiColleague.__init__(self, mediator)
         self.menu_args = menu_args
         self.widgets = []
-        self.bld_page()
-        self.update_texts()
+        self.build()
+        self.translate()
         self.curr_wdg = self.__next_wdg((-.1, 0, -1), (-3.6, 1, 1))
-        if self.curr_wdg:
-            self.curr_wdg.on_wdg_enter()
+        if self.curr_wdg: self.curr_wdg.on_wdg_enter()
 
-    def bld_page(self, back_btn=True):
-        if back_btn:
-            self.__bld_back_btn()
+    def build(self, back_btn=True):
+        if back_btn: self.__build_back_btn()
         self._set_buttons()
         self.transition_enter()
         self.eng.cursor_top()
 
-    def add_widget(self, wdg):
-        self.widgets += [wdg]
+    def add_widgets(self, widgets): self.widgets += widgets
 
     def on_arrow(self, direction):
-        if not self.curr_wdg:
-            return
-        if not self.curr_wdg.on_arrow(direction):
-            next_wdg = self.__next_wdg(direction)
-            if next_wdg:
-                self.curr_wdg.on_wdg_exit()
-                self.curr_wdg = next_wdg
-                self.curr_wdg.on_wdg_enter()
+        if not self.curr_wdg: return
+        catch_cmd = self.curr_wdg.on_arrow(direction)
+        # e.g. up/down in a combobox or left/right in a slider
+        if catch_cmd: return
+        next_wdg = self.__next_wdg(direction)
+        if not next_wdg: return
+        self.curr_wdg.on_wdg_exit()
+        self.curr_wdg = next_wdg
+        self.curr_wdg.on_wdg_enter()
 
     def on_enter(self):
-        if not self.curr_wdg:
-            return
-        if self.curr_wdg.on_enter():
-            self.enable()
+        if not self.curr_wdg: return
+        if self.curr_wdg.on_enter(): self.enable()
 
     @property
     def buttons(self):
@@ -105,7 +101,7 @@ class PageGui(GuiColleague):
                 wdg.bind(EXIT, wdg.on_wdg_exit)
 
     def transition_enter(self):
-        self.update_texts()
+        self.translate()
         for wdg in self.widgets:
             pos = wdg.get_pos()
             wdg.set_pos((pos[0] - 3.6, pos[1], pos[2]))
@@ -116,18 +112,18 @@ class PageGui(GuiColleague):
         self.enable()
 
     def enable(self):
-        self.mediator.event.accept('arrow_left-up', self.on_arrow, [(-1, 0, 0)])
-        self.mediator.event.accept('arrow_right-up', self.on_arrow, [(1, 0, 0)])
-        self.mediator.event.accept('arrow_up-up', self.on_arrow, [(0, 0, 1)])
-        self.mediator.event.accept('arrow_down-up', self.on_arrow, [(0, 0, -1)])
-        self.mediator.event.accept('enter-up', self.on_enter)
+        evts=[
+            ('arrow_left-up', self.on_arrow, [(-1, 0, 0)]),
+            ('arrow_right-up', self.on_arrow, [(1, 0, 0)]),
+            ('arrow_up-up', self.on_arrow, [(0, 0, 1)]),
+            ('arrow_down-up', self.on_arrow, [(0, 0, -1)]),
+            ('enter-up', self.on_enter)]
+        map(lambda args: self.mediator.event.accept(*args), evts)
 
     def disable(self):
-        self.mediator.event.ignore('arrow_left-up')
-        self.mediator.event.ignore('arrow_right-up')
-        self.mediator.event.ignore('arrow_up-up')
-        self.mediator.event.ignore('arrow_down-up')
-        self.mediator.event.ignore('enter-up')
+        evts=['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
+              'arrow_down-up', 'enter-up']
+        map(self.mediator.event.ignore, evts)
 
     def transition_exit(self, destroy=True):
         for wdg in self.widgets:
@@ -142,24 +138,24 @@ class PageGui(GuiColleague):
             seq.start()
 
     @staticmethod
-    def transl_text(obj, text_src, text_transl):
+    def bind_transl(obj, text_src, text_transl):
         # text_transl is not used, anyway we need it since we have this kind of
-        # use: wdg.transl_text('example str', _('example str'))
-        # this allows to change translations on the fly
+        # use: wdg.bind_transl('example str', _('example str'))
+        # this allows to change translations on the fly keeping the source
+        # text for remapping it later
         obj.text_src_tra = text_src
-        obj.__class__.transl_text = property(lambda self: _(self.text_src_tra))
+        obj.__class__.bind_transl = property(lambda self: _(self.text_src_tra))
 
-    def update_texts(self):
-        tr_wdg = [wdg for wdg in self.widgets if hasattr(wdg, 'transl_text')]
-        for wdg in tr_wdg:
-            wdg['text'] = wdg.transl_text
+    def translate(self):
+        tr_wdg = [wdg for wdg in self.widgets if hasattr(wdg, 'bind_transl')]
+        for wdg in tr_wdg: wdg['text'] = wdg.bind_transl
 
-    def __bld_back_btn(self):
+    def __build_back_btn(self):
         self.widgets += [DirectButton(
             text='', pos=(-.2, 1, -.8), command=self._on_back,
             **self.menu_args.btn_args)]
-        PageGui.transl_text(self.widgets[-1], 'Back', _('Back'))
-        self.widgets[-1]['text'] = self.widgets[-1].transl_text
+        PageGui.bind_transl(self.widgets[-1], 'Back', _('Back'))
+        self.widgets[-1]['text'] = self.widgets[-1].bind_transl
 
     def _on_back(self):
         self.mediator.event.on_back()
@@ -180,30 +176,28 @@ class PageGui(GuiColleague):
 
 class PageEvent(EventColleague):
 
-    def on_back(self):
-        pass
+    def on_back(self): pass
 
 
 class PageFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('show', lambda obj: obj.gui.show)
-        self._fwd_mth('hide', lambda obj: obj.gui.hide)
-        self._fwd_mth('enable', lambda obj: obj.gui.enable)
-        self._fwd_mth('disable', lambda obj: obj.gui.disable)
-        self._fwd_mth('attach_obs', lambda obj: obj.gui.attach)
-        self._fwd_mth('detach_obs', lambda obj: obj.gui.detach)
+        fwds =[
+            ('show', lambda obj: obj.gui.show),
+            ('hide', lambda obj: obj.gui.hide),
+            ('enable', lambda obj: obj.gui.enable),
+            ('disable', lambda obj: obj.gui.disable),
+            ('attach_obs', lambda obj: obj.gui.attach),
+            ('detach_obs', lambda obj: obj.gui.detach)]
+        map(lambda args: self._fwd_mth(*args), fwds)
 
 
 class Page(GameObject, PageFacade):
+
     gui_cls = PageGui
     event_cls = PageEvent
 
     def __init__(self, menu_args):
-        # we should not pass the menu to the page. now we do this since menu's
-        # clients attach to the menu for observing its events, but them are
-        # fired by pages. maybe the menu should attach clients' methods to the
-        # pages when they are pushed.
         PageFacade.__init__(self)
         self.menu_args = menu_args
         GameObject.__init__(self, self.init_lst)
