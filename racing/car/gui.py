@@ -146,6 +146,11 @@ class CarPanel(GameObject):
         self.damages_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
         self.weapon_lab = OnscreenText(_('weapon:'), pos=(-.3, -.7), **pars)
         self.weapon_img = None
+        self.forward_img = OnscreenImage(
+            'assets/images/gui/direction.txo',
+            scale=.15, parent=base.a2dTopCenter, pos=(0, 1, -.2))
+        self.forward_img.set_transparency(True)
+        self.forward_img.hide()
 
     def set_weapon(self, wpn):
         self.weapon_img = OnscreenImage(
@@ -155,6 +160,12 @@ class CarPanel(GameObject):
 
     def unset_weapon(self):
         self.weapon_img.destroy()
+
+    def show_forward(self):
+        self.forward_img.show()
+
+    def hide_forward(self):
+        self.forward_img.hide()
 
     def apply_damage(self, reset=False):
         col = self.race_props.season_props.gameprops.menu_args.text_normal
@@ -180,6 +191,7 @@ class CarPanel(GameObject):
         map(lambda wdg: wdg.destroy(), labels)
         if self.weapon_img and not self.weapon_img.is_empty():
             self.weapon_img.destroy()
+        self.forward_img.destroy()
 
 
 class CarAIPanel(GameObject):
@@ -235,6 +247,12 @@ class CarPlayerGui(CarGui):
 
     def apply_damage(self, reset=False):
         self.panel.apply_damage(reset)
+
+    def show_forward(self):
+        self.panel.show_forward()
+
+    def hide_forward(self):
+        self.panel.hide_forward()
 
     def destroy(self):
         map(lambda wdg: wdg.destroy(), [self.pars, self.panel])

@@ -710,6 +710,15 @@ class CarPlayerLogic(CarLogic):
             self.mediator.gui.panel.speed_txt.setText(str(int(self.mediator.phys.speed)))
         self.__check_wrong_way()
         self._update_dist()
+        self.__update_direction_gui()
+
+    def __update_direction_gui(self):
+        curr_wp = self.closest_wp().prev.node
+        curr_dir = None
+        if curr_wp.has_tag('direction'):
+            curr_dir = curr_wp.get_tag('direction')
+        if curr_dir: self.mediator.gui.show_forward()
+        else: self.mediator.gui.hide_forward()
 
     def fire(self):
         self.weapon.attach_obs(self.on_weapon_destroyed)

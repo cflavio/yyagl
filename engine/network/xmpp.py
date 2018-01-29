@@ -130,16 +130,18 @@ class YorgClient(ClientXMPP):
 
     @property
     def friends(self):
-        friends = self.client_roster.keys()
+        friends = [usr for usr in self.client_roster.keys() if self.client_roster[usr]['subscription'] in ['both']]
         return friends
 
     def on_subscribe(self, msg):
+        if self.xmpp.is_friend(msg['from']): return
         self.xmpp.notify('on_user_subscribe', msg['from'])
         logging.info('subscribe ' + str(self.client_roster))
         self.xmpp.notify('on_users')
 
     def on_subscribed(self, msg):
         logging.info('subscribed ' + str(self.client_roster))
+        self.xmpp.notify('on_users')
 
     def on_presence_available(self, msg):
         _from = str(msg['from'])
@@ -148,7 +150,7 @@ class YorgClient(ClientXMPP):
         nick = str(msg['muc']['nick'])
         is_user = nick == res.user + '@' + res.server
         if _from == room + '/' + nick and is_user:
-            print nick + ' is online in the room ' + room
+            self.xmpp.notify('on_presence_available_room', msg)
             return
         if str(msg['from']) not in [usr.name_full for usr in self.xmpp.users]:
             self.xmpp.users += [User(msg['from'], 0, True, self.xmpp)]
@@ -163,6 +165,14 @@ class YorgClient(ClientXMPP):
         self.xmpp.notify('on_presence_available', msg)
 
     def on_presence_unavailable(self, msg):
+        _from = str(msg['from'])
+        res = JID(msg['from'].resource)
+        room = str(JID(msg['muc']['room']).bare)
+        nick = str(msg['muc']['nick'])
+        is_user = nick == res.user + '@' + res.server
+        if _from == room + '/' + nick and is_user:
+            self.xmpp.notify('on_presence_unavailable_room', msg)
+            return
         usr = [_usr for _usr in self.xmpp.users if _usr.name==msg['from'].bare]
         if usr:  # we receive unavailable for nonlogged users at the beginning
             self.xmpp.users.remove(usr[0])
