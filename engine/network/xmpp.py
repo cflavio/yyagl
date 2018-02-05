@@ -189,6 +189,8 @@ class YorgClient(ClientXMPP):
             return self.xmpp.notify('on_invite_chat', msg)
         if msg['subject'] == 'declined':
             return self.xmpp.notify('on_declined', msg)
+        if msg['subject'] == 'cancel_invite':
+            return self.xmpp.notify('on_cancel_invite')
 
     def on_groupchat_message(self, msg):
         if msg['mucnick'] != self.xmpp.client.boundjid.bare:
