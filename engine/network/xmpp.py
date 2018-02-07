@@ -1,6 +1,7 @@
 from threading import Lock
 from yyagl.observer import Subject
 import logging
+from yyagl.gameobject import GameObject
 
 
 try:
@@ -52,15 +53,16 @@ class User(object):
         return self.name in self.xmpp.friends
 
 
-class XMPP(Subject):
+class XMPP(GameObject, Subject):
 
     def __init__(self):
         Subject.__init__(self)
+        GameObject.__init__(self)
         self.client = None
         self.users = []
 
-    def start(self, usr, pwd, on_ok, on_fail):
-        logging.basicConfig(level=logging.DEBUG,
+    def start(self, usr, pwd, on_ok, on_fail, debug=False):
+        logging.basicConfig(level=logging.DEBUG if debug else logging.INFO,
                             format='%(levelname)-8s %(message)s')
         self.client = YorgClient(usr, pwd, on_ok, on_fail, self)
         self.client.register_plugin('xep_0030') # Service Discovery
@@ -88,11 +90,13 @@ class XMPP(Subject):
     def destroy(self):
         self.disconnect()
         Subject.destroy(self)
+        GameObject.destroy(self)
 
 
-class YorgClient(ClientXMPP):
+class YorgClient(ClientXMPP, GameObject):
 
     def __init__(self, jid, password, on_ok, on_ko, xmpp):
+        GameObject.__init__(self)
         self.xmpp = xmpp
         self.presences_sent = []
         ClientXMPP.__init__(self, jid, password)
@@ -103,6 +107,8 @@ class YorgClient(ClientXMPP):
         self.add_event_handler('failed_auth', lambda msg: self.dispatch_msg('failed_auth', msg))
         self.add_event_handler('message', lambda msg: self.dispatch_msg('message', msg))
         self.add_event_handler('groupchat_message', lambda msg: self.dispatch_msg('groupchat_message', msg))
+        #self.add_event_handler('groupchat_invite', lambda msg: self.dispatch_msg('groupchat_invite', msg))
+        # we may receive non-yorg invites
         self.add_event_handler('presence_subscribe', lambda msg: self.dispatch_msg('subscribe', msg))
         self.add_event_handler('presence_subscribed', lambda msg: self.dispatch_msg('subscribed', msg))
         self.add_event_handler('presence_available', lambda msg: self.dispatch_msg('presence_available', msg))
@@ -119,6 +125,7 @@ class YorgClient(ClientXMPP):
         if code == 'presence_unavailable': self.cb_mux.add_cb(self.on_presence_unavailable, [msg])
 
     def session_start(self, event):
+        self.eng.log('session start')
         self.send_presence()
         self.get_roster()
         logging.info(self.client_roster)
@@ -134,12 +141,14 @@ class YorgClient(ClientXMPP):
         return friends
 
     def on_subscribe(self, msg):
+        self.eng.log('on subscribe ' + str(msg['from']))
         if self.xmpp.is_friend(msg['from']): return
         self.xmpp.notify('on_user_subscribe', msg['from'])
         logging.info('subscribe ' + str(self.client_roster))
         self.xmpp.notify('on_users')
 
     def on_subscribed(self, msg):
+        self.eng.log('on subscribed')
         logging.info('subscribed ' + str(self.client_roster))
         self.xmpp.notify('on_users')
 
@@ -149,6 +158,7 @@ class YorgClient(ClientXMPP):
         room = str(JID(msg['muc']['room']).bare)
         nick = str(msg['muc']['nick'])
         is_user = nick == res.user + '@' + res.server
+        self.eng.log('presence available: %s, %s, %s, %s, %s' %(_from, res, room, nick, is_user))
         if _from == room + '/' + nick and is_user:
             self.xmpp.notify('on_presence_available_room', msg)
             return
@@ -159,6 +169,7 @@ class YorgClient(ClientXMPP):
         self.sort_users()
         if msg['from'].bare != self.xmpp.client.boundjid.bare and msg['from'] not in self.presences_sent:
             self.presences_sent += [msg['from']]
+            self.eng.log('send presence to ' + str(msg['from']))
             self.xmpp.client.send_presence(
                 pfrom=self.xmpp.client.boundjid.full,
                 pto=msg['from'])
@@ -170,6 +181,7 @@ class YorgClient(ClientXMPP):
         room = str(JID(msg['muc']['room']).bare)
         nick = str(msg['muc']['nick'])
         is_user = nick == res.user + '@' + res.server
+        self.eng.log('presence unavailable: %s, %s, %s, %s, %s' %(_from, res, room, nick, is_user))
         if _from == room + '/' + nick and is_user:
             self.xmpp.notify('on_presence_unavailable_room', msg)
             return
@@ -179,6 +191,7 @@ class YorgClient(ClientXMPP):
         self.xmpp.notify('on_presence_unavailable', msg)
 
     def on_message(self, msg):
+        self.eng.log('message: ' + msg['subject'])
         if msg['subject'] == 'list_users':
             return self.on_list_users(msg)
         if msg['subject'] == 'answer_full':
@@ -220,6 +233,7 @@ class YorgClient(ClientXMPP):
         self.xmpp.users = sorted(self.xmpp.users, key=sortusr)
 
     def send_connected(self):
+        self.eng.log('send connected')
         self.send_presence(
             pfrom=self.boundjid.full,
             pto='ya2_yorg@jabb3r.org')
@@ -231,6 +245,7 @@ class YorgClient(ClientXMPP):
             mbody='query_full')
 
     def on_answer_full(self, msg):
+        self.eng.log('received answer full')
         self.send_presence(
             pfrom=self.boundjid.full,
             pto=msg['from'])
@@ -242,6 +257,8 @@ class YorgClient(ClientXMPP):
             mbody='list_users')
 
     def destroy(self):
+        self.eng.log('destroyed xmpp')
         self.del_event_handler('session_start', self.session_start)
         self.del_event_handler('failed_auth', self.on_ko)
         self.del_event_handler('message', self.on_message)
+        GameObject.destroy(self)
