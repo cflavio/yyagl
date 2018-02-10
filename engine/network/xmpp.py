@@ -47,6 +47,8 @@ class User(object):
         self.is_supporter = is_supporter
         self.is_in_yorg = is_in_yorg
         self.xmpp = xmpp
+        self.public_addr = ''
+        self.local_addr = ''
 
     @property
     def is_friend(self):
@@ -70,6 +72,7 @@ class XMPP(GameObject, Subject):
         self.client.register_plugin('xep_0060') # PubSub
         self.client.register_plugin('xep_0199') # XMPP Ping
         self.client.register_plugin('xep_0045') # Multi-User Chat
+        #self.client.register_plugin('xep_0059')
         if self.client.connect(): self.client.process()
 
     def send_connected(self):
@@ -163,7 +166,7 @@ class YorgClient(ClientXMPP, GameObject):
             self.xmpp.notify('on_presence_available_room', msg)
             return
         if str(msg['from']) not in [usr.name_full for usr in self.xmpp.users]:
-            self.xmpp.users += [User(msg['from'], 0, True, self.xmpp)]
+            self.xmpp.users += [User(msg['from'], 0, False, self.xmpp)]
             # TODO: create with is_in_yorg == False and use a stanza for
             # setting is_in_yorg = True
         self.sort_users()
@@ -204,6 +207,10 @@ class YorgClient(ClientXMPP, GameObject):
             return self.xmpp.notify('on_declined', msg)
         if msg['subject'] == 'cancel_invite':
             return self.xmpp.notify('on_cancel_invite')
+        if msg['subject'] == 'ip_address':
+            return self.xmpp.notify('on_ip_address', msg)
+        if msg['subject'] == 'yorg_init':
+            return self.xmpp.notify('on_yorg_init', msg)
 
     def on_groupchat_message(self, msg):
         if msg['mucnick'] != self.xmpp.client.boundjid.bare:
@@ -219,11 +226,18 @@ class YorgClient(ClientXMPP, GameObject):
         self.xmpp.users += [User(usr, 0, False, self.xmpp) for usr in out_users]
         filter_names = ['ya2_yorg@jabb3r.org', self.boundjid.bare]
         presence_users = [usr.name_full for usr in self.xmpp.users if usr.name not in filter_names]
+        me = [usr for usr in self.xmpp.users if usr.name == self.boundjid.bare][0]
         for usr in presence_users:
             if usr not in self.presences_sent:
                 self.xmpp.client.send_presence(
                     pfrom=self.xmpp.client.boundjid.full,
                     pto=usr)
+            self.send_message(
+                mfrom=self.boundjid.full,
+                mto=usr,
+                mtype='ya2_yorg',
+                msubject='yorg_init',
+                mbody='1' if me.is_supporter else '0')
 
         self.sort_users()
         self.xmpp.notify('on_users')
