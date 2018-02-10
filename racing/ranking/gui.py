@@ -1,6 +1,6 @@
 from panda3d.core import TextNode, Shader, TextureStage
 from direct.gui.OnscreenText import OnscreenText
-from direct.gui.DirectButton import DirectButton
+from yyagl.library.gui import Btn
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.library.panda.shader import load_shader
 from yyagl.gameobject import GuiColleague
@@ -51,7 +51,7 @@ class RankingPageGui(PageGui):
         else:
             cont_btn_cmd = self.notify
             cont_btn_ea = ['on_ranking_end']
-        cont_btn = DirectButton(
+        cont_btn = Btn(
             text=_('Continue'), pos=(0, 1, -.8), command=cont_btn_cmd,
             extraArgs=cont_btn_ea,
             **self.rprops.season_props.gameprops.menu_args.btn_args)

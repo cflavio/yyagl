@@ -1,6 +1,6 @@
 from inspect import getmro
 from panda3d.core import LPoint3f
-from direct.gui.DirectButton import DirectButton
+from yyagl.library.gui import Btn
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
@@ -51,7 +51,7 @@ class PageGui(GuiColleague):
 
     @property
     def buttons(self):
-        is_btn = lambda wdg: DirectButton in getmro(wdg.__class__)
+        is_btn = lambda wdg: Btn in getmro(wdg.__class__)
         return [wdg for wdg in self.widgets if is_btn(wdg)]
 
     def __dot(self, wdg, direction, start=None):
@@ -77,7 +77,7 @@ class PageGui(GuiColleague):
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
 
     def __next_wdg(self, direction, start=None):
-        iclss = [DirectButton, DirectCheckButton, DirectSlider,
+        iclss = [Btn, DirectCheckButton, DirectSlider,
                  DirectOptionMenu, ImgBtn, DirectEntry]  # interactive classes
         inter = lambda wdg: any(pcl in iclss for pcl in getmro(wdg.__class__))
         wdgs = [wdg for wdg in self.widgets if inter(wdg)]
@@ -107,7 +107,7 @@ class PageGui(GuiColleague):
             wdg.set_pos((pos[0] - 3.6, pos[1], pos[2]))
             Sequence(
                 Wait(abs(pos[2] - 1) / 4),
-                LerpPosInterval(wdg, .5, pos, blendType='easeInOut')
+                LerpPosInterval(wdg.get_np(), .5, pos, blendType='easeInOut')
             ).start()
         self.enable()
 
@@ -131,7 +131,7 @@ class PageGui(GuiColleague):
             end_pos = (pos[0] + 3.6, pos[1], pos[2])
             seq = Sequence(
                 Wait(abs(pos[2] - 1) / 4),
-                LerpPosInterval(wdg, .5, end_pos, blendType='easeInOut'),
+                LerpPosInterval(wdg.get_np(), .5, end_pos, blendType='easeInOut'),
                 Func(wdg.destroy if destroy else wdg.hide))
             if not destroy:
                 seq.append(Func(wdg.set_pos, pos))
@@ -151,7 +151,7 @@ class PageGui(GuiColleague):
         for wdg in tr_wdg: wdg['text'] = wdg.bind_transl
 
     def __build_back_btn(self):
-        self.widgets += [DirectButton(
+        self.widgets += [Btn(
             text='', pos=(-.2, 1, -.8), command=self._on_back,
             **self.menu_args.btn_args)]
         PageGui.bind_transl(self.widgets[-1], 'Back', _('Back'))

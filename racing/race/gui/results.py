@@ -1,7 +1,7 @@
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectFrame import DirectFrame
-from direct.gui.DirectButton import DirectButton
+from yyagl.library.gui import Btn
 from yyagl.racing.ranking.gui import RankingGui
 from yyagl.engine.gui.imgbtn import ImgBtn
 from yyagl.gameobject import GameObject
@@ -74,7 +74,7 @@ class Results(GameObject):
             self.notify('on_race_step', race_ranking)
             self.destroy()
             GameObject.destroy(self)
-        cont_btn = DirectButton(
+        cont_btn = Btn(
             text=_('Continue'), pos=(0, 1, -.6), command=step,
             **self.rprops.season_props.gameprops.menu_args.btn_args)
         self.__buttons += [cont_btn]

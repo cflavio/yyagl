@@ -9,32 +9,38 @@ class Widget(object):
         self.start_fg = self.start_frame_col = None
 
     def init(self, wdg):
+        wdg = wdg.get_np()
         if hasattr(wdg, 'component') and wdg.hascomponent('text0'):
             self.start_fg = wdg.component('text0').textNode.get_text_color()
         if hasattr(wdg, 'getFrameColor'):
             self.start_frame_col = wdg['frameColor']
 
+    def get_np(self):
+        return self
+
     def on_wdg_enter(self, pos=None):  # pos is for mouse
+        np = self.get_np()
         if hasattr(self, 'start_fg'):
-            self['text_fg'] = self.start_fg + Widget.col_offset
-        if hasattr(self, 'start_frame_col'):
-            self['frameColor'] = self.start_frame_col + Widget.col_offset
-        if hasattr(self, 'getShader') and self.get_shader():
-            self.set_shader_input('col_offset', .25)
-        if hasattr(self, 'setFocus'):
-            self['focus'] = 1
-            self.setFocus()
+            np['text_fg'] = self.start_fg + Widget.col_offset
+        if hasattr(np, 'start_frame_col'):
+            np['frameColor'] = np.start_frame_col + Widget.col_offset
+        if hasattr(np, 'getShader') and np.get_shader():
+            np.set_shader_input('col_offset', .25)
+        if hasattr(np, 'setFocus'):
+            np['focus'] = 1
+            np.setFocus()
 
     def on_wdg_exit(self, pos=None):  # pos is for mouse
+        np = self.get_np()
         if hasattr(self, 'start_fg'):
-            self['text_fg'] = self.start_fg
-        if hasattr(self, 'start_frame_col'):
-            self['frameColor'] = self.start_frame_col
-        if hasattr(self, 'getShader') and self.get_shader():
-            self.set_shader_input('col_offset', 0)
-        if hasattr(self, 'setFocus'):
-            self['focus'] = 0
-            self.setFocus()
+            np['text_fg'] = self.start_fg
+        if hasattr(np, 'start_frame_col'):
+            np['frameColor'] = np.start_frame_col
+        if hasattr(np, 'getShader') and np.get_shader():
+            np.set_shader_input('col_offset', 0)
+        if hasattr(np, 'setFocus'):
+            np['focus'] = 0
+            np.setFocus()
 
     def on_arrow(self, direction):
         is_hor = direction in [(-1, 0, 0), (1, 0, 0)]

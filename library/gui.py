@@ -1,4 +1,5 @@
-from panda.gui import PandaImg
+from panda.gui import PandaImg, PandaBtn
 
 
 Img = PandaImg
+Btn = PandaBtn
