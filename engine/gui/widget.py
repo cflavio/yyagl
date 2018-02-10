@@ -44,22 +44,23 @@ class Widget(object):
 
     def on_arrow(self, direction):
         is_hor = direction in [(-1, 0, 0), (1, 0, 0)]
-        is_menu = hasattr(self, 'setItems')
-        has_popup_open = is_menu and not self.popupMenu.is_hidden()
+        np = self.get_np()
+        is_menu = hasattr(np, 'setItems')
+        has_popup_open = is_menu and not np.popupMenu.is_hidden()
         if not is_hor and has_popup_open:
-            old_idx = self.highlightedIndex
+            old_idx = np.highlightedIndex
             dir2offset = {(0, 0, -1): 1, (0, 0, 1): -1}
-            idx = self.highlightedIndex + dir2offset[direction]
-            idx = min(len(self['items']) - 1, max(0, idx))
+            idx = np.highlightedIndex + dir2offset[direction]
+            idx = min(len(np['items']) - 1, max(0, idx))
             if old_idx != idx:
-                fcol = self.component('item%s' % idx)['frameColor']
-                old_cmp = self.component('item%s' % old_idx)
-                self._unhighlightItem(old_cmp, fcol)
-                curr_cmp = self.component('item%s' % idx)
-                self._highlightItem(curr_cmp, idx)
+                fcol = np.component('item%s' % idx)['frameColor']
+                old_cmp = np.component('item%s' % old_idx)
+                np._unhighlightItem(old_cmp, fcol)
+                curr_cmp = np.component('item%s' % idx)
+                np._highlightItem(curr_cmp, idx)
             return True
-        if is_hor and hasattr(self, 'setValue'):
-            self['value'] += -.1 if direction == (-1, 0, 0) else .1
+        if is_hor and hasattr(np, 'setValue'):
+            np['value'] += -.1 if direction == (-1, 0, 0) else .1
             return True
 
     def on_enter(self):

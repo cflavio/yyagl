@@ -1,14 +1,14 @@
 from inspect import getmro
-from panda3d.core import LPoint3f
-from yyagl.library.gui import Btn
+from panda3d.core import LPoint3f, LVecBase2f
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait, Func
 from direct.gui.DirectGuiGlobals import ENTER, EXIT, DISABLED
 from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.DirectCheckButton import DirectCheckButton
-from direct.gui.DirectSlider import DirectSlider
 from direct.gui.DirectEntry import DirectEntry
+from yyagl.library.gui import Btn, Slider
+from yyagl.engine.vec import Vec2
 from ...gameobject import GameObject, GuiColleague, EventColleague
 from ...facade import Facade
 from .imgbtn import ImgBtn
@@ -54,41 +54,36 @@ class PageGui(GuiColleague):
         is_btn = lambda wdg: Btn in getmro(wdg.__class__)
         return [wdg for wdg in self.widgets if is_btn(wdg)]
 
-    def __dot(self, wdg, direction, start=None):
+    def __currwdg2wdg_dot_direction(self, wdg, direction, start=None):
         start_pos = start if start else self.curr_wdg.get_pos(aspect2d)
         vec = wdg.get_pos(aspect2d) - start_pos
-        vec.normalize()
-        return vec.dot(direction)
+        vec = Vec2(vec.x, vec.z).normalize()
+        return vec.dot(LVecBase2f(direction[0], direction[2]))
 
-    def __next_factor(self, wdg, direction, start=None):
+    def __next_weight(self, wdg, direction, start=None):
         start_pos = start if start else self.curr_wdg.get_pos(aspect2d)
-        dot = self.__dot(wdg, direction, start)
+        dot = self.__currwdg2wdg_dot_direction(wdg, direction, start)
         wdg_pos = wdg.get_pos(aspect2d)
-        if wdg.__class__ == DirectSlider:
-            wdg_pos = LPoint3f(wdg_pos[0], 1, wdg_pos[2])
-        if direction in [(-1, 0, 0), (1, 0, 0)]:
-            proj_dist = abs(wdg_pos[0] - start_pos[0])
-        else:
-            proj_dist = abs(wdg_pos[2] - start_pos[2])
-        if direction in [(-1, 0, 0), (1, 0, 0)]:
-            weights = [.5, .5]
-        else:
-            weights = [.1, .9]
+        #if 'Slider' in wdg.__class__ .__name__:
+        #    wdg_pos = LPoint3f(wdg_pos[0], 1, wdg_pos[2])
+        axis = 0 if direction in [(-1, 0, 0), (1, 0, 0)] else 2
+        proj_dist = abs(wdg_pos[axis] - start_pos[axis])
+        weights = [.5, .5] if not axis else [.1, .9]
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
 
     def __next_wdg(self, direction, start=None):
-        iclss = [Btn, DirectCheckButton, DirectSlider,
+        iclss = [Btn, DirectCheckButton, Slider,
                  DirectOptionMenu, ImgBtn, DirectEntry]  # interactive classes
         inter = lambda wdg: any(pcl in iclss for pcl in getmro(wdg.__class__))
         wdgs = [wdg for wdg in self.widgets if inter(wdg)]
         wdgs = filter(lambda wdg: wdg['state'] != DISABLED, wdgs)
         if hasattr(self, 'curr_wdg') and self.curr_wdg:
             wdgs.remove(self.curr_wdg)
-        pos_dot = lambda wdg: self.__dot(wdg, direction, start) > .1
+        pos_dot = lambda wdg: self.__currwdg2wdg_dot_direction(wdg, direction, start) > .1
         wdgs = filter(pos_dot, wdgs)
         if not wdgs:
             return
-        nextfact = lambda wdg: self.__next_factor(wdg, direction, start)
+        nextfact = lambda wdg: self.__next_weight(wdg, direction, start)
         return max(wdgs, key=nextfact)
 
     def _set_buttons(self):

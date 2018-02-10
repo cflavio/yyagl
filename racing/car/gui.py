@@ -1,5 +1,5 @@
 from panda3d.core import TextNode, LVector3f, Point2, Point3, TextNode
-from direct.gui.DirectSlider import DirectSlider
+from yyagl.library.gui import Slider
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import GuiColleague, GameObject
@@ -15,7 +15,7 @@ class CarParameter(GameObject):
             text=attr_name, pos=pos, align=TextNode.ARight, fg=(1, 1, 1, 1),
             parent=base.a2dTopLeft, scale=.06)
         slider_pos = LVector3f(pos[0], 1, pos[1]) + (.3, 0, .01)
-        self.__slider = DirectSlider(
+        self.__slider = Slider(
             pos=slider_pos, value=init_val, range=val_range,
             command=self.__set_attr, parent=base.a2dTopLeft,
             scale=.24)
@@ -27,7 +27,7 @@ class CarParameter(GameObject):
         self.toggle()
 
     def toggle(self):
-        map(lambda wdg: (wdg.show if wdg.isHidden() else wdg.hide)(),
+        map(lambda wdg: (wdg.show if wdg.is_hidden() else wdg.hide)(),
             self.widgets)
 
     @property

@@ -1,5 +1,6 @@
 from direct.gui.DirectButton import DirectButton
 from direct.gui.OnscreenImage import OnscreenImage
+from direct.gui.DirectSlider import DirectSlider
 from ..igui import IImg, IBtn
 
 
@@ -59,3 +60,34 @@ class PandaBtn(IBtn):
     def hide(self): return self.btn.hide()
 
     def destroy(self): return self.btn.destroy()
+
+
+class PandaSlider(IBtn):
+
+    def __init__(
+            self, parent=None, pos=(0, 0, 0), scale=1, value=0, frameColor=(1, 1, 1, 1),
+            thumb_frameColor=(1, 1, 1, 1), command=None, range=(0, 1)):
+        self.slider = DirectSlider(parent=parent, pos=pos, scale=scale,
+            value=value, frameColor=frameColor,
+            thumb_frameColor=thumb_frameColor, command=command, range=range)
+
+    def get_np(self): return self.slider
+
+    def get_pos(self, pos=None):
+        return self.slider.get_pos(*[pos] if pos else [])
+
+    def set_pos(self, pos): return self.slider.set_pos(pos)
+
+    def __setitem__(self, key, value): self.slider[key] = value
+
+    def __getitem__(self, key): return self.slider[key]
+
+    def show(self): return self.slider.show()
+
+    def hide(self): return self.slider.hide()
+
+    def is_hidden(self): return self.slider.is_hidden()
+
+    def get_value(self): return self.slider.getValue()
+
+    def destroy(self): return self.slider.destroy()

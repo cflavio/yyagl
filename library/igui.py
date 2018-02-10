@@ -4,3 +4,7 @@ class IImg(object):
 
 class IBtn(object):
     pass
+
+
+class ISlider(object):
+    pass
