@@ -3,20 +3,26 @@ from os import environ, system
 from webbrowser import open_new_tab
 
 
-class Browser(object):
-
-    @staticmethod
-    def init_cls():
-        return BrowserLinux if platform.startswith('linux') else Browser
+class BrowserOpener(object):
 
     @staticmethod
     def open(url):
         open_new_tab(url)
 
 
-class BrowserLinux(Browser):
+class BrowserOpenerLinux(BrowserOpener):
 
     @staticmethod
     def open(url):
         environ['LD_LIBRARY_PATH'] = ''
         system('xdg-open ' + url)
+
+
+
+class Browser(object):
+
+    @staticmethod
+    def open(url):
+        cls = BrowserOpenerLinux if platform.startswith('linux') else \
+            BrowserOpener
+        cls.open(url)

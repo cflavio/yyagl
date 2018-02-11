@@ -16,7 +16,7 @@ class EngineGuiBase(GuiColleague):
 
     @staticmethod
     def open_browser(url):
-        Browser.init_cls().open(url)
+        Browser.open(url)
 
     @property
     def resolutions(self):
