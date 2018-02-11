@@ -28,7 +28,7 @@ class PageGui(GuiColleague):
 
     def build(self, back_btn=True):
         if back_btn: self.__build_back_btn()
-        self._set_buttons()
+        self._set_widgets()
         self.transition_enter()
         self.eng.cursor_top()
 
@@ -86,14 +86,16 @@ class PageGui(GuiColleague):
         nextfact = lambda wdg: self.__next_weight(wdg, direction, start)
         return max(wdgs, key=nextfact)
 
-    def _set_buttons(self):
-        for wdg in self.widgets:
-            clsname = wdg.__class__.__name__ + 'Widget'
-            wdg.__class__ = type(clsname, (wdg.__class__, Widget), {})
-            wdg.init(wdg)
-            if hasattr(wdg, 'bind'):
-                wdg.bind(ENTER, wdg.on_wdg_enter)
-                wdg.bind(EXIT, wdg.on_wdg_exit)
+    def _set_widgets(self):
+        map(self.__set_widget, self.widgets)
+
+    def __set_widget(self, wdg):
+        clsname = wdg.__class__.__name__ + 'Widget'
+        wdg.__class__ = type(clsname, (wdg.__class__, Widget), {})
+        wdg.init(wdg)
+        if hasattr(wdg, 'bind'):
+            wdg.bind(ENTER, wdg.on_wdg_enter)
+            wdg.bind(EXIT, wdg.on_wdg_exit)
 
     def transition_enter(self):
         self.translate()
@@ -152,9 +154,7 @@ class PageGui(GuiColleague):
         PageGui.bind_transl(self.widgets[-1], 'Back', _('Back'))
         self.widgets[-1]['text'] = self.widgets[-1].bind_transl
 
-    def _on_back(self):
-        self.mediator.event.on_back()
-        self.notify('on_back', self.__class__.__name__)
+    def _on_back(self): self.notify('on_back', self.__class__.__name__)
 
     def show(self):
         map(lambda wdg: wdg.show(), self.widgets)
@@ -162,7 +162,7 @@ class PageGui(GuiColleague):
 
     def hide(self):
         self.transition_exit(False)
-        self.mediator.event.ignoreAll()
+        self.notify('on_hide')
 
     def destroy(self):
         self.menu_args = None
@@ -196,12 +196,18 @@ class Page(GameObject, PageFacade):
         PageFacade.__init__(self)
         self.menu_args = menu_args
         GameObject.__init__(self, self.init_lst)
+        self.gui.attach(self.on_hide)
+        self.gui.attach(self.on_back)
 
     @property
     def init_lst(self):
         return [
             [('event', self.event_cls, [self])],
             [('gui', self.gui_cls, [self, self.menu_args])]]
+
+    def on_hide(self): self.event.ignoreAll()
+
+    def on_back(self, cls_name): self.event.on_back()
 
     def destroy(self):
         GameObject.destroy(self)

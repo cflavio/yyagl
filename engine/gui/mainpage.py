@@ -9,7 +9,7 @@ class MainPageGui(PageGui):
     def build(self, back_btn=True):
         self.__bld_social()
         self.__bld_version()
-        self._set_buttons()
+        self._set_widgets()
         self.transition_enter()
 
     def __bld_social(self):
