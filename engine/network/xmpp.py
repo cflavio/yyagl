@@ -219,13 +219,13 @@ class YorgClient(ClientXMPP, GameObject):
     def on_list_users(self, msg):
         self.xmpp.users = []
         self.xmpp.users = [User(line[1:], int(line[0]), True, self.xmpp) for line in msg['body'].split()]
-        roster_users = [name for name in self.xmpp.client.client_roster.keys() if self.xmpp.client.client_roster[name] in ['to', 'both']]
+        roster_users = [name for name in self.xmpp.client.client_roster.keys() if self.xmpp.client.client_roster[name]['subscription'] in ['to', 'both']]
         for user in ['ya2_yorg@jabb3r.org', self.boundjid.bare]:
             if user in roster_users: roster_users.remove(user)
         out_users = [usr for usr in roster_users if usr not in [_usr.name for _usr in self.xmpp.users]]
         self.xmpp.users += [User(usr, 0, False, self.xmpp) for usr in out_users]
         filter_names = ['ya2_yorg@jabb3r.org', self.boundjid.bare]
-        presence_users = [usr.name_full for usr in self.xmpp.users if usr.name not in filter_names]
+        presence_users = [usr.name_full for usr in self.xmpp.users if usr.name not in filter_names and usr.is_in_yorg]
         me = [usr for usr in self.xmpp.users if usr.name == self.boundjid.bare][0]
         for usr in presence_users:
             if usr not in self.presences_sent:

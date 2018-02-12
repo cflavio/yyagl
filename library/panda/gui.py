@@ -42,6 +42,8 @@ class PandaBtn(IBtn):
 
     def set_pos(self, pos): return self.btn.set_pos(pos)
 
+    def set_z(self, z): return self.btn.set_z(z)
+
     def set_shader(self, shader): return self.btn.set_shader(shader)
 
     def set_shader_input(self, input_name, input_val):
@@ -58,6 +60,8 @@ class PandaBtn(IBtn):
     def show(self): return self.btn.show()
 
     def hide(self): return self.btn.hide()
+
+    def is_hidden(self): return self.btn.is_hidden()
 
     def destroy(self): return self.btn.destroy()
 
