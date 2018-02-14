@@ -41,11 +41,12 @@ class CallbackMux():
 
 class User(object):
 
-    def __init__(self, name_full, is_supporter, is_in_yorg, xmpp):
+    def __init__(self, name_full, is_supporter, is_in_yorg, is_playing, xmpp):
         self.name_full = name_full
         self.name = JID(name_full).bare
         self.is_supporter = is_supporter
         self.is_in_yorg = is_in_yorg
+        self.is_playing = is_playing
         self.xmpp = xmpp
         self.public_addr = ''
         self.local_addr = ''
@@ -82,6 +83,20 @@ class XMPP(GameObject, Subject):
         if self.client:
             self.client.disconnect()
             self.client = self.client.destroy()
+
+    @property
+    def users_nodup(self):  #todo: once a frame
+        users = []
+        for usr in self.users:
+            if usr.is_in_yorg: users += [usr]
+            else:
+                if not any(_usr.name == usr.name for _usr in users):
+                    other_in_yorg = False
+                    others = [_usr for _usr in self.users if _usr.name == usr.name]
+                    for _usr in others:
+                        if _usr.is_in_yorg: other_in_yorg = True
+                    if not other_in_yorg: users += [usr]
+        return users
 
     @property
     def friends(self):
@@ -166,7 +181,7 @@ class YorgClient(ClientXMPP, GameObject):
             self.xmpp.notify('on_presence_available_room', msg)
             return
         if str(msg['from']) not in [usr.name_full for usr in self.xmpp.users]:
-            self.xmpp.users += [User(msg['from'], 0, False, self.xmpp)]
+            self.xmpp.users += [User(msg['from'], 0, False, False, self.xmpp)]
             # TODO: create with is_in_yorg == False and use a stanza for
             # setting is_in_yorg = True
         self.sort_users()
@@ -211,6 +226,8 @@ class YorgClient(ClientXMPP, GameObject):
             return self.xmpp.notify('on_ip_address', msg)
         if msg['subject'] == 'yorg_init':
             return self.xmpp.notify('on_yorg_init', msg)
+        if msg['subject'] == 'is_playing':
+            return self.xmpp.notify('on_is_playing', msg)
 
     def on_groupchat_message(self, msg):
         if msg['mucnick'] != self.xmpp.client.boundjid.bare:
@@ -218,12 +235,12 @@ class YorgClient(ClientXMPP, GameObject):
 
     def on_list_users(self, msg):
         self.xmpp.users = []
-        self.xmpp.users = [User(line[1:], int(line[0]), True, self.xmpp) for line in msg['body'].split()]
+        self.xmpp.users = [User(line[2:], int(line[0]), True, int(line[1]),self.xmpp) for line in msg['body'].split()]
         roster_users = [name for name in self.xmpp.client.client_roster.keys() if self.xmpp.client.client_roster[name]['subscription'] in ['to', 'both']]
         for user in ['ya2_yorg@jabb3r.org', self.boundjid.bare]:
             if user in roster_users: roster_users.remove(user)
         out_users = [usr for usr in roster_users if usr not in [_usr.name for _usr in self.xmpp.users]]
-        self.xmpp.users += [User(usr, 0, False, self.xmpp) for usr in out_users]
+        self.xmpp.users += [User(usr, 0, False, False, self.xmpp) for usr in out_users]
         filter_names = ['ya2_yorg@jabb3r.org', self.boundjid.bare]
         presence_users = [usr.name_full for usr in self.xmpp.users if usr.name not in filter_names and usr.is_in_yorg]
         me = [usr for usr in self.xmpp.users if usr.name == self.boundjid.bare][0]
