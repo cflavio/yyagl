@@ -1,3 +1,4 @@
 *.pyc
 *.txo
 assets/uml/class_diagram.png
+assets/uml/sequence_diagrams.pdf

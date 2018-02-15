@@ -1,0 +1,12 @@
+hide footbox
+skinparam sequence {
+    ArrowColor Black
+    ActorBorderColor Black
+    LifeLineBorderColor Black
+    LifeLineBackgroundColor White
+    ParticipantBorderColor Black
+    ParticipantBackgroundColor White
+    ParticipantFontColor Black
+    ActorBackgroundColor White
+    ActorFontColor Black
+}

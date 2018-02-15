@@ -1,0 +1,72 @@
+@startuml
+!include seq_diag_tmpl.txt
+title Startup
+Client -> YorgServer: send_presence()
+Client -> YorgServer: query_full()
+YorgServer --> Client: answer_full
+Client -> YorgServer: list_users()
+YorgServer --> Client: users_list
+Client -> OtherClient: yorg_init(supporter)
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Presence Subscription
+== Accepted ==
+Client -> OtherClient: presence_subscribe()
+OtherClient --> Client:  presence_subscription(subscribed)
+== Declined ==
+Client -> OtherClient: presence_subscribe()
+OtherClient --> Client:  presence_subscription(unsubscribed)
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Chat
+== MUC ==
+Client -> XMPPServer: groupchat_message(msg)
+XMPPServer -> OtherClient: groupchat_message(msg)
+== Single Chat ==
+Client -> OtherClient: message(msg)
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Invite Ok
+Server -> Client: invite(room)
+Server -> YorgServer: is_playing(1)
+Server -> OtherClient: is_playing(1)
+Client -> YorgServer: is_playing(1)
+Client -> OtherClient: is_playing(1)
+Client -> XMPPServer: joinMUC(room)
+XMPPServer --> Server: presence_available(room, client)
+Client -> Server: ip_address(ip_addr)
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Invite Ko
+== Declined ==
+Server -> Client: invite(room)
+Client -> YorgServer: is_playing(1)
+Client -> OtherClient: is_playing(1)
+Client --> Server: declined
+Client -> YorgServer: is_playing(0)
+Client -> OtherClient: is_playing(0)
+== Cancel ==
+Server -> Client: invite(room)
+Client -> YorgServer: is_playing(1)
+Client -> OtherClient: is_playing(1)
+Server -> Client: cancel_invite()
+Client --> Server: declined
+Client -> YorgServer: is_playing(0)
+Client -> OtherClient: is_playing(0)
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Back
+Client -> XMPPServer: leaveMUC(room)
+Client -> YorgServer: is_playing(0)
+Client -> OtherClient: is_playing(0)
+@enduml
