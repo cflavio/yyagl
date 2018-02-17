@@ -4,8 +4,9 @@ from yaml import load, dump
 
 class DctFile(object):
 
-    def __init__(self, fpath, default_dct={}):
+    def __init__(self, fpath, default_dct={}, persistent=True):
         self.fpath = fpath
+        self.persistent = persistent
         try:
             with open(fpath) as fyaml: fdct = load(fyaml)
             self.dct = self.__add_default(default_dct, fdct)
@@ -20,6 +21,7 @@ class DctFile(object):
         return dct
 
     def store(self):
+        if not self.persistent: return
         with open(self.fpath, 'w') as fyaml:
             dump(self.dct, fyaml, default_flow_style=False)
 

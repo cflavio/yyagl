@@ -1,3 +1,6 @@
+from socket import socket, AF_INET, SOCK_DGRAM, gaierror
+from json import load
+from urllib2 import urlopen
 from .network import AbsNetwork
 from yyagl.library.panda.network import PandaConnectionListener
 
@@ -21,7 +24,15 @@ class Server(AbsNetwork):
         self.tcp_socket = self.conn_mgr.open_TCP_server_rendezvous(port=9099, backlog=1000)
         self.conn_listener.add_conn(self.tcp_socket)
         self.listener_task = self.eng.add_task(self.task_listener, self.eng.network_priority)
-        self.eng.log('the server is up')
+        sock = socket(AF_INET, SOCK_DGRAM)
+        try:
+            sock.connect(('ya2.it', 0))
+            local_addr = sock.getsockname()[0]
+            public_addr = load(urlopen('http://httpbin.org/ip'))['origin']
+            addr = local_addr + ' - ' + public_addr
+        except gaierror:
+            self.eng.log_mgr.log('no connection')
+        self.eng.log('the server is up %s %s' % (public_addr, local_addr))
 
     def task_listener(self, task):
         if not self.conn_listener.conn_avail(): return task.cont

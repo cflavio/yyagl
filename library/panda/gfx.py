@@ -55,7 +55,7 @@ class PandaGfxMgr(GfxMgr):
         )
 
     def set_blur(self):
-        self.filters.setBlurSharpen(.5)
+        pass # self.filters.setBlurSharpen(.5)
 
     def print_stats(self):
         print '\n\n#####\nrender2d.analyze()'
