@@ -30,7 +30,7 @@ class SeasonLogic(LogicColleague):
     def load(self, ranking, tuning, drivers):
         self.ranking.load(ranking)
         self.tuning.load(tuning)
-        self.props = self.props._replace(drivers=drivers)
+        self.props.drivers = drivers
 
     def next_race(self):
         track = self.race.track.rprops.track_name

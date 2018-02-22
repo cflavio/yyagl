@@ -1,14 +1,25 @@
-from collections import namedtuple
 from panda3d.core import AudioSound as PAudioSound
 from yyagl.gameobject import AudioColleague
 from yyagl.engine.audio import AudioSound
 
 
-__sounds = 'engine brake crash crash_hs lap landing pitstop rocket_fired ' + \
-    'rocket_hit turbo rotate_all_fired rotate_all_hit'
+class CarSounds(object):
 
-
-CarSounds = namedtuple('CarSounds', __sounds)
+    def __init__(self, engine, brake, crash, crash_hs, lap, landing, pitstop,
+               rocket_fired, rocket_hit, turbo, rotate_all_fired,
+               rotate_all_hit):
+        self.engine = engine
+        self.brake = brake
+        self.crash = crash
+        self.crash_hs = crash_hs
+        self.lap = lap
+        self.landing = landing
+        self.pitstop = pitstop
+        self.rocket_fired = rocket_fired
+        self.rocket_hit = rocket_hit
+        self.turbo = turbo
+        self.rotate_all_fired = rotate_all_fired
+        self.rotate_all_hit = rotate_all_hit
 
 
 class AbsAudioUpdate:

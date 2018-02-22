@@ -1,12 +1,26 @@
-from collections import namedtuple
 from yyagl.gameobject import GameObject
 from yyagl.facade import Facade
 from .logic import DriverLogic
 
 
-DriverInfo = namedtuple('DriverInfo', 'img_idx name speed adherence stability')
-__fields = 'info car_name f_engine f_tires f_suspensions'
-DriverProps = namedtuple('DriverProps', __fields)
+class DriverInfo(object):
+
+    def __init__(self, img_idx, name, speed, adherence, stability):
+        self.img_idx = img_idx
+        self.name = name
+        self.speed = speed
+        self.adherence = adherence
+        self.stability = stability
+
+class DriverProps(object):
+
+    def __init__(self, info, car_name, f_engine, f_tires, f_suspensions):
+        self.info = info
+        self.car_name = car_name
+        self.f_engine = f_engine
+        self.f_tires = f_tires
+        self.f_suspensions = f_suspensions
+
 
 
 class DriverFacade(Facade):

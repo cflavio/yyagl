@@ -1,4 +1,3 @@
-from collections import namedtuple
 from yyagl.gameobject import GameObject, AiColleague, AudioColleague
 from yyagl.facade import Facade
 from .fsm import CarFsm
@@ -12,11 +11,22 @@ from .gui import CarGui, CarPlayerGui, CarNetworkGui
 from .ai import CarAi
 
 
-__fields = 'race_props name pos hpr callback race driver_engine ' + \
-    'driver_tires driver_suspensions track_waypoints ai_poller'
+class CarProps(object):
 
-
-CarProps = namedtuple('CarProps', __fields)
+    def __init__(
+            self, race_props, name, pos, hpr, callback, race, driver_engine,
+            driver_tires, driver_suspensions, track_waypoints, ai_poller):
+        self.race_props = race_props
+        self.name = name
+        self.pos = pos
+        self.hpr = hpr
+        self.callback = callback
+        self.race = race
+        self.driver_engine = driver_engine
+        self.driver_tires = driver_tires
+        self.driver_suspensions = driver_suspensions
+        self.track_waypoints = track_waypoints
+        self.ai_poller = ai_poller
 
 
 class CarFacade(Facade):

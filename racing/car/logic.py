@@ -1,5 +1,4 @@
 from math import sin, cos, pi
-from collections import namedtuple
 from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32
 from yyagl.gameobject import LogicColleague
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
@@ -8,7 +7,11 @@ from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.engine.vec import Vec2, Vec
 
 
-WPInfo = namedtuple('WPInfo', 'prev next')
+class WPInfo(object):
+
+    def __init__(self, prev, next):
+        self.prev = prev
+        self.next = next
 
 
 class Input2ForcesStrategy(object):
@@ -522,7 +525,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         return WPInfo(start_wp, end_wp)
 
     def update_waypoints(self):
-        closest_wp = int(self.closest_wp()[0].get_name()[8:])  # WaypointX
+        closest_wp = int(self.closest_wp().prev.get_name()[8:])  # WaypointX
         # facade: wp.num in Waypoint's class
         if closest_wp not in self.collected_wps:
             self.collected_wps += [closest_wp]
@@ -594,7 +597,8 @@ class CarLogic(LogicColleague, ComputerProxy):
     @property
     def direction(self):
         # car's direction dot current direction
-        start_wp, end_wp = self.closest_wp()
+        closest_wp = self.closest_wp()
+        start_wp, end_wp = closest_wp.prev, closest_wp.next
         wp_vec = Vec(end_wp.get_pos(start_wp).x, end_wp.get_pos(start_wp).y, 0).normalize()
         return self.car_vec.dot(wp_vec)
 

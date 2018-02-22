@@ -1,12 +1,17 @@
-from collections import namedtuple
 from yyagl.gameobject import Colleague
 from yyagl.library.bullet.bullet import BulletPhysWorld, BulletContact
 from ..facade import Facade
 
 
 PhysWorld = BulletPhysWorld
-CollInfo = namedtuple('CollInfo', 'node time')
 Contact = BulletContact
+
+
+class CollInfo(object):
+
+    def __init__(self, node, time):
+        self.node = node
+        self.time = time
 
 
 class PhysFacade(Facade):

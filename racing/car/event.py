@@ -1,4 +1,3 @@
-from collections import namedtuple
 from random import uniform, choice
 from itertools import chain
 from panda3d.core import Vec3, Vec2
@@ -14,8 +13,25 @@ from yyagl.computer_proxy import ComputerProxy, once_a_frame
 from yyagl.engine.vec import Vec
 
 
-Keys = namedtuple('Keys', 'forward rear left right fire respawn pause')
-DirKeys = namedtuple('Keys', 'forward rear left right')
+class Keys(object):
+
+    def __init__(self, forward, rear, left, right, fire, respawn, pause):
+        self.forward = forward
+        self.rear = rear
+        self.left = left
+        self.right = right
+        self.fire = fire
+        self.respawn = respawn
+        self.pause = pause
+
+
+class DirKeys(object):
+
+    def __init__(self, forward, rear, left, right):
+        self.forward = forward
+        self.rear = rear
+        self.left = left
+        self.right = right
 
 
 class InputBuilder(object):
@@ -154,7 +170,8 @@ class CarEvent(EventColleague, ComputerProxy):
         pass
 
     def process_respawn(self):
-        start_wp_n, end_wp_n = self.mediator.logic.last_wp
+        last_wp = self.mediator.logic.last_wp
+        start_wp_n, end_wp_n = last_wp.prev, last_wp.next
         self.mediator.gfx.nodepath.set_pos(start_wp_n.get_pos() + (0, 0, 2))
         wp_vec = Vec(end_wp_n.get_pos(start_wp_n).x, end_wp_n.get_pos(start_wp_n).y, 0).normalize()
         or_h = (wp_vec.xy).signed_angle_deg(Vec2(0, 1))

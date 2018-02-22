@@ -1,7 +1,9 @@
-from collections import namedtuple
+class ObsInfo(object):
 
-
-ObsInfo = namedtuple('ObsInfo', 'mth sort args')
+    def __init__(self, mth, sort, args):
+        self.mth = mth
+        self.sort = sort
+        self.args = args
 
 
 class Subject(object):

@@ -1,14 +1,31 @@
 from random import uniform
-from collections import namedtuple
 from panda3d.core import Vec3, LineSegs, LPoint3f
 from yyagl.gameobject import AiColleague, GameObject
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
 from yyagl.engine.vec import Vec
 
 
-ObstInfo = namedtuple('ObstInfo', 'name dist')
-LastObstInfo = namedtuple('LastObstInfo', 'direction time')
-DirKeys = namedtuple('DirKeys', 'forward left rear right')
+class ObstInfo(object):
+
+    def __init__(self, name, dist):
+        self.name = name
+        self.dist = dist
+
+
+class LastObstInfo(object):
+
+    def __init__(self, direction, time):
+        self.direction = direction
+        self.time = time
+
+
+class DirKeys(object):
+
+    def __init__(self, forward, left, rear, right):
+        self.forward = forward
+        self.left = left
+        self.rear = rear
+        self.right = right
 
 
 class CarAiPoller(object):
