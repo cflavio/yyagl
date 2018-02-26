@@ -127,7 +127,7 @@ class MenuLogic(LogicColleague):
         map(page.attach_obs, [self.on_back, self.on_push_page])
 
     def enable(self, val):
-        (self.pages[-1].disable if val else self.pages[-1].enable)()
+        (self.pages[-1].enable if val else self.pages[-1].disable)()
 
     def on_push_page(self, page_code, args=[]):
         pass

@@ -1,13 +1,8 @@
 from inspect import getmro
 from panda3d.core import LPoint3f, LVecBase2f
-from direct.interval.LerpInterval import LerpPosInterval
-from direct.interval.MetaInterval import Sequence
-from direct.interval.FunctionInterval import Wait, Func
 from direct.gui.DirectGuiGlobals import ENTER, EXIT, DISABLED
-from direct.gui.DirectOptionMenu import DirectOptionMenu
-from direct.gui.DirectCheckButton import DirectCheckButton
-from direct.gui.DirectEntry import DirectEntry
-from yyagl.library.gui import Btn, Slider
+from yyagl.library.gui import Btn, Slider, CheckBtn, OptionMenu, Entry
+from yyagl.library.ivals import Seq, Wait, PosIval, Func
 from yyagl.engine.vec import Vec2
 from ...gameobject import GameObject, GuiColleague, EventColleague
 from ...facade import Facade
@@ -72,19 +67,18 @@ class PageGui(GuiColleague):
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
 
     def __next_wdg(self, direction, start=None):
-        iclss = [Btn, DirectCheckButton, Slider,
-                 DirectOptionMenu, ImgBtn, DirectEntry]  # interactive classes
+        # interactive classes
+        iclss = [Btn, CheckBtn, Slider, OptionMenu, ImgBtn, Entry]
         inter = lambda wdg: any(pcl in iclss for pcl in getmro(wdg.__class__))
         wdgs = [wdg for wdg in self.widgets if inter(wdg)]
-        wdgs = filter(lambda wdg: wdg['state'] != DISABLED, wdgs)
+        wdgs = filter(lambda wdg: wdg.is_enabled, wdgs)
         if hasattr(self, 'curr_wdg') and self.curr_wdg:
             wdgs.remove(self.curr_wdg)
-        pos_dot = lambda wdg: self.__currwdg2wdg_dot_direction(wdg, direction, start) > .1
-        wdgs = filter(pos_dot, wdgs)
-        if not wdgs:
-            return
-        nextfact = lambda wdg: self.__next_weight(wdg, direction, start)
-        return max(wdgs, key=nextfact)
+        in_direction = lambda wdg: self.__currwdg2wdg_dot_direction(wdg, direction, start) > .1
+        wdgs = filter(in_direction, wdgs)
+        if not wdgs: return
+        nextweight = lambda wdg: self.__next_weight(wdg, direction, start)
+        return max(wdgs, key=nextweight)
 
     def _set_widgets(self):
         map(self.__set_widget, self.widgets)
@@ -99,60 +93,54 @@ class PageGui(GuiColleague):
 
     def transition_enter(self):
         self.translate()
-        for wdg in self.widgets:
-            pos = wdg.get_pos()
-            wdg.set_pos((pos[0] - 3.6, pos[1], pos[2]))
-            Sequence(
-                Wait(abs(pos[2] - 1) / 4),
-                LerpPosInterval(wdg.get_np(), .5, pos, blendType='easeInOut')
-            ).start()
+        map(self.__set_enter_transition, self.widgets)
         self.enable()
 
+    def __set_enter_transition(self, wdg):
+        pos = wdg.get_pos()
+        wdg.set_pos(pos - (3.6, 0, 0))
+        Seq(
+            Wait(abs(pos[2] - 1) / 4),
+            PosIval(wdg.get_np(), .5, pos)
+        ).start()
+
     def enable(self):
-        evts=[
-            ('arrow_left-up', self.on_arrow, [(-1, 0, 0)]),
-            ('arrow_right-up', self.on_arrow, [(1, 0, 0)]),
-            ('arrow_up-up', self.on_arrow, [(0, 0, 1)]),
-            ('arrow_down-up', self.on_arrow, [(0, 0, -1)]),
-            ('enter', self.on_enter)]
-        map(lambda args: self.mediator.event.accept(*args), evts)
+        #evts=[
+        #    ('arrow_left-up', self.on_arrow, [(-1, 0, 0)]),
+        #    ('arrow_right-up', self.on_arrow, [(1, 0, 0)]),
+        #    ('arrow_up-up', self.on_arrow, [(0, 0, 1)]),
+        #    ('arrow_down-up', self.on_arrow, [(0, 0, -1)]),
+        #    ('enter', self.on_enter)]
+        #map(lambda args: self.mediator.event.accept(*args), evts)
+        pass
 
     def disable(self):
-        evts=['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
-              'arrow_down-up', 'enter']
-        map(self.mediator.event.ignore, evts)
+        #evts=['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
+        #      'arrow_down-up', 'enter']
+        #map(self.mediator.event.ignore, evts)
+        pass
 
     def transition_exit(self, destroy=True):
-        for wdg in self.widgets:
-            pos = wdg.get_pos()
-            end_pos = (pos[0] + 3.6, pos[1], pos[2])
-            seq = Sequence(
-                Wait(abs(pos[2] - 1) / 4),
-                LerpPosInterval(wdg.get_np(), .5, end_pos, blendType='easeInOut'),
-                Func(wdg.destroy if destroy else wdg.hide))
-            if not destroy:
-                seq.append(Func(wdg.set_pos, pos))
-            seq.start()
+        map(lambda wdg: self.__set_exit_transition(wdg, destroy), self.widgets)
 
-    @staticmethod
-    def bind_transl(obj, text_src, text_transl):
-        # text_transl is not used, anyway we need it since we have this kind of
-        # use: wdg.bind_transl('example str', _('example str'))
-        # this allows to change translations on the fly keeping the source
-        # text for remapping it later
-        obj.text_src_tra = text_src
-        obj.__class__.bind_transl = property(lambda self: _(self.text_src_tra))
+    def __set_exit_transition(self, wdg, destroy):
+        pos = wdg.get_pos()
+        end_pos = (pos[0] + 3.6, pos[1], pos[2])
+        seq = Seq(
+            Wait(abs(pos[2] - 1) / 4),
+            PosIval(wdg.get_np(), .5, end_pos),
+            Func(wdg.destroy if destroy else wdg.hide))
+        if not destroy: seq.append(Func(wdg.set_pos, pos))
+        seq.start()
 
     def translate(self):
         tr_wdg = [wdg for wdg in self.widgets if hasattr(wdg, 'bind_transl')]
-        for wdg in tr_wdg: wdg['text'] = wdg.bind_transl
+        for wdg in tr_wdg: wdg.wdg['text'] = wdg.bind_transl
 
     def __build_back_btn(self):
         self.widgets += [Btn(
             text='', pos=(-.2, 1, -.8), command=self._on_back,
-            **self.menu_args.btn_args)]
-        PageGui.bind_transl(self.widgets[-1], 'Back', _('Back'))
-        self.widgets[-1]['text'] = self.widgets[-1].bind_transl
+            tra_src='Back', tra_tra=_('Back'), **self.menu_args.btn_args)]
 
     def _on_back(self): self.notify('on_back', self.__class__.__name__)
 

@@ -1,7 +1,13 @@
+from direct.gui.DirectGuiGlobals import DISABLED
 from direct.gui.DirectButton import DirectButton
+from direct.gui.DirectCheckButton import DirectCheckButton
+from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.DirectSlider import DirectSlider
-from ..igui import IImg, IBtn
+from direct.gui.DirectEntry import DirectEntry
+from direct.gui.DirectLabel import DirectLabel
+from direct.gui.OnscreenText import OnscreenText
+from ..igui import IImg, IBtn, ICheckBtn, IOptionMenu, IEntry, ILabel, IText
 
 
 class PandaImg(IImg):
@@ -14,84 +20,185 @@ class PandaImg(IImg):
         self.img = self.img.destroy()
 
 
-class PandaBtn(IBtn):
+class PandaBase(object):
+
+    def __init__(self, tra_src=None, tra_tra=None):
+        if tra_src and tra_tra: self.bind_tra(tra_src, tra_tra)
+
+    def bind_tra(self, text_src, text_transl):
+        # text_transl is not used, anyway we need it since we have this kind of
+        # use: self.bind_transl('example str', _('example str'))
+        # this allows to change translations on the fly keeping the source
+        # text for remapping it later
+        self.text_src_tra = text_src
+        self.__class__.bind_transl = property(lambda self: _(self.text_src_tra))
+        self['text'] = self.bind_transl
+
+    def get_pos(self, pos=None):
+        return self.wdg.get_pos(*[pos] if pos else [])
+
+    def set_pos(self, pos): return self.wdg.set_pos(pos)
+
+    def __setitem__(self, key, value): self.wdg[key] = value
+
+    def __getitem__(self, key): return self.wdg[key]
+
+    def get_np(self): return self.wdg
+
+    def show(self): return self.wdg.show()
+
+    def hide(self): return self.wdg.hide()
+
+    def is_hidden(self): return self.wdg.is_hidden()
+
+    def destroy(self): return self.wdg.destroy()
+
+
+class PandaAbs(PandaBase):
+
+    def get_value(self): return self.wdg.getValue()
+
+    def initialiseoptions(self, cls): return self.wdg.initialiseoptions(cls)
+
+    def set_z(self, z): return self.wdg.set_z(z)
+
+    def set_shader(self, shader): return self.wdg.set_shader(shader)
+
+    def set_shader_input(self, input_name, input_val):
+        return self.wdg.set_shader_input(input_name, input_val)
+
+    def set_transparency(self, val): return self.wdg.set_transparency(val)
+
+    def bind(self, evt, callback):
+        return self.wdg.bind(evt, callback)
+
+    def attachNewNode(self, gui_itm, sort_order):
+        return self.wdg.attachNewNode(gui_itm, sort_order)
+
+    @property
+    def is_enabled(self): return self.wdg['state'] != DISABLED
+
+
+class PandaBtn(IBtn, PandaAbs):
 
     def __init__(
             self, text='', parent=None, pos=(0, 0, 0), scale=(1, 1, 1),
             command=None, frameSize=(-1, 1, -1, 1), clickSound=None,
             text_fg=(1, 1, 1, 1), frameColor=(1, 1, 1, 1), text_font=None,
             rolloverSound=None, extraArgs=[], frameTexture=None, image=None,
-            text_scale=1.0):
-        self.btn = DirectButton(
+            text_scale=1.0, tra_src=None, tra_tra=None):
+        self.wdg = DirectButton(
             text=text, parent=parent, pos=pos, scale=scale, command=command,
             frameSize=frameSize, clickSound=clickSound, text_fg=text_fg,
             frameColor=frameColor, text_font=text_font,
             rolloverSound=rolloverSound, extraArgs=extraArgs,
             frameTexture=frameTexture, image=image, text_scale=1.0)
-
-    def initialiseoptions(self, cls): return self.btn.initialiseoptions(cls)
-
-    def get_np(self): return self.btn
-
-    def __setitem__(self, key, value): self.btn[key] = value
-
-    def __getitem__(self, key): return self.btn[key]
-
-    def get_pos(self, pos=None):
-        return self.btn.get_pos(*[pos] if pos else [])
-
-    def set_pos(self, pos): return self.btn.set_pos(pos)
-
-    def set_z(self, z): return self.btn.set_z(z)
-
-    def set_shader(self, shader): return self.btn.set_shader(shader)
-
-    def set_shader_input(self, input_name, input_val):
-        return self.btn.set_shader_input(input_name, input_val)
-
-    def set_transparency(self, val): return self.btn.set_transparency(val)
-
-    def bind(self, evt, callback):
-        return self.btn.bind(evt, callback)
-
-    def attachNewNode(self, gui_itm, sort_order):
-        return self.btn.attachNewNode(gui_itm, sort_order)
-
-    def show(self): return self.btn.show()
-
-    def hide(self): return self.btn.hide()
-
-    def is_hidden(self): return self.btn.is_hidden()
-
-    def destroy(self): return self.btn.destroy()
+        PandaAbs.__init__(self, tra_src, tra_tra)
 
 
-class PandaSlider(IBtn):
+class PandaSlider(IBtn, PandaAbs):
 
     def __init__(
             self, parent=None, pos=(0, 0, 0), scale=1, value=0, frameColor=(1, 1, 1, 1),
-            thumb_frameColor=(1, 1, 1, 1), command=None, range=(0, 1)):
-        self.slider = DirectSlider(parent=parent, pos=pos, scale=scale,
+            thumb_frameColor=(1, 1, 1, 1), command=None, range=(0, 1), tra_src=None, tra_tra=None):
+        self.wdg = DirectSlider(parent=parent, pos=pos, scale=scale,
             value=value, frameColor=frameColor,
             thumb_frameColor=thumb_frameColor, command=command, range=range)
+        PandaAbs.__init__(self, tra_src, tra_tra)
 
-    def get_np(self): return self.slider
 
-    def get_pos(self, pos=None):
-        return self.slider.get_pos(*[pos] if pos else [])
+class PandaCheckBtn(ICheckBtn, PandaAbs):
 
-    def set_pos(self, pos): return self.slider.set_pos(pos)
+    def __init__(
+            self, pos=(0, 1, 0), text='', indicatorValue=False,
+            indicator_frameColor=(1, 1, 1, 1), frameColor=(1, 1, 1, 1),
+            scale=(1, 1, 1), clickSound=None, rolloverSound=None,
+            text_fg=(1, 1, 1, 1), text_font=None, command=None, tra_src=None,
+            tra_tra=None):
+        self.wdg = DirectCheckButton(
+            pos=pos, text=text, indicatorValue=indicatorValue,
+            indicator_frameColor=indicator_frameColor,
+            frameColor=frameColor, scale=scale, clickSound=clickSound,
+            rolloverSound=rolloverSound, text_fg=text_fg, text_font=text_font,
+            command=None)
+        PandaAbs.__init__(self, tra_src, tra_tra)
 
-    def __setitem__(self, key, value): self.slider[key] = value
 
-    def __getitem__(self, key): return self.slider[key]
+class PandaOptionMenu(IOptionMenu, PandaAbs):
 
-    def show(self): return self.slider.show()
+    def __init__(
+            self, text='', items=[], pos=(0, 1, 0), scale=(1, 1, 1), initialitem='',
+            command=None, frameSize=(-1, 1, -1, 1), clickSound=None,
+            rolloverSound=None, textMayChange=False, text_fg=(1, 1, 1, 1),
+            item_frameColor=(1, 1, 1, 1), frameColor=(1, 1, 1, 1),
+            highlightColor=(1, 1, 1, 1), text_scale=.05,
+            popupMarker_frameColor=(1, 1, 1, 1), item_relief=None,
+            item_text_font=None, text_font=None, tra_src=None, tra_tra=None):
+        self.wdg = DirectOptionMenu(
+            text=text, items=items, pos=pos, scale=scale,
+            initialitem=initialitem, command=command, frameSize=frameSize,
+            clickSound=clickSound, rolloverSound=rolloverSound,
+            textMayChange=textMayChange, text_fg=text_fg,
+            item_frameColor=item_frameColor, frameColor=frameColor,
+            highlightColor=highlightColor, text_scale=text_scale,
+            popupMarker_frameColor=popupMarker_frameColor,
+            item_relief=item_relief, item_text_font=item_text_font,
+            text_font=text_font)
+        PandaAbs.__init__(self, tra_src, tra_tra)
 
-    def hide(self): return self.slider.hide()
+    def set(self, val, fCommand=None): return self.wdg.set(val, fCommand)
 
-    def is_hidden(self): return self.slider.is_hidden()
+    def get(self): return self.wdg.get()
 
-    def get_value(self): return self.slider.getValue()
+    @property
+    def selectedIndex(self): return self.wdg.selectedIndex
 
-    def destroy(self): return self.slider.destroy()
+
+class PandaEntry(IEntry, PandaAbs):
+
+    def __init__(self, scale=.05, pos=(0, 1, 0), entryFont=None, width=12,
+            frameColor=(1, 1, 1, 1), initialText='', obscured=False,
+            command=None, focusInCommand=None, focusInExtraArgs=[],
+            focusOutCommand=None, focusOutExtraArgs=[], parent=None,
+            tra_src=None, tra_tra=None):
+        self.wdg = DirectEntry(
+            scale=scale, pos=pos, entryFont=entryFont, width=width,
+            frameColor=frameColor, initialText=initialText, obscured=False,
+            command=command, focusInCommand=focusInCommand,
+            focusInExtraArgs=focusInExtraArgs, focusOutCommand=focusOutCommand,
+            focusOutExtraArgs=focusOutExtraArgs, parent=parent)
+        PandaAbs.__init__(self, tra_src, tra_tra)
+
+    @property
+    def onscreenText(self): return self.wdg.onscreenText
+
+    def get(self): return self.wdg.get()
+
+    def set(self, txt): return self.wdg.set(txt)
+
+    def enterText(self, txt): return self.wdg.enterText(txt)
+
+
+class PandaLabel(ILabel, PandaAbs):
+
+    def __init__(
+            self, text='', pos=(0, 1, 0), parent=None, text_wordwrap=10,
+            text_align=None, text_fg=(1, 1, 1, 1), text_font=None, scale=.05,
+            frameColor=(1, 1, 1, 1), tra_src=None, tra_tra=None):
+        self.wdg = DirectLabel(
+            text=text, pos=pos, parent=parent, text_wordwrap=text_wordwrap,
+            text_align=text_align, text_fg=text_fg, text_font=text_font,
+            scale=scale, frameColor=frameColor)
+        PandaAbs.__init__(self, tra_src, tra_tra)
+
+
+class PandaTxt(IText, PandaBase):
+
+    def __init__(
+            self, txt='', pos=(0, 1, 0), scale=.05, wordwrap=12, parent=None,
+            fg=(1, 1, 1, 1), font=None, align=None, tra_src=None,
+            tra_tra=None):
+        self.wdg = OnscreenText(
+            text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
+            parent=parent, fg=fg, font=font, align=align)
+        PandaBase.__init__(self, tra_src, tra_tra)
