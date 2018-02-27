@@ -1,4 +1,5 @@
-from direct.gui.DirectGuiGlobals import DISABLED
+from panda3d.core import TextNode
+from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL
 from direct.gui.DirectButton import DirectButton
 from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectOptionMenu import DirectOptionMenu
@@ -12,9 +13,22 @@ from ..igui import IImg, IBtn, ICheckBtn, IOptionMenu, IEntry, ILabel, IText
 
 class PandaImg(IImg):
 
-    def __init__(self, fpath, scale=1.0, is_background=False):
+    def __init__(self, fpath, scale=1.0, is_background=False, force_transp=None,
+                 layer=''):
         self.img = OnscreenImage(fpath, scale=scale)
         if is_background: self.img.set_bin('background', 10)
+        if force_transp: self.img.set_transparency(True)
+        elif force_transp is None:
+            alpha_formats = [12]  # panda3d.core.texture.Frgba
+            if self.img.get_texture().get_format() in alpha_formats:
+                self.img.set_transparency(True)
+        if layer == 'fg': self.img.set_bin('gui-popup', 50)
+
+    def set_pos(self, x, y, z): return self.img.set_pos(x, y, z)
+
+    def reparent_to(self, parent): return self.img.reparent_to(parent)
+
+    def get_parent(self): return self.img.get_parent()
 
     def destroy(self):
         self.img = self.img.destroy()
@@ -94,6 +108,19 @@ class PandaBtn(IBtn, PandaAbs):
             rolloverSound=rolloverSound, extraArgs=extraArgs,
             frameTexture=frameTexture, image=image, text_scale=1.0)
         PandaAbs.__init__(self, tra_src, tra_tra)
+        self['relief'] = FLAT
+        self.bind(ENTER, self._on_enter)
+        self.bind(EXIT, self._on_exit)
+
+    def _on_enter(self, pos): pass # pos comes from mouse
+
+    def _on_exit(self, pos): pass # pos comes from mouse
+
+    def enable(self):
+        self['state'] = NORMAL
+
+    def disable(self):
+        self['state'] = DISABLED
 
 
 class PandaSlider(IBtn, PandaAbs):
@@ -198,6 +225,10 @@ class PandaTxt(IText, PandaBase):
             self, txt='', pos=(0, 1, 0), scale=.05, wordwrap=12, parent=None,
             fg=(1, 1, 1, 1), font=None, align=None, tra_src=None,
             tra_tra=None):
+        str2par = {'bottomleft': base.a2dBottomLeft}
+        str2al = {'left': TextNode.A_left}
+        if parent: parent = str2par[parent]
+        if align: align = str2al[align]
         self.wdg = OnscreenText(
             text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
             parent=parent, fg=fg, font=font, align=align)

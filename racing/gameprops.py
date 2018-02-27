@@ -3,7 +3,8 @@ class GameProps(object):
     def __init__(
             self, menu_args, cars_names, drivers_info, season_tracks,
             tracks_tr, track_img, player_name, drivers_img, cars_img, car_path,
-            phys_path, model_name, damage_paths, wheel_gfx_names, xmpp_debug):
+            phys_path, model_name, damage_paths, wheel_gfx_names, xmpp_debug,
+            social_sites):
         self.menu_args = menu_args
         self.cars_names = cars_names
         self.drivers_info = drivers_info
@@ -19,3 +20,4 @@ class GameProps(object):
         self.damage_paths = damage_paths
         self.wheel_gfx_names = wheel_gfx_names
         self.xmpp_debug = xmpp_debug
+        self.social_sites = social_sites

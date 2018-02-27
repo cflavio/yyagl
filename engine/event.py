@@ -9,7 +9,7 @@ class EngineEvent(EventColleague):
         EventColleague.__init__(self, mediator)
         self.eng.add_task(self.__on_frame)
 
-        if self.eng.lib.lib_version().startswith('1.10'):
+        if self.eng.lib.version().startswith('1.10'):
             taskMgr.setupTaskChain('unpausable')
             taskMgr.add(self.__on_frame_unpausable, 'unpausable', taskChain='unpausable')
 

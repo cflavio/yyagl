@@ -1,5 +1,6 @@
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
+from yyagl.library.gui import Text
 from .page import Page, PageGui, PageFacade
 from .imgbtn import ImgBtn
 
@@ -7,24 +8,16 @@ from .imgbtn import ImgBtn
 class MainPageGui(PageGui):
 
     def build(self, back_btn=True):
-        self.__bld_social()
-        self.__bld_version()
+        self.__build_social()
+        self.__build_version()
         self._set_widgets()
         self.transition_enter()
 
-    def __bld_social(self):
-        sites = [
-            ('facebook', 'http://www.facebook.com/Ya2Tech'),
-            ('twitter', 'http://twitter.com/ya2tech'),
-            ('google_plus', 'https://plus.google.com/118211180567488443153'),
-            ('youtube',
-             'http://www.youtube.com/user/ya2games?sub_confirmation=1'),
-            ('pinterest', 'http://www.pinterest.com/ya2tech'),
-            ('tumblr', 'http://ya2tech.tumblr.com'),
-            ('feed', 'http://www.ya2.it/pages/feed-following.html')]
+    def __build_social(self):
+        sites = self.props.gameprops.social_sites
         menu_args = self.props.gameprops.menu_args
         left = (len(sites) - 1) / 2.0 * .15
-        self.widgets += [
+        buttons = [
             ImgBtn(
                 parent=base.a2dBottomCenter,
                 scale=.06,
@@ -35,13 +28,14 @@ class MainPageGui(PageGui):
                 extraArgs=[site[1]],
                 **menu_args.imgbtn_args)
             for i, site in enumerate(sites)]
+        self.widgets += buttons
 
-    def __bld_version(self):
-        self.widgets += [OnscreenText(
-            text=_('version: ') + self.eng.version,
-            parent=base.a2dBottomLeft, pos=(.02, .02), scale=.04,
-            fg=(.8, .8, .8, 1), align=TextNode.ALeft,
-            font=self.props.gameprops.menu_args.font)]
+    def __build_version(self):
+        txt = Text(
+            _('version: ') + self.eng.version, parent='bottomleft',
+            pos=(.02, .02), scale=.04, fg=(.8, .8, .8, 1), align='left',
+            font=self.props.gameprops.menu_args.font)
+        self.widgets += [txt]
 
 
 class MainPage(Page, PageFacade):

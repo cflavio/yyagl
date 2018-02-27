@@ -23,8 +23,6 @@ from .enginefacade import EngineFacade
 from .configuration import Cfg
 
 
-
-
 class Engine(GameObject, EngineFacade):
 
     network_priority = -39

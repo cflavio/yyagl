@@ -1,47 +1,41 @@
-from panda3d.core import WindowProperties
-from direct.gui.OnscreenImage import OnscreenImage
+from yyagl.library.gui import Img
 from yyagl.gameobject import GameObject
+from yyagl.facade import Facade
 
 
-class MouseCursor(GameObject):
+class MouseCursorFacade(Facade):
 
-    def __init__(self, fpath, scale, hotspot):
-        if not fpath: return
+    def __init__(self):
+        fwds =[
+            ('show', lambda obj: obj.cursor_img.show),
+            ('hide', lambda obj: obj.cursor_img.hide)]
+        map(lambda args: self._fwd_mth(*args), fwds)
+
+
+class MouseCursor(GameObject, MouseCursorFacade):
+
+    def __init__(self, filepath, scale, hotspot):
         GameObject.__init__(self)
-        self.__set_standard_cursor(False)
-        self.cursor_img = OnscreenImage(fpath)
-        self.cursor_img.set_transparency(True)
-        self.cursor_img.set_scale(scale)
-        self.cursor_img.set_bin('gui-popup', 50)
+        self.eng.lib.set_std_cursor(False)
+        self.cursor_img = Img(filepath, scale=scale, layer='fg')
         self.hotspot_dx = scale[0] * (1 - 2 * hotspot[0])
         self.hotspot_dy = scale[2] * (1 - 2 * hotspot[1])
         self.eng.attach_obs(self.on_frame)
-        if self.eng.lib.lib_version().startswith('1.10'):
+        if self.eng.lib.version().startswith('1.10'):
             self.eng.attach_obs(self.on_frame_unpausable)
 
-    @staticmethod
-    def __set_standard_cursor(show):
-        props = WindowProperties()
-        props.set_cursor_hidden(not show)
-        base.win.requestProperties(props)
+    def show_standard(self): self.eng.lib.set_std_cursor(True)
 
-    def show(self): self.cursor_img.show()
-
-    def show_standard(self): self.__set_standard_cursor(True)
-
-    def hide(self): self.cursor_img.hide()
-
-    def hide_standard(self): self.__set_standard_cursor(False)
+    def hide_standard(self): self.eng.lib.set_std_cursor(False)
 
     def cursor_top(self):
         self.cursor_img.reparent_to(self.cursor_img.get_parent())
 
     def __on_frame(self):
-        if not base.mouseWatcherNode.hasMouse(): return
-        m_x = base.mouseWatcherNode.get_mouse_x()
-        m_y = base.mouseWatcherNode.get_mouse_y()
-        h_x = m_x * base.getAspectRatio() + self.hotspot_dx
-        self.cursor_img.set_pos(h_x, 0, m_y - self.hotspot_dy)
+        mouse = self.eng.lib.get_mouse()
+        if not mouse: return
+        h_x = mouse[0] * self.eng.lib.aspect_ratio() + self.hotspot_dx
+        self.cursor_img.set_pos(h_x, 0, mouse[1] - self.hotspot_dy)
 
     def on_frame(self):
         if not self.eng.pause.is_paused: self.__on_frame()

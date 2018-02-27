@@ -181,6 +181,7 @@ class Page(GameObject, PageFacade):
     event_cls = PageEvent
 
     def __init__(self, menu_args):
+        # refactor: pages e.g. yyagl/engine/gui/mainpage.py don't call this
         PageFacade.__init__(self)
         self.menu_args = menu_args
         GameObject.__init__(self, self.init_lst)

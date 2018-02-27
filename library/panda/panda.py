@@ -2,7 +2,7 @@ import sys
 from os.path import exists
 from os import getcwd
 from panda3d.core import loadPrcFileData, Texture, TextPropertiesManager, \
-    TextProperties, PandaSystem, Filename
+    TextProperties, PandaSystem, Filename, WindowProperties
 from panda3d.bullet import get_bullet_version
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
@@ -55,10 +55,38 @@ class LibraryPanda3D(Library, DirectObject):
 
     def init(self, green=(.2, .8, .2, 1), red=(.8, .2, .2, 1), end_cb=None):
         LibShowBase()
+        base.disableMouse()
         self.__end_cb = end_cb
         self.__notify = DirectNotify().newCategory('ya2')
         self.__init_win()
         self.__init_fonts(green, red)
+
+    def has_window(self): return bool(base.win)
+
+    @property
+    def resolution(self):
+        win_prop = base.win.get_properties()
+        return win_prop.get_x_size(), win_prop.get_y_size()
+
+    @property
+    def resolutions(self):
+        d_i = base.pipe.get_display_information()
+
+        def res(idx):
+            return d_i.get_display_mode_width(idx), \
+                d_i.get_display_mode_height(idx)
+        return [res(idx) for idx in range(d_i.get_total_display_modes())]
+
+    def toggle_fullscreen(self):
+        props = WindowProperties()
+        props.set_fullscreen(not base.win.is_fullscreen())
+        base.win.request_properties(props)
+
+    def set_resolution(self, res, fullscreen=None):
+        props = WindowProperties()
+        props.set_size(res)
+        if fullscreen: props.set_fullscreen(True)
+        base.win.request_properties(props)
 
     def __init_win(self):
         if base.win: base.win.set_close_request_event('window-closed')
@@ -96,7 +124,7 @@ class LibraryPanda3D(Library, DirectObject):
     def log(self, msg): self.__notify.info(msg)
 
     @staticmethod
-    def lib_version(): return PandaSystem.get_version_string()
+    def version(): return PandaSystem.get_version_string()
 
     def lib_commit(self): return PandaSystem.get_git_commit()
 
@@ -120,9 +148,22 @@ class LibraryPanda3D(Library, DirectObject):
 
     def fullscreen(self): return base.win.get_properties().get_fullscreen()
 
-    def resolution(self): return base.win.get_properties().get_x_size(), base.win.get_properties().get_y_size()
-
     def set_volume(self, vol): return base.sfxManagerList[0].set_volume(vol)
+
+    @staticmethod
+    def get_mouse():
+        mwn = base.mouseWatcherNode
+        if not mwn.hasMouse(): return
+        return mwn.get_mouse_x(), mwn.get_mouse_y()
+
+    @staticmethod
+    def aspect_ratio(): return base.getAspectRatio()
+
+    @staticmethod
+    def set_std_cursor(show):
+        props = WindowProperties()
+        props.set_cursor_hidden(not show)
+        base.win.requestProperties(props)
 
     @staticmethod
     def find_geoms(model, name):  # no need to be cached

@@ -53,7 +53,7 @@ class PandaPause(Pause):
         self.__paused_tasks = []
         is_tsk = lambda tsk: tsk and hasattr(tsk, 'getFunction')
         tasks = [tsk for tsk in taskMgr.getTasks() if is_tsk(tsk)]
-        if LibraryPanda3D.lib_version().startswith('1.10'):
+        if LibraryPanda3D.version().startswith('1.10'):
             tasks = [tsk for tsk in tasks if tsk.get_task_chain() != 'unpausable']
         map(self.__process_task, tasks)
         for tsk in [_tsk for _tsk in taskMgr.getDoLaters()if is_tsk(_tsk)]:

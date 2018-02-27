@@ -30,7 +30,7 @@ class Library(object):
 
     def log(self, msg): pass
 
-    def lib_version(self): pass
+    def version(self): pass
 
     def lib_commit(self): pass
 

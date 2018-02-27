@@ -41,7 +41,7 @@ class EngineFacade(Facade):
         self._fwd_prop('is_runtime', lambda obj: obj.logic.is_runtime)
         self._fwd_prop('languages', lambda obj: obj.logic.cfg.lang_cfg.languages)
         self._fwd_prop('resolutions', lambda obj: obj.gui.resolutions)
-        self._fwd_prop('closest_res', lambda obj: obj.gui.closest_res)
+        self._fwd_prop('closest_resolution', lambda obj: obj.gui.closest_resolution)
         self._fwd_prop('joystick_mgr', lambda obj: obj.event.joystick_mgr)
         self._fwd_prop('curr_time',
                             lambda obj: globalClock.get_frame_time())

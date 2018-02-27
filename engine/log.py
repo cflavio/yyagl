@@ -32,7 +32,7 @@ class LogMgrBase(Colleague):  # headless log manager
             messages += ['cores: ' + str(cpu_count())]
         except NotImplementedError:  # on Windows
             messages += ['cores: not implemented']
-        lib_ver = self.eng.lib.lib_version()
+        lib_ver = self.eng.lib.version()
         if lib_ver.startswith('1.10'):
             import psutil
             messages += ['memory: %s GB' % round(psutil.virtual_memory().total / (1000000000.0), 2)]
@@ -62,7 +62,7 @@ class LogMgr(LogMgrBase):
         drv = 'driver version: {maj}.{min}'
         messages += [drv.format(maj=drv_maj, min=drv_min)]
         messages += ['fullscreen: ' + str(self.eng.lib.fullscreen())]
-        res_x, res_y = self.eng.lib.resolution()
+        res_x, res_y = self.eng.lib.resolution
         res_tmpl = 'resolution: {res_x}x{res_y}'
         messages += [res_tmpl.format(res_x=res_x, res_y=res_y)]
         map(self.log, messages)
