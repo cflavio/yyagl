@@ -16,6 +16,7 @@ class MouseCursor(GameObject, MouseCursorFacade):
 
     def __init__(self, filepath, scale, hotspot):
         GameObject.__init__(self)
+        MouseCursorFacade.__init__(self)
         self.eng.lib.set_std_cursor(False)
         self.cursor_img = Img(filepath, scale=scale, layer='fg')
         self.hotspot_dx = scale[0] * (1 - 2 * hotspot[0])
@@ -35,7 +36,7 @@ class MouseCursor(GameObject, MouseCursorFacade):
         mouse = self.eng.lib.get_mouse()
         if not mouse: return
         h_x = mouse[0] * self.eng.lib.aspect_ratio() + self.hotspot_dx
-        self.cursor_img.set_pos(h_x, 0, mouse[1] - self.hotspot_dy)
+        self.cursor_img.set_pos((h_x, 0, mouse[1] - self.hotspot_dy))
 
     def on_frame(self):
         if not self.eng.pause.is_paused: self.__on_frame()

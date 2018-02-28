@@ -1,7 +1,5 @@
 from panda3d.core import TextNode, Shader, TextureStage
-from direct.gui.OnscreenText import OnscreenText
-from yyagl.library.gui import Btn
-from direct.gui.OnscreenImage import OnscreenImage
+from yyagl.library.gui import Btn, Text, Img
 from yyagl.library.panda.shader import load_shader
 from yyagl.gameobject import GuiColleague
 from yyagl.engine.gui.page import Page, PageGui, PageEvent, PageFacade
@@ -26,7 +24,7 @@ class RankingPageGui(PageGui):
         self.text_err = self.mediator.menu.gui.menu_args.text_err
         items = self.ranking.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
-        txt = OnscreenText(text=_('Ranking'), scale=.1, pos=(0, .76),
+        txt = Text(_('Ranking'), scale=.1, pos=(0, .76),
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         for i, car in enumerate(sorted_ranking):
@@ -38,11 +36,11 @@ class RankingPageGui(PageGui):
         if self.sprops.gameprops.season_tracks.index(track) == ntracks - 1:
             cont_btn_cmd = self.notify
             cont_btn_ea = ['on_ranking_next_race']
-            img = OnscreenImage(
+            img = Img(
                 'assets/images/gui/trophy.txo', parent=base.a2dRightCenter,
                 pos=(-.58, 1, 0), scale=.55)
             img.set_transparency(True)
-            txt = OnscreenText(
+            txt = Text(
                 _('Congratulations!'), fg=(.8, .6, .2, 1), scale=.16,
                 pos=(0, -.3), font=loader.loadFont(self.sprops.font),
                 parent=base.a2dLeftCenter)
@@ -132,12 +130,12 @@ class RankingGui(GuiColleague):
             if driver.dprops.car_name == car_name)
         is_player_car = car_name == page.rprops.season_props.player_car_name
         RankingGui.eng.log_mgr.log('%s %s %s %s' % (text % drv.logic.dprops.info.name, car_name, drv.logic.dprops.info.img_idx, is_player_car))
-        txt = OnscreenText(
-            text=text % drv.logic.dprops.info.name, align=TextNode.A_left,
+        txt = Text(
+            text % drv.logic.dprops.info.name, align='left',
             scale=.072, pos=(pos_x, top - i * .16), font=page.font,
             fg=page.text_fg if is_player_car else page.text_bg)
         gprops = page.rprops.season_props.gameprops
-        img = OnscreenImage(
+        img = Img(
             gprops.cars_img % car_name,
             pos=(pos_x - .16, 1, top + .02 - i * .16), scale=.074)
         filtervpath = RankingGui.eng.curr_path + \

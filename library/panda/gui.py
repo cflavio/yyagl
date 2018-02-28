@@ -7,15 +7,17 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.DirectSlider import DirectSlider
 from direct.gui.DirectEntry import DirectEntry
 from direct.gui.DirectLabel import DirectLabel
+from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
-from ..igui import IImg, IBtn, ICheckBtn, IOptionMenu, IEntry, ILabel, IText
+from ..igui import IImg, IBtn, ICheckBtn, IOptionMenu, IEntry, ILabel, IText, \
+    IFrame
 
 
 class PandaImg(IImg):
 
-    def __init__(self, fpath, scale=1.0, is_background=False, force_transp=None,
-                 layer=''):
-        self.img = OnscreenImage(fpath, scale=scale)
+    def __init__(self, fpath, pos=(0, 1, 0), scale=1.0, is_background=False, force_transp=None,
+                 layer='', parent=None):
+        self.img = OnscreenImage(fpath, pos=pos, scale=scale, parent=parent)
         if is_background: self.img.set_bin('background', 10)
         if force_transp: self.img.set_transparency(True)
         elif force_transp is None:
@@ -24,14 +26,31 @@ class PandaImg(IImg):
                 self.img.set_transparency(True)
         if layer == 'fg': self.img.set_bin('gui-popup', 50)
 
-    def set_pos(self, x, y, z): return self.img.set_pos(x, y, z)
+    def set_pos(self, pos): return self.img.set_pos(pos)
+
+    def get_pos(self, pos=None):
+        return self.img.get_pos(*[pos] if pos else [])
 
     def reparent_to(self, parent): return self.img.reparent_to(parent)
 
     def get_parent(self): return self.img.get_parent()
 
-    def destroy(self):
-        self.img = self.img.destroy()
+    def show(self): return self.img.show()
+
+    def hide(self): return self.img.hide()
+
+    def is_hidden(self): return self.img.is_hidden()
+
+    def set_shader(self, shader): return self.img.set_shader(shader)
+
+    def set_shader_input(self, input_name, input_val):
+        return self.img.set_shader_input(input_name, input_val)
+
+    def set_transparency(self, val): return self.img.set_transparency(val)
+
+    def set_texture(self, ts, tex): return self.img.set_texture(ts, tex)
+
+    def destroy(self): self.img = self.img.destroy()
 
 
 class PandaBase(object):
@@ -226,10 +245,18 @@ class PandaTxt(IText, PandaBase):
             fg=(1, 1, 1, 1), font=None, align=None, tra_src=None,
             tra_tra=None):
         str2par = {'bottomleft': base.a2dBottomLeft}
-        str2al = {'left': TextNode.A_left}
+        str2al = {'left': TextNode.A_left, 'right': TextNode.A_right}
         if parent: parent = str2par[parent]
         if align: align = str2al[align]
         self.wdg = OnscreenText(
             text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
             parent=parent, fg=fg, font=font, align=align)
         PandaBase.__init__(self, tra_src, tra_tra)
+
+
+class PandaFrame(IFrame, PandaAbs):
+
+    def __init__(self, frameSize=(-1, 1, -1, 1), frameColor=(1, 1, 1, 1),
+            pos=(0, 1, 0), parent=None):
+        self.wdg = DirectFrame(frameSize=frameSize, frameColor=frameColor,
+            pos=pos, parent=parent)

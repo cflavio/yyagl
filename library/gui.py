@@ -1,5 +1,5 @@
 from panda.gui import PandaImg, PandaBtn, PandaSlider, PandaCheckBtn, \
-    PandaOptionMenu, PandaEntry, PandaLabel, PandaTxt
+    PandaOptionMenu, PandaEntry, PandaLabel, PandaTxt, PandaFrame
 
 
 Img = PandaImg
@@ -10,3 +10,4 @@ OptionMenu = PandaOptionMenu
 Entry = PandaEntry
 Label = PandaLabel
 Text = PandaTxt
+Frame = PandaFrame

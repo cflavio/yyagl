@@ -1,13 +1,15 @@
 from inspect import getmro
 from panda3d.core import LPoint3f, LVecBase2f
 from direct.gui.DirectGuiGlobals import ENTER, EXIT, DISABLED
-from yyagl.library.gui import Btn, Slider, CheckBtn, OptionMenu, Entry
+from yyagl.library.gui import Btn, Slider, CheckBtn, OptionMenu, Entry, \
+    Label, Img, Frame, Text
 from yyagl.library.ivals import Seq, Wait, PosIval, Func
 from yyagl.engine.vec import Vec2
 from ...gameobject import GameObject, GuiColleague, EventColleague
 from ...facade import Facade
 from .imgbtn import ImgBtn
-from .widget import Widget
+from .widget import Widget, FrameWidget, ImgWidget, BtnWidget, EntryWidget, \
+    CheckBtnWidget, SliderWidget, OptionMenuWidget
 
 
 class PageGui(GuiColleague):
@@ -84,8 +86,19 @@ class PageGui(GuiColleague):
         map(self.__set_widget, self.widgets)
 
     def __set_widget(self, wdg):
+        libwdg2wdg = {
+            FrameWidget: [Frame],
+            SliderWidget: [Slider],
+            BtnWidget: [Btn, Label],
+            OptionMenuWidget: [OptionMenu],
+            CheckBtnWidget: [CheckBtn],
+            EntryWidget: [Entry],
+            ImgWidget: [Img, Text]}
+        for libwdg, wdgcls in libwdg2wdg.items():
+            if any(cls in getmro(wdg.__class__) for cls in wdgcls):
+                par_cls = libwdg
         clsname = wdg.__class__.__name__ + 'Widget'
-        wdg.__class__ = type(clsname, (wdg.__class__, Widget), {})
+        wdg.__class__ = type(clsname, (wdg.__class__, par_cls), {})
         wdg.init(wdg)
         if hasattr(wdg, 'bind'):
             wdg.bind(ENTER, wdg.on_wdg_enter)
@@ -105,23 +118,22 @@ class PageGui(GuiColleague):
         ).start()
 
     def enable(self):
-        #evts=[
-        #    ('arrow_left-up', self.on_arrow, [(-1, 0, 0)]),
-        #    ('arrow_right-up', self.on_arrow, [(1, 0, 0)]),
-        #    ('arrow_up-up', self.on_arrow, [(0, 0, 1)]),
-        #    ('arrow_down-up', self.on_arrow, [(0, 0, -1)]),
-        #    ('enter', self.on_enter)]
-        #map(lambda args: self.mediator.event.accept(*args), evts)
-        pass
+        evts=[
+            ('arrow_left-up', self.on_arrow, [(-1, 0, 0)]),
+            ('arrow_right-up', self.on_arrow, [(1, 0, 0)]),
+            ('arrow_up-up', self.on_arrow, [(0, 0, 1)]),
+            ('arrow_down-up', self.on_arrow, [(0, 0, -1)]),
+            ('enter', self.on_enter)]
+        map(lambda args: self.mediator.event.accept(*args), evts)
 
     def disable(self):
-        #evts=['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
-        #      'arrow_down-up', 'enter']
-        #map(self.mediator.event.ignore, evts)
-        pass
+        evts=['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
+              'arrow_down-up', 'enter']
+        map(self.mediator.event.ignore, evts)
 
     def transition_exit(self, destroy=True):
         map(lambda wdg: self.__set_exit_transition(wdg, destroy), self.widgets)
+        self.disable()
 
     def __set_exit_transition(self, wdg, destroy):
         pos = wdg.get_pos()

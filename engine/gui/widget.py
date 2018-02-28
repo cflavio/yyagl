@@ -3,87 +3,11 @@ from direct.gui.DirectGuiGlobals import NORMAL, DISABLED
 
 class Widget(object):
 
-    col_offset = (.3, .3, .3, 0)
+    highlight_color_offset = (.3, .3, .3, 0)
 
-    def __init__(self):
-        self.start_fg = self.start_frame_col = None
+    def __init__(self): self.start_txt_color = self.start_frame_color = None
 
-    def init(self, wdg):
-        wdg = wdg.get_np()
-        if hasattr(wdg, 'component') and wdg.hascomponent('text0'):
-            self.start_fg = wdg.component('text0').textNode.get_text_color()
-        if hasattr(wdg, 'getFrameColor'):
-            self.start_frame_col = wdg['frameColor']
-
-    def get_np(self):
-        return self
-
-    def on_wdg_enter(self, pos=None):  # pos is for mouse
-        np = self.get_np()
-        if hasattr(self, 'start_fg'):
-            np['text_fg'] = self.start_fg + Widget.col_offset
-        if hasattr(np, 'start_frame_col'):
-            np['frameColor'] = np.start_frame_col + Widget.col_offset
-        if hasattr(np, 'getShader') and np.get_shader():
-            np.set_shader_input('col_offset', .25)
-        if hasattr(np, 'setFocus'):
-            np['focus'] = 1
-            np.setFocus()
-
-    def on_wdg_exit(self, pos=None):  # pos is for mouse
-        np = self.get_np()
-        if hasattr(self, 'start_fg'):
-            np['text_fg'] = self.start_fg
-        if hasattr(np, 'start_frame_col'):
-            np['frameColor'] = np.start_frame_col
-        if hasattr(np, 'getShader') and np.get_shader():
-            np.set_shader_input('col_offset', 0)
-        if hasattr(np, 'setFocus'):
-            np['focus'] = 0
-            np.setFocus()
-
-    def on_arrow(self, direction):
-        is_hor = direction in [(-1, 0, 0), (1, 0, 0)]
-        np = self.get_np()
-        is_menu = hasattr(np, 'setItems')
-        has_popup_open = is_menu and not np.popupMenu.is_hidden()
-        if not is_hor and has_popup_open:
-            old_idx = np.highlightedIndex
-            dir2offset = {(0, 0, -1): 1, (0, 0, 1): -1}
-            idx = np.highlightedIndex + dir2offset[direction]
-            idx = min(len(np['items']) - 1, max(0, idx))
-            if old_idx != idx:
-                fcol = np.component('item%s' % idx)['frameColor']
-                old_cmp = np.component('item%s' % old_idx)
-                np._unhighlightItem(old_cmp, fcol)
-                curr_cmp = np.component('item%s' % idx)
-                np._highlightItem(curr_cmp, idx)
-            return True
-        if is_hor and hasattr(np, 'setValue'):
-            np['value'] += -.1 if direction == (-1, 0, 0) else .1
-            return True
-
-    def on_enter(self):
-        if hasattr(self, 'setIndicatorValue'):
-            val = self['indicatorValue']
-            self['indicatorValue'] = not val
-        if hasattr(self, 'setItems') and self.popupMenu.is_hidden():
-            self.showPopupMenu()
-            self._highlightItem(self.component('item0'), 0)
-            return
-        elif hasattr(self, 'setItems') and not self.popupMenu.is_hidden():
-            self.selectHighlightedIndex()
-            idx = self.selectedIndex
-            if self['command']:
-                self['command'](self['items'][idx])
-            self.hidePopupMenu()
-            idx += -1 if idx else 1
-            fcol = self.component('item%s' % idx)['frameColor']
-            curr_name = 'item%s' % self.selectedIndex
-            self._unhighlightItem(self.component(curr_name), fcol)
-            return True
-        if self['command'] and self['state'] == NORMAL:
-            self['command'](*self['extraArgs'])
+    def get_np(self): return self.img
 
     def enable(self):
         self['state'] = NORMAL
@@ -92,3 +16,114 @@ class Widget(object):
     def disable(self):
         self['state'] = DISABLED
         self.set_alpha_scale(.25)
+
+
+class ImgWidget(Widget):
+
+    def init(self, wdg): pass
+
+
+class FrameWidget(Widget):
+
+    def init(self, wdg):
+        self.start_frame_color = wdg.get_np()['frameColor']
+
+    def on_wdg_enter(self, pos=None):  # pos: mouse's position
+        np = self.get_np()
+        np['frameColor'] = self.start_frame_color + Widget.highlight_color_offset
+
+    def on_wdg_exit(self, pos=None):  # pos: mouse's position
+        self.get_np()['frameColor'] = self.start_frame_color
+
+
+class BtnWidget(FrameWidget):
+
+    def init(self, wdg):
+        FrameWidget.init(self, wdg)
+        wdg = wdg.get_np()
+        self.start_txt_color = wdg.component('text0').textNode.get_text_color()
+
+    def on_arrow(self, direction): pass
+
+    def on_wdg_enter(self, pos=None):  # pos: mouse's position
+        FrameWidget.on_wdg_enter(self, pos)
+        np = self.get_np()
+        np['text_fg'] = self.start_txt_color + Widget.highlight_color_offset
+        np.set_shader_input('col_offset', .25)
+
+    def on_wdg_exit(self, pos=None):  # pos: mouse's position
+        FrameWidget.on_wdg_exit(self, pos)
+        self.get_np()['text_fg'] = self.start_txt_color
+        self.get_np()['frameColor'] = self.start_frame_color
+        self.get_np().set_shader_input('col_offset', 0)
+
+    def on_enter(self):
+        if self['command'] and self['state'] == NORMAL:
+            self['command'](*self['extraArgs'])
+
+
+class EntryWidget(FrameWidget):
+
+    def on_arrow(self, direction): pass
+
+    def on_wdg_enter(self, pos=None):  # pos: mouse's position
+        FrameWidget.on_wdg_enter(self, pos)
+        self.get_np()['focus'] = 1
+        self.get_np().setFocus()
+
+    def on_wdg_exit(self, pos=None):  # pos: mouse's position
+        FrameWidget.on_wdg_exit(self, pos)
+        self.get_np()['focus'] = 0
+        self.get_np().setFocus()
+
+
+class CheckBtnWidget(BtnWidget):
+
+    def on_enter(self):
+        self['indicatorValue'] = not self['indicatorValue']
+        BtnWidget.on_enter(self)
+
+
+class SliderWidget(FrameWidget):
+
+    def on_arrow(self, direction):
+        if direction in [(-1, 0, 0), (1, 0, 0)]:
+            self.get_np()['value'] += -.1 if direction == (-1, 0, 0) else .1
+            return True
+
+
+class OptionMenuWidget(BtnWidget):
+
+    def on_arrow(self, direction):
+        is_hor = direction in [(-1, 0, 0), (1, 0, 0)]
+        np = self.get_np()
+        if not is_hor and not np.popupMenu.is_hidden():
+            old_idx = np.highlightedIndex
+            dir2offset = {(0, 0, -1): 1, (0, 0, 1): -1}
+            idx = np.highlightedIndex + dir2offset[direction]
+            idx = min(len(np['items']) - 1, max(0, idx))
+            if old_idx == idx: return True
+            fcol = np.component('item%s' % idx)['frameColor']
+            old_cmp = np.component('item%s' % old_idx)
+            np._unhighlightItem(old_cmp, fcol)
+            curr_cmp = np.component('item%s' % idx)
+            np._highlightItem(curr_cmp, idx)
+            return True
+
+    def on_enter(self):
+        np = self.get_np()
+        if np.popupMenu.is_hidden():
+            np.showPopupMenu()
+            np._highlightItem(np.component('item0'), 0)
+            return
+        else:
+            np.selectHighlightedIndex()
+            idx = np.selectedIndex
+            if np['command']: np['command'](np['items'][idx])
+            np.hidePopupMenu()
+            idx += -1 if idx else 1
+            fcol = np.component('item%s' % idx)['frameColor']
+            curr_name = 'item%s' % np.selectedIndex
+            np._unhighlightItem(np.component(curr_name), fcol)
+            return True
+        BtnWidget.on_enter(self)

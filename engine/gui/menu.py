@@ -104,7 +104,8 @@ class MenuGui(GuiColleague):
         self.menu_args = menu_args
         self.background = None
         if not self.menu_args.background_img: return
-        self.background = Img(self.menu_args.background_img, (1.77778, 1, 1.0),
+        self.background = Img(self.menu_args.background_img,
+                              scale=(1.77778, 1, 1.0),
                               is_background=True)
 
     def destroy(self):

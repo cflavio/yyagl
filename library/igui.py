@@ -20,3 +20,6 @@ class ILabel(object): pass
 
 
 class IText(object): pass
+
+
+class IFrame(object): pass

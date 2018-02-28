@@ -1,6 +1,5 @@
 from panda3d.core import TextNode
-from direct.gui.OnscreenText import OnscreenText
-from direct.gui.OnscreenImage import OnscreenImage
+from yyagl.library.gui import Text, Img
 from yyagl.engine.gui.page import Page, PageGui, PageFacade
 from yyagl.gameobject import GameObject, EventColleague
 from yyagl.racing.ranking.gui import RankingGui
@@ -22,16 +21,16 @@ class LoadingPageGui(PageGui):
         self.text_fg = self.mediator.menu.gui.menu_args.text_active
         self.text_bg = self.mediator.menu.gui.menu_args.text_normal
         self.text_err = self.mediator.menu.gui.menu_args.text_err
-        self.load_txt = OnscreenText(
-            text=_('LOADING...'), scale=.2, pos=(0, .78), font=self.font,
+        self.load_txt = Text(
+            _('LOADING...'), scale=.2, pos=(0, .78), font=self.font,
             fg=(.75, .75, .75, 1), wordwrap=12)
         track_number = ''
         if not self.rprops.season_props.single_race:
             track_names = self.rprops.season_props.gameprops.season_tracks
             track_num = track_names.index(self.rprops.track_name) + 1
             track_number = ' (%s/%s)' % (track_num, len(track_names))
-        track_txt = OnscreenText(
-            text=_('track: ') + self.track_name_transl + track_number,
+        track_txt = Text(
+            _('track: ') + self.track_name_transl + track_number,
             scale=.08, pos=(0, .62), font=self.font, fg=self.text_bg,
             wordwrap=12)
         self.set_wld_img()
@@ -43,14 +42,14 @@ class LoadingPageGui(PageGui):
         PageGui.build(self, False)
 
     def set_wld_img(self):
-        self.wld_img = OnscreenImage(
+        self.wld_img = Img(
             'assets/images/loading/%s.txo' % self.rprops.track_name,
             pos=(-.25, 1, -.25), scale=.24, parent=base.a2dTopRight)
         self.wld_img.set_transparency(True)
         self.add_widgets([self.wld_img])
 
     def set_grid(self):
-        txt = OnscreenText(text=_('Starting grid'), scale=.1, pos=(-1.0, .38),
+        txt = Text(_('Starting grid'), scale=.1, pos=(-1.0, .38),
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         for i, car_name in enumerate(self.rprops.grid):
@@ -61,7 +60,7 @@ class LoadingPageGui(PageGui):
     def set_ranking(self):
         items = self.ranking.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
-        txt = OnscreenText(text=_('Ranking'), scale=.1, pos=(0, .38),
+        txt = Text(_('Ranking'), scale=.1, pos=(0, .38),
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         for i, car in enumerate(sorted_ranking):
@@ -70,11 +69,11 @@ class LoadingPageGui(PageGui):
             self.add_widgets([txt, img])
 
     def set_controls(self):
-        txt = OnscreenText(text=_('Controls'), scale=.1, pos=(1.0, .38),
+        txt = Text(_('Controls'), scale=.1, pos=(1.0, .38),
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         if self.rprops.joystick:
-            txt = OnscreenText(text=_('joypad'), scale=.08, pos=(1.0, .22),
+            txt = Text(_('joypad'), scale=.08, pos=(1.0, .22),
                                font=self.font, fg=self.text_bg)
             self.add_widgets([txt])
             return
@@ -86,31 +85,31 @@ class LoadingPageGui(PageGui):
         self.__cmd_label(_('respawn'), 'respawn', -.28)
 
     def set_upgrades(self):
-        txt = OnscreenText(text=_('Upgrades'), scale=.1, pos=(1.0, -.56),
+        txt = Text(_('Upgrades'), scale=.1, pos=(1.0, -.56),
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         tuning = self.tuning.car2tuning[
             self.rprops.season_props.player_car_name]
-        txt = OnscreenText(
-            text=_('engine: +') + str(tuning.f_engine),
-            align=TextNode.A_left, scale=.072, pos=(.8, -.7), font=self.font,
+        txt = Text(
+            _('engine: +') + str(tuning.f_engine),
+            align='left', scale=.072, pos=(.8, -.7), font=self.font,
             fg=self.text_bg)
         self.widgets += [txt]
-        txt = OnscreenText(
-            text=_('tires: +') + str(tuning.f_tires),
-            align=TextNode.A_left, scale=.072, pos=(.8, -.8), font=self.font,
+        txt = Text(
+            _('tires: +') + str(tuning.f_tires),
+            align='left', scale=.072, pos=(.8, -.8), font=self.font,
             fg=self.text_bg)
         self.widgets += [txt]
-        txt = OnscreenText(
-            text=_('suspensions: +') + str(tuning.f_suspensions),
-            align=TextNode.A_left, scale=.072, pos=(.8, -.9), font=self.font,
+        txt = Text(
+            _('suspensions: +') + str(tuning.f_suspensions),
+            align='left', scale=.072, pos=(.8, -.9), font=self.font,
             fg=self.text_bg)
         self.widgets += [txt]
 
     def __cmd_label(self, text, key, pos_z):
-        txt = OnscreenText(
-            text=text + ': ' + getattr(self.rprops.keys, key),
-            align=TextNode.A_left, scale=.072, pos=(.8, pos_z), font=self.font,
+        txt = Text(
+            text + ': ' + getattr(self.rprops.keys, key),
+            align='left', scale=.072, pos=(.8, pos_z), font=self.font,
             fg=self.text_bg)
         self.widgets += [txt]
 
