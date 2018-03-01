@@ -53,6 +53,7 @@ class WeaponGfxNetwork(WeaponGfx):
         self.ipos = LerpPosInterval(wpn_np, self.eng.client.rate, pos)
         self.ipos.start()
         fwd_start = render.get_relative_vector(wpn_np, Vec3(0, 1, 0))
+        if self.ifwd: self.ifwd.finish()
         self.ifwd = LerpFunc(self._rotate_wpn,
                              fromData=0,
                              toData=1,
@@ -69,6 +70,7 @@ class WeaponGfxNetwork(WeaponGfx):
         self.ipos = LerpPosInterval(wpn_np, self.eng.client.rate, pos)
         self.ipos.start()
         fwd_start = render.get_relative_vector(wpn_np, Vec3(0, 1, 0))
+        if self.ifwd: self.ifwd.finish()
         self.ifwd = LerpFunc(self._rotate_wpn,
                              fromData=0,
                              toData=1,

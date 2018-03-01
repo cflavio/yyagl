@@ -63,12 +63,6 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
         rename(platf, 'yorg')
         system('tar cfJ yorg-ng-%s.tar.xz yorg' % desc)
         rmtree('yorg')
-        platf2suff = {
-            'win32': 'zip',
-            'macosx_10_6_x86_64': 'zip',
-            'manylinux1_i686': 'tar.gz',
-            'manylinux1_x86_64': 'tar.gz'
-        }
-        remove('yorg-0.0.0_%s.%s' % (platf, platf2suff[platf]))
+        remove('yorg-0.0.0_%s.zip' % platf)
     rmtree('__whl_cache__')
     chdir('..')

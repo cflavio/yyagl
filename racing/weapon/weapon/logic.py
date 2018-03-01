@@ -3,10 +3,11 @@ from yyagl.gameobject import LogicColleague
 
 class WeaponLogic(LogicColleague):
 
-    def __init__(self, mediator, car, cars):
+    def __init__(self, mediator, car, cars, wpn_id):
         LogicColleague.__init__(self, mediator)
         self.car = car
         self.cars = cars
+        self.wpn_id = wpn_id
         self.has_fired = False
 
     def update_props(self, pos, fwd):

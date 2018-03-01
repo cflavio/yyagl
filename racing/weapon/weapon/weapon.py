@@ -7,6 +7,7 @@ from .audio import WeaponAudio
 class WeaponFacade(Facade):
 
     def __init__(self):
+        self._fwd_prop('id', lambda obj: obj.logic.wpn_id)
         self._fwd_mth('attach_obs', lambda obj: obj.logic.attach)
         self._fwd_mth('detach_obs', lambda obj: obj.logic.detach)
         self._fwd_mth('fire', lambda obj: obj.logic.fire)
@@ -22,11 +23,11 @@ class Weapon(GameObject, WeaponFacade):
     audio_cls = WeaponAudio
     deg = 0
 
-    def __init__(self, car, path, cars, part_path):
+    def __init__(self, car, path, cars, part_path, wpn_id):
         init_lst = [
             [('gfx', self.gfx_cls, [self, car.gfx.nodepath, path])],
             [('audio', self.audio_cls, [self])],
-            [('logic', self.logic_cls, [self, car, cars])],
+            [('logic', self.logic_cls, [self, car, cars, wpn_id])],
             [('ai', self.ai_cls, [self, car])]]
         GameObject.__init__(self, init_lst)
         WeaponFacade.__init__(self)
@@ -38,12 +39,12 @@ class Weapon(GameObject, WeaponFacade):
 
 class PhysWeapon(Weapon):
 
-    def __init__(self, car, path, cars, part_path):
+    def __init__(self, car, path, cars, part_path, wpn_id):
         init_lst = [
             [('gfx', self.gfx_cls, [self, car.gfx.nodepath, path])],
             [('phys', self.phys_cls, [self, car, cars])],
             [('audio', self.audio_cls, [self])],
-            [('logic', self.logic_cls, [self, car, cars])],
+            [('logic', self.logic_cls, [self, car, cars, wpn_id])],
             [('event', self.event_cls, [self, part_path])],
             [('ai', self.ai_cls, [self, car])]]
         GameObject.__init__(self, init_lst)

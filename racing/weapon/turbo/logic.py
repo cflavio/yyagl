@@ -3,8 +3,8 @@ from yyagl.racing.weapon.weapon.logic import WeaponLogic
 
 class TurboLogic(WeaponLogic):
 
-    def __init__(self, mediator, car, cars):
-        WeaponLogic.__init__(self, mediator, car, cars)
+    def __init__(self, mediator, car, cars, wpn_id):
+        WeaponLogic.__init__(self, mediator, car, cars, wpn_id)
         self.stored_max_speed = self.stored_engine_acc_frc = \
             self.destroy_tsk = None
 

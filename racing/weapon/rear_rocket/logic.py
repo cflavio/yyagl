@@ -3,8 +3,8 @@ from yyagl.racing.weapon.weapon.logic import WeaponLogic, WeaponLogicNetwork
 
 class RearRocketLogic(WeaponLogic):
 
-    def __init__(self, mediator, car, cars):
-        WeaponLogic.__init__(self, mediator, car, cars)
+    def __init__(self, mediator, car, cars, wpn_id):
+        WeaponLogic.__init__(self, mediator, car, cars, wpn_id)
         self.tsk = None
 
     def fire(self, sfx):

@@ -84,6 +84,7 @@ class CarEvent(EventColleague, ComputerProxy):
             ('rear', keys.rear), ('right', keys.right)]
         watch = inputState.watchWithModifiers
         self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
+        self.curr_wpn_id = 0
 
     def start(self):
         self.eng.attach_obs(self.on_frame)
@@ -112,7 +113,7 @@ class CarEvent(EventColleague, ComputerProxy):
             self.mediator.phys.pnode.apply_central_force((choice([-int_lat, int_lat]), choice([-int_lat, int_lat]), 96000))
             self.mediator.phys.pnode.apply_torque((0, 0, choice([-int_rot, int_rot])))
 
-    def on_bonus(self, cls=None):
+    def on_bonus(self, cls=None, wpn_id=None):
         if self.mediator.logic.weapon:
             self.mediator.logic.weapon.destroy()
         if cls == 'remove':
@@ -139,7 +140,8 @@ class CarEvent(EventColleague, ComputerProxy):
             MineNetwork: self.props.mine_path}
         path = wpn2path[wpn_cls]
         self.mediator.logic.weapon = wpn_cls(
-            self.mediator, path, self.props.season_props.car_names, part_path)
+            self.mediator, path, self.props.season_props.car_names, part_path, wpn_id or self.curr_wpn_id)
+        self.curr_wpn_id += 1
         self.mediator.logic.weapon.attach_obs(self.on_rotate_all)
         return wpn_cls
 
@@ -323,16 +325,18 @@ class CarPlayerEventClient(CarPlayerEvent):
         if self.mediator.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
             level = 2
         wpn = ''
+        wpn_id = 0
         wpn_pos = (0, 0, 0)
         wpn_fwd = (0, 0, 0)
         if self.mediator.logic.weapon:
             curr_wpn = self.mediator.logic.weapon
+            wpn_id = curr_wpn.id
             wpn = {
                 Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
                 RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
             wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
-        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, [level], [wpn], wpn_pos, wpn_fwd))
+        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, [level], [wpn, wpn_id], wpn_pos, wpn_fwd))
         packet += [len(self.mediator.logic.fired_weapons)]
         for i in range(len(self.mediator.logic.fired_weapons)):
             curr_wpn = self.mediator.logic.fired_weapons[i]
@@ -341,7 +345,7 @@ class CarPlayerEventClient(CarPlayerEvent):
                 RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
             wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
-            packet += chain([wpn], wpn_pos, wpn_fwd)
+            packet += chain([wpn, curr_wpn.id], wpn_pos, wpn_fwd)
         if self.eng.curr_time - self.last_sent > self.eng.client.rate:
             self.eng.client.send_udp(packet)
             self.last_sent = self.eng.curr_time
@@ -366,7 +370,7 @@ class CarNetworkEvent(CarEvent):
     def unset_fired_weapon(self, wpn):
         self.mediator.logic.unset_fired_weapon(wpn)
 
-    def set_weapon(self, wpn_cls):
+    def set_weapon(self, wpn_cls, wpn_id):
         #if wpn_code:
         #    wpncode2cls = {
         #        'rocket': Rocket, 'rearrocket': RearRocket, 'turbo': Turbo,
@@ -374,7 +378,7 @@ class CarNetworkEvent(CarEvent):
         #    wpn_cls = wpncode2cls[wpn_code]
         #else:
         #    wpn_cls = None
-        CarEvent.on_bonus(self, wpn_cls)
+        CarEvent.on_bonus(self, wpn_cls, wpn_id)
 
     def unset_weapon(self):
         self.mediator.logic.weapon.destroy()
