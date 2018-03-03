@@ -3,10 +3,10 @@ from itertools import chain
 from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import EventColleague
-from yyagl.racing.race.event import NetMsgs
+from yyagl.racing.race.event import NetMsgs, wpnclasses2id
 from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNetwork
-from yyagl.racing.weapon.turbo.turbo import Turbo
+from yyagl.racing.weapon.turbo.turbo import Turbo, TurboNetwork
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
 from yyagl.racing.weapon.mine.mine import Mine, MineNetwork
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
@@ -135,6 +135,7 @@ class CarEvent(EventColleague, ComputerProxy):
             RearRocket: self.props.rocket_path,
             RearRocketNetwork: self.props.rocket_path,
             Turbo: self.props.turbo_path,
+            TurboNetwork: self.props.turbo_path,
             RotateAll: self.props.rotate_all_path,
             Mine: self.props.mine_path,
             MineNetwork: self.props.mine_path}
@@ -331,18 +332,14 @@ class CarPlayerEventClient(CarPlayerEvent):
         if self.mediator.logic.weapon:
             curr_wpn = self.mediator.logic.weapon
             wpn_id = curr_wpn.id
-            wpn = {
-                Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
-                RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
+            wpn = wpnclasses2id[curr_wpn.__class__]
             wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
         packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, [level], [wpn, wpn_id], wpn_pos, wpn_fwd))
         packet += [len(self.mediator.logic.fired_weapons)]
         for i in range(len(self.mediator.logic.fired_weapons)):
             curr_wpn = self.mediator.logic.fired_weapons[i]
-            wpn = {
-                Rocket: 'rocket', RearRocket: 'rearrocket', Turbo: 'turbo',
-                RotateAll: 'rotateall', Mine: 'mine'}[curr_wpn.__class__]
+            wpn = wpnclasses2id[curr_wpn.__class__]
             wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
             packet += chain([wpn, curr_wpn.id], wpn_pos, wpn_fwd)

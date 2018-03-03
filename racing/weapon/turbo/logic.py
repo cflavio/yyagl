@@ -1,4 +1,4 @@
-from yyagl.racing.weapon.weapon.logic import WeaponLogic
+from yyagl.racing.weapon.weapon.logic import WeaponLogic, WeaponLogicNetwork
 
 
 class TurboLogic(WeaponLogic):
@@ -24,3 +24,6 @@ class TurboLogic(WeaponLogic):
         if self.stored_engine_acc_frc is not None:
             self.eng.remove_do_later(self.destroy_tsk)
         WeaponLogic.destroy(self)
+
+
+class TurboLogicNetwork(WeaponLogicNetwork, TurboLogic): pass

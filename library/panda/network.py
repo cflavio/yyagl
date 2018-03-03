@@ -82,9 +82,9 @@ class PandaWriteDatagram(WriteDatagram):
 
     def add_bool(self, val): self.datagram.add_bool(val)
 
-    def add_int(self, val): self.datagram.add_int64(val)
+    def add_int(self, val): self.datagram.add_int32(val)
 
-    def add_float(self, val): self.datagram.add_float64(val)
+    def add_float(self, val): self.datagram.add_float32(val)
 
     def add_string(self, val): self.datagram.add_string(val)
 
@@ -96,8 +96,8 @@ class PandaDatagramIterator(DatagramIterator):
 
     def get_bool(self): return self._iter.get_bool()
 
-    def get_int(self): return self._iter.get_int64()
+    def get_int(self): return self._iter.get_int32()
 
-    def get_float(self): return self._iter.get_float64()
+    def get_float(self): return self._iter.get_float32()
 
     def get_string(self): return self._iter.get_string()
