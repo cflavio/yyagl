@@ -39,7 +39,7 @@ class Engine(GameObject, EngineFacade):
         self.font_mgr = FontMgr()
         self.server = Server()
         self.client = Client()
-        self.xmpp = XMPP()
+        self.xmpp = XMPP(cfg.dev_cfg.xmpp_server)
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr.init_cls(), [self])],

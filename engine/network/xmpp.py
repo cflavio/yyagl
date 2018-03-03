@@ -58,10 +58,12 @@ class User(object):
 
 class XMPP(GameObject, Subject):
 
-    def __init__(self):
+    def __init__(self, yorg_srv):
         Subject.__init__(self)
         GameObject.__init__(self)
         self.client = None
+        self.yorg_srv = yorg_srv
+        self.is_server_up = False
         self.users = []
 
     def start(self, usr, pwd, on_ok, on_fail, debug=False):
@@ -237,11 +239,11 @@ class YorgClient(ClientXMPP, GameObject):
         self.xmpp.users = []
         self.xmpp.users = [User(line[2:], int(line[0]), True, int(line[1]),self.xmpp) for line in msg['body'].split()]
         roster_users = [name for name in self.xmpp.client.client_roster.keys() if self.xmpp.client.client_roster[name]['subscription'] in ['to', 'both']]
-        for user in ['ya2_yorg@jabb3r.org', self.boundjid.bare]:
+        for user in [self.xmpp.yorg_srv, self.boundjid.bare]:
             if user in roster_users: roster_users.remove(user)
         out_users = [usr for usr in roster_users if usr not in [_usr.name for _usr in self.xmpp.users]]
         self.xmpp.users += [User(usr, 0, False, False, self.xmpp) for usr in out_users]
-        filter_names = ['ya2_yorg@jabb3r.org', self.boundjid.bare]
+        filter_names = [self.xmpp.yorg_srv, self.boundjid.bare]
         presence_users = [usr.name_full for usr in self.xmpp.users if usr.name not in filter_names and usr.is_in_yorg]
         me = [usr for usr in self.xmpp.users if usr.name == self.boundjid.bare][0]
         for usr in presence_users:
@@ -267,22 +269,23 @@ class YorgClient(ClientXMPP, GameObject):
         self.eng.log('send connected')
         self.send_presence(
             pfrom=self.boundjid.full,
-            pto='ya2_yorg@jabb3r.org')
+            pto=self.xmpp.yorg_srv)
         self.send_message(
             mfrom=self.boundjid.full,
-            mto='ya2_yorg@jabb3r.org',
+            mto=self.xmpp.yorg_srv,
             mtype='chat',
             msubject='query_full',
             mbody='query_full')
 
     def on_answer_full(self, msg):
         self.eng.log('received answer full')
+        self.xmpp.is_server_up = True
         self.send_presence(
             pfrom=self.boundjid.full,
             pto=msg['from'])
         self.send_message(
             mfrom=self.boundjid.full,
-            mto='ya2_yorg@jabb3r.org',
+            mto=self.xmpp.yorg_srv,
             mtype='chat',
             msubject='list_users',
             mbody='list_users')
