@@ -8,7 +8,7 @@ class EngineGuiBase(GuiColleague):
 
     @staticmethod
     def init_cls():
-        return EngineGui if GuiColleague.eng.lib.has_window else EngineGuiBase
+        return EngineGui if GuiColleague.eng.lib.has_window() else EngineGuiBase
 
     @staticmethod
     def open_browser(url): Browser.open(url)

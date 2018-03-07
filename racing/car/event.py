@@ -319,6 +319,9 @@ class CarPlayerEventClient(CarPlayerEvent):
         pos = self.mediator.pos
         fwd = render.get_relative_vector(self.mediator.gfx.nodepath.node, Vec3(0, 1, 0))
         velocity = self.mediator.phys.vehicle.get_chassis().get_linear_velocity()
+        ang_vel = self.mediator.phys.vehicle.get_chassis().get_angular_velocity()
+        curr_inp = self._get_input()
+        inp = [curr_inp.forward, curr_inp.rear, curr_inp.left, curr_inp.right]
         level = 0
         curr_chassis = self.mediator.gfx.nodepath.get_children()[0]
         if self.mediator.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
@@ -335,7 +338,7 @@ class CarPlayerEventClient(CarPlayerEvent):
             wpn = wpnclasses2id[curr_wpn.__class__]
             wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
-        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, [level], [wpn, wpn_id], wpn_pos, wpn_fwd))
+        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, ang_vel, inp, [level], [wpn, wpn_id], wpn_pos, wpn_fwd))
         packet += [len(self.mediator.logic.fired_weapons)]
         for i in range(len(self.mediator.logic.fired_weapons)):
             curr_wpn = self.mediator.logic.fired_weapons[i]

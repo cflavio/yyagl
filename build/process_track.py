@@ -53,6 +53,7 @@ class DevCfg(object):
         self.shaders_dev = False
         self.gamma = 1.0
         self.menu_joypad = False
+        self.xmpp_server = ''
 
 
 class Conf(object):

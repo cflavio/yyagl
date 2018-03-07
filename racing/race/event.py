@@ -164,6 +164,14 @@ class RaceEventServer(RaceEvent):
             pos = car.gfx.nodepath.get_pos()
             fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
             velocity = car.phys.vehicle.getChassis().get_linear_velocity()
+            ang_vel = car.phys.vehicle.get_chassis().get_angular_velocity()
+            try: curr_inp = car.event._get_input()
+            except AttributeError as e:
+                print e
+                # car.event is created in the second frame
+                from yyagl.racing.car.event import DirKeys
+                curr_inp = DirKeys(False, False, False, False)
+            inp = [curr_inp.forward, curr_inp.rear, curr_inp.left, curr_inp.right]
             level = 0
             nodes = car.gfx.nodepath.get_children()
             if len(nodes):
@@ -185,7 +193,7 @@ class RaceEventServer(RaceEvent):
                 if curr_wpn.logic.has_fired:
                     wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
                     wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
-            packet += chain([name], pos, fwd, velocity, [level], [wpn, wpn_id], wpn_pos, wpn_fwd)
+            packet += chain([name], pos, fwd, velocity, ang_vel, inp, [level], [wpn, wpn_id], wpn_pos, wpn_fwd)
             packet += [len(car.logic.fired_weapons)]
             for i in range(len(car.logic.fired_weapons)):
                 curr_wpn = car.logic.fired_weapons[i]
@@ -200,20 +208,22 @@ class RaceEventServer(RaceEvent):
         pos = (data_lst[1], data_lst[2], data_lst[3])
         fwd = (data_lst[4], data_lst[5], data_lst[6])
         velocity = (data_lst[7], data_lst[8], data_lst[9])
-        level = data_lst[10]
-        weapon, car_wpn_id = data_lst[11], data_lst[12]
-        wpn_pos = (data_lst[13], data_lst[14], data_lst[15])
-        wpn_fwd = (data_lst[16], data_lst[17], data_lst[18])
+        ang_vel = (data_lst[10], data_lst[11], data_lst[12])
+        curr_inp = (data_lst[13], data_lst[14], data_lst[15], data_lst[16])
+        level = data_lst[17]
+        weapon, car_wpn_id = data_lst[18], data_lst[19]
+        wpn_pos = (data_lst[20], data_lst[21], data_lst[22])
+        wpn_fwd = (data_lst[23], data_lst[24], data_lst[25])
         fired_weapons = []
-        for i in range(data_lst[19]):
-            start = 20 + i * 8
+        for i in range(data_lst[26]):
+            start = 27 + i * 8
             fired_weapons += [[
                 data_lst[start],
                 data_lst[start + 1],
                 (data_lst[start + 2], data_lst[start + 3], data_lst[start + 4]),
                 (data_lst[start + 5], data_lst[start + 6], data_lst[start + 7])
             ]]
-        self.server_info[sender] = (pos, fwd, velocity, level, weapon)
+        self.server_info[sender] = (pos, fwd, velocity, ang_vel, curr_inp, level, weapon)
         car_name = self.eng.car_mapping[data_lst[-1]]
         for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
             if carname2id[car_name] == carname2id[car.name]:
@@ -298,19 +308,21 @@ class RaceEventClient(RaceEvent):
             car_pos = (data_lst[1], data_lst[2], data_lst[3])
             car_fwd = (data_lst[4], data_lst[5], data_lst[6])
             car_vel = (data_lst[7], data_lst[8], data_lst[9])
-            car_level = data_lst[10]
-            car_weapon, car_wpn_id = data_lst[11], data_lst[12]
-            car_wpn_pos = (data_lst[13], data_lst[14], data_lst[15])
-            car_wpn_fwd = (data_lst[16], data_lst[17], data_lst[18])
+            car_ang_vel = (data_lst[10], data_lst[11], data_lst[12])
+            car_inp = (data_lst[13], data_lst[14], data_lst[15], data_lst[16])
+            car_level = data_lst[17]
+            car_weapon, car_wpn_id = data_lst[18], data_lst[19]
+            car_wpn_pos = (data_lst[20], data_lst[21], data_lst[22])
+            car_wpn_fwd = (data_lst[23], data_lst[24], data_lst[25])
             fired_weapons = []
-            for i in range(data_lst[19]):
-                start = 20 + i * 8
+            for i in range(data_lst[26]):
+                start = 27 + i * 8
                 fired_weapons += [[
                     data_lst[start], data_lst[start + 1],
                     (data_lst[start + 2], data_lst[start + 3], data_lst[start + 4]),
                     (data_lst[start + 5], data_lst[start + 6], data_lst[start + 7])
                 ]]
-            data_lst = data_lst[20 + data_lst[19] * 8:]
+            data_lst = data_lst[27 + data_lst[26] * 8:]
             cars = self.mediator.logic.cars
             netcars = [car for car in cars if car.__class__ == NetworkCar]
             for car in netcars:
