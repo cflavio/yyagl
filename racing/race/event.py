@@ -115,13 +115,33 @@ class RaceEvent(EventColleague):
         race_ranking = {car: point for car, point in zipped}
         self.mediator.fsm.demand('Results', race_ranking)
 
-    @staticmethod
-    def _rotate_car(t, node, start_vec, end_vec):
+    def _move_car(self, car):
+        if not hasattr(car, 'logic'): return  # it's created in the second frame
+        t = globalClock.get_frame_time() - car.logic.last_network_packet
+        t = t / RaceEvent.eng.server.rate
+        node = car.gfx.nodepath.node
+        start_pos = car.logic.curr_network_start_pos
+        end_pos = car.logic.curr_network_end_pos
+        interp_pos = Vec3(
+            start_pos[0] * (1 - t) + end_pos[0] * t,
+            start_pos[1] * (1 - t) + end_pos[1] * t,
+            start_pos[2] * (1 - t) + end_pos[2] * t)
+        if t <= 1.0 and self.mediator.logic.min_dist(car) > 5:
+            node.set_pos(interp_pos)
+
+    def _rotate_car(self, car):
+        if not hasattr(car, 'logic'): return  # it's created in the second frame
+        t = globalClock.get_frame_time() - car.logic.last_network_packet
+        t = t / RaceEvent.eng.server.rate
+        node = car.gfx.nodepath.node
+        start_vec = car.logic.curr_network_start_vec
+        end_vec = car.logic.curr_network_end_vec
         interp_vec = Vec3(
             start_vec[0] * (1 - t) + end_vec[0] * t,
             start_vec[1] * (1 - t) + end_vec[1] * t,
             start_vec[2] * (1 - t) + end_vec[2] * t)
-        node.look_at(node.get_pos() + interp_vec)
+        if t <= 1.0 and self.mediator.logic.min_dist(car) > 5:
+            node.look_at(node.get_pos() + interp_vec)
 
     def destroy(self):
         map(self.ignore, ['escape-up', 'p-up'])
@@ -147,6 +167,10 @@ class RaceEventServer(RaceEvent):
         fwd = render.get_relative_vector(self.mediator.logic.player_car.gfx.nodepath.node, Vec3(0, 1, 0))
         velocity = self.mediator.logic.player_car.get_linear_velocity()
         self.server_info['server'] = (pos, fwd, velocity)
+        from yyagl.racing.car.car import NetworkCar
+        for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
+            self._move_car(car)
+            self._rotate_car(car)
         for car in [_car for _car in self.mediator.logic.cars if _car.ai_cls == CarAi]:
             pos = car.get_pos()
             fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
@@ -172,6 +196,10 @@ class RaceEventServer(RaceEvent):
                 from yyagl.racing.car.event import DirKeys
                 curr_inp = DirKeys(False, False, False, False)
             inp = [curr_inp.forward, curr_inp.rear, curr_inp.left, curr_inp.right]
+            eng_frc = car.phys.vehicle.get_wheel(0).get_engine_force()
+            brk_frc_fwd = car.phys.vehicle.get_wheel(0).get_brake()
+            brk_frc_rear = car.phys.vehicle.get_wheel(2).get_brake()
+            steering = car.phys.vehicle.get_steering_value(0)
             level = 0
             nodes = car.gfx.nodepath.get_children()
             if len(nodes):
@@ -193,7 +221,10 @@ class RaceEventServer(RaceEvent):
                 if curr_wpn.logic.has_fired:
                     wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
                     wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
-            packet += chain([name], pos, fwd, velocity, ang_vel, inp, [level], [wpn, wpn_id], wpn_pos, wpn_fwd)
+            packet += chain(
+                [name], pos, fwd, velocity, ang_vel, inp,
+                [eng_frc, brk_frc_fwd, brk_frc_rear, steering], [level],
+                [wpn, wpn_id], wpn_pos, wpn_fwd)
             packet += [len(car.logic.fired_weapons)]
             for i in range(len(car.logic.fired_weapons)):
                 curr_wpn = car.logic.fired_weapons[i]
@@ -210,13 +241,17 @@ class RaceEventServer(RaceEvent):
         velocity = (data_lst[7], data_lst[8], data_lst[9])
         ang_vel = (data_lst[10], data_lst[11], data_lst[12])
         curr_inp = (data_lst[13], data_lst[14], data_lst[15], data_lst[16])
-        level = data_lst[17]
-        weapon, car_wpn_id = data_lst[18], data_lst[19]
-        wpn_pos = (data_lst[20], data_lst[21], data_lst[22])
-        wpn_fwd = (data_lst[23], data_lst[24], data_lst[25])
+        eng_frc = data_lst[17]
+        brk_frc_fwd = data_lst[18]
+        brk_frc_rear = data_lst[19]
+        steering = data_lst[20]
+        level = data_lst[21]
+        weapon, car_wpn_id = data_lst[22], data_lst[23]
+        wpn_pos = (data_lst[24], data_lst[25], data_lst[26])
+        wpn_fwd = (data_lst[27], data_lst[28], data_lst[29])
         fired_weapons = []
-        for i in range(data_lst[26]):
-            start = 27 + i * 8
+        for i in range(data_lst[30]):
+            start = 31 + i * 8
             fired_weapons += [[
                 data_lst[start],
                 data_lst[start + 1],
@@ -227,13 +262,17 @@ class RaceEventServer(RaceEvent):
         car_name = self.eng.car_mapping[data_lst[-1]]
         for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
             if carname2id[car_name] == carname2id[car.name]:
-                LerpPosInterval(car.gfx.nodepath.node, self.eng.server.rate, pos).start()
-                fwd_start = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
-                LerpFunc(self._rotate_car,
-                         fromData=0,
-                         toData=1,
-                         duration=self.eng.server.rate,
-                         extraArgs=[car.gfx.nodepath.node, fwd_start, fwd]).start()
+                car.logic.last_network_packet = globalClock.getFrameTime()
+                car.logic.curr_network_start_pos = car.gfx.nodepath.get_pos()
+                car.logic.curr_network_end_pos = pos
+                car.logic.curr_network_start_vec = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
+                car.logic.curr_network_end_vec = fwd
+                car.logic.curr_network_eng_frc = eng_frc
+                car.logic.curr_network_brk_frc_fwd = brk_frc_fwd
+                car.logic.curr_network_brk_frc_rear = brk_frc_rear
+                car.logic.curr_network_steering = steering
+                from yyagl.racing.car.event import DirKeys
+                car.logic.curr_network_input = DirKeys(*curr_inp)
                 curr_level = 0
                 curr_chassis = car.gfx.nodepath.get_children()[0]
                 if car.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
@@ -297,6 +336,17 @@ class RaceEventServer(RaceEvent):
 
 class RaceEventClient(RaceEvent):
 
+    def __init__(self, mediator, menu_cls, keys):
+        RaceEvent.__init__(self, mediator, menu_cls, keys)
+        self.eng.attach_obs(self.on_frame)
+
+    def on_frame(self):
+        from yyagl.racing.car.car import NetworkCar
+        if not self.mediator.logic.cars: return  # during loading
+        for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
+            self._move_car(car)
+            self._rotate_car(car)
+
     def network_register(self):
         self.eng.client.register_cb(self.process_client)
 
@@ -310,30 +360,38 @@ class RaceEventClient(RaceEvent):
             car_vel = (data_lst[7], data_lst[8], data_lst[9])
             car_ang_vel = (data_lst[10], data_lst[11], data_lst[12])
             car_inp = (data_lst[13], data_lst[14], data_lst[15], data_lst[16])
-            car_level = data_lst[17]
-            car_weapon, car_wpn_id = data_lst[18], data_lst[19]
-            car_wpn_pos = (data_lst[20], data_lst[21], data_lst[22])
-            car_wpn_fwd = (data_lst[23], data_lst[24], data_lst[25])
+            eng_frc = data_lst[17]
+            brk_frc_fwd = data_lst[18]
+            brk_frc_rear = data_lst[19]
+            steering = data_lst[20]
+            car_level = data_lst[21]
+            car_weapon, car_wpn_id = data_lst[22], data_lst[23]
+            car_wpn_pos = (data_lst[24], data_lst[25], data_lst[26])
+            car_wpn_fwd = (data_lst[27], data_lst[28], data_lst[29])
             fired_weapons = []
-            for i in range(data_lst[26]):
-                start = 27 + i * 8
+            for i in range(data_lst[30]):
+                start = 31 + i * 8
                 fired_weapons += [[
                     data_lst[start], data_lst[start + 1],
                     (data_lst[start + 2], data_lst[start + 3], data_lst[start + 4]),
                     (data_lst[start + 5], data_lst[start + 6], data_lst[start + 7])
                 ]]
-            data_lst = data_lst[27 + data_lst[26] * 8:]
+            data_lst = data_lst[31 + data_lst[30] * 8:]
             cars = self.mediator.logic.cars
             netcars = [car for car in cars if car.__class__ == NetworkCar]
             for car in netcars:
                 if car_name == car.name:
-                    LerpPosInterval(car.gfx.nodepath.node, self.eng.client.rate, car_pos).start()
-                    fwd_start = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
-                    LerpFunc(self._rotate_car,
-                         fromData=0,
-                         toData=1,
-                         duration=self.eng.client.rate,
-                         extraArgs=[car.gfx.nodepath.node, fwd_start, car_fwd]).start()
+                    car.logic.last_network_packet = globalClock.getFrameTime()
+                    car.logic.curr_network_start_pos = car.gfx.nodepath.get_pos()
+                    car.logic.curr_network_end_pos = car_pos
+                    car.logic.curr_network_start_vec = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
+                    car.logic.curr_network_end_vec = car_fwd
+                    car.logic.curr_network_eng_frc = eng_frc
+                    car.logic.curr_network_brk_frc_fwd = brk_frc_fwd
+                    car.logic.curr_network_brk_frc_rear = brk_frc_rear
+                    car.logic.curr_network_steering = steering
+                    from yyagl.racing.car.event import DirKeys
+                    car.logic.curr_network_input = DirKeys(*car_inp)
                     curr_level = 0
                     curr_chassis = car.gfx.nodepath.get_children()[0]
                     if car.gfx.chassis_np_low.get_name() in curr_chassis.get_name():

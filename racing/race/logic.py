@@ -76,6 +76,13 @@ class RaceLogic(LogicColleague):
     def nonplayer_cars(self):
         return self.cars
 
+    def min_dist(self, car):
+        distances = []
+        for _car in [_car for _car in self.all_cars if _car != car]:
+            dist = (car.gfx.nodepath.node.get_pos() - _car.gfx.nodepath.node.get_pos()).length()
+            distances += [dist]
+        return min(distances)
+
     def on_frame(self):
         self.ai_poller.tick()
         self.track.update(self.player_car.get_pos())

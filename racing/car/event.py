@@ -322,6 +322,10 @@ class CarPlayerEventClient(CarPlayerEvent):
         ang_vel = self.mediator.phys.vehicle.get_chassis().get_angular_velocity()
         curr_inp = self._get_input()
         inp = [curr_inp.forward, curr_inp.rear, curr_inp.left, curr_inp.right]
+        eng_frc = self.mediator.phys.vehicle.get_wheel(0).get_engine_force()
+        brk_frc_fwd = self.mediator.phys.vehicle.get_wheel(0).get_brake()
+        brk_frc_rear = self.mediator.phys.vehicle.get_wheel(2).get_brake()
+        steering = self.mediator.phys.vehicle.get_steering_value(0)
         level = 0
         curr_chassis = self.mediator.gfx.nodepath.get_children()[0]
         if self.mediator.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
@@ -338,7 +342,10 @@ class CarPlayerEventClient(CarPlayerEvent):
             wpn = wpnclasses2id[curr_wpn.__class__]
             wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
-        packet = list(chain([NetMsgs.player_info], pos, fwd, velocity, ang_vel, inp, [level], [wpn, wpn_id], wpn_pos, wpn_fwd))
+        packet = list(chain(
+            [NetMsgs.player_info], pos, fwd, velocity, ang_vel, inp,
+            [eng_frc, brk_frc_fwd, brk_frc_rear, steering], [level],
+            [wpn, wpn_id], wpn_pos, wpn_fwd))
         packet += [len(self.mediator.logic.fired_weapons)]
         for i in range(len(self.mediator.logic.fired_weapons)):
             curr_wpn = self.mediator.logic.fired_weapons[i]
@@ -359,7 +366,7 @@ class CarNetworkEvent(CarEvent):
 
     @once_a_frame
     def _get_input(self):
-        return DirKeys(False, False, False, False)
+        return self.mediator.logic.curr_network_input
 
     def on_bonus(self, wpn_cls=None):
         pass

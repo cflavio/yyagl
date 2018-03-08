@@ -3,6 +3,7 @@ from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32
 from yyagl.gameobject import LogicColleague
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera
+from yyagl.racing.car.event import DirKeys
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.engine.vec import Vec2, Vec
 
@@ -245,6 +246,12 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.__wp_num = None
         self.applied_torque = False  # applied from weapons
         self.alt_jmp_wp = None
+        self.last_network_packet = 0
+        self.curr_network_start_pos = (0, 0, 0)
+        self.curr_network_end_pos = (0, 0, 0)
+        self.curr_network_start_vec = (0, 0, 0)
+        self.curr_network_end_vec = (0, 0, 0)
+        self.curr_network_input = DirKeys(False, False, False, False)
 
     def update(self, input2forces):
         phys = self.mediator.phys
