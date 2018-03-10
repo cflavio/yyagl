@@ -42,7 +42,7 @@ class PhysMgr(Colleague, PhysFacade):
         self.collision_objs = []
         self.__obj2coll = {}
         self.root = PhysWorld()
-        self.root.set_gravity((0, 0, -7.81))
+        self.root.set_gravity((0, 0, -8.5))
         self.root.init_debug()
 
     def start(self):

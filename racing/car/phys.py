@@ -181,10 +181,10 @@ class CarPhys(PhysColleague):
         self.vehicle.set_steering_value(steering, 1)
         self.vehicle.apply_engine_force(eng_frc, 0)
         self.vehicle.apply_engine_force(eng_frc, 1)
-        self.vehicle.set_brake(.28 * brake_frc, 2)
-        self.vehicle.set_brake(.28 * brake_frc, 3)
-        self.vehicle.set_brake(.72 * brake_frc, 0)
-        self.vehicle.set_brake(.72 * brake_frc, 1)
+        self.vehicle.set_brake(.72 * brake_frc, 2)
+        self.vehicle.set_brake(.72 * brake_frc, 3)
+        self.vehicle.set_brake(.28 * brake_frc, 0)
+        self.vehicle.set_brake(.28 * brake_frc, 1)
 
     def update_car_props(self):
         speeds = map(self.__update_whl_props, self.vehicle.get_wheels())
