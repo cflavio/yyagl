@@ -14,6 +14,7 @@ class <AppName>(p3d):
     dir('<yyaglpath>/thirdparty/sleekxmpp', 'sleekxmpp')
     dir('<yyaglpath>/thirdparty/yaml', 'yaml')
     file('<yyaglpath>/thirdparty/feedparser.py', 'feedparser.py')
+    file('<yyaglpath>/thirdparty/argparse.py', 'argparse.py')
     for root, _, fnames in walk('assets'):
         for fname in fnames:
             exclude(root + '/' + fname)
