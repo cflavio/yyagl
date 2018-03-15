@@ -8,7 +8,7 @@ from yyagl.racing.driver.logic import DriverPlayerLoaderStrategy
 class NetMsgs(object):
 
     client_ready = 100
-    start_race = 101
+    begin_race = 101
 
 
 class RaceLogic(LogicColleague):
@@ -165,7 +165,7 @@ class RaceLogicServer(RaceLogic):
             if all(client in self.ready_clients for client in connections) and self._loaded:
                 self.mediator.fsm.demand('Countdown', self.props.season_props)
                 self.start_play()
-                self.eng.server.send([NetMsgs.start_race])
+                self.eng.server.send([NetMsgs.begin_race])
 
     def exit_play(self):
         self.eng.server.destroy()
@@ -186,8 +186,8 @@ class RaceLogicClient(RaceLogic):
         # loading we should do a global protocol, perhaps
 
     def process_client(self, data_lst, sender):
-        if data_lst[0] == NetMsgs.start_race:
-            self.eng.log('start race')
+        if data_lst[0] == NetMsgs.begin_race:
+            self.eng.log('begin race')
             self.eng.remove_do_later(self.send_tsk)
             self.mediator.fsm.demand('Countdown', self.props.season_props)
             self.start_play()

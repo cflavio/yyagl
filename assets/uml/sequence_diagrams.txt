@@ -70,3 +70,56 @@ Client -> XMPPServer: leaveMUC(room)
 Client -> YorgServer: is_playing(0)
 Client -> OtherClient: is_playing(0)
 @enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Race's setting
+participant Client
+participant Server
+participant OtherClient
+Server -> Client: track_selected(track)
+Server -> OtherClient: track_selected(track)
+...
+Client -> Server: car_requested(car)
+OtherClient -> Server: car_requested(car)
+Server -> Client: car_confirm
+Server -> OtherClient: car_deny
+Server -> Client: car_selection(car)
+Server -> OtherClient: car_selection(car)
+== Server's deselection ==
+Server -> Client: car_deselection(car)
+Server -> OtherClient: car_deselection(car)
+...
+Server -> Client: start_drivers
+Server -> OtherClient: start_drivers
+Client -> Server: driver_selection(i)
+OtherClient -> Server: driver_selection(j)
+Server -> Client: start_race
+Server -> OtherClient: start_race
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Ingame
+Client -> Server: client_ready
+OtherClient -> Server: client_ready
+Server -> Client: begin_race
+Server -> OtherClient: begin_race
+...
+Client -> Server: player_info
+OtherClient -> Server: player_info
+Server -> Client: game_packet
+Server -> OtherClient: game_packet
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title End of race
+== Client wins ==
+Client -> Server: end_race_player
+Server -> Client: end_race
+Server -> OtherClient: end_race
+== Server wins ==
+Server -> Client: end_race
+Server -> OtherClient: end_race
+@enduml
