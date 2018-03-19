@@ -65,6 +65,38 @@ Client -> OtherClient: is_playing(0)
 
 @startuml
 !include seq_diag_tmpl.txt
+title Concurrent invites
+OtherServer -> Client: invite(room)
+Server -> Client: invite(room)
+Client -> OtherServer: declined
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Canceled invite
+Server -> Client: invite(room)
+Client -> XMPPServer: joinMUC(room)
+Server -> Client: cancel_invite()
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title The client quits
+Server -> Client: invite(room)
+Client -> Server: presence_unavailable/back
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title The client quits after the join
+Server -> Client: invite(room)
+Client -> XMPPServer: joinMUC(room)
+XMPPServer --> Server: presence_available(room, client)
+Client -> Server: presence_unavailable/back
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
 title Back
 Client -> XMPPServer: leaveMUC(room)
 Client -> YorgServer: is_playing(0)
@@ -100,6 +132,132 @@ Server -> OtherClient: start_race
 
 @startuml
 !include seq_diag_tmpl.txt
+title Race's setting: the client quits
+participant Client
+participant Server
+participant OtherClient
+Server -> Client: track_selected(track)
+Server -> OtherClient: track_selected(track)
+Client -> Server: presence_unavailable/quit
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Race's setting: the client quits (ii)
+participant Client
+participant Server
+participant OtherClient
+Server -> Client: track_selected(track)
+Server -> OtherClient: track_selected(track)
+...
+Client -> Server: presence_unavailable/quit
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Race's setting: the client quits (iii)
+participant Client
+participant Server
+participant OtherClient
+Server -> Client: track_selected(track)
+Server -> OtherClient: track_selected(track)
+...
+Client -> Server: car_requested(car)
+OtherClient -> Server: car_requested(car)
+Server -> Client: car_confirm
+Server -> OtherClient: car_deny
+Server -> Client: car_selection(car)
+Server -> OtherClient: car_selection(car)
+== Server's deselection ==
+Server -> Client: car_deselection(car)
+Server -> OtherClient: car_deselection(car)
+...
+Server -> Client: start_drivers
+Server -> OtherClient: start_drivers
+Client -> Server: presence_unavailable/quit
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Race's setting: the client quits (iv)
+participant Client
+participant Server
+participant OtherClient
+Server -> Client: track_selected(track)
+Server -> OtherClient: track_selected(track)
+...
+Client -> Server: car_requested(car)
+OtherClient -> Server: car_requested(car)
+Server -> Client: car_confirm
+Server -> OtherClient: car_deny
+Server -> Client: car_selection(car)
+Server -> OtherClient: car_selection(car)
+== Server's deselection ==
+Server -> Client: car_deselection(car)
+Server -> OtherClient: car_deselection(car)
+...
+Server -> Client: start_drivers
+Server -> OtherClient: start_drivers
+Client -> Server: driver_selection(i)
+Client -> Server: presence_unavailable/quit
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Race's setting: the server quits
+participant Client
+participant Server
+participant OtherClient
+Server -> Client: track_selected(track)
+Server -> OtherClient: track_selected(track)
+Server -> Client: presence_unavailable/back
+Server -> OtherClient: presence_unavailable/back
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Race's setting: the server quits (ii)
+participant Client
+participant Server
+participant OtherClient
+Server -> Client: track_selected(track)
+Server -> OtherClient: track_selected(track)
+...
+Client -> Server: car_requested(car)
+OtherClient -> Server: car_requested(car)
+Server -> Client: car_confirm
+Server -> OtherClient: car_deny
+Server -> Client: car_selection(car)
+Server -> OtherClient: car_selection(car)
+Server -> Client: presence_unavailable/quit
+Server -> OtherClient: presence_unavailable/quit
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Race's setting: the server quits (iii)
+participant Client
+participant Server
+participant OtherClient
+Server -> Client: track_selected(track)
+Server -> OtherClient: track_selected(track)
+...
+Client -> Server: car_requested(car)
+OtherClient -> Server: car_requested(car)
+Server -> Client: car_confirm
+Server -> OtherClient: car_deny
+Server -> Client: car_selection(car)
+Server -> OtherClient: car_selection(car)
+== Server's deselection ==
+Server -> Client: car_deselection(car)
+Server -> OtherClient: car_deselection(car)
+...
+Server -> Client: presence_unavailable/quit
+Server -> OtherClient: presence_unavailable/quit
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
 title Ingame
 Client -> Server: client_ready
 OtherClient -> Server: client_ready
@@ -110,6 +268,22 @@ Client -> Server: player_info
 OtherClient -> Server: player_info
 Server -> Client: game_packet
 Server -> OtherClient: game_packet
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Ingame: the client quits during the loading
+OtherClient -> Server: client_ready
+Client -> Server: presence_unavailable/quit
+@enduml
+
+@startuml
+!include seq_diag_tmpl.txt
+title Ingame: the server quits
+Server -> Client: game_packet
+Server -> OtherClient: game_packet
+Server -> Client: presence_unavailable/quit
+Server -> OtherClient: presence_unavailable/quit
 @enduml
 
 @startuml

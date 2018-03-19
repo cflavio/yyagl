@@ -130,8 +130,10 @@ class RankingGui(GuiColleague):
             if driver.dprops.car_name == car_name)
         is_player_car = car_name == page.rprops.season_props.player_car_name
         RankingGui.eng.log_mgr.log('%s %s %s %s' % (text % drv.logic.dprops.info.name, car_name, drv.logic.dprops.info.img_idx, is_player_car))
+        name = text % drv.logic.dprops.info.name
+        if '@' in name: name = name.split('@')[0] + '\1smaller\1@' + name.split('@')[1] + '\2'
         txt = Text(
-            text % drv.logic.dprops.info.name, align='left',
+            name, align='left',
             scale=.072, pos=(pos_x, top - i * .16), font=page.font,
             fg=page.text_fg if is_player_car else page.text_bg)
         gprops = page.rprops.season_props.gameprops
