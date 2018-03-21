@@ -23,8 +23,8 @@ class PageGui(GuiColleague):
         self.curr_wdg = self.__next_wdg((-.1, 0, -1), (-3.6, 1, 1))
         if self.curr_wdg: self.curr_wdg.on_wdg_enter()
 
-    def build(self, back_btn=True):
-        if back_btn: self.__build_back_btn()
+    def build(self, back_btn=True, exit_behav=False):
+        if back_btn: self.__build_back_btn(exit_behav)
         self._set_widgets()
         self.transition_enter()
         self.eng.cursor_top()
@@ -149,12 +149,17 @@ class PageGui(GuiColleague):
         tr_wdg = [wdg for wdg in self.widgets if hasattr(wdg, 'bind_transl')]
         for wdg in tr_wdg: wdg.wdg['text'] = wdg.bind_transl
 
-    def __build_back_btn(self):
+    def __build_back_btn(self, exit_behav):
+        tra_src = 'Quit' if exit_behav else 'Back'
+        tra_tra = _('Quit') if exit_behav else _('Back')
+        cb = self._on_quit if exit_behav else self._on_back
         self.widgets += [Btn(
-            text='', pos=(-.2, 1, -.8), command=self._on_back,
-            tra_src='Back', tra_tra=_('Back'), **self.menu_args.btn_args)]
+            text='', pos=(-.2, 1, -.8), command=cb,
+            tra_src=tra_src, tra_tra=tra_tra, **self.menu_args.btn_args)]
 
     def _on_back(self): self.notify('on_back', self.__class__.__name__)
+
+    def _on_quit(self): self.notify('on_quit', self.__class__.__name__)
 
     def show(self):
         map(lambda wdg: wdg.show(), self.widgets)
@@ -172,6 +177,8 @@ class PageGui(GuiColleague):
 class PageEvent(EventColleague):
 
     def on_back(self): pass
+
+    def on_quit(self): pass
 
 
 class PageFacade(Facade):
@@ -199,6 +206,7 @@ class Page(GameObject, PageFacade):
         GameObject.__init__(self, self.init_lst)
         self.gui.attach(self.on_hide)
         self.gui.attach(self.on_back)
+        self.gui.attach(self.on_quit)
 
     @property
     def init_lst(self):
@@ -209,6 +217,8 @@ class Page(GameObject, PageFacade):
     def on_hide(self): self.event.ignoreAll()
 
     def on_back(self, cls_name): self.event.on_back()
+
+    def on_quit(self, cls_name): self.event.on_quit()
 
     def destroy(self):
         GameObject.destroy(self)

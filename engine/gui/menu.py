@@ -124,8 +124,9 @@ class MenuLogic(LogicColleague):
             self.pages[-1].hide()
             if len(self.pages) > 1:
                 self.pages[-1].detach_obs(self.on_back)
+                self.pages[-1].detach_obs(self.on_quit)
         self.pages += [page]
-        map(page.attach_obs, [self.on_back, self.on_push_page])
+        map(page.attach_obs, [self.on_back, self.on_quit, self.on_push_page])
 
     def enable(self, val):
         (self.pages[-1].enable if val else self.pages[-1].disable)()
@@ -136,9 +137,23 @@ class MenuLogic(LogicColleague):
     def on_back(self):
         page = self.pages.pop()
         page.detach_obs(self.on_back)
+        page.detach_obs(self.on_quit)
         page.destroy()
         self.pages[-1].show()
         self.pages[-1].attach_obs(self.on_back)
+        self.pages[-1].attach_obs(self.on_quit)
+
+    def on_quit(self, clsname):
+        page = self.pages.pop()
+        page.detach_obs(self.on_back)
+        page.detach_obs(self.on_quit)
+        page.destroy()
+        while len(self.pages) > 1:
+            page = self.pages.pop()
+            page.destroy()
+        self.pages[0].show()
+        self.pages[0].attach_obs(self.on_back)
+        self.pages[0].attach_obs(self.on_quit)
 
     def destroy(self):
         map(lambda page: page.destroy(), self.pages)
