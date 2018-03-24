@@ -271,7 +271,8 @@ class CarNetworkGui(CarGui):
         menu_args = sprops.gameprops.menu_args
         pars = {'scale': .04, 'fg': menu_args.text_normal,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
-        name = name.split('@')[0] + '\1smaller\1@' + name.split('@')[1] + '\2'
+        if '@' in name:
+            name = name.split('@')[0] + '\1smaller\1@' + name.split('@')[1] + '\2'
         self.name_txt = OnscreenText(name, **pars)
         self.eng.attach_obs(self.on_frame)
 

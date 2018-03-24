@@ -23,7 +23,9 @@ class PandaConnectionListener(ConnectionListener):
         conn = self.conn_listener.get_new_connection(
             rendezvous=PointerToConnection(), address=addr, new_connection=new_conn)
         if not conn: return
-        return new_conn.p(), addr.get_ip_string()
+        ip_string = addr.get_ip_string()
+        if ip_string.startswith('::ffff:'): ip_string = ip_string[7:]
+        return new_conn.p(), ip_string
 
 
 class PandaConnectionMgr(ConnectionMgr):

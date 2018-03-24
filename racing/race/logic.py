@@ -161,11 +161,11 @@ class RaceLogicServer(RaceLogic):
             ipaddr = sender.get_address().get_ip_string()
             self.eng.log('client ready: ' + ipaddr)
             self.ready_clients += [sender]
-            connections = [conn[0] for conn in self.eng.server.connections]
-            if all(client in self.ready_clients for client in connections) and self._loaded:
-                self.mediator.fsm.demand('Countdown', self.props.season_props)
-                self.start_play()
-                self.eng.server.send([NetMsgs.begin_race])
+        connections = [conn[0] for conn in self.eng.server.connections]
+        if all(client in self.ready_clients for client in connections) and self._loaded:
+            self.mediator.fsm.demand('Countdown', self.props.season_props)
+            self.start_play()
+            self.eng.server.send([NetMsgs.begin_race])
 
     def exit_play(self):
         self.eng.server.destroy()
