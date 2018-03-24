@@ -62,7 +62,8 @@ class MeshBuilderMerged(MeshBuilder):
     def _add_geoms(self, geoms, mesh, geom_name):
         for geom in geoms:
             for _geom in [g.decompose() for g in geom.node().get_geoms()]:
-                mesh.add_geom(_geom, False, geom.get_transform(self.model.node))
+                mesh.add_geom(_geom, False,
+                              geom.get_transform(self.model.node))
         return geom_name
 
 
@@ -126,11 +127,9 @@ class TrackPhys(PhysColleague):
             self.wp2prevs[w_p] = lst_wp
         self.redraw_wps()
 
-    def redraw_wps(self):
-        pass
+    def redraw_wps(self): pass
 
-    def set_curr_wp(self, wp):
-        pass
+    def set_curr_wp(self, wayp): pass
 
     def __set_weapons(self):
         weapon_info = self.rprops.weapon_info
@@ -197,11 +196,13 @@ class TrackPhysDebug(TrackPhys):
         TrackPhys.__init__(self, mediator, race_props)
         self.curr_wp = ''
         self.wp2txt = {}
-        for wp in self.wp2prevs.keys():
-            self.wp2txt[wp] = OnscreenText(wp.get_name()[8:], fg=(1, 1, 1, 1), scale=.08)
+        for wayp in self.wp2prevs.keys():
+            self.wp2txt[wayp] = OnscreenText(wayp.get_name()[8:],
+                                             fg=(1, 1, 1, 1), scale=.08)
         self.eng.attach_obs(self.on_frame)
 
-    def __2d_pos(self, node):
+    @staticmethod
+    def __2d_pos(node):
         p3d = base.cam.get_relative_point(node.node, Point3(0, 0, 0))
         p2d = Point2()
         return p2d if base.camLens.project(p3d, p2d) else None
@@ -210,14 +211,16 @@ class TrackPhysDebug(TrackPhys):
         self.curr_wp = wp.get_name()[8:]
 
     def on_frame(self):
-        for wp in self.wp2prevs.keys():
-            pos2d = self.__2d_pos(wp)
+        for wayp in self.wp2prevs.keys():
+            pos2d = self.__2d_pos(wayp)
             if pos2d:
-                self.wp2txt[wp].show()
-                self.wp2txt[wp].setPos(1.7777 * pos2d[0] + .02, pos2d[1] + .02)
-                self.wp2txt[wp]['fg'] = (1, 0, 0, 1) if wp.get_name()[8:] == self.curr_wp else (1, 1, 1, 1)
+                self.wp2txt[wayp].show()
+                self.wp2txt[wayp].setPos(1.7777 * pos2d[0] + .02,
+                                         pos2d[1] + .02)
+                self.wp2txt[wayp]['fg'] = (1, 0, 0, 1) if \
+                    wayp.get_name()[8:] == self.curr_wp else (1, 1, 1, 1)
             else:
-                self.wp2txt[wp].hide()
+                self.wp2txt[wayp].hide()
 
     def redraw_wps(self):
         if not self.wp2prevs:

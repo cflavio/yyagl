@@ -9,13 +9,9 @@ class Widget(object):
 
     def get_np(self): return self.img
 
-    def enable(self):
-        self['state'] = NORMAL
-        self.set_alpha_scale(1)
+    def enable(self): pass
 
-    def disable(self):
-        self['state'] = DISABLED
-        self.set_alpha_scale(.25)
+    def disable(self): pass
 
 
 class ImgWidget(Widget):
@@ -27,6 +23,14 @@ class FrameWidget(Widget):
 
     def init(self, wdg):
         self.start_frame_color = wdg.get_np()['frameColor']
+
+    def enable(self):
+        self['state'] = NORMAL
+        if hasattr(self, 'set_alpha_scale'): self.set_alpha_scale(1)
+
+    def disable(self):
+        self['state'] = DISABLED
+        if hasattr(self, 'set_alpha_scale'): self.set_alpha_scale(.25)
 
     def on_wdg_enter(self, pos=None):  # pos: mouse's position
         np = self.get_np()

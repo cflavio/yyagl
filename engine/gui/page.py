@@ -125,11 +125,13 @@ class PageGui(GuiColleague):
             ('arrow_down-up', self.on_arrow, [(0, 0, -1)]),
             ('enter', self.on_enter)]
         map(lambda args: self.mediator.event.accept(*args), evts)
+        map(lambda wdg: wdg.enable(), self.widgets)
 
     def disable(self):
         evts=['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
               'arrow_down-up', 'enter']
         map(self.mediator.event.ignore, evts)
+        map(lambda wdg: wdg.disable(), self.widgets)
 
     def transition_exit(self, destroy=True):
         map(lambda wdg: self.__set_exit_transition(wdg, destroy), self.widgets)

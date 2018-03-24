@@ -26,5 +26,5 @@ class ImgBtn(Btn):
         self.set_shader_input('enable', 1)
 
     def disable(self):
-        Btn.enable(self)
+        Btn.disable(self)
         self.set_shader_input('enable', .2)
