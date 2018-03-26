@@ -446,3 +446,7 @@ class RaceEventClient(RaceEvent):
                 dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0,
                        'phoibe': 0, 'rea': 0, 'iperion': 0, 'teia': 0}
                 self.mediator.fsm.demand('Results', dct)
+
+    def destroy(self):
+        self.eng.detach_obs(self.on_frame)
+        RaceEvent.destroy(self)

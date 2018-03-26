@@ -151,6 +151,7 @@ class RaceLogicServer(RaceLogic):
         self._loaded = False
         self.ready_clients = []
         self.eng.server.register_cb(self.process_srv)
+        self.eval_tsk = self.eng.add_task(self.eval_start)
 
     def _on_loaded(self):
         self._loaded = True
@@ -161,15 +162,23 @@ class RaceLogicServer(RaceLogic):
             ipaddr = sender.get_address().get_ip_string()
             self.eng.log('client ready: ' + ipaddr)
             self.ready_clients += [sender]
+
+    def eval_start(self, task):
         connections = [conn[0] for conn in self.eng.server.connections]
         if all(client in self.ready_clients for client in connections) and self._loaded:
             self.mediator.fsm.demand('Countdown', self.props.season_props)
             self.start_play()
             self.eng.server.send([NetMsgs.begin_race])
+            self.eval_tsk = self.eng.remove_task(self.eval_tsk)
+        return task.cont
 
     def exit_play(self):
         self.eng.server.destroy()
         RaceLogic.exit_play(self)
+
+    def destroy(self):
+        if self.eval_tsk: self.eval_tsk = self.eng.remove_task(self.eval_tsk)
+        RaceLogic.destroy(self)
 
 
 class RaceLogicClient(RaceLogic):
@@ -195,3 +204,8 @@ class RaceLogicClient(RaceLogic):
     def exit_play(self):
         self.eng.client.destroy()
         RaceLogic.exit_play(self)
+
+    def destroy(self):
+        if self.send_tsk:
+            self.send_tsk = self.eng.remove_do_later(self.send_tsk)
+        RaceLogic.destroy(self)

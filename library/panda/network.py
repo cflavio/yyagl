@@ -42,6 +42,8 @@ class PandaConnectionMgr(ConnectionMgr):
     def open_UDP_connection(self, port):
         return self.conn_mgr.open_UDP_connection(port)
 
+    def close_connection(self, conn):
+        return self.conn_mgr.close_connection(conn)
 
 class PandaConnectionReader(ConnectionReader):
 

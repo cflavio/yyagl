@@ -38,5 +38,5 @@ class RaceGui(GuiColleague, RaceGuiFacade):
     def destroy(self):
         self.results.destroy()
         self.way_txt.destroy()
-        self.minimap.destroy()
+        if self.minimap: self.minimap.destroy()  # e.g. server has quit on loading
         GuiColleague.destroy(self)

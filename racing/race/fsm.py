@@ -72,10 +72,11 @@ class RaceFsm(FsmColleague):
         cars = [self.mediator.logic.player_car] + self.mediator.logic.cars
         map(lambda car: car.demand('Play'), cars)
 
-    @staticmethod
-    def exitPlay():
+    def exitPlay(self):
         RaceFsm.eng.log_mgr.log('exiting Play state')
         RaceFsm.eng.show_cursor()
+        if self.getCurrentOrNextState() != 'Results':
+            self.mediator.logic.exit_play()
 
     def enterResults(self, race_ranking):
         self.mediator.gui.results.show(
