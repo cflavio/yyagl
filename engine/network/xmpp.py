@@ -108,6 +108,10 @@ class XMPP(GameObject, Subject):
     def is_friend(self, name):
         return name in self.client.friends
 
+    def find_usr(self, usr_name):
+        users = [usr for usr in self.users if usr.name == usr_name]
+        if users: return users[0]
+
     def destroy(self):
         self.disconnect()
         Subject.destroy(self)

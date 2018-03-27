@@ -16,6 +16,7 @@ class PageGui(GuiColleague):
 
     def __init__(self, mediator, menu_args):
         GuiColleague.__init__(self, mediator)
+        self.enable_tsk = None
         self.menu_args = menu_args
         self.widgets = []
         self.build()
@@ -117,7 +118,13 @@ class PageGui(GuiColleague):
             PosIval(wdg.get_np(), .5, pos)
         ).start()
 
-    def enable(self):
+    def enable_navigation(self):
+        if self.enable_tsk:
+            self.eng.remove_do_later(self.enable_tsk)
+            self.enable_tsk = None
+        self.enable_tsk = self.eng.do_later(.01, self.enable_navigation_aux)
+
+    def enable_navigation_aux(self):
         evts=[
             ('arrow_left-up', self.on_arrow, [(-1, 0, 0)]),
             ('arrow_right-up', self.on_arrow, [(1, 0, 0)]),
@@ -125,12 +132,24 @@ class PageGui(GuiColleague):
             ('arrow_down-up', self.on_arrow, [(0, 0, -1)]),
             ('enter', self.on_enter)]
         map(lambda args: self.mediator.event.accept(*args), evts)
-        map(lambda wdg: wdg.enable(), self.widgets)
 
-    def disable(self):
+    def disable_navigation(self):
+        if self.enable_tsk:
+            self.eng.remove_do_later(self.enable_tsk)
+            self.enable_tsk = None
         evts=['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
               'arrow_down-up', 'enter']
         map(self.mediator.event.ignore, evts)
+
+    def enable(self):
+        self.enable_navigation()
+        map(lambda wdg: wdg.enable(), self.widgets)
+
+    def disable(self):
+        if self.enable_tsk:
+            self.eng.remove_do_later(self.enable_tsk)
+            self.enable_tsk = None
+        self.disable_navigation()
         map(lambda wdg: wdg.disable(), self.widgets)
 
     def transition_exit(self, destroy=True):
@@ -191,6 +210,8 @@ class PageFacade(Facade):
             ('hide', lambda obj: obj.gui.hide),
             ('enable', lambda obj: obj.gui.enable),
             ('disable', lambda obj: obj.gui.disable),
+            ('enable_navigation', lambda obj: obj.gui.enable_navigation),
+            ('disable_navigation', lambda obj: obj.gui.disable_navigation),
             ('attach_obs', lambda obj: obj.gui.attach),
             ('detach_obs', lambda obj: obj.gui.detach)]
         map(lambda args: self._fwd_mth(*args), fwds)

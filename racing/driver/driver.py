@@ -12,6 +12,11 @@ class DriverInfo(object):
         self.adherence = adherence
         self.stability = stability
 
+    def __repr__(self):
+        return 'driverinfo(%s %s %s %s %s)' % (
+            self.img_idx, self.name, self.speed, self.adherence,
+            self.stability)
+
 class DriverProps(object):
 
     def __init__(self, info, car_name, f_engine, f_tires, f_suspensions):
@@ -21,6 +26,10 @@ class DriverProps(object):
         self.f_tires = f_tires
         self.f_suspensions = f_suspensions
 
+    def __repr__(self):
+        return 'driver(%s %s %s %s %s)' % (
+            self.info, self.car_name, self.f_engine, self.f_tires,
+            self.f_suspensions)
 
 
 class DriverFacade(Facade):

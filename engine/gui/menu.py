@@ -131,6 +131,9 @@ class MenuLogic(LogicColleague):
     def enable(self, val):
         (self.pages[-1].enable if val else self.pages[-1].disable)()
 
+    def enable_navigation(self, val):
+        (self.pages[-1].enable_navigation if val else self.pages[-1].disable_navigation)()
+
     def on_push_page(self, page_code, args=[]):
         pass
 
@@ -168,7 +171,8 @@ class MenuFacade(Facade):
             ('push_page', lambda obj: obj.logic.push_page),
             ('attach_obs', lambda obj: obj.gui.attach),
             ('detach_obs', lambda obj: obj.gui.detach),
-            ('enable', lambda obj: obj.logic.enable)]
+            ('enable', lambda obj: obj.logic.enable),
+            ('enable_navigation', lambda obj: obj.logic.enable_navigation)]
         map(lambda args: self._fwd_mth(*args), fwd_mths)
 
 
