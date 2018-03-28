@@ -89,5 +89,7 @@ class AbsNetwork(GameObject):
         self.eng.detach_obs(self.on_frame)
         self.conn_reader.destroy()
         self.conn_writer.destroy()
+        self.conn_mgr.close_connection(self.conn_udp)
+        self.conn_udp = None
         self.conn_mgr = self.conn_reader = self.conn_writer = None
         GameObject.destroy(self)

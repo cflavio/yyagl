@@ -44,5 +44,6 @@ class Signs(object):
 
     def destroy(self):
         map(base.graphicsEngine.remove_window, self.buffers)
-        map(base.win.remove_display_region, self.drs)
+        if base.win:  # if you close the window during a race
+            map(base.win.remove_display_region, self.drs)
         map(lambda node: node.remove_node(), self.cameras + self.renders)

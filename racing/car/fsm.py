@@ -20,4 +20,4 @@ class CarFsm(FsmColleague):
         self.mediator.event.input_bld = InputBuilder.create(state, has_j)
         self.mediator.ai.destroy()
         self.mediator.ai = CarResultsAi(self.mediator, self.cprops)
-        self.mediator.gui.destroy()
+        self.mediator.gui.hide()

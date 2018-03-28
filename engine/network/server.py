@@ -51,10 +51,10 @@ class Server(AbsNetwork):
         map(lambda cln: self.conn_writer.send(datagram, cln), dests)
 
     def destroy(self):
-        AbsNetwork.destroy(self)
         map(self.conn_reader.remove_connection, [conn[0] for conn in self.connections])
         self.conn_mgr.close_connection(self.tcp_socket)
         self.eng.remove_task(self.listener_task)
         self.conn_listener = self.tcp_socket = self.conn_cb = \
             self.listener_task = self.connections = None
+        AbsNetwork.destroy(self)
         self.eng.log('the server has been destroyed')

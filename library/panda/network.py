@@ -58,6 +58,9 @@ class PandaConnectionReader(ConnectionReader):
         datagram = NetDatagram()
         if self.conn_reader.get_data(datagram): return datagram
 
+    def remove_connection(self, conn):
+        return self.conn_reader.remove_connection(conn)
+
     def destroy(self):
         self.conn_reader.shutdown()
         self.conn_reader = None

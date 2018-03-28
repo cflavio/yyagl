@@ -249,8 +249,7 @@ class YorgClient(ClientXMPP, GameObject):
             return self.xmpp.notify('on_is_playing', msg)
 
     def on_groupchat_message(self, msg):
-        if msg['mucnick'] != self.xmpp.client.boundjid.bare:
-            return self.xmpp.notify('on_groupchat_msg', msg)
+        return self.xmpp.notify('on_groupchat_msg', msg)
 
     def on_list_users(self, msg):
         out_users = self.xmpp.users[:]

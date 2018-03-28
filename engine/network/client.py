@@ -27,7 +27,5 @@ class Client(AbsNetwork):
     def destroy(self):
         self.conn_mgr.close_connection(self.conn)
         self.conn = None
-        self.conn_mgr.close_connection(self.conn_udp)
-        self.conn_udp = None
         self.eng.log('the client has been destroyed')
         AbsNetwork.destroy(self)

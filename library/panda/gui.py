@@ -224,6 +224,12 @@ class PandaEntry(IEntry, PandaAbs):
 
     def enterText(self, txt): return self.wdg.enterText(txt)
 
+    def enable(self):
+        self['state'] = NORMAL
+
+    def disable(self):
+        self['state'] = DISABLED
+
 
 class PandaLabel(ILabel, PandaAbs):
 

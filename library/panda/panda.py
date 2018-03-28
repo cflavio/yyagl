@@ -51,7 +51,7 @@ class LibraryPanda3D(Library, DirectObject):
         return taskMgr.add(mth, mth.__name__, priority)
 
     def remove_task(self, tsk):
-        return taskMgr.remove(tsk)
+        taskMgr.remove(tsk)
 
     def init(self, green=(.2, .8, .2, 1), red=(.8, .2, .2, 1), end_cb=None):
         LibShowBase()

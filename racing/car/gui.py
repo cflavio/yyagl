@@ -38,6 +38,9 @@ class CarParameter(GameObject):
         self.__callback(self.__slider['value'], *self.__args)
         self.__val.setText(str(round(self.__slider['value'], 2)))
 
+    def hide(self):
+        map(lambda wdg: wdg.hide(), self.widgets)
+
     def destroy(self):
         map(lambda wdg: wdg.destroy(), self.widgets)
         GameObject.destroy(self)
@@ -111,6 +114,9 @@ class CarParameters(object):
         is_visible = self.__pars[0].is_visible
         (self.eng.show_cursor if is_visible else self.eng.hide_cursor)()
 
+    def hide(self):
+        map(lambda wdg: wdg.hide(), self.__pars)
+
     def destroy(self):
         map(lambda wdg: wdg.destroy(), self.__pars)
 
@@ -182,6 +188,17 @@ class CarPanel(GameObject):
                 red = (col[0], col[1] - .5, col[2] - .5, col[3])
                 self.damages_txt['fg'] = red
 
+    def hide(self):
+        labels = [
+            self.speed_txt, self.time_txt, self.lap_txt, self.best_txt,
+            self.speed_lab, self.time_lab, self.lap_lab, self.best_lab,
+            self.damages_txt, self.damages_lab, self.ranking_txt,
+            self.ranking_lab, self.weapon_lab]
+        map(lambda wdg: wdg.hide(), labels)
+        if self.weapon_img and not self.weapon_img.is_empty():
+            self.weapon_img.hide()
+        self.forward_img.hide()
+
     def destroy(self):
         labels = [
             self.speed_txt, self.time_txt, self.lap_txt, self.best_txt,
@@ -222,11 +239,14 @@ class CarAIPanel(GameObject):
         txt += '\nright: %s' % self.curr_input.right
         self.wp_txt['text'] = txt
 
+    def hide(self): self.wp_txt.hide()
+
 
 class CarGui(GuiColleague):
 
-    def apply_damage(self, reset=False):
-        pass
+    def apply_damage(self, reset=False): pass
+
+    def hide(self): pass
 
 
 class CarPlayerGui(CarGui):
@@ -254,8 +274,14 @@ class CarPlayerGui(CarGui):
     def hide_forward(self):
         self.panel.hide_forward()
 
+    def hide(self):
+        CarGui.hide(self)
+        self.pars.hide()
+        self.panel.hide()
+        self.ai_panel.hide()
+
     def destroy(self):
-        map(lambda wdg: wdg.destroy(), [self.pars, self.panel])
+        map(lambda wdg: wdg.destroy(), [self.pars, self.panel, self.ai_panel])
         GuiColleague.destroy(self)
 
 
@@ -288,6 +314,10 @@ class CarNetworkGui(CarGui):
             self.name_txt.set_pos((pos[0], 1, pos[1] + .16))
         else:
             self.name_txt.hide()
+
+    def hide(self):
+        CarGui.hide(self)
+        self.name_txt.hide()
 
     def destroy(self):
         self.name_txt.destroy()
