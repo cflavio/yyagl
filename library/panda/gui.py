@@ -206,13 +206,14 @@ class PandaEntry(IEntry, PandaAbs):
             frameColor=(1, 1, 1, 1), initialText='', obscured=False,
             command=None, focusInCommand=None, focusInExtraArgs=[],
             focusOutCommand=None, focusOutExtraArgs=[], parent=None,
-            tra_src=None, tra_tra=None):
+            tra_src=None, tra_tra=None, text_fg=(1, 1, 1, 1)):
         self.wdg = DirectEntry(
             scale=scale, pos=pos, entryFont=entryFont, width=width,
-            frameColor=frameColor, initialText=initialText, obscured=False,
+            frameColor=frameColor, initialText=initialText, obscured=obscured,
             command=command, focusInCommand=focusInCommand,
             focusInExtraArgs=focusInExtraArgs, focusOutCommand=focusOutCommand,
-            focusOutExtraArgs=focusOutExtraArgs, parent=parent)
+            focusOutExtraArgs=focusOutExtraArgs, parent=parent,
+            text_fg=text_fg)
         PandaAbs.__init__(self, tra_src, tra_tra)
 
     @property
