@@ -1,5 +1,6 @@
 from panda3d.core import TextNode
 from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL
+from direct.showbase.DirectObject import DirectObject
 from direct.gui.DirectButton import DirectButton
 from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectOptionMenu import DirectOptionMenu
@@ -200,13 +201,13 @@ class PandaOptionMenu(IOptionMenu, PandaAbs):
     def selectedIndex(self): return self.wdg.selectedIndex
 
 
-class PandaEntry(IEntry, PandaAbs):
+class PandaEntry(IEntry, PandaAbs, DirectObject):
 
     def __init__(self, scale=.05, pos=(0, 1, 0), entryFont=None, width=12,
             frameColor=(1, 1, 1, 1), initialText='', obscured=False,
             command=None, focusInCommand=None, focusInExtraArgs=[],
             focusOutCommand=None, focusOutExtraArgs=[], parent=None,
-            tra_src=None, tra_tra=None, text_fg=(1, 1, 1, 1)):
+            tra_src=None, tra_tra=None, text_fg=(1, 1, 1, 1), on_tab=None):
         self.wdg = DirectEntry(
             scale=scale, pos=pos, entryFont=entryFont, width=width,
             frameColor=frameColor, initialText=initialText, obscured=obscured,
@@ -215,6 +216,7 @@ class PandaEntry(IEntry, PandaAbs):
             focusOutExtraArgs=focusOutExtraArgs, parent=parent,
             text_fg=text_fg)
         PandaAbs.__init__(self, tra_src, tra_tra)
+        if on_tab: self.accept('tab-up', on_tab)
 
     @property
     def onscreenText(self): return self.wdg.onscreenText
@@ -230,6 +232,10 @@ class PandaEntry(IEntry, PandaAbs):
 
     def disable(self):
         self['state'] = DISABLED
+
+    def destroy(self):
+        self.ignore('tab-up')
+        PandaAbs.destroy(self)
 
 
 class PandaLabel(ILabel, PandaAbs):

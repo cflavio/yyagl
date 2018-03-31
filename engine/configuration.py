@@ -112,6 +112,9 @@ class Cfg(object):
             if verb_el[0] == 'direct':
                 cfginfo += [
                     ('default-directnotify-level', verb_el[1])]
+            elif verb_el[0] == 'panda':
+                cfginfo += [
+                    ('notify-level', verb_el[1])]
             else:
                 cfginfo += [
                     ('notify-level-' + verb_el[0], verb_el[1])]

@@ -80,6 +80,10 @@ class EntryWidget(FrameWidget):
         self.get_np()['focus'] = 0
         self.get_np().setFocus()
 
+    def on_enter(self):
+        if self['command'] and self['state'] == NORMAL:
+            self['command'](*self['extraArgs'])
+
 
 class CheckBtnWidget(BtnWidget):
 
