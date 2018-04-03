@@ -26,7 +26,7 @@ class Server(AbsNetwork):
         self.listener_task = self.eng.add_task(self.task_listener, self.eng.network_priority)
         sock = socket(AF_INET, SOCK_DGRAM)
         try:
-            sock.connect(('ya2.it', 0))
+            sock.connect(('ya2.it', 8080))
             local_addr = sock.getsockname()[0]
             public_addr = load(urlopen('http://httpbin.org/ip'))['origin']
             addr = local_addr + ' - ' + public_addr
