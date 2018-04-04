@@ -124,6 +124,7 @@ class YorgClient(ClientXMPP, GameObject):
         GameObject.__init__(self)
         self.xmpp = xmpp
         self.presences_sent = []
+        self.registered = []
         ClientXMPP.__init__(self, jid, password)
         self.on_ok = on_ok
         self.on_ko = on_ko
@@ -227,31 +228,38 @@ class YorgClient(ClientXMPP, GameObject):
             self.xmpp.users += [User(_from, 0, False, False, self.xmpp)]
         self.xmpp.notify('on_presence_unavailable', msg)
 
+    def register(self, msg): self.registered += [msg]
+
+    def unregister(self, msg): self.registered.remove(msg)
+
+    def is_registered(self, msg): return msg in self.registered
+
     def on_message(self, msg):
         self.eng.log('message: ' + msg['subject'])
-        if msg['subject'] == 'list_users':
+        if self.is_registered('list_users') and msg['subject'] == 'list_users':
             return self.on_list_users(msg)
-        if msg['subject'] == 'answer_full':
+        if self.is_registered('answer_full') and msg['subject'] == 'answer_full':
             return self.on_answer_full(msg)
-        if msg['subject'] == 'chat':
+        if self.is_registered('chat') and msg['subject'] == 'chat':
             return self.xmpp.notify('on_msg', msg)
-        if msg['subject'] == 'invite':
+        if self.is_registered('invite') and msg['subject'] == 'invite':
             return self.xmpp.notify('on_invite_chat', msg)
-        if msg['subject'] == 'declined':
+        if self.is_registered('declined') and msg['subject'] == 'declined':
             return self.xmpp.notify('on_declined', msg)
-        if msg['subject'] == 'cancel_invite':
+        if self.is_registered('cancel_invite') and msg['subject'] == 'cancel_invite':
             return self.xmpp.notify('on_cancel_invite')
-        if msg['subject'] == 'ip_address':
+        if self.is_registered('ip_address') and msg['subject'] == 'ip_address':
             return self.xmpp.notify('on_ip_address', msg)
-        if msg['subject'] == 'yorg_init':
+        if self.is_registered('yorg_init') and msg['subject'] == 'yorg_init':
             return self.xmpp.notify('on_yorg_init', msg)
-        if msg['subject'] == 'is_playing':
+        if self.is_registered('is_playing') and msg['subject'] == 'is_playing':
             return self.xmpp.notify('on_is_playing', msg)
 
     def on_groupchat_message(self, msg):
         return self.xmpp.notify('on_groupchat_msg', msg)
 
     def on_list_users(self, msg):
+        self.unregister('list_users')
         out_users = self.xmpp.users[:]
         self.xmpp.users = [User(line[2:], int(line[0]), True, int(line[1]),self.xmpp, True) for line in msg['body'].split()]
         for usr in out_users:
@@ -284,6 +292,7 @@ class YorgClient(ClientXMPP, GameObject):
         self.send_presence(
             pfrom=self.boundjid.full,
             pto=self.xmpp.yorg_srv)
+        self.register('answer_full')
         self.send_message(
             mfrom=self.boundjid.full,
             mto=self.xmpp.yorg_srv,
@@ -293,10 +302,19 @@ class YorgClient(ClientXMPP, GameObject):
 
     def on_answer_full(self, msg):
         self.eng.log('received answer full')
+        self.unregister('answer_full')
         self.xmpp.is_server_up = True
         self.send_presence(
             pfrom=self.boundjid.full,
             pto=msg['from'])
+        self.register('list_users')
+        self.register('yorg_init')
+        self.register('invite')
+        self.register('declined')
+        self.register('cancel_invite')
+        self.register('ip_address')
+        self.register('is_playing')
+        self.register('chat')
         self.send_message(
             mfrom=self.boundjid.full,
             mto=self.xmpp.yorg_srv,
