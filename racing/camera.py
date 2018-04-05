@@ -99,7 +99,7 @@ class Camera(GameObject):
         c_i = curr_incr_slow if is_fast else curr_incr
         new_pos = self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
         # overwrite camera's position to set the physics
-        # new_pos = (car_pos.x + 10, car_pos.y - 5, car_pos.z + 5
+        # new_pos = (car_pos.x + 10, car_pos.y - 1, car_pos.z + 3)
         if not is_rolling: base.camera.set_pos(new_pos)
         base.camera.look_at(car_pos + tgt_vec)
 

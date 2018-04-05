@@ -46,9 +46,10 @@ class CarParameter(GameObject):
         GameObject.destroy(self)
 
 
-class CarParameters(object):
+class CarParameters(GameObject):
 
     def __init__(self, phys, logic):
+        GameObject.__init__(self)
         self.__pars = []
         pars_info = [
             ('max_speed', (10.0, 200.0)),
@@ -119,6 +120,7 @@ class CarParameters(object):
 
     def destroy(self):
         map(lambda wdg: wdg.destroy(), self.__pars)
+        GameObject.destroy(self)
 
 
 class CarPanel(GameObject):
