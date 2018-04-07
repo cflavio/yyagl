@@ -10,3 +10,4 @@ skinparam sequence {
     ActorBackgroundColor White
     ActorFontColor Black
 }
+skinparam noteBorderColor black

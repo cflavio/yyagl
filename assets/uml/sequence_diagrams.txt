@@ -2,10 +2,16 @@
 !include seq_diag_tmpl.txt
 title Startup
 Client -> YorgServer: send_presence()
+Client -> Client: register(answer_full)
 Client -> YorgServer: query_full()
 YorgServer --> Client: answer_full
+Client -> Client: unregister(answer_full)
+Client -> Client: register(list_users)
+note left of Client #white: Register also yorg_init,\ninvite, declined, cancel_invite,\nip_address, is_playing, chat.
+note left of Client #white: This manages messages\nfrom past sessions.
 Client -> YorgServer: list_users()
 YorgServer --> Client: users_list
+Client -> Client: unregister(list_users)
 Client -> OtherClient: yorg_init(supporter)
 @enduml
 
@@ -66,8 +72,8 @@ Client -> OtherClient: is_playing(0)
 @startuml
 !include seq_diag_tmpl.txt
 title Concurrent invites
-OtherServer -> Client: invite(room)
 Server -> Client: invite(room)
+OtherServer -> Client: invite(room)
 Client -> OtherServer: declined
 @enduml
 
@@ -83,7 +89,7 @@ Server -> Client: cancel_invite()
 !include seq_diag_tmpl.txt
 title The client quits
 Server -> Client: invite(room)
-Client -> Server: presence_unavailable/back
+Client -> Server: presence_unavailable
 @enduml
 
 @startuml
@@ -92,7 +98,7 @@ title The client quits after the join
 Server -> Client: invite(room)
 Client -> XMPPServer: joinMUC(room)
 XMPPServer --> Server: presence_available(room, client)
-Client -> Server: presence_unavailable/back
+Client -> Server: presence_unavailable
 @enduml
 
 @startuml
