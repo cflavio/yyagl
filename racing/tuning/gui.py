@@ -65,7 +65,7 @@ class TuningGui(GuiColleague):
             wordwrap=12, align=TextNode.ALeft,
             fg=self.sprops.gameprops.menu_args.text_normal)
         self.hint3_txt = OnscreenText(
-            text=_("supensions: they increase car's stability"),
+            text=_("suspensions: they increase car's stability"),
             scale=.06,
             pos=(.85, -.46), font=loader.loadFont(self.sprops.font),
             wordwrap=12, align=TextNode.ALeft,
