@@ -261,11 +261,23 @@ class CarLogic(LogicColleague, ComputerProxy):
         gfx = self.mediator.gfx
         is_skid = self.is_skidmarking
         gfx.on_skidmarking() if is_skid else gfx.on_no_skidmarking()
+        self.__clamp_orientation()
 
     def __update_roll_info(self):
         status = 'ok' if -45 <= self.mediator.gfx.nodepath.get_r() < 45 else 'ko'
         curr_t = globalClock.get_frame_time()
         setattr(self, 'last_roll_%s_time' % status, curr_t)
+
+    def __clamp_orientation(self):
+        max_deg = 45
+        if self.mediator.gfx.nodepath.get_p() < -max_deg:
+            self.mediator.gfx.nodepath.set_p(-max_deg)
+        if self.mediator.gfx.nodepath.get_r() < -max_deg:
+            self.mediator.gfx.nodepath.set_r(-max_deg)
+        if self.mediator.gfx.nodepath.get_p() > max_deg:
+            self.mediator.gfx.nodepath.set_p(max_deg)
+        if self.mediator.gfx.nodepath.get_r() > max_deg:
+            self.mediator.gfx.nodepath.set_r(max_deg)
 
     def reset_car(self):
         if self.mediator.fsm.getCurrentOrNextState() in ['Off', 'Loading']:
