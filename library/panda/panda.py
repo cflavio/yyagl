@@ -171,3 +171,9 @@ class LibraryPanda3D(Library, DirectObject):
         is_nm = lambda geom: geom.get_name().startswith(name)
         named_geoms = [geom for geom in geoms if is_nm(geom)]
         return [ng for ng in named_geoms if name in ng.get_name()]
+
+    @staticmethod
+    def load_sfx(fpath, loop=False):
+        sfx = loader.loadSfx(fpath)
+        sfx.set_loop(loop)
+        return sfx

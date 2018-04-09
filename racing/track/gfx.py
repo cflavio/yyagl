@@ -2,7 +2,7 @@ from os.path import exists
 from os import system
 from sys import executable
 from panda3d.core import AmbientLight, BitMask32, Spotlight, NodePath, \
-    OmniBoundingVolume
+    OmniBoundingVolume, LPoint3f
 from direct.actor.Actor import Actor
 from yyagl.gameobject import GfxColleague
 from .signs import Signs
@@ -101,6 +101,10 @@ class TrackGfx(GfxColleague):
         self.ambient_np.remove_node()
         self.spot_lgt.remove_node()
 
+    def update(self, car_pos):
+        sh_src = LPoint3f(*self.rprops.shadow_src)
+        self.spot_lgt.setPos(car_pos + sh_src)
+
     def destroy(self):
         map(lambda act: act.cleanup(), self.__actors)
         self.model.remove_node()
@@ -112,6 +116,8 @@ class TrackGfx(GfxColleague):
 
 
 class TrackGfxShader(TrackGfx):
+
+    def update(self, car_pos): pass
 
     def _set_light(self):
         self.eng.set_amb_lgt((.15, .15, .15, 1))

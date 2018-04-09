@@ -1,8 +1,40 @@
 from os.path import exists
 from panda3d.core import get_model_path, AntialiasAttrib, NodePath, PandaNode as P3DNode, LightRampAttrib
+from panda3d.core import Camera, OrthographicLens, NodePath, TextureStage
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from ..gfx import GfxMgr, Node
+
+
+class RenderToTexture(object):
+
+    def __init__(self):
+        self.buffer = base.win.make_texture_buffer('result buffer', 256, 256)
+        self.buffer.set_sort(-100)
+
+        self.display_region = self.buffer.makeDisplayRegion()
+        self.display_region.set_sort(20)
+
+        self.camera = NodePath(Camera('camera 2d'))
+        lens = OrthographicLens()
+        lens.set_film_size(1, 1)
+        lens.set_near_far(-1000, 1000)
+        self.camera.node().set_lens(lens)
+
+        self.root = NodePath('result render')
+        self.root.set_depth_test(False)
+        self.root.set_depth_write(False)
+        self.camera.reparent_to(self.root)
+        self.display_region.set_camera(self.camera)
+
+    @property
+    def texture(self): return self.buffer.get_texture()
+
+    def destroy(self):
+        base.graphicsEngine.remove_window(self.buffer)
+        if base.win:  # if you close the window during a race
+            base.win.remove_display_region(self.display_region)
+        map(lambda node: node.remove_node(), [self.camera, self.root])
 
 
 class PandaGfxMgr(GfxMgr):

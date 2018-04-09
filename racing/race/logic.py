@@ -85,7 +85,7 @@ class RaceLogic(LogicColleague):
 
     def on_frame(self):
         self.ai_poller.tick()
-        self.track.update(self.player_car.get_pos())
+        self.track.gfx.update(self.player_car.get_pos())
         positions = [(car.name, car.get_pos()) for car in self.all_cars]
         self.mediator.gui.update_minimap(positions)
         if self.props.a_i:

@@ -30,7 +30,7 @@ class RaceGui(GuiColleague, RaceGuiFacade):
 
     def start(self):
         self.minimap = Minimap(
-            self.mediator.track.lrtb, self.props.minimap_path,
+            self.mediator.track.bounds, self.props.minimap_path,
             self.props.minimap_image, self.props.col_dct,
             self.props.season_props.car_names,
             self.props.season_props.player_car_name)
