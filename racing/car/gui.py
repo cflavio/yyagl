@@ -54,12 +54,19 @@ class CarParameters(GameObject):
         pars_info = [
             ('max_speed', (10.0, 200.0)),
             ('mass', (100, 2000)),
-            ('steering_min_speed', (.5, -.2)),
-            ('steering_max_speed', (.5, -.28)),
+            #('steering_min_speed', (.5, -.2)),
+            #('steering_max_speed', (.5, -.28)),
             ('steering_clamp', (.5, -.36)),
             ('steering_inc', (1, 200)),
             ('steering_dec', (1, 200)),
+            #('suspension_stiffness_min_speed', (0, 240)),
+            #('suspension_stiffness_max_speed', (0, 240)),
+            #('wheels_damping_relaxation_min_speed', (-1, 10)),
+            #('wheels_damping_relaxation_max_speed', (-1, 10)),
+            #('wheels_damping_compression_min_speed', (-1, 10)),
+            #('wheels_damping_compression_max_speed', (-1, 10)),
             ('engine_acc_frc', (100, 10000)),
+            ('engine_acc_frc_ratio', (0, 1)),
             ('engine_dec_frc', (-10000, -100)),
             ('brake_frc', (1, 1000))]
         for i, par_info in enumerate(pars_info):
@@ -84,13 +91,9 @@ class CarParameters(GameObject):
             ('max_suspension_travel_cm', (1, 2000),
              'setMaxSuspensionTravelCm'),
             ('skid_info', (-10, 10), 'setSkidInfo'),
-            ('suspension_stiffness', (0, 100), 'setSuspensionStiffness'),
-            ('wheels_damping_relaxation', (-1, 10),
-             'setWheelsDampingRelaxation'),
-            ('wheels_damping_compression', (-1, 10),
-             'setWheelsDampingCompression'),
             ('friction_slip', (-1, 10), 'setFrictionSlip'),
-            ('roll_influence', (-1, 10), 'setRollInfluence')]
+            #('roll_influence', (-1, 10), 'setRollInfluence')
+            ]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
                 par_info[0], getattr(phys, par_info[0]), (.5, -1.08 - i * .08),

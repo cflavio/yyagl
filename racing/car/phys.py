@@ -11,6 +11,7 @@ class CarPhys(PhysColleague):
         self.pnode = self.vehicle = self.friction_slip = self.__track_phys = \
             self.coll_mesh = self.roll_influence = self.max_speed = None
         self.curr_speed_mul = 1.0
+        self.roll_influence_k = 1.0
         self.__prev_speed = 0
         self.__last_drift_time = 0
         self.__finds = {}  # cache for find's results
@@ -31,7 +32,7 @@ class CarPhys(PhysColleague):
         # they may be changed by drivers and tuning
         self.cfg['max_speed'] = self.get_speed()
         self.cfg['friction_slip'] = self.get_friction()
-        self.cfg['roll_influence'] = self.get_roll_influence()
+        self.cfg['roll_influence'] = self.get_roll_influence_static()
         self.__log_props()
         set_a = lambda field: setattr(self, field, self.cfg[field])
         map(set_a, self.cfg.keys())
@@ -39,13 +40,15 @@ class CarPhys(PhysColleague):
     def __log_props(self, starting=True):
         s_s = self.cfg['max_speed'] if starting else self.max_speed
         s_f = self.cfg['friction_slip'] if starting else self.friction_slip
-        s_r = self.cfg['roll_influence'] if starting else self.roll_influence
+        s_r = self.cfg['roll_influence'] if starting else self.get_roll_influence_static()
         log_info = [
             ('speed', self.cprops.name, round(s_s, 2),
              self.cprops.driver_engine),
             ('friction', self.cprops.name, round(s_f, 2),
              self.cprops.driver_tires),
-            ('roll', self.cprops.name, round(s_r, 2),
+            ('roll min', self.cprops.name, round(s_r[0], 2),
+             self.cprops.driver_suspensions),
+            ('roll max', self.cprops.name, round(s_r[1], 2),
              self.cprops.driver_suspensions)]
         for l_i in log_info:
             self.eng.log_mgr.log('%s %s: %s (%s)' % l_i)
@@ -116,11 +119,11 @@ class CarPhys(PhysColleague):
         whl.set_wheel_direction_cs((0, 0, -1))
         whl.set_wheel_axle_cs((1, 0, 0))
         whl.set_wheel_radius(radius)
-        whl.set_suspension_stiffness(self.suspension_stiffness)
-        whl.set_wheels_damping_relaxation(self.wheels_damping_relaxation)
-        whl.set_wheels_damping_compression(self.wheels_damping_compression)
+        whl.set_suspension_stiffness(self.suspension_stiffness[0])
+        whl.set_wheels_damping_relaxation(self.wheels_damping_relaxation[0])
+        whl.set_wheels_damping_compression(self.wheels_damping_compression[0])
         whl.set_friction_slip(self.friction_slip)  # high -> more adherence
-        whl.set_roll_influence(self.roll_influence)  # low ->  more stability
+        whl.set_roll_influence(self.roll_influence[0])  # low ->  more stability
         whl.set_max_suspension_force(self.max_suspension_force)
         whl.set_max_suspension_travel_cm(self.max_suspension_travel_cm)
         whl.set_skid_info(self.skid_info)
@@ -177,10 +180,13 @@ class CarPhys(PhysColleague):
         return max(0, min(1.0, self.lin_vel / self.max_speed))
 
     def set_forces(self, eng_frc, brake_frc, steering):
+        eng_frc_ratio = self.engine_acc_frc_ratio
         self.vehicle.set_steering_value(steering, 0)
         self.vehicle.set_steering_value(steering, 1)
-        self.vehicle.apply_engine_force(eng_frc, 0)
-        self.vehicle.apply_engine_force(eng_frc, 1)
+        self.vehicle.apply_engine_force(eng_frc * eng_frc_ratio, 0)
+        self.vehicle.apply_engine_force(eng_frc * eng_frc_ratio, 1)
+        self.vehicle.apply_engine_force(eng_frc * (1 - eng_frc_ratio), 2)
+        self.vehicle.apply_engine_force(eng_frc * (1 - eng_frc_ratio), 3)
         self.vehicle.set_brake(.72 * brake_frc, 2)
         self.vehicle.set_brake(.72 * brake_frc, 3)
         self.vehicle.set_brake(.28 * brake_frc, 0)
@@ -194,6 +200,19 @@ class CarPhys(PhysColleague):
         self.curr_speed_mul = (sum(speeds) / len(speeds)) if speeds else 1.0
 
     def __update_whl_props(self, whl):
+        susp_min = self.suspension_stiffness[0]
+        susp_max = self.suspension_stiffness[1]
+        susp_diff = susp_max - susp_min
+        whl.set_suspension_stiffness(susp_min + self.speed_ratio * susp_diff)
+        relax_min = self.wheels_damping_relaxation[0]
+        relax_max = self.wheels_damping_relaxation[1]
+        relax_diff = relax_max - relax_min
+        whl.set_wheels_damping_relaxation(relax_min + self.speed_ratio * relax_diff)
+        compr_min = self.wheels_damping_compression[0]
+        compr_max = self.wheels_damping_compression[1]
+        compr_diff = compr_max - compr_min
+        whl.set_wheels_damping_compression(compr_min + self.speed_ratio * compr_diff)
+        whl.set_roll_influence(self.roll_influence_k * self.get_roll_influence())
         contact_pt = whl.get_raycast_info().getContactPointWs()
         gnd_name = self.gnd_name(contact_pt)
         if not gnd_name or gnd_name in ['Vehicle', 'Wall', 'Respawn']:
@@ -237,13 +256,12 @@ class CarPhys(PhysColleague):
         if reset:
             self.max_speed = self.get_speed()
             self.friction_slip = self.get_friction()
-            self.roll_influence = self.get_roll_influence()
+            self.roll_influence_k = 1.0
         else:
             self.max_speed *= .95
             self.friction_slip *= .95
-            self.roll_influence *= 1.05
+            self.roll_influence_k *= 1.05
         map(lambda whl: whl.set_friction_slip(self.friction_slip), wheels)
-        map(lambda whl: whl.set_roll_influence(self.roll_influence), wheels)
         self.__log_props(False)
 
     def get_speed(self):
@@ -252,9 +270,18 @@ class CarPhys(PhysColleague):
     def get_friction(self):
         return self.cfg['friction_slip'] * (1 + .01 * self.cprops.driver_tires)
 
+    def get_roll_influence_static(self):
+        min_r = self.cfg['roll_influence'][0]
+        max_r = self.cfg['roll_influence'][1]
+        k = 1 + .01 * self.cprops.driver_suspensions
+        return [min_r * k, max_r * k]
+
     def get_roll_influence(self):
-        return self.cfg['roll_influence'] * (
-            1 + .01 * self.cprops.driver_suspensions)
+        min_r = self.cfg['roll_influence'][0]
+        max_r = self.cfg['roll_influence'][1]
+        diff_r = max_r - min_r
+        curr_r = min_r + self.speed_ratio * diff_r
+        return curr_r * (1 + .01 * self.cprops.driver_suspensions)
 
     def rotate(self):
         self.pnode.apply_torque((0, 0, 80000))
@@ -280,10 +307,22 @@ class CarPlayerPhys(CarPhys):
         drv_c = 1 + .01 * self.cprops.driver_tires
         return self.cfg['friction_slip'] * tun_c * drv_c
 
+    def get_roll_influence_static(self):
+        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_suspensions
+        drv_c = 1 + .01 * self.cprops.driver_suspensions
+        min_r = self.cfg['roll_influence'][0]
+        max_r = self.cfg['roll_influence'][1]
+        k = tun_c * drv_c
+        return [min_r * k, max_r * k]
+
     def get_roll_influence(self):
         tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_suspensions
         drv_c = 1 + .01 * self.cprops.driver_suspensions
-        return self.cfg['roll_influence'] * tun_c * drv_c
+        min_r = self.cfg['roll_influence'][0]
+        max_r = self.cfg['roll_influence'][1]
+        diff_r = max_r - min_r
+        curr_r = min_r + self.speed_ratio * diff_r
+        return curr_r * tun_c * drv_c
 
     def rotate(self):
         CarPhys.rotate(self)
