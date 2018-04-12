@@ -85,11 +85,14 @@ class AbsNetwork(GameObject):
     def is_active(self):
         return self.on_frame in [obs.mth for obslist in self.eng.event.observers.values() for obs in obslist]
 
-    def destroy(self):
+    def stop(self):
         self.eng.detach_obs(self.on_frame)
         self.conn_reader.destroy()
         self.conn_writer.destroy()
         self.conn_mgr.close_connection(self.conn_udp)
         self.conn_udp = None
         self.conn_mgr = self.conn_reader = self.conn_writer = None
+
+    def destroy(self):
+        self.stop()
         GameObject.destroy(self)

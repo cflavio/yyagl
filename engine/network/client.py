@@ -24,8 +24,13 @@ class Client(AbsNetwork):
     def _actual_send(self, datagram, receiver=None):
         self.conn_writer.send(datagram, self.conn)
 
-    def destroy(self):
+    def stop(self):
+        self.eng.log('the client has been stopped')
         self.conn_mgr.close_connection(self.conn)
         self.conn = None
+        AbsNetwork.stop(self)
+
+    def destroy(self):
+        self.stop()
         self.eng.log('the client has been destroyed')
         AbsNetwork.destroy(self)

@@ -1,5 +1,5 @@
 from panda3d.core import TextNode, LVector3f, Point2, Point3, TextNode
-from yyagl.library.gui import Slider
+from yyagl.library.gui import Entry
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import GuiColleague, GameObject
@@ -15,15 +15,12 @@ class CarParameter(GameObject):
             text=attr_name, pos=pos, align=TextNode.ARight, fg=(1, 1, 1, 1),
             parent=base.a2dTopLeft, scale=.06)
         slider_pos = LVector3f(pos[0], 1, pos[1]) + (.3, 0, .01)
-        self.__slider = Slider(
-            pos=slider_pos, value=init_val, range=val_range,
+        self.__slider = Entry(
+            pos=slider_pos, initialText=str(init_val),
             command=self.__set_attr, parent=base.a2dTopLeft,
-            scale=.24)
+            scale=.05, frameColor=(0, 0, 0, .2), text_fg=(1, 1, 1, 1))
         txt_pos = LVector3f(pos[0], pos[1], 1) + (.6, 0, 0)
-        self.__val = OnscreenText(
-            pos=txt_pos, align=TextNode.ALeft, fg=(1, 1, 1, 1),
-            parent=base.a2dTopLeft, scale=.06)
-        self.widgets = [self.__slider, self.__lab, self.__val]
+        self.widgets = [self.__slider, self.__lab]
         self.toggle()
 
     def toggle(self):
@@ -34,9 +31,8 @@ class CarParameter(GameObject):
     def is_visible(self):
         return any(not wdg.is_hidden() for wdg in self.widgets)
 
-    def __set_attr(self):
-        self.__callback(self.__slider['value'], *self.__args)
-        self.__val.setText(str(round(self.__slider['value'], 2)))
+    def __set_attr(self, val):
+        self.__callback(float(val), *self.__args)
 
     def hide(self):
         map(lambda wdg: wdg.hide(), self.widgets)
@@ -52,23 +48,19 @@ class CarParameters(GameObject):
         GameObject.__init__(self)
         self.__pars = []
         pars_info = [
-            ('max_speed', (10.0, 200.0)),
-            ('mass', (100, 2000)),
-            #('steering_min_speed', (.5, -.2)),
-            #('steering_max_speed', (.5, -.28)),
-            ('steering_clamp', (.5, -.36)),
-            ('steering_inc', (1, 200)),
-            ('steering_dec', (1, 200)),
-            #('suspension_stiffness_min_speed', (0, 240)),
-            #('suspension_stiffness_max_speed', (0, 240)),
-            #('wheels_damping_relaxation_min_speed', (-1, 10)),
-            #('wheels_damping_relaxation_max_speed', (-1, 10)),
-            #('wheels_damping_compression_min_speed', (-1, 10)),
-            #('wheels_damping_compression_max_speed', (-1, 10)),
-            ('engine_acc_frc', (100, 10000)),
-            ('engine_acc_frc_ratio', (0, 1)),
-            ('engine_dec_frc', (-10000, -100)),
-            ('brake_frc', (1, 1000))]
+            ('max_speed', phys.max_speed),
+            ('mass', phys.mass),
+            ('steering', phys.steering),
+            ('steering_clamp', phys.steering_clamp),
+            ('steering_inc', phys.steering_inc),
+            ('steering_dec', phys.steering_dec),
+            ('suspension_stiffness', phys.suspension_stiffness),
+            ('wheels_damping_relaxation', phys.wheels_damping_relaxation),
+            ('wheels_damping_compression', phys.wheels_damping_compression),
+            ('engine_acc_frc', phys.engine_acc_frc),
+            ('engine_acc_frc_ratio', phys.engine_acc_frc_ratio),
+            ('engine_dec_frc', phys.engine_dec_frc),
+            ('brake_frc', phys.brake_frc)]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
                 par_info[0], getattr(phys, par_info[0]), (.5, -.04 - i * .08),
@@ -76,10 +68,10 @@ class CarParameters(GameObject):
             # refactor: par_info is a cell var
             self.__pars += [new_par]
         pars_info = [
-            ('pitch_control', (-10, 10), phys.vehicle.setPitchControl),
-            ('suspension_compression', (-1, 10),
+            ('pitch_control', phys.pitch_control, phys.vehicle.setPitchControl),
+            ('suspension_compression', phys.suspension_compression,
              phys.vehicle.getTuning().setSuspensionCompression),
-            ('suspension_damping', (-1, 10),
+            ('suspension_damping', phys.suspension_damping,
              phys.vehicle.getTuning().setSuspensionDamping)]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
@@ -87,12 +79,12 @@ class CarParameters(GameObject):
                 par_info[1], par_info[2])
             self.__pars += [new_par]
         pars_info = [
-            ('max_suspension_force', (1, 15000), 'setMaxSuspensionForce'),
-            ('max_suspension_travel_cm', (1, 2000),
+            ('max_suspension_force', phys.max_suspension_force, 'setMaxSuspensionForce'),
+            ('max_suspension_travel_cm', phys.max_suspension_travel_cm,
              'setMaxSuspensionTravelCm'),
-            ('skid_info', (-10, 10), 'setSkidInfo'),
-            ('friction_slip', (-1, 10), 'setFrictionSlip'),
-            #('roll_influence', (-1, 10), 'setRollInfluence')
+            ('skid_info', phys.skid_info, 'setSkidInfo'),
+            ('friction_slip', phys.friction_slip, 'setFrictionSlip'),
+            ('roll_influence', phys.roll_influence, 'setRollInfluence')
             ]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
