@@ -86,12 +86,14 @@ class AbsNetwork(GameObject):
         return self.on_frame in [obs.mth for obslist in self.eng.event.observers.values() for obs in obslist]
 
     def stop(self):
-        self.eng.detach_obs(self.on_frame)
-        self.conn_reader.destroy()
-        self.conn_writer.destroy()
-        self.conn_mgr.close_connection(self.conn_udp)
-        self.conn_udp = None
-        self.conn_mgr = self.conn_reader = self.conn_writer = None
+        if self.conn_udp:
+            self.eng.detach_obs(self.on_frame)
+            self.conn_reader.destroy()
+            self.conn_writer.destroy()
+            self.conn_mgr.close_connection(self.conn_udp)
+            self.conn_udp = None
+            self.conn_mgr = self.conn_reader = self.conn_writer = None
+        else: self.eng.log('the network was already stopped')
 
     def destroy(self):
         self.stop()

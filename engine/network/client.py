@@ -26,8 +26,10 @@ class Client(AbsNetwork):
 
     def stop(self):
         self.eng.log('the client has been stopped')
-        self.conn_mgr.close_connection(self.conn)
-        self.conn = None
+        if self.conn:
+            self.conn_mgr.close_connection(self.conn)
+            self.conn = None
+        else: self.eng.log('the client was already stopped')
         AbsNetwork.stop(self)
 
     def destroy(self):
