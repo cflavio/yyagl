@@ -1,4 +1,5 @@
 from yyagl.gameobject import FsmColleague
+from yyagl.racing.race.logic import NetMsgs
 from yyagl.racing.race.gui.countdown import Countdown
 
 
@@ -35,26 +36,26 @@ class RaceFsm(FsmColleague):
     def enterCountdown(self, sprops):
         self.eng.log_mgr.log('entering Countdown state')
         self.eng.hide_cursor()
+        self.sprops = sprops
         self.mediator.event.register_menu()
         self.mediator.logic.enter_play()
         if self.shaders:
             self.eng.shader_mgr.toggle_shader()
         self.launch_tsk = self.eng.do_later(
-            sprops.race_start_time, self.aux_start_countdown,
-            [sprops.countdown_seconds])
+            sprops.race_start_time, self.aux_start_countdown)
         self.aux_launch_tsk = None
         cars = [self.mediator.logic.player_car] + self.mediator.logic.cars
         map(lambda car: car.reset_car(), cars)
         map(lambda car: car.demand('Countdown'), cars)
 
-    def aux_start_countdown(self, countdown_seconds):
+    def aux_start_countdown(self):
         # i think it's necessary since otherwise panda may use invoking's time
         # so it may be already elapsed.
-        self.aux_launch_tsk = self.eng.do_later(.5, self.start_countdown, [countdown_seconds])
+        self.aux_launch_tsk = self.eng.do_later(.5, self.start_countdown)
 
-    def start_countdown(self, countdown_seconds):
+    def start_countdown(self):
         self.countdown = Countdown(self.countdown_sfx, self.menu_args.font,
-                                   countdown_seconds)
+                                   self.sprops.countdown_seconds)
         self.countdown.attach(lambda: self.demand('Play'),
                               rename='on_start_race')
 
@@ -89,3 +90,34 @@ class RaceFsm(FsmColleague):
         self.mediator.logic.exit_play()
         if self.shaders:
             self.eng.toggle_shader()
+
+
+class RaceFsmServer(RaceFsm):
+
+    def __init__(self, mediator, shaders):
+        RaceFsm.__init__(self, mediator, shaders)
+        self._countdown_ready = False
+        self.countdown_clients = []
+        self.eval_tsk = self.eng.add_task(self.eval_start)
+
+    def aux_start_countdown(self):
+        self._countdown_ready = True
+
+    def eval_start(self, task):
+        connections = [conn[0] for conn in self.eng.server.connections]
+        if all(client in self.countdown_clients for client in connections) and self._countdown_ready:
+            self.eng.server.send([NetMsgs.start_countdown])
+            self.eval_tsk = self.eng.remove_task(self.eval_tsk)
+            self.aux_launch_tsk = self.eng.do_later(.5, self.start_countdown)
+            self.mediator.event.network_register()
+        return task.cont
+
+
+class RaceFsmClient(RaceFsm):
+
+    def __init__(self, mediator, shaders):
+        RaceFsm.__init__(self, mediator, shaders)
+
+    def aux_start_countdown(self):
+        self.eng.client.send([NetMsgs.client_at_countdown])
+        self.eng.log('sent client at countdown')

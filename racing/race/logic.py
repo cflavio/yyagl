@@ -9,6 +9,8 @@ class NetMsgs(object):
 
     client_ready = 100
     begin_race = 101
+    client_at_countdown = 102
+    start_countdown = 103
 
 
 class RaceLogic(LogicColleague):
@@ -51,7 +53,6 @@ class RaceLogic(LogicColleague):
     def start_play(self):
         self.eng.phys_mgr.start()
         self.eng.attach_obs(self.on_frame)
-        self.mediator.event.network_register()
         self.player_car.attach_obs(self.mediator.event.on_wrong_way)
         self.player_car.logic.camera.render_all(self.track.gfx.model)  # workaround for prepare_scene (panda3d 1.9)
         self.track.play_music()
@@ -162,6 +163,10 @@ class RaceLogicServer(RaceLogic):
             ipaddr = sender.get_address().get_ip_string()
             self.eng.log('client ready: ' + ipaddr)
             self.ready_clients += [sender]
+        if data_lst[0] == NetMsgs.client_at_countdown:
+            ipaddr = sender.get_address().get_ip_string()
+            self.eng.log('client at countdown: ' + ipaddr)
+            self.mediator.fsm.countdown_clients += [sender]
 
     def eval_start(self, task):
         connections = [conn[0] for conn in self.eng.server.connections]
@@ -200,6 +205,10 @@ class RaceLogicClient(RaceLogic):
             self.eng.remove_do_later(self.send_tsk)
             self.mediator.fsm.demand('Countdown', self.props.season_props)
             self.start_play()
+        if data_lst[0] == NetMsgs.start_countdown:
+            self.eng.log('start countdown')
+            self.aux_launch_tsk = self.eng.do_later(.5, self.mediator.fsm.start_countdown)
+            self.mediator.event.network_register()
 
     def exit_play(self):
         self.eng.client.destroy()

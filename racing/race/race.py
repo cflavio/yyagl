@@ -5,7 +5,7 @@ from .logic import RaceLogic, RaceLogicSinglePlayer, RaceLogicServer, \
     RaceLogicClient
 from .event import RaceEvent, RaceEventServer, RaceEventClient
 from .gui.gui import RaceGui
-from .fsm import RaceFsm
+from .fsm import RaceFsm, RaceFsmServer, RaceFsmClient
 
 
 class RaceFacade(Facade):
@@ -20,11 +20,12 @@ class Race(GameObject, RaceFacade):
     __metaclass__ = ABCMeta
     logic_cls = RaceLogic
     event_cls = RaceEvent
+    fsm_cls = RaceFsm
 
     def __init__(self, race_props):
         rpr = race_props
         init_lst = [
-            [('fsm', RaceFsm, [self, rpr.shaders_dev])],
+            [('fsm', self.fsm_cls, [self, rpr.shaders_dev])],
             [('gui', RaceGui, [self, rpr])],
             [('logic', self.logic_cls, [self, rpr])],
             [('event', self.event_cls, [self, rpr.ingame_menu, rpr.keys])]]
@@ -43,8 +44,10 @@ class RaceSinglePlayer(Race):
 class RaceServer(Race):
     logic_cls = RaceLogicServer
     event_cls = RaceEventServer
+    fsm_cls = RaceFsmServer
 
 
 class RaceClient(Race):
     logic_cls = RaceLogicClient
     event_cls = RaceEventClient
+    fsm_cls = RaceFsmClient
