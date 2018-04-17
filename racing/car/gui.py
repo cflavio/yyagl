@@ -13,8 +13,8 @@ class CarParameter(GameObject):
         self.__args = args
         self.__lab = OnscreenText(
             text=attr_name, pos=pos, align=TextNode.ARight, fg=(1, 1, 1, 1),
-            parent=base.a2dTopLeft, scale=.06)
-        slider_pos = LVector3f(pos[0], 1, pos[1]) + (.3, 0, .01)
+            parent=base.a2dTopLeft, scale=.046)
+        slider_pos = LVector3f(pos[0], 1, pos[1]) + (.05, 0, .01)
         self.__slider = Entry(
             pos=slider_pos, initialText=str(init_val),
             command=self.__set_attr, parent=base.a2dTopLeft,
@@ -32,7 +32,9 @@ class CarParameter(GameObject):
         return any(not wdg.is_hidden() for wdg in self.widgets)
 
     def __set_attr(self, val):
-        self.__callback(float(val), *self.__args)
+        try: self.__callback(float(val), *self.__args)
+        except ValueError:
+            self.__callback(eval(val), *self.__args)
 
     def hide(self):
         map(lambda wdg: wdg.hide(), self.widgets)
@@ -42,56 +44,65 @@ class CarParameter(GameObject):
         GameObject.destroy(self)
 
 
+class EagerCaller(object):
+
+    def __init__(self, meth, *args):
+        self.meth = meth
+        self.args = args
+
+    def call(self, arg):
+        self.meth(arg, *self.args)
+
+
 class CarParameters(GameObject):
 
     def __init__(self, phys, logic):
         GameObject.__init__(self)
         self.__pars = []
         pars_info = [
-            ('max_speed', phys.max_speed),
-            ('mass', phys.mass),
-            ('steering', phys.steering),
-            ('steering_clamp', phys.steering_clamp),
-            ('steering_inc', phys.steering_inc),
-            ('steering_dec', phys.steering_dec),
-            ('suspension_stiffness', phys.suspension_stiffness),
-            ('wheels_damping_relaxation', phys.wheels_damping_relaxation),
-            ('wheels_damping_compression', phys.wheels_damping_compression),
-            ('engine_acc_frc', phys.engine_acc_frc),
-            ('engine_acc_frc_ratio', phys.engine_acc_frc_ratio),
-            ('engine_dec_frc', phys.engine_dec_frc),
-            ('brake_frc', phys.brake_frc)]
+            ('maxSpeed', phys.max_speed, 'max_speed'),
+            ('mass', phys.mass, 'mass'),
+            ('steer', phys.steering, 'steering'),
+            ('steerClamp', phys.steering_clamp, 'steering_clamp'),
+            ('steerInc', phys.steering_inc, 'steering_inc'),
+            ('steerDec', phys.steering_dec, 'steering_dec'),
+            ('suspStiff', phys.suspension_stiffness, 'suspension_stiffness'),
+            ('whlDampRelax', phys.wheels_damping_relaxation, 'wheels_damping_relaxation'),
+            ('whlDampCompr', phys.wheels_damping_compression, 'wheels_damping_compression'),
+            ('engAccFrc', phys.engine_acc_frc, 'engine_acc_frc'),
+            ('engAccFrcRatio', phys.engine_acc_frc_ratio, 'engine_acc_frc_ratio'),
+            ('engDecFrc', phys.engine_dec_frc, 'engine_dec_frc'),
+            ('brakeFrc', phys.brake_frc, 'brake_frc')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
-                par_info[0], getattr(phys, par_info[0]), (.5, -.04 - i * .08),
-                par_info[1], lambda val: setattr(phys, par_info[0], val))
+                par_info[0], getattr(phys, par_info[2]), (.4, -.04 - i * .08),
+                par_info[1],
+                EagerCaller(self.assign_val, phys, par_info[2]).call)
             # refactor: par_info is a cell var
             self.__pars += [new_par]
         pars_info = [
-            ('pitch_control', phys.pitch_control, phys.vehicle.setPitchControl),
-            ('suspension_compression', phys.suspension_compression,
-             phys.vehicle.getTuning().setSuspensionCompression),
-            ('suspension_damping', phys.suspension_damping,
-             phys.vehicle.getTuning().setSuspensionDamping)]
+            ('pitchCtrl', phys.pitch_control, phys.vehicle.setPitchControl, 'pitch_control'),
+            ('suspCompr', phys.suspension_compression,
+             phys.vehicle.getTuning().setSuspensionCompression, 'suspension_compression'),
+            ('suspDamp', phys.suspension_damping,
+             phys.vehicle.getTuning().setSuspensionDamping, 'suspension_damping')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
-                par_info[0], getattr(phys, par_info[0]), (.5, -.84 - i * .08),
+                par_info[0], getattr(phys, par_info[3]), (.4, -1.48 - i * .08),
                 par_info[1], par_info[2])
             self.__pars += [new_par]
         pars_info = [
-            ('max_suspension_force', phys.max_suspension_force, 'setMaxSuspensionForce'),
-            ('max_suspension_travel_cm', phys.max_suspension_travel_cm,
-             'setMaxSuspensionTravelCm'),
-            ('skid_info', phys.skid_info, 'setSkidInfo'),
-            ('friction_slip', phys.friction_slip, 'setFrictionSlip'),
-            ('roll_influence', phys.roll_influence, 'setRollInfluence')
-            ]
+            ('maxSuspFrc', phys.max_suspension_force, 'setMaxSuspensionForce', 'max_suspension_force'),
+            ('maxSuspTravelCm', phys.max_suspension_travel_cm,
+             'setMaxSuspensionTravelCm', 'max_suspension_travel_cm'),
+            ('skidInfo', phys.skid_info, 'setSkidInfo', 'skid_info'),
+            ('fricSlip', phys.friction_slip, 'setFrictionSlip', 'friction_slip'),
+            ('rollInfl', phys.roll_influence, 'setRollInfluence', 'roll_influence')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
-                par_info[0], getattr(phys, par_info[0]), (.5, -1.08 - i * .08),
+                par_info[0], getattr(phys, par_info[3]), (.4, -1.08 - i * .08),
                 par_info[1],
-                lambda val: map(lambda whl: getattr(whl, par_info[2])(val),
-                                phys.vehicle.get_wheels()))
+                EagerCaller(self.assign_val_whl, phys, par_info[2]).call)
             self.__pars += [new_par]
         for i, coord in enumerate(['x', 'y', 'z']):
             def set_cam(val, j):
@@ -101,17 +112,21 @@ class CarParameters(GameObject):
                     val if j == 1 else vec[1],
                     val if j == 2 else vec[2])
             new_par = CarParameter(
-                'camera_' + coord, logic.camera.cam_vec[i],
-                (.5, -1.72 - i * .08), (-1, 1), set_cam, [i])
+                'cam_' + coord, logic.camera.cam_vec[i],
+                (.4, -1.72 - i * .08), (-1, 1), set_cam, [i])
             self.__pars += [new_par]
+
+    def assign_val(self, val, phys, field): setattr(phys, field, val)
+
+    def assign_val_whl(self, val, phys, field):
+        map(lambda whl: getattr(whl, field)(val), phys.vehicle.get_wheels())
 
     def toggle(self):
         map(lambda par: par.toggle(), self.__pars)
         is_visible = self.__pars[0].is_visible
         (self.eng.show_cursor if is_visible else self.eng.hide_cursor)()
 
-    def hide(self):
-        map(lambda wdg: wdg.hide(), self.__pars)
+    def hide(self): map(lambda wdg: wdg.hide(), self.__pars)
 
     def destroy(self):
         map(lambda wdg: wdg.destroy(), self.__pars)
