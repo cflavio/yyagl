@@ -1,5 +1,5 @@
 from panda3d.core import TextNode
-from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL
+from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL, B1PRESS
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.DirectButton import DirectButton
 from direct.gui.DirectCheckButton import DirectCheckButton
@@ -207,7 +207,8 @@ class PandaEntry(IEntry, PandaAbs, DirectObject):
             frameColor=(1, 1, 1, 1), initialText='', obscured=False,
             command=None, focusInCommand=None, focusInExtraArgs=[],
             focusOutCommand=None, focusOutExtraArgs=[], parent=None,
-            tra_src=None, tra_tra=None, text_fg=(1, 1, 1, 1), on_tab=None):
+            tra_src=None, tra_tra=None, text_fg=(1, 1, 1, 1), on_tab=None,
+            on_click=None):
         self.wdg = DirectEntry(
             scale=scale, pos=pos, entryFont=entryFont, width=width,
             frameColor=frameColor, initialText=initialText, obscured=obscured,
@@ -217,6 +218,7 @@ class PandaEntry(IEntry, PandaAbs, DirectObject):
             text_fg=text_fg)
         PandaAbs.__init__(self, tra_src, tra_tra)
         if on_tab: self.accept('tab-up', on_tab)
+        if on_click: self.wdg.bind(B1PRESS, on_click)
 
     @property
     def onscreenText(self): return self.wdg.onscreenText
