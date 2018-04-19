@@ -44,7 +44,7 @@ class RaceFsm(FsmColleague):
         cars = [self.mediator.logic.player_car] + self.mediator.logic.cars
         map(lambda car: car.reset_car(), cars)
         map(lambda car: car.demand('Countdown'), cars)
-        self.aux_launch_tsk = self.aux_aux_launch_tsk = None
+        self.aux_launch_tsk = None
         self.launch_tsk = self.eng.do_later(
             sprops.race_start_time, self.aux_start_countdown)
 
@@ -64,7 +64,6 @@ class RaceFsm(FsmColleague):
         if self.countdown: self.countdown.destroy()
         self.eng.remove_do_later(self.launch_tsk)
         if self.aux_launch_tsk: self.eng.remove_do_later(self.aux_launch_tsk)
-        if self.aux_aux_launch_tsk: self.eng.remove_do_later(self.aux_aux_launch_tsk)
         # eng.do_later(.5, game.player_car.gfx.apply_damage)
         # eng.do_later(.6, game.player_car.gfx.apply_damage)
         # eng.gfx.print_stats()
@@ -101,15 +100,16 @@ class RaceFsmServer(RaceFsm):
         self.countdown_clients = []
         self.eval_tsk = self.eng.add_task(self.eval_start)
 
-    def aux_start_countdown(self):
-        self._countdown_ready = True
+    def start_countdown(self): self._countdown_ready = True
+
+    def server_start_countdown(self): RaceFsm.start_countdown(self)
 
     def eval_start(self, task):
         connections = [conn[0] for conn in self.eng.server.connections]
         if all(client in self.countdown_clients for client in connections) and self._countdown_ready:
             self.eng.server.send([NetMsgs.start_countdown])
             self.eval_tsk = self.eng.remove_task(self.eval_tsk)
-            self.aux_launch_tsk = self.eng.do_later(.5, self.start_countdown)
+            self.aux_launch_tsk = self.eng.do_later(.5, self.server_start_countdown)
             self.mediator.event.network_register()
         return task.cont
 
@@ -119,11 +119,6 @@ class RaceFsmClient(RaceFsm):
     def __init__(self, mediator, shaders):
         RaceFsm.__init__(self, mediator, shaders)
 
-    def aux_start_countdown(self):
-        # i think it's necessary since otherwise panda may use invoking's time
-        # so it may be already elapsed.
-        self.aux_aux_launch_tsk = self.eng.do_later(.3, self.aux_aux_start_countdown)
+    def start_countdown(self): pass
 
-    def aux_aux_start_countdown(self):
-        self.eng.client.send([NetMsgs.client_at_countdown])
-        self.eng.log('sent client at countdown')
+    def client_start_countdown(self): RaceFsm.start_countdown(self)

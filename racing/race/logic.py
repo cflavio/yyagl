@@ -174,6 +174,7 @@ class RaceLogicServer(RaceLogic):
             self.mediator.fsm.demand('Countdown', self.props.season_props)
             self.start_play()
             self.eng.server.send([NetMsgs.begin_race])
+            self.eng.log('sent begin_race')
             self.eval_tsk = self.eng.remove_task(self.eval_tsk)
         return task.cont
 
@@ -205,9 +206,11 @@ class RaceLogicClient(RaceLogic):
             self.eng.remove_do_later(self.send_tsk)
             self.mediator.fsm.demand('Countdown', self.props.season_props)
             self.start_play()
+            self.eng.client.send([NetMsgs.client_at_countdown])
+            self.eng.log('sent client at countdown')
         if data_lst[0] == NetMsgs.start_countdown:
             self.eng.log('start countdown')
-            self.aux_launch_tsk = self.eng.do_later(.5, self.mediator.fsm.start_countdown)
+            self.aux_launch_tsk = self.eng.do_later(.5, self.mediator.fsm.client_start_countdown)
             self.mediator.event.network_register()
 
     def exit_play(self):

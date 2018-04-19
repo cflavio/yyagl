@@ -125,6 +125,8 @@ class RankingGui(GuiColleague):
     @staticmethod
     def set_drv_txt_img(page, i, car_name, pos_x, top, text):
         RankingGui.eng.log_mgr.log('drivers: ' + str([drv.dprops for drv in page.drivers]))
+        RankingGui.eng.log_mgr.log('i: %s  - carname: %s - text: %s' % (
+            i, car_name, text))
         drv = next(
             driver for driver in page.drivers
             if driver.dprops.car_name == car_name)

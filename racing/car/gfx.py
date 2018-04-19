@@ -68,16 +68,17 @@ class CarGfx(GfxColleague, CarGfxFacade):
             cha.prepare_scene()
             cha.premunge_scene()
         self.on_skidmarking()
-        taskMgr.add(self.preload_tsk, 'preload')
         self.cnt = 5
+        for i in range(6):
+            self.preload_tsk()
+            base.graphicsEngine.renderFrame()
 
-    def preload_tsk(self, tsk):
+    def preload_tsk(self):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
         if self.cnt:
             self.apply_damage()
             self.mediator.event.on_bonus(wpn_classes[self.cnt - 1])
             self.cnt -= 1
-            return tsk.again
         else:
             self.apply_damage(True)
             self.mediator.event.on_bonus('remove')
