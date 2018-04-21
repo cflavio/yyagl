@@ -46,6 +46,12 @@ class Driver(GameObject, DriverFacade):
         GameObject.__init__(self, init_lst)
         DriverFacade.__init__(self)
 
+    def __repr__(self):
+        dpr = self.logic.dprops
+        return 'driver(%s %s %s %s %s)' % (
+            dpr.info, dpr.car_name, dpr.f_engine, dpr.f_tires,
+            dpr.f_suspensions)
+
     def destroy(self):
         GameObject.destroy(self)
         DriverFacade.destroy(self)
