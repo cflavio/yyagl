@@ -212,7 +212,10 @@ class CarPhys(PhysColleague):
         compr_max = self.wheels_damping_compression[1]
         compr_diff = compr_max - compr_min
         whl.set_wheels_damping_compression(compr_min + self.speed_ratio * compr_diff)
-        whl.set_roll_influence(self.roll_influence_k * self.get_roll_influence())
+        roll_infl_min = self.roll_influence[0]
+        roll_infl_max = self.roll_influence[1]
+        roll_infl_diff = roll_infl_max - roll_infl_min
+        whl.set_roll_influence(self.roll_influence_k * (roll_infl_min + self.speed_ratio * roll_infl_diff))
         contact_pt = whl.get_raycast_info().getContactPointWs()
         gnd_name = self.gnd_name(contact_pt)
         if not gnd_name or gnd_name in ['Vehicle', 'Wall', 'Respawn']:

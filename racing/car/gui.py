@@ -61,7 +61,6 @@ class CarParameters(GameObject):
         self.__pars = []
         pars_info = [
             ('maxSpeed', phys.max_speed, 'max_speed'),
-            ('mass', phys.mass, 'mass'),
             ('steer', phys.steering, 'steering'),
             ('steerClamp', phys.steering_clamp, 'steering_clamp'),
             ('steerInc', phys.steering_inc, 'steering_inc'),
@@ -72,7 +71,9 @@ class CarParameters(GameObject):
             ('engAccFrc', phys.engine_acc_frc, 'engine_acc_frc'),
             ('engAccFrcRatio', phys.engine_acc_frc_ratio, 'engine_acc_frc_ratio'),
             ('engDecFrc', phys.engine_dec_frc, 'engine_dec_frc'),
-            ('brakeFrc', phys.brake_frc, 'brake_frc')]
+            ('brakeFrc', phys.brake_frc, 'brake_frc'),
+            ('engBrakeFrc', phys.eng_brk_frc, 'eng_brk_frc'),
+            ('rollInfl', phys.roll_influence, 'roll_influence')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
                 par_info[0], getattr(phys, par_info[2]), (.4, -.04 - i * .08),
@@ -81,6 +82,7 @@ class CarParameters(GameObject):
             # refactor: par_info is a cell var
             self.__pars += [new_par]
         pars_info = [
+            ('mass', phys.mass, phys.pnode.set_mass, 'mass'),
             ('pitchCtrl', phys.pitch_control, phys.vehicle.setPitchControl, 'pitch_control'),
             ('suspCompr', phys.suspension_compression,
              phys.vehicle.getTuning().setSuspensionCompression, 'suspension_compression'),
@@ -96,11 +98,10 @@ class CarParameters(GameObject):
             ('maxSuspTravelCm', phys.max_suspension_travel_cm,
              'setMaxSuspensionTravelCm', 'max_suspension_travel_cm'),
             ('skidInfo', phys.skid_info, 'setSkidInfo', 'skid_info'),
-            ('fricSlip', phys.friction_slip, 'setFrictionSlip', 'friction_slip'),
-            ('rollInfl', phys.roll_influence, 'setRollInfluence', 'roll_influence')]
+            ('fricSlip', phys.friction_slip, 'setFrictionSlip', 'friction_slip')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
-                par_info[0], getattr(phys, par_info[3]), (.4, -1.08 - i * .08),
+                par_info[0], getattr(phys, par_info[3]), (.4, -1.16 - i * .08),
                 par_info[1],
                 EagerCaller(self.assign_val_whl, phys, par_info[2]).call)
             self.__pars += [new_par]
@@ -113,7 +114,7 @@ class CarParameters(GameObject):
                     val if j == 2 else vec[2])
             new_par = CarParameter(
                 'cam_' + coord, logic.camera.cam_vec[i],
-                (.4, -1.72 - i * .08), (-1, 1), set_cam, [i])
+                (.4, -1.8 - i * .08), (-1, 1), set_cam, [i])
             self.__pars += [new_par]
 
     def assign_val(self, val, phys, field): setattr(phys, field, val)
