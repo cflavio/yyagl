@@ -269,7 +269,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         setattr(self, 'last_roll_%s_time' % status, curr_t)
 
     def __clamp_orientation(self):
-        max_deg = 45
+        max_deg = 36
         if self.mediator.gfx.nodepath.get_p() < -max_deg:
             self.mediator.gfx.nodepath.set_p(-max_deg)
         if self.mediator.gfx.nodepath.get_r() < -max_deg:

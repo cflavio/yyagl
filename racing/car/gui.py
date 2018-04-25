@@ -117,6 +117,18 @@ class CarParameters(GameObject):
                 (.4, -1.8 - i * .08), (-1, 1), set_cam, [i])
             self.__pars += [new_par]
 
+        pars_info = [
+            ('camDistMin', logic.camera.dist_min, 'dist_min'),
+            ('camDistMax', logic.camera.dist_max, 'dist_max'),
+            ('camLookMin', logic.camera.look_dist_min, 'look_dist_min'),
+            ('camLookMax', logic.camera.look_dist_max, 'look_dist_max'),
+            ('camOverwrite', logic.camera.overwrite, 'overwrite')]
+        for i, par_info in enumerate(pars_info):
+            new_par = CarParameter(
+                par_info[0], par_info[1],
+                (2.8, -.8 - .08 * i), (-1, 1), EagerCaller(self.assign_val, logic.camera, par_info[2]).call)
+            self.__pars += [new_par]
+
     def assign_val(self, val, phys, field): setattr(phys, field, val)
 
     def assign_val_whl(self, val, phys, field):

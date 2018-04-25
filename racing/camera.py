@@ -13,6 +13,7 @@ class Camera(GameObject):
     dist_max = 48
     look_dist_min = 2
     look_dist_max = 16
+    overwrite = [0, 0, 0]
 
     def __init__(self, car_np, cam_vec, car):
         GameObject.__init__(self)
@@ -99,7 +100,9 @@ class Camera(GameObject):
         c_i = curr_incr_slow if is_fast else curr_incr
         new_pos = self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
         # overwrite camera's position to set the physics
-        # new_pos = (car_pos.x + 10, car_pos.y - 1, car_pos.z + 3)
+        if any(val for val in self.overwrite):
+            ovw = self.overwrite
+            new_pos = (car_pos.x + ovw[0], car_pos.y + ovw[1], car_pos.z + ovw[2])
         if not is_rolling: base.camera.set_pos(new_pos)
         base.camera.look_at(car_pos + tgt_vec)
 

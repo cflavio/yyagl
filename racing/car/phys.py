@@ -1,6 +1,7 @@
 from yaml import load
-from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape
-from panda3d.core import LPoint3f, BitMask32, Mat4
+from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape, \
+    BulletBoxShape
+from panda3d.core import LPoint3f, BitMask32, Mat4, TransformState
 from yyagl.gameobject import PhysColleague
 
 
@@ -56,12 +57,15 @@ class CarPhys(PhysColleague):
     def __set_collision_mesh(self):
         fpath = self.cprops.race_props.coll_path % self.cprops.name
         self.coll_mesh = self.eng.load_model(fpath)
-        chassis_shape = BulletConvexHullShape()
-        for geom in self.eng.lib.find_geoms(
-                self.coll_mesh, self.cprops.race_props.coll_name):
-            chassis_shape.add_geom(geom.node().get_geom(0),
-                                   geom.get_transform())
-        self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape)
+        #chassis_shape = BulletConvexHullShape()
+        #for geom in self.eng.lib.find_geoms(
+        #        self.coll_mesh, self.cprops.race_props.coll_name):
+        #    chassis_shape.add_geom(geom.node().get_geom(0),
+        #                           geom.get_transform())
+        #self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape)
+        chassis_shape = BulletBoxShape(tuple(self.cfg['box_size']))
+        ts = TransformState.makePos(tuple(self.cfg['box_pos']))
+        self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape, ts)
         car_names = self.cprops.race_props.season_props.car_names
         car_idx = car_names.index(self.cprops.name)
         mask = BitMask32.bit(2 + car_idx) | BitMask32.bit(16) | BitMask32.bit(15)
