@@ -183,7 +183,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
         self.drift.process(car_input)
-        return self.get_eng_frc(eng_frc), brake_frc, self._steering
+        return self.get_eng_frc(eng_frc), brake_frc, phys.brake_ratio, self._steering
 
 
 class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
@@ -213,7 +213,7 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
             else:
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
-        return self.get_eng_frc(eng_frc), brake_frc, self._steering
+        return self.get_eng_frc(eng_frc), brake_frc, phys.brake_ratio, self._steering
 
 
 class CarLogic(LogicColleague, ComputerProxy):
@@ -255,8 +255,8 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     def update(self, input2forces):
         phys = self.mediator.phys
-        eng_f, brake_f, steering = self.input_strat.input2forces(input2forces, self.eng.joystick_mgr, self.is_drifting)
-        phys.set_forces(eng_f, brake_f, steering)
+        eng_f, brake_f, brake_r, steering = self.input_strat.input2forces(input2forces, self.eng.joystick_mgr, self.is_drifting)
+        phys.set_forces(eng_f, brake_f, brake_r, steering)
         self.__update_roll_info()
         gfx = self.mediator.gfx
         is_skid = self.is_skidmarking

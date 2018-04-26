@@ -72,6 +72,7 @@ class CarParameters(GameObject):
             ('engAccFrcRatio', phys.engine_acc_frc_ratio, 'engine_acc_frc_ratio'),
             ('engDecFrc', phys.engine_dec_frc, 'engine_dec_frc'),
             ('brakeFrc', phys.brake_frc, 'brake_frc'),
+            ('brakeRatio', phys.brake_ratio, 'brake_ratio'),
             ('engBrakeFrc', phys.eng_brk_frc, 'eng_brk_frc'),
             ('rollInfl', phys.roll_influence, 'roll_influence')]
         for i, par_info in enumerate(pars_info):
@@ -90,7 +91,7 @@ class CarParameters(GameObject):
              phys.vehicle.getTuning().setSuspensionDamping, 'suspension_damping')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
-                par_info[0], getattr(phys, par_info[3]), (.4, -1.48 - i * .08),
+                par_info[0], getattr(phys, par_info[3]), (.4, -1.56 - i * .08),
                 par_info[1], par_info[2])
             self.__pars += [new_par]
         pars_info = [
@@ -101,22 +102,10 @@ class CarParameters(GameObject):
             ('fricSlip', phys.friction_slip, 'setFrictionSlip', 'friction_slip')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
-                par_info[0], getattr(phys, par_info[3]), (.4, -1.16 - i * .08),
+                par_info[0], getattr(phys, par_info[3]), (.4, -1.24 - i * .08),
                 par_info[1],
                 EagerCaller(self.assign_val_whl, phys, par_info[2]).call)
             self.__pars += [new_par]
-        for i, coord in enumerate(['x', 'y', 'z']):
-            def set_cam(val, j):
-                vec = logic.camera.cam_vec
-                logic.camera.cam_vec = (
-                    val if j == 0 else vec[0],
-                    val if j == 1 else vec[1],
-                    val if j == 2 else vec[2])
-            new_par = CarParameter(
-                'cam_' + coord, logic.camera.cam_vec[i],
-                (.4, -1.8 - i * .08), (-1, 1), set_cam, [i])
-            self.__pars += [new_par]
-
         pars_info = [
             ('camDistMin', logic.camera.dist_min, 'dist_min'),
             ('camDistMax', logic.camera.dist_max, 'dist_max'),

@@ -183,7 +183,7 @@ class CarPhys(PhysColleague):
     def lin_vel_ratio(self):
         return max(0, min(1.0, self.lin_vel / self.max_speed))
 
-    def set_forces(self, eng_frc, brake_frc, steering):
+    def set_forces(self, eng_frc, brake_frc, brk_ratio, steering):
         eng_frc_ratio = self.engine_acc_frc_ratio
         self.vehicle.set_steering_value(steering, 0)
         self.vehicle.set_steering_value(steering, 1)
@@ -191,10 +191,10 @@ class CarPhys(PhysColleague):
         self.vehicle.apply_engine_force(eng_frc * eng_frc_ratio, 1)
         self.vehicle.apply_engine_force(eng_frc * (1 - eng_frc_ratio), 2)
         self.vehicle.apply_engine_force(eng_frc * (1 - eng_frc_ratio), 3)
-        self.vehicle.set_brake(.72 * brake_frc, 2)
-        self.vehicle.set_brake(.72 * brake_frc, 3)
-        self.vehicle.set_brake(.28 * brake_frc, 0)
-        self.vehicle.set_brake(.28 * brake_frc, 1)
+        self.vehicle.set_brake((1 - brk_ratio) * brake_frc, 2)
+        self.vehicle.set_brake((1 - brk_ratio) * brake_frc, 3)
+        self.vehicle.set_brake(brk_ratio * brake_frc, 0)
+        self.vehicle.set_brake(brk_ratio * brake_frc, 1)
 
     def update_car_props(self):
         speeds = map(self.__update_whl_props, self.vehicle.get_wheels())
