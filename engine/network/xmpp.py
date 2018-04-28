@@ -224,6 +224,7 @@ class YorgClient(ClientXMPP, GameObject):
                 for _usr in self.xmpp.users:
                     if _from == _usr.name_full:
                         _usr.is_online = False
+                        _usr.is_in_yorg = False
         else:
             self.xmpp.users += [User(_from, 0, False, False, self.xmpp)]
         self.xmpp.notify('on_presence_unavailable', msg)
