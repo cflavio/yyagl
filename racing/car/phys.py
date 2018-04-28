@@ -9,10 +9,11 @@ class CarPhys(PhysColleague):
 
     def __init__(self, mediator, car_props):
         PhysColleague.__init__(self, mediator)
-        self.pnode = self.vehicle = self.friction_slip = self.__track_phys = \
-            self.coll_mesh = self.roll_influence = self.max_speed = None
+        self.pnode = self.vehicle = self.__track_phys = self.coll_mesh = \
+            self.roll_influence = self.max_speed = self.friction_slip = \
+            self.friction_slip_rear = None
         self.curr_speed_mul = 1.0
-        self.roll_influence_k = 1.0
+        self.roll_influence_k = self.friction_slip_k = 1.0
         self.__prev_speed = 0
         self.__last_drift_time = 0
         self.__finds = {}  # cache for find's results
@@ -32,20 +33,30 @@ class CarPhys(PhysColleague):
 
         # they may be changed by drivers and tuning
         self.cfg['max_speed'] = self.get_speed()
-        self.cfg['friction_slip'] = self.get_friction()
+        self.cfg['friction_slip'] = self.get_friction_static()[0]
+        self.cfg['friction_slip_rear'] = self.get_friction_static()[1]
         self.cfg['roll_influence'] = self.get_roll_influence_static()
+        self.friction_slip = self.cfg['friction_slip']
+        self.friction_slip_rear = self.cfg['friction_slip_rear']
         self.__log_props()
         set_a = lambda field: setattr(self, field, self.cfg[field])
         map(set_a, self.cfg.keys())
 
     def __log_props(self, starting=True):
         s_s = self.cfg['max_speed'] if starting else self.max_speed
-        s_f = self.cfg['friction_slip'] if starting else self.friction_slip
+        s_f = self.cfg['friction_slip'] if starting else self.get_friction_static()[0]
+        s_fr = self.cfg['friction_slip_rear'] if starting else self.get_friction_static()[1]
         s_r = self.cfg['roll_influence'] if starting else self.get_roll_influence_static()
         log_info = [
             ('speed', self.cprops.name, round(s_s, 2),
              self.cprops.driver_engine),
-            ('friction', self.cprops.name, round(s_f, 2),
+            ('friction 0', self.cprops.name, round(s_f[0], 2),
+             self.cprops.driver_tires),
+            ('friction 1', self.cprops.name, round(s_f[1], 2),
+             self.cprops.driver_tires),
+            ('friction_rear 0', self.cprops.name, round(s_fr[0], 2),
+             self.cprops.driver_tires),
+            ('friction_rear 1', self.cprops.name, round(s_fr[1], 2),
              self.cprops.driver_tires),
             ('roll min', self.cprops.name, round(s_r[0], 2),
              self.cprops.driver_suspensions),
@@ -126,7 +137,7 @@ class CarPhys(PhysColleague):
         whl.set_suspension_stiffness(self.suspension_stiffness[0])
         whl.set_wheels_damping_relaxation(self.wheels_damping_relaxation[0])
         whl.set_wheels_damping_compression(self.wheels_damping_compression[0])
-        whl.set_friction_slip(self.friction_slip)  # high -> more adherence
+        whl.set_friction_slip(self.get_friction_static()[0 if is_front else 1][0])  # high -> more adherence
         whl.set_roll_influence(self.roll_influence[0])  # low ->  more stability
         whl.set_max_suspension_force(self.max_suspension_force)
         whl.set_max_suspension_travel_cm(self.max_suspension_travel_cm)
@@ -184,7 +195,7 @@ class CarPhys(PhysColleague):
         return max(0, min(1.0, self.lin_vel / self.max_speed))
 
     def set_forces(self, eng_frc, brake_frc, brk_ratio, steering):
-        eng_frc_ratio = self.engine_acc_frc_ratio
+        eng_frc_ratio = self.engine_acc_frc_ratio[1 if self.mediator.logic.is_drifting else 0]
         self.vehicle.set_steering_value(steering, 0)
         self.vehicle.set_steering_value(steering, 1)
         self.vehicle.apply_engine_force(eng_frc * eng_frc_ratio, 0)
@@ -231,9 +242,10 @@ class CarPhys(PhysColleague):
         if not gfx_node:
             print 'ground error', gnd_name
             return
+        fric = 1.0
         if gfx_node.has_tag('friction'):
             fric = float(gfx_node.get_tag('friction'))
-            whl.setFrictionSlip(self.friction_slip * fric)
+        whl.setFrictionSlip(self.get_friction()[0 if whl.is_front_wheel() else 1] * fric)
         if gfx_node.has_tag('speed'):
             return float(gfx_node.get_tag('speed'))
 
@@ -262,26 +274,33 @@ class CarPhys(PhysColleague):
         wheels = self.vehicle.get_wheels()
         if reset:
             self.max_speed = self.get_speed()
-            self.friction_slip = self.get_friction()
+            self.friction_slip_k = 1.0
             self.roll_influence_k = 1.0
         else:
             self.max_speed *= .95
-            self.friction_slip *= .95
+            self.friction_slip_k *= .95
             self.roll_influence_k *= 1.05
-        map(lambda whl: whl.set_friction_slip(self.friction_slip), wheels)
+        #map(lambda whl: whl.set_friction_slip(self.friction_slip), wheels)
         self.__log_props(False)
 
     def get_speed(self):
         return self.cfg['max_speed'] * (1 + .01 * self.cprops.driver_engine)
 
     def get_friction(self):
-        return self.cfg['friction_slip'] * (1 + .01 * self.cprops.driver_tires)
+        k = (1 + .01 * self.cprops.driver_tires)
+        return self.friction_slip[0] * k, self.friction_slip_rear[0] * k
 
     def get_roll_influence_static(self):
         min_r = self.cfg['roll_influence'][0]
         max_r = self.cfg['roll_influence'][1]
         k = 1 + .01 * self.cprops.driver_suspensions
         return [min_r * k, max_r * k]
+
+    def get_friction_static(self):
+        k = 1 + .01 * self.cprops.driver_tires
+        return [
+            (self.cfg['friction_slip'][0] * k, self.cfg['friction_slip'][1] * k),
+            (self.cfg['friction_slip_rear'][0] * k, self.cfg['friction_slip_rear'][1] * k)]
 
     def get_roll_influence(self):
         min_r = self.cfg['roll_influence'][0]
@@ -312,7 +331,21 @@ class CarPlayerPhys(CarPhys):
     def get_friction(self):
         tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_tires
         drv_c = 1 + .01 * self.cprops.driver_tires
-        return self.cfg['friction_slip'] * tun_c * drv_c
+        h = 1.0 if self.mediator.logic.is_drifting else .0
+        k = tun_c * drv_c * self.friction_slip_k
+        fdiff = self.friction_slip[1] - self.friction_slip[0]
+        rdiff = self.friction_slip_rear[1] - self.friction_slip_rear[0]
+        fslip = self.friction_slip[0] + h * fdiff
+        rslip = self.friction_slip_rear[0] + h * rdiff
+        return fslip * k, rslip * k
+
+    def get_friction_static(self):
+        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_tires
+        drv_c = 1 + .01 * self.cprops.driver_tires
+        k = tun_c * drv_c
+        return [
+            (self.cfg['friction_slip'][0] * k, self.cfg['friction_slip'][1] * k),
+            (self.cfg['friction_slip_rear'][0] * k, self.cfg['friction_slip_rear'][1] * k)]
 
     def get_roll_influence_static(self):
         tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_suspensions

@@ -74,7 +74,9 @@ class CarParameters(GameObject):
             ('brakeFrc', phys.brake_frc, 'brake_frc'),
             ('brakeRatio', phys.brake_ratio, 'brake_ratio'),
             ('engBrakeFrc', phys.eng_brk_frc, 'eng_brk_frc'),
-            ('rollInfl', phys.roll_influence, 'roll_influence')]
+            ('rollInfl', phys.roll_influence, 'roll_influence'),
+            ('fricSlip', phys.friction_slip, 'friction_slip'),
+            ('fricSlipRear', phys.friction_slip_rear, 'friction_slip_rear')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
                 par_info[0], getattr(phys, par_info[2]), (.4, -.04 - i * .08),
@@ -91,18 +93,17 @@ class CarParameters(GameObject):
              phys.vehicle.getTuning().setSuspensionDamping, 'suspension_damping')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
-                par_info[0], getattr(phys, par_info[3]), (.4, -1.56 - i * .08),
+                par_info[0], getattr(phys, par_info[3]), (.4, -1.64 - i * .08),
                 par_info[1], par_info[2])
             self.__pars += [new_par]
         pars_info = [
             ('maxSuspFrc', phys.max_suspension_force, 'setMaxSuspensionForce', 'max_suspension_force'),
             ('maxSuspTravelCm', phys.max_suspension_travel_cm,
              'setMaxSuspensionTravelCm', 'max_suspension_travel_cm'),
-            ('skidInfo', phys.skid_info, 'setSkidInfo', 'skid_info'),
-            ('fricSlip', phys.friction_slip, 'setFrictionSlip', 'friction_slip')]
+            ('skidInfo', phys.skid_info, 'setSkidInfo', 'skid_info')]
         for i, par_info in enumerate(pars_info):
             new_par = CarParameter(
-                par_info[0], getattr(phys, par_info[3]), (.4, -1.24 - i * .08),
+                par_info[0], getattr(phys, par_info[3]), (.4, -1.4 - i * .08),
                 par_info[1],
                 EagerCaller(self.assign_val_whl, phys, par_info[2]).call)
             self.__pars += [new_par]
