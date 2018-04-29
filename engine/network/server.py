@@ -13,7 +13,7 @@ class Server(AbsNetwork):
     def __init__(self):
         AbsNetwork.__init__(self)
         self.conn_listener = self.tcp_socket = self.conn_cb = \
-            self.listener_task = None
+            self.listener_task = self.public_addr = self.local_addr = None
         self.connections = []
 
     def start(self, read_cb, conn_cb):
@@ -25,13 +25,9 @@ class Server(AbsNetwork):
         self.conn_listener.add_conn(self.tcp_socket)
         self.listener_task = self.eng.add_task(self.task_listener, self.eng.network_priority)
         sock = socket(AF_INET, SOCK_DGRAM)
-        try:
-            sock.connect(('ya2.it', 8080))
-            local_addr = sock.getsockname()[0]
-            public_addr = load(urlopen('http://httpbin.org/ip'))['origin']
-            addr = local_addr + ' - ' + public_addr
-        except gaierror:
-            self.eng.log_mgr.log('no connection')
+        sock.connect(('ya2.it', 8080))
+        self.local_addr = sock.getsockname()[0]
+        self.public_addr = load(urlopen('http://httpbin.org/ip', timeout=3))['origin']
         self.eng.log('the server is up %s %s' % (public_addr, local_addr))
 
     def task_listener(self, task):
