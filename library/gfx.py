@@ -115,3 +115,18 @@ class Node(object):
     def cleanup(self): pass
 
     def write_bam_file(self, fpath): pass
+
+
+class AnimNode(object):
+
+    def __init__(self): pass
+
+
+class AmbientLight(object):
+
+    def __init__(self): pass
+
+
+class Spotlight(object):
+
+    def __init__(self): pass

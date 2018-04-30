@@ -3,10 +3,14 @@ from panda3d.core import get_model_path, LightRampAttrib, PandaNode, \
 from direct.filter.CommonFilters import CommonFilters
 from ..gameobject import GfxColleague
 from .particle import Particle
-from yyagl.library.panda.gfx import PandaGfxMgr
+from yyagl.library.panda.gfx import PandaGfxMgr, PandaAnimNode, \
+    PandaAmbientLight, PandaSpotlight
 
 
 GfxMgr = PandaGfxMgr
+AnimNode = PandaAnimNode
+AmbientLight = PandaAmbientLight
+Spotlight = PandaSpotlight
 
 
 class EngineGfx(GfxColleague):

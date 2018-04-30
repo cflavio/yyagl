@@ -28,7 +28,7 @@ class Server(AbsNetwork):
         sock.connect(('ya2.it', 8080))
         self.local_addr = sock.getsockname()[0]
         self.public_addr = load(urlopen('http://httpbin.org/ip', timeout=3))['origin']
-        self.eng.log('the server is up %s %s' % (public_addr, local_addr))
+        self.eng.log('the server is up %s %s' % (self.public_addr, self.local_addr))
 
     def task_listener(self, task):
         if not self.conn_listener.conn_avail(): return task.cont

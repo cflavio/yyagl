@@ -1,9 +1,11 @@
 from os.path import exists
 from panda3d.core import get_model_path, AntialiasAttrib, NodePath, PandaNode as P3DNode, LightRampAttrib
-from panda3d.core import Camera, OrthographicLens, NodePath, TextureStage
+from panda3d.core import Camera, OrthographicLens, NodePath, TextureStage, \
+    OmniBoundingVolume, AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, \
+    BitMask32
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
-from ..gfx import GfxMgr, Node
+from ..gfx import GfxMgr, Node, AnimNode, AmbientLight, Spotlight
 
 
 class RenderToTexture(object):
@@ -85,6 +87,13 @@ class PandaGfxMgr(GfxMgr):
             intensity=1.0,  # default: 1.0
             size='medium'  # default: 'medium' ('small', 'medium', 'large')
         )
+
+    @property
+    def shader_support(self):
+        return base.win.get_gsg().get_supports_basic_shaders()
+
+    def set_shader(self, val):
+        (render.set_shader_auto if val else render.set_shader_off)()
 
     def set_blur(self):
         pass # self.filters.setBlurSharpen(.5)
@@ -222,3 +231,60 @@ class PandaNode(Node):
     def cleanup(self): return self.node.cleanup()
 
     def write_bam_file(self, fpath): self.node.write_bam_file(fpath)
+
+
+class PandaAnimNode(AnimNode):
+
+    def __init__(self, path, anim_dct):
+        AnimNode.__init__(self)
+        self.node = Actor(path, anim_dct)
+
+    def loop(self, anim_name): return self.node.loop(anim_name)
+
+    def reparent_to(self, parent): return self.node.reparent_to(parent)
+
+    def get_name(self): return self.node.get_name()
+
+    def set_omni(self):
+        self.node.node().set_bounds(OmniBoundingVolume())
+        self.node.node().set_final(True)
+
+    def destroy(self):
+        self.node.cleanup()
+
+
+class PandaAmbientLight(AmbientLight):
+
+    def __init__(self, color):
+        AmbientLight.__init__(self)
+        ambient_lgt = P3DAmbientLight('ambient light')
+        ambient_lgt.set_color(color)
+        self.ambient_np = render.attach_new_node(ambient_lgt)
+        render.set_light(self.ambient_np)
+
+    def destroy(self):
+        render.clear_light(self.ambient_np)
+        self.ambient_np.remove_node()
+
+
+class PandaSpotlight(Spotlight):
+
+    def __init__(self):
+        Spotlight.__init__(self)
+        self.spot_lgt = render.attach_new_node(P3DSpotlight('spot'))
+        self.spot_lgt.node().set_scene(render)
+        self.spot_lgt.node().set_shadow_caster(True, 1024, 1024)
+        self.spot_lgt.node().get_lens().set_fov(40)
+        self.spot_lgt.node().get_lens().set_near_far(20, 200)
+        self.spot_lgt.node().set_camera_mask(BitMask32.bit(0))
+        render.set_light(self.spot_lgt)
+
+    def set_pos(self, pos): return self.spot_lgt.set_pos(*pos)
+
+    def look_at(self, pos): return self.spot_lgt.look_at(*pos)
+
+    def set_color(self, color): return self.spot_lgt.set_color(*color)
+
+    def destroy(self):
+        render.clear_light(self.spot_lgt)
+        self.spot_lgt.remove_node()
