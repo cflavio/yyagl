@@ -25,7 +25,7 @@ class DriverLoaderStrategy(GameObject):
         for _drv in r_p.drivers:
             if _drv.dprops.car_name == load_car_name:
                 drv = _drv
-        s_p = track.get_start_pos(r_p.grid.index(load_car_name))
+        s_p = track.get_start_pos_hpr(r_p.grid.index(load_car_name))
         pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
         car_props = CarProps(
             r_p, load_car_name, pos, hpr,

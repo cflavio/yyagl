@@ -24,6 +24,6 @@ class Countdown(GameObject):
         self.notify('on_start_race')
 
     def destroy(self):
-        self.tsk = self.eng.remove_do_later(self.tsk)
+        self.tsk = self.eng.rm_do_later(self.tsk)
         self.__countdown_txt.destroy()
         GameObject.destroy(self)

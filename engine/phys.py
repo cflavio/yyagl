@@ -1,10 +1,16 @@
 from yyagl.gameobject import Colleague
-from yyagl.library.bullet.bullet import BulletPhysWorld, BulletContact
+from yyagl.library.bullet.bullet import BulletPhysWorld, BulletContact, \
+    BulletTriangleMesh, BulletTriangleMeshShape, BulletRigidBodyNode, \
+    BulletGhostNode
 from ..facade import Facade
 
 
 PhysWorld = BulletPhysWorld
 Contact = BulletContact
+TriangleMesh = BulletTriangleMesh
+TriangleMeshShape = BulletTriangleMeshShape
+RigidBodyNode = BulletRigidBodyNode
+GhostNode = BulletGhostNode
 
 
 class CollInfo(object):

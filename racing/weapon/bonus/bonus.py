@@ -16,12 +16,12 @@ class BonusFacade(Facade):
 
 class Bonus(GameObject, BonusFacade):
 
-    def __init__(self, pos, model_name, model_suff, waypoints):
+    def __init__(self, pos, model_name, model_suff, track_phys, track_gfx):
         init_lst = [
             [('gfx', BonusGfx, [self, pos, model_name, model_suff])],
             [('event', BonusEvent, [self])],
             [('phys', BonusPhys, [self, pos])],
-            [('logic', BonusLogic, [self, waypoints])]]
+            [('logic', BonusLogic, [self, track_phys, track_gfx])]]
         GameObject.__init__(self, init_lst)
         BonusFacade.__init__(self)
 

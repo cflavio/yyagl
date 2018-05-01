@@ -120,7 +120,7 @@ class PageGui(GuiColleague):
 
     def enable_navigation(self):
         if self.enable_tsk:
-            self.eng.remove_do_later(self.enable_tsk)
+            self.eng.rm_do_later(self.enable_tsk)
             self.enable_tsk = None
         self.enable_tsk = self.eng.do_later(.01, self.enable_navigation_aux)
 
@@ -135,7 +135,7 @@ class PageGui(GuiColleague):
 
     def disable_navigation(self):
         if self.enable_tsk:
-            self.eng.remove_do_later(self.enable_tsk)
+            self.eng.rm_do_later(self.enable_tsk)
             self.enable_tsk = None
         evts=['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
               'arrow_down-up', 'enter']
@@ -147,7 +147,7 @@ class PageGui(GuiColleague):
 
     def disable(self):
         if self.enable_tsk:
-            self.eng.remove_do_later(self.enable_tsk)
+            self.eng.rm_do_later(self.enable_tsk)
             self.enable_tsk = None
         self.disable_navigation()
         map(lambda wdg: wdg.disable(), self.widgets)

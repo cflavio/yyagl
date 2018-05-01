@@ -22,7 +22,7 @@ class TurboLogic(WeaponLogic):
         if self.stored_engine_acc_frc is not None:
             self.car.phys.engine_acc_frc = self.stored_engine_acc_frc
         if self.stored_engine_acc_frc is not None:
-            self.eng.remove_do_later(self.destroy_tsk)
+            self.eng.rm_do_later(self.destroy_tsk)
         WeaponLogic.destroy(self)
 
 

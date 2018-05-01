@@ -3,9 +3,10 @@ from yyagl.gameobject import LogicColleague
 
 class BonusLogic(LogicColleague):
 
-    def __init__(self, mediator, track_phys):
+    def __init__(self, mediator, track_phys, track_gfx):
         LogicColleague.__init__(self, mediator)
         self.track_phys = track_phys
+        self.track_gfx = track_gfx
         pos = self.mediator.gfx.model.get_pos()
         wp_info = [
             (w_p, (w_p.get_python_tag('initial_pos') - pos).length())
@@ -14,7 +15,7 @@ class BonusLogic(LogicColleague):
         self.closest_wp.set_pos(self.mediator.gfx.model.get_pos())
         boxes = self.closest_wp.get_python_tag('weapon_boxes')
         self.closest_wp.set_python_tag('weapon_boxes', boxes + [self.mediator])
-        track_phys.redraw_wps()
+        track_gfx.redraw_wps()
 
     def destroy(self):
         cwp = self.closest_wp
@@ -26,6 +27,6 @@ class BonusLogic(LogicColleague):
             cwp.set_pos(weap_boxes[-1].gfx.model.get_pos())
         else:
             cwp.set_pos(cwp.get_python_tag('initial_pos'))
-        self.track_phys.redraw_wps()
-        self.track_phys = self.closest_wp = None
+        self.track_gfx.redraw_wps()
+        self.track_phys = self.track_gfx = self.closest_wp = None
         LogicColleague.destroy(self)

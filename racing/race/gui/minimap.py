@@ -4,9 +4,9 @@ from yyagl.gameobject import GameObject
 
 class Minimap(GameObject):
 
-    def __init__(self, lrtb, track_img, handle_img, col_dct, cars, player_car):
+    def __init__(self, bounds, track_img, handle_img, col_dct, cars, player_car):
         GameObject.__init__(self)
-        self.lrtb = lrtb
+        self.bounds = bounds
         self.minimap = OnscreenImage(
             track_img, pos=(-.25, 1, .25), scale=.2,
             parent=base.a2dBottomRight)
@@ -33,7 +33,7 @@ class Minimap(GameObject):
         map(self.__update_car, car_info)
 
     def __update_car(self, car_i):
-        left, right, top, bottom = self.lrtb
+        left, right, top, bottom = self.bounds
         car_name, car_pos = car_i
         pos_x_norm = (car_pos.get_x() - left) / (right - left)
         pos_y_norm = (car_pos.get_y() - bottom) / (top - bottom)

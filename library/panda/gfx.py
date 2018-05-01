@@ -2,7 +2,7 @@ from os.path import exists
 from panda3d.core import get_model_path, AntialiasAttrib, NodePath, PandaNode as P3DNode, LightRampAttrib
 from panda3d.core import Camera, OrthographicLens, NodePath, TextureStage, \
     OmniBoundingVolume, AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, \
-    BitMask32
+    BitMask32, Point2, Point3
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from ..gfx import GfxMgr, Node, AnimNode, AmbientLight, Spotlight
@@ -88,6 +88,12 @@ class PandaGfxMgr(GfxMgr):
             size='medium'  # default: 'medium' ('small', 'medium', 'large')
         )
 
+    @staticmethod
+    def pos2d(node):
+        p3d = base.cam.get_relative_point(node.node, Point3(0, 0, 0))
+        p2d = Point2()
+        return p2d if base.camLens.project(p3d, p2d) else None
+
     @property
     def shader_support(self):
         return base.win.get_gsg().get_supports_basic_shaders()
@@ -119,7 +125,7 @@ class PandaNode(Node):
     def attach_node(self, name): return PandaNode(self.node.attach_new_node(name))
 
     def add_shape(self, shape):
-        return self.node.node().add_shape(shape)
+        return self.node.node().add_shape(shape.mesh_shape)
 
     def get_name(self): return self.node.get_name()
 
@@ -143,6 +149,15 @@ class PandaNode(Node):
     def get_y(self): return self.node.get_y()
 
     def get_z(self): return self.node.get_z()
+
+    @property
+    def x(self): return self.get_x()
+
+    @property
+    def y(self): return self.get_y()
+
+    @property
+    def z(self): return self.get_z()
 
     def set_hpr(self, hpr): return self.node.set_hpr(hpr)
 

@@ -13,7 +13,7 @@ class MineLogic(WeaponLogic):
         self.tsk = self.eng.do_later(30, self.mediator.destroy)
 
     def destroy(self):
-        if self.tsk: self.eng.remove_do_later(self.tsk)
+        if self.tsk: self.eng.rm_do_later(self.tsk)
         WeaponLogic.destroy(self)
 
 

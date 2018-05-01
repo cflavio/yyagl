@@ -14,6 +14,6 @@ class Particle(GameObject):
 
     def destroy(self):
         if not self.eng.lib.version().startswith('1.10'): return
-        self.__destroy_tsk = self.eng.remove_do_later(self.__destroy_tsk)
+        self.__destroy_tsk = self.eng.rm_do_later(self.__destroy_tsk)
         self.__np = self.__np.remove_node()
         GameObject.destroy(self)

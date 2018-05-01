@@ -203,7 +203,7 @@ class RaceLogicClient(RaceLogic):
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.begin_race:
             self.eng.log('begin race')
-            self.eng.remove_do_later(self.send_tsk)
+            self.eng.rm_do_later(self.send_tsk)
             self.mediator.fsm.demand('Countdown', self.props.season_props)
             self.start_play()
             self.eng.client.send([NetMsgs.client_at_countdown])
@@ -219,5 +219,5 @@ class RaceLogicClient(RaceLogic):
 
     def destroy(self):
         if self.send_tsk:
-            self.send_tsk = self.eng.remove_do_later(self.send_tsk)
+            self.send_tsk = self.eng.rm_do_later(self.send_tsk)
         RaceLogic.destroy(self)

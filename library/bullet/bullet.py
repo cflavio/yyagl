@@ -1,5 +1,10 @@
-from panda3d.bullet import BulletWorld, BulletDebugNode
-from ..phys import PhysWorld, Contact
+from panda3d.bullet import BulletWorld, BulletDebugNode, \
+    BulletTriangleMesh as BTriangleMesh, \
+    BulletTriangleMeshShape as BTriangleMeshShape, \
+    BulletRigidBodyNode as BRigidBodyNode, \
+    BulletGhostNode as BGhostNode
+from ..phys import PhysWorld, Contact, TriangleMesh, TriangleMeshShape, \
+    RigidBodyNode, GhostNode
 
 
 class BulletPhysWorld(PhysWorld):
@@ -56,3 +61,27 @@ class BulletContact(Contact):
     def get_node0(self): return self.contact.get_node0()
 
     def get_node1(self): return self.contact.get_node1()
+
+
+class BulletTriangleMesh(TriangleMesh):
+
+    def __init__(self): self.mesh = BTriangleMesh()
+
+    def add_geom(self, geom, remove_duplicates, transform):
+        return self.mesh.add_geom(geom, remove_duplicates, transform)
+
+
+class BulletTriangleMeshShape(TriangleMeshShape):
+
+    def __init__(self, mesh, dynamic):
+        self.mesh_shape = BTriangleMeshShape(mesh.mesh, dynamic=dynamic)
+
+
+class BulletRigidBodyNode(RigidBodyNode):
+
+    def __init__(self, name): self.node = BRigidBodyNode(name)
+
+
+class BulletGhostNode(GhostNode):
+
+    def __init__(self, name): self.node = BGhostNode(name)

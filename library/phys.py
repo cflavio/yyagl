@@ -36,3 +36,23 @@ class Contact(object):
     def get_node0(self): pass
 
     def get_node1(self): pass
+
+
+class TriangleMesh(object):
+
+    def __init__(self): pass
+
+
+class TriangleMeshShape(object):
+
+    def __init__(self, mesh, dynamic): pass
+
+
+class RigidBodyNode(object):
+
+    def __init__(self): pass
+
+
+class GhostNode(object):
+
+    def __init__(self): pass

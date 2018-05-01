@@ -46,7 +46,7 @@ class EngineFacade(Facade):
         self._fwd_prop('curr_time',
                             lambda obj: globalClock.get_frame_time())
 
-    def remove_do_later(self, tsk):
+    def rm_do_later(self, tsk):
         self.pause.remove_task(tsk)
         return self.lib.remove_task(tsk)
 
