@@ -1,4 +1,5 @@
 from panda3d.core import LineSegs, BitMask32, Point2, Point3
+from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.gameobject import PhysColleague, GameObject
 from yyagl.racing.weapon.bonus.bonus import Bonus
 from yyagl.engine.phys import TriangleMesh, TriangleMeshShape, GhostNode, \
@@ -76,16 +77,58 @@ class MeshBuilderUnmerged(MeshBuilder):
         return geoms.get_name()
 
 
-class TrackPhys(PhysColleague):
+class Waypoint(object):
+
+    def __init__(self, node):
+        self.node = node
+        self.initial_pos = node.get_pos()
+        self.weapon_boxes = []
+        self.prevs = []
+        self.prevs_grid = []
+        self.__grid_wps = {}
+
+    def set_prevs(self, waypoints, prev_name, wp_root, wpstr):
+        prevs = self.node.get_tag(prev_name).split(',')
+        prev_nodes =  [wp_root.find(wpstr + idx) for idx in prevs]
+        def find_wp(name):
+            for wayp in waypoints:
+                if wayp.name == name: return wayp
+        prev_names = [wayp.get_name() for wayp in prev_nodes]
+        self.prevs = [find_wp(name) for name in prev_names]
+
+    def set_prevs_grid(self, nopitlane_wps):
+        self.prevs_grid = [wayp for wayp in self.prevs if wayp in nopitlane_wps]
+
+    @property
+    def name(self): return self.node.get_name()
+
+    @property
+    def pos(self): return self.node.get_pos()
+
+    def __repr__(self):
+        prevs = [wp.name[8:] for wp in self.prevs]
+        prevs_grid = [wp.name[8:] for wp in self.prevs_grid]
+        prevs_nogrid = [wp.name[8:] for wp in self.prevs_nogrid]
+        prevs_nopitlane = [wp.name[8:] for wp in self.prevs_nopitlane]
+        return self.name[8:] + ' [%s]' % ','.join(prevs) + \
+            ' [%s]' % ','.join(prevs_grid) + \
+            ' [%s]' % ','.join(prevs_nogrid) + \
+            ' [%s]' % ','.join(prevs_nopitlane)
+
+
+class TrackPhys(PhysColleague, ComputerProxy):
 
     def __init__(self, mediator, race_props):
-        self.corners = self.model = self.wp2prevs = None
+        ComputerProxy.__init__(self)
+        self.corners = self.model = None
         self.bonuses = []
         self.rigid_bodies = []
         self.ghosts = []
         self.nodes = []
         self.generate_tsk = []
+        self.waypoints = []
         self.race_props = race_props
+        self.__grid_wps = {}
         PhysColleague.__init__(self, mediator)
 
     def sync_bld(self):
@@ -115,15 +158,102 @@ class TrackPhys(PhysColleague):
         wp_info = self.race_props.wp_info
         wp_root = self.model.find('**/' + wp_info.root_name)
         waypoints = wp_root.find_all_matches('**/%s*' % wp_info.wp_name)
-        self.wp2prevs = {}
         for wayp in waypoints:
-            wayp.set_python_tag('initial_pos', wayp.get_pos())
-            # do a proper wp class
-            wayp.set_python_tag('weapon_boxes', [])
             wpstr = '**/' + wp_info.wp_name
-            prevs = wayp.get_tag(wp_info.prev_name).split(',')
-            lst_wp = [wp_root.find(wpstr + idx) for idx in prevs]
-            self.wp2prevs[wayp] = lst_wp
+            neww = Waypoint(wayp)
+            self.waypoints += [neww]
+        for wayp in self.waypoints:
+            wayp.set_prevs(self.waypoints, wp_info.prev_name, wp_root, wpstr)
+            wayp.set_prevs_grid(self.nopitlane_wps(wayp))
+        for w_p in self.waypoints:
+            w_p.prevs_nogrid = self.nogrid_wps(w_p)
+        for w_p in self.waypoints:
+            w_p.prevs_nopitlane = self.nopitlane_wps(w_p)
+        if self.eng.cfg.dev_cfg.verbose:
+            import pprint
+            to_print = [self.waypoints, self.pitstop_wps, self.grid_wps]
+            map(pprint.pprint, to_print)
+
+    def nopitlane_wps(self, curr_wp):
+        if curr_wp in self.__grid_wps:
+            return self.__grid_wps[curr_wp]
+        wps = self.waypoints[:]
+        if curr_wp not in self.pitstop_wps:
+            for _wp in self.pitstop_wps:
+                wps.remove(_wp)
+        self.__grid_wps[curr_wp] = wps
+        return wps
+
+    @compute_once
+    def nogrid_wps(self, curr_wp):
+        wps = self.waypoints[:]
+        if curr_wp not in self.grid_wps:
+            for _wp in self.grid_wps:
+                wps.remove(_wp)
+        return wps
+
+    @property
+    def grid_wps(self):
+        wps = self.waypoints
+        start_forks = [w_p for w_p in wps if len(w_p.prevs) > 1]
+
+        def parents(w_p):
+            return [pwp for pwp in wps if w_p in pwp.prevs]
+        end_forks = [w_p for w_p in wps if len(parents(w_p)) > 1]
+        grid_forks = []
+        for w_p in start_forks:
+            for start in w_p.prevs[:]:
+                to_process = [start]
+                is_grid = False
+                is_pitstop = False
+                try_forks = []
+                while to_process:
+                    next_wp = to_process.pop(0)
+                    try_forks += [next_wp]
+                    for nwp in next_wp.prevs:
+                        if nwp not in end_forks:
+                            to_process += [nwp]
+                        if 'Goal' in self.__get_hits(next_wp, nwp):
+                            is_grid = True
+                        if 'PitStop' in self.__get_hits(next_wp, nwp):
+                            is_pitstop = True
+                if is_grid and not is_pitstop:
+                    grid_forks += try_forks
+        return grid_forks
+
+    @property
+    def pitstop_wps(self):
+        # it returns the waypoints of the pitlane
+        wps = self.waypoints
+        start_forks = [w_p for w_p in wps if len(w_p.prevs) > 1]
+
+        def parents(w_p):
+            return [pwp for pwp in wps if w_p in pwp.prevs]
+        end_forks = [w_p for w_p in wps if len(parents(w_p)) > 1]
+        pitstop_forks = []
+        for w_p in start_forks:
+            for start in w_p.prevs[:]:
+                to_process = [start]
+                is_pit_stop = False
+                try_forks = []
+                while to_process:
+                    next_wp = to_process.pop(0)
+                    try_forks += [next_wp]
+                    for nwp in next_wp.prevs:
+                        if nwp not in end_forks:
+                            to_process += [nwp]
+                        if 'PitStop' in self.__get_hits(next_wp, nwp):
+                            is_pit_stop = True
+                if is_pit_stop:
+                    pitstop_forks += try_forks
+        return pitstop_forks
+
+    @staticmethod
+    def __get_hits(wp1, wp2):
+        return [
+            hit.get_node().get_name()
+            for hit in TrackPhys.eng.phys_mgr.ray_test_all(
+                wp1.pos, wp2.pos).get_hits()]
 
     def set_curr_wp(self, wayp): pass
 
@@ -182,5 +312,6 @@ class TrackPhys(PhysColleague):
         map(self.eng.rm_do_later, self.generate_tsk)
         self.eng.log_tasks()
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
-            self.wp2prevs = self.generate_tsk = self.bonuses = None
-        self.race_props = None
+            self.generate_tsk = self.bonuses = self.race_props = \
+            self.waypoints = None
+        ComputerProxy.destroy(self)

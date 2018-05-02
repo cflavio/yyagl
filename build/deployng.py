@@ -40,7 +40,13 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
             'plugins': plugins,
             'gui_apps': {appname + '_app': 'main.py'},
             'platforms': deploy_platforms,
-            'include_modules': {'*': ['keyring.backends.*']}}}
+            'include_modules': {'*': ['keyring.backends.*']}},
+        'bdist_apps': {
+            'installers': {
+                'manylinux1_x86_64': ['gztar'],  # xztar isn't supported in py2
+                'manylinux1_i386': ['gztar'],  # xztar isn't supported in py2
+                'win32': ['gztar'],  # xztar isn't supported in py2
+                'macosx_10_6_x86_64': ['gztar']}}}  # xztar isn't supported in py2
     with open('bsetup.py', 'w') as f_setup:
         f_setup.write(setuppy % (appname, opt_dct))
     with open('requirements.txt', 'w') as f_req:
@@ -53,6 +59,7 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
                                            # venv's one
     map(remove, ['bsetup.py', 'requirements.txt'])
     chdir('build')
+    # we need the following since xztar archives aren't supported in py2
     for platf in deploy_platforms:
         platf2desc = {
             'win32': 'windows',
@@ -65,7 +72,7 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
         rmtree('yorg')
         platf2suff = {
             'win32': 'zip',
-            'macosx_10_6_x86_64': 'zip',
+            'macosx_10_6_x86_64': 'tar.gz',
             'manylinux1_i686': 'zip',
             'manylinux1_x86_64': 'tar.gz'}
         remove('yorg-0.0.0_%s.%s' % (platf, platf2suff[platf]))

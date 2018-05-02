@@ -114,37 +114,37 @@ class TrackGfxDebug(TrackGfx):
         self.eng.attach_obs(self.on_frame)
         self.eng.do_later(2.0, self.redraw_wps)
 
-    def set_curr_wp(self, wayp): self.curr_wp = wayp.get_name()[8:]
+    def set_curr_wp(self, wayp): self.curr_wp = wayp.name[8:]
 
     def on_frame(self):
         if hasattr(self.mediator, 'phys') and not self.wp2txt:
-            for wayp in self.mediator.phys.wp2prevs.keys():
-                self.wp2txt[wayp] = OnscreenText(wayp.get_name()[8:],
+            for wayp in self.mediator.phys.waypoints:
+                self.wp2txt[wayp] = OnscreenText(wayp.name[8:],
                                                  fg=(1, 1, 1, 1), scale=.08)
         if not hasattr(self.mediator, 'phys'): return  # first frame, refactor
-        map(self.__process_wp, self.mediator.phys.wp2prevs.keys())
+        map(self.__process_wp, self.mediator.phys.waypoints)
 
     def __process_wp(self, wayp):
-        pos2d = self.eng.gfx.gfx_mgr.pos2d(wayp)
+        pos2d = self.eng.gfx.gfx_mgr.pos2d(wayp.node)
         if pos2d:
             self.wp2txt[wayp].show()
             self.wp2txt[wayp].setPos(1.7777 * pos2d[0] + .02,
                                      pos2d[1] + .02)
             # refactor: set_pos doesn't work
             self.wp2txt[wayp]['fg'] = (1, 0, 0, 1) if \
-                wayp.get_name()[8:] == self.curr_wp else (1, 1, 1, 1)
+                wayp.name[8:] == self.curr_wp else (1, 1, 1, 1)
         else: self.wp2txt[wayp].hide()
 
     def redraw_wps(self):
         if not hasattr(self.mediator, 'phys'): return  # first frame, refactor
-        if not self.mediator.phys.wp2prevs: return
+        if not self.mediator.phys.waypoints: return
         # it may be invoked on track's destruction
         if self.wp_np: self.wp_np.remove_node()
         segs = LineSegs()
-        for w_p in self.mediator.phys.wp2prevs.keys():
-            for dest in self.mediator.phys.wp2prevs[w_p]:
-                segs.moveTo(w_p.get_pos())
-                segs.drawTo(dest.get_pos())
+        for w_p in self.mediator.phys.waypoints:
+            for dest in w_p.prevs:
+                segs.moveTo(w_p.pos)
+                segs.drawTo(dest.pos)
         segs_node = segs.create()
         self.wp_np = render.attach_new_node(segs_node)
 
@@ -152,7 +152,7 @@ class TrackGfxDebug(TrackGfx):
         self.eng.detach_obs(self.on_frame)
         self.wp_np = self.wp_np.remove_node()
         map(lambda txt: txt.destroy(), self.wp2txt.values())
-        self.wp2txt = self.mediator.phys.wp2prevs = None
+        self.wp2txt = self.mediator.phys.waypoints = None
         TrackGfx.destroy(self)
 
 

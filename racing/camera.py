@@ -87,7 +87,7 @@ class Camera(GameObject):
 
 
         curr_wp = self.car.logic.closest_wp().next
-        if curr_wp.has_tag('camera'):
+        if curr_wp.node.has_tag('camera'):
             cam_forced_pos = curr_wp.get_tag('camera')
             cam_forced_pos = cam_forced_pos.split(',')
             cam_forced_pos = (float(elm) for elm in cam_forced_pos)

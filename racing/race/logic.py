@@ -109,7 +109,7 @@ class RaceLogic(LogicColleague):
             curr_wp = car.last_wp_not_fork()
             past_wp = car.not_fork_wps()[car.not_fork_wps().index(curr_wp) - 1]
             # we consider the past since the current may be in front of the car
-            dist = (past_wp.get_pos() - car.get_pos()).length()
+            dist = (past_wp.pos - car.get_pos()).length()
             wp_num = car.logic.wp_num
             info += [(car.name, car.laps_num, wp_num, dist)]
         sortfunc = lambda val: (val[1], val[2], val[3])

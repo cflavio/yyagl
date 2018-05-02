@@ -9,24 +9,22 @@ class BonusLogic(LogicColleague):
         self.track_gfx = track_gfx
         pos = self.mediator.gfx.model.get_pos()
         wp_info = [
-            (w_p, (w_p.get_python_tag('initial_pos') - pos).length())
-            for w_p in track_phys.wp2prevs]
+            (w_p, (w_p.initial_pos - pos).length())
+            for w_p in track_phys.waypoints]
         self.closest_wp = min(wp_info, key=lambda pair: pair[1])[0]
-        self.closest_wp.set_pos(self.mediator.gfx.model.get_pos())
-        boxes = self.closest_wp.get_python_tag('weapon_boxes')
-        self.closest_wp.set_python_tag('weapon_boxes', boxes + [self.mediator])
+        self.closest_wp.node.set_pos(self.mediator.gfx.model.get_pos())
+        self.closest_wp.weapon_boxes += [self.mediator]
         track_gfx.redraw_wps()
 
     def destroy(self):
         cwp = self.closest_wp
-        boxes = cwp.get_python_tag('weapon_boxes')
+        boxes = cwp.weapon_boxes
         boxes.remove(self.mediator)
-        cwp.set_python_tag('weapon_boxes', boxes)
-        if cwp.get_python_tag('weapon_boxes'):
-            weap_boxes = cwp.get_python_tag('weapon_boxes')
-            cwp.set_pos(weap_boxes[-1].gfx.model.get_pos())
+        cwp.weapon_boxes = boxes
+        if cwp.weapon_boxes:
+            cwp.node.set_pos(cwp.weapon_boxes[-1].gfx.model.get_pos())
         else:
-            cwp.set_pos(cwp.get_python_tag('initial_pos'))
+            cwp.node.set_pos(cwp.initial_pos)
         self.track_gfx.redraw_wps()
         self.track_phys = self.track_gfx = self.closest_wp = None
         LogicColleague.destroy(self)

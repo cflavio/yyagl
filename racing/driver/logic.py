@@ -32,7 +32,7 @@ class DriverLoaderStrategy(GameObject):
             lambda: DriverLoaderStrategy.load(cars, r_p, load_car_name, track,
                                               race, player_car_names, seas_p, aipoller, cb),
             race, drv.dprops.f_engine, drv.dprops.f_tires,
-            drv.dprops.f_suspensions, race.track.phys.wp2prevs, aipoller)
+            drv.dprops.f_suspensions, race.track.phys.waypoints, aipoller)
         return car_cls(car_props)
 
 

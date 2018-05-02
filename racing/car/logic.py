@@ -239,10 +239,6 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.start_pos = car_props.pos
         self.start_pos_hpr = car_props.hpr
         self.last_ai_wp = None
-        for w_p in car_props.track_waypoints:
-            self.nogrid_wps(w_p)
-        for w_p in car_props.track_waypoints:
-            self.nopitlane_wps(w_p)
         self.__wp_num = None
         self.applied_torque = False  # applied from weapons
         self.alt_jmp_wp = None
@@ -304,96 +300,22 @@ class CarLogic(LogicColleague, ComputerProxy):
         car_dot_vel = max(car_dot_vel_l, car_dot_vel_r)
         return car_dot_vel > .1
 
-    @property
-    def pitstop_wps(self):
-        # it returns the waypoints of the pitlane
-        wps = self.cprops.track_waypoints
-        start_forks = [w_p for w_p in wps if len(wps[w_p]) > 1]
-
-        def parents(w_p):
-            return [pwp for pwp in wps if w_p in wps[pwp]]
-        end_forks = [w_p for w_p in wps if len(parents(w_p)) > 1]
-        pitstop_forks = []
-        for w_p in start_forks:
-            for start in wps[w_p][:]:
-                to_process = [start]
-                is_pit_stop = False
-                try_forks = []
-                while to_process:
-                    next_wp = to_process.pop(0)
-                    try_forks += [next_wp]
-                    for nwp in wps[next_wp]:
-                        if nwp not in end_forks:
-                            to_process += [nwp]
-                        if 'PitStop' in self.__get_hits(next_wp, nwp):
-                            is_pit_stop = True
-                if is_pit_stop:
-                    pitstop_forks += try_forks
-        return pitstop_forks
-
-    @property
-    def grid_wps(self):
-        wps = self.cprops.track_waypoints
-        start_forks = [w_p for w_p in wps if len(wps[w_p]) > 1]
-
-        def parents(w_p):
-            return [pwp for pwp in wps if w_p in wps[pwp]]
-        end_forks = [w_p for w_p in wps if len(parents(w_p)) > 1]
-        grid_forks = []
-        for w_p in start_forks:
-            for start in wps[w_p][:]:
-                to_process = [start]
-                is_grid = False
-                is_pitstop = False
-                try_forks = []
-                while to_process:
-                    next_wp = to_process.pop(0)
-                    try_forks += [next_wp]
-                    for nwp in wps[next_wp]:
-                        if nwp not in end_forks:
-                            to_process += [nwp]
-                        if 'Goal' in self.__get_hits(next_wp, nwp):
-                            is_grid = True
-                        if 'PitStop' in self.__get_hits(next_wp, nwp):
-                            is_pitstop = True
-                if is_grid and not is_pitstop:
-                    grid_forks += try_forks
-        return grid_forks
+    def last_wp_not_fork(self):
+        # make a Waypoint class which contains the nodepath and facades stuff
+        for pwp in reversed(self.collected_wps):
+            _wp = [__wp for __wp in self.cprops.track_waypoints
+                   if __wp.name[8:] == str(pwp)][0]  # facade wp's name
+            if _wp in self.not_fork_wps():
+                return _wp
+        if self.not_fork_wps():  # if the track has a goal
+            return self.not_fork_wps()[-1]
 
     @staticmethod
     def __get_hits(wp1, wp2):
         return [
             hit.get_node().get_name()
             for hit in CarLogic.eng.phys_mgr.ray_test_all(
-                wp1.get_pos(), wp2.get_pos()).get_hits()]
-
-    @compute_once
-    def nogrid_wps(self, curr_wp):
-        wps = self.cprops.track_waypoints.copy()
-        if curr_wp not in self.grid_wps:
-            for _wp in self.grid_wps:
-                del wps[_wp]
-        return wps
-
-    def nopitlane_wps(self, curr_wp):
-        if curr_wp in self.__grid_wps:
-            return self.__grid_wps[curr_wp]
-        wps = self.cprops.track_waypoints.copy()
-        if curr_wp not in self.pitstop_wps:
-            for _wp in self.pitstop_wps:
-                del wps[_wp]
-        self.__grid_wps[curr_wp] = wps
-        return wps
-
-    def last_wp_not_fork(self):
-        # make a Waypoint class which contains the nodepath and facades stuff
-        for pwp in reversed(self.collected_wps):
-            _wp = [__wp for __wp in self.cprops.track_waypoints
-                   if __wp.get_name()[8:] == str(pwp)][0]  # facade wp's name
-            if _wp in self.not_fork_wps():
-                return _wp
-        if self.not_fork_wps():  # if the track has a goal
-            return self.not_fork_wps()[-1]
+                wp1.pos, wp2.pos).get_hits()]
 
     @compute_once
     def not_fork_wps(self):
@@ -401,14 +323,14 @@ class CarLogic(LogicColleague, ComputerProxy):
         goal_wp = None
         wps = self.cprops.track_waypoints
         for curr_wp in wps:
-            for next_wp in wps[curr_wp]:
+            for next_wp in curr_wp.prevs:
                 hits = self.__get_hits(curr_wp, next_wp)
                 if 'Goal' in hits and 'PitStop' not in hits:
                     goal_wp = next_wp
 
         def parents(w_p):
             return [_wp for _wp in self.cprops.track_waypoints
-                    if w_p in self.cprops.track_waypoints[_wp]]
+                    if w_p in _wp.prevs]
         wps = []
         if not goal_wp:
             return wps
@@ -428,10 +350,12 @@ class CarLogic(LogicColleague, ComputerProxy):
         return wps
 
     def __log_wp_info(self, curr_chassis, curr_wp, closest_wps, waypoints):
-        print self.mediator.name
-        print self.mediator.gfx.chassis_np_hi.get_name(), curr_chassis.get_name()
-        print len(self.mediator.logic.lap_times), self.mediator.laps - 1
-        print self.last_ai_wp, '\n', curr_wp, '\n', closest_wps
+        print 'car name', self.mediator.name
+        print 'damage', self.mediator.gfx.chassis_np_hi.get_name(), curr_chassis.get_name()
+        print 'laps', len(self.mediator.logic.lap_times), self.mediator.laps - 1
+        print 'last_ai_wp', self.last_ai_wp
+        print 'curr_wp', curr_wp
+        print 'closest_wps', closest_wps
         import pprint
         to_print = [waypoints, self._pitstop_wps, self._grid_wps,
                     self.cprops.track_waypoints]
@@ -468,72 +392,75 @@ class CarLogic(LogicColleague, ComputerProxy):
     @once_a_frame
     def closest_wp(self):
         w2p = self.cprops.track_waypoints
-        closest_wps = w2p.keys()
+        closest_wps = w2p
         if self.last_ai_wp:
             closest_wps = [self.last_ai_wp] + \
-                w2p[self.last_ai_wp] + \
-                [wp for wp in w2p if self.last_ai_wp in w2p[wp]]
+                self.last_ai_wp.prevs + \
+                [wp for wp in w2p if self.last_ai_wp in wp.prevs]
         not_last = len(self.mediator.logic.lap_times) < self.mediator.laps - 1
         car_np = self.mediator.gfx.nodepath
-        distances = [car_np.get_distance(wp) for wp in closest_wps]
+        distances = [car_np.get_distance(wp.node) for wp in closest_wps]
         curr_wp = closest_wps[distances.index(min(distances))]
-        self._pitstop_wps = self.nogrid_wps(curr_wp)
-        self._grid_wps = self.nopitlane_wps(curr_wp)
-        considered_wps = self._pitstop_wps.items() \
+        self._pitstop_wps = curr_wp.prevs_nogrid
+        self._grid_wps = curr_wp.prevs_nopitlane
+        considered_wps = self._pitstop_wps \
             if self.hi_chassis_name in self.curr_chassis_name and not_last \
-            else self._grid_wps.items()
-        waypoints = {
-            wp[0]: wp[1] for wp in considered_wps if wp[0] in closest_wps
-            or any(_wp in closest_wps for _wp in wp[1])}
-        distances = [car_np.get_distance(wp) for wp in waypoints.keys()]
+            else self._grid_wps
+        waypoints = [wp for wp in considered_wps if wp in closest_wps or any(_wp in closest_wps for _wp in wp.prevs)]
+        distances = [car_np.get_distance(wp.node) for wp in waypoints]
         if not distances:  # there is a bug
             self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps,
                                waypoints)
-        dist_lst = zip(waypoints.keys(), distances)
+        dist_lst = zip(waypoints, distances)
         curr_wp = min(dist_lst, key=lambda pair: pair[1])[0]
+        other_wps = [wp for wp in w2p if curr_wp in wp.prevs]
+        for owp in other_wps:
+            if owp not in waypoints: waypoints += [owp]
         if self.alt_jmp_wp:
-            dist_wp = (car_np.get_pos() - curr_wp.get_pos()).length()
-            dist_alt = (car_np.get_pos() - self.alt_jmp_wp.get_pos()).length()
-            dist_h_wp = abs(car_np.get_z() - curr_wp.get_z())
-            dist_h_alt = abs(car_np.get_z() - self.alt_jmp_wp.get_z())
+            dist_wp = (car_np.get_pos() - curr_wp.pos).length()
+            dist_alt = (car_np.get_pos() - self.alt_jmp_wp.pos).length()
+            dist_h_wp = abs(car_np.get_z() - curr_wp.node.get_z())
+            dist_h_alt = abs(car_np.get_z() - self.alt_jmp_wp.node.get_z())
             if dist_wp > .5 * dist_alt and dist_h_wp > 1.5 * dist_h_alt:
                 curr_wp = self.alt_jmp_wp
-                waypoints[curr_wp] = self._grid_wps[curr_wp]
+                curr_wp.prevs = curr_wp.prevs_nopitlane
         for cons_wp in considered_wps:
-            if curr_wp in cons_wp[1]:
-                waypoints[cons_wp[0]] = cons_wp[1]
-        may_prev = waypoints[curr_wp]
-        distances = [self.pt_line_dst(car_np, w_p, curr_wp)
-                     for w_p in may_prev]
+            if curr_wp in cons_wp.prevs:
+                for wayp in waypoints:
+                    if wayp == cons_wp: wayp.prevs = cons_wp.prevs
+        may_prev = curr_wp.prevs
+        distances = [self.pt_line_dst(car_np, w_p.node, curr_wp.node)
+                     for w_p in may_prev if w_p != curr_wp]
         if not distances:  # there is a bug
             self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps,
                                waypoints)
         prev_wp = may_prev[distances.index(min(distances))]
-        may_succ = [w_p for w_p in waypoints if curr_wp in waypoints[w_p]]
+        may_succ = [w_p for w_p in waypoints if curr_wp in w_p.prevs]
         if len(may_succ) >= 2:
-            if any(wp.has_tag('jump') for wp in may_succ):
+            if any(wp.node.has_tag('jump') for wp in may_succ):
                 cha_name = self.mediator.gfx.chassis_np.get_name()
                 if cha_name in self.curr_chassis_name:
-                    may_succ = [wp for wp in may_succ if wp.has_tag('jump')]
+                    may_succ = [wp for wp in may_succ if wp.node.has_tag('jump')]
                     if not self.alt_jmp_wp:
-                        jmp_wp_str = may_succ[0].get_tag('jump')
-                        for cwp in self._grid_wps.keys():
-                            if cwp.get_name() == 'Waypoint' + jmp_wp_str:
+                        jmp_wp_str = may_succ[0].node.get_tag('jump')
+                        for cwp in self._grid_wps:
+                            if cwp.name == 'Waypoint' + jmp_wp_str:
                                 self.alt_jmp_wp = cwp
                 else:
                     may_succ = [wp for wp in may_succ
-                                if not wp.has_tag('jump')]
-        distances = [self.pt_line_dst(car_np, curr_wp, w_p)
+                                if not wp.node.has_tag('jump')]
+        distances = [self.pt_line_dst(car_np, curr_wp.node, w_p.node)
                      for w_p in may_succ]
         if not distances:  # there is a bug
             self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps,
                                waypoints)
+
         next_wp = may_succ[distances.index(min(distances))]
-        if len(self._grid_wps[curr_wp]) >= 2:
+        if len(curr_wp.prevs_grid) >= 2:
             self.alt_jmp_wp = None
-        curr_vec = Vec2(*car_np.get_pos(curr_wp).xy).normalize()
-        prev_vec = Vec2(*car_np.get_pos(prev_wp).xy).normalize()
-        next_vec = Vec2(*car_np.get_pos(next_wp).xy).normalize()
+        curr_vec = Vec2(*car_np.get_pos(curr_wp.node).xy).normalize()
+        prev_vec = Vec2(*car_np.get_pos(prev_wp.node).xy).normalize()
+        next_vec = Vec2(*car_np.get_pos(next_wp.node).xy).normalize()
         prev_angle = prev_vec.signed_angle_deg(curr_vec)
         next_angle = next_vec.signed_angle_deg(curr_vec)
         if min(distances) > 10 and abs(prev_angle) > abs(next_angle):
@@ -544,7 +471,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         return WPInfo(start_wp, end_wp)
 
     def update_waypoints(self):
-        closest_wp = int(self.closest_wp().prev.get_name()[8:])  # WaypointX
+        closest_wp = int(self.closest_wp().prev.name[8:])  # WaypointX
         # facade: wp.num in Waypoint's class
         if closest_wp not in self.collected_wps:
             self.collected_wps += [closest_wp]
@@ -558,22 +485,22 @@ class CarLogic(LogicColleague, ComputerProxy):
         wps = self.cprops.track_waypoints
         in_forks, start_forks = [], []
         for w_p in wps:
-            if len(wps[w_p]) > 1:
+            if len(w_p.prevs) > 1:
                 start_forks += [w_p]
         end_forks = []
         for w_p in wps:
             cnt_parents = 0
             for w_p1 in wps:
-                if w_p in wps[w_p1]:
+                if w_p in w_p1.prevs:
                     cnt_parents += 1
             if cnt_parents > 1:
                 end_forks += [w_p]
         for w_p in start_forks:
-            to_process = wps[w_p][:]
+            to_process = w_p.prevs[:]
             while to_process:
                 first_wp = to_process.pop(0)
                 in_forks += [first_wp]
-                for w_p2 in wps[first_wp]:
+                for w_p2 in first_wp.prevs:
                     if w_p2 not in end_forks:
                         to_process += [w_p2]
         return in_forks
@@ -585,13 +512,13 @@ class CarLogic(LogicColleague, ComputerProxy):
     def __recompute_wp_num(self):  # wp_num is used for ranking
         self.__wp_num = len(
             [vwp for vwp in self.collected_wps if vwp in [
-                int(wp.get_name()[8:]) for wp in self.not_fork_wps()]])
+                int(wp.name[8:]) for wp in self.not_fork_wps()]])
 
     @property
     def correct_lap(self):
         wps = self.cprops.track_waypoints
-        all_wp = [int(w_p.get_name()[8:]) for w_p in wps]
-        f_wp = [int(w_p.get_name()[8:]) for w_p in self.__fork_wp()]
+        all_wp = [int(w_p.name[8:]) for w_p in wps]
+        f_wp = [int(w_p.name[8:]) for w_p in self.__fork_wp()]
         map(all_wp.remove, f_wp)
         is_correct = all(w_p in self.collected_wps for w_p in all_wp)
         if not is_correct:
@@ -618,7 +545,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         # car's direction dot current direction
         closest_wp = self.closest_wp()
         start_wp, end_wp = closest_wp.prev, closest_wp.next
-        wp_vec = Vec(end_wp.get_pos(start_wp).x, end_wp.get_pos(start_wp).y, 0).normalize()
+        wp_vec = Vec(end_wp.node.get_pos(start_wp.node).x, end_wp.node.get_pos(start_wp.node).y, 0).normalize()
         return self.car_vec.dot(wp_vec)
 
     @property

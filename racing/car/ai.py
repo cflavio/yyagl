@@ -100,7 +100,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
     @property
     @once_a_frame
     def tgt_vec(self):
-        return Vec(*(self.curr_tgt_wp.get_pos() - self.car.pos)).normalize()
+        return Vec(*(self.curr_tgt_wp.pos - self.car.pos)).normalize()
 
     def _update_gnd(self, direction, hit_res):  # direction in left, center, right
         if not hit_res: return
