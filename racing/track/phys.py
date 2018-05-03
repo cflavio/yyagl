@@ -164,6 +164,8 @@ class TrackPhys(PhysColleague, ComputerProxy):
             self.waypoints += [neww]
         for wayp in self.waypoints:
             wayp.set_prevs(self.waypoints, wp_info.prev_name, wp_root, wpstr)
+        for wayp in self.waypoints:
+            # it uses the results of the previous step: can't use the same for
             wayp.set_prevs_grid(self.nopitlane_wps(wayp))
         for w_p in self.waypoints:
             w_p.prevs_nogrid = self.nogrid_wps(w_p)

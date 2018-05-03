@@ -88,11 +88,11 @@ class Camera(GameObject):
 
         curr_wp = self.car.logic.closest_wp().next
         if curr_wp.node.has_tag('camera'):
-            cam_forced_pos = curr_wp.get_tag('camera')
+            cam_forced_pos = curr_wp.node.get_tag('camera')
             cam_forced_pos = cam_forced_pos.split(',')
             cam_forced_pos = (float(elm) for elm in cam_forced_pos)
             cam_forced_pos = Vec3(*cam_forced_pos)
-            cam_forced_vec = cam_forced_pos - curr_wp.get_pos()
+            cam_forced_vec = cam_forced_pos - curr_wp.pos
             cam_forced_vec.normalize()
             cam_forced_vec *= back_car_vec.length()
             back_car_vec = cam_forced_vec

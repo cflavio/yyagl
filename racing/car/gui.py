@@ -179,14 +179,21 @@ class CarPanel(GameObject):
             scale=.05, parent=base.a2dTopRight, pos=(-.2, 1, -.69))
         self.weapon_img.set_transparency(True)
 
-    def unset_weapon(self):
-        self.weapon_img.destroy()
+    def unset_weapon(self): self.weapon_img.destroy()
 
-    def show_forward(self):
-        self.forward_img.show()
+    def show_forward(self): self.forward_img.show()
 
-    def hide_forward(self):
-        self.forward_img.hide()
+    def set_forward_angle(self, angle):
+        curr_angle = self.forward_img.get_r()
+        curr_incr = globalClock.getDt() * 30
+        if abs(curr_angle - angle) < curr_incr:
+            tgt_val = angle
+        else:
+            sign = 1 if angle > curr_angle else -1
+            tgt_val = curr_angle + curr_incr * sign
+        self.forward_img.set_r(tgt_val)
+
+    def hide_forward(self): self.forward_img.hide()
 
     def apply_damage(self, reset=False):
         col = self.race_props.season_props.gameprops.menu_args.text_normal

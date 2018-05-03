@@ -1,5 +1,5 @@
 from math import sin, cos, pi
-from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32
+from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32, LVector3f
 from yyagl.gameobject import LogicColleague
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera
@@ -662,13 +662,23 @@ class CarPlayerLogic(CarLogic):
         self._update_dist()
         self.__update_direction_gui()
 
+    @property
+    @once_a_frame
+    def tgt_vec(self):
+        return Vec(*((self.closest_wp().next).pos - self.mediator.pos)).normalize()
+
     def __update_direction_gui(self):
         curr_wp = self.closest_wp().prev.node
         curr_dir = None
         if curr_wp.has_tag('direction'):
             curr_dir = curr_wp.get_tag('direction')
-        if curr_dir: self.mediator.gui.show_forward()
+        if curr_dir:
+            self.mediator.gui.show_forward()
         else: self.mediator.gui.hide_forward()
+        tgt_vec = LVector3f(self.tgt_vec.x, self.tgt_vec.y, 0)
+        tgt_vec.normalize()
+        up = LVector3f(0, 0, 1)
+        self.mediator.gui.panel.set_forward_angle(-self.car_vec.signedAngleDeg(tgt_vec, up))
 
     def fire(self):
         self.weapon.attach_obs(self.on_weapon_destroyed)

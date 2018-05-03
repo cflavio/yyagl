@@ -67,6 +67,8 @@ class RaceFsm(FsmColleague):
         # eng.do_later(.5, game.player_car.gfx.apply_damage)
         # eng.do_later(.6, game.player_car.gfx.apply_damage)
         # eng.gfx.print_stats()
+        if self.getCurrentOrNextState() != 'Play':
+            self.mediator.logic.exit_play()
 
     def enterPlay(self):
         self.eng.log_mgr.log('entering Play state')

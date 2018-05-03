@@ -92,8 +92,8 @@ class RaceEvent(EventColleague):
     def on_ingame_exit(self):
         self.ingame_menu.gui.detach(self.on_ingame_back)
         self.ingame_menu.gui.detach(self.on_ingame_exit)
-        if self.mediator.fsm.getCurrentOrNextState() != 'Results':
-            self.mediator.logic.exit_play()
+        #if self.mediator.fsm.getCurrentOrNextState() != 'Results':
+        #    self.mediator.logic.exit_play()
         self.ingame_menu.destroy()
         self.notify('on_ingame_exit_confirm')
 

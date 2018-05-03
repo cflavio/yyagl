@@ -150,7 +150,7 @@ class TrackGfxDebug(TrackGfx):
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
-        self.wp_np = self.wp_np.remove_node()
+        if self.wp_np: self.wp_np = self.wp_np.remove_node()
         map(lambda txt: txt.destroy(), self.wp2txt.values())
         self.wp2txt = self.mediator.phys.waypoints = None
         TrackGfx.destroy(self)
