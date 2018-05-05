@@ -5,6 +5,7 @@ from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera
 from yyagl.racing.car.event import DirKeys
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
+from yyagl.racing.bitmasks import BitMasks
 from yyagl.engine.vec import Vec2, Vec
 
 
@@ -364,12 +365,12 @@ class CarLogic(LogicColleague, ComputerProxy):
     @property
     @compute_once
     def bitmask(self):
-        b_m = BitMask32.bit(0) | BitMask32.bit(1)
+        b_m = BitMask32.bit(BitMasks.general) | BitMask32.bit(BitMasks.track)
         cars_idx = range(len(self.cprops.race_props.season_props.car_names))
         cars_idx.remove(
             self.cprops.race_props.season_props.car_names.index(self.mediator.name))
         for bitn in cars_idx:
-            b_m = b_m | BitMask32.bit(2 + bitn)
+            b_m = b_m | BitMask32.bit(BitMasks.car(bitn))
         return b_m
 
     @property

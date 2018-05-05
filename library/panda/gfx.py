@@ -5,6 +5,7 @@ from panda3d.core import Camera, OrthographicLens, NodePath, TextureStage, \
     BitMask32, Point2, Point3
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
+from yyagl.racing.bitmasks import BitMasks
 from ..gfx import GfxMgr, Node, AnimNode, AmbientLight, Spotlight
 
 
@@ -291,7 +292,7 @@ class PandaSpotlight(Spotlight):
         self.spot_lgt.node().set_shadow_caster(True, 1024, 1024)
         self.spot_lgt.node().get_lens().set_fov(40)
         self.spot_lgt.node().get_lens().set_near_far(20, 200)
-        self.spot_lgt.node().set_camera_mask(BitMask32.bit(0))
+        self.spot_lgt.node().set_camera_mask(BitMask32.bit(BitMasks.general))
         render.set_light(self.spot_lgt)
 
     def set_pos(self, pos): return self.spot_lgt.set_pos(*pos)

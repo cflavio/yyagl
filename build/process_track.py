@@ -11,6 +11,7 @@ from yyagl.engine.engine import Engine
 from yyagl.gameobject import GameObject
 from direct.actor.Actor import Actor
 from yyagl.build.mtprocesser import MultithreadedProcesser
+from yyagl.racing.bitmasks import BitMasks
 
 
 class Props(object):
@@ -100,7 +101,7 @@ class TrackProcesser(GameObject):
         for submodel in self.model.get_children():
             if not submodel.get_name().startswith(self.props.empty_name):
                 submodel.flatten_light()
-        self.model.hide(BitMask32.bit(0))
+        self.model.hide(BitMask32.bit(BitMasks.general))
         self.__load_empties()
 
     def __load_empties(self):

@@ -2,6 +2,7 @@ from panda3d.core import LineSegs, BitMask32, Point2, Point3
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.gameobject import PhysColleague, GameObject
 from yyagl.racing.weapon.bonus.bonus import Bonus
+from yyagl.racing.bitmasks import BitMasks
 from yyagl.engine.phys import TriangleMesh, TriangleMeshShape, GhostNode, \
     RigidBodyNode
 
@@ -43,9 +44,9 @@ class MeshBuilder(GameObject):
         lst += [nodepath.get_node()]
         nodepath.get_node().notify_collisions(True)
         if not is_merged:
-            nodepath.set_collide_mask(BitMask32.bit(1) | BitMask32.bit(15))
+            nodepath.set_collide_mask(BitMask32.bit(BitMasks.track) | BitMask32.bit(BitMasks.track_merged))
         if is_ghost:
-            nodepath.set_collide_mask(BitMask32.bit(16))
+            nodepath.set_collide_mask(BitMask32.bit(BitMasks.ghost))
 
     def destroy(self):
         self.model = self.rigid_bodies = self.ghosts = self.nodes = None

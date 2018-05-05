@@ -1,6 +1,7 @@
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.core import Mat4, BitMask32
 from yyagl.gameobject import PhysColleague
+from yyagl.racing.bitmasks import BitMasks
 
 
 class WeaponPhys(PhysColleague):
@@ -40,12 +41,12 @@ class RocketWeaponPhys(WeaponPhys):
 
     def fire(self):
         WeaponPhys.fire(self)
-        b_m = BitMask32.bit(0)
+        b_m = BitMask32.bit(BitMasks.general)
         cars_idx = range(len(self.car.logic.cprops.race_props.season_props.car_names))
         cars_idx.remove(
             self.car.logic.cprops.race_props.season_props.car_names.index(self.car.name))
         for bitn in cars_idx:
-            b_m = b_m | BitMask32.bit(2 + bitn)
+            b_m = b_m | BitMask32.bit(BitMasks.car(bitn))
         self.n_p.set_collide_mask(b_m)
         self.eng.phys_mgr.add_collision_obj(self.node)
         self.node.set_python_tag('car', self.mediator.logic.car)
