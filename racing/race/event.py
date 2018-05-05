@@ -441,11 +441,11 @@ class RaceEventClient(RaceEvent):
         if data_lst[0] == NetMsgs.game_packet:
             self.__process_game_packet(data_lst)
         if data_lst[0] == NetMsgs.end_race:
-            if self.mediator.fsm.get_current_or_next_state() != 'Results':
-                # forward the actual ranking
-                dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0,
-                       'phoibe': 0, 'rea': 0, 'iperion': 0, 'teia': 0}
-                self.mediator.fsm.demand('Results', dct)
+            if self.mediator.fsm.getCurrentOrNextState() != 'Results':
+                points = [10, 8, 6, 4, 3, 2, 1, 0]
+                zipped = zip(self.mediator.logic.race_ranking(), points)
+                race_ranking = {car: point for car, point in zipped}
+                self.mediator.fsm.demand('Results', race_ranking)
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)

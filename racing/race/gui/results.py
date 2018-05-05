@@ -5,6 +5,7 @@ from yyagl.library.gui import Btn
 from yyagl.racing.ranking.gui import RankingGui
 from yyagl.engine.gui.imgbtn import ImgBtn
 from yyagl.gameobject import GameObject
+from yyagl.racing.race.event import NetMsgs
 
 
 class Results(GameObject):
@@ -71,6 +72,8 @@ class Results(GameObject):
             for i, site in enumerate(sites)]
 
         def step():
+            if self.eng.server.is_active:
+                self.eng.server.send([NetMsgs.end_race])
             self.notify('on_race_step', race_ranking)
             self.destroy()
             GameObject.destroy(self)
