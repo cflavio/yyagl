@@ -95,6 +95,8 @@ class TrackGfx(GfxColleague):
         sh_src = LPoint3f(*self.raceprops.shadow_src)
         self.spot_lgt.set_pos(car_pos + sh_src)
 
+    def redraw_wps(self): pass
+
     def destroy(self):
         map(lambda node: node.destroy(), self.__anim_nodes)
         self.model.remove_node()
