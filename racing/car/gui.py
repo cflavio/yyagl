@@ -315,6 +315,7 @@ class CarNetworkGui(CarGui):
         for drv in self.race_props.drivers:
             if drv.dprops.car_name == self.mediator.name:
                 name = drv.dprops.info.name
+                break
         sprops = self.race_props.season_props
         menu_args = sprops.gameprops.menu_args
         pars = {'scale': .04, 'fg': menu_args.text_normal,
