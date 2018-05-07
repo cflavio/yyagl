@@ -114,6 +114,7 @@ Server -> Client: invite(room)
 Client -> XMPPServer: joinMUC(room)
 Client -> Server: presence_unavailable
 XMPPServer --> Server: presence_available(room, client)
+XMPPServer --> Server: presence_unavailable(room, client)
 @enduml
 
 @startuml
@@ -123,6 +124,7 @@ Server -> Client: invite(room)
 Client -> XMPPServer: joinMUC(room)
 XMPPServer --> Server: presence_available(room, client)
 Client -> Server: presence_unavailable
+XMPPServer --> Server: presence_unavailable(room, client)
 @enduml
 
 @startuml
