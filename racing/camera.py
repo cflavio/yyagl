@@ -114,6 +114,7 @@ class Camera(GameObject):
         base.camera.set_pos(0, 0, 10000)
         base.camera.look_at(0, 0, 0)
         skydome = track_model.find('**/OBJSkydome*')
+        Camera.eng.log('skydome %sfound' % ('' if skydome else 'not '))
         skydome and skydome.hide()
         base.graphicsEngine.render_frame()
         base.graphicsEngine.render_frame()

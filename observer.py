@@ -5,6 +5,8 @@ class ObsInfo(object):
         self.sort = sort
         self.args = args
 
+    def __repr__(self): return str(self.mth)
+
 
 class Subject(object):
 
@@ -26,7 +28,7 @@ class Subject(object):
 
     def notify(self, meth, *args, **kwargs):
         if meth not in self.observers: return  # no obs for this notification
-        for obs in self.observers[meth]:
+        for obs in self.observers[meth][:]:
             if obs in self.observers[meth]: # if an obs removes another one
                 act_args = obs.args + list(args)
                 obs.mth(*act_args, **kwargs)

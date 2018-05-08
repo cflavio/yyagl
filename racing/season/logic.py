@@ -33,7 +33,7 @@ class SeasonLogic(LogicColleague):
         self.props.drivers = drivers
 
     def next_race(self):
-        track = self.race.track.rprops.track_name
+        track = self.race.track.race_props.track_name
         ntracks = len(self.props.gameprops.season_tracks)
         if self.props.gameprops.season_tracks.index(track) == ntracks - 1:
             self.notify('on_season_end')

@@ -167,7 +167,7 @@ class PandaCheckBtn(ICheckBtn, PandaAbs):
             indicator_frameColor=indicator_frameColor,
             frameColor=frameColor, scale=scale, clickSound=clickSound,
             rolloverSound=rolloverSound, text_fg=text_fg, text_font=text_font,
-            command=None)
+            command=command)
         PandaAbs.__init__(self, tra_src, tra_tra)
 
 
