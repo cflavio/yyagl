@@ -43,7 +43,7 @@ class RankingPageGui(PageGui):
             txt = Text(
                 _('Congratulations!'), fg=(.8, .6, .2, 1), scale=.16,
                 pos=(0, -.3), font=loader.loadFont(self.sprops.font),
-                parent=base.a2dLeftCenter)
+                parent='leftcenter')
             txt.set_r(-79)
             self.add_widgets([txt, img])
         else:

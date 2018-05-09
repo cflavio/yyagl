@@ -259,7 +259,8 @@ class PandaTxt(IText, PandaBase):
             self, txt='', pos=(0, 1, 0), scale=.05, wordwrap=12, parent=None,
             fg=(1, 1, 1, 1), font=None, align=None, tra_src=None,
             tra_tra=None):
-        str2par = {'bottomleft': base.a2dBottomLeft}
+        str2par = {'bottomleft': base.a2dBottomLeft,
+                   'leftcenter': base.a2dLeftCenter}
         str2al = {'left': TextNode.A_left, 'right': TextNode.A_right}
         if parent: parent = str2par[parent]
         if align: align = str2al[align]
@@ -267,6 +268,8 @@ class PandaTxt(IText, PandaBase):
             text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
             parent=parent, fg=fg, font=font, align=align)
         PandaBase.__init__(self, tra_src, tra_tra)
+
+    def set_r(self, val): return self.wdg.set_r(val)
 
 
 class PandaFrame(IFrame, PandaAbs):
