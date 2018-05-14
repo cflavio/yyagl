@@ -1,5 +1,6 @@
-from socket import socket, AF_INET, SOCK_DGRAM, gaierror
+from socket import socket, AF_INET, SOCK_DGRAM, gaierror, error
 from json import load
+from pickle import loads, dumps
 from urllib2 import urlopen
 from .network import AbsNetwork
 from yyagl.library.panda.network import PandaConnectionListener
@@ -28,6 +29,10 @@ class Server(AbsNetwork):
         sock.connect(('ya2.it', 8080))
         self.local_addr = sock.getsockname()[0]
         self.public_addr = load(urlopen('http://httpbin.org/ip', timeout=3))['origin']
+        self.udp_sock = socket(AF_INET, SOCK_DGRAM)
+        self.udp_sock.bind(('', 9099))
+        self.udp_sock.setblocking(0)
+
         self.eng.log('the server is up %s %s' % (self.public_addr, self.local_addr))
 
     def task_listener(self, task):
@@ -46,11 +51,30 @@ class Server(AbsNetwork):
         dests = receivers if receiver else [conn[0] for conn in self.connections]
         map(lambda cln: self.conn_writer.send(datagram, cln), dests)
 
+    def process_udp(self):
+        try:
+            payload, client_address = self.udp_sock.recvfrom(8192)
+        except error: return
+        payload = loads(payload)
+        sender = payload['sender']
+        if sender not in self.addr2conn:
+            self.addr2conn[sender] = client_address
+        self.read_cb(payload['payload'], client_address)
+
+    def send_udp(self, data_lst, receiver):
+        if receiver not in self.addr2conn: return
+        payload = {}
+        my_addr = self.my_addr if hasattr(self, 'my_addr') else 'server'
+        payload['sender'] = my_addr
+        payload['payload'] = data_lst
+        self.udp_sock.sendto(dumps(payload), self.addr2conn[receiver])
+
     def stop(self):
         if self.tcp_socket:
             map(self.conn_reader.remove_connection, [conn[0] for conn in self.connections])
             self.conn_mgr.close_connection(self.tcp_socket)
             self.eng.remove_task(self.listener_task)
+            self.udp_sock.close()
             self.conn_listener = self.tcp_socket = self.conn_cb = \
                 self.listener_task = self.connections = None
         else: self.eng.log('the server was already stopped')

@@ -27,16 +27,15 @@ class AbsNetwork(GameObject):
         GameObject.__init__(self)
         self.conn_mgr = None
         self.conn_reader = None
+        self.conn_reader_udp = None
         self.conn_writer = None
         self.read_cb = None
+        self.addr2conn = {}
 
     def start(self, read_cb):
         self.conn_mgr = ConnectionMgr()
         self.conn_reader = ConnectionReader(self.conn_mgr)
         self.conn_writer = ConnectionWriter(self.conn_mgr)
-        self.conn_udp = self.conn_mgr.open_UDP_connection(9099)
-        if not self.conn_udp: raise NetworkError
-        self.conn_reader.add_conn(self.conn_udp)
         self.eng.attach_obs(self.on_frame, 1)
         self.read_cb = read_cb
 
@@ -51,24 +50,8 @@ class AbsNetwork(GameObject):
         map(lambda data: type2mth[type(data)](data), data_lst)
         self._actual_send(datagram, receiver)
 
-    def _actual_send_udp(self, datagram, receiver=None):
-        addr = NetAddress()
-        addr.set_host(receiver, 9099)
-        self.conn_writer.send(datagram, self.conn_udp, addr)
-
-    def send_udp(self, data_lst, receiver=None):
-        datagram = WriteDatagram()
-        my_addr = self.my_addr if hasattr(self, 'my_addr') else 'server'
-        data_lst = data_lst + [my_addr]
-        types = {bool: 'B', int: 'I', float: 'F', str: 'S'}
-        datagram.add_string(''.join(types[type(part)] for part in data_lst))
-        type2mth = {
-            bool: datagram.add_bool, int: datagram.add_int,
-            float: datagram.add_float, str: datagram.add_string}
-        map(lambda data: type2mth[type(data)](data), data_lst)
-        self._actual_send_udp(datagram, receiver)
-
     def on_frame(self):
+        self.process_udp()
         if not self.conn_reader.data_available(): return
         datagram = self.conn_reader.get()
         if not datagram: return
@@ -86,14 +69,11 @@ class AbsNetwork(GameObject):
         return self.on_frame in [obs.mth for obslist in self.eng.event.observers.values() for obs in obslist]
 
     def stop(self):
-        if self.conn_udp:
-            self.eng.detach_obs(self.on_frame)
-            self.conn_reader.destroy()
-            self.conn_writer.destroy()
-            self.conn_mgr.close_connection(self.conn_udp)
-            self.conn_udp = None
-            self.conn_mgr = self.conn_reader = self.conn_writer = None
-        else: self.eng.log('the network was already stopped')
+        self.eng.detach_obs(self.on_frame)
+        self.conn_reader.destroy()
+        self.conn_writer.destroy()
+        self.addr2conn = None
+        self.conn_mgr = self.conn_reader = self.conn_writer = None
 
     def destroy(self):
         self.stop()

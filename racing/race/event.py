@@ -260,7 +260,7 @@ class RaceEventServer(RaceEvent):
                 (data_lst[start + 5], data_lst[start + 6], data_lst[start + 7])
             ]]
         self.server_info[sender] = (pos, fwd, velocity, ang_vel, curr_inp, level, weapon)
-        car_name = self.eng.car_mapping[data_lst[-1]]
+        car_name = self.eng.car_mapping[sender[0]]
         for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
             if carname2id[car_name] == carname2id[car.name]:
                 car.logic.last_network_packet = globalClock.getFrameTime()
