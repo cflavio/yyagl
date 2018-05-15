@@ -12,6 +12,7 @@ class <AppName>(p3d):
     config(start_dir='<appname>', version='<version>', display_name='<AppName>')
     dir('<yyaglpath>/thirdparty/dns', 'dns')
     dir('<yyaglpath>/thirdparty/sleekxmpp', 'sleekxmpp')
+    dir('<yyaglpath>/thirdparty/simpleubjson', 'simpleubjson')
     dir('<yyaglpath>/thirdparty/yaml', 'yaml')
     file('<yyaglpath>/thirdparty/feedparser.py', 'feedparser.py')
     file('<yyaglpath>/thirdparty/argparse.py', 'argparse.py')

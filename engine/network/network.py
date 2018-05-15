@@ -1,3 +1,4 @@
+from decimal import Decimal
 from panda3d.core import QueuedConnectionManager, QueuedConnectionReader, \
     ConnectionWriter, NetDatagram, NetAddress
 from direct.distributed.PyDatagram import PyDatagram
@@ -64,16 +65,26 @@ class AbsNetwork(GameObject):
     def register_cb(self, callback):
         self.read_cb = callback
 
+    def _fix_payload(self, payload):
+        ret = {}
+        ret['sender'] = payload['sender']
+        def __fix(elm):
+            return float(elm) if type(elm) == Decimal else elm
+        ret['payload'] = [__fix(payl) for payl in payload['payload']]
+        return ret
+
     @property
     def is_active(self):
         return self.on_frame in [obs.mth for obslist in self.eng.event.observers.values() for obs in obslist]
 
     def stop(self):
-        self.eng.detach_obs(self.on_frame)
-        self.conn_reader.destroy()
-        self.conn_writer.destroy()
-        self.addr2conn = None
-        self.conn_mgr = self.conn_reader = self.conn_writer = None
+        if self.udp_sock:
+            self.eng.detach_obs(self.on_frame)
+            self.conn_reader.destroy()
+            self.conn_writer.destroy()
+            self.udp_sock.close()
+            self.addr2conn = {}
+            self.udp_sock = self.conn_mgr = self.conn_reader = self.conn_writer = None
 
     def destroy(self):
         self.stop()

@@ -1,6 +1,6 @@
 from socket import socket, AF_INET, SOCK_DGRAM, gaierror, error
 from json import load
-from pickle import loads, dumps
+from simpleubjson import encode, decode
 from urllib2 import urlopen
 from .network import AbsNetwork
 from yyagl.library.panda.network import PandaConnectionListener
@@ -55,7 +55,7 @@ class Server(AbsNetwork):
         try:
             payload, client_address = self.udp_sock.recvfrom(8192)
         except error: return
-        payload = loads(payload)
+        payload = self._fix_payload(dict(decode(payload)))
         sender = payload['sender']
         if sender not in self.addr2conn:
             self.addr2conn[sender] = client_address
@@ -67,7 +67,7 @@ class Server(AbsNetwork):
         my_addr = self.my_addr if hasattr(self, 'my_addr') else 'server'
         payload['sender'] = my_addr
         payload['payload'] = data_lst
-        self.udp_sock.sendto(dumps(payload), self.addr2conn[receiver])
+        self.udp_sock.sendto(encode(payload), self.addr2conn[receiver])
 
     def stop(self):
         if self.tcp_socket:

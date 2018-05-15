@@ -1,7 +1,7 @@
 from socket import socket, AF_INET, SOCK_DGRAM, gaierror, error
 from json import load
 from urllib2 import urlopen
-from pickle import loads, dumps
+from simpleubjson import encode, decode
 from .network import AbsNetwork, NetworkError
 
 
@@ -30,12 +30,12 @@ class Client(AbsNetwork):
     def send_udp(self, data_lst, receiver=None):
         receiver = receiver if receiver else self.srv_addr
         payload = {'sender': self.my_addr, 'payload': data_lst}
-        self.udp_sock.sendto(dumps(payload), (receiver, 9099))
+        self.udp_sock.sendto(encode(payload), (receiver, 9099))
 
     def process_udp(self):
         try:
             payload, client_address = self.udp_sock.recvfrom(8192)
-            payload = loads(payload)
+            payload = self._fix_payload(dict(decode(payload)))
             sender = payload['sender']
             self.read_cb(payload['payload'], sender)
         except error: pass
