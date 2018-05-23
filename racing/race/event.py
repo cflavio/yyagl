@@ -87,14 +87,14 @@ class RaceEvent(EventColleague):
         self.ingame_menu.gui.detach(self.on_ingame_exit)
         self.register_menu()
         self.eng.hide_cursor()
-        self.ingame_menu.destroy()
+        self.ingame_menu = self.ingame_menu.destroy()
 
     def on_ingame_exit(self):
         self.ingame_menu.gui.detach(self.on_ingame_back)
         self.ingame_menu.gui.detach(self.on_ingame_exit)
         #if self.mediator.fsm.getCurrentOrNextState() != 'Results':
         #    self.mediator.logic.exit_play()
-        self.ingame_menu.destroy()
+        self.ingame_menu = self.ingame_menu.destroy()
         self.notify('on_ingame_exit_confirm')
 
     def register_menu(self):
@@ -340,6 +340,7 @@ class RaceEventClient(RaceEvent):
     def __init__(self, mediator, menu_cls, keys):
         RaceEvent.__init__(self, mediator, menu_cls, keys)
         self.eng.attach_obs(self.on_frame)
+        self.eng.xmpp.attach(self.on_server_quit)
 
     def on_frame(self):
         from yyagl.racing.car.car import NetworkCar
@@ -350,6 +351,10 @@ class RaceEventClient(RaceEvent):
 
     def network_register(self):
         self.eng.client.register_cb(self.process_client)
+
+    def on_server_quit(self):
+        if self.ingame_menu: self.on_ingame_back()
+        self.ignore('escape-up')
 
     def __process_game_packet(self, data_lst):
         from yyagl.racing.car.car import NetworkCar
@@ -449,4 +454,5 @@ class RaceEventClient(RaceEvent):
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
+        self.eng.xmpp.detach(self.on_server_quit)
         RaceEvent.destroy(self)
