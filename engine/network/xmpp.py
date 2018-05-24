@@ -237,23 +237,23 @@ class YorgClient(ClientXMPP, GameObject):
 
     def on_message(self, msg):
         self.eng.log('message: ' + msg['subject'])
-        if self.is_registered('list_users') and msg['subject'] == 'list_users':
+        if self.is_registered('list_users') and msg['subject'] == 'list_users' and msg['type'] != 'error':
             return self.on_list_users(msg)
-        if self.is_registered('answer_full') and msg['subject'] == 'answer_full':
+        if self.is_registered('answer_full') and msg['subject'] == 'answer_full' and msg['type'] != 'error':
             return self.on_answer_full(msg)
-        if self.is_registered('chat') and msg['subject'] == 'chat':
+        if self.is_registered('chat') and msg['subject'] == 'chat' and msg['type'] != 'error':
             return self.xmpp.notify('on_msg', msg)
-        if self.is_registered('invite') and msg['subject'] == 'invite':
+        if self.is_registered('invite') and msg['subject'] == 'invite' and msg['type'] != 'error':
             return self.xmpp.notify('on_invite_chat', msg)
-        if self.is_registered('declined') and msg['subject'] == 'declined':
+        if self.is_registered('declined') and msg['subject'] == 'declined' and msg['type'] != 'error':
             return self.xmpp.notify('on_declined', msg)
-        if self.is_registered('cancel_invite') and msg['subject'] == 'cancel_invite':
+        if self.is_registered('cancel_invite') and msg['subject'] == 'cancel_invite' and msg['type'] != 'error':
             return self.xmpp.notify('on_cancel_invite')
-        if self.is_registered('ip_address') and msg['subject'] == 'ip_address':
+        if self.is_registered('ip_address') and msg['subject'] == 'ip_address' and msg['type'] != 'error':
             return self.xmpp.notify('on_ip_address', msg)
-        if self.is_registered('yorg_init') and msg['subject'] == 'yorg_init':
+        if self.is_registered('yorg_init') and msg['subject'] == 'yorg_init' and msg['type'] != 'error':
             return self.xmpp.notify('on_yorg_init', msg)
-        if self.is_registered('is_playing') and msg['subject'] == 'is_playing':
+        if self.is_registered('is_playing') and msg['subject'] == 'is_playing' and msg['type'] != 'error':
             return self.xmpp.notify('on_is_playing', msg)
 
     def on_groupchat_message(self, msg):
