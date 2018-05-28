@@ -304,7 +304,6 @@ class CarPlayerEvent(CarEvent):
 class CarPlayerEventServer(CarPlayerEvent):
 
     def _process_end_goal(self):
-        self.eng.server.send([NetMsgs.end_race])
         CarPlayerEvent._process_end_goal(self)
 
 

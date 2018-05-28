@@ -50,7 +50,7 @@ class Results(GameObject):
         self.__res_txts += [
             OnscreenText(_('share:'), pos=(-.1, -.82), align=TextNode.A_right,
                          **pars)]
-        self.__buttons = []
+        self._buttons = []
 
         min_time = min(lap_times or [0])
         facebook_url = self.rprops.share_urls[0]
@@ -61,7 +61,7 @@ class Results(GameObject):
         sites = [('facebook', facebook_url), ('twitter', twitter_url),
                  ('google_plus', plus_url), ('tumblr', tumblr_url)]
         menu_args= self.rprops.season_props.gameprops.menu_args
-        self.__buttons += [
+        self._buttons += [
             ImgBtn(
                 scale=.078,
                 pos=(.02 + i*.18, 1, -.79), frameColor=(0, 0, 0, 0),
@@ -80,7 +80,7 @@ class Results(GameObject):
         cont_btn = Btn(
             text=_('Continue'), pos=(0, 1, -.6), command=step,
             **self.rprops.season_props.gameprops.menu_args.btn_args)
-        self.__buttons += [cont_btn]
+        self._buttons += [cont_btn]
 
     def destroy(self):
         if not self.result_frm or self.result_frm.isEmpty():
@@ -88,6 +88,15 @@ class Results(GameObject):
         # if it is reached by step then there are two destroys: step's one
         # and race.gui's one
         map(lambda txt: txt.destroy(), self.__res_txts)
-        map(lambda btn: btn.destroy(), self.__buttons)
+        map(lambda btn: btn.destroy(), self._buttons)
         self.result_frm.destroy()
         GameObject.destroy(self)
+
+
+class ResultsServer(Results):
+
+    def show(self, race_ranking, lap_times, drivers):
+        Results.show(self, race_ranking, lap_times, drivers)
+        self._buttons[-1].hide()
+
+    def show_continue_btn(self): self._buttons[-1].show()

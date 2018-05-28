@@ -114,7 +114,8 @@ class RaceEvent(EventColleague):
         points = [10, 8, 6, 4, 3, 2, 1, 0]
         zipped = zip(self.mediator.logic.race_ranking(), points)
         race_ranking = {car: point for car, point in zipped}
-        self.mediator.fsm.demand('Results', race_ranking)
+        if self.mediator.fsm.getCurrentOrNextState() != 'Results':
+            self.mediator.fsm.demand('Results', race_ranking)
 
     def _move_car(self, car):
         if not hasattr(car, 'logic'): return  # it's created in the second frame
@@ -155,6 +156,8 @@ class RaceEventServer(RaceEvent):
         RaceEvent.__init__(self, mediator, menu_cls, keys)
         self.server_info = {}
         self.eng.attach_obs(self.on_frame)
+        self.players_ended = []
+        self.end_race_sent = False
 
     def network_register(self):
         self.eng.server.register_cb(self.process_srv)
@@ -181,6 +184,7 @@ class RaceEventServer(RaceEvent):
             for conn, addr in self.eng.server.connections:
                 self.eng.server.send_udp(self.__prepare_game_packet(), addr)
             self.last_sent = globalClock.get_frame_time()
+        self.check_end()
 
     def __prepare_game_packet(self):
         packet = [NetMsgs.game_packet]
@@ -323,12 +327,16 @@ class RaceEventServer(RaceEvent):
         if data_lst[0] == NetMsgs.player_info:
             self.__process_player_info(data_lst, sender)
         if data_lst[0] == NetMsgs.end_race_player:
-            self.eng.server.send([NetMsgs.end_race])
-            dct = {'kronos': 0, 'themis': 0, 'diones': 0, 'iapeto': 0,
-                   'phoibe': 0, 'rea': 0, 'iperion': 0, 'teia': 0}
-            self.mediator.fsm.demand('Results', dct)
-            # forward the actual ranking
-            self.mediator.gui.results.show(dct)
+            self.players_ended += [sender]
+
+    def check_end(self):
+        if self.end_race_sent: return
+        if not self.mediator.gui.results.result_frm: return
+        connections = [conn[0] for conn in self.eng.server.connections]
+        if not all(conn in self.players_ended for conn in connections): return
+        self.end_race_sent = True
+        self.eng.server.send([NetMsgs.end_race])
+        self.mediator.gui.results.show_continue_btn()
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
