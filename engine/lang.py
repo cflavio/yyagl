@@ -14,7 +14,7 @@ class LangMgr(GameObject):
 
     @property
     def lang_codes(self):
-        return [lang[:2].lower() for lang in self.eng.cfg.lang_cfg.languages]
+        return [lang[1] for lang in self.eng.cfg.lang_cfg.languages]
 
     def set_lang(self, lang):
         self.lang = lang

@@ -29,7 +29,7 @@ class ProfilingCfg(object):
 class LangCfg(object):
 
     def __init__(self, lang='en', lang_path='assets/locale',
-            lang_domain='yyagl_game', languages=['English']):
+            lang_domain='yyagl_game', languages=[('English', 'en')]):
         self.lang = lang
         self.lang_path = lang_path
         self.lang_domain = lang_domain
