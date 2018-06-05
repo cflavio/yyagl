@@ -19,6 +19,8 @@ class LangMgr(GameObject):
     def set_lang(self, lang):
         self.lang = lang
         try:
+            self.eng.log('setting language %s' % lang)
             translation(self.domain, self.dpath, [lang]).install(unicode=1)
         except IOError:  # english translation is already in the code
+            self.eng.log('language error')
             install(self.domain, self.dpath, unicode=1)
