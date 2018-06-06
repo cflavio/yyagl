@@ -19,26 +19,6 @@ except ImportError:  # sleekxmpp requires openssl 1.0.2
         def disconnect(self): pass
 
 
-class CallbackMux():
-    # this is a sort of "multiplexer" i.e. it manages callbacks from threads
-    # and redirect them to the main thread (this prevents deadlocks)
-
-    def __init__(self):
-        self.lock = Lock()
-        self.callbacks = []
-        taskMgr.add(self.process_callbacks, 'processing callbacks')
-
-    def add_cb(self, func, args):
-        with self.lock: self.callbacks += [(func, args)]
-
-    def process_callbacks(self, task):
-        with self.lock:
-            callbacks = self.callbacks[:]
-            self.callbacks = []
-        for func, args in callbacks: func(*args)
-        return task.cont
-
-
 class User(object):
 
     def __init__(self, name_full, is_supporter, is_in_yorg, is_playing, xmpp, is_online=False):
@@ -128,7 +108,6 @@ class YorgClient(ClientXMPP, GameObject):
         ClientXMPP.__init__(self, jid, password)
         self.on_ok = on_ok
         self.on_ko = on_ko
-        self.cb_mux = CallbackMux()
         self.add_event_handler('session_start', lambda msg: self.dispatch_msg('session_start', msg))
         self.add_event_handler('failed_auth', lambda msg: self.dispatch_msg('failed_auth', msg))
         self.add_event_handler('message', lambda msg: self.dispatch_msg('message', msg))
@@ -141,14 +120,14 @@ class YorgClient(ClientXMPP, GameObject):
         self.add_event_handler('presence_unavailable', lambda msg: self.dispatch_msg('presence_unavailable', msg))
 
     def dispatch_msg(self, code, msg):
-        if code == 'session_start': self.cb_mux.add_cb(self.session_start, [msg])
-        if code == 'failed_auth': self.cb_mux.add_cb(self.on_ko, [msg])
-        if code == 'message': self.cb_mux.add_cb(self.on_message, [msg])
-        if code == 'groupchat_message': self.cb_mux.add_cb(self.on_groupchat_message, [msg])
-        if code == 'subscribe': self.cb_mux.add_cb(self.on_subscribe, [msg])
-        if code == 'subscribed': self.cb_mux.add_cb(self.on_subscribed, [msg])
-        if code == 'presence_available': self.cb_mux.add_cb(self.on_presence_available, [msg])
-        if code == 'presence_unavailable': self.cb_mux.add_cb(self.on_presence_unavailable, [msg])
+        if code == 'session_start': self.eng.cb_mux.add_cb(self.session_start, [msg])
+        if code == 'failed_auth': self.eng.cb_mux.add_cb(self.on_ko, [msg])
+        if code == 'message': self.eng.cb_mux.add_cb(self.on_message, [msg])
+        if code == 'groupchat_message': self.eng.cb_mux.add_cb(self.on_groupchat_message, [msg])
+        if code == 'subscribe': self.eng.cb_mux.add_cb(self.on_subscribe, [msg])
+        if code == 'subscribed': self.eng.cb_mux.add_cb(self.on_subscribed, [msg])
+        if code == 'presence_available': self.eng.cb_mux.add_cb(self.on_presence_available, [msg])
+        if code == 'presence_unavailable': self.eng.cb_mux.add_cb(self.on_presence_unavailable, [msg])
 
     def session_start(self, event):
         self.eng.log('session start')

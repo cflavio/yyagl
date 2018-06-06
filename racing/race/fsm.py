@@ -107,7 +107,7 @@ class RaceFsmServer(RaceFsm):
     def server_start_countdown(self): RaceFsm.start_countdown(self)
 
     def eval_start(self, task):
-        connections = [conn[0] for conn in self.eng.server.connections]
+        connections = [conn for conn in self.eng.server.connections]
         if all(client in self.countdown_clients for client in connections) and self._countdown_ready:
             self.eng.server.send([NetMsgs.start_countdown])
             self.eval_tsk = self.eng.remove_task(self.eval_tsk)

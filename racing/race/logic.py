@@ -160,16 +160,16 @@ class RaceLogicServer(RaceLogic):
 
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.client_ready:
-            ipaddr = sender.get_address().get_ip_string()
+            ipaddr = sender.getpeername()[0]
             self.eng.log('client ready: ' + ipaddr)
             self.ready_clients += [sender]
         if data_lst[0] == NetMsgs.client_at_countdown:
-            ipaddr = sender.get_address().get_ip_string()
+            ipaddr = sender.getpeername()[0]
             self.eng.log('client at countdown: ' + ipaddr)
             self.mediator.fsm.countdown_clients += [sender]
 
     def eval_start(self, task):
-        connections = [conn[0] for conn in self.eng.server.connections]
+        connections = [conn for conn in self.eng.server.connections]
         if all(client in self.ready_clients for client in connections) and self._loaded:
             self.mediator.fsm.demand('Countdown', self.props.season_props)
             self.start_play()

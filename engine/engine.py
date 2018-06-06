@@ -21,6 +21,7 @@ from .lang import LangMgr
 from ..gameobject import GameObject, Colleague
 from .enginefacade import EngineFacade
 from .configuration import Cfg
+from .cbmux import CallbackMux
 
 
 class Engine(GameObject, EngineFacade):
@@ -39,6 +40,7 @@ class Engine(GameObject, EngineFacade):
         self.font_mgr = FontMgr()
         self.server = Server()
         self.client = Client()
+        self.cb_mux = CallbackMux()
         self.xmpp = XMPP(cfg.dev_cfg.xmpp_server)
         comps = [
             [('logic', EngineLogic, [self, cfg])],

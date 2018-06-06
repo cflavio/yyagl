@@ -181,8 +181,8 @@ class RaceEventServer(RaceEvent):
             velocity = car.get_linear_velocity()
             self.server_info[car] = (pos, fwd, velocity)
         if globalClock.get_frame_time() - self.last_sent > self.eng.server.rate:
-            for conn, addr in self.eng.server.connections:
-                self.eng.server.send_udp(self.__prepare_game_packet(), addr)
+            for conn in self.eng.server.connections:
+                self.eng.server.send_udp(self.__prepare_game_packet(), conn.getpeername())
             self.last_sent = globalClock.get_frame_time()
         self.check_end()
 

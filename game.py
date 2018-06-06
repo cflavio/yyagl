@@ -28,6 +28,8 @@ class GameBase(GameObject, GameFacade):  # it doesn't manage the window
         GameFacade.destroy(self)
         GameObject.destroy(self)
         #self.eng = self.eng.destroy()
+        self.eng.server.destroy()
+        self.eng.client.destroy()
         # it crashes
         self.eng.xmpp.destroy()
 
