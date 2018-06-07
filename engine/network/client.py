@@ -14,12 +14,14 @@ class ClientThread(Thread):
 
     def __init__(self, srv_addr, eng):
         Thread.__init__(self)
+        self.daemon = True
         self.eng = eng
         self.is_running = True
         self.tcp_sock = socket(AF_INET, SOCK_STREAM)
         self.tcp_sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.tcp_sock.connect((srv_addr, 9099))
         self.msgs = Queue()
+        self.rpc_ret = Queue()
         self.size_struct = Struct('!I')
 
     def run(self):
@@ -30,7 +32,10 @@ class ClientThread(Thread):
                 for s in readable:
                     data = self.recv_one_message(s)
                     if data:
-                        self.eng.cb_mux.add_cb(self.read_cb, [dict(decode(data))['payload'], s])
+                        d = dict(decode(data))
+                        if 'is_rpc' in d: self.rpc_ret.put(d['result'])
+                        else:
+                            self.eng.cb_mux.add_cb(self.read_cb, [d['payload'], s])
                 for s in writable:
                     try:
                         msg = self.msgs.get_nowait()
@@ -41,6 +46,11 @@ class ClientThread(Thread):
             except error as e: print e
 
     def send_msg(self, msg): self.msgs.put(msg)
+
+    def do_rpc(self, funcname, args, kwargs):
+        msg = {'is_rpc': True, 'payload': [funcname, args, kwargs]}
+        self.msgs.put(encode(msg))
+        return self.rpc_ret.get()
 
     def recv_one_message(self, sock):
         lengthbuf = self.recvall(sock, self.size_struct.size)
@@ -66,6 +76,7 @@ class Client(AbsNetwork):
     def __init__(self):
         AbsNetwork.__init__(self)
         self.udp_sock = None
+        self._functions = []
 
     def start(self, read_cb, srv_addr, my_addr):
         AbsNetwork.start(self, read_cb)
@@ -91,6 +102,18 @@ class Client(AbsNetwork):
         receiver = receiver if receiver else self.srv_addr
         payload = {'sender': self.my_addr, 'payload': data_lst}
         self.udp_sock.sendto(encode(payload), (receiver, 9099))
+
+    def register_rpc(self, funcname):
+        self._functions += [funcname]
+
+    def unregister_rpc(self, funcname):
+        self._functions.remove(funcname)
+
+    def __getattr__(self, attr):
+        if attr not in self._functions: raise AttributeError(attr)
+        def do_rpc(*args, **kwargs):
+            return self.client_thread.do_rpc(attr, args, kwargs)
+        return do_rpc
 
     def process_udp(self):
         try:

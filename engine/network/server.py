@@ -11,11 +11,13 @@ from .network import AbsNetwork
 
 class ServerThread(Thread):
 
-    def __init__(self, eng):
+    def __init__(self, eng, rpc_cb):
         Thread.__init__(self)
+        self.daemon = True
         self.is_running = True
         self.lock = Lock()
         self.eng = eng
+        self.rpc_cb = rpc_cb
         self.tcp_sock = socket(AF_INET, SOCK_STREAM)
         self.tcp_sock.setblocking(0)
         self.tcp_sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -38,7 +40,11 @@ class ServerThread(Thread):
                     else:
                         data = self.recv_one_message(s)
                         if data:
-                            self.eng.cb_mux.add_cb(self.read_cb, [dict(decode(data))['payload'], s])
+                            d = dict(decode(data))
+                            if 'is_rpc' in d:
+                                self.eng.cb_mux.add_cb(self.rpc_cb, [d, s])
+                            else:
+                                self.eng.cb_mux.add_cb(self.read_cb, [d['payload'], s])
                 for s in writable:
                     with self.lock:
                         if self.conn2msgs[s]:
@@ -76,6 +82,7 @@ class Server(AbsNetwork):
         AbsNetwork.__init__(self)
         self.tcp_sock = self.udp_sock = self.conn_cb = self.public_addr = \
         self.local_addr = self.server_thread = None
+        self._functions = {}
 
     @property
     def connections(self): return self.server_thread.connections[1:]
@@ -94,7 +101,7 @@ class Server(AbsNetwork):
         self.udp_sock = socket(AF_INET, SOCK_DGRAM)
         self.udp_sock.bind(('', 9099))
         self.udp_sock.setblocking(0)
-        self.server_thread = ServerThread(self.eng)
+        self.server_thread = ServerThread(self.eng, self.rpc_cb)
         self.server_thread.start()
         self.server_thread.read_cb = read_cb
         self.read_cb = read_cb
@@ -104,6 +111,17 @@ class Server(AbsNetwork):
         receivers = [cln for cln in [conn for conn in self.connections] if cln == receiver]
         dests = receivers if receiver else [conn for conn in self.connections]
         map(lambda cln: self.server_thread.send_msg(cln, datagram), dests)
+
+    def rpc_cb(self, d, conn):
+        funcname, args, kwargs = d['payload']
+        if not kwargs: kwargs = {}
+        kwargs['sender'] = conn
+        r = self._functions[funcname](*args, **kwargs)
+        self.server_thread.send_msg(conn, encode({'is_rpc': True, 'result': r}))
+
+    def register_rpc(self, func): self._functions[func.__name__] = func
+
+    def unregister_rpc(self, func): del self._functions[func.__name__]
 
     def process_udp(self):
         try: payload, addr = self.udp_sock.recvfrom(8192)
