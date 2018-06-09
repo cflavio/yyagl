@@ -77,7 +77,9 @@ class CarPhys(PhysColleague):
         #                           geom.get_transform())
         #self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape)
         chassis_shape = BulletBoxShape(tuple(self.cfg['box_size']))
-        ts = TransformState.makePos(tuple(self.cfg['box_pos']))
+        p = self.cfg['box_pos']
+        p[2] += self.cfg['center_mass_offset']
+        ts = TransformState.makePos(tuple(p))
         self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape, ts)
         car_names = self.cprops.race_props.season_props.car_names
         car_idx = car_names.index(self.cprops.name)
@@ -116,10 +118,11 @@ class CarPhys(PhysColleague):
         fl_node = ffl if ffl else meth('**/' + wheel_names.both.fl)
         rr_node = rrr if rrr else meth('**/' + wheel_names.both.rr)
         rl_node = rrl if rrl else meth('**/' + wheel_names.both.rl)
-        fr_pos = fr_node.get_pos() + (0, 0, f_radius)
-        fl_pos = fl_node.get_pos() + (0, 0, f_radius)
-        rr_pos = rr_node.get_pos() + (0, 0, r_radius)
-        rl_pos = rl_node.get_pos() + (0, 0, r_radius)
+        offset = self.cfg['center_mass_offset']
+        fr_pos = fr_node.get_pos() + (0, 0, f_radius + offset)
+        fl_pos = fl_node.get_pos() + (0, 0, f_radius + offset)
+        rr_pos = rr_node.get_pos() + (0, 0, r_radius + offset)
+        rl_pos = rl_node.get_pos() + (0, 0, r_radius + offset)
         wheels_info = [
             (fr_pos, True, wheels['fr'], f_radius),
             (fl_pos, True, wheels['fl'], f_radius),

@@ -1,3 +1,4 @@
+from yaml import load
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
 from yyagl.gameobject import GfxColleague, GameObject
@@ -55,6 +56,10 @@ class CarGfx(GfxColleague, CarGfxFacade):
         self.chassis_np_hi = self.eng.load_model(hi_dam_fpath)
         fpath = gprops.model_name % self.cprops.name
         chassis = self.eng.load_model(fpath)
+        ppath = self.cprops.race_props.season_props.gameprops.phys_path
+        fpath = ppath % self.cprops.name
+        with open(fpath) as phys_file:
+            chassis.set_z(load(phys_file)['center_mass_offset'])
         self.load_wheels(chassis)
 
     def reparent(self):
