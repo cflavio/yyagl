@@ -27,6 +27,10 @@ class DriverLoaderStrategy(GameObject):
                 drv = _drv
         s_p = track.get_start_pos_hpr(r_p.grid.index(load_car_name))
         pos, hpr = s_p[0] + (0, 0, .2), s_p[1]
+        if load_car_name == r_p.season_props.player_car_name:
+            if r_p.start_wp:
+                wp = [wp for wp in track.phys.waypoints if wp.name == 'Waypoint%s' % r_p.start_wp][0]
+                pos = wp.node.get_pos()
         car_props = CarProps(
             r_p, load_car_name, pos, hpr,
             lambda: DriverLoaderStrategy.load(cars, r_p, load_car_name, track,

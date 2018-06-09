@@ -11,7 +11,7 @@ class RaceProps(object):
             shadow_src, laps, rocket_path, turbo_path, rotate_all_path,
             mine_path, bonus_model, bonus_suff, a_i, ingame_menu, share_urls,
             respawn_name, pitstop_name, wall_name, goal_name, bonus_name,
-            roads_names, grid):
+            roads_names, grid, start_wp):
         self.season_props = season_props
         self.keys = keys
         self.joystick = joystick
@@ -66,3 +66,4 @@ class RaceProps(object):
         self.bonus_name = bonus_name
         self.roads_names = roads_names
         self.grid = grid
+        self.start_wp = start_wp

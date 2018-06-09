@@ -50,7 +50,7 @@ class DevCfg(object):
 
     def __init__(self, mt_render=False, model_path='assets/models',
             shaders_dev=False, gamma=1.0, menu_joypad=True, verbose='',
-            verbose_log=False, xmpp_server=''):
+            verbose_log=False, xmpp_server='', start_wp=''):
         self.multithreaded_render = mt_render  # multithreaded rendering
         self.model_path = model_path
         self.shaders_dev = shaders_dev
@@ -59,6 +59,7 @@ class DevCfg(object):
         self.verbose = verbose
         self.verbose_log = verbose_log
         self.xmpp_server = xmpp_server
+        self.start_wp = start_wp
 
 
 class Cfg(object):
