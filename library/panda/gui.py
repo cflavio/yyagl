@@ -1,4 +1,4 @@
-from panda3d.core import TextNode
+from panda3d.core import TextNode, Texture
 from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL, B1PRESS
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.DirectButton import DirectButton
@@ -275,6 +275,8 @@ class PandaTxt(IText, PandaBase):
 class PandaFrame(IFrame, PandaAbs):
 
     def __init__(self, frameSize=(-1, 1, -1, 1), frameColor=(1, 1, 1, 1),
-            pos=(0, 1, 0), parent=None):
+            pos=(0, 1, 0), parent=None, textureCoord=False):
         self.wdg = DirectFrame(frameSize=frameSize, frameColor=frameColor,
             pos=pos, parent=parent)
+        if textureCoord:
+            self.wdg['frameTexture'] = Texture()

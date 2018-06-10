@@ -681,6 +681,7 @@ class CarPlayerLogic(CarLogic):
             self.mediator.gui.panel.time_txt.setText(str(d_t))
         if self.lap_time_start:
             self.mediator.gui.panel.speed_txt.setText(str(int(self.mediator.phys.speed)))
+            self.mediator.gui.panel.speed_c.progress = self.mediator.phys.speed_ratio
         self.__check_wrong_way()
         self._update_dist()
         self.__update_direction_gui()
