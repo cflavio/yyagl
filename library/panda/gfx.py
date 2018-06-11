@@ -56,7 +56,7 @@ class PandaGfxMgr(GfxMgr):
         render.set_two_sided(True)
         if antialiasing:
             render.set_antialias(AntialiasAttrib.MAuto)
-        if shaders:
+        if shaders and base.win:
             self.filters = CommonFilters(base.win, base.cam)
 
     def _intermediate_cb(self, model, fpath):
@@ -80,6 +80,7 @@ class PandaGfxMgr(GfxMgr):
         self.filters.set_cartoon_ink(separation=1)
 
     def set_bloom(self):
+        if not base.win: return
         self.filters.setBloom(
             blend=(.3, .4, .3, 0),  # default: (.3, .4, .3, 0)
             mintrigger=.6,  # default: .6
