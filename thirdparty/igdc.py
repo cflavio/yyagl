@@ -300,6 +300,7 @@ class IGDClient:
         self.pr=urlparse(descURL)
         baseURL=self.pr.scheme+"://"+self.pr.netloc
         dom=minidom.parseString(descXMLs)
+        if self.debug: print dom.toxml()
         for e in dom.getElementsByTagName('service'):
             stn=e.getElementsByTagName('serviceType')
             if self.igdsvc=="WANIPC":
