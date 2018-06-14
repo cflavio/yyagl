@@ -10,6 +10,7 @@ class LangMgr(GameObject):
         self.lang = lang
         self.domain = domain
         self.dpath = join(self.eng.curr_path, dpath)
+        self.eng.log('language: %s, %s' % (self.domain, self.dpath))
         self.set_lang(lang)
 
     @property
@@ -18,7 +19,5 @@ class LangMgr(GameObject):
 
     def set_lang(self, lang):
         self.lang = lang
-        try:
-            translation(self.domain, self.dpath, [lang]).install(unicode=1)
-        except IOError:  # english translation is already in the code
-            install(self.domain, self.dpath, unicode=1)
+        self.eng.log('setting language %s, %s, %s' % (lang, self.domain, self.dpath))
+        translation(self.domain, self.dpath, [lang], fallback=True).install(unicode=1)

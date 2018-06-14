@@ -1,10 +1,12 @@
 from collections import Mapping
 from yaml import load, dump
+from .gameobject import GameObject
 
 
-class DctFile(object):
+class DctFile(GameObject):
 
     def __init__(self, fpath, default_dct={}, persistent=True):
+        GameObject.__init__(self)
         self.fpath = fpath
         self.persistent = persistent
         try:
@@ -21,6 +23,7 @@ class DctFile(object):
         return dct
 
     def store(self):
+        self.eng.log('storing %s' % self.fpath)
         if not self.persistent: return
         with open(self.fpath, 'w') as fyaml:
             dump(self.dct, fyaml, default_flow_style=False)

@@ -164,6 +164,7 @@ class YorgClient(ClientXMPP, GameObject):
         nick = str(msg['muc']['nick'])
         is_user = nick == res.user + '@' + res.server
         self.eng.log('presence available: %s, %s, %s, %s, %s' %(_from, res, room, nick, is_user))
+        if _from == room: return
         if _from == room + '/' + nick and is_user:
             self.xmpp.notify('on_presence_available_room', msg)
             return
