@@ -9,7 +9,7 @@ class SeasonProps(object):
             self, gameprops, car_names, player_car_name, player_car_names,
             drivers, tuning_imgs, font, countdown_sfx, single_race, wpn2img,
             tuning_engine, tuning_tires, tuning_suspensions, race_start_time,
-            countdown_seconds):
+            countdown_seconds, camera):
         self.gameprops = gameprops
         self.car_names = car_names
         self.player_car_name = player_car_name
@@ -25,6 +25,7 @@ class SeasonProps(object):
         self.tuning_suspensions = tuning_suspensions
         self.race_start_time = race_start_time
         self.countdown_seconds = countdown_seconds
+        self.camera = camera
 
 
 class SeasonFacade(Facade):

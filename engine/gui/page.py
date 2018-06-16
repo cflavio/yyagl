@@ -175,7 +175,7 @@ class PageGui(GuiColleague):
         tra_tra = _('Quit') if exit_behav else _('Back')
         cb = self._on_quit if exit_behav else self._on_back
         self.widgets += [Btn(
-            text='', pos=(-.2, 1, -.8), command=cb,
+            text='', pos=(-.2, 1, -.92), command=cb,
             tra_src=tra_src, tra_tra=tra_tra, **self.menu_args.btn_args)]
 
     def _on_back(self): self.notify('on_back', self.__class__.__name__)

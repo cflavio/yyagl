@@ -2,7 +2,7 @@ from math import sin, cos, pi
 from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32, LVector3f
 from yyagl.gameobject import LogicColleague
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
-from yyagl.racing.camera import Camera
+from yyagl.racing.camera import Camera, FPCamera
 from yyagl.racing.car.event import DirKeys
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.racing.bitmasks import BitMasks
@@ -646,7 +646,8 @@ class CarPlayerLogic(CarLogic):
 
     def __init__(self, mediator, car_props):
         CarLogic.__init__(self, mediator, car_props)
-        self.camera = Camera(mediator.gfx.nodepath, car_props.race_props.camera_vec, self.mediator)
+        camera_cls = Camera if car_props.race_props.season_props.camera == 'top' else FPCamera
+        self.camera = camera_cls(mediator.gfx.nodepath, car_props.race_props.camera_vec, self.mediator)
         start_pos = self.start_pos + (0, 0, 10000)
         self.eng.do_later(.01, self.camera.camera.set_pos, [start_pos])
         self.car_positions = []
