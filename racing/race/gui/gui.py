@@ -32,6 +32,7 @@ class RaceGui(GuiColleague, RaceGuiFacade):
             'assets/images/gui/arrow_circle.txo',
             scale=.08, parent=base.a2dBottomCenter, pos=(0, 1, .28))
         self.way_img.set_transparency(True)
+        self.way_img.hide()
         self.minimap = None
         RaceGuiFacade.__init__(self)
 

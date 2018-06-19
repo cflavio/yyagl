@@ -71,6 +71,7 @@ class XMPP(GameObject, Subject):
     def users_nodup(self):  #todo: once a frame
         users = []
         for usr in self.users:
+            if any(_usr.name == usr.name for _usr in users): continue
             if usr.is_in_yorg: users += [usr]
             else:
                 if not any(_usr.name == usr.name for _usr in users):

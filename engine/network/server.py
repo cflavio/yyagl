@@ -1,12 +1,12 @@
 from socket import socket, AF_INET, SOCK_DGRAM, SOCK_STREAM, gaierror, error, \
     SOL_SOCKET, SO_REUSEADDR
 from json import load
-from struct import Struct
+from struct import Struct, error as unpack_error
 from threading import Thread, Lock
 from select import select
 from simpleubjson import encode, decode
 from urllib2 import urlopen
-from .network import AbsNetwork
+from .network import AbsNetwork, ConnectionError
 
 
 class ServerThread(Thread):
@@ -35,16 +35,21 @@ class ServerThread(Thread):
                 for s in readable:
                     if s is self.tcp_sock:
                         conn, addr = s.accept()
+                        conn.setblocking(1)  # required on osx
                         self.connections += [conn]
                         self.conn2msgs[conn] = []
                     else:
-                        data = self.recv_one_message(s)
-                        if data:
-                            d = dict(decode(data))
-                            if 'is_rpc' in d:
-                                self.eng.cb_mux.add_cb(self.rpc_cb, [d, s])
-                            else:
-                                self.eng.cb_mux.add_cb(self.read_cb, [d['payload'], s])
+                        try:
+                            data = self.recv_one_message(s)
+                            if data:
+                                d = dict(decode(data))
+                                if 'is_rpc' in d:
+                                    self.eng.cb_mux.add_cb(self.rpc_cb, [d, s])
+                                else:
+                                    self.eng.cb_mux.add_cb(self.read_cb, [d['payload'], s])
+                        except ConnectionError as e:
+                            print e
+                            self.connections.remove(s)
                 for s in writable:
                     with self.lock:
                         if self.conn2msgs[s]:
@@ -56,7 +61,10 @@ class ServerThread(Thread):
 
     def recv_one_message(self, sock):
         lengthbuf = self.recvall(sock, self.size_struct.size)
-        length = self.size_struct.unpack(lengthbuf)[0]
+        try: length = self.size_struct.unpack(lengthbuf)[0]
+        except unpack_error as e:
+            print e
+            raise ConnectionError()
         return self.recvall(sock, length)
 
     def recvall(self, sock, count):

@@ -3,8 +3,10 @@ from decimal import Decimal
 from yyagl.gameobject import GameObject
 
 
-class NetworkError(Exception):
-    pass
+class NetworkError(Exception): pass
+
+
+class ConnectionError(Exception): pass
 
 
 class AbsNetwork(GameObject):
