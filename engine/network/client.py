@@ -7,48 +7,38 @@ from threading import Thread, Lock
 from json import load
 from urllib2 import urlopen
 from simpleubjson import encode, decode
-from .network import AbsNetwork, NetworkError, ConnectionError
+from .network import AbsNetwork, NetworkError, ConnectionError, NetworkThread
 
 
-class ClientThread(Thread):
+class ClientThread(NetworkThread):
 
     def __init__(self, srv_addr, eng):
-        Thread.__init__(self)
-        self.daemon = True
-        self.eng = eng
-        self.is_running = True
-        self.tcp_sock = socket(AF_INET, SOCK_STREAM)
-        self.tcp_sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self.tcp_sock.connect((srv_addr, 9099))
+        self.srv_addr = srv_addr
+        NetworkThread.__init__(self, eng)
         self.msgs = Queue()
         self.rpc_ret = Queue()
-        self.size_struct = Struct('!I')
-        self.connections = [self.tcp_sock]
 
-    def run(self):
-        while self.is_running:
-            try:
-                readable, writable, exceptional = select(
-                    self.connections, self.connections, self.connections, 1)
-                for s in readable:
-                    try:
-                        data = self.recv_one_message(s)
-                        if data:
-                            d = dict(decode(data))
-                            if 'is_rpc' in d: self.rpc_ret.put(d['result'])
-                            else:
-                                self.eng.cb_mux.add_cb(self.read_cb, [d['payload'], s])
-                    except ConnectionError as e:
-                        print e
-                        self.connections.remove(s)
-                for s in writable:
-                    try:
-                        msg = self.msgs.get_nowait()
-                        s.sendall(self.size_struct.pack(len(msg)))
-                        s.sendall(msg)
-                    except Empty: pass
-                for s in exceptional: print 'exception', s.getpeername()
-            except error as e: print e
+    def _configure_socket(self):
+        self.tcp_sock.connect((self.srv_addr, 9099))
+
+    def _process_read(self, s):
+        try:
+            data = self.recv_one_message(s)
+            if data:
+                d = dict(decode(data))
+                if 'is_rpc' in d: self.rpc_ret.put(d['result'])
+                else:
+                    self.eng.cb_mux.add_cb(self.read_cb, [d['payload'], s])
+        except ConnectionError as e:
+            print e
+            self.connections.remove(s)
+
+    def _process_write(self, s):
+        try:
+            msg = self.msgs.get_nowait()
+            s.sendall(self.size_struct.pack(len(msg)))
+            s.sendall(msg)
+        except Empty: pass
 
     def send_msg(self, msg): self.msgs.put(msg)
 
@@ -56,27 +46,6 @@ class ClientThread(Thread):
         msg = {'is_rpc': True, 'payload': [funcname, args, kwargs]}
         self.msgs.put(encode(msg))
         return self.rpc_ret.get()
-
-    def recv_one_message(self, sock):
-        lengthbuf = self.recvall(sock, self.size_struct.size)
-        try: length = self.size_struct.unpack(lengthbuf)[0]
-        except unpack_error as e:
-            print e
-            raise ConnectionError()
-        return self.recvall(sock, length)
-
-    def recvall(self, sock, count):
-        buf = b''
-        while count:
-            newbuf = sock.recv(count)
-            if not newbuf: return None
-            buf += newbuf
-            count -= len(newbuf)
-        return buf
-
-    def destroy(self):
-        self.is_running = False
-        self.tcp_sock.close()
 
 
 class Client(AbsNetwork):
@@ -87,40 +56,28 @@ class Client(AbsNetwork):
         self._functions = []
 
     def start(self, read_cb, srv_addr, my_addr):
-        AbsNetwork.start(self, read_cb)
         self.srv_addr = srv_addr
-        sock = socket(AF_INET, SOCK_DGRAM)
-        sock.connect(('ya2.it', 8080))
-        self.local_addr = sock.getsockname()[0]
-        self.public_addr = load(urlopen('http://httpbin.org/ip', timeout=3))['origin']
-        self.udp_sock = socket(AF_INET, SOCK_DGRAM)
-        self.udp_sock.setblocking(0)
         self.my_addr = my_addr
-        self.client_thread = ClientThread(srv_addr, self.eng)
-        self.client_thread.start()
-        self.client_thread.read_cb = read_cb
-        self.read_cb = read_cb
-        self.eng.log('the client is up')
+        AbsNetwork.start(self, read_cb)
 
-    def register_cb(self, callback):
-        self.read_cb = callback
-        self.client_thread.read_cb = callback
+    def _build_network_thread(self):
+        return ClientThread(self.srv_addr, self.eng)
+
+    def _configure_udp(self): pass
 
     def send_udp(self, data_lst, receiver=None):
         receiver = receiver if receiver else self.srv_addr
         payload = {'sender': self.my_addr, 'payload': data_lst}
         self.udp_sock.sendto(encode(payload), (receiver, 9099))
 
-    def register_rpc(self, funcname):
-        self._functions += [funcname]
+    def register_rpc(self, funcname): self._functions += [funcname]
 
-    def unregister_rpc(self, funcname):
-        self._functions.remove(funcname)
+    def unregister_rpc(self, funcname): self._functions.remove(funcname)
 
     def __getattr__(self, attr):
         if attr not in self._functions: raise AttributeError(attr)
         def do_rpc(*args, **kwargs):
-            return self.client_thread.do_rpc(attr, args, kwargs)
+            return self.network_thr.do_rpc(attr, args, kwargs)
         return do_rpc
 
     def process_udp(self):
@@ -131,17 +88,4 @@ class Client(AbsNetwork):
         except error: pass
 
     def _actual_send(self, datagram, receiver=None):
-        self.client_thread.send_msg(datagram)
-
-    def stop(self):
-        self.eng.log('the client has been stopped')
-        if self.udp_sock:
-            self.udp_sock.close()
-            self.client_thread.destroy()
-        else: self.eng.log('the client was already stopped')
-        AbsNetwork.stop(self)
-
-    def destroy(self):
-        self.stop()
-        self.eng.log('the client has been destroyed')
-        AbsNetwork.destroy(self)
+        self.network_thr.send_msg(datagram)
