@@ -19,8 +19,8 @@ class Colleague(Subject):
 
     def _end_async(self, *args, **kwargs):
         self.sync_bld(*args, **kwargs)
-        notify_args = 'on_comp_blt', self
-        self.notify_tsk = self.eng.do_later(.001, self.mediator.notify, notify_args)
+        args = 'on_comp_blt', self
+        self.notify_tsk = self.eng.do_later(.001, self.mediator.notify, args)
         # since on_comp_blt is fired from __init__, when it's catched by
         # GODirector's on_comp_blt, it triggers __process_lst, but since
         # __init__ it's not finished, __process_lst's setattrs is not

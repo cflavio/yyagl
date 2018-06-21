@@ -1,5 +1,5 @@
 from os.path import join
-from gettext import install, translation
+from gettext import translation
 from yyagl.gameobject import GameObject
 
 
@@ -19,5 +19,7 @@ class LangMgr(GameObject):
 
     def set_lang(self, lang):
         self.lang = lang
-        self.eng.log('setting language %s, %s, %s' % (lang, self.domain, self.dpath))
-        translation(self.domain, self.dpath, [lang], fallback=True).install(unicode=1)
+        args = lang, self.domain, self.dpath
+        self.eng.log('setting language %s, %s, %s' % args)
+        tra = translation(self.domain, self.dpath, [lang], fallback=True)
+        tra.install(unicode=1)

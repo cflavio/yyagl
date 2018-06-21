@@ -12,10 +12,10 @@ class PauseGui(GuiColleague):
         self.pause_frm = None
 
     def toggle(self, show_frm=True):
-        if not self.mediator.logic._pause.is_paused:
+        if not self.mediator.logic.pause.is_paused:
             if show_frm:
                 self.pause_frm = DirectFrame(frameColor=(.3, .3, .3, .7),
-                                               frameSize=(-1.8, 1.8, -1, 1))
+                                             frameSize=(-1.8, 1.8, -1, 1))
         else:
             if self.pause_frm: self.pause_frm.destroy()
 
@@ -28,30 +28,30 @@ class PauseLogic(LogicColleague):
 
     def __init__(self, mediator):
         LogicColleague.__init__(self, mediator)
-        self._pause = LibPause()
+        self.pause = LibPause()
 
     def remove_task(self, tsk):
-        self._pause.remove_task(tsk)
+        self.pause.remove_task(tsk)
 
     def pause(self):
-        return self._pause.pause()
+        return self.pause.pause()
 
     def resume(self):
-        return self._pause.resume()
+        return self.pause.resume()
 
     def toggle(self, show_frm=True):
         self.mediator.gui.toggle(show_frm)
-        (self.resume if self._pause.is_paused else self.pause)()
+        (self.resume if self.pause.is_paused else self.pause)()
 
     def destroy(self):
-        self._pause.destroy()
+        self.pause.destroy()
         LogicColleague.destroy(self)
 
 
 class PauseFacade(Facade):
 
     def __init__(self):
-        self._fwd_prop('is_paused', lambda obj: obj.logic._pause.is_paused)
+        self._fwd_prop('is_paused', lambda obj: obj.logic.pause.is_paused)
 
 
 class PauseMgr(GameObject, Colleague, PauseFacade):

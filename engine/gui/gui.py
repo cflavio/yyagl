@@ -1,4 +1,3 @@
-from panda3d.core import WindowProperties
 from ...gameobject import GuiColleague
 from .cursor import MouseCursor
 from .browser import Browser
@@ -8,7 +7,8 @@ class EngineGuiBase(GuiColleague):
 
     @staticmethod
     def init_cls():
-        return EngineGui if GuiColleague.eng.lib.has_window() else EngineGuiBase
+        has_win = GuiColleague.eng.lib.has_window()
+        return EngineGui if has_win else EngineGuiBase
 
     @staticmethod
     def open_browser(url): Browser.open(url)

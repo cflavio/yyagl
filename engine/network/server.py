@@ -1,11 +1,6 @@
-from socket import socket, AF_INET, SOCK_DGRAM, SOCK_STREAM, gaierror, error, \
-    SOL_SOCKET, SO_REUSEADDR
-from json import load
-from struct import Struct, error as unpack_error
-from threading import Thread, Lock
-from select import select
+from socket import error
+from threading import Lock
 from simpleubjson import encode, decode
-from urllib2 import urlopen
 from .network import AbsNetwork, ConnectionError, NetworkThread
 
 
@@ -22,31 +17,32 @@ class ServerThread(NetworkThread):
         self.tcp_sock.bind(('', 9099))
         self.tcp_sock.listen(1)
 
-    def _process_read(self, s):
-        if s is self.tcp_sock:
-            conn, addr = s.accept()
+    def _process_read(self, sock):
+        if sock is self.tcp_sock:
+            conn, addr = sock.accept()
             conn.setblocking(1)  # required on osx
             self.connections += [conn]
             self.conn2msgs[conn] = []
         else:
             try:
-                data = self.recv_one_message(s)
+                data = self.recv_one_message(sock)
                 if data:
-                    d = dict(decode(data))
-                    if 'is_rpc' in d:
-                        self.eng.cb_mux.add_cb(self.rpc_cb, [d, s])
+                    dct = dict(decode(data))
+                    if 'is_rpc' in dct:
+                        self.eng.cb_mux.add_cb(self.rpc_cb, [dct, sock])
                     else:
-                        self.eng.cb_mux.add_cb(self.read_cb, [d['payload'], s])
-            except ConnectionError as e:
-                print e
-                self.connections.remove(s)
+                        args = [dct['payload'], sock]
+                        self.eng.cb_mux.add_cb(self.read_cb, args)
+            except ConnectionError as exc:
+                print exc
+                self.connections.remove(sock)
 
-    def _process_write(self, s):
+    def _process_write(self, sock):
         with self.lock:
-            if self.conn2msgs[s]:
-                msg = self.conn2msgs[s].pop(0)
-                s.sendall(self.size_struct.pack(len(msg)))
-                s.sendall(msg)
+            if self.conn2msgs[sock]:
+                msg = self.conn2msgs[sock].pop(0)
+                sock.sendall(self.size_struct.pack(len(msg)))
+                sock.sendall(msg)
 
     def send_msg(self, conn, msg):
         with self.lock: self.conn2msgs[conn] += [msg]
@@ -57,7 +53,7 @@ class Server(AbsNetwork):
     def __init__(self):
         AbsNetwork.__init__(self)
         self.tcp_sock = self.udp_sock = self.conn_cb = self.public_addr = \
-        self.local_addr = self.network_thr = None
+            self.local_addr = self.network_thr = None
         self._functions = {}
 
     @property
@@ -73,16 +69,17 @@ class Server(AbsNetwork):
     def _configure_udp(self): self.udp_sock.bind(('', 9099))
 
     def _actual_send(self, datagram, receiver=None):
-        receivers = [cln for cln in [conn for conn in self.connections] if cln == receiver]
+        receivers = [cln for cln in self.connections if cln == receiver]
         dests = receivers if receiver else [conn for conn in self.connections]
         map(lambda cln: self.network_thr.send_msg(cln, datagram), dests)
 
-    def rpc_cb(self, d, conn):
-        funcname, args, kwargs = d['payload']
+    def rpc_cb(self, dct, conn):
+        funcname, args, kwargs = dct['payload']
         if not kwargs: kwargs = {}
         kwargs['sender'] = conn
-        r = self._functions[funcname](*args, **kwargs)
-        self.network_thr.send_msg(conn, encode({'is_rpc': True, 'result': r}))
+        ret = self._functions[funcname](*args, **kwargs)
+        dct = {'is_rpc': True, 'result': ret}
+        self.network_thr.send_msg(conn, encode(dct))
 
     def register_rpc(self, func): self._functions[func.__name__] = func
 

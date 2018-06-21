@@ -1,13 +1,7 @@
-from socket import socket, AF_INET, SOCK_DGRAM, gaierror, error, SOCK_STREAM, \
-    SOL_SOCKET, SO_REUSEADDR
-from select import select
-from struct import Struct, error as unpack_error
+from socket import error
 from Queue import Queue, Empty
-from threading import Thread, Lock
-from json import load
-from urllib2 import urlopen
 from simpleubjson import encode, decode
-from .network import AbsNetwork, NetworkError, ConnectionError, NetworkThread
+from .network import AbsNetwork, ConnectionError, NetworkThread
 
 
 class ClientThread(NetworkThread):
@@ -21,23 +15,24 @@ class ClientThread(NetworkThread):
     def _configure_socket(self):
         self.tcp_sock.connect((self.srv_addr, 9099))
 
-    def _process_read(self, s):
+    def _process_read(self, sock):
         try:
-            data = self.recv_one_message(s)
+            data = self.recv_one_message(sock)
             if data:
-                d = dict(decode(data))
-                if 'is_rpc' in d: self.rpc_ret.put(d['result'])
+                dct = dict(decode(data))
+                if 'is_rpc' in dct: self.rpc_ret.put(dct['result'])
                 else:
-                    self.eng.cb_mux.add_cb(self.read_cb, [d['payload'], s])
-        except ConnectionError as e:
-            print e
-            self.connections.remove(s)
+                    args = [dct['payload'], sock]
+                    self.eng.cb_mux.add_cb(self.read_cb, args)
+        except ConnectionError as exc:
+            print exc
+            self.connections.remove(sock)
 
-    def _process_write(self, s):
+    def _process_write(self, sock):
         try:
             msg = self.msgs.get_nowait()
-            s.sendall(self.size_struct.pack(len(msg)))
-            s.sendall(msg)
+            sock.sendall(self.size_struct.pack(len(msg)))
+            sock.sendall(msg)
         except Empty: pass
 
     def send_msg(self, msg): self.msgs.put(msg)
@@ -52,7 +47,7 @@ class Client(AbsNetwork):
 
     def __init__(self):
         AbsNetwork.__init__(self)
-        self.udp_sock = None
+        self.udp_sock = self.srv_addr = self.my_addr = None
         self._functions = []
 
     def start(self, read_cb, srv_addr, my_addr):
@@ -76,6 +71,7 @@ class Client(AbsNetwork):
 
     def __getattr__(self, attr):
         if attr not in self._functions: raise AttributeError(attr)
+
         def do_rpc(*args, **kwargs):
             return self.network_thr.do_rpc(attr, args, kwargs)
         return do_rpc

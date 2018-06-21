@@ -1,6 +1,5 @@
 from urllib import urlopen
 from os.path import exists
-from panda3d.core import Mat4
 from ..gameobject import LogicColleague
 from .configuration import Cfg
 from yyagl.gameobject import GameObject
@@ -23,14 +22,16 @@ class VersionChecker(GameObject, ComputerProxy):
         major, minor, build = int(major), int(minor), int(build)
         curr_ver = self.eng.version
         curr_major, curr_minor, curr_build = curr_ver.split('-')[0].split('.')
-        curr_major, curr_minor, curr_build = int(curr_major), int(curr_minor), int(curr_build)
+        curr_major = int(curr_major)
+        curr_minor = int(curr_minor)
+        curr_build = int(curr_build)
         return curr_major > major or \
             curr_major == major and curr_minor > minor or \
             curr_major == major and curr_minor == minor and curr_build >= build
 
     def destroy(self):
         GameObject.destroy(self)
-        #ComputerProxy.destroy(self)  # raises an exception
+        # ComputerProxy.destroy(self)  # raises an exception
 
 
 class EngineLogic(LogicColleague):

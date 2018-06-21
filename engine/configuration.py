@@ -1,19 +1,19 @@
 from panda3d.core import load_prc_file_data
 from yyagl.library.builder import LibraryBuilder
-from .log import LogMgr
 
 
 class GuiCfg(object):
 
     def __init__(self, fps=False, win_size='1280 720', win_orig=None,
-            win_title='yyagl', fullscreen=False, sync_video=None,
-            antialiasing=False, shaders=True, volume=1):
+                 win_title='yyagl', fullscreen=False, sync_video=None,
+                 antialiasing=False, shaders=True, volume=1):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title
         self.win_orig = win_orig
         self.fullscreen = fullscreen
-        self.sync_video = LibraryBuilder.cls.runtime if sync_video is None else sync_video
+        self.sync_video = LibraryBuilder.cls.runtime if sync_video is None \
+            else sync_video
         self.antialiasing = antialiasing
         self.shaders = shaders
         self.volume = volume
@@ -29,7 +29,7 @@ class ProfilingCfg(object):
 class LangCfg(object):
 
     def __init__(self, lang='en', lang_path='assets/locale',
-            lang_domain='yyagl_game', languages=[('English', 'en')]):
+                 lang_domain='yyagl_game', languages=[('English', 'en')]):
         self.lang = lang
         self.lang_path = lang_path
         self.lang_domain = lang_domain
@@ -39,7 +39,7 @@ class LangCfg(object):
 class CursorCfg(object):
 
     def __init__(self, cursor_hidden=False, cursor_path='',
-            cursor_scale=(1, 1, 1), cursor_hotspot=(0, 0)):
+                 cursor_scale=(1, 1, 1), cursor_hotspot=(0, 0)):
         self.cursor_hidden = cursor_hidden
         self.cursor_path = cursor_path
         self.cursor_scale = cursor_scale
@@ -49,8 +49,8 @@ class CursorCfg(object):
 class DevCfg(object):
 
     def __init__(self, mt_render=False, model_path='assets/models',
-            shaders_dev=False, gamma=1.0, menu_joypad=True, verbose='',
-            verbose_log=False, xmpp_server='', start_wp=''):
+                 shaders_dev=False, gamma=1.0, menu_joypad=True, verbose='',
+                 verbose_log=False, xmpp_server='', start_wp=''):
         self.multithreaded_render = mt_render  # multithreaded rendering
         self.model_path = model_path
         self.shaders_dev = shaders_dev
@@ -64,12 +64,13 @@ class DevCfg(object):
 
 class Cfg(object):
 
-    def __init__(self, gui_cfg, profiling_cfg, lang_cfg, cursor_cfg, dev_cfg):
-        self.gui_cfg = gui_cfg
-        self.profiling_cfg = profiling_cfg
-        self.lang_cfg = lang_cfg
-        self.cursor_cfg = cursor_cfg
-        self.dev_cfg = dev_cfg
+    def __init__(self, gui_cfg=None, profiling_cfg=None, lang_cfg=None,
+                 cursor_cfg=None, dev_cfg=None):
+        self.gui_cfg = gui_cfg or GuiCfg()
+        self.profiling_cfg = profiling_cfg or ProfilingCfg()
+        self.lang_cfg = lang_cfg or LangCfg()
+        self.cursor_cfg = cursor_cfg or CursorCfg()
+        self.dev_cfg = dev_cfg or DevCfg()
         self.__configure()
 
     @staticmethod

@@ -46,13 +46,16 @@ class Engine(GameObject, EngineFacade):
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr.init_cls(), [self])],
-            [('gfx', EngineGfx, [self, cfg.dev_cfg.model_path, cfg.gui_cfg.antialiasing, cfg.gui_cfg.shaders])],
+            [('gfx', EngineGfx, [self, cfg.dev_cfg.model_path,
+                                 cfg.gui_cfg.antialiasing,
+                                 cfg.gui_cfg.shaders])],
             [('phys_mgr', PhysMgr, [self])],
             [('event', EngineEvent, [self, cfg.dev_cfg.menu_joypad])],
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self, cfg.gui_cfg.volume])],
             [('pause', PauseMgr, [self])],
-            [('lang_mgr', LangMgr, (cfg.lang_cfg.lang, cfg.lang_cfg.lang_domain,
+            [('lang_mgr', LangMgr, (cfg.lang_cfg.lang,
+                                    cfg.lang_cfg.lang_domain,
                                     cfg.lang_cfg.lang_path))]]
         GameObject.__init__(self, comps)
 

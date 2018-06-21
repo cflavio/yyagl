@@ -1,12 +1,12 @@
-from socket import socket, AF_INET, SOCK_DGRAM, gaierror, error, SOCK_STREAM, \
+from socket import socket, AF_INET, SOCK_DGRAM, error, SOCK_STREAM, \
     SOL_SOCKET, SO_REUSEADDR
 from select import select
-from simpleubjson import encode, decode
 from decimal import Decimal
 from json import load
 from urllib2 import urlopen
-from threading import Thread, Lock
+from threading import Thread
 from struct import Struct, error as unpack_error
+from simpleubjson import encode
 from yyagl.gameobject import GameObject
 
 
@@ -34,20 +34,21 @@ class NetworkThread(Thread):
             try:
                 readable, writable, exceptional = select(
                     self.connections, self.connections, self.connections, 1)
-                for s in readable: self._process_read(s)
-                for s in writable: self._process_write(s)
-                for s in exceptional: print 'exception', s.getpeername()
-            except error as e: print e
+                for sock in readable: self._process_read(sock)
+                for sock in writable: self._process_write(sock)
+                for sock in exceptional: print 'exception', sock.getpeername()
+            except error as exc: print exc
 
     def recv_one_message(self, sock):
         lengthbuf = self.recvall(sock, self.size_struct.size)
         try: length = self.size_struct.unpack(lengthbuf)[0]
-        except unpack_error as e:
-            print e
+        except unpack_error as exc:
+            print exc
             raise ConnectionError()
         return self.recvall(sock, length)
 
-    def recvall(self, sock, count):
+    @staticmethod
+    def recvall(sock, count):
         buf = b''
         while count:
             newbuf = sock.recv(count)
@@ -67,7 +68,9 @@ class AbsNetwork(GameObject):
 
     def __init__(self):
         GameObject.__init__(self)
-        self.network_thr = self.read_cb = None
+        self.network_thr = self.read_cb = self.udp_sock = self.conn_cb = \
+            self.tcp_socket = self.udp_sock = self.public_addr = \
+            self.local_addr = None
         self.addr2conn = {}
 
     def start(self, read_cb):
@@ -76,7 +79,8 @@ class AbsNetwork(GameObject):
         sock = socket(AF_INET, SOCK_DGRAM)
         sock.connect(('ya2.it', 8080))
         self.local_addr = sock.getsockname()[0]
-        self.public_addr = load(urlopen('http://httpbin.org/ip', timeout=3))['origin']
+        res = urlopen('http://httpbin.org/ip', timeout=3)
+        self.public_addr = load(res)['origin']
         self.udp_sock = socket(AF_INET, SOCK_DGRAM)
         self.udp_sock.setblocking(0)
         self._configure_udp()
@@ -84,7 +88,8 @@ class AbsNetwork(GameObject):
         self.network_thr.start()
         self.network_thr.read_cb = read_cb
         self.read_cb = read_cb
-        self.eng.log('%s is up %s %s' % (self.__class__.__name__, self.public_addr, self.local_addr))
+        args = (self.__class__.__name__, self.public_addr, self.local_addr)
+        self.eng.log('%s is up %s %s' % args)
 
     def register_cb(self, callback):
         self.read_cb = callback
@@ -95,16 +100,19 @@ class AbsNetwork(GameObject):
 
     def on_frame(self): self.process_udp()
 
-    def _fix_payload(self, payload):
+    @staticmethod
+    def _fix_payload(payload):
         ret = {'sender': payload['sender']}
+
         def __fix(elm):
-            return float(elm) if type(elm) == Decimal else elm
+            return float(elm) if isinstance(elm, Decimal) else elm
         ret['payload'] = [__fix(payl) for payl in payload['payload']]
         return ret
 
     @property
     def is_active(self):
-        return self.on_frame in [obs.mth for obslist in self.eng.event.observers.values() for obs in obslist]
+        observers = self.eng.event.observers.values()
+        return self.on_frame in [obs.mth for olst in observers for obs in olst]
 
     def stop(self):
         if not self.network_thr:

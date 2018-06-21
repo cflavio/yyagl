@@ -1,4 +1,5 @@
-from panda.ivals import PandaSeq, PandaWait, PandaPosIval, PandaFunc
+from yyagl.library.panda.ivals import PandaSeq, PandaWait, PandaPosIval, \
+    PandaFunc
 
 
 Seq = PandaSeq

@@ -13,5 +13,5 @@ class FontMgr(GameObject):
         return self.__fonts[fpath]
 
     def destroy(self):
-        self.fonts = None
+        self.__fonts = None
         GameObject.destroy(self)

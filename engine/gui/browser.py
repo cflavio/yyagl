@@ -18,7 +18,6 @@ class BrowserOpenerLinux(BrowserOpener):
         system('xdg-open ' + url)
 
 
-
 class Browser(object):
 
     @staticmethod

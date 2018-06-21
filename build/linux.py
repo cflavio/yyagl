@@ -99,10 +99,10 @@ def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
 
 
 def __bld_pckgs(appname, platform, int_str):
-    with InsideDir('img/data'): system('tar -cf - * | xz > ../pdata.tar.xz')
+    with InsideDir('img/data'): system('tar -cvf - * | xz > ../pdata.tar.xz')
     system('rm -rf img/data/*')
     move('img/pdata.tar.xz', 'img/data/pdata.tar.xz')
-    with InsideDir('img'): system('zip -9r ../pdata.zip *')
+    with InsideDir('img'): system('zip -r ../pdata.zip *')
     system('cat pdata.zip >> ./mojosetup_' + platform)
     fdst = '%s-%s%s-linux_%s' % (appname, branch, int_str, platform)
     move('mojosetup_' + platform, fdst)

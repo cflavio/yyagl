@@ -5,7 +5,7 @@ from yyagl.library.panda.shader import load_shader
 class Circle(Frame):
 
     def __init__(self, size=.4, pos=(.5, .5), parent=None, ray=.4, width=.05,
-                   color_start=(1, 1, 0, 1), color_end=(0, 1, 0, 1)):
+                 color_start=(1, 1, 0, 1), color_end=(0, 1, 0, 1)):
         Frame.__init__(self, pos=(pos[0], 1, pos[1]), textureCoord=True,
                        frameSize=(-size, size, -size, size), parent=parent)
         shader_dirpath = 'yyagl/assets/shaders/'

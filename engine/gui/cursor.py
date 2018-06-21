@@ -6,7 +6,7 @@ from yyagl.facade import Facade
 class MouseCursorFacade(Facade):
 
     def __init__(self):
-        fwds =[
+        fwds = [
             ('show', lambda obj: obj.cursor_img.show),
             ('hide', lambda obj: obj.cursor_img.hide)]
         map(lambda args: self._fwd_mth(*args), fwds)

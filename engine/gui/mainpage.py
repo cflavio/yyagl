@@ -1,5 +1,3 @@
-from panda3d.core import TextNode
-from direct.gui.OnscreenText import OnscreenText
 from yyagl.library.gui import Text
 from .page import Page, PageGui, PageFacade
 from .imgbtn import ImgBtn

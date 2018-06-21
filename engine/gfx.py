@@ -1,6 +1,3 @@
-from panda3d.core import get_model_path, LightRampAttrib, PandaNode, \
-    NodePath, AntialiasAttrib
-from direct.filter.CommonFilters import CommonFilters
 from ..gameobject import GfxColleague
 from .particle import Particle
 from yyagl.library.panda.gfx import PandaGfxMgr, PandaAnimNode, \
@@ -23,7 +20,7 @@ class EngineGfx(GfxColleague):
         self.part2eff = {}
         if self.mediator.cfg.gui_cfg.shaders and \
                 self.eng.lib.version().startswith('1.10'):
-            #self.set_toon()
+            # self.set_toon()
             self.set_bloom()
             self.set_blur()
 
