@@ -28,6 +28,10 @@ class PygameJoystickMgrBase(object):  # if there is not pygame
 
 class PygameJoystickMgr(PygameJoystickMgrBase):
 
+    def __init__(self):
+        PygameJoystickMgrBase.__init__(self)
+        self.joysticks = None
+
     def init_joystick(self):
         PygameJoystickMgrBase.init_joystick(self)
         pygame.init()

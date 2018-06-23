@@ -3,7 +3,8 @@ class GfxMgr(object):
     @staticmethod
     def init(model_path, antialiasing): pass
 
-    def load_model(self, filename, callback=None, extra_args=[], anim=None): pass
+    def load_model(self, filename, callback=None, extra_args=[], anim=None):
+        pass
 
 
 class Node(object):
@@ -38,11 +39,11 @@ class Node(object):
 
     def set_hpr(self, hpr): pass
 
-    def set_h(self, h): pass
+    def set_h(self, heading): pass
 
-    def set_p(self, p): pass
+    def set_p(self, pitch): pass
 
-    def set_r(self, r): pass
+    def set_r(self, roll): pass
 
     def get_hpr(self): pass
 
@@ -66,7 +67,7 @@ class Node(object):
 
     def set_material(self, material): pass
 
-    def set_texture(self, ts, texture): pass
+    def set_texture(self, texture_stage, texture): pass
 
     def has_tag(self, name): pass
 

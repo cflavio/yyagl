@@ -33,8 +33,9 @@ class FrameWidget(Widget):
         if hasattr(self, 'set_alpha_scale'): self.set_alpha_scale(.25)
 
     def on_wdg_enter(self, pos=None):  # pos: mouse's position
-        np = self.get_np()
-        np['frameColor'] = self.start_frame_color + Widget.highlight_color_offset
+        nodepath = self.get_np()
+        offset = Widget.highlight_color_offset
+        nodepath['frameColor'] = self.start_frame_color + offset
 
     def on_wdg_exit(self, pos=None):  # pos: mouse's position
         self.get_np()['frameColor'] = self.start_frame_color
@@ -51,9 +52,9 @@ class BtnWidget(FrameWidget):
 
     def on_wdg_enter(self, pos=None):  # pos: mouse's position
         FrameWidget.on_wdg_enter(self, pos)
-        np = self.get_np()
-        np['text_fg'] = self.start_txt_color + Widget.highlight_color_offset
-        np.set_shader_input('col_offset', .25)
+        nodepath = self.get_np()
+        nodepath['text_fg'] = self.start_txt_color + Widget.highlight_color_offset
+        nodepath.set_shader_input('col_offset', .25)
 
     def on_wdg_exit(self, pos=None):  # pos: mouse's position
         FrameWidget.on_wdg_exit(self, pos)
@@ -104,18 +105,18 @@ class OptionMenuWidget(BtnWidget):
 
     def on_arrow(self, direction):
         is_hor = direction in [(-1, 0, 0), (1, 0, 0)]
-        np = self.get_np()
-        if not is_hor and not np.popupMenu.is_hidden():
-            old_idx = np.highlightedIndex
+        nodepath = self.get_np()
+        if not is_hor and not nodepath.popupMenu.is_hidden():
+            old_idx = nodepath.highlightedIndex
             dir2offset = {(0, 0, -1): 1, (0, 0, 1): -1}
-            idx = np.highlightedIndex + dir2offset[direction]
-            idx = min(len(np['items']) - 1, max(0, idx))
+            idx = nodepath.highlightedIndex + dir2offset[direction]
+            idx = min(len(nodepath['items']) - 1, max(0, idx))
             if old_idx == idx: return True
-            fcol = np.component('item%s' % idx)['frameColor']
-            old_cmp = np.component('item%s' % old_idx)
-            np._unhighlightItem(old_cmp, fcol)
-            curr_cmp = np.component('item%s' % idx)
-            np._highlightItem(curr_cmp, idx)
+            fcol = nodepath.component('item%s' % idx)['frameColor']
+            old_cmp = nodepath.component('item%s' % old_idx)
+            nodepath._unhighlightItem(old_cmp, fcol)
+            curr_cmp = nodepath.component('item%s' % idx)
+            nodepath._highlightItem(curr_cmp, idx)
             return True
 
     def on_enter(self):

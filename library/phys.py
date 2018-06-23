@@ -22,9 +22,9 @@ class PhysWorld(object):
 
     def ray_test_all(self, node, mask=None): pass
 
-    def ray_test_closest(self, a, b, mask=None): pass
+    def ray_test_closest(self, pt_a, pt_b, mask=None): pass
 
-    def do_physics(self, dt, num_substeps, size_substeps): pass
+    def do_physics(self, d_t, num_substeps, size_substeps): pass
 
     def get_contacts(self, node): pass
 

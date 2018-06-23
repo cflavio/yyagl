@@ -10,7 +10,9 @@ from ..phys import PhysWorld, Contact, TriangleMesh, TriangleMeshShape, \
 class BulletPhysWorld(PhysWorld):
 
     def __init__(self):
+        PhysWorld.__init__(self)
         self.wld = BulletWorld()
+        self.__debug_np = None
 
     def set_gravity(self, vec): return self.wld.set_gravity(vec)
 
@@ -40,14 +42,17 @@ class BulletPhysWorld(PhysWorld):
         if mask: args += [mask]
         return self.wld.ray_test_all(*args)
 
-    def ray_test_closest(self, a, b, mask=None):
-        args = [a, b]
+    def ray_test_closest(self, pt_a, pt_b, mask=None):
+        args = [pt_a, pt_b]
         if mask: args += [mask]
         return self.wld.ray_test_closest(*args)
 
-    def do_physics(self, dt, num_substeps, size_substeps): return self.wld.do_physics(dt, num_substeps, size_substeps)
+    def do_physics(self, dt, num_substeps, size_substeps):
+        return self.wld.do_physics(dt, num_substeps, size_substeps)
 
-    def get_contacts(self, node): return [BulletContact(contact) for contact in self.wld.contact_test(node).get_contacts()]
+    def get_contacts(self, node):
+        contacts = self.wld.contact_test(node).get_contacts()
+        return [BulletContact(contact) for contact in contacts]
 
     def toggle_debug(self):
         is_hidden = self.__debug_np.is_hidden()
@@ -56,7 +61,9 @@ class BulletPhysWorld(PhysWorld):
 
 class BulletContact(Contact):
 
-    def __init__(self, contact): self.contact = contact
+    def __init__(self, contact):
+        Contact.__init__(self, contact)
+        self.contact = contact
 
     def get_node0(self): return self.contact.get_node0()
 
@@ -65,7 +72,9 @@ class BulletContact(Contact):
 
 class BulletTriangleMesh(TriangleMesh):
 
-    def __init__(self): self.mesh = BTriangleMesh()
+    def __init__(self):
+        TriangleMesh.__init__(self)
+        self.mesh = BTriangleMesh()
 
     def add_geom(self, geom, remove_duplicates, transform):
         return self.mesh.add_geom(geom, remove_duplicates, transform)
@@ -74,14 +83,19 @@ class BulletTriangleMesh(TriangleMesh):
 class BulletTriangleMeshShape(TriangleMeshShape):
 
     def __init__(self, mesh, dynamic):
+        TriangleMeshShape.__init__(self, mesh, dynamic)
         self.mesh_shape = BTriangleMeshShape(mesh.mesh, dynamic=dynamic)
 
 
 class BulletRigidBodyNode(RigidBodyNode):
 
-    def __init__(self, name): self.node = BRigidBodyNode(name)
+    def __init__(self, name):
+        RigidBodyNode.__init__(self)
+        self.node = BRigidBodyNode(name)
 
 
 class BulletGhostNode(GhostNode):
 
-    def __init__(self, name): self.node = BGhostNode(name)
+    def __init__(self, name):
+        GhostNode.__init__(self)
+        self.node = BGhostNode(name)

@@ -1,6 +1,6 @@
 from inspect import getmro
-from panda3d.core import LPoint3f, LVecBase2f
-from direct.gui.DirectGuiGlobals import ENTER, EXIT, DISABLED
+from panda3d.core import LVecBase2f
+from direct.gui.DirectGuiGlobals import ENTER, EXIT
 from yyagl.library.gui import Btn, Slider, CheckBtn, OptionMenu, Entry, \
     Label, Img, Frame, Text
 from yyagl.library.ivals import Seq, Wait, PosIval, Func
@@ -8,7 +8,7 @@ from yyagl.engine.vec import Vec2
 from ...gameobject import GameObject, GuiColleague, EventColleague
 from ...facade import Facade
 from .imgbtn import ImgBtn
-from .widget import Widget, FrameWidget, ImgWidget, BtnWidget, EntryWidget, \
+from .widget import FrameWidget, ImgWidget, BtnWidget, EntryWidget, \
     CheckBtnWidget, SliderWidget, OptionMenuWidget
 
 
@@ -62,8 +62,8 @@ class PageGui(GuiColleague):
         start_pos = start if start else self.curr_wdg.get_pos(aspect2d)
         dot = self.__currwdg2wdg_dot_direction(wdg, direction, start)
         wdg_pos = wdg.get_pos(aspect2d)
-        #if 'Slider' in wdg.__class__ .__name__:
-        #    wdg_pos = LPoint3f(wdg_pos[0], 1, wdg_pos[2])
+        # if 'Slider' in wdg.__class__ .__name__:
+        #     wdg_pos = LPoint3f(wdg_pos[0], 1, wdg_pos[2])
         axis = 0 if direction in [(-1, 0, 0), (1, 0, 0)] else 2
         proj_dist = abs(wdg_pos[axis] - start_pos[axis])
         weights = [.5, .5] if not axis else [.1, .9]
@@ -77,7 +77,8 @@ class PageGui(GuiColleague):
         wdgs = filter(lambda wdg: wdg.is_enabled, wdgs)
         if hasattr(self, 'curr_wdg') and self.curr_wdg:
             wdgs.remove(self.curr_wdg)
-        in_direction = lambda wdg: self.__currwdg2wdg_dot_direction(wdg, direction, start) > .1
+        mth = self.__currwdg2wdg_dot_direction
+        in_direction = lambda wdg: mth(wdg, direction, start) > .1
         wdgs = filter(in_direction, wdgs)
         if not wdgs: return
         nextweight = lambda wdg: self.__next_weight(wdg, direction, start)
@@ -86,7 +87,8 @@ class PageGui(GuiColleague):
     def _set_widgets(self):
         map(self.__set_widget, self.widgets)
 
-    def __set_widget(self, wdg):
+    @staticmethod
+    def __set_widget(wdg):
         libwdg2wdg = {
             FrameWidget: [Frame],
             SliderWidget: [Slider],
@@ -110,7 +112,8 @@ class PageGui(GuiColleague):
         map(self.__set_enter_transition, self.widgets)
         self.enable()
 
-    def __set_enter_transition(self, wdg):
+    @staticmethod
+    def __set_enter_transition(wdg):
         pos = wdg.get_pos()
         wdg.set_pos(pos - (3.6, 0, 0))
         Seq(
@@ -125,7 +128,7 @@ class PageGui(GuiColleague):
         self.enable_tsk = self.eng.do_later(.01, self.enable_navigation_aux)
 
     def enable_navigation_aux(self):
-        evts=[
+        evts = [
             ('arrow_left-up', self.on_arrow, [(-1, 0, 0)]),
             ('arrow_right-up', self.on_arrow, [(1, 0, 0)]),
             ('arrow_up-up', self.on_arrow, [(0, 0, 1)]),
@@ -137,8 +140,8 @@ class PageGui(GuiColleague):
         if self.enable_tsk:
             self.eng.rm_do_later(self.enable_tsk)
             self.enable_tsk = None
-        evts=['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
-              'arrow_down-up', 'enter']
+        evts = ['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
+                'arrow_down-up', 'enter']
         map(self.mediator.event.ignore, evts)
 
     def enable(self):
@@ -156,7 +159,8 @@ class PageGui(GuiColleague):
         map(lambda wdg: self.__set_exit_transition(wdg, destroy), self.widgets)
         self.disable()
 
-    def __set_exit_transition(self, wdg, destroy):
+    @staticmethod
+    def __set_exit_transition(wdg, destroy):
         pos = wdg.get_pos()
         end_pos = (pos[0] + 3.6, pos[1], pos[2])
         seq = Seq(
@@ -173,9 +177,9 @@ class PageGui(GuiColleague):
     def __build_back_btn(self, exit_behav):
         tra_src = 'Quit' if exit_behav else 'Back'
         tra_tra = _('Quit') if exit_behav else _('Back')
-        cb = self._on_quit if exit_behav else self._on_back
+        callback = self._on_quit if exit_behav else self._on_back
         self.widgets += [Btn(
-            text='', pos=(-.2, 1, -.92), command=cb,
+            text='', pos=(-.2, 1, -.92), command=callback,
             tra_src=tra_src, tra_tra=tra_tra, **self.menu_args.btn_args)]
 
     def _on_back(self): self.notify('on_back', self.__class__.__name__)
@@ -205,7 +209,7 @@ class PageEvent(EventColleague):
 class PageFacade(Facade):
 
     def __init__(self):
-        fwds =[
+        fwds = [
             ('show', lambda obj: obj.gui.show),
             ('hide', lambda obj: obj.gui.hide),
             ('enable', lambda obj: obj.gui.enable),

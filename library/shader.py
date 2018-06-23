@@ -25,6 +25,6 @@ class LibShaderMgr(object):
 
     def set_shader_pars(self, model): pass
 
-    def __set_slots(self, ts, model, slot): pass
+    def __set_slots(self, texture_stage, model, slot): pass
 
     def destroy(self): pass
