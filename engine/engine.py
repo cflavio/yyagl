@@ -39,8 +39,8 @@ class Engine(GameObject, EngineFacade):
         self.shader_mgr = ShaderMgr(cfg.dev_cfg.shaders_dev, cfg.dev_cfg.gamma)
         self.profiler = AbsProfiler.build(cfg.profiling_cfg.pyprof_percall)
         self.font_mgr = FontMgr()
-        self.server = Server()
-        self.client = Client()
+        self.server = Server(cfg.dev_cfg.port)
+        self.client = Client(cfg.dev_cfg.port)
         self.cb_mux = CallbackMux()
         self.xmpp = XMPP(cfg.dev_cfg.xmpp_server)
         comps = [

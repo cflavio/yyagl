@@ -18,8 +18,9 @@ class ConnectionError(Exception): pass
 
 class NetworkThread(Thread):
 
-    def __init__(self, eng):
+    def __init__(self, eng, port):
         Thread.__init__(self)
+        self.port = port
         self.daemon = True
         self.eng = eng
         self.is_running = True
@@ -66,11 +67,12 @@ class AbsNetwork(GameObject):
 
     rate = .1
 
-    def __init__(self):
+    def __init__(self, port):
         GameObject.__init__(self)
         self.network_thr = self.read_cb = self.udp_sock = self.conn_cb = \
             self.tcp_socket = self.udp_sock = self.public_addr = \
             self.local_addr = None
+        self.port = port
         self.addr2conn = {}
 
     def start(self, read_cb):

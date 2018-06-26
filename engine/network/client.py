@@ -6,14 +6,14 @@ from .network import AbsNetwork, ConnectionError, NetworkThread
 
 class ClientThread(NetworkThread):
 
-    def __init__(self, srv_addr, eng):
+    def __init__(self, srv_addr, eng, port):
         self.srv_addr = srv_addr
-        NetworkThread.__init__(self, eng)
+        NetworkThread.__init__(self, eng, port)
         self.msgs = Queue()
         self.rpc_ret = Queue()
 
     def _configure_socket(self):
-        self.tcp_sock.connect((self.srv_addr, 9099))
+        self.tcp_sock.connect((self.srv_addr, self.port))
 
     def _process_read(self, sock):
         try:
@@ -45,8 +45,8 @@ class ClientThread(NetworkThread):
 
 class Client(AbsNetwork):
 
-    def __init__(self):
-        AbsNetwork.__init__(self)
+    def __init__(self, port):
+        AbsNetwork.__init__(self, port)
         self.udp_sock = self.srv_addr = self.my_addr = None
         self._functions = []
 
@@ -63,7 +63,7 @@ class Client(AbsNetwork):
     def send_udp(self, data_lst, receiver=None):
         receiver = receiver if receiver else self.srv_addr
         payload = {'sender': self.my_addr, 'payload': data_lst}
-        self.udp_sock.sendto(encode(payload), (receiver, 9099))
+        self.udp_sock.sendto(encode(payload), (receiver, self.port))
 
     def register_rpc(self, funcname): self._functions += [funcname]
 

@@ -6,15 +6,15 @@ from .network import AbsNetwork, ConnectionError, NetworkThread
 
 class ServerThread(NetworkThread):
 
-    def __init__(self, eng, rpc_cb):
-        NetworkThread.__init__(self, eng)
+    def __init__(self, eng, rpc_cb, port):
+        NetworkThread.__init__(self, eng, port)
         self.rpc_cb = rpc_cb
         self.lock = Lock()
         self.conn2msgs = {}
 
     def _configure_socket(self):
         self.tcp_sock.setblocking(0)
-        self.tcp_sock.bind(('', 9099))
+        self.tcp_sock.bind(('', self.port))
         self.tcp_sock.listen(1)
 
     def _process_read(self, sock):
@@ -50,8 +50,8 @@ class ServerThread(NetworkThread):
 
 class Server(AbsNetwork):
 
-    def __init__(self):
-        AbsNetwork.__init__(self)
+    def __init__(self, port):
+        AbsNetwork.__init__(self, port)
         self.tcp_sock = self.udp_sock = self.conn_cb = self.public_addr = \
             self.local_addr = self.network_thr = None
         self._functions = {}
@@ -66,7 +66,7 @@ class Server(AbsNetwork):
     def _build_network_thread(self):
         return ServerThread(self.eng, self.rpc_cb)
 
-    def _configure_udp(self): self.udp_sock.bind(('', 9099))
+    def _configure_udp(self): self.udp_sock.bind(('', self.port))
 
     def _actual_send(self, datagram, receiver=None):
         receivers = [cln for cln in self.connections if cln == receiver]
