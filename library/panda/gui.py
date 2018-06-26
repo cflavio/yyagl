@@ -217,8 +217,13 @@ class PandaEntry(IEntry, PandaAbs, DirectObject):
             focusOutExtraArgs=focusOutExtraArgs, parent=parent,
             text_fg=text_fg)
         PandaAbs.__init__(self, tra_src, tra_tra)
-        if on_tab: self.accept('tab-up', on_tab)
+        if on_tab:
+            self.on_tab_cb = on_tab
+            self.accept('tab-up', self.on_tab)
         if on_click: self.wdg.bind(B1PRESS, on_click)
+
+    def on_tab(self):
+        if self.wdg['focus']: self.on_tab_cb()
 
     @property
     def onscreenText(self): return self.wdg.onscreenText
@@ -237,6 +242,7 @@ class PandaEntry(IEntry, PandaAbs, DirectObject):
 
     def destroy(self):
         self.ignore('tab-up')
+        self.on_tab_cb = None
         PandaAbs.destroy(self)
 
 
