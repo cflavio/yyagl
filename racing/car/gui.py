@@ -159,9 +159,10 @@ class CarPanel(GameObject):
         self.ranking_txt = OnscreenText(pos=(-.24, -.3), **pars)
         self.damages_img = OnscreenImage(
             'assets/images/gui/car_icon.txo',
-            scale=(.12, 1, .06), parent=base.a2dBottomLeft, pos=(.46, 1, .12))
+            scale=(.12, 1, .12), parent=base.a2dBottomLeft, pos=(.46, 1, .12))
         self.damages_img.set_transparency(True)
         self.damages_img.set_color_scale(menu_args.text_normal)
+        self.damages_img.set_r(90)
         pars = {'scale': .05, 'parent': pars['parent'],
                 'fg': menu_args.text_normal,
                 'align': TextNode.A_right, 'font': pars['font']}

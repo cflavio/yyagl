@@ -90,8 +90,9 @@ class AbsNetwork(GameObject):
         self.network_thr.start()
         self.network_thr.read_cb = read_cb
         self.read_cb = read_cb
-        args = (self.__class__.__name__, self.public_addr, self.local_addr)
-        self.eng.log('%s is up %s %s' % args)
+        args = self.__class__.__name__, self.public_addr, self.local_addr, \
+            self.port
+        self.eng.log('%s is up %s %s port %s' % args)
 
     def register_cb(self, callback):
         self.read_cb = callback

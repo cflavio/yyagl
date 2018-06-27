@@ -30,7 +30,7 @@ class RaceGui(GuiColleague, RaceGuiFacade):
             font=self.eng.font_mgr.load_font(r_p.season_props.font))
         self.way_img = OnscreenImage(
             'assets/images/gui/arrow_circle.txo',
-            scale=.08, parent=base.a2dBottomCenter, pos=(0, 1, .28))
+            scale=.12, parent=base.a2dBottomCenter, pos=(0, 1, .3))
         self.way_img.set_transparency(True)
         self.way_img.hide()
         self.minimap = None

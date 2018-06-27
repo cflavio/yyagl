@@ -1,4 +1,4 @@
-from socket import error
+from socket import error, socket, AF_INET, SOCK_DGRAM
 from Queue import Queue, Empty
 from simpleubjson import encode, decode
 from .network import AbsNetwork, ConnectionError, NetworkThread
@@ -47,16 +47,19 @@ class Client(AbsNetwork):
 
     def __init__(self, port):
         AbsNetwork.__init__(self, port)
-        self.udp_sock = self.srv_addr = self.my_addr = None
+        self.udp_sock = self.srv_addr = None
         self._functions = []
+        sock = socket(AF_INET, SOCK_DGRAM)
+        sock.connect(('ya2.it', 8080))
+        self.my_addr = sock.getsockname()[0]
 
-    def start(self, read_cb, srv_addr, my_addr):
+    def start(self, read_cb, srv_addr):
         self.srv_addr = srv_addr
-        self.my_addr = my_addr
         AbsNetwork.start(self, read_cb)
 
     def _build_network_thread(self):
-        return ClientThread(self.srv_addr, self.eng)
+        srv, port = self.srv_addr.split(':')
+        return ClientThread(srv, self.eng, int(port))
 
     def _configure_udp(self): pass
 

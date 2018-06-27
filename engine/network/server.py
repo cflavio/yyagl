@@ -64,7 +64,7 @@ class Server(AbsNetwork):
         self.conn_cb = conn_cb
 
     def _build_network_thread(self):
-        return ServerThread(self.eng, self.rpc_cb)
+        return ServerThread(self.eng, self.rpc_cb, self.port)
 
     def _configure_udp(self): self.udp_sock.bind(('', self.port))
 
