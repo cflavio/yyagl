@@ -68,7 +68,7 @@ def __bld(appname, start_path, platform, ico_fpath):
 
 def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
     copytree('usr/lib/' + appname, 'img/data/lib')
-    remove('img/data/lib/panda3d/cmu_1.9/linux_amd64/libstdc++.so.6')
+    remove('img/data/lib/panda3d/cmu_1.9/linux_%s/libstdc++.so.6' % platform)
     copytree('../../assets', 'img/data/assets')
     copytree('../../yyagl/assets', 'img/data/yyagl/assets')
     for root, _, fnames in walk('img/data/assets'):
