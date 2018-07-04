@@ -48,7 +48,6 @@ class Client(AbsNetwork):
     def __init__(self, port):
         AbsNetwork.__init__(self, port)
         self.udp_sock = self.srv_addr = None
-        self.authenticated = False
         self._functions = []
         sock = socket(AF_INET, SOCK_DGRAM)
         sock.connect(('ya2.it', 8080))
