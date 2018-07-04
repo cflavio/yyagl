@@ -2,12 +2,14 @@ from socket import error
 from threading import Lock
 from simpleubjson import encode, decode
 from .network import AbsNetwork, ConnectionError, NetworkThread
+from yyagl.gameobject import GameObject
 
 
-class ServerThread(NetworkThread):
+class ServerThread(NetworkThread, GameObject):
 
     def __init__(self, eng, rpc_cb, port):
         NetworkThread.__init__(self, eng, port)
+        GameObject.__init__(self)
         self.rpc_cb = rpc_cb
         self.lock = Lock()
         self.conn2msgs = {}
@@ -23,6 +25,7 @@ class ServerThread(NetworkThread):
             conn.setblocking(1)  # required on osx
             self.connections += [conn]
             self.conn2msgs[conn] = []
+            self.notify('on_connected', conn)
         else:
             try:
                 data = self.recv_one_message(sock)
@@ -35,6 +38,7 @@ class ServerThread(NetworkThread):
                         self.eng.cb_mux.add_cb(self.read_cb, args)
             except ConnectionError as exc:
                 print exc
+                self.notify('on_disconnected', sock)
                 self.connections.remove(sock)
 
     def _process_write(self, sock):
@@ -62,6 +66,14 @@ class Server(AbsNetwork):
     def start(self, read_cb, conn_cb):
         AbsNetwork.start(self, read_cb)
         self.conn_cb = conn_cb
+        self.network_thr.attach(self.on_connected)
+        self.network_thr.attach(self.on_disconnected)
+
+    def on_connected(self, conn):
+        self.notify('on_connected', conn)
+
+    def on_disconnected(self, conn):
+        self.notify('on_disconnected', conn)
 
     def _build_network_thread(self):
         return ServerThread(self.eng, self.rpc_cb, self.port)
