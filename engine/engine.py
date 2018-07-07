@@ -29,7 +29,6 @@ class Engine(GameObject, EngineFacade):
     network_priority = -39
 
     def __init__(self, cfg=None, end_cb=None):
-        self.upnp = False
         self.lib = LibraryBuilder.build()
         self.lib.configure()
         self.lib.init(end_cb=end_cb)
