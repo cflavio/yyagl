@@ -46,8 +46,8 @@ class SeasonLogic(LogicColleague):
     def create_race_server(self, race_props):
         self.race = RaceServer(race_props)
 
-    def create_race_client(self, race_props):
-        self.race = RaceClient(race_props)
+    def create_race_client(self, race_props, yorg_client):
+        self.race = RaceClient(race_props, yorg_client)
 
     def create_race(self, race_props):
         self.race = RaceSinglePlayer(race_props)

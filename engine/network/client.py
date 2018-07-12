@@ -66,7 +66,8 @@ class Client(AbsNetwork):
     def send_udp(self, data_lst, receiver=None):
         receiver = receiver if receiver else self.srv_addr
         payload = {'sender': self.my_addr, 'payload': data_lst}
-        self.udp_sock.sendto(encode(payload), (receiver, self.port))
+        host, port = receiver.split(':')
+        self.udp_sock.sendto(encode(payload), (host, int(port)))
 
     def register_rpc(self, funcname): self._functions += [funcname]
 
