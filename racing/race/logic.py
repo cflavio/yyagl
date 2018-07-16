@@ -35,7 +35,8 @@ class RaceLogic(LogicColleague):
             if driver.dprops.car_name == r_p.season_props.player_car_name:
                 self.load_car = lambda: DriverPlayerLoaderStrategy.load(
                     r_p, car_name, self.track, self.mediator, player_car_names,
-                    self.props.season_props, self.ai_poller, self._on_loaded)
+                    self.props.season_props, self.ai_poller, self._on_loaded,
+                    self.yorg_client)
         self.mediator.track = self.track  # facade this
 
     def _on_loaded(self):
@@ -129,6 +130,8 @@ class RaceLogic(LogicColleague):
 
     def exit_play(self):
         self.track.stop_music()
+        self.yorg_client.is_server_active = False
+        self.yorg_client.is_client_active = False
         self.player_car.detach_obs(self.mediator.event.on_wrong_way)
         self.track.destroy()
         map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
@@ -148,8 +151,8 @@ class RaceLogicSinglePlayer(RaceLogic):
 
 class RaceLogicServer(RaceLogic):
 
-    def __init__(self, mediator, rprops):
-        RaceLogic.__init__(self, mediator, rprops)
+    def __init__(self, mediator, rprops, yorg_client):
+        RaceLogic.__init__(self, mediator, rprops, yorg_client)
         self._loaded = False
         self.ready_clients = []
         self.eng.server.register_cb(self.process_srv)
