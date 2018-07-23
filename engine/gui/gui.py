@@ -26,7 +26,7 @@ class EngineGuiBase(GuiColleague):
         try:
             return min(self.resolutions, key=distance)
         except ValueError:  # sometimes we have empty resolutions
-            return self.resolution
+            return self.eng.lib.resolution
 
     def set_resolution_check(self, res):
         res_msg = 'resolutions: {curr} (current), {res} (wanted)'
