@@ -75,7 +75,8 @@ class LibraryPanda3D(Library, DirectObject):
         def res(idx):
             return d_i.get_display_mode_width(idx), \
                 d_i.get_display_mode_height(idx)
-        return [res(idx) for idx in range(d_i.get_total_display_modes())]
+        ret = [res(idx) for idx in range(d_i.get_total_display_modes())]
+        return ret if ret else [self.resolution]
 
     def toggle_fullscreen(self):
         props = WindowProperties()
