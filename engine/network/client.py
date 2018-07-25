@@ -38,7 +38,7 @@ class Client(AbsNetwork):
 
     def start(self, read_cb, srv_addr):
         self.srv_addr = srv_addr
-        AbsNetwork.start(self, read_cb)
+        return AbsNetwork.start(self, read_cb)
 
     def _bld_netw_thr(self):
         srv, port = self.srv_addr.split(':')

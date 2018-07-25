@@ -102,12 +102,16 @@ class AbsNetwork(GameObject):
         self.udp_sock = socket(AF_INET, SOCK_DGRAM)
         self.udp_sock.setblocking(0)
         self._configure_udp()
-        self.netw_thr = self._bld_netw_thr()
-        self.netw_thr.start()
-        self.netw_thr.read_cb = read_cb
-        args = self.__class__.__name__, self.public_addr, self.local_addr, \
-            self.port
-        self.eng.log('%s is up %s %s port %s' % args)
+        try:
+            self.netw_thr = self._bld_netw_thr()
+            self.netw_thr.start()
+            self.netw_thr.read_cb = read_cb
+            args = self.__class__.__name__, self.public_addr, self.local_addr, \
+                self.port
+            self.eng.log('%s is up %s %s port %s' % args)
+            return True
+        except ValueError:  # e.g. empty server
+            self.eng.log("can't start the network")
 
     @property
     def public_addr(self):
