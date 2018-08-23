@@ -23,7 +23,7 @@ class Race(GameObject, RaceFacade):
     fsm_cls = RaceFsm
     gui_cls = RaceGui
 
-    def __init__(self, race_props, yorg_client):
+    def __init__(self, race_props, yorg_client=None):
         rpr = race_props
         init_lst = [
             [('fsm', self.fsm_cls, [self, rpr.shaders_dev])],

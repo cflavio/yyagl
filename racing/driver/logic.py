@@ -50,9 +50,9 @@ class DriverPlayerLoaderStrategy(GameObject):
             car_cls = AiCarPlayer
         else:
             car_cls = CarPlayer
-            if yorg_client.is_server_active:
+            if yorg_client and yorg_client.is_server_active:
                 car_cls = CarPlayerServer
-            if yorg_client.is_client_active:
+            if yorg_client and yorg_client.is_client_active:
                 car_cls = CarPlayerClient
         race.logic.player_car = DriverLoaderStrategy.actual_load(
             cars, car_name, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb, yorg_client)

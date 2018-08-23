@@ -130,8 +130,9 @@ class RaceLogic(LogicColleague):
 
     def exit_play(self):
         self.track.stop_music()
-        self.yorg_client.is_server_active = False
-        self.yorg_client.is_client_active = False
+        if self.yorg_client:
+            self.yorg_client.is_server_active = False
+            self.yorg_client.is_client_active = False
         self.player_car.detach_obs(self.mediator.event.on_wrong_way)
         self.track.destroy()
         map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
