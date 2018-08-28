@@ -28,30 +28,30 @@ class PauseLogic(LogicColleague):
 
     def __init__(self, mediator):
         LogicColleague.__init__(self, mediator)
-        self.pause = LibPause()
+        self._pause = LibPause()
 
     def remove_task(self, tsk):
-        self.pause.remove_task(tsk)
+        self._pause.remove_task(tsk)
 
     def pause(self):
-        return self.pause.pause()
+        return self._pause.pause()
 
     def resume(self):
-        return self.pause.resume()
+        return self._pause.resume()
 
     def toggle(self, show_frm=True):
         self.mediator.gui.toggle(show_frm)
-        (self.resume if self.pause.is_paused else self.pause)()
+        (self.resume if self._pause.is_paused else self.pause)()
 
     def destroy(self):
-        self.pause.destroy()
+        self._pause.destroy()
         LogicColleague.destroy(self)
 
 
 class PauseFacade(Facade):
 
     def __init__(self):
-        self._fwd_prop('is_paused', lambda obj: obj.logic.pause.is_paused)
+        self._fwd_prop('is_paused', lambda obj: obj.logic._pause.is_paused)
 
 
 class PauseMgr(GameObject, Colleague, PauseFacade):

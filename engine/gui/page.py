@@ -243,9 +243,9 @@ class Page(GameObject, PageFacade):
 
     def on_hide(self): self.event.ignoreAll()
 
-    def on_back(self, cls_name): self.event.on_back()
+    def on_back(self, cls_name): self.event.on_back()  # unused arg
 
-    def on_quit(self, cls_name): self.event.on_quit()
+    def on_quit(self, cls_name): self.event.on_quit()  # unused arg
 
     def destroy(self):
         GameObject.destroy(self)

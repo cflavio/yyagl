@@ -53,7 +53,8 @@ class BtnWidget(FrameWidget):
     def on_wdg_enter(self, pos=None):  # pos: mouse's position
         FrameWidget.on_wdg_enter(self, pos)
         nodepath = self.get_np()
-        nodepath['text_fg'] = self.start_txt_color + Widget.highlight_color_offset
+        nodepath['text_fg'] = self.start_txt_color + \
+            Widget.highlight_color_offset
         nodepath.set_shader_input('col_offset', .25)
 
     def on_wdg_exit(self, pos=None):  # pos: mouse's position
@@ -120,19 +121,19 @@ class OptionMenuWidget(BtnWidget):
             return True
 
     def on_enter(self):
-        np = self.get_np()
-        if np.popupMenu.is_hidden():
-            np.showPopupMenu()
-            np._highlightItem(np.component('item0'), 0)
+        nodepath = self.get_np()
+        if nodepath.popupMenu.is_hidden():
+            nodepath.showPopupMenu()
+            nodepath._highlightItem(nodepath.component('item0'), 0)
             return
         else:
-            np.selectHighlightedIndex()
-            idx = np.selectedIndex
-            if np['command']: np['command'](np['items'][idx])
-            np.hidePopupMenu()
+            nodepath.selectHighlightedIndex()
+            idx = nodepath.selectedIndex
+            if nodepath['command']: nodepath['command'](nodepath['items'][idx])
+            nodepath.hidePopupMenu()
             idx += -1 if idx else 1
-            fcol = np.component('item%s' % idx)['frameColor']
-            curr_name = 'item%s' % np.selectedIndex
-            np._unhighlightItem(np.component(curr_name), fcol)
+            fcol = nodepath.component('item%s' % idx)['frameColor']
+            curr_name = 'item%s' % nodepath.selectedIndex
+            nodepath._unhighlightItem(nodepath.component(curr_name), fcol)
             return True
         BtnWidget.on_enter(self)

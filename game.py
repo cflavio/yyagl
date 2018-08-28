@@ -1,4 +1,3 @@
-import __builtin__
 from abc import ABCMeta
 from .gameobject import LogicColleague, GameObject
 from .engine.engine import Engine

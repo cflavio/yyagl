@@ -13,7 +13,7 @@ class EngineEvent(EventColleague):
             taskMgr.add(mth, 'unpausable', taskChain='unpausable')
         self.joystick_mgr = JoystickMgr(emulate_keyboard)
 
-    def __on_frame(self, task):
+    def __on_frame(self, task):  # unused task
         self.notify('on_start_frame')
         self.notify('on_frame')
         self.notify('on_end_frame')
