@@ -221,7 +221,7 @@ class RaceLogicClient(RaceLogic):
             self.mediator.event.network_register()
 
     def exit_play(self):
-        self.eng.client.destroy()
+        self.eng.client.stop()
         RaceLogic.exit_play(self)
 
     def destroy(self):

@@ -30,6 +30,7 @@ class RaceFsm(FsmColleague):
         self.mediator.gui.loading.exit_loading()
         self.mediator.event.notify('on_race_loaded')
         # eng.set_cam_pos((0, 0, 0))
+        if not self.mediator.logic.player_car: return  # we've closed the window
         self.mediator.logic.player_car.attach_obs(self.mediator.event.on_wrong_way)
         self.mediator.logic.player_car.attach_obs(self.mediator.event.on_end_race)
 
