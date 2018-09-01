@@ -185,6 +185,7 @@ class RaceLogicServer(RaceLogic):
 
     def exit_play(self):
         self.eng.server.destroy()
+        self.eng.client.stop()
         RaceLogic.exit_play(self)
 
     def destroy(self):

@@ -37,7 +37,10 @@ class NetworkThread(Thread):
                 for sock in readable: self._process_read(sock)
                 for sock in writable: self._process_write(sock)
                 for sock in exceptional: print 'exception', sock.getpeername()
-            except error as exc: print exc
+            except (error, AttributeError) as exc: print exc
+            # AttributeError happens when the server user exits from a race,
+            # then destroy is being called but _process_read is still alive
+            # and self.eng.cb_mux.add_cb is invoked, but self.eng in None
 
     def _process_read(self, sock):
         try:
