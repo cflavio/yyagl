@@ -185,7 +185,7 @@ class RaceLogicServer(RaceLogic):
 
     def exit_play(self):
         self.eng.server.destroy()
-        self.eng.client.stop()
+        #self.eng.client.stop()
         RaceLogic.exit_play(self)
 
     def destroy(self):
@@ -222,10 +222,14 @@ class RaceLogicClient(RaceLogic):
             self.mediator.event.network_register()
 
     def exit_play(self):
-        self.eng.client.stop()
+        #self.eng.client.stop()
+        if self.eng.server.is_active:
+            self.eng.server.destroy()
         RaceLogic.exit_play(self)
 
     def destroy(self):
         if self.send_tsk:
             self.send_tsk = self.eng.rm_do_later(self.send_tsk)
+        self.yorg_client.detach(self.on_begin_race)
+        self.yorg_client.detach(self.on_start_countdown)
         RaceLogic.destroy(self)

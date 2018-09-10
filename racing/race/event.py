@@ -471,6 +471,7 @@ class RaceEventClient(RaceEvent):
             self.mediator.fsm.demand('Results', race_ranking)
 
     def destroy(self):
+        self.yorg_client.detach(self.on_game_packet)
         self.eng.detach_obs(self.on_frame)
         self.eng.xmpp.detach(self.on_server_quit)
         RaceEvent.destroy(self)
