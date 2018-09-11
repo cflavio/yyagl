@@ -188,7 +188,7 @@ class RaceEventServer(RaceEvent):
             self.server_info[car] = (pos, fwd, velocity)
         if globalClock.get_frame_time() - self.last_sent > self.eng.server.rate:
             #for conn in self.eng.server.connections:
-            self.eng.client.send_udp(self.__prepare_game_packet())
+            self.eng.client.send_udp(self.__prepare_game_packet(), self.yorg_client.myid)
             self.last_sent = globalClock.get_frame_time()
         self.check_end()
 

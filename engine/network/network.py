@@ -109,29 +109,11 @@ class AbsNetwork(GameObject):
             self.netw_thr = self._bld_netw_thr()
             self.netw_thr.start()
             self.netw_thr.read_cb = read_cb
-            args = self.__class__.__name__, self.public_addr, self.local_addr, \
-                self.port
-            self.eng.log('%s is up %s %s port %s' % args)
+            args = self.__class__.__name__, self.port
+            self.eng.log('%s is up, port %s' % args)
             return True
         except ValueError:  # e.g. empty server
             self.eng.log("can't start the network")
-
-    @property
-    def public_addr(self):
-        if not AbsNetwork._public_addr:
-            res = urlopen('http://httpbin.org/ip', timeout=3)
-            _public_addr = load(res)['origin']
-            AbsNetwork._public_addr = _public_addr
-        return AbsNetwork._public_addr
-
-    @property
-    def local_addr(self):
-        if not AbsNetwork._local_addr:
-            sock = socket(AF_INET, SOCK_DGRAM)
-            sock.connect(('ya2.it', 8080))
-            _local_addr = sock.getsockname()[0]
-            AbsNetwork._local_addr = _local_addr
-        return AbsNetwork._local_addr
 
     def register_cb(self, callback):
         self.read_cb = callback

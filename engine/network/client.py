@@ -46,8 +46,8 @@ class Client(AbsNetwork):
 
     def _configure_udp(self): pass
 
-    def send_udp(self, data_lst):
-        dgram = {'sender': self.local_addr, 'payload': data_lst}
+    def send_udp(self, data_lst, sender):
+        dgram = {'sender': sender, 'payload': data_lst}
         host, port = self.srv_addr.split(':')
         self.udp_sock.sendto(encode(dgram), (host, int(port)))
 

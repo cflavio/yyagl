@@ -354,7 +354,7 @@ class CarPlayerEventClient(CarPlayerEvent):
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
             packet += chain([wpn, curr_wpn.id], wpn_pos, wpn_fwd)
         if self.eng.curr_time - self.last_sent > self.eng.client.rate:
-            self.eng.client.send_udp(packet)
+            self.eng.client.send_udp(packet, self.yorg_client.myid)
             self.last_sent = self.eng.curr_time
 
     def _process_end_goal(self):
