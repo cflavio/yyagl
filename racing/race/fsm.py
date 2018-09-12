@@ -57,12 +57,15 @@ class RaceFsm(FsmColleague):
     def start_countdown(self):
         self.countdown = Countdown(self.countdown_sfx, self.menu_args.font,
                                    self.sprops.countdown_seconds)
-        self.countdown.attach(lambda: self.demand('Play'),
-                              rename='on_start_race')
+        self.lmb_call = lambda: self.demand('Play')
+        self.countdown.attach(self.lmb_call, rename='on_start_race')
 
     def exitCountdown(self):
         self.eng.log_mgr.log('exiting Countdown state')
-        if self.countdown: self.countdown.destroy()
+        if self.countdown:
+            self.countdown.detach('on_start_race', self.lmb_call)
+            self.countdown.destroy()
+        self.lmb_call = None
         self.eng.rm_do_later(self.launch_tsk)
         if self.aux_launch_tsk: self.eng.rm_do_later(self.aux_launch_tsk)
         # eng.do_later(.5, game.player_car.gfx.apply_damage)
