@@ -81,6 +81,10 @@ class Camera(GameObject):
         back_car_vec = -fwd_car_vec * self.curr_dist
         car_pos = self.car_np.get_pos()
         back_car_vec += (0, 0, self._back_vec_z)
+        tmp_back_pos = car_pos + back_car_vec
+        curr_gnd_h = self.gnd_height(tmp_back_pos)
+        if curr_gnd_h and tmp_back_pos.z < curr_gnd_h + .5:
+            back_car_vec.z = curr_gnd_h - car_pos.z + .5
         back_incr = (.05 if is_rotating else 25.0) * globalClock.get_dt()
         l_d_speed = self.look_dist_min + look_dist_diff * self.curr_speed_ratio
         l_d = 0 if is_rolling else l_d_speed
@@ -116,6 +120,12 @@ class Camera(GameObject):
 
     @property
     def camera(self): return base.camera
+
+    def gnd_height(self, pos):
+        hits = self.eng.phys_mgr.root.ray_test_all(pos - (0, 0, 100), pos + (0, 0, 100))
+        for hit in hits.get_hits():
+            if any(hit.getNode().getName().startswith(pref) for pref in ['RoadOBJ', 'OffroadOBJ']):
+                return hit.getHitPos().z
 
     @staticmethod
     def render_all(track_model):  # workaround for premunge_scene in 1.9
