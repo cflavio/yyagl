@@ -14,8 +14,7 @@ class DriverLoaderStrategy(GameObject):
         if eng.server.is_active or eng.client.is_active:
             car_cls = NetworkCar  # if car in player_cars else Car
         no_p = car not in player_car_names
-        srv_or_sng = eng.server.is_active or not eng.client.is_active
-        car_cls = AiCar if no_p and srv_or_sng else car_cls
+        car_cls = AiCar if no_p and race.__class__.__name__ == 'RaceSinglePlayer' else car_cls
         race.logic.cars += [DriverLoaderStrategy.actual_load(
             cars, car, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb, yorg_client)]
 
