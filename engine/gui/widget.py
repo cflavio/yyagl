@@ -74,13 +74,13 @@ class EntryWidget(FrameWidget):
 
     def on_wdg_enter(self, pos=None):  # pos: mouse's position
         FrameWidget.on_wdg_enter(self, pos)
-        self.get_np()['focus'] = 1
-        self.get_np().setFocus()
+        #self.get_np()['focus'] = 1  # it focuses it if mouse over
+        #self.get_np().setFocus()
 
     def on_wdg_exit(self, pos=None):  # pos: mouse's position
         FrameWidget.on_wdg_exit(self, pos)
-        self.get_np()['focus'] = 0
-        self.get_np().setFocus()
+        #self.get_np()['focus'] = 0
+        #self.get_np().setFocus()
 
     def on_enter(self):
         if self['command'] and self['state'] == NORMAL:
