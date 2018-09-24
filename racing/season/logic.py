@@ -25,6 +25,10 @@ class SeasonLogic(LogicColleague):
     def on_tuning_sel(self, val):
         tun = self.tuning.car2tuning[self.props.player_car_name]
         setattr(tun, val, getattr(tun, val) + 1)
+        val2field = {'f_engine': 'tuning_engine', 'f_tires': 'tuning_tires',
+                     'f_suspensions': 'tuning_suspensions'}
+        field = val2field[val]
+        setattr(self.props, field, getattr(self.props, field) + 1)
         self.next_race()
 
     def load(self, ranking, tuning, drivers):
