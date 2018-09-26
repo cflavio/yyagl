@@ -7,6 +7,7 @@ from decimal import Decimal
 from json import load
 from urllib2 import urlopen
 from threading import Thread
+from thread import interrupt_main
 from struct import Struct, error as unpack_error
 from simpleubjson import encode
 from yyagl.gameobject import GameObject
@@ -41,6 +42,9 @@ class NetworkThread(Thread):
             # AttributeError happens when the server user exits from a race,
             # then destroy is being called but _process_read is still alive
             # and self.eng.cb_mux.add_cb is invoked, but self.eng in None
+            except Exception as exc:
+                print exc
+                interrupt_main()
 
     def _process_read(self, sock):
         try:
