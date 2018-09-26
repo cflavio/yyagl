@@ -187,10 +187,12 @@ class PageGui(GuiColleague):
     def _on_quit(self): self.notify('on_quit', self.__class__.__name__)
 
     def show(self):
-        map(lambda wdg: wdg.show(), self.widgets)
+        visible_widgets = [wdg for wdg in self.widgets if wdg.was_visible]
+        map(lambda wdg: wdg.show(), visible_widgets)
         self.transition_enter()
 
     def hide(self):
+        for wdg in self.widgets: wdg.was_visible = not wdg.is_hidden()
         self.transition_exit(False)
         self.notify('on_hide')
 

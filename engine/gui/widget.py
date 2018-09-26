@@ -5,7 +5,9 @@ class Widget(object):
 
     highlight_color_offset = (.3, .3, .3, 0)
 
-    def __init__(self): self.start_txt_color = self.start_frame_color = None
+    def __init__(self):
+        self.start_txt_color = self.start_frame_color = None
+        self.was_visible = True
 
     def get_np(self): return self.img
 
