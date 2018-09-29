@@ -129,19 +129,20 @@ class PageGui(GuiColleague):
 
     def enable_navigation_aux(self):
         evts = [
-            ('arrow_left-up', self.on_arrow, [(-1, 0, 0)]),
-            ('arrow_right-up', self.on_arrow, [(1, 0, 0)]),
-            ('arrow_up-up', self.on_arrow, [(0, 0, 1)]),
-            ('arrow_down-up', self.on_arrow, [(0, 0, -1)]),
-            ('enter', self.on_enter)]
+            (self.menu_args.nav.left, self.on_arrow, [(-1, 0, 0)]),
+            (self.menu_args.nav.right, self.on_arrow, [(1, 0, 0)]),
+            (self.menu_args.nav.up, self.on_arrow, [(0, 0, 1)]),
+            (self.menu_args.nav.down, self.on_arrow, [(0, 0, -1)]),
+            (self.menu_args.nav.fire, self.on_enter)]
         map(lambda args: self.mediator.event.accept(*args), evts)
 
     def disable_navigation(self):
         if self.enable_tsk:
             self.eng.rm_do_later(self.enable_tsk)
             self.enable_tsk = None
-        evts = ['arrow_left-up', 'arrow_right-up', 'arrow_up-up',
-                'arrow_down-up', 'enter']
+        evts = [self.menu_args.nav.left, self.menu_args.nav.right,
+                self.menu_args.nav.up, self.menu_args.nav.down,
+                self.menu_args.nav.fire]
         map(self.mediator.event.ignore, evts)
 
     def enable(self):
@@ -197,8 +198,8 @@ class PageGui(GuiColleague):
         self.notify('on_hide')
 
     def destroy(self):
-        self.menu_args = None
         self.transition_exit()
+        self.menu_args = None
 
 
 class PageEvent(EventColleague):
