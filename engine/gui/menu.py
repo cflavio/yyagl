@@ -4,7 +4,7 @@ from ...facade import Facade
 from ...library.gui import Img
 
 
-class NavInfo:
+class NavInfoPerPlayer:
 
     def __init__(self, left, right, up, down, fire):
         self.left = left
@@ -12,6 +12,13 @@ class NavInfo:
         self.up = up
         self.down = down
         self.fire = fire
+
+
+class NavInfo:
+
+    def __init__(self, navinfo_lst):
+        self.navinfo_lst = navinfo_lst
+
 
 class MenuArgs(GameObject):
 

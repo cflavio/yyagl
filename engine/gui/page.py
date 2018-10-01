@@ -14,10 +14,11 @@ from .widget import FrameWidget, ImgWidget, BtnWidget, EntryWidget, \
 
 class PageGui(GuiColleague):
 
-    def __init__(self, mediator, menu_args):
+    def __init__(self, mediator, menu_args, players=[0]):
         GuiColleague.__init__(self, mediator)
         self.enable_tsk = None
         self.menu_args = menu_args
+        self.players = players
         self.widgets = []
         self.build()
         self.translate()
@@ -110,7 +111,7 @@ class PageGui(GuiColleague):
     def transition_enter(self):
         self.translate()
         map(self.__set_enter_transition, self.widgets)
-        self.enable()
+        self.enable(self.players)
 
     @staticmethod
     def __set_enter_transition(wdg):
@@ -121,44 +122,46 @@ class PageGui(GuiColleague):
             PosIval(wdg.get_np(), .5, pos)
         ).start()
 
-    def enable_navigation(self):
+    def enable_navigation(self, players):
         if self.enable_tsk:
             self.eng.rm_do_later(self.enable_tsk)
             self.enable_tsk = None
-        self.enable_tsk = self.eng.do_later(.01, self.enable_navigation_aux)
+        self.enable_tsk = self.eng.do_later(.01, self.enable_navigation_aux, [players])
 
-    def enable_navigation_aux(self):
-        evts = [
-            (self.menu_args.nav.left, self.on_arrow, [(-1, 0, 0)]),
-            (self.menu_args.nav.right, self.on_arrow, [(1, 0, 0)]),
-            (self.menu_args.nav.up, self.on_arrow, [(0, 0, 1)]),
-            (self.menu_args.nav.down, self.on_arrow, [(0, 0, -1)]),
-            (self.menu_args.nav.fire, self.on_enter)]
-        map(lambda args: self.mediator.event.accept(*args), evts)
+    def enable_navigation_aux(self, players):
+        for player in players:
+            nav = self.menu_args.nav.navinfo_lst[player]
+            evts = [
+                (nav.left, self.on_arrow, [(-1, 0, 0)]),
+                (nav.right, self.on_arrow, [(1, 0, 0)]),
+                (nav.up, self.on_arrow, [(0, 0, 1)]),
+                (nav.down, self.on_arrow, [(0, 0, -1)]),
+                (nav.fire, self.on_enter)]
+            map(lambda args: self.mediator.event.accept(*args), evts)
 
-    def disable_navigation(self):
+    def disable_navigation(self, players):
         if self.enable_tsk:
             self.eng.rm_do_later(self.enable_tsk)
             self.enable_tsk = None
-        evts = [self.menu_args.nav.left, self.menu_args.nav.right,
-                self.menu_args.nav.up, self.menu_args.nav.down,
-                self.menu_args.nav.fire]
-        map(self.mediator.event.ignore, evts)
+        for player in players:
+            nav = self.menu_args.nav.navinfo_lst[player]
+            evts = [nav.left, nav.right, nav.up, nav.down, nav.fire]
+            map(self.mediator.event.ignore, evts)
 
-    def enable(self):
-        self.enable_navigation()
+    def enable(self, players):
+        self.enable_navigation(players)
         map(lambda wdg: wdg.enable(), self.widgets)
 
-    def disable(self):
+    def disable(self, players):
         if self.enable_tsk:
             self.eng.rm_do_later(self.enable_tsk)
             self.enable_tsk = None
-        self.disable_navigation()
+        self.disable_navigation(players)
         map(lambda wdg: wdg.disable(), self.widgets)
 
     def transition_exit(self, destroy=True):
         map(lambda wdg: self.__set_exit_transition(wdg, destroy), self.widgets)
-        self.disable()
+        self.disable(self.players)
 
     @staticmethod
     def __set_exit_transition(wdg, destroy):
@@ -229,10 +232,11 @@ class Page(GameObject, PageFacade):
     gui_cls = PageGui
     event_cls = PageEvent
 
-    def __init__(self, menu_args):
+    def __init__(self, menu_args, players=[0]):
         # refactor: pages e.g. yyagl/engine/gui/mainpage.py don't call this
         PageFacade.__init__(self)
         self.menu_args = menu_args
+        self.players = players
         GameObject.__init__(self, self.init_lst)
         self.gui.attach(self.on_hide)
         self.gui.attach(self.on_back)
@@ -242,7 +246,7 @@ class Page(GameObject, PageFacade):
     def init_lst(self):
         return [
             [('event', self.event_cls, [self])],
-            [('gui', self.gui_cls, [self, self.menu_args])]]
+            [('gui', self.gui_cls, [self, self.menu_args, self.players])]]
 
     def on_hide(self): self.event.ignoreAll()
 
