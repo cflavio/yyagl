@@ -1,13 +1,15 @@
 from direct.gui.DirectGuiGlobals import NORMAL, DISABLED
+from panda3d.core import LVecBase4f
 
 
 class Widget(object):
 
-    highlight_color_offset = (.3, .3, .3, 0)
+    highlight_color_offset = [LVecBase4f(0, 0, .4, 0), LVecBase4f(0, .4, 0, 0)]
 
     def __init__(self):
         self.start_txt_color = self.start_frame_color = None
         self.was_visible = True
+        self.curr_offset = LVecBase4f(0, 0, 0, 0)
 
     def get_np(self): return self.img
 
@@ -24,6 +26,7 @@ class ImgWidget(Widget):
 class FrameWidget(Widget):
 
     def init(self, wdg):
+        self.curr_offset = LVecBase4f(0, 0, 0, 0)
         self.start_frame_color = wdg.get_np()['frameColor']
 
     def enable(self):
@@ -34,13 +37,14 @@ class FrameWidget(Widget):
         self['state'] = DISABLED
         if hasattr(self, 'set_alpha_scale'): self.set_alpha_scale(.25)
 
-    def on_wdg_enter(self, pos=None):  # pos: mouse's position
+    def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
         nodepath = self.get_np()
-        offset = Widget.highlight_color_offset
-        nodepath['frameColor'] = self.start_frame_color + offset
+        self.curr_offset += Widget.highlight_color_offset[player]
+        nodepath['frameColor'] = LVecBase4f(self.start_frame_color) + self.curr_offset
 
-    def on_wdg_exit(self, pos=None):  # pos: mouse's position
-        self.get_np()['frameColor'] = self.start_frame_color
+    def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
+        self.curr_offset -= Widget.highlight_color_offset[player]
+        self.get_np()['frameColor'] = LVecBase4f(self.start_frame_color) + self.curr_offset
 
 
 class BtnWidget(FrameWidget):
@@ -52,18 +56,17 @@ class BtnWidget(FrameWidget):
 
     def on_arrow(self, direction): pass
 
-    def on_wdg_enter(self, pos=None):  # pos: mouse's position
-        FrameWidget.on_wdg_enter(self, pos)
+    def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
+        FrameWidget.on_wdg_enter(self, pos, player)
         nodepath = self.get_np()
-        nodepath['text_fg'] = self.start_txt_color + \
-            Widget.highlight_color_offset
-        nodepath.set_shader_input('col_offset', .25)
+        nodepath['text_fg'] = self.start_txt_color + self.curr_offset
+        nodepath.set_shader_input('col_offset', self.curr_offset)
 
-    def on_wdg_exit(self, pos=None):  # pos: mouse's position
-        FrameWidget.on_wdg_exit(self, pos)
+    def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
+        FrameWidget.on_wdg_exit(self, pos, player)
         self.get_np()['text_fg'] = self.start_txt_color
         self.get_np()['frameColor'] = self.start_frame_color
-        self.get_np().set_shader_input('col_offset', 0)
+        self.get_np().set_shader_input('col_offset', self.curr_offset)
 
     def on_enter(self):
         if self['command'] and self['state'] == NORMAL:
@@ -74,13 +77,13 @@ class EntryWidget(FrameWidget):
 
     def on_arrow(self, direction): pass
 
-    def on_wdg_enter(self, pos=None):  # pos: mouse's position
-        FrameWidget.on_wdg_enter(self, pos)
+    def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
+        FrameWidget.on_wdg_enter(self, pos, player)
         #self.get_np()['focus'] = 1  # it focuses it if mouse over
         #self.get_np().setFocus()
 
-    def on_wdg_exit(self, pos=None):  # pos: mouse's position
-        FrameWidget.on_wdg_exit(self, pos)
+    def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
+        FrameWidget.on_wdg_exit(self, pos, player)
         #self.get_np()['focus'] = 0
         #self.get_np().setFocus()
 

@@ -22,8 +22,10 @@ class PageGui(GuiColleague):
         self.widgets = []
         self.build()
         self.translate()
-        self.curr_wdg = self.__next_wdg((-.1, 0, -1), (-3.6, 1, 1))
-        if self.curr_wdg: self.curr_wdg.on_wdg_enter()
+        self.curr_wdgs = []
+        for player in players:
+            self.curr_wdgs += [self.__next_wdg((-.1, 0, -1), player, (-3.6, 1, 1))]
+            if self.curr_wdgs[-1]: self.curr_wdgs[-1].on_wdg_enter(None, player)
 
     def build(self, back_btn=True, exit_behav=False):
         if back_btn: self.__build_back_btn(exit_behav)
@@ -33,35 +35,36 @@ class PageGui(GuiColleague):
 
     def add_widgets(self, widgets): self.widgets += widgets
 
-    def on_arrow(self, direction):
-        if not self.curr_wdg: return
-        catch_cmd = self.curr_wdg.on_arrow(direction)
+    def on_arrow(self, direction, player):
+        if not self.curr_wdgs[player]: return
+        catch_cmd = self.curr_wdgs[player].on_arrow(direction)
         # e.g. up/down in a combobox or left/right in a slider
         if catch_cmd: return
-        next_wdg = self.__next_wdg(direction)
+        next_wdg = self.__next_wdg(direction, player)
         if not next_wdg: return
-        self.curr_wdg.on_wdg_exit()
-        self.curr_wdg = next_wdg
-        self.curr_wdg.on_wdg_enter()
+        self.curr_wdgs[player].on_wdg_exit(None, player)
+        self.curr_wdgs[player] = next_wdg
+        self.curr_wdgs[player].on_wdg_enter(None, player)
 
     def on_enter(self):
-        if not self.curr_wdg: return
-        if self.curr_wdg.on_enter(): self.enable()
+        for player in self.players:
+            if not self.curr_wdgs[player]: return
+            if self.curr_wdgs[player].on_enter(): self.enable()
 
     @property
     def buttons(self):
         is_btn = lambda wdg: Btn in getmro(wdg.__class__)
         return [wdg for wdg in self.widgets if is_btn(wdg)]
 
-    def __currwdg2wdg_dot_direction(self, wdg, direction, start=None):
-        start_pos = start if start else self.curr_wdg.get_pos(aspect2d)
+    def __currwdg2wdg_dot_direction(self, wdg, direction, player, start=None):
+        start_pos = start if start else self.curr_wdgs[player].get_pos(aspect2d)
         vec = wdg.get_pos(aspect2d) - start_pos
         vec = Vec2(vec.x, vec.z).normalize()
         return vec.dot(LVecBase2f(direction[0], direction[2]))
 
-    def __next_weight(self, wdg, direction, start=None):
-        start_pos = start if start else self.curr_wdg.get_pos(aspect2d)
-        dot = self.__currwdg2wdg_dot_direction(wdg, direction, start)
+    def __next_weight(self, wdg, direction, player, start=None):
+        start_pos = start if start else self.curr_wdgs[player].get_pos(aspect2d)
+        dot = self.__currwdg2wdg_dot_direction(wdg, direction, player, start)
         wdg_pos = wdg.get_pos(aspect2d)
         # if 'Slider' in wdg.__class__ .__name__:
         #     wdg_pos = LPoint3f(wdg_pos[0], 1, wdg_pos[2])
@@ -70,19 +73,19 @@ class PageGui(GuiColleague):
         weights = [.5, .5] if not axis else [.1, .9]
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
 
-    def __next_wdg(self, direction, start=None):
+    def __next_wdg(self, direction, player, start=None):
         # interactive classes
         iclss = [Btn, CheckBtn, Slider, OptionMenu, ImgBtn, Entry]
         inter = lambda wdg: any(pcl in iclss for pcl in getmro(wdg.__class__))
         wdgs = [wdg for wdg in self.widgets if inter(wdg)]
         wdgs = filter(lambda wdg: wdg.is_enabled, wdgs)
-        if hasattr(self, 'curr_wdg') and self.curr_wdg:
-            wdgs.remove(self.curr_wdg)
+        if hasattr(self, 'curr_wdgs') and player < len(self.curr_wdgs) and self.curr_wdgs[player]:
+            wdgs.remove(self.curr_wdgs[player])
         mth = self.__currwdg2wdg_dot_direction
-        in_direction = lambda wdg: mth(wdg, direction, start) > .1
+        in_direction = lambda wdg: mth(wdg, direction, player, start) > .1
         wdgs = filter(in_direction, wdgs)
         if not wdgs: return
-        nextweight = lambda wdg: self.__next_weight(wdg, direction, start)
+        nextweight = lambda wdg: self.__next_weight(wdg, direction, player, start)
         return max(wdgs, key=nextweight)
 
     def _set_widgets(self):
@@ -132,10 +135,10 @@ class PageGui(GuiColleague):
         for player in players:
             nav = self.menu_args.nav.navinfo_lst[player]
             evts = [
-                (nav.left, self.on_arrow, [(-1, 0, 0)]),
-                (nav.right, self.on_arrow, [(1, 0, 0)]),
-                (nav.up, self.on_arrow, [(0, 0, 1)]),
-                (nav.down, self.on_arrow, [(0, 0, -1)]),
+                (nav.left, self.on_arrow, [(-1, 0, 0), player]),
+                (nav.right, self.on_arrow, [(1, 0, 0), player]),
+                (nav.up, self.on_arrow, [(0, 0, 1), player]),
+                (nav.down, self.on_arrow, [(0, 0, -1), player]),
                 (nav.fire, self.on_enter)]
             map(lambda args: self.mediator.event.accept(*args), evts)
 
