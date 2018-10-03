@@ -68,9 +68,10 @@ class BtnWidget(FrameWidget):
         self.get_np()['frameColor'] = self.start_frame_color
         self.get_np().set_shader_input('col_offset', self.curr_offset)
 
-    def on_enter(self):
+    def on_enter(self, player):
         if self['command'] and self['state'] == NORMAL:
-            self['command'](*self['extraArgs'])
+            lst_arg = [player] if player is not None else []
+            self['command'](*self['extraArgs'] + lst_arg)
 
 
 class EntryWidget(FrameWidget):

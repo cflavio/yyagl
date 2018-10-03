@@ -46,10 +46,10 @@ class PageGui(GuiColleague):
         self.curr_wdgs[player] = next_wdg
         self.curr_wdgs[player].on_wdg_enter(None, player)
 
-    def on_enter(self):
-        for player in self.players:
-            if not self.curr_wdgs[player]: return
-            if self.curr_wdgs[player].on_enter(): self.enable()
+    def on_enter(self, player):
+        if not self.curr_wdgs[player]: return
+        arg = player if len(self.players) > 1 else None
+        if self.curr_wdgs[player].on_enter(arg): self.enable()
 
     @property
     def buttons(self):
@@ -139,7 +139,7 @@ class PageGui(GuiColleague):
                 (nav.right, self.on_arrow, [(1, 0, 0), player]),
                 (nav.up, self.on_arrow, [(0, 0, 1), player]),
                 (nav.down, self.on_arrow, [(0, 0, -1), player]),
-                (nav.fire, self.on_enter)]
+                (nav.fire, self.on_enter, [player])]
             map(lambda args: self.mediator.event.accept(*args), evts)
 
     def disable_navigation(self, players):
