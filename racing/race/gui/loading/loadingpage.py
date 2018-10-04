@@ -13,7 +13,7 @@ class LoadingPageGui(PageGui):
         self.drivers = drivers
         self.ranking = ranking
         self.tuning = tuning
-        PageGui.__init__(self, mediator, menu)
+        PageGui.__init__(self, mediator, menu.gui.menu_args)
 
     def build(self, back_btn=True):
         self.eng.init_gfx()
