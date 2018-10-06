@@ -20,7 +20,7 @@ class DriverLoaderStrategy(GameObject):
 
     @staticmethod
     def actual_load(cars, load_car_name, r_p, track, race, car_cls,
-                    player_car_names, seas_p, aipoller, cb, yorg_client):
+                    player_car_names, seas_p, aipoller, cb, yorg_client, player_car_idx):
         for _drv in r_p.drivers:
             if _drv.dprops.car_name == load_car_name:
                 drv = _drv
@@ -37,7 +37,10 @@ class DriverLoaderStrategy(GameObject):
                                               yorg_client),
             race, drv.dprops.f_engine, drv.dprops.f_tires,
             drv.dprops.f_suspensions, race.track.phys.waypoints, aipoller)
-        return car_cls(car_props, yorg_client)
+        if player_car_idx == -1:
+            return car_cls(car_props, yorg_client)
+        else:
+            return car_cls(car_props, yorg_client, player_car_idx)
 
 
 class DriverPlayerLoaderStrategy(GameObject):
@@ -57,7 +60,8 @@ class DriverPlayerLoaderStrategy(GameObject):
                 if yorg_client and yorg_client.is_client_active:
                     car_cls = CarPlayerClient
             race.logic.player_cars += [DriverLoaderStrategy.actual_load(
-                loadcars, car, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb, yorg_client)]
+                loadcars, car, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb, yorg_client,
+                player_car_names.index(car))]
         else:
             car_cls = Car
             if eng.server.is_active or eng.client.is_active:

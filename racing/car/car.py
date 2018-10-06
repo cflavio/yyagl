@@ -94,6 +94,10 @@ class CarPlayer(Car):
     phys_cls = CarPlayerPhys
     gfx_cls = CarPlayerGfx
 
+    def __init__(self, car_props, yorg_client, player_car_idx):
+        self.player_car_idx = player_car_idx
+        Car.__init__(self, car_props, yorg_client)
+
 
 class CarPlayerServer(Car):
     event_cls = CarPlayerEventServer

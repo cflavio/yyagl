@@ -36,6 +36,8 @@ class Camera(GameObject):
         inertia_fact = max(0, min(1, self.ease(dist / self.inertia_dist))) if dist else 0
         return self.speed * inertia_fact
 
+    def get_camera(self): return base.win.get_active_display_regions()[self.car.player_car_idx].get_camera()
+
     @staticmethod
     def new_val(val, tgt, incr):
         beyond = abs(val - tgt) < incr
@@ -61,7 +63,7 @@ class Camera(GameObject):
 
     def _new_pos(self, back_car_vec, speed_ratio, c_i):
         car_pos = self.car_np.get_pos()
-        cam_pos = base.camera.get_pos()
+        cam_pos = self.get_camera().get_pos()
         return self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
 
     def update(self, speed_ratio, is_rolling, is_fast, is_rotating):
@@ -88,7 +90,7 @@ class Camera(GameObject):
         back_incr = (.05 if is_rotating else 25.0) * globalClock.get_dt()
         l_d_speed = self.look_dist_min + look_dist_diff * self.curr_speed_ratio
         l_d = 0 if is_rolling else l_d_speed
-        cam_pos = base.camera.get_pos()
+        cam_pos = self.get_camera().get_pos()
 
         curr_incr = self.curr_speed(cam_pos, car_pos + back_car_vec) * globalClock.get_dt()
         curr_incr_slow = self.speed_slow * globalClock.get_dt()
@@ -115,11 +117,11 @@ class Camera(GameObject):
         if any(val for val in self.overwrite):
             ovw = self.overwrite
             new_pos = (car_pos.x + ovw[0], car_pos.y + ovw[1], car_pos.z + ovw[2])
-        if not is_rolling: base.camera.set_pos(new_pos)
-        base.camera.look_at(car_pos + tgt_vec)
+        if not is_rolling: self.get_camera().set_pos(new_pos)
+        self.get_camera().look_at(car_pos + tgt_vec)
 
     @property
-    def camera(self): return base.camera
+    def camera(self): return self.get_camera()
 
     def gnd_height(self, pos):
         hits = self.eng.phys_mgr.root.ray_test_all(pos - (0, 0, 100), pos + (0, 0, 100))
@@ -127,10 +129,9 @@ class Camera(GameObject):
             if any(hit.getNode().getName().startswith(pref) for pref in ['RoadOBJ', 'OffroadOBJ']):
                 return hit.getHitPos().z
 
-    @staticmethod
-    def render_all(track_model):  # workaround for premunge_scene in 1.9
-        base.camera.set_pos(0, 0, 10000)
-        base.camera.look_at(0, 0, 0)
+    def render_all(self, track_model):  # workaround for premunge_scene in 1.9
+        self.get_camera().set_pos(0, 0, 10000)
+        self.get_camera().look_at(0, 0, 0)
         skydome = track_model.find('**/OBJSkydome*')
         Camera.eng.log('skydome %sfound' % ('' if skydome else 'not '))
         skydome and skydome.hide()
@@ -151,7 +152,7 @@ class FPCamera(Camera):
     def _new_pos(self, back_car_vec, speed_ratio, c_i):
         car_pos = self.car_np.get_pos()
         dist_diff = self.dist_max - self.dist_min
-        cam_pos = base.camera.get_pos()
+        cam_pos = self.get_camera().get_pos()
         curr_cam_pos = car_pos + back_car_vec
         curr_cam_dist_fact = self.dist_min + dist_diff * speed_ratio
         curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
