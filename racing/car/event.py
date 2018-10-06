@@ -13,15 +13,21 @@ from yyagl.computer_proxy import ComputerProxy, once_a_frame
 from yyagl.engine.vec import Vec
 
 
-class Keys(object):
+class PlayerKeys(object):
 
-    def __init__(self, forward, rear, left, right, fire, respawn, pause):
+    def __init__(self, forward, rear, left, right, fire, respawn):
         self.forward = forward
         self.rear = rear
         self.left = left
         self.right = right
         self.fire = fire
         self.respawn = respawn
+
+
+class Keys(object):
+
+    def __init__(self, players_keys, pause):
+        self.players_keys = players_keys
         self.pause = pause
 
 
@@ -54,8 +60,9 @@ class InputBuilderAi(InputBuilder):
 
 class InputBuilderKeyboard(InputBuilder):
 
-    def build(self, ai, joystick_mgr):
+    def build(self, ai, joystick_mgr, player_car_idx):
         keys = ['forward', 'rear', 'left', 'right']
+        keys = [key + str(player_car_idx) for key in keys]
         return DirKeys(*[inputState.isSet(key) for key in keys])
 
 
@@ -78,10 +85,11 @@ class CarEvent(EventColleague, ComputerProxy):
         ComputerProxy.__init__(self)
         self.eng.attach_obs(self.on_collision)
         self.props = race_props
-        keys = race_props.keys
+        keys = race_props.keys.players_keys[mediator.player_car_idx]
+        suff = str(mediator.player_car_idx)
         self.label_events = [
-            ('forward', keys.forward), ('left', keys.left),
-            ('rear', keys.rear), ('right', keys.right)]
+            ('forward' + suff, keys.forward), ('left' + suff, keys.left),
+            ('rear' + suff, keys.rear), ('right' + suff, keys.right)]
         watch = inputState.watchWithModifiers
         self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
         self.curr_wpn_id = 0
@@ -118,7 +126,8 @@ class CarEvent(EventColleague, ComputerProxy):
             self.mediator.logic.weapon.destroy()
         if cls == 'remove':
             self.mediator.logic.weapon = None
-            self.ignore(self.props.keys.fire)
+            keys = self.props.keys.players_keys[self.mediator.player_car_idx]
+            self.ignore(keys.fire)
             return
         if cls: wpn_cls = cls
         else:
@@ -221,7 +230,8 @@ class CarPlayerEvent(CarEvent):
             self.accept('f8', self._process_end_goal)
         state = self.mediator.fsm.getCurrentOrNextState()
         self.input_bld = InputBuilder.create(state, race_props.joystick)
-        self.accept(self.props.keys.respawn, self.process_respawn)
+        keys = self.props.keys.players_keys[mediator.player_car_idx]
+        self.accept(keys.respawn, self.process_respawn)
 
     def on_frame(self):
         CarEvent.on_frame(self)
@@ -256,7 +266,8 @@ class CarPlayerEvent(CarEvent):
             self.mediator.gui.panel.unset_weapon()
         wpn_cls = CarEvent.on_bonus(self, wpn_cls)
         if not wpn_cls: return  # if removing
-        self.accept(self.props.keys.fire, self.on_fire)
+        keys = self.props.keys.players_keys[self.mediator.player_car_idx]
+        self.accept(keys.fire, self.on_fire)
         self.mediator.gui.panel.set_weapon(
             self.props.season_props.wpn2img[wpn_cls.__name__])
         return wpn_cls
@@ -293,10 +304,12 @@ class CarPlayerEvent(CarEvent):
 
     @once_a_frame
     def _get_input(self):
-        return self.input_bld.build(self.mediator.ai, self.eng.joystick_mgr)
+        return self.input_bld.build(self.mediator.ai, self.eng.joystick_mgr,
+                                    self.mediator.player_car_idx)
 
     def destroy(self):
-        evts = ['f11', 'f8', self.props.keys.fire, self.props.keys.respawn]
+        keys = self.props.keys.players_keys[self.mediator.player_car_idx]
+        evts = ['f11', 'f8', keys.fire, keys.respawn]
         map(self.ignore, evts)
         CarEvent.destroy(self)
 
