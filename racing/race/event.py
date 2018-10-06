@@ -105,7 +105,7 @@ class RaceEvent(EventColleague):
         if way_str:
             self.mediator.gui.way_txt.setText(way_str)
             self.mediator.gui.way_img.show()
-        elif not self.mediator.logic.player_car.logic.is_moving:
+        elif not self.mediator.logic.player_cars[0].logic.is_moving:
             respawn_key = self.mediator.logic.props.keys.respawn
             txt = _('press %s to respawn') % respawn_key
             self.mediator.gui.way_txt.setText(txt)
@@ -170,12 +170,12 @@ class RaceEventServer(RaceEvent):
 
     def on_frame(self):
         if not hasattr(self.mediator.logic, 'player_car') or \
-                not hasattr(self.mediator.logic.player_car, 'phys') or \
+                not hasattr(self.mediator.logic.player_cars[0], 'phys') or \
                 any([not hasattr(car, 'phys') for car in self.mediator.logic.cars]):
             return  # still loading; attach when the race has started
-        pos = self.mediator.logic.player_car.get_pos()
-        fwd = render.get_relative_vector(self.mediator.logic.player_car.gfx.nodepath.node, Vec3(0, 1, 0))
-        velocity = self.mediator.logic.player_car.get_linear_velocity()
+        pos = self.mediator.logic.player_cars[0].get_pos()
+        fwd = render.get_relative_vector(self.mediator.logic.player_cars[0].gfx.nodepath.node, Vec3(0, 1, 0))
+        velocity = self.mediator.logic.player_cars[0].get_linear_velocity()
         self.server_info['server'] = (pos, fwd, velocity)
         from yyagl.racing.car.car import NetworkCar
         for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
@@ -194,7 +194,7 @@ class RaceEventServer(RaceEvent):
 
     def __prepare_game_packet(self):
         packet = ['game_packet', self.yorg_client.myid]
-        for car in [self.mediator.logic.player_car] + self.mediator.logic.cars:
+        for car in self.mediator.logic.player_cars + self.mediator.logic.cars:
             name = carname2id[car.name]
             pos = car.gfx.nodepath.get_pos()
             fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))

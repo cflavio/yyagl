@@ -32,7 +32,7 @@ class DriverLoaderStrategy(GameObject):
                 pos = wp.node.get_pos()
         car_props = CarProps(
             r_p, load_car_name, pos, hpr,
-            lambda: DriverLoaderStrategy.load(cars, r_p, load_car_name, track,
+            lambda: DriverPlayerLoaderStrategy.load(cars, r_p, load_car_name, track,
                                               race, player_car_names, seas_p, aipoller, cb,
                                               yorg_client),
             race, drv.dprops.f_engine, drv.dprops.f_tires,
@@ -43,18 +43,29 @@ class DriverLoaderStrategy(GameObject):
 class DriverPlayerLoaderStrategy(GameObject):
 
     @staticmethod
-    def load(r_p, car_name, track, race, player_car_names, s_p, aipoller, cb, yorg_client):
-        cars = [car for car in r_p.season_props.car_names if car != car_name]
-        if r_p.a_i:
-            car_cls = AiCarPlayer
+    def load(loadcars, r_p, car_name, track, race, player_car_names, s_p, aipoller, cb, yorg_client):
+        if not loadcars: return cb()
+        eng = DriverLoaderStrategy.eng
+        car = loadcars.pop(0)
+        if car in player_car_names:
+            if r_p.a_i:
+                car_cls = AiCarPlayer
+            else:
+                car_cls = CarPlayer
+                if yorg_client and yorg_client.is_server_active:
+                    car_cls = CarPlayerServer
+                if yorg_client and yorg_client.is_client_active:
+                    car_cls = CarPlayerClient
+            race.logic.player_cars += [DriverLoaderStrategy.actual_load(
+                loadcars, car, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb, yorg_client)]
         else:
-            car_cls = CarPlayer
-            if yorg_client and yorg_client.is_server_active:
-                car_cls = CarPlayerServer
-            if yorg_client and yorg_client.is_client_active:
-                car_cls = CarPlayerClient
-        race.logic.player_car = DriverLoaderStrategy.actual_load(
-            cars, car_name, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb, yorg_client)
+            car_cls = Car
+            if eng.server.is_active or eng.client.is_active:
+                car_cls = NetworkCar  # if car in player_cars else Car
+            no_p = car not in player_car_names
+            car_cls = AiCar if no_p and race.__class__.__name__ == 'RaceSinglePlayer' else car_cls
+            race.logic.cars += [DriverLoaderStrategy.actual_load(
+                loadcars, car, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb, yorg_client)]
 
 
 class DriverLogic(LogicColleague):

@@ -89,7 +89,7 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         tuning = self.tuning.car2tuning[
-            self.rprops.season_props.player_car_name]
+            self.rprops.season_props.player_car_names[0]]
         txt = Text(
             _('engine: +') + str(tuning.f_engine),
             align='left', scale=.072, pos=(.8, -.7), font=self.font,

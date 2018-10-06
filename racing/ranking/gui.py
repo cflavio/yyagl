@@ -130,7 +130,7 @@ class RankingGui(GuiColleague):
         drv = next(
             driver for driver in page.drivers
             if driver.dprops.car_name == car_name)
-        is_player_car = car_name == page.rprops.season_props.player_car_name
+        is_player_car = car_name in page.rprops.season_props.player_car_names
         RankingGui.eng.log_mgr.log('%s %s %s %s' % (text % drv.logic.dprops.info.name, car_name, drv.logic.dprops.info.img_idx, is_player_car))
         name = text % drv.logic.dprops.info.name
         if '@' in name: name = name.split('@')[0] + '\1smaller\1@' + name.split('@')[1] + '\2'

@@ -18,8 +18,8 @@ class RaceLogic(LogicColleague):
     def __init__(self, mediator, rprops, yorg_client):
         self.load_txt = self.cam_tsk = self.cam_node = self.send_tsk = \
             self.cam_pivot = self.ready_clients = self.preview = \
-            self.curr_load_txt = self.track = self.cars = self.player_car = \
-            self.load_car = None
+            self.curr_load_txt = self.track = self.cars = self.load_car = None
+        self.player_cars = []
         self.props = rprops
         self.yorg_client = yorg_client
         LogicColleague.__init__(self, mediator)
@@ -32,38 +32,42 @@ class RaceLogic(LogicColleague):
         self.track = Track(r_p)
         self.track.attach_obs(self.on_track_loaded)
         for driver in self.props.drivers:
-            if driver.dprops.car_name == r_p.season_props.player_car_name:
+            if driver.dprops.car_name in r_p.season_props.player_car_name[0]:
                 self.load_car = lambda: DriverPlayerLoaderStrategy.load(
+                    self.props.season_props.car_names[:],
                     r_p, car_name, self.track, self.mediator, player_car_names,
                     self.props.season_props, self.ai_poller, self._on_loaded,
                     self.yorg_client)
+                break
         self.mediator.track = self.track  # facade this
 
     def _on_loaded(self):
         self.mediator.fsm.demand('Countdown', self.props.season_props)
 
     def on_track_loaded(self):
-        self.load_car()
         self.cars = []
+        self.load_car()
 
     def enter_play(self):
         self.track.detach_obs(self.on_track_loaded)
         self.track.reparent_to(self.eng.gfx.root)
-        self.player_car.reparent()
+        map(lambda pcar: pcar.reparent(), self.player_cars)
         map(lambda car: car.reparent(), self.cars)
 
     def start_play(self):
         self.eng.phys_mgr.start()
         self.eng.attach_obs(self.on_frame)
-        self.player_car.attach_obs(self.mediator.event.on_wrong_way)
-        self.player_car.logic.camera.render_all(self.track.gfx.model)  # workaround for prepare_scene (panda3d 1.9)
+        for player_car in self.player_cars:
+            player_car.attach_obs(self.mediator.event.on_wrong_way)
+            player_car.logic.camera.render_all(self.track.gfx.model)  # workaround for prepare_scene (panda3d 1.9)
         self.track.play_music()
         map(lambda car: car.reset_car(), self.all_cars)
         map(lambda car: car.start(), self.all_cars)
         map(lambda car: car.event.attach(self.on_rotate_all), self.all_cars)
         self.mediator.gui.start()
         ai_cars = [car.name for car in self.all_cars if car.__class__ == AiCar]
-        if self.props.a_i: ai_cars += [self.player_car.name]
+        for player_car in self.player_cars:
+            if self.props.a_i: ai_cars += [player_car.name]
         self.ai_poller.set_cars(ai_cars)
 
     def on_rotate_all(self, sender):
@@ -73,7 +77,7 @@ class RaceLogic(LogicColleague):
 
     @property
     def all_cars(self):
-        return [self.player_car] + self.cars
+        return self.player_cars + self.cars
 
     @property
     def nonplayer_cars(self):
@@ -88,24 +92,26 @@ class RaceLogic(LogicColleague):
 
     def on_frame(self):
         self.ai_poller.tick()
-        self.track.gfx.update(self.player_car.get_pos())
+        for player_car in self.player_cars:
+            self.track.gfx.update(player_car.get_pos())
         positions = [(car.name, car.get_pos()) for car in self.all_cars]
         self.mediator.gui.update_minimap(positions)
         if self.props.a_i:
-            self.track.phys.set_curr_wp(self.player_car.ai.curr_logic.curr_tgt_wp)
+            self.track.phys.set_curr_wp(self.player_cars[0].ai.curr_logic.curr_tgt_wp)  # for debug
         if self.mediator.fsm.getCurrentOrNextState() == 'Play':
-            self.player_car.upd_ranking(self.ranking())
-            if self.props.a_i:
-                self.player_car.gui.ai_panel.curr_wp = self.player_car.ai.curr_logic.curr_tgt_wp.get_name()[8:]
-                self.player_car.gui.ai_panel.curr_logic = self.player_car.ai.curr_logic.__class__.__name__
-                self.player_car.gui.ai_panel.curr_car_dot_traj = round(self.player_car.ai.curr_logic.car_dot_traj, 3)
-                self.player_car.gui.ai_panel.curr_obsts = self.player_car.ai.front_logic.get_obstacles()
-                self.player_car.gui.ai_panel.curr_obsts_back = self.player_car.ai.rear_logic.get_obstacles()
-                self.player_car.gui.ai_panel.curr_input = self.player_car.ai.get_input()
-                self.player_car.gui.upd_ai()
+            for player_car in self.player_cars:
+                player_car.upd_ranking(self.ranking())
+                if self.props.a_i:
+                    player_car.gui.ai_panel.curr_wp = player_car.ai.curr_logic.curr_tgt_wp.get_name()[8:]
+                    player_car.gui.ai_panel.curr_logic = player_car.ai.curr_logic.__class__.__name__
+                    player_car.gui.ai_panel.curr_car_dot_traj = round(player_car.ai.curr_logic.car_dot_traj, 3)
+                    player_car.gui.ai_panel.curr_obsts = player_car.ai.front_logic.get_obstacles()
+                    player_car.gui.ai_panel.curr_obsts_back = player_car.ai.rear_logic.get_obstacles()
+                    player_car.gui.ai_panel.curr_input = player_car.ai.get_input()
+                    player_car.gui.upd_ai()
 
     def ranking(self):
-        cars = [self.player_car] + self.cars
+        cars = self.player_cars + self.cars
         info = []
         for car in cars:
             curr_wp = car.last_wp_not_fork()
@@ -119,7 +125,7 @@ class RaceLogic(LogicColleague):
         return [car[0] for car in ranking_info]
 
     def race_ranking(self):
-        cars = [self.player_car] + self.cars
+        cars = self.player_cars + self.cars
         compl_ranking = []
         nlaps = self.props.laps
         for car in [car for car in cars if len(car.lap_times) == nlaps]:
@@ -133,7 +139,8 @@ class RaceLogic(LogicColleague):
         if self.yorg_client:
             self.yorg_client.is_server_active = False
             self.yorg_client.is_client_active = False
-        self.player_car.detach_obs(self.mediator.event.on_wrong_way)
+        for player_car in self.player_cars:
+            player_car.detach_obs(self.mediator.event.on_wrong_way)
         self.track.destroy()
         map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
         map(lambda car: car.destroy(), self.all_cars)

@@ -30,9 +30,10 @@ class RaceFsm(FsmColleague):
         self.mediator.gui.loading.exit_loading()
         self.mediator.event.notify('on_race_loaded')
         # eng.set_cam_pos((0, 0, 0))
-        if not self.mediator.logic.player_car: return  # we've closed the window
-        self.mediator.logic.player_car.attach_obs(self.mediator.event.on_wrong_way)
-        self.mediator.logic.player_car.attach_obs(self.mediator.event.on_end_race)
+        if not all(self.mediator.logic.player_cars): return  # we've closed the window
+        for player_car in self.mediator.logic.player_cars:
+            player_car.attach_obs(self.mediator.event.on_wrong_way)
+            player_car.attach_obs(self.mediator.event.on_end_race)
 
     def enterCountdown(self, sprops):
         self.eng.log_mgr.log('entering Countdown state')
@@ -42,7 +43,7 @@ class RaceFsm(FsmColleague):
         self.mediator.logic.enter_play()
         if self.shaders:
             self.eng.shader_mgr.toggle_shader()
-        cars = [self.mediator.logic.player_car] + self.mediator.logic.cars
+        cars = self.mediator.logic.player_cars + self.mediator.logic.cars
         map(lambda car: car.reset_car(), cars)
         map(lambda car: car.demand('Countdown'), cars)
         self.aux_launch_tsk = None
@@ -76,7 +77,7 @@ class RaceFsm(FsmColleague):
 
     def enterPlay(self):
         self.eng.log_mgr.log('entering Play state')
-        cars = [self.mediator.logic.player_car] + self.mediator.logic.cars
+        cars = self.mediator.logic.player_cars + self.mediator.logic.cars
         map(lambda car: car.demand('Play'), cars)
 
     def exitPlay(self):
@@ -87,9 +88,9 @@ class RaceFsm(FsmColleague):
 
     def enterResults(self, race_ranking):
         self.mediator.gui.results.show(
-            race_ranking, self.mediator.logic.player_car.lap_times,
+            race_ranking, self.mediator.logic.player_cars[0].lap_times,
             self.mediator.logic.drivers)
-        cars = [self.mediator.logic.player_car] + self.mediator.logic.cars
+        cars = self.mediator.logic.player_cars + self.mediator.logic.cars
         map(lambda car: car.demand('Results'), cars)
 
     def exitResults(self):
