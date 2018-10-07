@@ -649,7 +649,7 @@ class CarPlayerLogic(CarLogic):
         camera_cls = Camera if car_props.race_props.season_props.camera == 'top' else FPCamera
         self.camera = camera_cls(mediator.gfx.nodepath, car_props.race_props.camera_vec, self.mediator)
         start_pos = self.start_pos + (0, 0, 10000)
-        self.eng.do_later(.01, self.camera.camera.set_pos, [start_pos])
+        #self.eng.do_later(.01, self.camera.camera.set_pos, [start_pos])
         self.car_positions = []
         self.last_upd_dist_time = 0
         self.is_moving = True

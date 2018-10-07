@@ -58,15 +58,20 @@ class RaceLogic(LogicColleague):
 
     def set_display_regions(self):
         if len(self.player_cars) != 2: return
-        d_r = list(base.win.get_active_display_regions())[:1]
+        d_r = [base.win.get_active_display_regions()[0]]
         d_r[0].set_dimensions(0, .5, 0, 1)
         d_r += [base.win.make_display_region(.5, 1, 0, 1)]
         cam_node = Camera('cam')
         cam_np = NodePath(cam_node)
-        d_r[1].set_camera(cam_np)
+        d_r[-1].set_camera(cam_np)
         cam_np.reparentTo(render)
-        cameras = [dr.get_camera() for dr in d_r]
-        map(lambda cam: cam.node().get_lens().set_aspect_ratio(1), cameras)
+        self.cameras = [dr.get_camera() for dr in d_r]
+        self.mediator.event.accept('aspectRatioChanged', self.on_aspect_ratio_changed)
+        self.on_aspect_ratio_changed()
+
+    def on_aspect_ratio_changed(self):
+        a_r = base.get_aspect_ratio() / 2.0
+        map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras)
 
     def start_play(self):
         self.eng.phys_mgr.start()

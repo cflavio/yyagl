@@ -36,7 +36,8 @@ class Camera(GameObject):
         inertia_fact = max(0, min(1, self.ease(dist / self.inertia_dist))) if dist else 0
         return self.speed * inertia_fact
 
-    def get_camera(self): return base.win.get_active_display_regions()[self.car.player_car_idx].get_camera()
+    def get_camera(self):
+        return base.win.get_active_display_regions()[self.car.player_car_idx].get_camera()
 
     @staticmethod
     def new_val(val, tgt, incr):
