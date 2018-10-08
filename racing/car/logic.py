@@ -715,4 +715,4 @@ class CarPlayerLogic(CarLogic):
     def __check_wrong_way(self):
         if self.cprops.track_waypoints:
             way_str = _('wrong way') if self.direction < -.6 else ''
-            self.mediator.event.notify('on_wrong_way', way_str)
+            self.mediator.gui.on_wrong_way(way_str)

@@ -60,6 +60,21 @@ class LibraryPanda3D(Library, DirectObject):
         self.__notify = DirectNotify().newCategory('ya2')
         self.__init_win()
         self.__init_fonts(green, red)
+        base.a2dTopQuarter = base.aspect2d.attachNewNode('a2dTopQuarter')
+        base.a2dTopQuarter.setPos(base.a2dLeft / 2.0, 0, base.a2dTop)
+        base.a2dTopThirdQuarter = base.aspect2d.attachNewNode('a2dTopThirdQuarter')
+        base.a2dTopThirdQuarter.setPos(base.a2dRight / 2.0, 0, base.a2dTop)
+        base.a2dBottomQuarter = base.aspect2d.attachNewNode('a2dBottomQuarter')
+        base.a2dBottomQuarter.setPos(base.a2dLeft / 2.0, 0, base.a2dBottom)
+        base.a2dBottomThirdQuarter = base.aspect2d.attachNewNode('a2dBottomThirdQuarter')
+        base.a2dBottomThirdQuarter.setPos(base.a2dRight / 2.0, 0, base.a2dBottom)
+        self.accept('aspectRatioChanged', self.on_aspect_ratio_changed)
+
+    def on_aspect_ratio_changed(self):
+        base.a2dTopQuarter.setPos(base.a2dLeft / 2.0, 0, base.a2dTop)
+        base.a2dTopThirdQuarter.setPos(base.a2dRight / 2.0, 0, base.a2dTop)
+        base.a2dBottomQuarter.setPos(base.a2dLeft / 2.0, 0, base.a2dBottom)
+        base.a2dBottomThirdQuarter.setPos(base.a2dRight / 2.0, 0, base.a2dBottom)
 
     def has_window(self): return bool(base.win)
 

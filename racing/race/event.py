@@ -101,19 +101,6 @@ class RaceEvent(EventColleague):
     def register_menu(self):
         self.accept('escape-up', self.fire_ingame_menu)
 
-    def on_wrong_way(self, way_str):
-        if way_str:
-            self.mediator.gui.way_txt.setText(way_str)
-            self.mediator.gui.way_img.show()
-        elif not self.mediator.logic.player_cars[0].logic.is_moving:
-            respawn_key = self.mediator.logic.props.keys.respawn
-            txt = _('press %s to respawn') % respawn_key
-            self.mediator.gui.way_txt.setText(txt)
-            self.mediator.gui.way_img.hide()
-        else:
-            self.mediator.gui.way_txt.setText('')
-            self.mediator.gui.way_img.hide()
-
     def on_end_race(self):
         points = [10, 8, 6, 4, 3, 2, 1, 0]
         zipped = zip(self.mediator.logic.race_ranking(), points)

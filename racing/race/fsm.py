@@ -32,7 +32,6 @@ class RaceFsm(FsmColleague):
         # eng.set_cam_pos((0, 0, 0))
         if not all(self.mediator.logic.player_cars): return  # we've closed the window
         for player_car in self.mediator.logic.player_cars:
-            player_car.attach_obs(self.mediator.event.on_wrong_way)
             player_car.attach_obs(self.mediator.event.on_end_race)
 
     def enterCountdown(self, sprops):

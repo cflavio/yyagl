@@ -70,14 +70,13 @@ class RaceLogic(LogicColleague):
         self.on_aspect_ratio_changed()
 
     def on_aspect_ratio_changed(self):
-        a_r = base.get_aspect_ratio() / 2.0
+        a_r = base.getAspectRatio() / 2.0
         map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras)
 
     def start_play(self):
         self.eng.phys_mgr.start()
         self.eng.attach_obs(self.on_frame)
         for player_car in self.player_cars:
-            player_car.attach_obs(self.mediator.event.on_wrong_way)
             player_car.logic.camera.render_all(self.track.gfx.model)  # workaround for prepare_scene (panda3d 1.9)
         self.track.play_music()
         map(lambda car: car.reset_car(), self.all_cars)
@@ -158,8 +157,6 @@ class RaceLogic(LogicColleague):
         if self.yorg_client:
             self.yorg_client.is_server_active = False
             self.yorg_client.is_client_active = False
-        for player_car in self.player_cars:
-            player_car.detach_obs(self.mediator.event.on_wrong_way)
         self.track.destroy()
         map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
         map(lambda car: car.destroy(), self.all_cars)

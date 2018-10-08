@@ -139,18 +139,22 @@ class CarParameters(GameObject):
 
 class CarPanel(GameObject):
 
-    def __init__(self, race_props):
+    def __init__(self, race_props, player_idx, ncars):
         GameObject.__init__(self)
         self.race_props = race_props
+        self.player_idx = player_idx
         sprops = self.race_props.season_props
         menu_args = sprops.gameprops.menu_args
-        pars = {'scale': .065, 'parent': base.a2dTopRight,
+        parent_tr = base.a2dTopCenter if player_idx == 0 else base.a2dTopRight
+        parent_tl = base.a2dTopLeft if player_idx == 0 else base.a2dTopCenter
+        parent_bl = base.a2dBottomLeft if player_idx == 0 else base.a2dBottomCenter
+        pars = {'scale': .065, 'parent': parent_tr,
                 'fg': menu_args.text_active, 'align': TextNode.A_left,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
         self.speed_txt = OnscreenText(pos=(-.18, -.1), **pars)
         self.speed_txt['align'] = TextNode.A_center
         self.speed_c = Circle(
-            size=.1, pos=(-.18, -.1), parent=base.a2dTopRight, ray=.4,
+            size=.1, pos=(-.18, -.1), parent=parent_tr, ray=.4,
             width=.05, color_start=(.9, .6, .1, 1), color_end=(.2, .8, .2, 1))
         lap_str = '1/' + str(self.race_props.laps)
         self.lap_txt = OnscreenText(text=lap_str, pos=(-.24, -.2), **pars)
@@ -159,7 +163,7 @@ class CarPanel(GameObject):
         self.ranking_txt = OnscreenText(pos=(-.24, -.3), **pars)
         self.damages_img = OnscreenImage(
             'assets/images/gui/car_icon.txo',
-            scale=(.12, 1, .12), parent=base.a2dBottomLeft, pos=(.46, 1, .12))
+            scale=(.12, 1, .12), parent=parent_bl, pos=(.46, 1, .12))
         self.damages_img.set_transparency(True)
         self.damages_img.set_color_scale(menu_args.text_normal)
         self.damages_img.set_r(90)
@@ -173,14 +177,17 @@ class CarPanel(GameObject):
         self.best_lab = OnscreenText(_('best lap:'), pos=(-.3, -.6), **pars)
         self.ranking_lab = OnscreenText(_('ranking:'), pos=(-.3, -.3), **pars)
         self.damages_lab = OnscreenText(_('damages:'), pos=(.3, .1), **pars)
-        self.damages_lab.reparent_to(base.a2dBottomLeft)
+        self.damages_lab.reparent_to(parent_bl)
         self.weapon_lab = OnscreenText(
-            _('weapon'), pos=(.18, -.08), scale=.05, parent=base.a2dTopLeft,
+            _('weapon'), pos=(.18, -.08), scale=.05, parent=parent_tl,
             fg=menu_args.text_normal, font=self.eng.font_mgr.load_font(sprops.font))
         self.weapon_img = None
+        if ncars == 1: parent = base.a2dTopCenter
+        elif player_idx == 0: parent = base.a2dTopQuarter
+        else: parent = base.a2dTopThirdQuarter
         self.forward_img = OnscreenImage(
             'assets/images/gui/direction.txo',
-            scale=.15, parent=base.a2dTopCenter, pos=(0, 1, -.2))
+            scale=.15, parent=parent, pos=(0, 1, -.2))
         self.forward_img.set_transparency(True)
         self.forward_img.hide()
 
@@ -189,9 +196,10 @@ class CarPanel(GameObject):
 
     def set_weapon(self, wpn):
         self.weapon_lab.show()
+        parent_tl = base.a2dTopLeft if self.player_idx == 0 else base.a2dTopCenter
         self.weapon_img = OnscreenImage(
             'assets/images/weapons/%s.txo' % wpn,
-            scale=.12, parent=base.a2dTopLeft, pos=(.18, 1, -.24))
+            scale=.12, parent=parent_tl, pos=(.18, 1, -.24))
         self.weapon_img.set_transparency(True)
 
     def unset_weapon(self):
@@ -289,10 +297,24 @@ class CarPlayerGui(CarGui):
 
     def __init__(self, mediator, car_props):
         self.race_props = car_props
+        ncars = len(self.race_props.season_props.player_car_names)
         CarGui.__init__(self, mediator)
         self.pars = CarParameters(mediator.phys, mediator.logic)
-        self.panel = CarPanel(car_props)
+        self.panel = CarPanel(car_props, mediator.player_car_idx, ncars)
         self.ai_panel = CarAIPanel()
+        if ncars == 1: parent = base.a2dBottomCenter
+        elif mediator.player_car_idx == 0: parent = base.a2dBottomQuarter
+        else: parent = base.a2dBottomThirdQuarter
+        self.way_txt = OnscreenText(
+            '', pos=(0, .1), scale=.1,
+            fg=self.race_props.season_props.gameprops.menu_args.text_err,
+            parent=parent,
+            font=self.eng.font_mgr.load_font(self.race_props.season_props.font))
+        self.way_img = OnscreenImage(
+            'assets/images/gui/arrow_circle.txo', scale=.12, parent=parent,
+            pos=(0, 1, .3))
+        self.way_img.set_transparency(True)
+        self.way_img.hide()
 
     def upd_ranking(self, ranking):
         r_i = ranking.index(self.mediator.name) + 1
@@ -316,8 +338,23 @@ class CarPlayerGui(CarGui):
         self.panel.hide()
         self.ai_panel.hide()
 
+    def on_wrong_way(self, way_str):
+        if way_str:
+            self.way_txt.setText(way_str)
+            self.way_img.show()
+        elif not self.mediator.logic.is_moving:
+            keys = self.race_props.keys.players_keys[self.mediator.player_car_idx]
+            txt = _('press %s to respawn') % keys.respawn
+            self.way_txt.setText(txt)
+            self.way_img.hide()
+        else:
+            self.way_txt.setText('')
+            self.way_img.hide()
+
     def destroy(self):
         map(lambda wdg: wdg.destroy(), [self.pars, self.panel, self.ai_panel])
+        self.way_txt.destroy()
+        self.way_img.destroy()
         GuiColleague.destroy(self)
 
 
