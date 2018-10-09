@@ -66,6 +66,7 @@ class RaceEvent(EventColleague):
         EventColleague.__init__(self, mediator)
         self.yorg_client = yorg_client
         self.menu_cls = menu_cls
+        self.ended_cars = []
         if not (self.eng.server.is_active or self.eng.client.is_active):
             self.accept(keys.pause, self.eng.toggle_pause)
         self.last_sent = globalClock.get_frame_time()  # for networking
@@ -101,7 +102,9 @@ class RaceEvent(EventColleague):
     def register_menu(self):
         self.accept('escape-up', self.fire_ingame_menu)
 
-    def on_end_race(self):
+    def on_end_race(self, player_name):
+        self.ended_cars += [player_name]
+        if not all(pcar in self.ended_cars for pcar in self.mediator.logic.props.season_props.player_car_names): return
         points = [10, 8, 6, 4, 3, 2, 1, 0]
         zipped = zip(self.mediator.logic.race_ranking(), points)
         race_ranking = {car: point for car, point in zipped}

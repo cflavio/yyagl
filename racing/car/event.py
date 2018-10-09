@@ -44,7 +44,7 @@ class InputBuilder(object):
 
     @staticmethod
     def create(state, joystick):
-        if state == 'Results':
+        if state in ['Waiting', 'Results']:
             return InputBuilderAi()
         elif joystick:
             return InputBuilderJoystick()
@@ -54,7 +54,7 @@ class InputBuilder(object):
 
 class InputBuilderAi(InputBuilder):
 
-    def build(self, ai, joystick_mgr):
+    def build(self, ai, joystick_mgr, player_car_idx):
         return ai.get_input()
 
 
@@ -227,7 +227,8 @@ class CarPlayerEvent(CarEvent):
         CarEvent.__init__(self, mediator, race_props, yorg_client)
         if not self.eng.is_runtime:
             self.accept('f11', self.mediator.gui.pars.toggle)
-            self.accept('f8', self._process_end_goal)
+            suff = str(8 + mediator.player_car_idx)
+            self.accept('f' + suff, self._process_end_goal)
         state = self.mediator.fsm.getCurrentOrNextState()
         self.input_bld = InputBuilder.create(state, race_props.joystick)
         keys = self.props.keys.players_keys[mediator.player_car_idx]
@@ -289,7 +290,8 @@ class CarPlayerEvent(CarEvent):
         self.mediator.audio.lap_sfx.play()
 
     def _process_end_goal(self):
-        self.notify('on_end_race')
+        self.mediator.fsm.demand('Waiting')
+        self.notify('on_end_race', self.mediator.name)
 
     def _process_goal(self):
         CarEvent._process_goal(self)

@@ -143,6 +143,7 @@ class CarPanel(GameObject):
         GameObject.__init__(self)
         self.race_props = race_props
         self.player_idx = player_idx
+        self.ncars = ncars
         sprops = self.race_props.season_props
         menu_args = sprops.gameprops.menu_args
         parent_tr = base.a2dTopCenter if player_idx == 0 else base.a2dTopRight
@@ -193,6 +194,20 @@ class CarPanel(GameObject):
 
     def __close_vec(self, vec1, vec2):
         return all(abs(b - a) < .01 for a, b in zip(vec1, vec2))
+
+    def enter_waiting(self):
+        if self.ncars == 1: parent = base.aspect2d
+        elif self.player_idx == 0: parent = base.a2dCenterQuarter
+        else: parent = base.a2dCenterThirdQuarter
+        menu_args = self.race_props.season_props.gameprops.menu_args
+        pars = {'scale': .065, 'parent': parent,
+                'fg': menu_args.text_normal,
+                'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
+        self.wait_lab = OnscreenText(_('waiting for the other players'),
+                                     pos=(0, 0), **pars)
+
+    def exit_waiting(self):
+        self.wait_lab.destroy()
 
     def set_weapon(self, wpn):
         self.weapon_lab.show()
