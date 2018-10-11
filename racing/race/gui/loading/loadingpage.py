@@ -107,8 +107,9 @@ class LoadingPageGui(PageGui):
         self.widgets += [txt]
 
     def __cmd_label(self, text, key, pos_z):
+        _key = getattr(self.rprops.keys.players_keys[0], key)
         txt = Text(
-            text + ': ' + getattr(self.rprops.keys.players_keys[0], key),
+            text + ': ' + self.eng.event.key2desc(_key),
             align='left', scale=.072, pos=(.8, pos_z), font=self.font,
             fg=self.text_bg)
         self.widgets += [txt]

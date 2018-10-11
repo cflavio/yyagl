@@ -359,7 +359,7 @@ class CarPlayerGui(CarGui):
             self.way_img.show()
         elif not self.mediator.logic.is_moving:
             keys = self.race_props.keys.players_keys[self.mediator.player_car_idx]
-            txt = _('press %s to respawn') % keys.respawn
+            txt = _('press %s to respawn') % self.eng.event.key2desc(keys.respawn)
             self.way_txt.setText(txt)
             self.way_img.hide()
         else:
