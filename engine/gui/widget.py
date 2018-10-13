@@ -134,12 +134,12 @@ class OptionMenuWidget(BtnWidget):
             return
         else:
             nodepath.selectHighlightedIndex()
-            idx = nodepath.selectedIndex
+            idx = nodepath.selected_idx
             if nodepath['command']: nodepath['command'](nodepath['items'][idx])
             nodepath.hidePopupMenu()
             idx += -1 if idx else 1
             fcol = nodepath.component('item%s' % idx)['frameColor']
-            curr_name = 'item%s' % nodepath.selectedIndex
+            curr_name = 'item%s' % nodepath.selected_idx
             nodepath._unhighlightItem(nodepath.component(curr_name), fcol)
             return True
         BtnWidget.on_enter(self)

@@ -1,4 +1,4 @@
-from yyagl.gameobject import GameObject, AiColleague, AudioColleague
+from yyagl.gameobject import GameObject, AiColleague
 from yyagl.facade import Facade
 from .fsm import CarFsm
 from .gfx import CarGfx, CarPlayerGfx
@@ -33,7 +33,7 @@ class CarFacade(Facade):
 
     def __init__(self):
         self._fwd_mth('last_wp_not_fork',
-                           lambda obj: obj.logic.last_wp_not_fork)
+                      lambda obj: obj.logic.last_wp_not_fork)
         self._fwd_mth('not_fork_wps', lambda obj: obj.logic.not_fork_wps)
         self._fwd_mth('reparent', lambda obj: obj.gfx.reparent)
         self._fwd_mth('attach_obs', lambda obj: obj.event.attach)
@@ -75,7 +75,8 @@ class Car(GameObject, CarFacade):
              ('phys', self.phys_cls, [self, car_props]),
              ('logic', self.logic_cls, [self, car_props]),
              ('gui', self.gui_cls, [self, car_props.race_props]),
-             ('event', self.event_cls, [self, car_props.race_props, yorg_client]),
+             ('event', self.event_cls, [self, car_props.race_props,
+                                        yorg_client]),
              ('ai', self.ai_cls, [self, car_props])],
             [('audio', self.audio_cls, [self, car_props.race_props])]]
         GameObject.__init__(self, init_lst, car_props.callback)

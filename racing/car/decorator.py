@@ -1,4 +1,3 @@
-from direct.actor.Actor import Actor
 from yyagl.gameobject import GameObject
 
 
@@ -6,7 +5,8 @@ class Decorator(GameObject):
 
     def __init__(self, fpath, parent):
         GameObject.__init__(self)
-        self.gfx_np = self.eng.load_model(fpath, anim={'anim': fpath + '-Anim'})
+        anim_dct = {'anim': fpath + '-Anim'}
+        self.gfx_np = self.eng.load_model(fpath, anim=anim_dct)
         self.gfx_np.loop('anim')
         #self.gfx_np.flatten_light()
         self.gfx_np.reparent_to(parent)

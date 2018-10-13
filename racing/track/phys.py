@@ -1,5 +1,5 @@
-from panda3d.core import LineSegs, BitMask32, Point2, Point3
-from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
+from panda3d.core import BitMask32
+from yyagl.computer_proxy import ComputerProxy, compute_once
 from yyagl.gameobject import PhysColleague, GameObject
 from yyagl.racing.weapon.bonus.bonus import Bonus
 from yyagl.racing.bitmasks import BitMasks
@@ -43,10 +43,12 @@ class MeshBuilder(GameObject):
         meth(nodepath.get_node())
         lst += [nodepath.get_node()]
         nodepath.get_node().notify_collisions(True)
+        bit = BitMask32.bit
         if not is_merged:
-            nodepath.set_collide_mask(BitMask32.bit(BitMasks.track) | BitMask32.bit(BitMasks.track_merged))
+            bmask = bit(BitMasks.track) | bit(BitMasks.track_merged)
+            nodepath.set_collide_mask(bmask)
         if is_ghost:
-            nodepath.set_collide_mask(BitMask32.bit(BitMasks.ghost))
+            nodepath.set_collide_mask(bit(BitMasks.ghost))
 
     def destroy(self):
         self.model = self.rigid_bodies = self.ghosts = self.nodes = None
@@ -90,7 +92,8 @@ class Waypoint(object):
 
     def set_prevs(self, waypoints, prev_name, wp_root, wpstr):
         prevs = self.node.get_tag(prev_name).split(',')
-        prev_nodes =  [wp_root.find(wpstr + idx) for idx in prevs]
+        prev_nodes = [wp_root.find(wpstr + idx) for idx in prevs]
+
         def find_wp(name):
             for wayp in waypoints:
                 if wayp.name == name: return wayp
@@ -141,10 +144,11 @@ class TrackPhys(PhysColleague, ComputerProxy):
         self.__hide_all_models()
 
     def __set_meshes(self):
+        rprops = self.race_props
         builders = [
-            MeshBuilderUnmerged(self.model, self.race_props.unmerged_names, False),
-            MeshBuilderMerged(self.model, self.race_props.merged_names, False),
-            MeshBuilderMerged(self.model, self.race_props.ghost_names, True)]
+            MeshBuilderUnmerged(self.model, rprops.unmerged_names, False),
+            MeshBuilderMerged(self.model, rprops.merged_names, False),
+            MeshBuilderMerged(self.model, rprops.ghost_names, True)]
         for bld in builders:
             self.nodes += bld.nodes
             self.ghosts += bld.ghosts
@@ -294,7 +298,8 @@ class TrackPhys(PhysColleague, ComputerProxy):
     def create_bonus(self, pos):
         self.eng.log('created bonus', True)
         prs = self.race_props
-        bonus = Bonus(pos, prs.bonus_model, prs.bonus_suff, self, self.mediator.gfx)
+        bonus = Bonus(pos, prs.bonus_model, prs.bonus_suff, self,
+                      self.mediator.gfx)
         self.bonuses += [bonus]
         bonus.attach_obs(self.on_bonus_collected)
 

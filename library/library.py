@@ -24,13 +24,16 @@ class Library(object):
 
     def remove_task(self, tsk): pass
 
-    def init(self, green=(.2, .8, .2, 1), red=(.8, .2, .2, 1)): pass
+    @staticmethod
+    def init(green=(.2, .8, .2, 1), red=(.8, .2, .2, 1), end_cb=None):
+        pass
 
     def load_font(self, fpath, outline=True): pass
 
     def log(self, msg): pass
 
-    def version(self): pass
+    @staticmethod
+    def version(): pass
 
     def lib_commit(self): pass
 

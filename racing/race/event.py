@@ -292,7 +292,7 @@ class RaceEventServer(RaceEvent):
                     curr_wpn = self.__lookup_wpn(car, wpn, wpn_id, wpn_pos, wpn_fwd)
                     if not curr_wpn:
                         if car.logic.weapon:
-                            car.event.set_fired_weapon(wpn, wpn_pos, wpn_fwd)
+                            car.event.set_fired_weapon()
                     else:
                         curr_wpn.update_fired_props(wpn_pos, wpn_fwd)
                 self.__clean_fired_weapons(car, fired_weapons)
@@ -419,7 +419,7 @@ class RaceEventClient(RaceEvent):
                         curr_wpn = self.__lookup_wpn(car, wpn, wpn_id, wpn_pos, wpn_fwd)
                         if not curr_wpn:
                             if car.logic.weapon:
-                                car.event.set_fired_weapon(wpn, wpn_pos, wpn_fwd)
+                                car.event.set_fired_weapon()
                         else:
                             curr_wpn.update_fired_props(wpn_pos, wpn_fwd)
                     self.__clean_fired_weapons(car, fired_weapons)

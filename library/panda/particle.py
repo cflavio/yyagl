@@ -2,7 +2,7 @@ from math import pi, sin, cos
 from random import uniform
 from panda3d.core import GeomVertexArrayFormat, Geom, GeomVertexFormat, \
     GeomVertexData, GeomVertexWriter, GeomPoints, OmniBoundingVolume, \
-    GeomNode, Shader, Vec3
+    GeomNode, Vec3
 from yyagl.library.panda.shader import load_shader
 
 
@@ -20,18 +20,21 @@ class PandaParticle(object):
         _format = GeomVertexFormat()
         _format.add_array(array)
         _format = GeomVertexFormat.register_format(_format)
-        if not PandaParticle._vdata:  #TODO: use python buffer protocol in place of this
+        npart = PandaParticle.num_particles
+        if not PandaParticle._vdata:
+            # TODO: use python buffer protocol in place of this
             vdata = GeomVertexData('info', _format, Geom.UHStatic)
             vdata.set_num_rows(1)
             vertex = GeomVertexWriter(vdata, 'init_vel')
-            map(lambda vtx: vertex.add_data3f(*vtx), PandaParticle.__init_velocities())
+            vels = PandaParticle.__init_velocities()
+            map(lambda vtx: vertex.add_data3f(*vtx), vels)
             start_time = GeomVertexWriter(vdata, 'start_particle_time')
-            rates = [(PandaParticle.rate * i, 0, 0) for i in range(PandaParticle.num_particles)]
+            rates = [(PandaParticle.rate * i, 0, 0) for i in range(npart)]
             map(lambda vtx: start_time.add_data3f(*vtx), rates)
             PandaParticle._vdata = vdata
         vdata = PandaParticle._vdata
         prim = GeomPoints(Geom.UH_static)
-        prim.add_next_vertices(PandaParticle.num_particles)
+        prim.add_next_vertices(npart)
         geom = Geom(vdata)
         geom.add_primitive(prim)
         geom.set_bounds(OmniBoundingVolume())
@@ -60,10 +63,12 @@ class PandaParticle(object):
         return vels
 
     @staticmethod
-    def set_shader(np, color, tot_time):
-        shader = load_shader('yyagl/assets/shaders/particle.vert', 'yyagl/assets/shaders/particle.frag')
+    def set_shader(nodepath, color, tot_time):
+        path = 'yyagl/assets/shaders/'
+        shader = load_shader(path + 'particle.vert', path + 'particle.frag')
         if not shader: return
-        np.node.set_shader(shader)
-        np.node.set_shader_input('color', color)
-        np.node.set_shader_input('start_time', globalClock.get_frame_time())
-        np.node.set_shader_input('tot_time', tot_time)
+        nodepath.node.set_shader(shader)
+        inputs = [('color', color),
+                  ('start_time', globalClock.get_frame_time()),
+                  ('tot_time', tot_time)]
+        map(lambda inp: nodepath.node.set_shader_input(*inp), inputs)

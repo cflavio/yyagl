@@ -1,9 +1,7 @@
 from os.path import exists
 from os import system
 from sys import executable
-from itertools import product
-from panda3d.core import BitMask32, NodePath, OmniBoundingVolume, LPoint3f, \
-    Point2, Point3, LineSegs
+from panda3d.core import NodePath, LPoint3f, LineSegs
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.engine.gfx import AnimNode, AmbientLight, Spotlight
 from yyagl.gameobject import GfxColleague
@@ -14,7 +12,7 @@ class TrackGfx(GfxColleague):
 
     def __init__(self, mediator, race_props):
         self.ambient_np = self.spot_lgt = self.model = self.empty_models = \
-            self.signs = None
+            self.signs = self.ambient = None
         self.__anim_nodes = []
         self.__flat_roots = {}
         self.raceprops = race_props
@@ -54,7 +52,8 @@ class TrackGfx(GfxColleague):
         self.model.premunge_scene()
         GfxColleague.async_bld(self)
 
-    def __cloned_root(self, model):
+    @staticmethod
+    def __cloned_root(model):
         cloned_root = NodePath(model.get_name())
         cloned_root.reparent_to(model.get_parent())
         cloned_root.set_pos(model.get_pos())

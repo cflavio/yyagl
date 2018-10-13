@@ -1,7 +1,6 @@
 class GfxMgr(object):
 
-    @staticmethod
-    def init(model_path, antialiasing): pass
+    def init(self, model_path, antialiasing, shaders): pass
 
     def load_model(self, filename, callback=None, extra_args=[], anim=None):
         pass

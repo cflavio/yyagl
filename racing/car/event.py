@@ -3,9 +3,10 @@ from itertools import chain
 from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import EventColleague
-from yyagl.racing.race.event import NetMsgs, wpnclasses2id
+from yyagl.racing.race.event import wpnclasses2id
 from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
-from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNetwork
+from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, \
+    RearRocketNetwork
 from yyagl.racing.weapon.turbo.turbo import Turbo, TurboNetwork
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
 from yyagl.racing.weapon.mine.mine import Mine, MineNetwork
@@ -118,8 +119,11 @@ class CarEvent(EventColleague, ComputerProxy):
         if any(obj_name.startswith(wpn_name) for wpn_name in weapons):
             int_lat = 10000
             int_rot = 20000
-            self.mediator.phys.pnode.apply_central_force((choice([-int_lat, int_lat]), choice([-int_lat, int_lat]), 96000))
-            self.mediator.phys.pnode.apply_torque((0, 0, choice([-int_rot, int_rot])))
+            rndval = lambda: choice([-int_lat, int_lat])
+            frc = rndval(), rnval(), 96000
+            self.mediator.phys.pnode.apply_central_force(frc)
+            torque = choice([-int_rot, int_rot])
+            self.mediator.phys.pnode.apply_torque((0, 0, torque))
 
     def on_bonus(self, cls=None, wpn_id=None):
         if self.mediator.logic.weapon:
@@ -150,7 +154,8 @@ class CarEvent(EventColleague, ComputerProxy):
             MineNetwork: self.props.mine_path}
         path = wpn2path[wpn_cls]
         self.mediator.logic.weapon = wpn_cls(
-            self.mediator, path, self.props.season_props.car_names, part_path, wpn_id or self.curr_wpn_id)
+            self.mediator, path, self.props.season_props.car_names, part_path,
+            wpn_id or self.curr_wpn_id)
         self.curr_wpn_id += 1
         self.mediator.logic.weapon.attach_obs(self.on_rotate_all)
         return wpn_cls
@@ -175,7 +180,8 @@ class CarEvent(EventColleague, ComputerProxy):
         lap_times = self.mediator.logic.lap_times
         if self.mediator.logic.lap_time_start:
             lap_times += [self.mediator.logic.lap_time]
-            self._process_nonstart_goals(1 + len(lap_times), self.mediator.laps)
+            self._process_nonstart_goals(1 + len(lap_times),
+                                         self.mediator.laps)
         self.mediator.logic.lap_time_start = self.eng.curr_time
 
     def _process_nonstart_goals(self, lap_number, laps):
@@ -185,7 +191,8 @@ class CarEvent(EventColleague, ComputerProxy):
         last_wp = self.mediator.logic.last_wp
         start_wp_n, end_wp_n = last_wp.prev, last_wp.next
         self.mediator.gfx.nodepath.set_pos(start_wp_n.pos + (0, 0, 2))
-        wp_vec = Vec(end_wp_n.node.get_pos(start_wp_n.node).x, end_wp_n.node.get_pos(start_wp_n.node).y, 0).normalize()
+        endpos = end_wp_n.node.get_pos(start_wp_n.node)
+        wp_vec = Vec(endpos.x, endpos.y, 0).normalize()
         or_h = (wp_vec.xy).signed_angle_deg(Vec2(0, 1))
         self.mediator.gfx.nodepath.set_hpr((-or_h, 0, 0))
         self.mediator.gfx.nodepath.get_node().set_linear_velocity(0)
@@ -193,7 +200,8 @@ class CarEvent(EventColleague, ComputerProxy):
 
     def on_frame(self):
         _input = self._get_input()
-        if self.mediator.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']:
+        states = ['Loading', 'Countdown']
+        if self.mediator.fsm.getCurrentOrNextState() in states:
             _input = DirKeys(*[False for _ in range(4)])
             self.mediator.logic.reset_car()
         self.__update_contact_pos()
@@ -241,11 +249,11 @@ class CarPlayerEvent(CarEvent):
             self.mediator.fsm.getCurrentOrNextState() == 'Countdown',
             self.mediator.logic.is_rotating)
         self.mediator.audio.update(self.mediator.logic.is_skidmarking,
-                              self.mediator.phys.lin_vel_ratio,
-                              self._get_input(),
-                              self.mediator.logic.is_drifting,
-                              self.mediator.phys.is_flying,
-                              self.mediator.logic.is_rolling)
+                                   self.mediator.phys.lin_vel_ratio,
+                                   self._get_input(),
+                                   self.mediator.logic.is_drifting,
+                                   self.mediator.phys.is_flying,
+                                   self.mediator.logic.is_rolling)
 
     def on_collision(self, obj, tgt_obj):
         CarEvent.on_collision(self, obj, tgt_obj)
@@ -262,22 +270,22 @@ class CarPlayerEvent(CarEvent):
             if obj != tgt_obj.get_python_tag('car').phys.pnode:
                 self.mediator.audio.rocket_hit_sfx.play()
 
-    def on_bonus(self, wpn_cls=None):
-        if self.mediator.logic.weapon:
-            self.mediator.gui.panel.unset_weapon()
-        wpn_cls = CarEvent.on_bonus(self, wpn_cls)
-        if not wpn_cls: return  # if removing
+    def on_bonus(self, cls=None, wpn_id=None):
+        if self.mediator.logic.weapon: self.mediator.gui.panel.unset_weapon()
+        cls = CarEvent.on_bonus(self, cls)
+        if not cls: return  # if removing
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
         self.accept(keys.fire, self.on_fire)
         self.mediator.gui.panel.set_weapon(
-            self.props.season_props.wpn2img[wpn_cls.__name__])
-        return wpn_cls
+            self.props.season_props.wpn2img[cls.__name__])
+        return cls
 
     def on_fire(self):
-        self.ignore(self.props.keys.fire)
+        keys = self.props.keys.players_keys[self.mediator.player_car_idx]
+        self.ignore(keys.fire)
         self.mediator.logic.fire()
         self.mediator.gui.panel.unset_weapon()
-        self.ignore(self.props.keys.fire)
+        self.ignore(keys.fire)
 
     def _process_wall(self):
         CarEvent._process_wall(self)
@@ -295,12 +303,12 @@ class CarPlayerEvent(CarEvent):
 
     def _process_goal(self):
         CarEvent._process_goal(self)
-        lap_times = self.mediator.logic.lap_times
-        is_best = not lap_times or min(lap_times) > self.mediator.logic.lap_time
-        if self.mediator.logic.lap_time_start and (not lap_times or is_best):
+        logic = self.mediator.logic
+        is_best = not logic.lap_times or min(logic.lap_times) > logic.lap_time
+        if logic.lap_time_start and (not logic.lap_times or is_best):
             self.mediator.gui.panel.best_txt.setText(
                 self.mediator.gui.panel.time_txt.getText())
-        if len(lap_times) == self.mediator.laps:
+        if len(logic.lap_times) == self.mediator.laps:
             self._process_end_goal()
         # self.on_bonus()  # to test weapons
 
@@ -332,20 +340,22 @@ class CarPlayerEventClient(CarPlayerEvent):
     def on_frame(self):
         CarPlayerEvent.on_frame(self)
         pos = self.mediator.pos
-        fwd = render.get_relative_vector(self.mediator.gfx.nodepath.node, Vec3(0, 1, 0))
-        velocity = self.mediator.phys.vehicle.get_chassis().get_linear_velocity()
-        ang_vel = self.mediator.phys.vehicle.get_chassis().get_angular_velocity()
+        gfx = self.mediator.gfx
+        vehicle = self.mediator.phys.vehicle
+        fwd = render.get_relative_vector(gfx.nodepath.node, Vec3(0, 1, 0))
+        velocity = vehicle.get_chassis().get_linear_velocity()
+        ang_vel = vehicle.get_chassis().get_angular_velocity()
         curr_inp = self._get_input()
         inp = [curr_inp.forward, curr_inp.rear, curr_inp.left, curr_inp.right]
-        eng_frc = self.mediator.phys.vehicle.get_wheel(0).get_engine_force()
-        brk_frc_fwd = self.mediator.phys.vehicle.get_wheel(0).get_brake()
-        brk_frc_rear = self.mediator.phys.vehicle.get_wheel(2).get_brake()
-        steering = self.mediator.phys.vehicle.get_steering_value(0)
+        eng_frc = vehicle.get_wheel(0).get_engine_force()
+        brk_frc_fwd = vehicle.get_wheel(0).get_brake()
+        brk_frc_rear = vehicle.get_wheel(2).get_brake()
+        steering = vehicle.get_steering_value(0)
         level = 0
-        curr_chassis = self.mediator.gfx.nodepath.get_children()[0]
-        if self.mediator.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+        curr_chassis = gfx.nodepath.get_children()[0]
+        if gfx.chassis_np_low.get_name() in curr_chassis.get_name():
             level = 1
-        if self.mediator.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+        if gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
             level = 2
         wpn = ''
         wpn_id = 0
@@ -355,8 +365,9 @@ class CarPlayerEventClient(CarPlayerEvent):
             curr_wpn = self.mediator.logic.weapon
             wpn_id = curr_wpn.id
             wpn = wpnclasses2id[curr_wpn.__class__]
-            wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
-            wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
+            wnode = curr_wpn.gfx.gfx_np.node
+            wpn_pos = wnode.get_pos(render)
+            wpn_fwd = render.get_relative_vector(wnode, Vec3(0, 1, 0))
         packet = list(chain(
             ['player_info', self.yorg_client.myid], pos, fwd, velocity,
             ang_vel, inp, [eng_frc, brk_frc_fwd, brk_frc_rear, steering],
@@ -365,8 +376,9 @@ class CarPlayerEventClient(CarPlayerEvent):
         for i in range(len(self.mediator.logic.fired_weapons)):
             curr_wpn = self.mediator.logic.fired_weapons[i]
             wpn = wpnclasses2id[curr_wpn.__class__]
-            wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
-            wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
+            wnode = curr_wpn.gfx.gfx_np.node
+            wpn_pos = wnode.get_pos(render)
+            wpn_fwd = render.get_relative_vector(wnode, Vec3(0, 1, 0))
             packet += chain([wpn, curr_wpn.id], wpn_pos, wpn_fwd)
         if self.eng.curr_time - self.last_sent > self.eng.client.rate:
             self.eng.client.send_udp(packet, self.yorg_client.myid)
@@ -386,7 +398,7 @@ class CarNetworkEvent(CarEvent):
     def on_bonus(self, wpn_cls=None):
         pass
 
-    def set_fired_weapon(self, wpn_cls, wpn_pos, wpn_fwd):
+    def set_fired_weapon(self):
         self.mediator.logic.fire()
 
     def unset_fired_weapon(self, wpn):

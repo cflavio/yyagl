@@ -16,6 +16,8 @@ def load_shader(vert, frag):
 class PandaShaderMgr(LibShaderMgr):
 
     def __init__(self, shaders, gamma):
+        LibShaderMgr.__init__(self, shaders, gamma)
+        self.filter_mgr = None
         self.gamma, self.buffer, self.lcam, self.lights = gamma, None, None, []
         if shaders: self.setup_post_fx()
 
@@ -80,7 +82,8 @@ class PandaShaderMgr(LibShaderMgr):
         final_quad.set_shader_input('gamma', self.gamma)
         final_quad.set_shader_input('in_tex', aa_scene)
 
-    def __load_shader(self, vshad, fshad):
+    @staticmethod
+    def __load_shader(vshad, fshad):
         with open('yyagl/assets/shaders/%s.vert' % vshad) as vfile:
             fvert = vfile.read()
         with open('yyagl/assets/shaders/%s.frag' % fshad) as ffile:
@@ -153,9 +156,9 @@ class PandaShaderMgr(LibShaderMgr):
         model.set_shader_input('gloss_slot', 0)
         model.set_shader_input('detail_slot', 0)
         model.set_shader_input('detail_scale', (1, 1))
-        for ts in texture_stages:
-            if ts.getSort() == 0: continue
-            self.__set_slots(ts, model, 1 if ts.getSort() == 10 else 2)
+        for tstage in texture_stages:
+            if tstage.getSort() == 0: continue
+            self.__set_slots(tstage, model, 1 if tstage.getSort() == 10 else 2)
 
     def __set_slots(self, ts, model, slot):
         if ts.getMode() == TextureStage.MGloss:
@@ -170,7 +173,8 @@ class PandaShaderMgr(LibShaderMgr):
                     if state.has_attrib(attrib_type):
                         attrib = state.get_attrib(attrib_type)
                         for j in range(attrib.get_num_stages()):
-                            scale = attrib.get_transform(attrib.get_stage(j)).get_scale()
+                            stage = attrib.get_stage(j)
+                            scale = attrib.get_transform(stage).get_scale()
                             model.set_shader_input('detail_scale', scale)
 
     def destroy(self): self.clear_lights()

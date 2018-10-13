@@ -1,4 +1,3 @@
-from panda3d.core import AudioSound as PAudioSound
 from yyagl.gameobject import AudioColleague
 from yyagl.engine.audio import AudioSound
 
@@ -6,8 +5,8 @@ from yyagl.engine.audio import AudioSound
 class CarSounds(object):
 
     def __init__(self, engine, brake, crash, crash_hs, lap, landing, pitstop,
-               rocket_fired, rocket_hit, turbo, rotate_all_fired,
-               rotate_all_hit):
+                 rocket_fired, rocket_hit, turbo, rotate_all_fired,
+                 rotate_all_hit):
         self.engine = engine
         self.brake = brake
         self.crash = crash
@@ -22,13 +21,15 @@ class CarSounds(object):
         self.rotate_all_hit = rotate_all_hit
 
 
-class AbsAudioUpdate:
+class AbsAudioUpdate(object):
 
     def __init__(self, engine_sfx, brake_sfx):
         self.engine_sfx = engine_sfx
         self.brake_sfx = brake_sfx
 
-    def update(): pass
+    def update(self, skidmarking, speed_ratio, input_, drifting, flying,
+               rolling):
+        pass
 
     def destroy(self): self.engine_sfx = self.brake_sfx = None
 
@@ -39,9 +40,10 @@ class CountDownAudioUpdate(AbsAudioUpdate):
         AbsAudioUpdate.__init__(self, engine_sfx, brake_sfx)
         self.curr_eng_ratio = 0
 
-    def update(self, is_skidmarking, speed_ratio, input, is_drifting, is_flying, is_rolling):
+    def update(self, skidmarking, speed_ratio, input_, drifting, flying,
+               rolling):
         incr = 1.0 * globalClock.getDt()
-        self.curr_eng_ratio += incr if input.forward else -incr
+        self.curr_eng_ratio += incr if input_.forward else -incr
         self.curr_eng_ratio = min(1, max(0, self.curr_eng_ratio))
         self.engine_sfx.set_volume(max(.4, abs(self.curr_eng_ratio)))
         self.engine_sfx.set_play_rate(max(.4, abs(self.curr_eng_ratio)))
@@ -49,23 +51,24 @@ class CountDownAudioUpdate(AbsAudioUpdate):
 
 class RaceAudioUpdate(AbsAudioUpdate):
 
-    def update(self, is_skidmarking, speed_ratio, input, is_drifting, is_flying, is_rolling):
-        is_brk_playing = self.brake_sfx.is_playing()
+    def update(self, skidmarking, speed_ratio, input_, drifting, flying,
+               rolling):
+        brk_playing = self.brake_sfx.is_playing()
         if speed_ratio > .4:
-            is_skidmarking = is_skidmarking or is_drifting
-        if is_drifting and not is_skidmarking and speed_ratio > .4:
+            skidmarking = skidmarking or drifting
+        if drifting and not skidmarking and speed_ratio > .4:
             self.brake_sfx.set_volume((speed_ratio - .4) / .8)
         else:
             self.brake_sfx.set_volume(1)
-        if is_skidmarking and not is_brk_playing and not is_flying and not is_rolling:
+        if skidmarking and not brk_playing and not flying and not rolling:
             self.brake_sfx.play()
-        elif is_brk_playing and (not is_skidmarking or (is_flying or is_rolling)):
+        elif brk_playing and (not skidmarking or (flying or rolling)):
             self.brake_sfx.stop()
         gear_thresholds = [0, .3, .6, .8, .9]
         thr = max(gtr for gtr in gear_thresholds if speed_ratio >= gtr)
         idx = gear_thresholds.index(thr)
-        up = 1 if idx == len(gear_thresholds) - 1 else gear_thresholds[idx + 1]
-        gear_ratio = (speed_ratio - thr) / (up - thr)
+        up_ = 1 if idx == len(gear_thresholds) - 1 else gear_thresholds[idx + 1]
+        gear_ratio = (speed_ratio - thr) / (up_ - thr)
         self.engine_sfx.set_volume(.4 + .6 * speed_ratio)
         play_rate = speed_ratio - .1 + .2 * gear_ratio
         self.engine_sfx.set_play_rate(max(.1, abs(play_rate)))
@@ -95,14 +98,18 @@ class CarPlayerAudio(CarAudio):
         map(lambda sfx: sfx.set_loop(True), [self.engine_sfx, self.brake_sfx])
         self.engine_sfx.set_volume(0)
         self.engine_sfx.play()
-        self.update_state = CountDownAudioUpdate(self.engine_sfx, self.brake_sfx)
+        self.update_state = CountDownAudioUpdate(self.engine_sfx,
+                                                 self.brake_sfx)
 
     def on_play(self):
         self.update_state.destroy()
         self.update_state = RaceAudioUpdate(self.engine_sfx, self.brake_sfx)
 
-    def update(self, is_skidmarking, speed_ratio, input, is_drifting, is_flying, is_rolling):
-        self.update_state.update(is_skidmarking, speed_ratio, input, is_drifting, is_flying, is_rolling)
+    def update(self, is_skidmarking, speed_ratio, input_, is_drifting,
+               is_flying, is_rolling):
+        self.update_state.update(
+            is_skidmarking, speed_ratio, input_, is_drifting, is_flying,
+            is_rolling)
 
     def destroy(self):
         self.update_state.destroy()

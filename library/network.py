@@ -13,11 +13,11 @@ class ConnectionMgr(object):
 
     def __init__(self): pass
 
-    def open_TCP_server_rendezvous(self, port, backlog): pass
+    def open_tcp_server_rendezvous(self, port, backlog): pass
 
-    def open_TCP_client_connection(self, hostname, port, timeout_ms): pass
+    def open_tcp_client_connection(self, hostname, port, timeout_ms): pass
 
-    def open_UDP_connection(self, port): pass
+    def open_udp_connection(self, port): pass
 
 
 class ConnectionReader(object):
@@ -37,7 +37,7 @@ class ConnectionWriter(object):
 
     def __init__(self, conn_mgr): pass
 
-    def send(self, msg, dst): pass
+    def send(self, msg, dst, addr=None): pass
 
     def destroy(self): pass
 

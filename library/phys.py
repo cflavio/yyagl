@@ -20,7 +20,7 @@ class PhysWorld(object):
 
     def remove_vehicle(self, node): pass
 
-    def ray_test_all(self, node, mask=None): pass
+    def ray_test_all(self, a, b, mask=None): pass
 
     def ray_test_closest(self, pt_a, pt_b, mask=None): pass
 

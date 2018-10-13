@@ -1,8 +1,8 @@
 from os.path import exists
-from panda3d.core import get_model_path, AntialiasAttrib, NodePath, PandaNode as P3DNode, LightRampAttrib
-from panda3d.core import Camera, OrthographicLens, NodePath, TextureStage, \
-    OmniBoundingVolume, AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, \
-    BitMask32, Point2, Point3
+from panda3d.core import get_model_path, AntialiasAttrib, \
+    PandaNode as P3DNode, LightRampAttrib, Camera, OrthographicLens, NodePath, \
+    OmniBoundingVolume, AmbientLight as P3DAmbientLight, \
+    Spotlight as P3DSpotlight, BitMask32, Point2, Point3
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.racing.bitmasks import BitMasks
@@ -45,6 +45,7 @@ class PandaGfxMgr(GfxMgr):
     def __init__(self):
         self.root = PandaNode(render)
         self.callbacks = {}
+        self.filters = None
 
     def init(self, model_path, antialiasing, shaders):
         get_model_path().append_directory(model_path)
@@ -65,10 +66,13 @@ class PandaGfxMgr(GfxMgr):
     def load_model(self, filename, callback=None, extra_args=[], anim=None):
         ext = '.bam' if exists(filename + '.bam') else ''
         if anim:
-            return PandaNode(Actor(filename + ext, {'anim': filename + '-Anim' + ext}))
+            anim_dct = {'anim': filename + '-Anim' + ext}
+            return PandaNode(Actor(filename + ext, anim_dct))
         elif callback:
             self.callbacks[filename + ext] = callback
-            return loader.loadModel(filename + ext, callback=self._intermediate_cb, extraArgs=extra_args + [filename + ext])
+            return loader.loadModel(
+              filename + ext, callback=self._intermediate_cb,
+              extraArgs=extra_args + [filename + ext])
         else:
             return PandaNode(loader.loadModel(filename + ext))
 
@@ -100,13 +104,15 @@ class PandaGfxMgr(GfxMgr):
     def shader_support(self):
         return base.win.get_gsg().get_supports_basic_shaders()
 
-    def set_shader(self, val):
+    @staticmethod
+    def set_shader(val):
         (render.set_shader_auto if val else render.set_shader_off)()
 
-    def set_blur(self):
-        pass # self.filters.setBlurSharpen(.5)
+    @staticmethod
+    def set_blur(): pass  # self.filters.setBlurSharpen(.5)
 
-    def print_stats(self):
+    @staticmethod
+    def print_stats():
         print '\n\n#####\nrender2d.analyze()'
         base.render2d.analyze()
         print '\n\n#####\nrender.analyze()'
@@ -124,7 +130,8 @@ class PandaNode(Node):
         self.node = np
         self.node.set_python_tag('pandanode', self)
 
-    def attach_node(self, name): return PandaNode(self.node.attach_new_node(name))
+    def attach_node(self, name):
+        return PandaNode(self.node.attach_new_node(name))
 
     def add_shape(self, shape):
         return self.node.node().add_shape(shape.mesh_shape)
@@ -183,7 +190,8 @@ class PandaNode(Node):
 
     def get_transform(self, node): return self.node.get_transform(node.node)
 
-    def get_relative_vector(self, node, vec): return self.node.get_relative_vector(node.node, vec)
+    def get_relative_vector(self, node, vec):
+        return self.node.get_relative_vector(node.node, vec)
 
     def set_transparency(self, val): return self.node.set_transparency(val)
 
@@ -191,7 +199,8 @@ class PandaNode(Node):
 
     def set_material(self, material): return self.node.set_material(material, 1)
 
-    def set_texture(self, ts, texture): return self.node.set_texture(ts, texture)
+    def set_texture(self, ts, texture):
+        return self.node.set_texture(ts, texture)
 
     def has_tag(self, name): return self.node.has_tag(name)
 
@@ -199,24 +208,30 @@ class PandaNode(Node):
 
     def get_python_tag(self, name): return self.node.get_python_tag(name)
 
-    def set_python_tag(self, name, val): return self.node.set_python_tag(name, val)
+    def set_python_tag(self, name, val):
+        return self.node.set_python_tag(name, val)
 
     def remove_node(self): return self.node.remove_node()
 
     def is_empty(self): return self.node.is_empty()
 
-    def get_distance(self, other_node): return self.node.get_distance(other_node.node)
+    def get_distance(self, other_node):
+        return self.node.get_distance(other_node.node)
 
     def reparent_to(self, parent): return self.node.reparent_to(parent.node)
 
-    def wrt_reparent_to(self, parent): return self.node.wrt_reparent_to(parent.node)
+    def wrt_reparent_to(self, parent):
+        return self.node.wrt_reparent_to(parent.node)
 
-    def __get_pandanode(self, np):
-        if np.has_python_tag('pandanode'): return np.get_python_tag('pandanode')
-        return PandaNode(np)
+    @staticmethod
+    def __get_pandanode(nodepath):
+        if nodepath.has_python_tag('pandanode'):
+            return nodepath.get_python_tag('pandanode')
+        return PandaNode(nodepath)
 
     def find_all_matches(self, name):
-        return [self.__get_pandanode(node) for node in self.node.find_all_matches(name)]
+        nodes = self.node.find_all_matches(name)
+        return [self.__get_pandanode(node) for node in nodes]
 
     def find(self, name):
         model = self.node.find(name)
@@ -226,7 +241,8 @@ class PandaNode(Node):
 
     def prepare_scene(self): return self.node.prepare_scene(base.win.get_gsg())
 
-    def premunge_scene(self): return self.node.premunge_scene(base.win.get_gsg())
+    def premunge_scene(self):
+        return self.node.premunge_scene(base.win.get_gsg())
 
     def clear_model_nodes(self): return self.node.clear_model_nodes()
 
@@ -235,7 +251,8 @@ class PandaNode(Node):
     def hide(self, mask=None):
         return self.node.hide(*[] if mask is None else [mask])
 
-    def set_depth_offset(self, offset): return self.node.set_depth_offset(offset)
+    def set_depth_offset(self, offset):
+        return self.node.set_depth_offset(offset)
 
     def get_tight_bounds(self): return self.node.get_tight_bounds()
 

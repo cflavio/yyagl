@@ -10,7 +10,9 @@ from ..network import ConnectionListener, ConnectionMgr, ConnectionReader, \
 class PandaConnectionListener(ConnectionListener):
 
     def __init__(self, conn_mgr):
-        self.conn_listener = QueuedConnectionListener(conn_mgr.conn_mgr, num_threads=0)
+        ConnectionListener.__init__(self)
+        self.conn_listener = QueuedConnectionListener(conn_mgr.conn_mgr,
+                                                      num_threads=0)
 
     def add_conn(self, tcp_socket):
         return self.conn_listener.add_connection(tcp_socket)
@@ -21,7 +23,8 @@ class PandaConnectionListener(ConnectionListener):
         new_conn = PointerToConnection()
         addr = NetAddress()
         conn = self.conn_listener.get_new_connection(
-            rendezvous=PointerToConnection(), address=addr, new_connection=new_conn)
+            rendezvous=PointerToConnection(), address=addr,
+            new_connection=new_conn)
         if not conn: return
         ip_string = addr.get_ip_string()
         if ip_string.startswith('::ffff:'): ip_string = ip_string[7:]
@@ -30,7 +33,9 @@ class PandaConnectionListener(ConnectionListener):
 
 class PandaConnectionMgr(ConnectionMgr):
 
-    def __init__(self): self.conn_mgr = QueuedConnectionManager()
+    def __init__(self):
+        ConnectionMgr.__init__(self)
+        self.conn_mgr = QueuedConnectionManager()
 
     def open_TCP_server_rendezvous(self, port, backlog):
         return self.conn_mgr.open_TCP_server_rendezvous(port, backlog)
@@ -45,10 +50,13 @@ class PandaConnectionMgr(ConnectionMgr):
     def close_connection(self, conn):
         return self.conn_mgr.close_connection(conn)
 
+
 class PandaConnectionReader(ConnectionReader):
 
     def __init__(self, conn_mgr):
-        self.conn_reader = QueuedConnectionReader(conn_mgr.conn_mgr, num_threads=0)
+        ConnectionReader.__init__(self)
+        self.conn_reader = QueuedConnectionReader(conn_mgr.conn_mgr,
+                                                  num_threads=0)
 
     def data_available(self): return self.conn_reader.data_available()
 
@@ -69,7 +77,9 @@ class PandaConnectionReader(ConnectionReader):
 class PandaConnectionWriter(ConnectionWriter):
 
     def __init__(self, conn_mgr):
-        self.conn_writer = P3DConnectionWriter(conn_mgr.conn_mgr, num_threads=0)
+        ConnectionWriter.__init__(self)
+        self.conn_writer = P3DConnectionWriter(conn_mgr.conn_mgr,
+                                               num_threads=0)
 
     def send(self, msg, dst, addr=None):
         if addr is None: return self.conn_writer.send(msg.datagram, dst)
@@ -85,6 +95,7 @@ class PandaConnectionWriter(ConnectionWriter):
 class PandaWriteDatagram(WriteDatagram):
 
     def __init__(self):
+        WriteDatagram.__init__(self)
         self.datagram = PyDatagram()
 
     def add_bool(self, val): self.datagram.add_bool(val)
@@ -99,6 +110,7 @@ class PandaWriteDatagram(WriteDatagram):
 class PandaDatagramIterator(DatagramIterator):
 
     def __init__(self, datagram):
+        DatagramIterator.__init__(self)
         self._iter = PyDatagramIterator(datagram)
 
     def get_bool(self): return self._iter.get_bool()

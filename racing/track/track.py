@@ -8,7 +8,8 @@ from .audio import TrackAudio
 class TrackFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('get_start_pos_hpr', lambda obj: obj.phys.get_start_pos_hpr)
+        self._fwd_mth('get_start_pos_hpr',
+                      lambda obj: obj.phys.get_start_pos_hpr)
         self._fwd_mth('play_music', lambda obj: obj.audio.music.play)
         self._fwd_mth('stop_music', lambda obj: obj.audio.music.stop)
         self._fwd_mth('update', lambda obj: obj.event.update)

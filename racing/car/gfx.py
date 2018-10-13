@@ -1,4 +1,4 @@
-from yaml import load
+from yaml import load as yaml_load
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
 from yyagl.gameobject import GfxColleague, GameObject
@@ -15,14 +15,17 @@ from yyagl.racing.weapon.mine.mine import Mine
 class CarGfxFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('on_skidmarking', lambda obj: obj.skidmark_mgr.on_skidmarking)
-        self._fwd_mth('on_no_skidmarking', lambda obj: obj.skidmark_mgr.on_no_skidmarking)
+        self._fwd_mth('on_skidmarking',
+                      lambda obj: obj.skidmark_mgr.on_skidmarking)
+        self._fwd_mth('on_no_skidmarking',
+                      lambda obj: obj.skidmark_mgr.on_no_skidmarking)
 
 
 class CarGfx(GfxColleague, CarGfxFacade):
 
     def __init__(self, mediator, car_props):
-        self.chassis_np = self.cnt = None
+        self.chassis_np = self.cnt = self.chassis_np_low = \
+            self.chassis_np_hi = None
         self.cprops = car_props
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
         self.nodepath = self.eng.attach_node(BulletRigidBodyNode('Vehicle'))
@@ -42,7 +45,8 @@ class CarGfx(GfxColleague, CarGfxFacade):
         info = deccode2info[dec_code]
         fpath = 'assets/models/misc/' + info[0]
         self.decorators += [Decorator(fpath, self.nodepath)]
-        self.dec_tsk += [self.eng.do_later(info[1], self.unset_decorator, [self.decorators[-1]])]
+        args = info[1], self.unset_decorator, [self.decorators[-1]]
+        self.dec_tsk += [self.eng.do_later(args)]
 
     def unset_decorator(self, dec):
         self.decorators.remove(dec)
@@ -59,7 +63,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         ppath = self.cprops.race_props.season_props.gameprops.phys_path
         fpath = ppath % self.cprops.name
         with open(fpath) as phys_file:
-            chassis.set_z(load(phys_file)['center_mass_offset'])
+            chassis.set_z(yaml_load(phys_file)['center_mass_offset'])
         self.load_wheels(chassis)
 
     def reparent(self):
@@ -74,7 +78,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
             cha.premunge_scene()
         self.on_skidmarking()
         self.cnt = 5
-        for i in range(6):
+        for _ in range(6):
             self.preload_tsk()
             base.graphicsEngine.renderFrame()
 
@@ -110,9 +114,8 @@ class CarGfx(GfxColleague, CarGfxFacade):
                 self.eng.curr_time - self.last_crash_t < 5.0 or \
                 self.crash_cnt < 2:
             return False
-        self.eng.particle(
-            self.eng.gfx.root, self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75), (0, 0, 0),
-            (1, .4, .1, 1), .8)
+        pos = self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75)
+        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), (1, .4, .1, 1), .8)
         self.apply_damage()
         level = 0
         curr_chassis = self.nodepath.get_children()[0]

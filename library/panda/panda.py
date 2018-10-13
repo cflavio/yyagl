@@ -19,6 +19,11 @@ class LibraryPanda3D(Library, DirectObject):
     task_cont = Task.cont
     runtime = not exists('main.py')
 
+    def __init__(self):
+        Library.__init__(self)
+        DirectObject.__init__(self)
+        self.__end_cb = self.__notify = None
+
     @staticmethod
     def configure():
         loadPrcFileData('', 'notify-level-ya2 info')
@@ -45,7 +50,8 @@ class LibraryPanda3D(Library, DirectObject):
     def send(self, msg): return messenger.send(msg)
 
     def do_later(self, time, meth, args=[]):
-        return taskMgr.doMethodLater(time, lambda meth, args: meth(*args), meth.__name__, [meth, args])
+        return taskMgr.doMethodLater(
+            time, lambda meth, args: meth(*args), meth.__name__, [meth, args])
 
     def add_task(self, mth, priority=0):
         return taskMgr.add(mth, mth.__name__, priority)
@@ -61,26 +67,31 @@ class LibraryPanda3D(Library, DirectObject):
         self.__init_win()
         self.__init_fonts(green, red)
         base.a2dTopQuarter = base.aspect2d.attachNewNode('a2dTopQuarter')
-        base.a2dTopQuarter.setPos(base.a2dLeft / 2.0, 0, base.a2dTop)
-        base.a2dTopThirdQuarter = base.aspect2d.attachNewNode('a2dTopThirdQuarter')
-        base.a2dTopThirdQuarter.setPos(base.a2dRight / 2.0, 0, base.a2dTop)
+        base.a2dTopQuarter.setPos(base.a2dLeft / 2, 0, base.a2dTop)
+        base.a2dTopThirdQuarter = \
+            base.aspect2d.attachNewNode('a2dTopThirdQuarter')
+        base.a2dTopThirdQuarter.setPos(base.a2dRight / 2, 0, base.a2dTop)
         base.a2dCenterQuarter = base.aspect2d.attachNewNode('a2dCenterQuarter')
-        base.a2dCenterQuarter.setPos(base.a2dLeft / 2.0, 0, 0)
-        base.a2dCenterThirdQuarter = base.aspect2d.attachNewNode('a2dCenterThirdQuarter')
-        base.a2dCenterThirdQuarter.setPos(base.a2dRight / 2.0, 0, 0)
+        base.a2dCenterQuarter.setPos(base.a2dLeft / 2, 0, 0)
+        base.a2dCenterThirdQuarter = \
+            base.aspect2d.attachNewNode('a2dCenterThirdQuarter')
+        base.a2dCenterThirdQuarter.setPos(base.a2dRight / 2, 0, 0)
         base.a2dBottomQuarter = base.aspect2d.attachNewNode('a2dBottomQuarter')
-        base.a2dBottomQuarter.setPos(base.a2dLeft / 2.0, 0, base.a2dBottom)
-        base.a2dBottomThirdQuarter = base.aspect2d.attachNewNode('a2dBottomThirdQuarter')
-        base.a2dBottomThirdQuarter.setPos(base.a2dRight / 2.0, 0, base.a2dBottom)
+        base.a2dBottomQuarter.setPos(base.a2dLeft / 2, 0, base.a2dBottom)
+        base.a2dBottomThirdQuarter = \
+            base.aspect2d.attachNewNode('a2dBottomThirdQuarter')
+        base.a2dBottomThirdQuarter.setPos(base.a2dRight / 2, 0, base.a2dBottom)
         self.accept('aspectRatioChanged', self.on_aspect_ratio_changed)
 
-    def on_aspect_ratio_changed(self):
-        base.a2dTopQuarter.setPos(base.a2dLeft / 2.0, 0, base.a2dTop)
-        base.a2dTopThirdQuarter.setPos(base.a2dRight / 2.0, 0, base.a2dTop)
-        base.a2dBottomQuarter.setPos(base.a2dLeft / 2.0, 0, base.a2dBottom)
-        base.a2dBottomThirdQuarter.setPos(base.a2dRight / 2.0, 0, base.a2dBottom)
+    @staticmethod
+    def on_aspect_ratio_changed():
+        base.a2dTopQuarter.setPos(base.a2dLeft / 2, 0, base.a2dTop)
+        base.a2dTopThirdQuarter.setPos(base.a2dRight / 2, 0, base.a2dTop)
+        base.a2dBottomQuarter.setPos(base.a2dLeft / 2, 0, base.a2dBottom)
+        base.a2dBottomThirdQuarter.setPos(base.a2dRight / 2, 0, base.a2dBottom)
 
-    def has_window(self): return bool(base.win)
+    @staticmethod
+    def has_window(): return bool(base.win)
 
     @property
     def resolution(self):
@@ -97,12 +108,14 @@ class LibraryPanda3D(Library, DirectObject):
         ret = [res(idx) for idx in range(d_i.get_total_display_modes())]
         return ret if ret else [self.resolution]
 
-    def toggle_fullscreen(self):
+    @staticmethod
+    def toggle_fullscreen():
         props = WindowProperties()
         props.set_fullscreen(not base.win.is_fullscreen())
         base.win.request_properties(props)
 
-    def set_resolution(self, res, fullscreen=None):
+    @staticmethod
+    def set_resolution(res, fullscreen=None):
         props = WindowProperties()
         props.set_size(res)
         if fullscreen: props.set_fullscreen(True)
@@ -113,7 +126,8 @@ class LibraryPanda3D(Library, DirectObject):
         # not headless
         self.accept('window-closed', self.__on_end)
 
-    def __init_fonts(self, green=(.2, .8, .2, 1), red=(.8, .2, .2, 1)):
+    @staticmethod
+    def __init_fonts(green=(.2, .8, .2, 1), red=(.8, .2, .2, 1)):
         tp_mgr = TextPropertiesManager.get_global_ptr()
         for namecol, col in zip(['green', 'red'], [green, red]):
             props = TextProperties()
@@ -138,7 +152,7 @@ class LibraryPanda3D(Library, DirectObject):
         font = base.loader.loadFont(fpath)
         font.set_pixels_per_unit(60)
         font.set_minfilter(Texture.FTLinearMipmapLinear)
-        outline and font.set_outline((0, 0, 0, 1), .8, .2)
+        if outline: font.set_outline((0, 0, 0, 1), .8, .2)
         return font
 
     def log(self, msg): self.__notify.info(msg)
@@ -156,15 +170,19 @@ class LibraryPanda3D(Library, DirectObject):
 
     def driver_renderer(self): return base.win.get_gsg().get_driver_renderer()
 
-    def driver_shader_version_major(self): return base.win.get_gsg().get_driver_shader_version_major()
+    def driver_shader_version_major(self):
+        return base.win.get_gsg().get_driver_shader_version_major()
 
-    def driver_shader_version_minor(self): return base.win.get_gsg().get_driver_shader_version_minor()
+    def driver_shader_version_minor(self):
+        return base.win.get_gsg().get_driver_shader_version_minor()
 
     def driver_version(self): return base.win.get_gsg().get_driver_version()
 
-    def driver_version_major(self): return base.win.get_gsg().get_driver_version_major()
+    def driver_version_major(self):
+        return base.win.get_gsg().get_driver_version_major()
 
-    def driver_version_minor(self): return base.win.get_gsg().get_driver_version_minor()
+    def driver_version_minor(self):
+        return base.win.get_gsg().get_driver_version_minor()
 
     def fullscreen(self): return base.win.get_properties().get_fullscreen()
 

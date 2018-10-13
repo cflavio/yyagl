@@ -1,5 +1,6 @@
 from panda3d.core import TextNode, Texture
-from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL, B1PRESS
+from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL, \
+    B1PRESS
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.DirectButton import DirectButton
 from direct.gui.DirectCheckButton import DirectCheckButton
@@ -16,8 +17,8 @@ from ..igui import IImg, IBtn, ICheckBtn, IOptionMenu, IEntry, ILabel, IText, \
 
 class PandaImg(IImg):
 
-    def __init__(self, fpath, pos=(0, 1, 0), scale=1.0, is_background=False, force_transp=None,
-                 layer='', parent=None):
+    def __init__(self, fpath, pos=(0, 1, 0), scale=1.0, is_background=False,
+                 force_transp=None, layer='', parent=None):
         self.img = OnscreenImage(fpath, pos=pos, scale=scale, parent=parent)
         if is_background: self.img.set_bin('background', 10)
         if force_transp: self.img.set_transparency(True)
@@ -49,7 +50,7 @@ class PandaImg(IImg):
 
     def set_transparency(self, val): return self.img.set_transparency(val)
 
-    def set_texture(self, ts, tex): return self.img.set_texture(ts, tex)
+    def set_texture(self, tstage, tex): return self.img.set_texture(tstage, tex)
 
     def destroy(self): self.img = self.img.destroy()
 
@@ -107,6 +108,8 @@ class PandaAbs(PandaBase):
         return self.wdg.bind(evt, callback)
 
     def attachNewNode(self, gui_itm, sort_order):
+        # it won't work if we name it attach_node. hopefully this will be
+        # possible when we'll use decorators in place of mixins
         return self.wdg.attachNewNode(gui_itm, sort_order)
 
     @property
@@ -120,7 +123,7 @@ class PandaBtn(IBtn, PandaAbs):
             command=None, frameSize=(-1, 1, -1, 1), clickSound=None,
             text_fg=(1, 1, 1, 1), frameColor=(1, 1, 1, 1), text_font=None,
             rolloverSound=None, extraArgs=[], frameTexture=None, image=None,
-            text_scale=1.0, tra_src=None, tra_tra=None):
+            tra_src=None, tra_tra=None):
         self.wdg = DirectButton(
             text=text, parent=parent, pos=pos, scale=scale, command=command,
             frameSize=frameSize, clickSound=clickSound, text_fg=text_fg,
@@ -132,9 +135,9 @@ class PandaBtn(IBtn, PandaAbs):
         self.bind(ENTER, self._on_enter)
         self.bind(EXIT, self._on_exit)
 
-    def _on_enter(self, pos): pass # pos comes from mouse
+    def _on_enter(self, pos): pass  # pos comes from mouse
 
-    def _on_exit(self, pos): pass # pos comes from mouse
+    def _on_exit(self, pos): pass  # pos comes from mouse
 
     def enable(self):
         self['state'] = NORMAL
@@ -146,11 +149,13 @@ class PandaBtn(IBtn, PandaAbs):
 class PandaSlider(IBtn, PandaAbs):
 
     def __init__(
-            self, parent=None, pos=(0, 0, 0), scale=1, value=0, frameColor=(1, 1, 1, 1),
-            thumb_frameColor=(1, 1, 1, 1), command=None, range=(0, 1), tra_src=None, tra_tra=None):
-        self.wdg = DirectSlider(parent=parent, pos=pos, scale=scale,
-            value=value, frameColor=frameColor,
-            thumb_frameColor=thumb_frameColor, command=command, range=range)
+            self, parent=None, pos=(0, 0, 0), scale=1, value=0,
+            frameColor=(1, 1, 1, 1), thumb_frameColor=(1, 1, 1, 1),
+            command=None, range_=(0, 1), tra_src=None, tra_tra=None):
+        self.wdg = DirectSlider(
+            parent=parent, pos=pos, scale=scale, value=value,
+            frameColor=frameColor, thumb_frameColor=thumb_frameColor,
+            command=command, range=range_)
         PandaAbs.__init__(self, tra_src, tra_tra)
 
 
@@ -174,13 +179,14 @@ class PandaCheckBtn(ICheckBtn, PandaAbs):
 class PandaOptionMenu(IOptionMenu, PandaAbs):
 
     def __init__(
-            self, text='', items=[], pos=(0, 1, 0), scale=(1, 1, 1), initialitem='',
-            command=None, frameSize=(-1, 1, -1, 1), clickSound=None,
-            rolloverSound=None, textMayChange=False, text_fg=(1, 1, 1, 1),
-            item_frameColor=(1, 1, 1, 1), frameColor=(1, 1, 1, 1),
-            highlightColor=(1, 1, 1, 1), text_scale=.05,
-            popupMarker_frameColor=(1, 1, 1, 1), item_relief=None,
-            item_text_font=None, text_font=None, tra_src=None, tra_tra=None):
+            self, text='', items=[], pos=(0, 1, 0), scale=(1, 1, 1),
+            initialitem='', command=None, frameSize=(-1, 1, -1, 1),
+            clickSound=None, rolloverSound=None, textMayChange=False,
+            text_fg=(1, 1, 1, 1), item_frameColor=(1, 1, 1, 1),
+            frameColor=(1, 1, 1, 1), highlightColor=(1, 1, 1, 1),
+            text_scale=.05, popupMarker_frameColor=(1, 1, 1, 1),
+            item_relief=None, item_text_font=None, text_font=None, tra_src=None,
+            tra_tra=None):
         self.wdg = DirectOptionMenu(
             text=text, items=items, pos=pos, scale=scale,
             initialitem=initialitem, command=command, frameSize=frameSize,
@@ -193,22 +199,24 @@ class PandaOptionMenu(IOptionMenu, PandaAbs):
             text_font=text_font)
         PandaAbs.__init__(self, tra_src, tra_tra)
 
-    def set(self, val, fCommand=None): return self.wdg.set(val, fCommand)
+    def set(self, val, f_cmd=None): return self.wdg.set(val, f_cmd)
 
     def get(self): return self.wdg.get()
 
     @property
-    def selectedIndex(self): return self.wdg.selectedIndex
+    def selected_idx(self): return self.wdg.selectedIndex
 
 
 class PandaEntry(IEntry, PandaAbs, DirectObject):
 
-    def __init__(self, scale=.05, pos=(0, 1, 0), entryFont=None, width=12,
+    def __init__(
+            self, scale=.05, pos=(0, 1, 0), entryFont=None, width=12,
             frameColor=(1, 1, 1, 1), initialText='', obscured=False,
             command=None, focusInCommand=None, focusInExtraArgs=[],
             focusOutCommand=None, focusOutExtraArgs=[], parent=None,
             tra_src=None, tra_tra=None, text_fg=(1, 1, 1, 1), on_tab=None,
             on_click=None):
+        DirectObject.__init__(self)
         self.wdg = DirectEntry(
             scale=scale, pos=pos, entryFont=entryFont, width=width,
             frameColor=frameColor, initialText=initialText, obscured=obscured,
@@ -225,14 +233,11 @@ class PandaEntry(IEntry, PandaAbs, DirectObject):
     def on_tab(self):
         if self.wdg['focus']: self.on_tab_cb()
 
-    @property
-    def onscreenText(self): return self.wdg.onscreenText
-
     def get(self): return self.wdg.get()
 
     def set(self, txt): return self.wdg.set(txt)
 
-    def enterText(self, txt): return self.wdg.enterText(txt)
+    def enter_text(self, txt): return self.wdg.enterText(txt)
 
     def enable(self):
         self['state'] = NORMAL
@@ -281,8 +286,9 @@ class PandaTxt(IText, PandaBase):
 class PandaFrame(IFrame, PandaAbs):
 
     def __init__(self, frameSize=(-1, 1, -1, 1), frameColor=(1, 1, 1, 1),
-            pos=(0, 1, 0), parent=None, textureCoord=False):
+                 pos=(0, 1, 0), parent=None, textureCoord=False):
+        PandaAbs.__init__(self)
         self.wdg = DirectFrame(frameSize=frameSize, frameColor=frameColor,
-            pos=pos, parent=parent)
+                               pos=pos, parent=parent)
         if textureCoord:
             self.wdg['frameTexture'] = Texture()

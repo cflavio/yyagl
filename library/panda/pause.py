@@ -10,6 +10,7 @@ from yyagl.library.panda.panda import LibraryPanda3D
 class PandaPause(Pause):
 
     def __init__(self):
+        Pause.__init__(self)
         self.__paused_taskchain = 'ya2 paused tasks'
         taskMgr.setupTaskChain(self.__paused_taskchain, frameBudget=0)
         fpath = dirname(modules[Task.__name__].__file__)
@@ -19,7 +20,8 @@ class PandaPause(Pause):
 
     @property
     def is_paused(self):
-        return taskMgr.getTasksNamed('__on_frame')[0].getTaskChain() == self.__paused_taskchain
+        tsk = taskMgr.getTasksNamed('__on_frame')[0]
+        return tsk.getTaskChain() == self.__paused_taskchain
 
     def __process_task(self, tsk):
         func = tsk.get_function()  # ordinary tasks
@@ -54,7 +56,8 @@ class PandaPause(Pause):
         is_tsk = lambda tsk: tsk and hasattr(tsk, 'getFunction')
         tasks = [tsk for tsk in taskMgr.getTasks() if is_tsk(tsk)]
         if LibraryPanda3D.version().startswith('1.10'):
-            tasks = [tsk for tsk in tasks if tsk.get_task_chain() != 'unpausable']
+            tasks = [tsk for tsk in tasks
+                     if tsk.get_task_chain() != 'unpausable']
         map(self.__process_task, tasks)
         for tsk in [_tsk for _tsk in taskMgr.getDoLaters()if is_tsk(_tsk)]:
             self.__paused_tasks += [tsk]
