@@ -4,7 +4,9 @@ from sys import executable
 from shutil import rmtree
 
 
-prereq = 'psutil'
+prereq = '''psutil
+simpleubjson
+'''
 requirements = '''
 --pre --extra-index-url https://archive.panda3d.org/branches/deploy-ng
 panda3d'''
@@ -63,7 +65,7 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
         system('tar cfJ yorg-ng-%s.tar.xz yorg' % desc)
         rmtree('yorg')
         platf2suff = {
-            'win32': 'zip',
+            'win32': 'tar.gz',
             'macosx_10_6_x86_64': 'tar.gz',
             'manylinux1_i686': 'zip',
             'manylinux1_x86_64': 'tar.gz'}

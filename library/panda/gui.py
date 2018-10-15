@@ -272,7 +272,8 @@ class PandaTxt(IText, PandaBase):
             tra_tra=None):
         str2par = {'bottomleft': base.a2dBottomLeft,
                    'leftcenter': base.a2dLeftCenter}
-        str2al = {'left': TextNode.A_left, 'right': TextNode.A_right}
+        str2al = {'left': TextNode.A_left, 'right': TextNode.A_right,
+                  'center': TextNode.A_center}
         if parent: parent = str2par[parent]
         if align: align = str2al[align]
         self.wdg = OnscreenText(

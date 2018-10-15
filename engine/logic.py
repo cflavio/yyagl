@@ -21,6 +21,7 @@ class VersionChecker(GameObject, ComputerProxy):
         major, minor, build = ver.split('.')
         major, minor, build = int(major), int(minor), int(build)
         curr_ver = self.eng.version
+        if curr_ver == 'deploy-ng': return True
         curr_major, curr_minor, curr_build = curr_ver.split('-')[0].split('.')
         curr_major = int(curr_major)
         curr_minor = int(curr_minor)

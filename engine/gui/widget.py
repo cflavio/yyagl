@@ -4,7 +4,11 @@ from panda3d.core import LVecBase4f
 
 class Widget(object):
 
-    highlight_color_offset = [LVecBase4f(0, 0, .4, 0), LVecBase4f(0, .4, 0, 0)]
+    highlight_color_offset = [
+        LVecBase4f(0, 0, .4, 0),
+        LVecBase4f(0, .4, 0, 0),
+        LVecBase4f(.4, 0, 0, 0),
+        LVecBase4f(.4, .4, 0, 0)]
 
     def __init__(self):
         self.start_txt_color = self.start_frame_color = None

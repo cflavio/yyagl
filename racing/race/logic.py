@@ -57,21 +57,62 @@ class RaceLogic(LogicColleague):
         self.set_display_regions()
 
     def set_display_regions(self):
-        if len(self.player_cars) != 2: return
-        d_r = [base.win.get_active_display_regions()[0]]
-        d_r[0].set_dimensions(0, .5, 0, 1)
-        d_r += [base.win.make_display_region(.5, 1, 0, 1)]
-        cam_node = Camera('cam')
-        cam_np = NodePath(cam_node)
-        d_r[-1].set_camera(cam_np)
-        cam_np.reparentTo(render)
+        if len(self.player_cars) == 1: return
+        if len(self.player_cars) == 2:
+            d_r = [base.win.get_active_display_regions()[0]]
+            d_r[0].set_dimensions(0, .5, 0, 1)
+            d_r += [base.win.make_display_region(.5, 1, 0, 1)]
+            cam_node = Camera('cam')
+            cam_np = NodePath(cam_node)
+            d_r[-1].set_camera(cam_np)
+            cam_np.reparentTo(render)
+        if len(self.player_cars) == 3:
+            d_r = [base.win.get_active_display_regions()[0]]
+            d_r[0].set_dimensions(0, 1, .5, 1)
+            d_r += [base.win.make_display_region(0, .5, 0, .5)]
+            cam_node = Camera('cam')
+            cam_np = NodePath(cam_node)
+            d_r[-1].set_camera(cam_np)
+            cam_np.reparentTo(render)
+            d_r += [base.win.make_display_region(.5, 1, 0, .5)]
+            cam_node = Camera('cam')
+            cam_np = NodePath(cam_node)
+            d_r[-1].set_camera(cam_np)
+            cam_np.reparentTo(render)
+        if len(self.player_cars) == 4:
+            d_r = [base.win.get_active_display_regions()[0]]
+            d_r[0].set_dimensions(0, .5, .5, 1)
+            d_r += [base.win.make_display_region(.5, 1, .5, 1)]
+            cam_node = Camera('cam')
+            cam_np = NodePath(cam_node)
+            d_r[-1].set_camera(cam_np)
+            cam_np.reparentTo(render)
+            d_r += [base.win.make_display_region(0, .5, 0, .5)]
+            cam_node = Camera('cam')
+            cam_np = NodePath(cam_node)
+            d_r[-1].set_camera(cam_np)
+            cam_np.reparentTo(render)
+            d_r += [base.win.make_display_region(.5, 1, 0, .5)]
+            cam_node = Camera('cam')
+            cam_np = NodePath(cam_node)
+            d_r[-1].set_camera(cam_np)
+            cam_np.reparentTo(render)
         self.cameras = [dr.get_camera() for dr in d_r]
         self.mediator.event.accept('aspectRatioChanged', self.on_aspect_ratio_changed)
         self.on_aspect_ratio_changed()
 
     def on_aspect_ratio_changed(self):
-        a_r = base.getAspectRatio() / 2.0
-        map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras)
+        if len(self.player_cars) == 2:
+            a_r = base.getAspectRatio() / 2.0
+            map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras)
+        if len(self.player_cars) == 3:
+            a_r = base.getAspectRatio() * 2.0
+            map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[:1])
+            a_r = base.getAspectRatio()
+            map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[1:])
+        if len(self.player_cars) == 4:
+            a_r = base.getAspectRatio()
+            map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[1:])
 
     def start_play(self):
         self.eng.phys_mgr.start()

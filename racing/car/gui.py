@@ -146,9 +146,48 @@ class CarPanel(GameObject):
         self.ncars = ncars
         sprops = self.race_props.season_props
         menu_args = sprops.gameprops.menu_args
-        parent_tr = base.a2dTopCenter if player_idx == 0 else base.a2dTopRight
-        parent_tl = base.a2dTopLeft if player_idx == 0 else base.a2dTopCenter
-        parent_bl = base.a2dBottomLeft if player_idx == 0 else base.a2dBottomCenter
+        if ncars == 1:
+            parent_tr = base.a2dTopRight
+        elif ncars == 2:
+            if self.player_idx == 0: parent_tr = base.a2dTopCenter
+            else: parent_tr = base.a2dTopRight
+        elif ncars == 3:
+            if self.player_idx == 0: parent_tr = base.a2dTopRight
+            elif self.player_idx == 1: parent_tr = base.aspect2d
+            else: parent_tr = base.a2dRightCenter
+        elif ncars == 4:
+            if self.player_idx == 0: parent_tr = base.a2dTopCenter
+            elif self.player_idx == 1: parent_tr = base.a2dTopRight
+            elif self.player_idx == 2: parent_tr = base.aspect2d
+            else: parent_tr = base.a2dRightCenter
+        if ncars == 1:
+            parent_tl = base.a2dTopLeft
+        elif ncars == 2:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            else: parent_tl = base.a2dTopCenter
+        elif ncars == 3:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            elif self.player_idx == 1: parent_tl = base.a2dLeftCenter
+            else: parent_tl = base.aspect2d
+        elif ncars == 4:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            elif self.player_idx == 1: parent_tl = base.a2dTopCenter
+            elif self.player_idx == 2: parent_tl = base.a2dLeftCenter
+            else: parent_tl = base.aspect2d
+        if ncars == 1:
+            parent_bl = base.a2dBottomLeft
+        elif ncars == 2:
+            if self.player_idx == 0: parent_bl = base.a2dBottomLeft
+            else: parent_bl = base.a2dBottomCenter
+        elif ncars == 3:
+            if self.player_idx == 0: parent_bl = base.a2dLeftCenter
+            elif self.player_idx == 1: parent_bl = base.a2dBottomLeft
+            else: parent_bl = base.a2dBottomCenter
+        elif ncars == 4:
+            if self.player_idx == 0: parent_bl = base.a2dLeftCenter
+            elif self.player_idx == 1: parent_bl = base.aspect2d
+            elif self.player_idx == 2: parent_bl = base.a2dBottomLeft
+            else: parent_bl = base.a2dBottomCenter
         pars = {'scale': .065, 'parent': parent_tr,
                 'fg': menu_args.text_active, 'align': TextNode.A_left,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
@@ -184,8 +223,18 @@ class CarPanel(GameObject):
             fg=menu_args.text_normal, font=self.eng.font_mgr.load_font(sprops.font))
         self.weapon_img = None
         if ncars == 1: parent = base.a2dTopCenter
-        elif player_idx == 0: parent = base.a2dTopQuarter
-        else: parent = base.a2dTopThirdQuarter
+        elif ncars == 2:
+            if player_idx == 0: parent = base.a2dTopQuarter
+            else: parent = base.a2dTopThirdQuarter
+        elif ncars == 3:
+            if player_idx == 0: parent = base.a2dTopCenter
+            elif player_idx == 0: parent = base.a2dCenterQuarter
+            else: parent = base.a2dCenterThirdQuarter
+        elif ncars == 4:
+            if player_idx == 0: parent = base.a2dTopQuarter
+            elif player_idx == 1: parent = base.a2dTopThirdQuarter
+            elif player_idx == 2: parent = base.a2dCenterQuarter
+            else: parent = base.a2dCenterThirdQuarter
         self.forward_img = OnscreenImage(
             'assets/images/gui/direction.txo',
             scale=.15, parent=parent, pos=(0, 1, -.2))
@@ -197,8 +246,18 @@ class CarPanel(GameObject):
 
     def enter_waiting(self):
         if self.ncars == 1: parent = base.aspect2d
-        elif self.player_idx == 0: parent = base.a2dCenterQuarter
-        else: parent = base.a2dCenterThirdQuarter
+        elif self.ncars == 2:
+            if self.player_idx == 0: parent = base.a2dCenterQuarter
+            else: parent = base.a2dCenterThirdQuarter
+        elif self.ncars == 3:
+            if self.player_idx == 0: parent = base.a2dQuarterCenter
+            elif self.player_idx == 1: parent = base.a2dTirdQuarterQuarter
+            else: parent = base.a2dThirdQuarterThirdQuarter
+        elif self.ncars == 4:
+            if self.player_idx == 0: parent = base.a2dQuarterQuarter
+            elif self.player_idx == 1: parent = base.a2dQuarterThirdQuarter
+            elif self.player_idx == 2: parent = base.a2dTirdQuarterQuarter
+            else: parent = base.a2dThirdQuarterThirdQuarter
         menu_args = self.race_props.season_props.gameprops.menu_args
         pars = {'scale': .065, 'parent': parent,
                 'fg': menu_args.text_normal,
@@ -211,7 +270,21 @@ class CarPanel(GameObject):
 
     def set_weapon(self, wpn):
         self.weapon_lab.show()
-        parent_tl = base.a2dTopLeft if self.player_idx == 0 else base.a2dTopCenter
+        ncars = len(self.race_props.season_props.player_car_names)
+        if ncars == 1:
+            parent_tl = base.a2dTopLeft
+        elif ncars == 2:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            else: parent_tl = base.a2dTopCenter
+        elif ncars == 3:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            elif self.player_idx == 1: parent_tl = base.a2dLeftCenter
+            else: parent_tl = base.aspect2d
+        elif ncars == 4:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            elif self.player_idx == 1: parent_tl = base.a2dTopCenter
+            elif self.player_idx == 2: parent_tl = base.a2dLeftCenter
+            else: parent_tl = base.aspect2d
         self.weapon_img = OnscreenImage(
             'assets/images/weapons/%s.txo' % wpn,
             scale=.12, parent=parent_tl, pos=(.18, 1, -.24))
@@ -318,8 +391,18 @@ class CarPlayerGui(CarGui):
         self.panel = CarPanel(car_props, mediator.player_car_idx, ncars)
         self.ai_panel = CarAIPanel()
         if ncars == 1: parent = base.a2dBottomCenter
-        elif mediator.player_car_idx == 0: parent = base.a2dBottomQuarter
-        else: parent = base.a2dBottomThirdQuarter
+        elif ncars == 2:
+            if mediator.player_car_idx == 0: parent = base.a2dBottomQuarter
+            else: parent = base.a2dBottomThirdQuarter
+        elif ncars == 3:
+            if mediator.player_car_idx == 0: parent = base.aspect2d
+            elif mediator.player_car_idx == 1: parent = base.a2dBottomQuarter
+            else: parent = base.a2dBottomThirdQuarter
+        elif ncars == 4:
+            if mediator.player_car_idx == 0: parent = base.a2dCenterQuarter
+            elif mediator.player_car_idx == 1: parent = base.a2dCenterThirdQuarter
+            elif mediator.player_car_idx == 2: parent = base.a2dBottomQuarter
+            else: parent = base.a2dBottomThirdQuarter
         self.way_txt = OnscreenText(
             '', pos=(0, .1), scale=.1,
             fg=self.race_props.season_props.gameprops.menu_args.text_err,

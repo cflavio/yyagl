@@ -40,6 +40,10 @@ class DirKeys(object):
         self.left = left
         self.right = right
 
+    def __repr__(self):
+        return 'forward: %s, rear: %s, left: %s, right: %s' % (
+            self.forward, self.rear, self.left, self.right)
+
 
 class InputBuilder(object):
 
