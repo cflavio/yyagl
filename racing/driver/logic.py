@@ -69,7 +69,7 @@ class DriverPlayerLoaderStrategy(GameObject):
             no_p = car not in player_car_names
             car_cls = AiCar if no_p and race.__class__.__name__ == 'RaceSinglePlayer' else car_cls
             race.logic.cars += [DriverLoaderStrategy.actual_load(
-                loadcars, car, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb, yorg_client)]
+                loadcars, car, r_p, track, race, car_cls, player_car_names, s_p, aipoller, cb, yorg_client, -1)]
 
 
 class DriverLogic(LogicColleague):

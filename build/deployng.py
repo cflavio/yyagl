@@ -34,7 +34,8 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
             'include_patterns': incl_patterns,
             'plugins': plugins,
             'gui_apps': {appname: 'main.py'},
-            'platforms': deploy_platforms},
+            'platforms': deploy_platforms,
+            'include_modules': {'*': ['encodings.hex_codec']}},
         'bdist_apps': {
             'installers': {
                 'manylinux1_x86_64': ['gztar'],  # xztar isn't supported in py2

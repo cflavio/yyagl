@@ -46,7 +46,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         fpath = 'assets/models/misc/' + info[0]
         self.decorators += [Decorator(fpath, self.nodepath)]
         args = info[1], self.unset_decorator, [self.decorators[-1]]
-        self.dec_tsk += [self.eng.do_later(args)]
+        self.dec_tsk += [self.eng.do_later(*args)]
 
     def unset_decorator(self, dec):
         self.decorators.remove(dec)

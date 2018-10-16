@@ -33,7 +33,7 @@ class RaceLogic(LogicColleague):
         self.track = Track(r_p)
         self.track.attach_obs(self.on_track_loaded)
         for driver in self.props.drivers:
-            if driver.dprops.car_name in r_p.season_props.player_car_name[0]:
+            if driver.dprops.car_name == r_p.season_props.player_car_names[0]:
                 self.load_car = lambda: DriverPlayerLoaderStrategy.load(
                     self.props.season_props.car_names[:],
                     r_p, car_name, self.track, self.mediator, player_car_names,

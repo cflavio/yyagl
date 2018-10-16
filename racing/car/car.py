@@ -1,6 +1,6 @@
 from yyagl.gameobject import GameObject, AiColleague
 from yyagl.facade import Facade
-from .fsm import CarFsm
+from .fsm import CarFsm, CarPlayerFsm
 from .gfx import CarGfx, CarPlayerGfx
 from .phys import CarPhys, CarPlayerPhys
 from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
@@ -94,6 +94,7 @@ class CarPlayer(Car):
     logic_cls = CarPlayerLogic
     phys_cls = CarPlayerPhys
     gfx_cls = CarPlayerGfx
+    fsm_cls = CarPlayerFsm
 
     def __init__(self, car_props, yorg_client, player_car_idx):
         self.player_car_idx = player_car_idx

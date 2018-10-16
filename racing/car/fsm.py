@@ -9,7 +9,7 @@ class CarFsm(FsmColleague):
         FsmColleague.__init__(self, mediator)
         self.defaultTransitions = {'Loading': ['Countdown'],
                                    'Countdown': ['Play'],
-                                   'Play': ['Waiting'],
+                                   'Play': ['Waiting', 'Results'],
                                    'Waiting': ['Results']}
         self.cprops = car_props
 
@@ -23,6 +23,13 @@ class CarFsm(FsmColleague):
         self.mediator.ai.destroy()
         self.mediator.ai = CarResultsAi(self.mediator, self.cprops)
         self.mediator.gui.hide()
+        self.mediator.gui.panel.enter_waiting()
+
+
+class CarPlayerFsm(CarFsm):
+
+    def enterWaiting(self):
+        CarFsm.enterWaiting(self)
         self.mediator.gui.panel.enter_waiting()
 
     def enterResults(self):

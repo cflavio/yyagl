@@ -49,7 +49,7 @@ class PageGui(GuiColleague):
     def on_enter(self, player):
         if not self.curr_wdgs[player]: return
         arg = player if len(self.players) > 1 else None
-        if self.curr_wdgs[player].on_enter(arg): self.enable()
+        if self.curr_wdgs[player].on_enter(arg): self.enable([player])
 
     @property
     def buttons(self):
@@ -79,7 +79,10 @@ class PageGui(GuiColleague):
         inter = lambda wdg: any(pcl in iclss for pcl in getmro(wdg.__class__))
         wdgs = [wdg for wdg in self.widgets if inter(wdg)]
         wdgs = filter(lambda wdg: wdg.is_enabled, wdgs)
-        if hasattr(self, 'curr_wdgs') and player < len(self.curr_wdgs) and self.curr_wdgs[player]:
+        if hasattr(self, 'curr_wdgs') and player < len(self.curr_wdgs) and self.curr_wdgs[player] \
+                and self.curr_wdgs[player] in wdgs:
+                # the last check for this case: multiple players appear on the
+                # same button, one player clicks it, another moves from it
             wdgs.remove(self.curr_wdgs[player])
         mth = self.__currwdg2wdg_dot_direction
         in_direction = lambda wdg: mth(wdg, direction, player, start) > .1

@@ -90,13 +90,6 @@ class CarEvent(EventColleague, ComputerProxy):
         ComputerProxy.__init__(self)
         self.eng.attach_obs(self.on_collision)
         self.props = race_props
-        keys = race_props.keys.players_keys[mediator.player_car_idx]
-        suff = str(mediator.player_car_idx)
-        self.label_events = [
-            ('forward' + suff, keys.forward), ('left' + suff, keys.left),
-            ('rear' + suff, keys.rear), ('right' + suff, keys.right)]
-        watch = inputState.watchWithModifiers
-        self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
         self.curr_wpn_id = 0
 
     def start(self):
@@ -124,7 +117,7 @@ class CarEvent(EventColleague, ComputerProxy):
             int_lat = 10000
             int_rot = 20000
             rndval = lambda: choice([-int_lat, int_lat])
-            frc = rndval(), rnval(), 96000
+            frc = rndval(), rndval(), 96000
             self.mediator.phys.pnode.apply_central_force(frc)
             torque = choice([-int_rot, int_rot])
             self.mediator.phys.pnode.apply_torque((0, 0, torque))
@@ -134,8 +127,6 @@ class CarEvent(EventColleague, ComputerProxy):
             self.mediator.logic.weapon.destroy()
         if cls == 'remove':
             self.mediator.logic.weapon = None
-            keys = self.props.keys.players_keys[self.mediator.player_car_idx]
-            self.ignore(keys.fire)
             return
         if cls: wpn_cls = cls
         else:
@@ -228,7 +219,6 @@ class CarEvent(EventColleague, ComputerProxy):
 
     def destroy(self):
         map(self.eng.detach_obs, [self.on_collision, self.on_frame])
-        map(lambda tok: tok.release(), self.toks)
         EventColleague.destroy(self)
         ComputerProxy.destroy(self)
 
@@ -237,6 +227,13 @@ class CarPlayerEvent(CarEvent):
 
     def __init__(self, mediator, race_props, yorg_client):
         CarEvent.__init__(self, mediator, race_props, yorg_client)
+        keys = race_props.keys.players_keys[mediator.player_car_idx]
+        suff = str(mediator.player_car_idx)
+        self.label_events = [
+            ('forward' + suff, keys.forward), ('left' + suff, keys.left),
+            ('rear' + suff, keys.rear), ('right' + suff, keys.right)]
+        watch = inputState.watchWithModifiers
+        self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
         if not self.eng.is_runtime:
             self.accept('f11', self.mediator.gui.pars.toggle)
             suff = str(8 + mediator.player_car_idx)
@@ -277,6 +274,10 @@ class CarPlayerEvent(CarEvent):
     def on_bonus(self, cls=None, wpn_id=None):
         if self.mediator.logic.weapon: self.mediator.gui.panel.unset_weapon()
         cls = CarEvent.on_bonus(self, cls)
+        if cls == 'remove':
+            keys = self.props.keys.players_keys[self.mediator.player_car_idx]
+            self.ignore(keys.fire)
+            return
         if not cls: return  # if removing
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
         self.accept(keys.fire, self.on_fire)
@@ -324,6 +325,7 @@ class CarPlayerEvent(CarEvent):
     def destroy(self):
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
         evts = ['f11', 'f8', keys.fire, keys.respawn]
+        map(lambda tok: tok.release(), self.toks)
         map(self.ignore, evts)
         CarEvent.destroy(self)
 

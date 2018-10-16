@@ -99,9 +99,9 @@ class EntryWidget(FrameWidget):
 
 class CheckBtnWidget(BtnWidget):
 
-    def on_enter(self):
+    def on_enter(self, player=0):
         self['indicatorValue'] = not self['indicatorValue']
-        BtnWidget.on_enter(self)
+        BtnWidget.on_enter(self, player)
 
 
 class SliderWidget(FrameWidget):
@@ -110,6 +110,8 @@ class SliderWidget(FrameWidget):
         if direction in [(-1, 0, 0), (1, 0, 0)]:
             self.get_np()['value'] += -.1 if direction == (-1, 0, 0) else .1
             return True
+
+    def on_enter(self, player=0): pass
 
 
 class OptionMenuWidget(BtnWidget):
@@ -130,7 +132,7 @@ class OptionMenuWidget(BtnWidget):
             nodepath._highlightItem(curr_cmp, idx)
             return True
 
-    def on_enter(self):
+    def on_enter(self, player=0):
         nodepath = self.get_np()
         if nodepath.popupMenu.is_hidden():
             nodepath.showPopupMenu()
@@ -138,12 +140,12 @@ class OptionMenuWidget(BtnWidget):
             return
         else:
             nodepath.selectHighlightedIndex()
-            idx = nodepath.selected_idx
+            idx = nodepath.selectedIndex
             if nodepath['command']: nodepath['command'](nodepath['items'][idx])
             nodepath.hidePopupMenu()
             idx += -1 if idx else 1
             fcol = nodepath.component('item%s' % idx)['frameColor']
-            curr_name = 'item%s' % nodepath.selected_idx
+            curr_name = 'item%s' % nodepath.selectedIndex
             nodepath._unhighlightItem(nodepath.component(curr_name), fcol)
             return True
         BtnWidget.on_enter(self)
