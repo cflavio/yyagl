@@ -1,5 +1,5 @@
 from panda3d.core import load_prc_file_data
-from yyagl.library.builder import LibraryBuilder
+from yyagl.library.builder import LibBuilder
 
 
 class GuiCfg(object):
@@ -12,7 +12,7 @@ class GuiCfg(object):
         self.win_title = win_title
         self.win_orig = win_orig
         self.fullscreen = fullscreen
-        self.sync_video = LibraryBuilder.cls.runtime if sync_video is None \
+        self.sync_video = LibBuilder.cls.runtime if sync_video is None \
             else sync_video
         self.antialiasing = antialiasing
         self.shaders = shaders

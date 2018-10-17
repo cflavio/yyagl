@@ -1,11 +1,9 @@
 from panda3d.core import Vec2 as PVec2, Vec3 as PVec3, Mat4
-from ..vec import Vec, Vec2
 
 
-class Panda3DVec(Vec):
+class Panda3DVec:
 
     def __init__(self, x, y, z):
-        Vec.__init__(self, x, y, z)
         self.vec = PVec3(x, y, z)
 
     def rotate(self, deg):
@@ -20,10 +18,9 @@ class Panda3DVec(Vec):
         return self.vec
 
 
-class Panda2DVec(Vec2):
+class Panda2DVec:
 
     def __init__(self, x, y):
-        Vec2.__init__(self, x, y)
         self.vec = PVec2(x, y)
 
     def normalize(self):

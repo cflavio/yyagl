@@ -6,7 +6,7 @@ from shutil import rmtree
 
 prereq = '''psutil
 simpleubjson
-'''
+pyyaml'''
 requirements = '''
 --pre --extra-index-url https://archive.panda3d.org/branches/deploy-ng
 panda3d'''
@@ -32,8 +32,9 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
         'build_apps': {
             'exclude_patterns': excl_patterns,
             'include_patterns': incl_patterns,
+            'log_filename': '$USER_APPDATA/Yorg/p3d_log.log',
             'plugins': plugins,
-            'gui_apps': {appname: 'main.py'},
+            'console_apps': {appname: 'main.py'},
             'platforms': deploy_platforms,
             'include_modules': {'*': ['encodings.hex_codec']}},
         'bdist_apps': {

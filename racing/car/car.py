@@ -67,7 +67,7 @@ class Car(GameObject, CarFacade):
     ai_cls = AiColleague
     audio_cls = CarAudio
 
-    def __init__(self, car_props, yorg_client):
+    def __init__(self, car_props, yorg_client, player_car_idx):
         self.eng.log_mgr.log('init car ' + car_props.name)
         init_lst = [
             [('fsm', self.fsm_cls, [self, car_props])],
@@ -79,6 +79,7 @@ class Car(GameObject, CarFacade):
                                         yorg_client]),
              ('ai', self.ai_cls, [self, car_props])],
             [('audio', self.audio_cls, [self, car_props.race_props])]]
+        self.player_car_idx = player_car_idx
         GameObject.__init__(self, init_lst, car_props.callback)
         CarFacade.__init__(self)
 
@@ -95,10 +96,6 @@ class CarPlayer(Car):
     phys_cls = CarPlayerPhys
     gfx_cls = CarPlayerGfx
     fsm_cls = CarPlayerFsm
-
-    def __init__(self, car_props, yorg_client, player_car_idx):
-        self.player_car_idx = player_car_idx
-        Car.__init__(self, car_props, yorg_client)
 
 
 class CarPlayerServer(Car):

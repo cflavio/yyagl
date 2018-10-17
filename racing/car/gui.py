@@ -195,7 +195,7 @@ class CarPanel(GameObject):
         self.speed_txt['align'] = TextNode.A_center
         self.speed_c = Circle(
             size=.1, pos=(-.18, -.1), parent=parent_tr, ray=.4,
-            width=.05, color_start=(.9, .6, .1, 1), color_end=(.2, .8, .2, 1))
+            thickness=.05, col_start=(.9, .6, .1, 1), col_end=(.2, .8, .2, 1))
         lap_str = '1/' + str(self.race_props.laps)
         self.lap_txt = OnscreenText(text=lap_str, pos=(-.24, -.2), **pars)
         self.time_txt = OnscreenText(pos=(-.24, -.5), **pars)

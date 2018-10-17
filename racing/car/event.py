@@ -127,7 +127,7 @@ class CarEvent(EventColleague, ComputerProxy):
             self.mediator.logic.weapon.destroy()
         if cls == 'remove':
             self.mediator.logic.weapon = None
-            return
+            return cls
         if cls: wpn_cls = cls
         else:
             wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]

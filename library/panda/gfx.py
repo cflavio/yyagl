@@ -6,7 +6,6 @@ from panda3d.core import get_model_path, AntialiasAttrib, \
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.racing.bitmasks import BitMasks
-from ..gfx import GfxMgr, Node, AnimNode, AmbientLight, Spotlight
 
 
 class RenderToTexture(object):
@@ -40,7 +39,7 @@ class RenderToTexture(object):
         map(lambda node: node.remove_node(), [self.camera, self.root])
 
 
-class PandaGfxMgr(GfxMgr):
+class PandaGfxMgr(object):
 
     def __init__(self):
         self.root = PandaNode(render)
@@ -123,10 +122,9 @@ class PandaGfxMgr(GfxMgr):
         base.render.ls()
 
 
-class PandaNode(Node):
+class PandaNode(object):
 
     def __init__(self, np):
-        Node.__init__(self)
         self.node = np
         self.node.set_python_tag('pandanode', self)
 
@@ -267,10 +265,9 @@ class PandaNode(Node):
     def write_bam_file(self, fpath): self.node.write_bam_file(fpath)
 
 
-class PandaAnimNode(AnimNode):
+class PandaAnimNode(object):
 
     def __init__(self, path, anim_dct):
-        AnimNode.__init__(self)
         self.node = Actor(path, anim_dct)
 
     def loop(self, anim_name): return self.node.loop(anim_name)
@@ -287,10 +284,9 @@ class PandaAnimNode(AnimNode):
         self.node.cleanup()
 
 
-class PandaAmbientLight(AmbientLight):
+class PandaAmbientLight(object):
 
     def __init__(self, color):
-        AmbientLight.__init__(self)
         ambient_lgt = P3DAmbientLight('ambient light')
         ambient_lgt.set_color(color)
         self.ambient_np = render.attach_new_node(ambient_lgt)
@@ -301,10 +297,9 @@ class PandaAmbientLight(AmbientLight):
         self.ambient_np.remove_node()
 
 
-class PandaSpotlight(Spotlight):
+class PandaSpotlight(object):
 
     def __init__(self):
-        Spotlight.__init__(self)
         self.spot_lgt = render.attach_new_node(P3DSpotlight('spot'))
         self.spot_lgt.node().set_scene(render)
         self.spot_lgt.node().set_shadow_caster(True, 1024, 1024)

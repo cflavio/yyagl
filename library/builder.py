@@ -1,9 +1,9 @@
-from .panda.panda import LibraryPanda3D
+from .panda.panda import LibPanda3D
 
 
-class LibraryBuilder(object):
+class LibBuilder(object):
 
-    cls = LibraryPanda3D
+    cls = LibPanda3D
 
     @staticmethod
-    def build(): return LibraryPanda3D()
+    def build(): return LibPanda3D()

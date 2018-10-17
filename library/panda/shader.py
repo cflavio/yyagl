@@ -4,7 +4,6 @@ from panda3d.core import AmbientLight, DirectionalLight, PointLight, \
     FrameBufferProperties, GraphicsPipe, GraphicsOutput, NodePath, PandaNode, \
     TextureStage, TexMatrixAttrib
 from direct.filter.FilterManager import FilterManager
-from ..shader import LibShaderMgr
 
 
 def load_shader(vert, frag):
@@ -13,10 +12,9 @@ def load_shader(vert, frag):
     else: return Shader.make(Shader.SLGLSL, vert, frag)
 
 
-class PandaShaderMgr(LibShaderMgr):
+class PandaShaderMgr(object):
 
     def __init__(self, shaders, gamma):
-        LibShaderMgr.__init__(self, shaders, gamma)
         self.filter_mgr = None
         self.gamma, self.buffer, self.lcam, self.lights = gamma, None, None, []
         if shaders: self.setup_post_fx()

@@ -3,14 +3,12 @@ from os.path import dirname, abspath, join
 from sys import modules
 from direct.task import Task
 from direct.interval.IntervalGlobal import ivalMgr
-from yyagl.library.pause import Pause
-from yyagl.library.panda.panda import LibraryPanda3D
+from yyagl.library.panda.panda import LibPanda3D
 
 
-class PandaPause(Pause):
+class PandaPause(object):
 
     def __init__(self):
-        Pause.__init__(self)
         self.__paused_taskchain = 'ya2 paused tasks'
         taskMgr.setupTaskChain(self.__paused_taskchain, frameBudget=0)
         fpath = dirname(modules[Task.__name__].__file__)
@@ -55,7 +53,7 @@ class PandaPause(Pause):
         self.__paused_tasks = []
         is_tsk = lambda tsk: tsk and hasattr(tsk, 'getFunction')
         tasks = [tsk for tsk in taskMgr.getTasks() if is_tsk(tsk)]
-        if LibraryPanda3D.version().startswith('1.10'):
+        if LibPanda3D.version().startswith('1.10'):
             tasks = [tsk for tsk in tasks
                      if tsk.get_task_chain() != 'unpausable']
         map(self.__process_task, tasks)

@@ -2,7 +2,7 @@ from sys import path
 from os.path import dirname, realpath
 path.append(dirname(realpath(__file__)) + '/../thirdparty')
 
-from ..library.builder import LibraryBuilder
+from ..library.builder import LibBuilder
 from .pause import PauseMgr
 from .profiler import AbsProfiler
 from .shader import ShaderMgr
@@ -29,7 +29,7 @@ class Engine(GameObject, EngineFacade):
     network_priority = -39
 
     def __init__(self, cfg=None, end_cb=None):
-        self.lib = LibraryBuilder.build()
+        self.lib = LibBuilder.build()
         self.lib.configure()
         self.lib.init(end_cb=end_cb)
         Colleague.eng = GameObject.eng = self

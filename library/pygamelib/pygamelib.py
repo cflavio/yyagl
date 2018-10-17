@@ -21,7 +21,7 @@ class PygameJoystickMgrBase(object):  # if there is not pygame
     def get_joystick(self): return 0, 0, 0, 0
 
     @staticmethod
-    def has_support(): return has_pygame()
+    def supported(): return has_pygame()
 
     def destroy(self): pass
 
@@ -30,7 +30,7 @@ class PygameJoystickMgr(PygameJoystickMgrBase):
 
     def __init__(self):
         PygameJoystickMgrBase.__init__(self)
-        self.joysticks = None
+        self.joysticks = []
 
     def init_joystick(self):
         PygameJoystickMgrBase.init_joystick(self)
@@ -50,5 +50,5 @@ class PygameJoystickMgr(PygameJoystickMgrBase):
     def destroy(self):
         joystick.quit()
         pygame.quit()
-        self.joysticks = None
+        self.joysticks = []
         PygameJoystickMgrBase.destroy(self)

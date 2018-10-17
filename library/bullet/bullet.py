@@ -3,14 +3,11 @@ from panda3d.bullet import BulletWorld, BulletDebugNode, \
     BulletTriangleMeshShape as BTriangleMeshShape, \
     BulletRigidBodyNode as BRigidBodyNode, \
     BulletGhostNode as BGhostNode
-from ..phys import PhysWorld, Contact, TriangleMesh, TriangleMeshShape, \
-    RigidBodyNode, GhostNode
 
 
-class BulletPhysWorld(PhysWorld):
+class BulletPhysWorld(object):
 
     def __init__(self):
-        PhysWorld.__init__(self)
         self.wld = BulletWorld()
         self.__debug_np = None
 
@@ -59,10 +56,9 @@ class BulletPhysWorld(PhysWorld):
         (self.__debug_np.show if is_hidden else self.__debug_np.hide)()
 
 
-class BulletContact(Contact):
+class BulletContact(object):
 
     def __init__(self, contact):
-        Contact.__init__(self, contact)
         self.contact = contact
 
     def get_node0(self): return self.contact.get_node0()
@@ -70,32 +66,28 @@ class BulletContact(Contact):
     def get_node1(self): return self.contact.get_node1()
 
 
-class BulletTriangleMesh(TriangleMesh):
+class BulletTriangleMesh(object):
 
     def __init__(self):
-        TriangleMesh.__init__(self)
         self.mesh = BTriangleMesh()
 
     def add_geom(self, geom, remove_duplicates, transform):
         return self.mesh.add_geom(geom, remove_duplicates, transform)
 
 
-class BulletTriangleMeshShape(TriangleMeshShape):
+class BulletTriangleMeshShape(object):
 
     def __init__(self, mesh, dynamic):
-        TriangleMeshShape.__init__(self, mesh, dynamic)
         self.mesh_shape = BTriangleMeshShape(mesh.mesh, dynamic=dynamic)
 
 
-class BulletRigidBodyNode(RigidBodyNode):
+class BulletRigidBodyNode(object):
 
     def __init__(self, name):
-        RigidBodyNode.__init__(self)
         self.node = BRigidBodyNode(name)
 
 
-class BulletGhostNode(GhostNode):
+class BulletGhostNode(object):
 
     def __init__(self, name):
-        GhostNode.__init__(self)
         self.node = BGhostNode(name)

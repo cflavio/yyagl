@@ -11,11 +11,9 @@ from direct.gui.DirectEntry import DirectEntry
 from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
-from ..igui import IImg, IBtn, ICheckBtn, IOptionMenu, IEntry, ILabel, IText, \
-    IFrame
 
 
-class PandaImg(IImg):
+class PandaImg(object):
 
     def __init__(self, fpath, pos=(0, 1, 0), scale=1.0, is_background=False,
                  force_transp=None, layer='', parent=None):
@@ -116,14 +114,14 @@ class PandaAbs(PandaBase):
     def is_enabled(self): return self.wdg['state'] != DISABLED
 
 
-class PandaBtn(IBtn, PandaAbs):
+class PandaBtn(PandaAbs):
 
     def __init__(
             self, text='', parent=None, pos=(0, 0, 0), scale=(1, 1, 1),
             command=None, frameSize=(-1, 1, -1, 1), clickSound=None,
             text_fg=(1, 1, 1, 1), frameColor=(1, 1, 1, 1), text_font=None,
             rolloverSound=None, extraArgs=[], frameTexture=None, image=None,
-            tra_src=None, tra_tra=None):
+            tra_src=None, tra_tra=None, text_scale=.8):
         self.wdg = DirectButton(
             text=text, parent=parent, pos=pos, scale=scale, command=command,
             frameSize=frameSize, clickSound=clickSound, text_fg=text_fg,
@@ -146,7 +144,7 @@ class PandaBtn(IBtn, PandaAbs):
         self['state'] = DISABLED
 
 
-class PandaSlider(IBtn, PandaAbs):
+class PandaSlider(PandaAbs):
 
     def __init__(
             self, parent=None, pos=(0, 0, 0), scale=1, value=0,
@@ -159,7 +157,7 @@ class PandaSlider(IBtn, PandaAbs):
         PandaAbs.__init__(self, tra_src, tra_tra)
 
 
-class PandaCheckBtn(ICheckBtn, PandaAbs):
+class PandaCheckBtn(PandaAbs):
 
     def __init__(
             self, pos=(0, 1, 0), text='', indicatorValue=False,
@@ -176,7 +174,7 @@ class PandaCheckBtn(ICheckBtn, PandaAbs):
         PandaAbs.__init__(self, tra_src, tra_tra)
 
 
-class PandaOptionMenu(IOptionMenu, PandaAbs):
+class PandaOptionMenu(PandaAbs):
 
     def __init__(
             self, text='', items=[], pos=(0, 1, 0), scale=(1, 1, 1),
@@ -207,7 +205,7 @@ class PandaOptionMenu(IOptionMenu, PandaAbs):
     def selected_idx(self): return self.wdg.selectedIndex
 
 
-class PandaEntry(IEntry, PandaAbs, DirectObject):
+class PandaEntry(PandaAbs, DirectObject):
 
     def __init__(
             self, scale=.05, pos=(0, 1, 0), entryFont=None, width=12,
@@ -251,7 +249,7 @@ class PandaEntry(IEntry, PandaAbs, DirectObject):
         PandaAbs.destroy(self)
 
 
-class PandaLabel(ILabel, PandaAbs):
+class PandaLabel(PandaAbs):
 
     def __init__(
             self, text='', pos=(0, 1, 0), parent=None, text_wordwrap=10,
@@ -264,7 +262,7 @@ class PandaLabel(ILabel, PandaAbs):
         PandaAbs.__init__(self, tra_src, tra_tra)
 
 
-class PandaTxt(IText, PandaBase):
+class PandaTxt(PandaBase):
 
     def __init__(
             self, txt='', pos=(0, 1, 0), scale=.05, wordwrap=12, parent=None,
@@ -284,7 +282,7 @@ class PandaTxt(IText, PandaBase):
     def set_r(self, val): return self.wdg.set_r(val)
 
 
-class PandaFrame(IFrame, PandaAbs):
+class PandaFrame(PandaAbs):
 
     def __init__(self, frameSize=(-1, 1, -1, 1), frameColor=(1, 1, 1, 1),
                  pos=(0, 1, 0), parent=None, textureCoord=False):

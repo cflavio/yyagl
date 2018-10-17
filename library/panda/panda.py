@@ -8,19 +8,17 @@ from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task.Task import Task
 from direct.directnotify.DirectNotify import DirectNotify
-from ..library import Library
 
 
 class LibShowBase(ShowBase): pass
 
 
-class LibraryPanda3D(Library, DirectObject):
+class LibPanda3D(DirectObject):
 
     task_cont = Task.cont
     runtime = not exists('main.py')
 
     def __init__(self):
-        Library.__init__(self)
         DirectObject.__init__(self)
         self.__end_cb = self.__notify = None
 

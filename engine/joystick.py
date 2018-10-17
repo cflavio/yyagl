@@ -27,7 +27,7 @@ class JoystickMgr(GameObject):
     def get_joystick(self): return self.joystick_lib.get_joystick()
 
     @staticmethod
-    def has_support(): return JoystickMgrLib.has_support()
+    def supported(): return JoystickMgrLib.supported()
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)

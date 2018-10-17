@@ -38,7 +38,7 @@ class DriverLoaderStrategy(GameObject):
             race, drv.dprops.f_engine, drv.dprops.f_tires,
             drv.dprops.f_suspensions, race.track.phys.waypoints, aipoller)
         if player_car_idx == -1:
-            return car_cls(car_props, yorg_client)
+            return car_cls(car_props, yorg_client, player_car_idx)
         else:
             return car_cls(car_props, yorg_client, player_car_idx)
 
