@@ -90,8 +90,10 @@ class Server(AbsNetwork):
     def process_udp(self):
         try: dgram, conn = self.udp_sock.recvfrom(8192)
         except error: return
-        dgram = self._fix_payload(dict(decode(dgram)))
-        self.read_cb(dgram['payload'], dgram['sender'])
+        try:
+            dgram = self._fix_payload(dict(decode(dgram)))
+            self.read_cb(dgram['payload'], dgram['sender'])
+        except MarkerError as e: print e
 
     def send_udp(self, data_lst, receiver):
         if receiver[0] not in self.addr2conn: return
