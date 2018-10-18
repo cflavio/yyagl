@@ -2,6 +2,7 @@ from panda3d.bullet import BulletRigidBodyNode
 from panda3d.core import Mat4, BitMask32
 from yyagl.gameobject import PhysColleague
 from yyagl.racing.bitmasks import BitMasks
+from yyagl.engine.vec import Vec
 
 
 class WeaponPhys(PhysColleague):
@@ -16,13 +17,15 @@ class WeaponPhys(PhysColleague):
         self.node.set_mass(50)
         self.node.add_shape(self.coll_mesh_cls(.5))
         self.n_p = self.parent.attach_node(self.node)
-        self.n_p.set_pos((0, 0, self.joint_z))
+        self.n_p.set_pos(Vec(0, 0, self.joint_z))
         self.n_p.wrt_reparent_to(self.eng.gfx.root)
         launch_dist = self.car.logic.car_vec * self.launch_dist
-        self.n_p.set_pos(self.n_p.get_pos() + launch_dist)
+        pos = self.n_p.get_pos()
+        pos = Vec(pos.x, pos.y, pos.z)
+        self.n_p.set_pos(pos + launch_dist)
         self.eng.phys_mgr.attach_rigid_body(self.node)
         self.mediator.gfx.gfx_np.reparent_to(self.n_p)
-        self.mediator.gfx.gfx_np.set_pos((0, 0, self.gfx_dz))
+        self.mediator.gfx.gfx_np.set_pos(Vec(0, 0, self.gfx_dz))
 
     def destroy(self):
         if self.node:  # has not been fired
@@ -75,7 +78,7 @@ class RocketWeaponPhys(WeaponPhys):
         node_pos = self.n_p.get_pos()
         height = self.car.phys.gnd_height(node_pos) + .8
         new_height = self.__new_val(node_pos[2], height, globalClock.getDt() * 4.0)
-        self.n_p.set_pos((node_pos[0], node_pos[1], new_height))
+        self.n_p.set_pos(Vec(node_pos[0], node_pos[1], new_height))
         return tsk.again
 
     def destroy(self):

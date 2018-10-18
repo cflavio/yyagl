@@ -60,7 +60,7 @@ class PageGui(GuiColleague):
         start_pos = start if start else self.curr_wdgs[player].get_pos(aspect2d)
         vec = wdg.get_pos(aspect2d) - start_pos
         vec = Vec2(vec.x, vec.z).normalize()
-        return vec.dot(LVecBase2f(direction[0], direction[2]))
+        return vec.dot(Vec2(direction[0], direction[2]))
 
     def __next_weight(self, wdg, direction, player, start=None):
         start_pos = start if start else self.curr_wdgs[player].get_pos(aspect2d)

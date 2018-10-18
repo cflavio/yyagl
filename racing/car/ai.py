@@ -144,19 +144,22 @@ class AbsAiLogic(ComputerProxy, GameObject):
             offset_y = Vec(uniform(*self.width_bounds), 0, 0)
         else:
             offset_y = Vec(self.width_bounds[self.bnd_idx(direction)], 0, 0)
-        start = Vec(*(self.car.pos - self.car_vec * .8))
+        vpos = Vec(self.car.pos.x, self.car.pos.y, self.car.pos.z)
+        start = vpos - self.car_vec * .8
         offset_y.rotate(self.car.heading)
         half = (self.height_bounds[0] + self.height_bounds[1]) / 4
-        start = start + offset_y + (0, 0, uniform(half, self.height_bounds[1]))
+        start = start + offset_y + Vec(0, 0, uniform(half, self.height_bounds[1]))
         lgt = 4 + 41 * self.car.phys.speed_ratio
-        lookahed_vec = Vec(*(self.car_vec * lgt))
+        lookahed_vec = self.car_vec * lgt
         deg = uniform(*sector2bounds[direction])
         lookahed_vec.rotate(deg)
-        lookahead_pos = Vec(*(self.car.pos)) + lookahed_vec + (0, 0, self.height_bounds[0] - 2)
+        lookahead_pos = Vec(*(self.car.pos)) + lookahed_vec + Vec(0, 0, self.height_bounds[0] - 2)
         hit_res = self.eng.phys_mgr.ray_test_all(start, lookahead_pos, self.car.logic.bitmask)
         result = []
         for hit in hit_res.get_hits():
-            result += [(hit.get_node().get_name(), (start - hit.get_hit_pos()).length())]
+            hpos = hit.get_hit_pos()
+            hpos = Vec(hpos.x, hpos.y, hpos.z)
+            result += [(hit.get_node().get_name(), (start - hpos).length())]
         result = sorted(result, key=lambda elm: elm[1])
         if self.car.fsm.getCurrentOrNextState() != 'Results' and \
                 self.player_car == self.car.name:

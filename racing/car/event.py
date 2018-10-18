@@ -207,8 +207,10 @@ class CarEvent(EventColleague, ComputerProxy):
             self.mediator.gfx.nodepath.set_r(0)
 
     def __update_contact_pos(self):
-        top = self.mediator.pos + (0, 0, 50)
-        bottom = self.mediator.pos + (0, 0, -50)
+        p3dpos = self.mediator.pos + (0, 0, 50)
+        top = Vec(p3dpos.x, p3dpos.y, p3dpos.z)
+        p3dpos = self.mediator.pos + (0, 0, -50)
+        bottom = Vec(p3dpos.x, p3dpos.y, p3dpos.z)
         hits = self.eng.phys_mgr.ray_test_all(top, bottom).get_hits()
         r_n = self.props.road_name
         for hit in [hit for hit in hits if r_n in hit.get_node().get_name()]:

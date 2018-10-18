@@ -3,6 +3,7 @@ from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
 from direct.actor.Actor import Actor
 from yyagl.gameobject import GfxColleague
+from yyagl.engine.vec import Vec
 
 
 class WeaponGfx(GfxColleague):
@@ -26,7 +27,7 @@ class WeaponGfx(GfxColleague):
         self.gfx_np.reparent_to(self.parent)
         self.gfx_np.set_h(self.mediator.deg)
         self.gfx_np.set_scale(1.5)
-        self.gfx_np.set_pos((0, 0, 1.5))
+        self.gfx_np.set_pos(Vec(0, 0, 1.5))
 
     def reparent(self, parent):
         self.gfx_np.reparent_to(parent)

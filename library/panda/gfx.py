@@ -140,7 +140,7 @@ class PandaNode(object):
 
     def set_collide_mask(self, mask): return self.node.set_collide_mask(mask)
 
-    def set_pos(self, pos): return self.node.set_pos(pos)
+    def set_pos(self, pos): return self.node.set_pos(pos.vec)
 
     def set_x(self, x): return self.node.set_x(x)
 

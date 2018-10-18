@@ -1,6 +1,7 @@
 from math import cos, pi
 from panda3d.core import Vec3, LVector3f, Mat4
 from yyagl.gameobject import GameObject
+from yyagl.engine.vec import Vec2, Vec
 
 
 class Camera(GameObject):
@@ -25,6 +26,7 @@ class Camera(GameObject):
         self.curr_dist = 0
         self.curr_h = 0
         self.car = car
+        base.camLens.set_near_far(1.0, 1000.0)
 
     @staticmethod
     def ease(val):
@@ -128,7 +130,11 @@ class Camera(GameObject):
 
     def gnd_height(self, pos):
         phys_root = self.eng.phys_mgr.root
-        hits = phys_root.ray_test_all(pos - (0, 0, 100), pos + (0, 0, 100))
+        bottompos = pos - (0, 0, 100)
+        bottom = Vec(bottompos.x, bottompos.y, bottompos.z)
+        toppos = pos + (0, 0, 100)
+        top = Vec(toppos.x, toppos.y, toppos.z)
+        hits = phys_root.ray_test_all(bottom, top)
         for hit in hits.get_hits():
             prefs = ['RoadOBJ', 'OffroadOBJ']
             if any(hit.getNode().getName().startswith(pref) for pref in prefs):
@@ -154,7 +160,11 @@ class FPCamera(Camera):
     dist_max = 24
     height = 8
 
-    def _new_pos(self, back_car_vec, speed_ratio, c_i):
+    def __init__(self, car_np, cam_vec, car):
+        Camera.__init__(self, car_np, cam_vec, car)
+        base.camLens.set_near_far(1.0, 240.0)
+
+    def _new_pos(self, back_car_vec, c_i):
         car_pos = self.car_np.get_pos()
         curr_cam_pos = car_pos + back_car_vec
         curr_occl = self.__occlusion_mesh(curr_cam_pos)
@@ -164,7 +174,7 @@ class FPCamera(Camera):
             back_car_vec = occl_pos - car_pos
             is_occl = True
         if not is_occl:
-            new_pos = Camera._new_pos(self, back_car_vec, speed_ratio, c_i)
+            new_pos = Camera._new_pos(self, back_car_vec, c_i)
         else:
             new_pos = occl_pos
         return new_pos
@@ -203,10 +213,12 @@ class FPCamera(Camera):
     def __closest_occl(self, pos, tgt):
         occl = None
         dist = 9999
-        occl_l = self.eng.phys_mgr.root.ray_test_all(tgt, pos)  # , mask)
+        tgtv = Vec(tgt.x, tgt.y, tgt.z)
+        posv = Vec(pos.x, pos.y, pos.z)
+        occl_l = self.eng.phys_mgr.root.ray_test_all(tgtv, posv)  # , mask)
         for _occl in occl_l.get_hits():
             if _occl.getNode().getName() not in ['Vehicle', 'Goal']:
-                if (_occl.getHitPos() - tgt).length() < dist:
-                    dist = (_occl.getHitPos() - tgt).length()
+                if (_occl.getHitPos() - tgtv).length() < dist:
+                    dist = (_occl.getHitPos() - tgtv).length()
                     occl = _occl
         return occl

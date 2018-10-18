@@ -6,7 +6,8 @@ from shutil import rmtree
 
 prereq = '''psutil
 simpleubjson
-pyyaml'''
+pyyaml
+feedparser'''
 requirements = '''
 --pre --extra-index-url https://archive.panda3d.org/branches/deploy-ng
 panda3d'''

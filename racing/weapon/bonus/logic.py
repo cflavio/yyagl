@@ -1,4 +1,5 @@
 from yyagl.gameobject import LogicColleague
+from yyagl.engine.vec import Vec
 
 
 class BonusLogic(LogicColleague):
@@ -12,7 +13,9 @@ class BonusLogic(LogicColleague):
             (w_p, (w_p.initial_pos - pos).length())
             for w_p in track_phys.waypoints]
         self.closest_wp = min(wp_info, key=lambda pair: pair[1])[0]
-        self.closest_wp.node.set_pos(self.mediator.gfx.model.get_pos())
+        pos = self.mediator.gfx.model.get_pos()
+        pos = Vec(pos.x, pos.y, pos.z)
+        self.closest_wp.node.set_pos(pos)
         self.closest_wp.weapon_boxes += [self.mediator]
         track_gfx.redraw_wps()
 
@@ -22,9 +25,13 @@ class BonusLogic(LogicColleague):
         boxes.remove(self.mediator)
         cwp.weapon_boxes = boxes
         if cwp.weapon_boxes:
-            cwp.node.set_pos(cwp.weapon_boxes[-1].gfx.model.get_pos())
+            pos = cwp.weapon_boxes[-1].gfx.model.get_pos()
+            pos = Vec(pos.x, pos.y, pos.z)
+            cwp.node.set_pos(pos)
         else:
-            cwp.node.set_pos(cwp.initial_pos)
+            pos = cwp.initial_pos
+            pos = Vec(pos.x, pos.y, pos.z)
+            cwp.node.set_pos(pos)
         self.track_gfx.redraw_wps()
         self.track_phys = self.track_gfx = self.closest_wp = None
         LogicColleague.destroy(self)

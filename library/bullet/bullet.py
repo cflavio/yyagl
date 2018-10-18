@@ -35,7 +35,7 @@ class BulletPhysWorld(object):
     def remove_vehicle(self, node): return self.wld.remove_vehicle(node)
 
     def ray_test_all(self, a, b, mask=None):
-        args = [a, b]
+        args = [a.vec, b.vec]
         if mask: args += [mask]
         return self.wld.ray_test_all(*args)
 

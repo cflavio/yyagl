@@ -78,21 +78,21 @@ class DriftingForce(object):
         car_vec = self.car.logic.car_vec
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
-        car_vec_left = rot_mat_left.xformVec(car_vec)
+        car_vec_left = rot_mat_left.xformVec(car_vec.vec)
 
         rot_mat_drift_left = Mat4()
         deg = 45 if input_dct.forward else 90
         rot_mat_drift_left.setRotateMat(deg, (0, 0, 1))
-        drift_vec_left = rot_mat_drift_left.xformVec(car_vec)
+        drift_vec_left = rot_mat_drift_left.xformVec(car_vec.vec)
 
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
-        car_vec_right = rot_mat_right.xformVec(car_vec)
+        car_vec_right = rot_mat_right.xformVec(car_vec.vec)
 
         rot_mat_drift_right = Mat4()
         deg = -45 if input_dct.forward else 90
         rot_mat_drift_right.setRotateMat(deg, (0, 0, 1))
-        drift_vec_right = rot_mat_drift_right.xformVec(car_vec)
+        drift_vec_right = rot_mat_drift_right.xformVec(car_vec.vec)
 
         max_intensity = 10000.0
         max_torque = 5000.0
@@ -143,7 +143,10 @@ class DriftingForce(object):
             if not whl.is_front_wheel():
                 slip = 1 + car_dot_vel_l * vel_fact * .002
                 whl.setFrictionSlip(whl.getFrictionSlip() * slip)
-        if intensity: phys.pnode.apply_central_force(direction * intensity)
+        if intensity:
+            v = direction * intensity
+            v = Vec(v.x, v.y, v.z)
+            phys.pnode.apply_central_force(v.vec)
         if intensity_torque:
             phys.pnode.apply_torque((0, 0, intensity_torque))
 
@@ -325,10 +328,10 @@ class CarLogic(LogicColleague, ComputerProxy):
         car_vec = self.car_vec
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
-        car_vec_left = rot_mat_left.xformVec(car_vec)
+        car_vec_left = rot_mat_left.xformVec(car_vec.vec)
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
-        car_vec_right = rot_mat_right.xformVec(car_vec)
+        car_vec_right = rot_mat_right.xformVec(car_vec.vec)
         vel = self.mediator.phys.vehicle.get_chassis().get_linear_velocity()
         vel.normalize()
         car_dot_vel_l = car_vec_left.dot(vel)
@@ -348,10 +351,12 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @staticmethod
     def __get_hits(wp1, wp2):
-        return [
-            hit.get_node().get_name()
-            for hit in CarLogic.eng.phys_mgr.ray_test_all(
-                wp1.pos, wp2.pos).get_hits()]
+        hits = []
+        p3d_wp1 = Vec(wp1.pos.x, wp1.pos.y, wp1.pos.z)
+        p3d_wp2 = Vec(wp2.pos.x, wp2.pos.y, wp2.pos.z)
+        for hit in CarLogic.eng.phys_mgr.ray_test_all(p3d_wp1, p3d_wp2).get_hits():
+            hits += [hit.get_node().get_name()]
+        return hits
 
     @compute_once
     def not_fork_wps(self):
@@ -718,7 +723,7 @@ class CarPlayerLogic(CarLogic):
         tgt_vec = LVector3f(self.tgt_vec.x, self.tgt_vec.y, 0)
         tgt_vec.normalize()
         vec_up = LVector3f(0, 0, 1)
-        angle = -self.car_vec.signedAngleDeg(tgt_vec, vec_up)
+        angle = -self.car_vec.signed_angle_deg(tgt_vec, vec_up)
         self.mediator.gui.panel.set_forward_angle(angle)
 
     def fire(self):

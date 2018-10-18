@@ -5,6 +5,7 @@ from yyagl.racing.weapon.bonus.bonus import Bonus
 from yyagl.racing.bitmasks import BitMasks
 from yyagl.engine.phys import TriangleMesh, TriangleMeshShape, GhostNode, \
     RigidBodyNode
+from yyagl.library.panda.vec import Panda3DVec
 
 
 class MeshBuilder(GameObject):
@@ -257,10 +258,12 @@ class TrackPhys(PhysColleague, ComputerProxy):
 
     @staticmethod
     def __get_hits(wp1, wp2):
-        return [
-            hit.get_node().get_name()
-            for hit in TrackPhys.eng.phys_mgr.ray_test_all(
-                wp1.pos, wp2.pos).get_hits()]
+        hits = []
+        p3d_wp1 = Panda3DVec(wp1.pos.x, wp1.pos.y, wp1.pos.z)
+        p3d_wp2 = Panda3DVec(wp2.pos.x, wp2.pos.y, wp2.pos.z)
+        for hit in TrackPhys.eng.phys_mgr.ray_test_all(p3d_wp1, p3d_wp2).get_hits():
+            hits += [hit.get_node().get_name()]
+        return hits
 
     def set_curr_wp(self, wayp): pass
 
