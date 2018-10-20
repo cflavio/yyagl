@@ -1,5 +1,5 @@
-from yyagl.library.gui import Btn
-from yyagl.library.panda.shader import load_shader
+from yyagl.lib.gui import Btn
+from yyagl.lib.p3d.shader import load_shader
 
 
 class ImgBtn(Btn):

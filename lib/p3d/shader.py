@@ -12,7 +12,7 @@ def load_shader(vert, frag):
     else: return Shader.make(Shader.SLGLSL, vert, frag)
 
 
-class PandaShaderMgr(object):
+class P3dShaderMgr(object):
 
     def __init__(self, shaders, gamma):
         self.filter_mgr = None

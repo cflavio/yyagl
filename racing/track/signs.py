@@ -1,4 +1,4 @@
-from yyagl.library.panda.gfx import RenderToTexture
+from yyagl.lib.p3d.gfx import RenderToTexture
 from panda3d.core import TextureStage
 
 

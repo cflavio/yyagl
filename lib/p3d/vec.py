@@ -3,14 +3,14 @@ from panda3d.core import Vec2 as PVec2, Vec3 as PVec3, Mat4, LVector2f, \
 
 
 
-class Panda2DVec(object):
+class P3dVec2(object):
 
     def __init__(self, x, y):
         self.vec = PVec2(x, y)
 
     def normalize(self):
         self.vec.normalize()
-        return Panda2DVec(self.vec.x, self.vec.y)
+        return P3dVec2(self.vec.x, self.vec.y)
 
     def signed_angle_deg(self, vec):
         return self.vec.signed_angle_deg(LVector2f(vec.x, vec.y))
@@ -25,14 +25,14 @@ class Panda2DVec(object):
 
 
 
-class Panda3DVec(Panda2DVec):
+class P3dVec3(P3dVec2):
 
     def __init__(self, x, y, z):
         self.vec = PVec3(x, y, z)
 
     def normalize(self):
         self.vec.normalize()
-        return Panda3DVec(self.vec.x, self.vec.y, self.vec.z)
+        return P3dVec3(self.vec.x, self.vec.y, self.vec.z)
 
     def signed_angle_deg(self, vec, vec_up):
         return self.vec.signed_angle_deg(LVector3f(vec.x, vec.y, vec.z), vec_up)
@@ -44,19 +44,19 @@ class Panda3DVec(Panda2DVec):
 
     def __add__(self, vec):
         p3dvec = self.vec + vec.vec
-        return Panda3DVec(p3dvec.x, p3dvec.y, p3dvec.z)
+        return P3dVec3(p3dvec.x, p3dvec.y, p3dvec.z)
 
     def __sub__(self, vec):
         p3dvec = self.vec - vec.vec
-        return Panda3DVec(p3dvec.x, p3dvec.y, p3dvec.z)
+        return P3dVec3(p3dvec.x, p3dvec.y, p3dvec.z)
 
     def __neg__(self):
         p3dvec = - self.vec
-        return Panda3DVec(p3dvec.x, p3dvec.y, p3dvec.z)
+        return P3dVec3(p3dvec.x, p3dvec.y, p3dvec.z)
 
     def __mul__(self, val):
         p3dvec = self.vec * val
-        return Panda3DVec(p3dvec.x, p3dvec.y, p3dvec.z)
+        return P3dVec3(p3dvec.x, p3dvec.y, p3dvec.z)
 
     def length(self): return self.vec.length()
 
@@ -64,4 +64,4 @@ class Panda3DVec(Panda2DVec):
     def z(self): return self.vec.z
 
     @property
-    def xy(self): return Panda2DVec(self.vec.x, self.vec.y)
+    def xy(self): return P3dVec2(self.vec.x, self.vec.y)

@@ -29,8 +29,6 @@ class GameBase(GameObject, GameFacade):  # it doesn't manage the window
         # self.eng = self.eng.destroy()
         self.eng.server.destroy()
         self.eng.client.destroy()
-        # it crashes
-        self.eng.xmpp.destroy()
 
 
 class Game(GameBase):  # it adds the window

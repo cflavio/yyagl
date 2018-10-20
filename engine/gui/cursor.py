@@ -1,4 +1,4 @@
-from yyagl.library.gui import Img
+from yyagl.lib.gui import Img
 from yyagl.gameobject import GameObject
 from yyagl.facade import Facade
 

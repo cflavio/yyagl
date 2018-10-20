@@ -1,8 +1,8 @@
 from os.path import exists
-from panda3d.core import get_model_path, AntialiasAttrib, \
-    PandaNode as P3DNode, LightRampAttrib, Camera, OrthographicLens, NodePath, \
-    OmniBoundingVolume, AmbientLight as P3DAmbientLight, \
-    Spotlight as P3DSpotlight, BitMask32, Point2, Point3
+from panda3d.core import get_model_path, AntialiasAttrib, PandaNode, \
+    LightRampAttrib, Camera, OrthographicLens, NodePath, OmniBoundingVolume, \
+    AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, BitMask32, \
+    Point2, Point3
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.racing.bitmasks import BitMasks
@@ -39,10 +39,10 @@ class RenderToTexture(object):
         map(lambda node: node.remove_node(), [self.camera, self.root])
 
 
-class PandaGfxMgr(object):
+class P3dGfxMgr(object):
 
     def __init__(self):
-        self.root = PandaNode(render)
+        self.root = P3dNode(render)
         self.callbacks = {}
         self.filters = None
 
@@ -60,23 +60,23 @@ class PandaGfxMgr(object):
             self.filters = CommonFilters(base.win, base.cam)
 
     def _intermediate_cb(self, model, fpath):
-        return self.callbacks[fpath](PandaNode(model))
+        return self.callbacks[fpath](P3dNode(model))
 
     def load_model(self, filename, callback=None, extra_args=[], anim=None):
         ext = '.bam' if exists(filename + '.bam') else ''
         if anim:
             anim_dct = {'anim': filename + '-Anim' + ext}
-            return PandaNode(Actor(filename + ext, anim_dct))
+            return P3dNode(Actor(filename + ext, anim_dct))
         elif callback:
             self.callbacks[filename + ext] = callback
             return loader.loadModel(
               filename + ext, callback=self._intermediate_cb,
               extraArgs=extra_args + [filename + ext])
         else:
-            return PandaNode(loader.loadModel(filename + ext))
+            return P3dNode(loader.loadModel(filename + ext))
 
     def set_toon(self):
-        tempnode = NodePath(P3DNode('temp node'))
+        tempnode = NodePath(PandaNode('temp node'))
         tempnode.set_attrib(LightRampAttrib.make_single_threshold(.5, .4))
         tempnode.set_shader_auto()
         base.cam.node().set_initial_state(tempnode.get_state())
@@ -122,14 +122,14 @@ class PandaGfxMgr(object):
         base.render.ls()
 
 
-class PandaNode(object):
+class P3dNode(object):
 
     def __init__(self, np):
         self.node = np
         self.node.set_python_tag('pandanode', self)
 
     def attach_node(self, name):
-        return PandaNode(self.node.attach_new_node(name))
+        return P3dNode(self.node.attach_new_node(name))
 
     def add_shape(self, shape):
         return self.node.node().add_shape(shape.mesh_shape)
@@ -225,7 +225,7 @@ class PandaNode(object):
     def __get_pandanode(nodepath):
         if nodepath.has_python_tag('pandanode'):
             return nodepath.get_python_tag('pandanode')
-        return PandaNode(nodepath)
+        return P3dNode(nodepath)
 
     def find_all_matches(self, name):
         nodes = self.node.find_all_matches(name)
@@ -265,7 +265,7 @@ class PandaNode(object):
     def write_bam_file(self, fpath): self.node.write_bam_file(fpath)
 
 
-class PandaAnimNode(object):
+class P3dAnimNode(object):
 
     def __init__(self, path, anim_dct):
         self.node = Actor(path, anim_dct)
@@ -284,7 +284,7 @@ class PandaAnimNode(object):
         self.node.cleanup()
 
 
-class PandaAmbientLight(object):
+class P3dAmbientLight(object):
 
     def __init__(self, color):
         ambient_lgt = P3DAmbientLight('ambient light')
@@ -297,7 +297,7 @@ class PandaAmbientLight(object):
         self.ambient_np.remove_node()
 
 
-class PandaSpotlight(object):
+class P3dSpotlight(object):
 
     def __init__(self):
         self.spot_lgt = render.attach_new_node(P3DSpotlight('spot'))

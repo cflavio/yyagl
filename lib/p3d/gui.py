@@ -13,7 +13,7 @@ from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
 
 
-class PandaImg(object):
+class P3dImg(object):
 
     def __init__(self, fpath, pos=(0, 1, 0), scale=1.0, is_background=False,
                  force_transp=None, layer='', parent=None):
@@ -53,7 +53,7 @@ class PandaImg(object):
     def destroy(self): self.img = self.img.destroy()
 
 
-class PandaBase(object):
+class P3dBase(object):
 
     def __init__(self, tra_src=None, tra_tra=None):
         if tra_src and tra_tra: self.bind_tra(tra_src, tra_tra)
@@ -87,7 +87,7 @@ class PandaBase(object):
     def destroy(self): return self.wdg.destroy()
 
 
-class PandaAbs(PandaBase):
+class P3dAbs(P3dBase):
 
     def get_value(self): return self.wdg.getValue()
 
@@ -114,7 +114,7 @@ class PandaAbs(PandaBase):
     def is_enabled(self): return self.wdg['state'] != DISABLED
 
 
-class PandaBtn(PandaAbs):
+class P3dBtn(P3dAbs):
 
     def __init__(
             self, text='', parent=None, pos=(0, 0, 0), scale=(1, 1, 1),
@@ -128,7 +128,7 @@ class PandaBtn(PandaAbs):
             frameColor=frameColor, text_font=text_font,
             rolloverSound=rolloverSound, extraArgs=extraArgs,
             frameTexture=frameTexture, image=image, text_scale=1.0)
-        PandaAbs.__init__(self, tra_src, tra_tra)
+        P3dAbs.__init__(self, tra_src, tra_tra)
         self['relief'] = FLAT
         self.bind(ENTER, self._on_enter)
         self.bind(EXIT, self._on_exit)
@@ -144,7 +144,7 @@ class PandaBtn(PandaAbs):
         self['state'] = DISABLED
 
 
-class PandaSlider(PandaAbs):
+class P3dSlider(P3dAbs):
 
     def __init__(
             self, parent=None, pos=(0, 0, 0), scale=1, value=0,
@@ -154,10 +154,10 @@ class PandaSlider(PandaAbs):
             parent=parent, pos=pos, scale=scale, value=value,
             frameColor=frameColor, thumb_frameColor=thumb_frameColor,
             command=command, range=range_)
-        PandaAbs.__init__(self, tra_src, tra_tra)
+        P3dAbs.__init__(self, tra_src, tra_tra)
 
 
-class PandaCheckBtn(PandaAbs):
+class P3dCheckBtn(P3dAbs):
 
     def __init__(
             self, pos=(0, 1, 0), text='', indicatorValue=False,
@@ -171,10 +171,10 @@ class PandaCheckBtn(PandaAbs):
             frameColor=frameColor, scale=scale, clickSound=clickSound,
             rolloverSound=rolloverSound, text_fg=text_fg, text_font=text_font,
             command=command)
-        PandaAbs.__init__(self, tra_src, tra_tra)
+        P3dAbs.__init__(self, tra_src, tra_tra)
 
 
-class PandaOptionMenu(PandaAbs):
+class P3dOptionMenu(P3dAbs):
 
     def __init__(
             self, text='', items=[], pos=(0, 1, 0), scale=(1, 1, 1),
@@ -195,7 +195,7 @@ class PandaOptionMenu(PandaAbs):
             popupMarker_frameColor=popupMarker_frameColor,
             item_relief=item_relief, item_text_font=item_text_font,
             text_font=text_font)
-        PandaAbs.__init__(self, tra_src, tra_tra)
+        P3dAbs.__init__(self, tra_src, tra_tra)
 
     def set(self, val, f_cmd=None): return self.wdg.set(val, f_cmd)
 
@@ -205,7 +205,7 @@ class PandaOptionMenu(PandaAbs):
     def selected_idx(self): return self.wdg.selectedIndex
 
 
-class PandaEntry(PandaAbs, DirectObject):
+class P3dEntry(P3dAbs, DirectObject):
 
     def __init__(
             self, scale=.05, pos=(0, 1, 0), entryFont=None, width=12,
@@ -222,7 +222,7 @@ class PandaEntry(PandaAbs, DirectObject):
             focusInExtraArgs=focusInExtraArgs, focusOutCommand=focusOutCommand,
             focusOutExtraArgs=focusOutExtraArgs, parent=parent,
             text_fg=text_fg)
-        PandaAbs.__init__(self, tra_src, tra_tra)
+        P3dAbs.__init__(self, tra_src, tra_tra)
         if on_tab:
             self.on_tab_cb = on_tab
             self.accept('tab-up', self.on_tab)
@@ -246,10 +246,10 @@ class PandaEntry(PandaAbs, DirectObject):
     def destroy(self):
         self.ignore('tab-up')
         self.on_tab_cb = None
-        PandaAbs.destroy(self)
+        P3dAbs.destroy(self)
 
 
-class PandaLabel(PandaAbs):
+class P3dLabel(P3dAbs):
 
     def __init__(
             self, text='', pos=(0, 1, 0), parent=None, text_wordwrap=10,
@@ -259,10 +259,10 @@ class PandaLabel(PandaAbs):
             text=text, pos=pos, parent=parent, text_wordwrap=text_wordwrap,
             text_align=text_align, text_fg=text_fg, text_font=text_font,
             scale=scale, frameColor=frameColor)
-        PandaAbs.__init__(self, tra_src, tra_tra)
+        P3dAbs.__init__(self, tra_src, tra_tra)
 
 
-class PandaTxt(PandaBase):
+class P3dTxt(P3dBase):
 
     def __init__(
             self, txt='', pos=(0, 1, 0), scale=.05, wordwrap=12, parent=None,
@@ -277,16 +277,16 @@ class PandaTxt(PandaBase):
         self.wdg = OnscreenText(
             text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
             parent=parent, fg=fg, font=font, align=align)
-        PandaBase.__init__(self, tra_src, tra_tra)
+        P3dBase.__init__(self, tra_src, tra_tra)
 
     def set_r(self, val): return self.wdg.set_r(val)
 
 
-class PandaFrame(PandaAbs):
+class P3dFrame(P3dAbs):
 
     def __init__(self, frameSize=(-1, 1, -1, 1), frameColor=(1, 1, 1, 1),
                  pos=(0, 1, 0), parent=None, textureCoord=False):
-        PandaAbs.__init__(self)
+        P3dAbs.__init__(self)
         self.wdg = DirectFrame(frameSize=frameSize, frameColor=frameColor,
                                pos=pos, parent=parent)
         if textureCoord:

@@ -1,7 +1,7 @@
 from panda3d.core import AudioSound as PAudioSound
 
 
-class PandaAudioSound(object):
+class P3dAudioSound(object):
 
     def __init__(self, fpath):
         self.snd = loader.loadSfx(fpath)

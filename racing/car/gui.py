@@ -1,5 +1,5 @@
 from panda3d.core import TextNode, LVector3f, Point2, Point3, TextNode
-from yyagl.library.gui import Entry
+from yyagl.lib.gui import Entry
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import GuiColleague, GameObject

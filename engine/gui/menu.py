@@ -1,7 +1,7 @@
 from direct.gui.DirectGuiGlobals import FLAT
 from ...gameobject import GuiColleague, LogicColleague, GameObject
 from ...facade import Facade
-from ...library.gui import Img
+from ...lib.gui import Img
 
 
 class NavInfoPerPlayer:

@@ -13,7 +13,7 @@ from direct.directnotify.DirectNotify import DirectNotify
 class LibShowBase(ShowBase): pass
 
 
-class LibPanda3D(DirectObject):
+class LibP3d(DirectObject):
 
     task_cont = Task.cont
     runtime = not exists('main.py')

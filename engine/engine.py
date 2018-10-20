@@ -2,7 +2,7 @@ from sys import path
 from os.path import dirname, realpath
 path.append(dirname(realpath(__file__)) + '/../thirdparty')
 
-from ..library.builder import LibBuilder
+from ..lib.builder import LibBuilder
 from .pause import PauseMgr
 from .profiler import AbsProfiler
 from .shader import ShaderMgr
@@ -12,7 +12,6 @@ from .phys import PhysMgr
 from .gfx import EngineGfx
 from .network.server import Server
 from .network.client import Client
-from .network.xmpp import XMPP
 from .gui.gui import EngineGui
 from .logic import EngineLogic
 from .event import EngineEvent
@@ -41,7 +40,6 @@ class Engine(GameObject, EngineFacade):
         self.server = Server(cfg.dev_cfg.port)
         self.client = Client(cfg.dev_cfg.port)
         self.cb_mux = CallbackMux()
-        self.xmpp = XMPP(cfg.dev_cfg.xmpp_server)
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr.init_cls(), [self])],

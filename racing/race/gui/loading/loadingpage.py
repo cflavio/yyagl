@@ -1,5 +1,5 @@
 from panda3d.core import TextNode
-from yyagl.library.gui import Text, Img
+from yyagl.lib.gui import Text, Img
 from yyagl.engine.gui.page import Page, PageGui, PageFacade
 from yyagl.gameobject import GameObject, EventColleague
 from yyagl.racing.ranking.gui import RankingGui
@@ -109,7 +109,7 @@ class LoadingPageGui(PageGui):
     def __cmd_label(self, text, key, pos_z):
         _key = getattr(self.rprops.keys.players_keys[0], key)
         txt = Text(
-            text + ': ' + self.eng.event.key2desc(_key),
+            text + ': ' + self.eng.event.key2desc(_key).decode('utf-8'),
             align='left', scale=.072, pos=(.8, pos_z), font=self.font,
             fg=self.text_bg)
         self.widgets += [txt]

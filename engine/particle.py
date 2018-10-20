@@ -1,6 +1,6 @@
 from ..gameobject import GameObject
-from yyagl.library.panda.particle import PandaParticle
-LibParticle = PandaParticle
+from yyagl.lib.p3d.particle import P3dParticle
+LibParticle = P3dParticle
 
 
 class Particle(GameObject):

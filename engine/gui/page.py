@@ -1,9 +1,9 @@
 from inspect import getmro
 from panda3d.core import LVecBase2f
 from direct.gui.DirectGuiGlobals import ENTER, EXIT
-from yyagl.library.gui import Btn, Slider, CheckBtn, OptionMenu, Entry, \
+from yyagl.lib.gui import Btn, Slider, CheckBtn, OptionMenu, Entry, \
     Label, Img, Frame, Text
-from yyagl.library.ivals import Seq, Wait, PosIval, Func
+from yyagl.lib.ivals import Seq, Wait, PosIval, Func
 from yyagl.engine.vec import Vec2
 from ...gameobject import GameObject, GuiColleague, EventColleague
 from ...facade import Facade

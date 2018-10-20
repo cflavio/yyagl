@@ -1,5 +1,5 @@
 from yyagl.gameobject import Colleague
-from yyagl.library.bullet.bullet import BulletPhysWorld, BulletContact, \
+from yyagl.lib.bullet.bullet import BulletPhysWorld, BulletContact, \
     BulletTriangleMesh, BulletTriangleMeshShape, BulletRigidBodyNode, \
     BulletGhostNode
 from ..facade import Facade

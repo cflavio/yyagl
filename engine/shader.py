@@ -1,4 +1,4 @@
-from yyagl.library.panda.shader import PandaShaderMgr
+from yyagl.lib.p3d.shader import P3dShaderMgr
 
 
-ShaderMgr = PandaShaderMgr
+ShaderMgr = P3dShaderMgr

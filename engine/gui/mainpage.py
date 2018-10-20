@@ -1,4 +1,4 @@
-from yyagl.library.gui import Text
+from yyagl.lib.gui import Text
 from .page import Page, PageGui, PageFacade
 from .imgbtn import ImgBtn
 

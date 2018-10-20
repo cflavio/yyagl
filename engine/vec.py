@@ -1,3 +1,3 @@
-from yyagl.library.panda.vec import Panda2DVec, Panda3DVec
-Vec = Panda3DVec
-Vec2 = Panda2DVec
+from yyagl.lib.p3d.vec import P3dVec2, P3dVec3
+Vec = P3dVec3
+Vec2 = P3dVec2

@@ -1,5 +1,5 @@
 from panda3d.core import load_prc_file_data
-from yyagl.library.builder import LibBuilder
+from yyagl.lib.builder import LibBuilder
 
 
 class GuiCfg(object):

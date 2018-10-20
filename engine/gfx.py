@@ -1,13 +1,13 @@
 from ..gameobject import GfxColleague
 from .particle import Particle
-from yyagl.library.panda.gfx import PandaGfxMgr, PandaAnimNode, \
-    PandaAmbientLight, PandaSpotlight
+from yyagl.lib.p3d.gfx import P3dGfxMgr, P3dAnimNode, P3dAmbientLight, \
+    P3dSpotlight
 
 
-GfxMgr = PandaGfxMgr
-AnimNode = PandaAnimNode
-AmbientLight = PandaAmbientLight
-Spotlight = PandaSpotlight
+GfxMgr = P3dGfxMgr
+AnimNode = P3dAnimNode
+AmbientLight = P3dAmbientLight
+Spotlight = P3dSpotlight
 
 
 class EngineGfx(GfxColleague):

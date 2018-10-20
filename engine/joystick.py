@@ -1,5 +1,5 @@
 from yyagl.gameobject import GameObject
-from yyagl.library.pygamelib.pygamelib import PygameJoystickMgr as \
+from yyagl.lib.pygamelib.pygamelib import PygameJoystickMgr as \
     JoystickMgrLib
 
 

@@ -1,6 +1,6 @@
 from os import name
-from yyagl.library.gui import Frame
-from yyagl.library.panda.shader import load_shader
+from yyagl.lib.gui import Frame
+from yyagl.lib.p3d.shader import load_shader
 from yyagl.gameobject import GameObject
 
 
