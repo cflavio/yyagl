@@ -4,27 +4,11 @@ from ...facade import Facade
 from ...lib.gui import Img
 
 
-class NavInfoPerPlayer:
-
-    def __init__(self, left, right, up, down, fire):
-        self.left = left
-        self.right = right
-        self.up = up
-        self.down = down
-        self.fire = fire
-
-
-class NavInfo:
-
-    def __init__(self, navinfo_lst):
-        self.navinfo_lst = navinfo_lst
-
-
 class MenuArgs(GameObject):
 
     def __init__(self, font, text_active, text_normal, text_err, text_scale,
                  btn_size, btn_color, background_img, rollover_sfx, click_sfx,
-                 social_imgs_dpath, nav):
+                 social_imgs_dpath):
         GameObject.__init__(self)
         self.__font = font
         self.text_active = text_active
@@ -37,7 +21,6 @@ class MenuArgs(GameObject):
         self.__rollover_sfx = rollover_sfx
         self.__click_sfx = click_sfx
         self.social_imgs_dpath = social_imgs_dpath
-        self.nav = nav
 
     @property
     def font(self):

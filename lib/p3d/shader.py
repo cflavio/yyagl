@@ -1,13 +1,18 @@
-from os.path import isfile
+from os.path import isfile, dirname
 from panda3d.core import AmbientLight, DirectionalLight, PointLight, \
     Spotlight, LVector4f, LVector3f, Vec3, Shader, Texture, WindowProperties,\
     FrameBufferProperties, GraphicsPipe, GraphicsOutput, NodePath, PandaNode, \
-    TextureStage, TexMatrixAttrib
+    TextureStage, TexMatrixAttrib, Filename
 from direct.filter.FilterManager import FilterManager
 
 
 def load_shader(vert, frag):
-    if isfile(vert) and isfile(frag):
+
+    def is_file(path):
+        joinchar = '/' if base.appRunner and not path.startswith('/') else ''
+        path = (base.appRunner and dirname(str(base.appRunner.p3dFilename)) or '') + joinchar + path
+        return isfile(path)
+    if is_file(vert) and is_file(frag):
         return Shader.load(Shader.SLGLSL, vert, frag)
     else: return Shader.make(Shader.SLGLSL, vert, frag)
 
