@@ -6,6 +6,7 @@ from panda3d.core import get_model_path, AntialiasAttrib, PandaNode, \
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.racing.bitmasks import BitMasks
+from yyagl.lib.p3d.p3d import LibP3d
 
 
 class RenderToTexture(object):
@@ -73,7 +74,7 @@ class P3dGfxMgr(object):
               filename + ext, callback=self._intermediate_cb,
               extraArgs=extra_args + [filename + ext])
         else:
-            return P3dNode(loader.loadModel(filename + ext))
+            return P3dNode(loader.loadModel(LibP3d.p3dpath(filename + ext)))
 
     def set_toon(self):
         tempnode = NodePath(PandaNode('temp node'))

@@ -4,6 +4,7 @@ from panda3d.core import GeomVertexArrayFormat, Geom, GeomVertexFormat, \
     GeomVertexData, GeomVertexWriter, GeomPoints, OmniBoundingVolume, \
     GeomNode, Vec3
 from yyagl.lib.p3d.shader import load_shader
+from yyagl.engine.vec import Vec
 
 
 class P3dParticle(object):
@@ -43,7 +44,7 @@ class P3dParticle(object):
         __np = parent.attach_node(node)
         __np.set_transparency(True)
         __np.node.set_bin('fixed', 0)
-        __np.set_pos(pos)
+        __np.set_pos(Vec(pos.x, pos.y, pos.z))
         __np.set_hpr(hpr)
         return __np
 

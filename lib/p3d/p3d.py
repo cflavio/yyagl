@@ -26,6 +26,16 @@ class LibP3d(DirectObject):
     def configure():
         loadPrcFileData('', 'notify-level-ya2 info')
 
+    @staticmethod
+    def fixpath(path):
+        if sys.platform == 'win32':
+            if path.startswith('/'): path = path[1] + ':\\' + path[3:]
+            path = path.replace('/', '\\')
+        return path
+
+    @staticmethod
+    def p3dpath(path): return Filename.fromOsSpecific(path)
+
     def last_frame_dt(self): return globalClock.get_dt()
 
     @property
