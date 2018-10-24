@@ -81,9 +81,9 @@ class WeaponGfxNetwork(WeaponGfx):
     @staticmethod
     def _rotate_wpn(t, node, start_vec, end_vec):
         interp_vec = Vec3(
-            start_vec[0] * (1 - t) + end_vec[0] * t,
-            start_vec[1] * (1 - t) + end_vec[1] * t,
-            start_vec[2] * (1 - t) + end_vec[2] * t)
+            float(start_vec[0]) * (1 - t) + float(end_vec[0]) * t,
+            float(start_vec[1]) * (1 - t) + float(end_vec[1]) * t,
+            float(start_vec[2]) * (1 - t) + float(end_vec[2]) * t)
         node.look_at(node.get_pos() + interp_vec)
 
     def destroy(self):

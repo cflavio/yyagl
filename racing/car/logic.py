@@ -2,7 +2,7 @@ from math import sin, cos, pi
 from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32, LVector3f
 from yyagl.gameobject import LogicColleague
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
-from yyagl.racing.camera import Camera
+from yyagl.racing.camera import Camera, FPCamera
 from yyagl.racing.car.event import DirKeys
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.racing.bitmasks import BitMasks
@@ -259,6 +259,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         is_skid = self.is_skidmarking
         gfx.on_skidmarking() if is_skid else gfx.on_no_skidmarking()
         self.__clamp_orientation()
+        self.__adjust_car()
 
     def __update_roll_info(self):
         status = 'ok' if -45 <= self.mediator.gfx.nodepath.get_r() < 45 else 'ko'
@@ -275,6 +276,27 @@ class CarLogic(LogicColleague, ComputerProxy):
             self.mediator.gfx.nodepath.set_p(max_deg)
         if self.mediator.gfx.nodepath.get_r() > max_deg:
             self.mediator.gfx.nodepath.set_r(max_deg)
+
+    def __adjust_car(self):
+        if not self.mediator.phys.is_flying: return
+        car_vec = self.car_vec.xy
+        dir_vec = Vec2(*self.mediator.phys.vehicle.get_chassis().get_linear_velocity().xy).normalize()
+        angle = car_vec.signed_angle_deg(dir_vec)
+        angle_incr = 15.0 * globalClock.get_dt()
+        if angle < 0: angle_incr *= -1
+        incr = angle if abs(angle) < abs(angle_incr) else angle_incr
+        h = self.mediator.gfx.nodepath.get_h()
+        self.mediator.gfx.nodepath.set_h(h + incr)
+        p = self.mediator.gfx.nodepath.get_p()
+        p_incr = 15.0 * globalClock.get_dt()
+        if p > 0: p_incr *= -1
+        p_incr = -p if abs(p) < abs(p_incr) else p_incr
+        self.mediator.gfx.nodepath.set_p(p + p_incr)
+        r = self.mediator.gfx.nodepath.get_r()
+        r_incr = 15.0 * globalClock.get_dt()
+        if r > 0: r_incr *= -1
+        r_incr = -r if abs(r) < abs(r_incr) else r_incr
+        self.mediator.gfx.nodepath.set_r(r + r_incr)
 
     def reset_car(self):
         if self.mediator.fsm.getCurrentOrNextState() in ['Off', 'Loading']:
@@ -624,7 +646,8 @@ class CarPlayerLogic(CarLogic):
 
     def __init__(self, mediator, car_props):
         CarLogic.__init__(self, mediator, car_props)
-        self.camera = Camera(mediator.gfx.nodepath, car_props.race_props.camera_vec, self.mediator)
+        camera_cls = Camera if car_props.race_props.season_props.camera == 'top' else FPCamera
+        self.camera = camera_cls(mediator.gfx.nodepath, car_props.race_props.camera_vec, self.mediator)
         start_pos = self.start_pos + (0, 0, 10000)
         self.eng.do_later(.01, self.camera.camera.set_pos, [start_pos])
         self.car_positions = []
@@ -659,6 +682,7 @@ class CarPlayerLogic(CarLogic):
             self.mediator.gui.panel.time_txt.setText(str(d_t))
         if self.lap_time_start:
             self.mediator.gui.panel.speed_txt.setText(str(int(self.mediator.phys.speed)))
+            self.mediator.gui.panel.speed_c.progress = self.mediator.phys.speed_ratio
         self.__check_wrong_way()
         self._update_dist()
         self.__update_direction_gui()

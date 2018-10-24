@@ -21,6 +21,7 @@ from .lang import LangMgr
 from ..gameobject import GameObject, Colleague
 from .enginefacade import EngineFacade
 from .configuration import Cfg
+from .cbmux import CallbackMux
 
 
 class Engine(GameObject, EngineFacade):
@@ -37,19 +38,23 @@ class Engine(GameObject, EngineFacade):
         self.shader_mgr = ShaderMgr(cfg.dev_cfg.shaders_dev, cfg.dev_cfg.gamma)
         self.profiler = AbsProfiler.build(cfg.profiling_cfg.pyprof_percall)
         self.font_mgr = FontMgr()
-        self.server = Server()
-        self.client = Client()
+        self.server = Server(cfg.dev_cfg.port)
+        self.client = Client(cfg.dev_cfg.port)
+        self.cb_mux = CallbackMux()
         self.xmpp = XMPP(cfg.dev_cfg.xmpp_server)
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr.init_cls(), [self])],
-            [('gfx', EngineGfx, [self, cfg.dev_cfg.model_path, cfg.gui_cfg.antialiasing, cfg.gui_cfg.shaders])],
+            [('gfx', EngineGfx, [self, cfg.dev_cfg.model_path,
+                                 cfg.gui_cfg.antialiasing,
+                                 cfg.gui_cfg.shaders])],
             [('phys_mgr', PhysMgr, [self])],
             [('event', EngineEvent, [self, cfg.dev_cfg.menu_joypad])],
             [('gui', EngineGui.init_cls(), [self])],
             [('audio', EngineAudio, [self, cfg.gui_cfg.volume])],
             [('pause', PauseMgr, [self])],
-            [('lang_mgr', LangMgr, (cfg.lang_cfg.lang, cfg.lang_cfg.lang_domain,
+            [('lang_mgr', LangMgr, (cfg.lang_cfg.lang,
+                                    cfg.lang_cfg.lang_domain,
                                     cfg.lang_cfg.lang_path))]]
         GameObject.__init__(self, comps)
 

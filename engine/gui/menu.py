@@ -1,5 +1,4 @@
 from direct.gui.DirectGuiGlobals import FLAT
-from direct.gui.OnscreenImage import OnscreenImage
 from ...gameobject import GuiColleague, LogicColleague, GameObject
 from ...facade import Facade
 from ...library.gui import Img
@@ -132,7 +131,8 @@ class MenuLogic(LogicColleague):
         (self.pages[-1].enable if val else self.pages[-1].disable)()
 
     def enable_navigation(self, val):
-        (self.pages[-1].enable_navigation if val else self.pages[-1].disable_navigation)()
+        page = self.pages[-1]
+        (page.enable_navigation if val else page.disable_navigation)()
 
     def on_push_page(self, page_code, args=[]):
         pass
@@ -146,7 +146,7 @@ class MenuLogic(LogicColleague):
         self.pages[-1].attach_obs(self.on_back)
         self.pages[-1].attach_obs(self.on_quit)
 
-    def on_quit(self, clsname):
+    def on_quit(self):
         page = self.pages.pop()
         page.detach_obs(self.on_back)
         page.detach_obs(self.on_quit)

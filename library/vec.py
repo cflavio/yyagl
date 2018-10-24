@@ -4,7 +4,7 @@ class Vec(object):
 
     def rotate(self, deg): pass
 
-    def __add__(a, b): pass
+    def __add__(self, x, y): pass
 
     def normalize(self): pass
 

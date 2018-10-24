@@ -1,4 +1,5 @@
 from datetime import datetime
+from sys import version_info
 from platform import system, release, architecture, platform, processor, \
     version, machine
 from multiprocessing import cpu_count
@@ -35,8 +36,11 @@ class LogMgrBase(Colleague):  # headless log manager
         lib_ver = self.eng.lib.version()
         if lib_ver.startswith('1.10'):
             import psutil
-            messages += ['memory: %s GB' % round(psutil.virtual_memory().total / (1000000000.0), 2)]
+            mem = psutil.virtual_memory().total / 1000000000.0
+            messages += ['memory: %s GB' % round(mem, 2)]
         lib_commit = self.eng.lib.lib_commit()
+        py_ver = [str(elm) for elm in version_info[:3]]
+        messages += ['python version: %s' % '.'.join(py_ver)]
         messages += ['panda version: %s %s' % (lib_ver, lib_commit)]
         messages += ['bullet version: ' + str(self.eng.lib.phys_version())]
         messages += ['appdata: ' + str(self.eng.lib.user_appdata_dir())]

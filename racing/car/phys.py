@@ -18,6 +18,7 @@ class CarPhys(PhysColleague):
         self.__prev_speed = 0
         self.__last_drift_time = 0
         self.__finds = {}  # cache for find's results
+        self.__whl2flytime = {}
         self.cprops = car_props
         self._load_phys()
         self.__set_collision_mesh()
@@ -76,7 +77,9 @@ class CarPhys(PhysColleague):
         #                           geom.get_transform())
         #self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape)
         chassis_shape = BulletBoxShape(tuple(self.cfg['box_size']))
-        ts = TransformState.makePos(tuple(self.cfg['box_pos']))
+        p = self.cfg['box_pos']
+        p[2] += self.cfg['center_mass_offset']
+        ts = TransformState.makePos(tuple(p))
         self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape, ts)
         car_names = self.cprops.race_props.season_props.car_names
         car_idx = car_names.index(self.cprops.name)
@@ -115,19 +118,20 @@ class CarPhys(PhysColleague):
         fl_node = ffl if ffl else meth('**/' + wheel_names.both.fl)
         rr_node = rrr if rrr else meth('**/' + wheel_names.both.rr)
         rl_node = rrl if rrl else meth('**/' + wheel_names.both.rl)
-        fr_pos = fr_node.get_pos() + (0, 0, f_radius)
-        fl_pos = fl_node.get_pos() + (0, 0, f_radius)
-        rr_pos = rr_node.get_pos() + (0, 0, r_radius)
-        rl_pos = rl_node.get_pos() + (0, 0, r_radius)
+        offset = self.cfg['center_mass_offset']
+        fr_pos = fr_node.get_pos() + (0, 0, f_radius + offset)
+        fl_pos = fl_node.get_pos() + (0, 0, f_radius + offset)
+        rr_pos = rr_node.get_pos() + (0, 0, r_radius + offset)
+        rl_pos = rl_node.get_pos() + (0, 0, r_radius + offset)
         wheels_info = [
             (fr_pos, True, wheels['fr'], f_radius),
             (fl_pos, True, wheels['fl'], f_radius),
             (rr_pos, False, wheels['rr'], r_radius),
             (rl_pos, False, wheels['rl'], r_radius)]
-        for (pos, front, nodepath, radius) in wheels_info:
-            self.__add_wheel(pos, front, nodepath.get_node(), radius)
+        for i, (pos, front, nodepath, radius) in enumerate(wheels_info):
+            self.__add_wheel(pos, front, nodepath.get_node(), radius, i)
 
-    def __add_wheel(self, pos, is_front, node, radius):
+    def __add_wheel(self, pos, is_front, node, radius, i):
         whl = self.vehicle.create_wheel()
         whl.set_node(node)
         whl.set_chassis_connection_point_cs(LPoint3f(*pos))
@@ -143,6 +147,7 @@ class CarPhys(PhysColleague):
         whl.set_max_suspension_force(self.max_suspension_force)
         whl.set_max_suspension_travel_cm(self.max_suspension_travel_cm)
         whl.set_skid_info(self.skid_info)
+        self.__whl2flytime[i] = 0
 
     @property
     def lateral_force(self):
@@ -209,13 +214,14 @@ class CarPhys(PhysColleague):
         self.vehicle.set_brake(brk_ratio * brake_frc, 1)
 
     def update_car_props(self):
-        speeds = map(self.__update_whl_props, self.vehicle.get_wheels())
+        wheels = zip(self.vehicle.get_wheels(), range(4))
+        speeds = map(lambda whi: self.__update_whl_props(*whi), wheels)
         speeds = [speed for speed in speeds if speed]
         if self.is_drifting:
             self.__last_drift_time = globalClock.get_frame_time()
         self.curr_speed_mul = (sum(speeds) / len(speeds)) if speeds else 1.0
 
-    def __update_whl_props(self, whl):
+    def __update_whl_props(self, whl, i):
         susp_min = self.suspension_stiffness[0]
         susp_max = self.suspension_stiffness[1]
         susp_diff = susp_max - susp_min
@@ -246,7 +252,11 @@ class CarPhys(PhysColleague):
         fric = 1.0
         if gfx_node.has_tag('friction'):
             fric = float(gfx_node.get_tag('friction'))
-        whl.setFrictionSlip(self.get_friction()[0 if whl.is_front_wheel() else 1] * fric)
+        if not whl.get_raycast_info().is_in_contact(): self.__whl2flytime[i] = globalClock.get_frame_time()
+        gnd_time = globalClock.get_frame_time() - self.__whl2flytime[i]
+        gnd_recovery_time = .2 if whl.is_front_wheel() else .1
+        gnd_factor = min(1, gnd_time / gnd_recovery_time)
+        whl.setFrictionSlip(self.get_friction()[0 if whl.is_front_wheel() else 1] * fric * gnd_factor)
         if gfx_node.has_tag('speed'):
             return float(gfx_node.get_tag('speed'))
 

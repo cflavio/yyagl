@@ -1,4 +1,3 @@
-import __builtin__
 from abc import ABCMeta
 from .gameobject import LogicColleague, GameObject
 from .engine.engine import Engine
@@ -27,7 +26,9 @@ class GameBase(GameObject, GameFacade):  # it doesn't manage the window
     def destroy(self):
         GameFacade.destroy(self)
         GameObject.destroy(self)
-        #self.eng = self.eng.destroy()
+        # self.eng = self.eng.destroy()
+        self.eng.server.destroy()
+        self.eng.client.destroy()
         # it crashes
         self.eng.xmpp.destroy()
 

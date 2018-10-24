@@ -15,12 +15,13 @@ class NetMsgs(object):
 
 class RaceLogic(LogicColleague):
 
-    def __init__(self, mediator, rprops):
+    def __init__(self, mediator, rprops, yorg_client):
         self.load_txt = self.cam_tsk = self.cam_node = self.send_tsk = \
             self.cam_pivot = self.ready_clients = self.preview = \
             self.curr_load_txt = self.track = self.cars = self.player_car = \
             self.load_car = None
         self.props = rprops
+        self.yorg_client = yorg_client
         LogicColleague.__init__(self, mediator)
         self.ai_poller = CarAiPoller()
 
@@ -34,7 +35,8 @@ class RaceLogic(LogicColleague):
             if driver.dprops.car_name == r_p.season_props.player_car_name:
                 self.load_car = lambda: DriverPlayerLoaderStrategy.load(
                     r_p, car_name, self.track, self.mediator, player_car_names,
-                    self.props.season_props, self.ai_poller, self._on_loaded)
+                    self.props.season_props, self.ai_poller, self._on_loaded,
+                    self.yorg_client)
         self.mediator.track = self.track  # facade this
 
     def _on_loaded(self):
@@ -128,6 +130,9 @@ class RaceLogic(LogicColleague):
 
     def exit_play(self):
         self.track.stop_music()
+        if self.yorg_client:
+            self.yorg_client.is_server_active = False
+            self.yorg_client.is_client_active = False
         self.player_car.detach_obs(self.mediator.event.on_wrong_way)
         self.track.destroy()
         map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
@@ -147,8 +152,8 @@ class RaceLogicSinglePlayer(RaceLogic):
 
 class RaceLogicServer(RaceLogic):
 
-    def __init__(self, mediator, rprops):
-        RaceLogic.__init__(self, mediator, rprops)
+    def __init__(self, mediator, rprops, yorg_client):
+        RaceLogic.__init__(self, mediator, rprops, yorg_client)
         self._loaded = False
         self.ready_clients = []
         self.eng.server.register_cb(self.process_srv)
@@ -160,16 +165,16 @@ class RaceLogicServer(RaceLogic):
 
     def process_srv(self, data_lst, sender):
         if data_lst[0] == NetMsgs.client_ready:
-            ipaddr = sender.get_address().get_ip_string()
+            ipaddr = sender.getpeername()[0]
             self.eng.log('client ready: ' + ipaddr)
             self.ready_clients += [sender]
         if data_lst[0] == NetMsgs.client_at_countdown:
-            ipaddr = sender.get_address().get_ip_string()
+            ipaddr = sender.getpeername()[0]
             self.eng.log('client at countdown: ' + ipaddr)
             self.mediator.fsm.countdown_clients += [sender]
 
     def eval_start(self, task):
-        connections = [conn[0] for conn in self.eng.server.connections]
+        connections = [conn for conn in self.eng.server.connections]
         if all(client in self.ready_clients for client in connections) and self._loaded:
             self.mediator.fsm.demand('Countdown', self.props.season_props)
             self.start_play()
@@ -180,6 +185,7 @@ class RaceLogicServer(RaceLogic):
 
     def exit_play(self):
         self.eng.server.destroy()
+        #self.eng.client.stop()
         RaceLogic.exit_play(self)
 
     def destroy(self):
@@ -190,31 +196,37 @@ class RaceLogicServer(RaceLogic):
 class RaceLogicClient(RaceLogic):
 
     def _on_loaded(self):
-        self.eng.client.register_cb(self.process_client)
+        #self.eng.client.register_cb(self.process_client)
+        self.yorg_client.attach(self.on_begin_race)
+        self.yorg_client.attach(self.on_start_countdown)
 
         def send_ready(task):
-            self.eng.client.send([NetMsgs.client_ready])
+            self.eng.client.send(['client_ready'])
             self.eng.log('sent client ready')
             return task.again
         self.send_tsk = taskMgr.doMethodLater(.5, send_ready, 'send ready')
         # the server could not be listen to this event if it is still
         # loading we should do a global protocol, perhaps
 
-    def process_client(self, data_lst, sender):
-        if data_lst[0] == NetMsgs.begin_race:
-            self.eng.log('begin race')
-            self.eng.rm_do_later(self.send_tsk)
-            self.mediator.fsm.demand('Countdown', self.props.season_props)
-            self.start_play()
-            self.eng.client.send([NetMsgs.client_at_countdown])
-            self.eng.log('sent client at countdown')
-        if data_lst[0] == NetMsgs.start_countdown:
-            self.eng.log('start countdown')
-            self.aux_launch_tsk = self.eng.do_later(.5, self.mediator.fsm.client_start_countdown)
-            self.mediator.event.network_register()
+    def on_begin_race(self):
+        self.eng.log('begin race')
+        self.yorg_client.detach(self.on_begin_race)
+        self.eng.rm_do_later(self.send_tsk)
+        self.mediator.fsm.demand('Countdown', self.props.season_props)
+        self.start_play()
+        self.eng.client.send(['client_at_countdown'])
+        self.eng.log('sent client at countdown')
+
+    def on_start_countdown(self):
+        self.eng.log('start countdown')
+        self.yorg_client.detach(self.on_start_countdown)
+        self.aux_launch_tsk = self.eng.do_later(.5, self.mediator.fsm.client_start_countdown)
+        self.mediator.event.network_register()
 
     def exit_play(self):
-        self.eng.client.destroy()
+        #self.eng.client.stop()
+        if self.eng.server.is_active:
+            self.eng.server.destroy()
         RaceLogic.exit_play(self)
 
     def destroy(self):

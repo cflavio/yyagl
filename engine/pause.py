@@ -12,10 +12,10 @@ class PauseGui(GuiColleague):
         self.pause_frm = None
 
     def toggle(self, show_frm=True):
-        if not self.mediator.logic._pause.is_paused:
+        if not self.mediator.logic.pause.is_paused:
             if show_frm:
                 self.pause_frm = DirectFrame(frameColor=(.3, .3, .3, .7),
-                                               frameSize=(-1.8, 1.8, -1, 1))
+                                             frameSize=(-1.8, 1.8, -1, 1))
         else:
             if self.pause_frm: self.pause_frm.destroy()
 

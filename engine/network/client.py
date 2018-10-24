@@ -1,58 +1,63 @@
-from socket import socket, AF_INET, SOCK_DGRAM, gaierror, error
-from json import load
-from urllib2 import urlopen
+from socket import error, socket, AF_INET, SOCK_DGRAM
+from Queue import Queue, Empty
 from simpleubjson import encode, decode
-from .network import AbsNetwork, NetworkError
+from .network import AbsNetwork, ConnectionError, NetworkThread
+
+
+class ClientThread(NetworkThread):
+
+    def __init__(self, srv_addr, eng, port):
+        self.srv_addr = srv_addr
+        NetworkThread.__init__(self, eng, port)
+        self.msgs = Queue()
+        self.rpc_ret = Queue()
+
+    def _configure_socket(self):
+        self.tcp_sock.connect((self.srv_addr, self.port))
+
+    def _rpc_cb(self, dct, sock):
+        self.rpc_ret.put(dct['result'])
+
+    def _queue(self, sock):
+        return self.msgs
+
+    def send_msg(self, msg, receiver=None): self.msgs.put(msg)
+
+    def do_rpc(self, funcname, args, kwargs):
+        msg = {'is_rpc': True, 'payload': [funcname, args, kwargs]}
+        self.msgs.put(encode(msg))
+        return self.rpc_ret.get()
 
 
 class Client(AbsNetwork):
 
-    def __init__(self):
-        AbsNetwork.__init__(self)
-        self.conn = None
+    def __init__(self, port):
+        AbsNetwork.__init__(self, port)
+        self.srv_addr = None
+        self._functions = []
 
-    def start(self, read_cb, srv_addr, my_addr):
-        AbsNetwork.start(self, read_cb)
+    def start(self, read_cb, srv_addr):
         self.srv_addr = srv_addr
-        sock = socket(AF_INET, SOCK_DGRAM)
-        sock.connect(('ya2.it', 8080))
-        self.local_addr = sock.getsockname()[0]
-        self.public_addr = load(urlopen('http://httpbin.org/ip', timeout=3))['origin']
-        self.udp_sock = socket(AF_INET, SOCK_DGRAM)
-        self.udp_sock.setblocking(0)
-        self.conn = self.conn_mgr.open_TCP_client_connection(
-            hostname=srv_addr, port=9099, timeout_ms=3000)
-        if not self.conn: raise NetworkError
-        self.my_addr = my_addr
-        self.conn_reader.add_conn(self.conn)
-        self.eng.log('the client is up')
+        return AbsNetwork.start(self, read_cb)
 
-    def send_udp(self, data_lst, receiver=None):
-        receiver = receiver if receiver else self.srv_addr
-        payload = {'sender': self.my_addr, 'payload': data_lst}
-        self.udp_sock.sendto(encode(payload), (receiver, 9099))
+    def _bld_netw_thr(self):
+        srv, port = self.srv_addr.split(':')
+        return ClientThread(srv, self.eng, int(port))
 
-    def process_udp(self):
-        try:
-            payload, client_address = self.udp_sock.recvfrom(8192)
-            payload = self._fix_payload(dict(decode(payload)))
-            sender = payload['sender']
-            self.read_cb(payload['payload'], sender)
-        except error: pass
+    def _configure_udp(self): pass
 
-    def _actual_send(self, datagram, receiver=None):
-        self.conn_writer.send(datagram, self.conn)
+    def send_udp(self, data_lst, sender):
+        dgram = {'sender': sender, 'payload': data_lst}
+        host, port = self.srv_addr.split(':')
+        self.udp_sock.sendto(encode(dgram), (host, int(port)))
 
-    def stop(self):
-        self.eng.log('the client has been stopped')
-        if self.conn:
-            self.conn_mgr.close_connection(self.conn)
-            self.conn = None
-            self.udp_sock.close()
-        else: self.eng.log('the client was already stopped')
-        AbsNetwork.stop(self)
+    def register_rpc(self, funcname): self._functions += [funcname]
 
-    def destroy(self):
-        self.stop()
-        self.eng.log('the client has been destroyed')
-        AbsNetwork.destroy(self)
+    def unregister_rpc(self, funcname): self._functions.remove(funcname)
+
+    def __getattr__(self, attr):
+        if attr not in self._functions: raise AttributeError(attr)
+
+        def do_rpc(*args, **kwargs):
+            return self.netw_thr.do_rpc(attr, args, kwargs)
+        return do_rpc

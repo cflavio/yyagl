@@ -1,5 +1,3 @@
-from panda3d.core import TextNode
-from direct.gui.OnscreenText import OnscreenText
 from yyagl.library.gui import Text
 from .page import Page, PageGui, PageFacade
 from .imgbtn import ImgBtn
@@ -7,8 +5,8 @@ from .imgbtn import ImgBtn
 
 class MainPageGui(PageGui):
 
-    def build(self, back_btn=True):
-        self.__build_social()
+    def build(self, back_btn=True):  # the signature is different from the
+        self.__build_social()        # inherited one
         self.__build_version()
         self._set_widgets()
         self.transition_enter()

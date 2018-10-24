@@ -1,5 +1,6 @@
-from panda.gui import PandaImg, PandaBtn, PandaSlider, PandaCheckBtn, \
-    PandaOptionMenu, PandaEntry, PandaLabel, PandaTxt, PandaFrame
+from yyagl.library.panda.gui import PandaImg, PandaBtn, PandaSlider, \
+    PandaCheckBtn, PandaOptionMenu, PandaEntry, PandaLabel, PandaTxt, \
+    PandaFrame
 
 
 Img = PandaImg

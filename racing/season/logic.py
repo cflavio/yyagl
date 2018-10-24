@@ -25,6 +25,10 @@ class SeasonLogic(LogicColleague):
     def on_tuning_sel(self, val):
         tun = self.tuning.car2tuning[self.props.player_car_name]
         setattr(tun, val, getattr(tun, val) + 1)
+        val2field = {'f_engine': 'tuning_engine', 'f_tires': 'tuning_tires',
+                     'f_suspensions': 'tuning_suspensions'}
+        field = val2field[val]
+        setattr(self.props, field, getattr(self.props, field) + 1)
         self.next_race()
 
     def load(self, ranking, tuning, drivers):
@@ -43,11 +47,11 @@ class SeasonLogic(LogicColleague):
             self.notify('on_season_cont', next_track,
                         self.props.player_car_name, self.props.drivers)
 
-    def create_race_server(self, race_props):
-        self.race = RaceServer(race_props)
+    def create_race_server(self, race_props, yorg_client):
+        self.race = RaceServer(race_props, yorg_client)
 
-    def create_race_client(self, race_props):
-        self.race = RaceClient(race_props)
+    def create_race_client(self, race_props, yorg_client):
+        self.race = RaceClient(race_props, yorg_client)
 
     def create_race(self, race_props):
         self.race = RaceSinglePlayer(race_props)

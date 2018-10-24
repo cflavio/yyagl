@@ -62,8 +62,9 @@ id2carname = {
 
 class RaceEvent(EventColleague):
 
-    def __init__(self, mediator, menu_cls, keys):
+    def __init__(self, mediator, menu_cls, keys, yorg_client):
         EventColleague.__init__(self, mediator)
+        self.yorg_client = yorg_client
         self.menu_cls = menu_cls
         if not (self.eng.server.is_active or self.eng.client.is_active):
             self.accept(keys.pause, self.eng.toggle_pause)
@@ -103,12 +104,15 @@ class RaceEvent(EventColleague):
     def on_wrong_way(self, way_str):
         if way_str:
             self.mediator.gui.way_txt.setText(way_str)
+            self.mediator.gui.way_img.show()
         elif not self.mediator.logic.player_car.logic.is_moving:
             respawn_key = self.mediator.logic.props.keys.respawn
             txt = _('press %s to respawn') % respawn_key
             self.mediator.gui.way_txt.setText(txt)
+            self.mediator.gui.way_img.hide()
         else:
             self.mediator.gui.way_txt.setText('')
+            self.mediator.gui.way_img.hide()
 
     def on_end_race(self):
         points = [10, 8, 6, 4, 3, 2, 1, 0]
@@ -139,9 +143,9 @@ class RaceEvent(EventColleague):
         start_vec = car.logic.curr_network_start_vec
         end_vec = car.logic.curr_network_end_vec
         interp_vec = Vec3(
-            start_vec[0] * (1 - t) + end_vec[0] * t,
-            start_vec[1] * (1 - t) + end_vec[1] * t,
-            start_vec[2] * (1 - t) + end_vec[2] * t)
+            float(start_vec[0]) * (1 - t) + float(end_vec[0]) * t,
+            float(start_vec[1]) * (1 - t) + float(end_vec[1]) * t,
+            float(start_vec[2]) * (1 - t) + float(end_vec[2]) * t)
         if t <= 1.0 and self.mediator.logic.min_dist(car) > 5:
             node.look_at(node.get_pos() + interp_vec)
 
@@ -152,15 +156,17 @@ class RaceEvent(EventColleague):
 
 class RaceEventServer(RaceEvent):
 
-    def __init__(self, mediator, menu_cls, keys):
-        RaceEvent.__init__(self, mediator, menu_cls, keys)
+    def __init__(self, mediator, menu_cls, keys, yorg_client):
+        RaceEvent.__init__(self, mediator, menu_cls, keys, yorg_client)
         self.server_info = {}
         self.eng.attach_obs(self.on_frame)
         self.players_ended = []
         self.end_race_sent = False
 
     def network_register(self):
-        self.eng.server.register_cb(self.process_srv)
+        #self.eng.server.register_cb(self.process_srv)
+        self.yorg_client.attach(self.on_player_info)
+        self.yorg_client.attach(self.on_end_race_player)
 
     def on_frame(self):
         if not hasattr(self.mediator.logic, 'player_car') or \
@@ -181,13 +187,13 @@ class RaceEventServer(RaceEvent):
             velocity = car.get_linear_velocity()
             self.server_info[car] = (pos, fwd, velocity)
         if globalClock.get_frame_time() - self.last_sent > self.eng.server.rate:
-            for conn, addr in self.eng.server.connections:
-                self.eng.server.send_udp(self.__prepare_game_packet(), addr)
+            #for conn in self.eng.server.connections:
+            self.eng.client.send_udp(self.__prepare_game_packet(), self.yorg_client.myid)
             self.last_sent = globalClock.get_frame_time()
         self.check_end()
 
     def __prepare_game_packet(self):
-        packet = [NetMsgs.game_packet]
+        packet = ['game_packet', self.yorg_client.myid]
         for car in [self.mediator.logic.player_car] + self.mediator.logic.cars:
             name = carname2id[car.name]
             pos = car.gfx.nodepath.get_pos()
@@ -239,8 +245,9 @@ class RaceEventServer(RaceEvent):
                 packet += chain([wpn, curr_wpn.id], wpn_pos, wpn_fwd)
         return packet
 
-    def __process_player_info(self, data_lst, sender):
+    def on_player_info(self, data_lst):
         from yyagl.racing.car.car import NetworkCar
+        sender = data_lst[0]
         pos = (data_lst[1], data_lst[2], data_lst[3])
         fwd = (data_lst[4], data_lst[5], data_lst[6])
         velocity = (data_lst[7], data_lst[8], data_lst[9])
@@ -264,7 +271,10 @@ class RaceEventServer(RaceEvent):
                 (data_lst[start + 5], data_lst[start + 6], data_lst[start + 7])
             ]]
         self.server_info[sender] = (pos, fwd, velocity, ang_vel, curr_inp, level, weapon)
-        car_name = self.eng.car_mapping[sender[0]]
+        car_name = self.eng.car_mapping[sender]
+        if not self.mediator:
+            print "received player_info packet while we've quit"
+            return
         for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
             if carname2id[car_name] == carname2id[car.name]:
                 car.logic.last_network_packet = globalClock.getFrameTime()
@@ -323,11 +333,8 @@ class RaceEventServer(RaceEvent):
         for wpn in notfound_wpn:
             car.event.unset_fired_weapon(wpn)
 
-    def process_srv(self, data_lst, sender):
-        if data_lst[0] == NetMsgs.player_info:
-            self.__process_player_info(data_lst, sender)
-        if data_lst[0] == NetMsgs.end_race_player:
-            self.players_ended += [sender]
+    def on_end_race_player(self, uid):
+        self.players_ended += [uid]
 
     def check_end(self):
         if self.end_race_sent: return
@@ -335,7 +342,7 @@ class RaceEventServer(RaceEvent):
         connections = [conn[0] for conn in self.eng.server.connections]
         if not all(conn in self.players_ended for conn in connections): return
         self.end_race_sent = True
-        self.eng.server.send([NetMsgs.end_race])
+        self.eng.client.send(['end_race'])
         self.mediator.gui.results.show_continue_btn()
 
     def destroy(self):
@@ -345,8 +352,8 @@ class RaceEventServer(RaceEvent):
 
 class RaceEventClient(RaceEvent):
 
-    def __init__(self, mediator, menu_cls, keys):
-        RaceEvent.__init__(self, mediator, menu_cls, keys)
+    def __init__(self, mediator, menu_cls, keys, yorg_client):
+        RaceEvent.__init__(self, mediator, menu_cls, keys, yorg_client)
         self.eng.attach_obs(self.on_frame)
         self.eng.xmpp.attach(self.on_server_quit)
 
@@ -358,13 +365,15 @@ class RaceEventClient(RaceEvent):
             self._rotate_car(car)
 
     def network_register(self):
-        self.eng.client.register_cb(self.process_client)
+        #self.eng.client.register_cb(self.process_client)
+        self.yorg_client.attach(self.on_game_packet)
+        self.yorg_client.attach(self.on_end_race)
 
     def on_server_quit(self):
         if self.ingame_menu: self.on_ingame_back()
         self.ignore('escape-up')
 
-    def __process_game_packet(self, data_lst):
+    def on_game_packet(self, data_lst):
         from yyagl.racing.car.car import NetworkCar
         data_lst = data_lst[1:]
         while len(data_lst) > 1:
@@ -453,14 +462,16 @@ class RaceEventClient(RaceEvent):
     def process_client(self, data_lst, sender):
         if data_lst[0] == NetMsgs.game_packet:
             self.__process_game_packet(data_lst)
-        if data_lst[0] == NetMsgs.end_race:
-            if self.mediator.fsm.getCurrentOrNextState() != 'Results':
-                points = [10, 8, 6, 4, 3, 2, 1, 0]
-                zipped = zip(self.mediator.logic.race_ranking(), points)
-                race_ranking = {car: point for car, point in zipped}
-                self.mediator.fsm.demand('Results', race_ranking)
+
+    def on_end_race(self):
+        if self.mediator.fsm.getCurrentOrNextState() != 'Results':
+            points = [10, 8, 6, 4, 3, 2, 1, 0]
+            zipped = zip(self.mediator.logic.race_ranking(), points)
+            race_ranking = {car: point for car, point in zipped}
+            self.mediator.fsm.demand('Results', race_ranking)
 
     def destroy(self):
+        self.yorg_client.detach(self.on_game_packet)
         self.eng.detach_obs(self.on_frame)
         self.eng.xmpp.detach(self.on_server_quit)
         RaceEvent.destroy(self)

@@ -5,6 +5,7 @@ from ..vec import Vec, Vec2
 class Panda3DVec(Vec):
 
     def __init__(self, x, y, z):
+        Vec.__init__(self, x, y, z)
         self.vec = PVec3(x, y, z)
 
     def rotate(self, deg):
@@ -12,7 +13,7 @@ class Panda3DVec(Vec):
         rot_mat.set_rotate_mat(deg, (0, 0, 1))
         self.vec = rot_mat.xform_vec(self.vec)
 
-    def __add__(a, b): return a.vec + b.vec
+    def __add__(self, vec): return self.vec + vec.vec
 
     def normalize(self):
         self.vec.normalize()
@@ -22,6 +23,7 @@ class Panda3DVec(Vec):
 class Panda2DVec(Vec2):
 
     def __init__(self, x, y):
+        Vec2.__init__(self, x, y)
         self.vec = PVec2(x, y)
 
     def normalize(self):

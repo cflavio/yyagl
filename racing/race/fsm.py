@@ -30,6 +30,7 @@ class RaceFsm(FsmColleague):
         self.mediator.gui.loading.exit_loading()
         self.mediator.event.notify('on_race_loaded')
         # eng.set_cam_pos((0, 0, 0))
+        if not self.mediator.logic.player_car: return  # we've closed the window
         self.mediator.logic.player_car.attach_obs(self.mediator.event.on_wrong_way)
         self.mediator.logic.player_car.attach_obs(self.mediator.event.on_end_race)
 
@@ -56,12 +57,15 @@ class RaceFsm(FsmColleague):
     def start_countdown(self):
         self.countdown = Countdown(self.countdown_sfx, self.menu_args.font,
                                    self.sprops.countdown_seconds)
-        self.countdown.attach(lambda: self.demand('Play'),
-                              rename='on_start_race')
+        self.lmb_call = lambda: self.demand('Play')
+        self.countdown.attach(self.lmb_call, rename='on_start_race')
 
     def exitCountdown(self):
         self.eng.log_mgr.log('exiting Countdown state')
-        if self.countdown: self.countdown.destroy()
+        if self.countdown:
+            self.countdown.detach('on_start_race', self.lmb_call)
+            self.countdown.destroy()
+        self.lmb_call = None
         self.eng.rm_do_later(self.launch_tsk)
         if self.aux_launch_tsk: self.eng.rm_do_later(self.aux_launch_tsk)
         # eng.do_later(.5, game.player_car.gfx.apply_damage)
@@ -107,7 +111,7 @@ class RaceFsmServer(RaceFsm):
     def server_start_countdown(self): RaceFsm.start_countdown(self)
 
     def eval_start(self, task):
-        connections = [conn[0] for conn in self.eng.server.connections]
+        connections = [conn for conn in self.eng.server.connections]
         if all(client in self.countdown_clients for client in connections) and self._countdown_ready:
             self.eng.server.send([NetMsgs.start_countdown])
             self.eval_tsk = self.eng.remove_task(self.eval_tsk)

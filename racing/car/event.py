@@ -73,7 +73,7 @@ class InputBuilderJoystick(InputBuilder):
 
 class CarEvent(EventColleague, ComputerProxy):
 
-    def __init__(self, mediator, race_props):
+    def __init__(self, mediator, race_props, yorg_client):
         EventColleague.__init__(self, mediator)
         ComputerProxy.__init__(self)
         self.eng.attach_obs(self.on_collision)
@@ -214,11 +214,11 @@ class CarEvent(EventColleague, ComputerProxy):
 
 class CarPlayerEvent(CarEvent):
 
-    def __init__(self, mediator, race_props):
-        CarEvent.__init__(self, mediator, race_props)
+    def __init__(self, mediator, race_props, yorg_client):
+        CarEvent.__init__(self, mediator, race_props, yorg_client)
         if not self.eng.is_runtime:
             self.accept('f11', self.mediator.gui.pars.toggle)
-            self.accept('f8', self.notify, ['on_end_race'])
+            self.accept('f8', self._process_end_goal)
         state = self.mediator.fsm.getCurrentOrNextState()
         self.input_bld = InputBuilder.create(state, race_props.joystick)
         self.accept(self.props.keys.respawn, self.process_respawn)
@@ -309,9 +309,10 @@ class CarPlayerEventServer(CarPlayerEvent):
 
 class CarPlayerEventClient(CarPlayerEvent):
 
-    def __init__(self, mediator, race_props):
-        CarPlayerEvent.__init__(self, mediator, race_props)
+    def __init__(self, mediator, race_props, yorg_client):
+        CarPlayerEvent.__init__(self, mediator, race_props, yorg_client)
         self.last_sent = self.eng.curr_time
+        self.yorg_client = yorg_client
 
     def on_frame(self):
         CarPlayerEvent.on_frame(self)
@@ -342,9 +343,9 @@ class CarPlayerEventClient(CarPlayerEvent):
             wpn_pos = curr_wpn.gfx.gfx_np.node.get_pos(render)
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
         packet = list(chain(
-            [NetMsgs.player_info], pos, fwd, velocity, ang_vel, inp,
-            [eng_frc, brk_frc_fwd, brk_frc_rear, steering], [level],
-            [wpn, wpn_id], wpn_pos, wpn_fwd))
+            ['player_info', self.yorg_client.myid], pos, fwd, velocity,
+            ang_vel, inp, [eng_frc, brk_frc_fwd, brk_frc_rear, steering],
+            [level], [wpn, wpn_id], wpn_pos, wpn_fwd))
         packet += [len(self.mediator.logic.fired_weapons)]
         for i in range(len(self.mediator.logic.fired_weapons)):
             curr_wpn = self.mediator.logic.fired_weapons[i]
@@ -353,11 +354,11 @@ class CarPlayerEventClient(CarPlayerEvent):
             wpn_fwd = render.get_relative_vector(curr_wpn.gfx.gfx_np.node, Vec3(0, 1, 0))
             packet += chain([wpn, curr_wpn.id], wpn_pos, wpn_fwd)
         if self.eng.curr_time - self.last_sent > self.eng.client.rate:
-            self.eng.client.send_udp(packet)
+            self.eng.client.send_udp(packet, self.yorg_client.myid)
             self.last_sent = self.eng.curr_time
 
     def _process_end_goal(self):
-        self.eng.client.send([NetMsgs.end_race_player])
+        self.eng.client.send(['end_race_player'])
         CarPlayerEvent._process_end_goal(self)
 
 

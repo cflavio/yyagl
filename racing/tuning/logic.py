@@ -8,6 +8,9 @@ class TuningCar(object):
         self.f_tires = f_tires
         self.f_suspensions = f_suspensions
 
+    def __repr__(self):
+        return '[eng %s; tir %s; sus %s]' % (self.f_engine, self.f_tires, self.f_suspensions)
+
 
 class TuningLogic(LogicColleague):
 

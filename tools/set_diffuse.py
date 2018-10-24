@@ -10,7 +10,7 @@ def __set_diffuse(fpath):
         map(lambda outl: fin.write(outl + '\n'), out_lines)
 
 
-def __process_line():
+def __process_line(line, out_lines):
     if not line.strip().startswith('<Scalar> diff'):
         return out_lines + [line.rstrip()]
     else: return out_lines + [line.split(' { ')[0] + ' { 1.000000 }']

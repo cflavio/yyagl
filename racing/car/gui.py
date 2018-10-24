@@ -3,6 +3,7 @@ from yyagl.library.gui import Entry
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import GuiColleague, GameObject
+from yyagl.engine.gui.circle import Circle
 
 
 class CarParameter(GameObject):
@@ -146,26 +147,36 @@ class CarPanel(GameObject):
         pars = {'scale': .065, 'parent': base.a2dTopRight,
                 'fg': menu_args.text_active, 'align': TextNode.A_left,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
-        self.speed_txt = OnscreenText(pos=(-.24, -.1), **pars)
+        self.speed_txt = OnscreenText(pos=(-.18, -.1), **pars)
+        self.speed_txt['align'] = TextNode.A_center
+        self.speed_c = Circle(
+            size=.1, pos=(-.18, -.1), parent=base.a2dTopRight, ray=.4,
+            width=.05, color_start=(.9, .6, .1, 1), color_end=(.2, .8, .2, 1))
         lap_str = '1/' + str(self.race_props.laps)
         self.lap_txt = OnscreenText(text=lap_str, pos=(-.24, -.2), **pars)
-        self.time_txt = OnscreenText(pos=(-.24, -.3), **pars)
-        self.best_txt = OnscreenText(pos=(-.24, -.4), **pars)
-        self.ranking_txt = OnscreenText(pos=(-.24, -.5), **pars)
-        self.damages_txt = OnscreenText(pos=(-.24, -.6), **pars)
-        self.damages_txt['text'] = '-'
-        self.damages_txt['fg'] = menu_args.text_normal
+        self.time_txt = OnscreenText(pos=(-.24, -.5), **pars)
+        self.best_txt = OnscreenText(pos=(-.24, -.6), **pars)
+        self.ranking_txt = OnscreenText(pos=(-.24, -.3), **pars)
+        self.damages_img = OnscreenImage(
+            'assets/images/gui/car_icon.txo',
+            scale=(.12, 1, .12), parent=base.a2dBottomLeft, pos=(.46, 1, .12))
+        self.damages_img.set_transparency(True)
+        self.damages_img.set_color_scale(menu_args.text_normal)
+        self.damages_img.set_r(90)
         pars = {'scale': .05, 'parent': pars['parent'],
                 'fg': menu_args.text_normal,
                 'align': TextNode.A_right, 'font': pars['font']}
         self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
         self.lap_lab = OnscreenText(
             text=_('lap:'), pos=(-.3, -.2), **pars)
-        self.time_lab = OnscreenText(_('time:'), pos=(-.3, -.3), **pars)
-        self.best_lab = OnscreenText(_('best lap:'), pos=(-.3, -.4), **pars)
-        self.ranking_lab = OnscreenText(_('ranking:'), pos=(-.3, -.5), **pars)
-        self.damages_lab = OnscreenText(_('damages:'), pos=(-.3, -.6), **pars)
-        self.weapon_lab = OnscreenText(_('weapon:'), pos=(-.3, -.7), **pars)
+        self.time_lab = OnscreenText(_('time:'), pos=(-.3, -.5), **pars)
+        self.best_lab = OnscreenText(_('best lap:'), pos=(-.3, -.6), **pars)
+        self.ranking_lab = OnscreenText(_('ranking:'), pos=(-.3, -.3), **pars)
+        self.damages_lab = OnscreenText(_('damages:'), pos=(.3, .1), **pars)
+        self.damages_lab.reparent_to(base.a2dBottomLeft)
+        self.weapon_lab = OnscreenText(
+            _('weapon'), pos=(.18, -.08), scale=.05, parent=base.a2dTopLeft,
+            fg=menu_args.text_normal, font=self.eng.font_mgr.load_font(sprops.font))
         self.weapon_img = None
         self.forward_img = OnscreenImage(
             'assets/images/gui/direction.txo',
@@ -173,13 +184,19 @@ class CarPanel(GameObject):
         self.forward_img.set_transparency(True)
         self.forward_img.hide()
 
+    def __close_vec(self, vec1, vec2):
+        return all(abs(b - a) < .01 for a, b in zip(vec1, vec2))
+
     def set_weapon(self, wpn):
+        self.weapon_lab.show()
         self.weapon_img = OnscreenImage(
             'assets/images/weapons/%s.txo' % wpn,
-            scale=.05, parent=base.a2dTopRight, pos=(-.2, 1, -.69))
+            scale=.12, parent=base.a2dTopLeft, pos=(.18, 1, -.24))
         self.weapon_img.set_transparency(True)
 
-    def unset_weapon(self): self.weapon_img.destroy()
+    def unset_weapon(self):
+        self.weapon_lab.hide()
+        self.weapon_img.destroy()
 
     def show_forward(self): self.forward_img.show()
 
@@ -198,24 +215,21 @@ class CarPanel(GameObject):
     def apply_damage(self, reset=False):
         col = self.race_props.season_props.gameprops.menu_args.text_normal
         if reset:
-            self.damages_txt['text'] = '-'
-            self.damages_txt['fg'] = col
+            self.damages_img.set_color_scale(col)
         else:
-            if self.damages_txt['text'] == '-':
-                self.damages_txt['text'] = _('low')
-                yellow = (col[0], col[1] - .25, col[2] - .5, col[3])
-                self.damages_txt['fg'] = yellow
-            elif self.damages_txt['text'] == _('low'):
-                self.damages_txt['text'] = _('hi')
+            yellow = (col[0], col[1] - .25, col[2] - .5, col[3])
+            if self.__close_vec(self.damages_img.get_color_scale(), col):
+                self.damages_img.set_color_scale(yellow)
+            elif self.__close_vec(self.damages_img.get_color_scale(), yellow):
                 red = (col[0], col[1] - .5, col[2] - .5, col[3])
-                self.damages_txt['fg'] = red
+                self.damages_img.set_color_scale(red)
 
     def hide(self):
         labels = [
-            self.speed_txt, self.time_txt, self.lap_txt, self.best_txt,
-            self.speed_lab, self.time_lab, self.lap_lab, self.best_lab,
-            self.damages_txt, self.damages_lab, self.ranking_txt,
-            self.ranking_lab, self.weapon_lab]
+            self.speed_txt, self.speed_c, self.time_txt, self.lap_txt,
+            self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
+            self.best_lab, self.damages_img, self.damages_lab,
+            self.ranking_txt, self.ranking_lab, self.weapon_lab]
         map(lambda wdg: wdg.hide(), labels)
         if self.weapon_img and not self.weapon_img.is_empty():
             self.weapon_img.hide()
@@ -223,10 +237,10 @@ class CarPanel(GameObject):
 
     def destroy(self):
         labels = [
-            self.speed_txt, self.time_txt, self.lap_txt, self.best_txt,
-            self.speed_lab, self.time_lab, self.lap_lab, self.best_lab,
-            self.damages_txt, self.damages_lab, self.ranking_txt,
-            self.ranking_lab, self.weapon_lab]
+            self.speed_txt, self.speed_c, self.time_txt, self.lap_txt,
+            self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
+            self.best_lab, self.damages_img, self.damages_lab,
+            self.ranking_txt, self.ranking_lab, self.weapon_lab]
         map(lambda wdg: wdg.destroy(), labels)
         if self.weapon_img and not self.weapon_img.is_empty():
             self.weapon_img.destroy()

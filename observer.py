@@ -20,16 +20,20 @@ class Subject(object):
         sorted_obs = sorted(self.observers[onm], key=lambda obs: obs.sort)
         self.observers[onm] = sorted_obs
 
-    def detach(self, obs_meth):
-        onm = obs_meth.__name__
-        observers = [obs for obs in self.observers[onm] if obs.mth == obs_meth]
+    def detach(self, obs_meth, lambda_call=None):
+        if type(obs_meth) == str :
+            onm = obs_meth
+            observers = [obs for obs in self.observers[onm] if obs.mth == lambda_call]
+        else:
+            onm = obs_meth.__name__
+            observers = [obs for obs in self.observers[onm] if obs.mth == obs_meth]
         if not observers: raise Exception
         map(self.observers[onm].remove, observers)
 
     def notify(self, meth, *args, **kwargs):
         if meth not in self.observers: return  # no obs for this notification
         for obs in self.observers[meth][:]:
-            if obs in self.observers[meth]: # if an obs removes another one
+            if obs in self.observers[meth]:  # if an obs removes another one
                 act_args = obs.args + list(args)
                 obs.mth(*act_args, **kwargs)
 

@@ -23,13 +23,13 @@ class Race(GameObject, RaceFacade):
     fsm_cls = RaceFsm
     gui_cls = RaceGui
 
-    def __init__(self, race_props):
+    def __init__(self, race_props, yorg_client=None):
         rpr = race_props
         init_lst = [
             [('fsm', self.fsm_cls, [self, rpr.shaders_dev])],
             [('gui', self.gui_cls, [self, rpr])],
-            [('logic', self.logic_cls, [self, rpr])],
-            [('event', self.event_cls, [self, rpr.ingame_menu, rpr.keys])]]
+            [('logic', self.logic_cls, [self, rpr, yorg_client])],
+            [('event', self.event_cls, [self, rpr.ingame_menu, rpr.keys, yorg_client])]]
         GameObject.__init__(self, init_lst)
         RaceFacade.__init__(self)
 
@@ -43,9 +43,9 @@ class RaceSinglePlayer(Race):
 
 
 class RaceServer(Race):
-    logic_cls = RaceLogicServer
+    logic_cls = RaceLogicClient
     event_cls = RaceEventServer
-    fsm_cls = RaceFsmServer
+    fsm_cls = RaceFsmClient
     gui_cls = RaceGuiServer
 
 

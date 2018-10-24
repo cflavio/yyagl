@@ -38,14 +38,17 @@ class Fixer(object):
             '  <Scalar> magfilter { LINEAR_MIPMAP_LINEAR }\n',
             '  <Scalar> wrap { REPEAT }\n',
             '}\n']
-        rep = BlockReplacer(self.out_lines, '<Texture> MASKOBJTrack {', '}', new_lines)
+        rep_str = '<Texture> MASKOBJTrack {'
+        rep = BlockReplacer(self.out_lines, rep_str, '}', new_lines)
         self.replacers += [rep]
 
         new_lines = [
             '<Texture> TEXREPOBJTrack1 {\n',
             '  "./tex/snowbackground.jpg"\n',
             '  <Scalar> envtype { MODULATE }\n']
-        rep = BlockReplacer(self.out_lines, '<Texture> TEXREPOBJTrack1 {', '  <Scalar> envtype { MODULATE }', new_lines)
+        rep_str = '<Texture> TEXREPOBJTrack1 {'
+        repl_str = '  <Scalar> envtype { MODULATE }'
+        rep = BlockReplacer(self.out_lines, rep_str, repl_str, new_lines)
         self.replacers += [rep]
 
         new_lines = [
@@ -53,7 +56,9 @@ class Fixer(object):
             '  "./tex/Tileable ice ground texture.jpg"\n',
             '  <Scalar> envtype { MODULATE }\n',
             '  <Scalar> saved-result { 1 }\n']
-        rep = BlockReplacer(self.out_lines, '<Texture> TEXREPOBJTrack2 {', '  <Scalar> envtype { MODULATE }', new_lines)
+        rep_str = '<Texture> TEXREPOBJTrack2 {'
+        repl_str = '  <Scalar> envtype { MODULATE }'
+        rep = BlockReplacer(self.out_lines, rep_str, repl_str, new_lines)
         self.replacers += [rep]
 
         new_lines = [
@@ -66,7 +71,7 @@ class Fixer(object):
             if not any(rep.process_line(line) for rep in self.replacers):
                 self.out_lines += [line]
         with open('track_fixed.egg', 'w') as fout:
-            map(lambda outl: fout.write(outl), self.out_lines)
+            map(fout.write, self.out_lines)
 
 
 Fixer()

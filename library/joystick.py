@@ -5,6 +5,6 @@ class JoystickMgr(object):
     def get_joystick(self): pass
 
     @staticmethod
-    def has_support(self): pass
+    def has_support(): pass
 
     def destroy(self): pass

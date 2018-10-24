@@ -1,4 +1,4 @@
-from panda3d.core import TextNode
+from panda3d.core import TextNode, Texture
 from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL, B1PRESS
 from direct.showbase.DirectObject import DirectObject
 from direct.gui.DirectButton import DirectButton
@@ -217,8 +217,13 @@ class PandaEntry(IEntry, PandaAbs, DirectObject):
             focusOutExtraArgs=focusOutExtraArgs, parent=parent,
             text_fg=text_fg)
         PandaAbs.__init__(self, tra_src, tra_tra)
-        if on_tab: self.accept('tab-up', on_tab)
+        if on_tab:
+            self.on_tab_cb = on_tab
+            self.accept('tab-up', self.on_tab)
         if on_click: self.wdg.bind(B1PRESS, on_click)
+
+    def on_tab(self):
+        if self.wdg['focus']: self.on_tab_cb()
 
     @property
     def onscreenText(self): return self.wdg.onscreenText
@@ -237,6 +242,7 @@ class PandaEntry(IEntry, PandaAbs, DirectObject):
 
     def destroy(self):
         self.ignore('tab-up')
+        self.on_tab_cb = None
         PandaAbs.destroy(self)
 
 
@@ -275,6 +281,8 @@ class PandaTxt(IText, PandaBase):
 class PandaFrame(IFrame, PandaAbs):
 
     def __init__(self, frameSize=(-1, 1, -1, 1), frameColor=(1, 1, 1, 1),
-            pos=(0, 1, 0), parent=None):
+            pos=(0, 1, 0), parent=None, textureCoord=False):
         self.wdg = DirectFrame(frameSize=frameSize, frameColor=frameColor,
             pos=pos, parent=parent)
+        if textureCoord:
+            self.wdg['frameTexture'] = Texture()

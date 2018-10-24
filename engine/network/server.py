@@ -1,86 +1,101 @@
-from socket import socket, AF_INET, SOCK_DGRAM, gaierror, error
-from json import load
+from socket import error
+from Queue import Queue, Empty
 from simpleubjson import encode, decode
-from urllib2 import urlopen
-from .network import AbsNetwork
-from yyagl.library.panda.network import PandaConnectionListener
+from .network import AbsNetwork, ConnectionError, NetworkThread
+from yyagl.gameobject import GameObject
 
 
-ConnectionListener = PandaConnectionListener
+class ServerThread(NetworkThread, GameObject):
+
+    def __init__(self, eng, rpc_cb, port):
+        NetworkThread.__init__(self, eng, port)
+        GameObject.__init__(self)
+        self.rpc_cb = rpc_cb
+        self.conn2msgs = {}
+
+    def _configure_socket(self):
+        self.tcp_sock.setblocking(0)
+        self.tcp_sock.bind(('', self.port))
+        self.tcp_sock.listen(1)
+
+    def _process_read(self, sock):
+        if sock is self.tcp_sock:
+            conn, addr = sock.accept()
+            conn.setblocking(1)  # required on osx
+            self.connections += [conn]
+            self.conn2msgs[conn] = Queue()
+            self.notify('on_connected', conn)
+        else:
+            NetworkThread._process_read(self, sock)
+
+    def _rpc_cb(self, dct, sock):
+        self.eng.cb_mux.add_cb(self.rpc_cb, [dct, sock])
+
+    def _queue(self, sock):
+        return self.conn2msgs[sock]
+
+    def send_msg(self, conn, msg):
+        self.conn2msgs[conn].put(msg)
 
 
 class Server(AbsNetwork):
 
-    def __init__(self):
-        AbsNetwork.__init__(self)
-        self.conn_listener = self.tcp_socket = self.conn_cb = \
-            self.listener_task = self.public_addr = self.local_addr = None
-        self.connections = []
+    def __init__(self, port):
+        AbsNetwork.__init__(self, port)
+        self.conn_cb = None
+        self.fname2ref = {}
+
+    @property
+    def connections(self): return self.netw_thr.connections[1:]
 
     def start(self, read_cb, conn_cb):
         AbsNetwork.start(self, read_cb)
         self.conn_cb = conn_cb
-        self.conn_listener = ConnectionListener(self.conn_mgr)
-        self.connections = []
-        self.tcp_socket = self.conn_mgr.open_TCP_server_rendezvous(port=9099, backlog=1000)
-        self.conn_listener.add_conn(self.tcp_socket)
-        self.listener_task = self.eng.add_task(self.task_listener, self.eng.network_priority)
-        sock = socket(AF_INET, SOCK_DGRAM)
-        sock.connect(('ya2.it', 8080))
-        self.local_addr = sock.getsockname()[0]
-        self.public_addr = load(urlopen('http://httpbin.org/ip', timeout=3))['origin']
-        self.udp_sock = socket(AF_INET, SOCK_DGRAM)
-        self.udp_sock.bind(('', 9099))
-        self.udp_sock.setblocking(0)
+        self.netw_thr.attach(self.on_connected)
+        self.netw_thr.attach(self.on_disconnected)
 
-        self.eng.log('the server is up %s %s' % (self.public_addr, self.local_addr))
+    def on_connected(self, conn):
+        self.notify('on_connected', conn)
 
-    def task_listener(self, task):
-        if not self.conn_listener.conn_avail(): return task.cont
-        conn, addr = self.conn_listener.get_conn()
-        if not conn: return task.cont
-        self.connections += [(conn, addr)]
-        self.conn_reader.add_conn(self.connections[-1][0])
-        self.conn_cb(addr)
-        msg = 'received a connection from ' + addr
-        self.eng.log(msg)
-        return task.cont
+    def on_disconnected(self, conn):
+        self.notify('on_disconnected', conn)
 
-    def _actual_send(self, datagram, receiver=None):
-        receivers = [cln for cln in [conn[0] for conn in self.connections] if cln == receiver]
-        dests = receivers if receiver else [conn[0] for conn in self.connections]
-        map(lambda cln: self.conn_writer.send(datagram, cln), dests)
+    def _bld_netw_thr(self):
+        return ServerThread(self.eng, self.rpc_cb, self.port)
+
+    def _configure_udp(self): self.udp_sock.bind(('', self.port))
+
+    def send(self, data_lst, receiver=None):
+        dgram = encode({'payload': data_lst})
+        receivers = [cln for cln in self.connections if cln == receiver]
+        dests = receivers if receiver else self.connections
+        map(lambda cln: self.netw_thr.send_msg(cln, dgram), dests)
+
+    def rpc_cb(self, dct, conn):
+        funcname, args, kwargs = dct['payload']
+        kwargs = kwargs or {}
+        kwargs['sender'] = conn
+        ret = self.fname2ref[funcname](*args, **kwargs)
+        dct = {'is_rpc': True, 'result': ret}
+        self.netw_thr.send_msg(conn, encode(dct))
+
+    def register_rpc(self, func): self.fname2ref[func.__name__] = func
+
+    def unregister_rpc(self, func): del self.fname2ref[func.__name__]
+
+    def on_udp_pck(self, dgram):
+        sender = dgram['sender']
+        if sender not in self.addr2conn: self.addr2conn[sender] = conn
 
     def process_udp(self):
-        try:
-            payload, client_address = self.udp_sock.recvfrom(8192)
+        try: dgram, conn = self.udp_sock.recvfrom(8192)
         except error: return
-        payload = self._fix_payload(dict(decode(payload)))
-        sender = payload['sender']
-        if sender not in self.addr2conn:
-            self.addr2conn[sender] = client_address
-        self.read_cb(payload['payload'], client_address)
+        try:
+            dgram = self._fix_payload(dict(decode(dgram)))
+            self.read_cb(dgram['payload'], dgram['sender'])
+        except MarkerError as e: print e
 
     def send_udp(self, data_lst, receiver):
-        if receiver not in self.addr2conn: return
-        payload = {}
-        my_addr = self.my_addr if hasattr(self, 'my_addr') else 'server'
-        payload['sender'] = my_addr
-        payload['payload'] = data_lst
-        self.udp_sock.sendto(encode(payload), self.addr2conn[receiver])
-
-    def stop(self):
-        if self.tcp_socket:
-            map(self.conn_reader.remove_connection, [conn[0] for conn in self.connections])
-            self.conn_mgr.close_connection(self.tcp_socket)
-            self.eng.remove_task(self.listener_task)
-            self.udp_sock.close()
-            self.conn_listener = self.tcp_socket = self.conn_cb = \
-                self.listener_task = self.connections = None
-        else: self.eng.log('the server was already stopped')
-        AbsNetwork.stop(self)
-        self.eng.log('the server has been stopped')
-
-    def destroy(self):
-        AbsNetwork.destroy(self)
-        self.eng.log('the server has been destroyed')
+        if receiver[0] not in self.addr2conn: return
+        dgram = {'sender': 'server', 'payload': data_lst}
+        self.udp_sock.sendto(encode(dgram), self.addr2conn[receiver[0]])

@@ -1,5 +1,5 @@
 from math import cos, pi
-from panda3d.core import Vec3, LVector3f
+from panda3d.core import Vec3, LVector3f, Mat4
 from yyagl.gameobject import GameObject
 
 
@@ -54,6 +54,16 @@ class Camera(GameObject):
             res += [fit_p() if beyond else tgt]
         return LVector3f(* res)
 
+    @property
+    def _back_vec_z(self):
+        dist_diff = self.dist_max - self.dist_min
+        return self.dist_min + dist_diff * self.curr_speed_ratio
+
+    def _new_pos(self, back_car_vec, speed_ratio, c_i):
+        car_pos = self.car_np.get_pos()
+        cam_pos = base.camera.get_pos()
+        return self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
+
     def update(self, speed_ratio, is_rolling, is_fast, is_rotating):
         self.curr_speed_ratio = self.new_val(
             self.curr_speed_ratio, speed_ratio, 1 * globalClock.get_dt())
@@ -69,13 +79,17 @@ class Camera(GameObject):
             self.curr_dist, self.dist_min + dist_diff * self.curr_speed_ratio,
             dincr)
         back_car_vec = -fwd_car_vec * self.curr_dist
-        back_car_vec += (0, 0,
-                         self.dist_min + dist_diff * self.curr_speed_ratio)
-        back_incr = (.05 if is_rotating else 25.0) * globalClock.get_dt()
         car_pos = self.car_np.get_pos()
+        back_car_vec += (0, 0, self._back_vec_z)
+        tmp_back_pos = car_pos + back_car_vec
+        curr_gnd_h = self.gnd_height(tmp_back_pos)
+        if curr_gnd_h and tmp_back_pos.z < curr_gnd_h + .5:
+            back_car_vec.z = curr_gnd_h - car_pos.z + .5
+        back_incr = (.05 if is_rotating else 25.0) * globalClock.get_dt()
         l_d_speed = self.look_dist_min + look_dist_diff * self.curr_speed_ratio
         l_d = 0 if is_rolling else l_d_speed
         cam_pos = base.camera.get_pos()
+
         curr_incr = self.curr_speed(cam_pos, car_pos + back_car_vec) * globalClock.get_dt()
         curr_incr_slow = self.speed_slow * globalClock.get_dt()
         if is_fast:
@@ -83,8 +97,6 @@ class Camera(GameObject):
         self.curr_look_dist = self.new_val(self.curr_look_dist, l_d,
                                            curr_incr_slow)
         tgt_vec = self.fwd_car_vec * self.curr_look_dist
-
-
 
         curr_wp = self.car.logic.closest_wp().next
         if curr_wp.node.has_tag('camera'):
@@ -98,7 +110,7 @@ class Camera(GameObject):
             back_car_vec = cam_forced_vec
 
         c_i = curr_incr_slow if is_fast else curr_incr
-        new_pos = self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
+        new_pos = self._new_pos(back_car_vec, speed_ratio, c_i)
         # overwrite camera's position to set the physics
         if any(val for val in self.overwrite):
             ovw = self.overwrite
@@ -108,6 +120,12 @@ class Camera(GameObject):
 
     @property
     def camera(self): return base.camera
+
+    def gnd_height(self, pos):
+        hits = self.eng.phys_mgr.root.ray_test_all(pos - (0, 0, 100), pos + (0, 0, 100))
+        for hit in hits.get_hits():
+            if any(hit.getNode().getName().startswith(pref) for pref in ['RoadOBJ', 'OffroadOBJ']):
+                return hit.getHitPos().z
 
     @staticmethod
     def render_all(track_model):  # workaround for premunge_scene in 1.9
@@ -122,3 +140,69 @@ class Camera(GameObject):
 
     def destroy(self):
         GameObject.destroy(self)
+
+
+class FPCamera(Camera):
+
+    dist_min = 16
+    dist_max = 24
+    height = 8
+
+    def _new_pos(self, back_car_vec, speed_ratio, c_i):
+        car_pos = self.car_np.get_pos()
+        dist_diff = self.dist_max - self.dist_min
+        cam_pos = base.camera.get_pos()
+        curr_cam_pos = car_pos + back_car_vec
+        curr_cam_dist_fact = self.dist_min + dist_diff * speed_ratio
+        curr_occl = self.__occlusion_mesh(curr_cam_pos, curr_cam_dist_fact)
+        is_occl = False
+        if curr_occl:
+            occl_pos = curr_occl.getHitPos()
+            back_car_vec = occl_pos - car_pos
+            is_occl = True
+        if not is_occl:
+            new_pos = Camera._new_pos(self, back_car_vec, speed_ratio, c_i)
+        else:
+            new_pos = occl_pos
+        return new_pos
+
+    @property
+    def _back_vec_z(self):
+        return self.height
+
+    def __occlusion_mesh(self, pos, curr_cam_dist_fact):
+        tgt = self.car.gfx.nodepath.get_pos()
+        occl = self.__closest_occl(pos, tgt)
+        if not occl:
+            return
+        car_vec = self.car.logic.car_vec
+        rot_mat_left = Mat4()
+        rot_mat_left.setRotateMat(90, (0, 0, 1))
+        car_vec_left = rot_mat_left.xformVec(car_vec)
+        tgt_left = tgt + car_vec_left
+        pos_left = pos + car_vec_left
+        occl_left = self.__closest_occl(pos_left, tgt_left)
+        if not occl_left:
+            return
+        rot_mat_right = Mat4()
+        rot_mat_right.setRotateMat(-90, (0, 0, 1))
+        car_vec_right = rot_mat_right.xformVec(car_vec)
+        car_vec_right += (0, 0, 2)
+        tgt_right = tgt + car_vec_right
+        pos_right = pos + car_vec_right
+        occl_right = self.eng.phys_mgr.root.ray_test_closest(tgt_right, pos_right)
+        occl_right = self.__closest_occl(pos_right, tgt_right)
+        if not occl_right:
+            return
+        return occl
+
+    def __closest_occl(self, pos, tgt):
+        occl = None
+        dist = 9999
+        occl_l = self.eng.phys_mgr.root.ray_test_all(tgt, pos)#, mask)
+        for _occl in occl_l.get_hits():
+            if _occl.getNode().getName() not in ['Vehicle', 'Goal']:
+                if (_occl.getHitPos() - tgt).length() < dist:
+                    dist = (_occl.getHitPos() - tgt).length()
+                    occl = _occl
+        return occl

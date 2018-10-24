@@ -67,7 +67,7 @@ class Car(GameObject, CarFacade):
     ai_cls = AiColleague
     audio_cls = CarAudio
 
-    def __init__(self, car_props):
+    def __init__(self, car_props, yorg_client):
         self.eng.log_mgr.log('init car ' + car_props.name)
         init_lst = [
             [('fsm', self.fsm_cls, [self, car_props])],
@@ -75,7 +75,7 @@ class Car(GameObject, CarFacade):
              ('phys', self.phys_cls, [self, car_props]),
              ('logic', self.logic_cls, [self, car_props]),
              ('gui', self.gui_cls, [self, car_props.race_props]),
-             ('event', self.event_cls, [self, car_props.race_props]),
+             ('event', self.event_cls, [self, car_props.race_props, yorg_client]),
              ('ai', self.ai_cls, [self, car_props])],
             [('audio', self.audio_cls, [self, car_props.race_props])]]
         GameObject.__init__(self, init_lst, car_props.callback)
