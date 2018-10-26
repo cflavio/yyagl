@@ -1,20 +1,18 @@
-from panda3d.core import AudioSound as PAudioSound
+from panda3d.core import AudioSound
+from yyagl.facade import Facade
 
 
-class P3dAudioSound(object):
+class P3dSound(Facade):
 
-    def __init__(self, fpath):
-        self.snd = loader.loadSfx(fpath)
+    def __init__(self, filepath):
+        self.snd = loader.loadSfx(filepath)
+        self._fwd_mth('stop', lambda obj: obj.snd.stop)
+        self._fwd_mth('set_loop', lambda obj: obj.snd.set_loop)
+        self._fwd_mth('set_volume', lambda obj: obj.snd.set_volume)
+        self._fwd_mth('set_play_rate', lambda obj: obj.snd.set_play_rate)
 
     def play(self):
-        return self.snd.status() != PAudioSound.PLAYING and self.snd.play()
+        if self.snd.status() != AudioSound.PLAYING: return self.snd.play()
 
-    def stop(self): return self.snd.stop()
-
-    def set_loop(self, val): return self.snd.set_loop(val)
-
-    def set_volume(self, val): return self.snd.set_volume(val)
-
-    def set_play_rate(self, val): return self.snd.set_play_rate(val)
-
-    def is_playing(self): return self.snd.status() == PAudioSound.PLAYING
+    @property
+    def playing(self): return self.snd.status() == AudioSound.PLAYING

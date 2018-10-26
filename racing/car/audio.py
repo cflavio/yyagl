@@ -53,7 +53,7 @@ class RaceAudioUpdate(AbsAudioUpdate):
 
     def update(self, skidmarking, speed_ratio, input_, drifting, flying,
                rolling):
-        brk_playing = self.brake_sfx.is_playing()
+        brk_playing = self.brake_sfx.playing
         if speed_ratio > .4:
             skidmarking = skidmarking or drifting
         if drifting and not skidmarking and speed_ratio > .4:

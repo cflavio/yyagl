@@ -1,8 +1,8 @@
 from ..gameobject import AudioColleague
-from yyagl.lib.p3d.audio import P3dAudioSound
+from yyagl.lib.p3d.audio import P3dSound
 
 
-AudioSound = P3dAudioSound
+AudioSound = P3dSound
 
 
 class EngineAudio(AudioColleague):

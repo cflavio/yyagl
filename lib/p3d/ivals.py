@@ -2,15 +2,14 @@ from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait
 from direct.interval.LerpInterval import LerpPosInterval
 from direct.interval.FunctionInterval import Func
+from yyagl.facade import Facade
 
 
-class P3dSeq(object):
+class P3dSeq(Facade):
 
-    def __init__(self, *args):
-        ivals = [arg.ival for arg in args]
-        self.seq = Sequence(*ivals)
-
-    def start(self): return self.seq.start()
+    def __init__(self, *ivals):
+        self.seq = Sequence(*[ival.ival for ival in ivals])
+        self._fwd_mth('start', lambda obj: obj.seq.start)
 
     def append(self, ival): return self.seq.append(ival.ival)
 
@@ -22,8 +21,10 @@ class P3dWait(object):
 
 class P3dPosIval(object):
 
-    def __init__(self, np, time=1.0, pos=(0, 0, 0), blendType='easeInOut'):
-        self.ival = LerpPosInterval(np, time, pos=pos, blendType=blendType)
+    def __init__(self, np, time=1.0, pos=(0, 0, 0), blend_type='ease'):
+        blend2p3d = {'ease': 'easeInOut'}
+        self.ival = LerpPosInterval(np, time, pos=pos,
+                                    blendType=blend2p3d[blend_type])
 
 
 class P3dFunc(object):
