@@ -54,7 +54,7 @@ class CarFacade(Facade):
         self._fwd_prop('name', lambda obj: obj.logic.cprops.name)
         self._fwd_prop('laps', lambda obj: obj.logic.cprops.race_props.laps)
         self._fwd_prop('pos', lambda obj: obj.gfx.nodepath.get_pos())
-        self._fwd_prop('heading', lambda obj: obj.gfx.nodepath.get_h())
+        self._fwd_prop('heading', lambda obj: obj.gfx.nodepath.h)
 
 
 class Car(GameObject, CarFacade):

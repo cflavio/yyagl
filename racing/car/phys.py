@@ -109,9 +109,9 @@ class CarPhys(PhysColleague):
 
     def __set_wheels(self):
         wheels = self.mediator.gfx.wheels
-        f_bounds = wheels['fr'].get_tight_bounds()
+        f_bounds = wheels['fr'].tight_bounds
         f_radius = (f_bounds[1][2] - f_bounds[0][2]) / 2.0 + .01
-        r_bounds = wheels['rr'].get_tight_bounds()
+        r_bounds = wheels['rr'].tight_bounds
         r_radius = (r_bounds[1][2] - r_bounds[0][2]) / 2.0 + .01
         wheel_names = self.cprops.race_props.wheel_names
         ffr = self.coll_mesh.find('**/' + wheel_names.frontrear.fr)

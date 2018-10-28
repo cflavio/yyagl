@@ -82,7 +82,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
         self._curr_sector = 0  # i.e. center
         self.sector2samples_gnd = {'left': [''], 'center': [''], 'right': ['']}
         self.sector2obsts = {'left': [], 'center': [], 'right': []}
-        bnds = car.phys.coll_mesh.get_tight_bounds()  # (lowerleft, upperright)
+        bnds = car.phys.coll_mesh.tight_bounds  # (lowerleft, upperright)
         self.width_bounds = (bnds[0].x * 1.15, bnds[1].x * 1.15)
         whl_height = max(whl.get_wheel_radius()
                          for whl in car.phys.vehicle.get_wheels())

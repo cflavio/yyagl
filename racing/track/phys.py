@@ -97,25 +97,24 @@ class Waypoint(object):
 
         def find_wp(name):
             for wayp in waypoints:
-                if wayp.name == name: return wayp
+                if wayp.get_name() == name: return wayp
         prev_names = [wayp.get_name() for wayp in prev_nodes]
         self.prevs = [find_wp(name) for name in prev_names]
 
     def set_prevs_grid(self, nopitlane_wps):
         self.prevs_grid = [wayp for wayp in self.prevs if wayp in nopitlane_wps]
 
-    @property
-    def name(self): return self.node.get_name()
+    def get_name(self): return self.node.get_name()
 
     @property
     def pos(self): return self.node.get_pos()
 
     def __repr__(self):
-        prevs = [wp.name[8:] for wp in self.prevs]
-        prevs_grid = [wp.name[8:] for wp in self.prevs_grid]
-        prevs_nogrid = [wp.name[8:] for wp in self.prevs_nogrid]
-        prevs_nopitlane = [wp.name[8:] for wp in self.prevs_nopitlane]
-        return self.name[8:] + ' [%s]' % ','.join(prevs) + \
+        prevs = [wp.get_name()[8:] for wp in self.prevs]
+        prevs_grid = [wp.get_name()[8:] for wp in self.prevs_grid]
+        prevs_nogrid = [wp.get_name()[8:] for wp in self.prevs_nogrid]
+        prevs_nopitlane = [wp.get_name()[8:] for wp in self.prevs_nopitlane]
+        return self.get_name()[8:] + ' [%s]' % ','.join(prevs) + \
             ' [%s]' % ','.join(prevs_grid) + \
             ' [%s]' % ','.join(prevs_nogrid) + \
             ' [%s]' % ','.join(prevs_nopitlane)
@@ -290,7 +289,7 @@ class TrackPhys(PhysColleague, ComputerProxy):
         start_node = self.model.find(node_str)
         if start_node:
             start_pos = start_node.get_pos()
-            start_hpr = start_node.get_hpr()
+            start_hpr = start_node.hpr
         return start_pos, start_hpr
 
     @property

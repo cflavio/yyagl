@@ -5,30 +5,40 @@ from panda3d.core import get_model_path, AntialiasAttrib, PandaNode, \
     Point2, Point3
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
-from yyagl.racing.bitmasks import BitMasks
 from yyagl.lib.p3d.p3d import LibP3d
+from yyagl.facade import Facade
 
 
 class RenderToTexture(object):
 
-    def __init__(self):
-        self.buffer = base.win.make_texture_buffer('result buffer', 256, 256)
+    def __init__(self, size=(256, 256)):
+        self.__set_buffer(size)
+        self.__set_display_region()
+        self.__set_camera()
+        self.__set_root()
+        self.display_region.set_camera(self.camera)
+
+    def __set_buffer(self, size):
+        self.buffer = base.win.make_texture_buffer('result buffer', size[0],
+                                                   size[1])
         self.buffer.set_sort(-100)
 
-        self.display_region = self.buffer.makeDisplayRegion()
+    def __set_display_region(self):
+        self.display_region = self.buffer.make_display_region()
         self.display_region.set_sort(20)
 
+    def __set_camera(self):
         self.camera = NodePath(Camera('camera 2d'))
         lens = OrthographicLens()
         lens.set_film_size(1, 1)
         lens.set_near_far(-1000, 1000)
         self.camera.node().set_lens(lens)
 
-        self.root = NodePath('result render')
+    def __set_root(self):
+        self.root = NodePath('root')
         self.root.set_depth_test(False)
         self.root.set_depth_write(False)
         self.camera.reparent_to(self.root)
-        self.display_region.set_camera(self.camera)
 
     @property
     def texture(self): return self.buffer.get_texture()
@@ -38,30 +48,25 @@ class RenderToTexture(object):
         if base.win:  # if you close the window during a race
             base.win.remove_display_region(self.display_region)
         map(lambda node: node.remove_node(), [self.camera, self.root])
+        self.buffer = self.display_region = self.camera = self.root = None
 
 
 class P3dGfxMgr(object):
 
-    def __init__(self):
+    def __init__(self, model_path, antialiasing, shaders):
         self.root = P3dNode(render)
         self.callbacks = {}
         self.filters = None
-
-    def init(self, model_path, antialiasing, shaders):
         get_model_path().append_directory(model_path)
         if base.appRunner:
             root_dir = base.appRunner.p3dFilename.get_dirname()
-            get_model_path().append_directory(root_dir + '/' + model_path)
-            get_model_path().append_directory(root_dir)
+            paths = [root_dir + '/' + model_path, root_dir]
+            map(get_model_path().append_directory, paths)
         render.set_shader_auto()
         render.set_two_sided(True)
-        if antialiasing:
-            render.set_antialias(AntialiasAttrib.MAuto)
+        if antialiasing: render.set_antialias(AntialiasAttrib.MAuto)
         if shaders and base.win:
             self.filters = CommonFilters(base.win, base.cam)
-
-    def _intermediate_cb(self, model, fpath):
-        return self.callbacks[fpath](P3dNode(model))
 
     def load_model(self, filename, callback=None, extra_args=[], anim=None):
         ext = '.bam' if exists(filename + '.bam') else ''
@@ -69,30 +74,24 @@ class P3dGfxMgr(object):
             anim_dct = {'anim': filename + '-Anim' + ext}
             return P3dNode(Actor(filename + ext, anim_dct))
         elif callback:
-            self.callbacks[filename + ext] = callback
             return loader.loadModel(
-              filename + ext, callback=self._intermediate_cb,
-              extraArgs=extra_args + [filename + ext])
+              filename + ext, callback=lambda model: callback(P3dNode(model)))
         else:
             return P3dNode(loader.loadModel(LibP3d.p3dpath(filename + ext)))
 
     def set_toon(self):
-        tempnode = NodePath(PandaNode('temp node'))
-        tempnode.set_attrib(LightRampAttrib.make_single_threshold(.5, .4))
-        tempnode.set_shader_auto()
-        base.cam.node().set_initial_state(tempnode.get_state())
+        tmp_node = NodePath(PandaNode('temp node'))
+        tmp_node.set_attrib(LightRampAttrib.make_single_threshold(.5, .4))
+        tmp_node.set_shader_auto()
+        base.cam.node().set_initial_state(tmp_node.get_state())
         self.filters.set_cartoon_ink(separation=1)
 
     def set_bloom(self):
         if not base.win: return
         self.filters.setBloom(
-            blend=(.3, .4, .3, 0),  # default: (.3, .4, .3, 0)
-            mintrigger=.6,  # default: .6
-            maxtrigger=1.0,  # default: 1.0
-            desat=.6,  # default: .6
-            intensity=1.0,  # default: 1.0
-            size='medium'  # default: 'medium' ('small', 'medium', 'large')
-        )
+            blend=(.3, .4, .3, 0), mintrigger=.6, maxtrigger=1.0, desat=.6,
+            intensity=1.0, size='medium')
+        # default: (.3, .4, .3, 0), .6, 1, .6, 1, 'medium'
 
     @staticmethod
     def pos2d(node):
@@ -105,29 +104,50 @@ class P3dGfxMgr(object):
         return base.win.get_gsg().get_supports_basic_shaders()
 
     @staticmethod
-    def set_shader(val):
-        (render.set_shader_auto if val else render.set_shader_off)()
+    def enable_shader(): render.set_shader_auto()
 
     @staticmethod
-    def set_blur(): pass  # self.filters.setBlurSharpen(.5)
+    def disable_shader(): render.set_shader_off()
 
     @staticmethod
     def print_stats():
-        print '\n\n#####\nrender2d.analyze()'
-        base.render2d.analyze()
-        print '\n\n#####\nrender.analyze()'
-        base.render.analyze()
-        print '\n\n#####\nrender2d.ls()'
-        base.render2d.ls()
-        print '\n\n#####\nrender.ls()'
-        base.render.ls()
+        info = [('render2d.analyze', base.render2d.analyze),
+                ('render.analyze', base.render.analyze),
+                ('render2d.ls', base.render2d.ls),
+                ('render.ls', base.render.ls)]
+        for elm in info:
+            print '\n\n#####\n%s()' % elm[0]
+            elm[1]()
 
 
-class P3dNode(object):
+class P3dNode(Facade):
 
-    def __init__(self, np):
-        self.node = np
-        self.node.set_python_tag('pandanode', self)
+    def __init__(self, nodepath):
+        self.node = nodepath
+        self.node.set_python_tag('yyaglnode', self)
+        self._fwd_mth('set_collide_mask', lambda obj: obj.node.set_collide_mask)
+        self._fwd_mth('set_x', lambda obj: obj.node.set_x)
+        self._fwd_mth('set_y', lambda obj: obj.node.set_y)
+        self._fwd_mth('set_z', lambda obj: obj.node.set_z)
+        self._fwd_mth('set_hpr', lambda obj: obj.node.set_hpr)
+        self._fwd_mth('set_h', lambda obj: obj.node.set_h)
+        self._fwd_mth('set_p', lambda obj: obj.node.set_p)
+        self._fwd_mth('set_r', lambda obj: obj.node.set_r)
+        self._fwd_mth('set_scale', lambda obj: obj.node.set_scale)
+        self._fwd_mth('set_transparency', lambda obj: obj.node.set_transparency)
+        self._fwd_mth('set_alpha_scale', lambda obj: obj.node.set_alpha_scale)
+        self._fwd_mth('set_texture', lambda obj: obj.node.set_texture)
+        self._fwd_mth('has_tag', lambda obj: obj.node.has_tag)
+        self._fwd_mth('get_tag', lambda obj: obj.node.get_tag)
+        self._fwd_mth('get_python_tag', lambda obj: obj.node.get_python_tag)
+        self._fwd_mth('remove_node', lambda obj: obj.node.remove_node)
+        self._fwd_mth('flatten_strong', lambda obj: obj.node.flatten_strong)
+        self._fwd_mth('clear_model_nodes', lambda obj: obj.node.clear_model_nodes)
+        self._fwd_mth('show', lambda obj: obj.node.show)
+        self._fwd_mth('set_depth_offset', lambda obj: obj.node.set_depth_offset)
+        self._fwd_mth('loop', lambda obj: obj.node.loop)
+        self._fwd_mth('cleanup', lambda obj: obj.node.cleanup)
+        self._fwd_mth('write_bam_file', lambda obj: obj.node.write_bam_file)
 
     def attach_node(self, name):
         return P3dNode(self.node.attach_new_node(name))
@@ -139,80 +159,45 @@ class P3dNode(object):
 
     def get_node(self): return self.node.node()
 
-    def set_collide_mask(self, mask): return self.node.set_collide_mask(mask)
-
     def set_pos(self, pos): return self.node.set_pos(pos.vec)
-
-    def set_x(self, x): return self.node.set_x(x)
-
-    def set_y(self, y): return self.node.set_y(y)
-
-    def set_z(self, z): return self.node.set_z(z)
 
     def get_pos(self, other=None):
         return self.node.get_pos(* [] if other is None else [other.node])
 
-    def get_x(self): return self.node.get_x()
-
-    def get_y(self): return self.node.get_y()
-
-    def get_z(self): return self.node.get_z()
+    @property
+    def x(self): return self.node.get_x()
 
     @property
-    def x(self): return self.get_x()
+    def y(self): return self.node.get_y()
 
     @property
-    def y(self): return self.get_y()
+    def z(self): return self.node.get_z()
 
     @property
-    def z(self): return self.get_z()
+    def hpr(self): return self.node.get_hpr()
 
-    def set_hpr(self, hpr): return self.node.set_hpr(hpr)
+    @property
+    def h(self): return self.node.get_h()
 
-    def set_h(self, h): return self.node.set_h(h)
+    @property
+    def p(self): return self.node.get_p()
 
-    def set_p(self, p): return self.node.set_p(p)
+    @property
+    def r(self): return self.node.get_r()
 
-    def set_r(self, r): return self.node.set_r(r)
+    @property
+    def scale(self): return self.node.get_scale()
 
-    def get_hpr(self): return self.node.get_hpr()
-
-    def get_h(self): return self.node.get_h()
-
-    def get_p(self): return self.node.get_p()
-
-    def get_r(self): return self.node.get_r()
-
-    def set_scale(self, scale): return self.node.set_scale(scale)
-
-    def get_scale(self): return self.node.get_scale()
-
-    def get_transform(self, node): return self.node.get_transform(node.node)
+    @property
+    def is_empty(self): return self.node.is_empty()
 
     def get_relative_vector(self, node, vec):
         return self.node.get_relative_vector(node.node, vec)
 
-    def set_transparency(self, val): return self.node.set_transparency(val)
-
-    def set_alpha_scale(self, val): return self.node.set_alpha_scale(val)
-
     def set_material(self, material): return self.node.set_material(material, 1)
-
-    def set_texture(self, ts, texture):
-        return self.node.set_texture(ts, texture)
-
-    def has_tag(self, name): return self.node.has_tag(name)
-
-    def get_tag(self, name): return self.node.get_tag(name)
-
-    def get_python_tag(self, name): return self.node.get_python_tag(name)
 
     def set_python_tag(self, name, val):
         return self.node.set_python_tag(name, val)
-
-    def remove_node(self): return self.node.remove_node()
-
-    def is_empty(self): return self.node.is_empty()
 
     def get_distance(self, other_node):
         return self.node.get_distance(other_node.node)
@@ -224,8 +209,8 @@ class P3dNode(object):
 
     @staticmethod
     def __get_pandanode(nodepath):
-        if nodepath.has_python_tag('pandanode'):
-            return nodepath.get_python_tag('pandanode')
+        if nodepath.has_python_tag('yyaglnode'):
+            return nodepath.get_python_tag('yyaglnode')
         return P3dNode(nodepath)
 
     def find_all_matches(self, name):
@@ -236,53 +221,38 @@ class P3dNode(object):
         model = self.node.find(name)
         if model: return self.__get_pandanode(model)
 
-    def flatten_strong(self): return self.node.flatten_strong()
-
-    def prepare_scene(self): return self.node.prepare_scene(base.win.get_gsg())
-
-    def premunge_scene(self):
-        return self.node.premunge_scene(base.win.get_gsg())
-
-    def clear_model_nodes(self): return self.node.clear_model_nodes()
-
-    def show(self): return self.node.show()
+    def optimize(self):
+        self.node.prepare_scene(base.win.get_gsg())
+        self.node.premunge_scene(base.win.get_gsg())
 
     def hide(self, mask=None):
         return self.node.hide(*[] if mask is None else [mask])
 
-    def set_depth_offset(self, offset):
-        return self.node.set_depth_offset(offset)
+    @property
+    def tight_bounds(self): return self.node.get_tight_bounds()
 
-    def get_tight_bounds(self): return self.node.get_tight_bounds()
+    @property
+    def parent(self): return self.node.get_parent()
 
-    def get_parent(self): return self.node.get_parent()
-
-    def get_children(self): return self.node.get_children()
-
-    def loop(self, name): return self.node.loop(name)
-
-    def cleanup(self): return self.node.cleanup()
-
-    def write_bam_file(self, fpath): self.node.write_bam_file(fpath)
+    @property
+    def children(self): return self.node.get_children()
 
 
-class P3dAnimNode(object):
+class P3dAnimNode(Facade):
 
-    def __init__(self, path, anim_dct):
-        self.node = Actor(path, anim_dct)
+    def __init__(self, filepath, anim_dct):
+        self.node = Actor(filepath, anim_dct)
+        self._fwd_mth('loop', lambda obj: obj.node.loop)
+        self._fwd_mth('reparent_to', lambda obj: obj.node.reparent_to)
 
-    def loop(self, anim_name): return self.node.loop(anim_name)
-
-    def reparent_to(self, parent): return self.node.reparent_to(parent)
-
-    def get_name(self): return self.node.get_name()
+    @property
+    def name(self): return self.node.get_name()
 
     def set_omni(self):
         self.node.node().set_bounds(OmniBoundingVolume())
         self.node.node().set_final(True)
 
-    def destroy(self):
-        self.node.cleanup()
+    def destroy(self): self.node.cleanup()
 
 
 class P3dAmbientLight(object):
@@ -298,15 +268,16 @@ class P3dAmbientLight(object):
         self.ambient_np.remove_node()
 
 
-class P3dSpotlight(object):
+class P3dSpotlight(Facade):
 
-    def __init__(self):
+    def __init__(self, mask=None):
         self.spot_lgt = render.attach_new_node(P3DSpotlight('spot'))
-        self.spot_lgt.node().set_scene(render)
-        self.spot_lgt.node().set_shadow_caster(True, 1024, 1024)
-        self.spot_lgt.node().get_lens().set_fov(40)
-        self.spot_lgt.node().get_lens().set_near_far(20, 200)
-        self.spot_lgt.node().set_camera_mask(BitMask32.bit(BitMasks.general))
+        snode = self.spot_lgt.node()
+        snode.set_scene(render)
+        snode.set_shadow_caster(True, 1024, 1024)
+        snode.get_lens().set_fov(40)
+        snode.get_lens().set_near_far(20, 200)
+        if mask: snode.set_camera_mask(mask)
         render.set_light(self.spot_lgt)
 
     def set_pos(self, pos): return self.spot_lgt.set_pos(*pos)

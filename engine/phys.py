@@ -58,10 +58,8 @@ class PhysMgr(Colleague, PhysFacade):
         self.root.do_physics(self.eng.lib.last_frame_dt(), 10, 1/180.0)
         self.__do_collisions()
 
-    def ray_test_closest(self, top, bottom, mask=None):
-        args = [top, bottom]
-        if mask: args += [mask]
-        return self.root.ray_test_closest(*args)
+    def ray_test_closest(self, top, bottom):
+        return self.root.ray_test_closest(top, bottom)
 
     def add_collision_obj(self, node): self.collision_objs += [node]
 

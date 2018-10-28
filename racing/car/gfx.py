@@ -73,9 +73,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         wheels = self.wheels.values()
         map(lambda whl: whl.reparent_to(self.eng.gfx.root), wheels)
         # try RigidBodyCombiner for the wheels
-        for cha in chas:
-            cha.prepare_scene()
-            cha.premunge_scene()
+        for cha in chas: cha.optimize()
         self.on_skidmarking()
         self.cnt = 5
         for _ in range(6):
@@ -118,7 +116,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), (1, .4, .1, 1), .8)
         self.apply_damage()
         level = 0
-        curr_chassis = self.nodepath.get_children()[0]
+        curr_chassis = self.nodepath.children[0]
         if self.chassis_np_low.get_name() in curr_chassis.get_name():
             level = 1
         if self.chassis_np_hi.get_name() in curr_chassis.get_name():
@@ -127,7 +125,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         return True
 
     def apply_damage(self, reset=False):
-        curr_chassis = self.nodepath.get_children()[0]
+        curr_chassis = self.nodepath.children[0]
         if reset:
             next_chassis = self.chassis_np
         elif self.chassis_np_low.get_name() in curr_chassis.get_name():
@@ -173,7 +171,7 @@ class SkidmarkMgr(GameObject):
     def on_skidmarking(self):
         fr_pos = self.car.gfx.wheels['fr'].get_pos(self.eng.gfx.root)
         fl_pos = self.car.gfx.wheels['fl'].get_pos(self.eng.gfx.root)
-        heading = self.car.gfx.nodepath.get_h()
+        heading = self.car.gfx.nodepath.h
         if self.r_skidmark:
             self.r_skidmark.update(fr_pos, heading)
             self.l_skidmark.update(fl_pos, heading)

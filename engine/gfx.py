@@ -14,8 +14,7 @@ class EngineGfx(GfxColleague):
 
     def __init__(self, mediator, model_path, antialiasing, shaders):
         GfxColleague.__init__(self, mediator)
-        self.gfx_mgr = GfxMgr()
-        self.gfx_mgr.init(model_path, antialiasing, shaders)
+        self.gfx_mgr = GfxMgr(model_path, antialiasing, shaders)
         self.root = None
         self.part2eff = {}
         if self.mediator.cfg.gui_cfg.shaders and \

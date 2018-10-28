@@ -29,7 +29,7 @@ class Skidmark(GameObject):
         self.add_vertices(whl_radius, car_h)
 
         def alpha(time, n_p):
-            if not n_p.is_empty():
+            if not n_p.is_empty:
                 n_p.set_alpha_scale(time)
             # this if seems necessary since, if there are skidmarks and you
             # exit from the race (e.g. back to the menu), then alpha is being

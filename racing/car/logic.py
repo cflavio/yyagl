@@ -276,20 +276,20 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.__adjust_car()
 
     def __update_roll_info(self):
-        roll = self.mediator.gfx.nodepath.get_r()
+        roll = self.mediator.gfx.nodepath.r
         status = 'ok' if -45 <= roll < 45 else 'ko'
         curr_t = globalClock.get_frame_time()
         setattr(self, 'last_roll_%s_time' % status, curr_t)
 
     def __clamp_orientation(self):
         max_deg = 36
-        if self.mediator.gfx.nodepath.get_p() < -max_deg:
+        if self.mediator.gfx.nodepath.p < -max_deg:
             self.mediator.gfx.nodepath.set_p(-max_deg)
-        if self.mediator.gfx.nodepath.get_r() < -max_deg:
+        if self.mediator.gfx.nodepath.r < -max_deg:
             self.mediator.gfx.nodepath.set_r(-max_deg)
-        if self.mediator.gfx.nodepath.get_p() > max_deg:
+        if self.mediator.gfx.nodepath.p > max_deg:
             self.mediator.gfx.nodepath.set_p(max_deg)
-        if self.mediator.gfx.nodepath.get_r() > max_deg:
+        if self.mediator.gfx.nodepath.r > max_deg:
             self.mediator.gfx.nodepath.set_r(max_deg)
 
     def __adjust_car(self):
@@ -301,14 +301,14 @@ class CarLogic(LogicColleague, ComputerProxy):
         angle_incr = 15.0 * globalClock.get_dt()
         if angle < 0: angle_incr *= -1
         incr = angle if abs(angle) < abs(angle_incr) else angle_incr
-        heading = self.mediator.gfx.nodepath.get_h()
+        heading = self.mediator.gfx.nodepath.h
         self.mediator.gfx.nodepath.set_h(heading + incr)
-        pitch = self.mediator.gfx.nodepath.get_p()
+        pitch = self.mediator.gfx.nodepath.p
         p_incr = 15.0 * globalClock.get_dt()
         if pitch > 0: p_incr *= -1
         p_incr = -pitch if abs(pitch) < abs(p_incr) else p_incr
         self.mediator.gfx.nodepath.set_p(pitch + p_incr)
-        roll = self.mediator.gfx.nodepath.get_r()
+        roll = self.mediator.gfx.nodepath.r
         r_incr = 15.0 * globalClock.get_dt()
         if roll > 0: r_incr *= -1
         r_incr = -roll if abs(roll) < abs(r_incr) else r_incr
@@ -343,7 +343,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         # make a Waypoint class which contains the nodepath and facades stuff
         for pwp in reversed(self.collected_wps):
             _wp = [__wp for __wp in self.cprops.track_waypoints
-                   if __wp.name[8:] == str(pwp)][0]  # facade wp's name
+                   if __wp.get_name()[8:] == str(pwp)][0]  # facade wp's name
             if _wp in self.not_fork_wps():
                 return _wp
         if self.not_fork_wps():  # if the track has a goal
@@ -420,7 +420,7 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @property
     def curr_chassis(self):
-        return self.mediator.gfx.nodepath.get_children()[0]
+        return self.mediator.gfx.nodepath.children[0]
 
     @property
     def curr_chassis_name(self):
@@ -514,7 +514,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         return WPInfo(start_wp, end_wp)
 
     def update_waypoints(self):
-        closest_wp = int(self.closest_wp().prev.name[8:])  # WaypointX
+        closest_wp = int(self.closest_wp().prev.get_name()[8:])  # WaypointX
         # facade: wp.num in Waypoint's class
         if closest_wp not in self.collected_wps:
             self.collected_wps += [closest_wp]
@@ -555,13 +555,13 @@ class CarLogic(LogicColleague, ComputerProxy):
     def __recompute_wp_num(self):  # wp_num is used for ranking
         self.__wp_num = len(
             [vwp for vwp in self.collected_wps if vwp in [
-                int(wp.name[8:]) for wp in self.not_fork_wps()]])
+                int(wp.get_name()[8:]) for wp in self.not_fork_wps()]])
 
     @property
     def correct_lap(self):
         wps = self.cprops.track_waypoints
-        all_wp = [int(w_p.name[8:]) for w_p in wps]
-        f_wp = [int(w_p.name[8:]) for w_p in self.__fork_wp()]
+        all_wp = [int(w_p.get_name()[8:]) for w_p in wps]
+        f_wp = [int(w_p.get_name()[8:]) for w_p in self.__fork_wp()]
         map(all_wp.remove, f_wp)
         is_correct = all(w_p in self.collected_wps for w_p in all_wp)
         if not is_correct:
@@ -580,7 +580,7 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @property
     def car_vec(self):  # port (or add) this to 3D
-        car_rad = deg2Rad(self.mediator.gfx.nodepath.get_h())
+        car_rad = deg2Rad(self.mediator.gfx.nodepath.h)
         return Vec(-sin(car_rad), cos(car_rad), 0).normalize()
 
     @property
