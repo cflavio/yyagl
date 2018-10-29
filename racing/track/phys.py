@@ -41,9 +41,9 @@ class MeshBuilder(GameObject):
         nodepath = self.eng.attach_node(ncls(geom_name).node)
         self.nodes += [nodepath]
         nodepath.add_shape(shape)
-        meth(nodepath.get_node())
-        lst += [nodepath.get_node()]
-        nodepath.get_node().notify_collisions(True)
+        meth(nodepath.p3dnode)
+        lst += [nodepath.p3dnode]
+        nodepath.p3dnode.notify_collisions(True)
         bit = BitMask32.bit
         if not is_merged:
             bmask = bit(BitMasks.track) | bit(BitMasks.track_merged)
@@ -98,13 +98,13 @@ class Waypoint(object):
         def find_wp(name):
             for wayp in waypoints:
                 if wayp.get_name() == name: return wayp
-        prev_names = [wayp.get_name() for wayp in prev_nodes]
+        prev_names = [wayp.name for wayp in prev_nodes]
         self.prevs = [find_wp(name) for name in prev_names]
 
     def set_prevs_grid(self, nopitlane_wps):
         self.prevs_grid = [wayp for wayp in self.prevs if wayp in nopitlane_wps]
 
-    def get_name(self): return self.node.get_name()
+    def get_name(self): return self.node.name
 
     @property
     def pos(self): return self.node.get_pos()

@@ -123,7 +123,7 @@ class P3dGfxMgr(object):
 class P3dNode(Facade):
 
     def __init__(self, nodepath):
-        self.node = nodepath
+        self.nodepath = nodepath
         self.node.set_python_tag('yyaglnode', self)
         self._fwd_mth('set_collide_mask', lambda obj: obj.node.set_collide_mask)
         self._fwd_mth('set_x', lambda obj: obj.node.set_x)
@@ -155,9 +155,14 @@ class P3dNode(Facade):
     def add_shape(self, shape):
         return self.node.node().add_shape(shape.mesh_shape)
 
-    def get_name(self): return self.node.get_name()
+    @property
+    def name(self): return self.node.get_name()
 
-    def get_node(self): return self.node.node()
+    @property
+    def node(self): return self.nodepath
+
+    @property
+    def p3dnode(self): return self.node.node()
 
     def set_pos(self, pos): return self.node.set_pos(pos.vec)
 

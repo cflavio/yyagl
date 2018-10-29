@@ -128,9 +128,9 @@ class CarGfx(GfxColleague, CarGfxFacade):
         curr_chassis = self.nodepath.children[0]
         if reset:
             next_chassis = self.chassis_np
-        elif self.chassis_np_low.get_name() in curr_chassis.get_name():
+        elif self.chassis_np_low.name in curr_chassis.get_name():
             next_chassis = self.chassis_np_hi
-        elif self.chassis_np_hi.get_name() in curr_chassis.get_name():
+        elif self.chassis_np_hi.name in curr_chassis.get_name():
             return
         else:
             next_chassis = self.chassis_np_low

@@ -54,7 +54,7 @@ class RocketWeaponPhys(WeaponPhys):
         self.eng.phys_mgr.add_collision_obj(self.node)
         self.node.set_python_tag('car', self.mediator.logic.car)
         self.rot_mat = Mat4()
-        rot_deg = self.parent.get_h() + self.rot_deg
+        rot_deg = self.parent.h + self.rot_deg
         self.rot_mat.set_rotate_mat(rot_deg, (0, 0, 1))
         self.update_tsk = taskMgr.add(self.update_weapon, 'update_weapon')
 

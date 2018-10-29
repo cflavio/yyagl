@@ -82,7 +82,7 @@ class CarPhys(PhysColleague):
         boxpos = self.cfg['box_pos']
         boxpos[2] += self.cfg['center_mass_offset']
         pos = TransformState.makePos(tuple(boxpos))
-        self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape, pos)
+        self.mediator.gfx.nodepath.p3dnode.add_shape(chassis_shape, pos)
         car_names = self.cprops.race_props.season_props.car_names
         car_idx = car_names.index(self.cprops.name)
         car_bit = BitMask32.bit(BitMasks.car(car_idx))
@@ -92,7 +92,7 @@ class CarPhys(PhysColleague):
         self.mediator.gfx.nodepath.set_collide_mask(mask)
 
     def __set_phys_node(self):
-        self.pnode = self.mediator.gfx.nodepath.get_node()
+        self.pnode = self.mediator.gfx.nodepath.p3dnode
         self.pnode.set_mass(self.mass)
         self.pnode.set_deactivation_enabled(False)
         self.eng.phys_mgr.attach_rigid_body(self.pnode)
@@ -134,7 +134,7 @@ class CarPhys(PhysColleague):
             (rr_pos, False, wheels['rr'], r_radius),
             (rl_pos, False, wheels['rl'], r_radius)]
         for i, (pos, front, nodepath, radius) in enumerate(wheels_info):
-            self.__add_wheel(pos, front, nodepath.get_node(), radius, i)
+            self.__add_wheel(pos, front, nodepath.p3dnode, radius, i)
 
     def __add_wheel(self, pos, is_front, node, radius, i):
         whl = self.vehicle.create_wheel()

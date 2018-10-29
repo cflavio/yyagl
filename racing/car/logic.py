@@ -428,7 +428,7 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @property
     def hi_chassis_name(self):
-        return self.mediator.gfx.chassis_np_hi.get_name()
+        return self.mediator.gfx.chassis_np_hi.name
 
     @once_a_frame
     def closest_wp(self):

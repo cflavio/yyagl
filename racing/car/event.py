@@ -96,7 +96,7 @@ class CarEvent(EventColleague, ComputerProxy):
         self.eng.attach_obs(self.on_frame)
 
     def on_collision(self, obj, tgt_obj):
-        if obj != self.mediator.gfx.nodepath.get_node():
+        if obj != self.mediator.gfx.nodepath.p3dnode:
             return
         obj_name = tgt_obj.get_name()
         if obj_name.startswith(self.props.respawn_name):
@@ -262,7 +262,7 @@ class CarPlayerEvent(CarEvent):
 
     def on_collision(self, obj, tgt_obj):
         CarEvent.on_collision(self, obj, tgt_obj)
-        if obj != self.mediator.gfx.nodepath.get_node():
+        if obj != self.mediator.gfx.nodepath.p3dnode:
             return
         obj_name = tgt_obj.get_name()
         if any(obj_name.startswith(s) for s in self.props.roads_names):

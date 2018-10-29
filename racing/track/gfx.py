@@ -39,7 +39,7 @@ class TrackGfx(GfxColleague):
         for model in self.model.find_all_matches(anim_name):
             # bam files don't contain actor info
             cloned_root = self.__cloned_root(model)
-            model_subname = model.get_name()[len(rpr.empty_name):]
+            model_subname = model.name[len(rpr.empty_name):]
             # filenames are like EmptyModelName
             path = '%s/%s' % (rpr.track_path, model_subname)
             if '.' in path: path = path.split('.')[0]
@@ -54,7 +54,7 @@ class TrackGfx(GfxColleague):
 
     @staticmethod
     def __cloned_root(model):
-        cloned_root = NodePath(model.get_name())
+        cloned_root = NodePath(model.name)
         cloned_root.reparent_to(model.parent)
         cloned_root.set_pos(model.get_pos())
         cloned_root.set_hpr(model.hpr)

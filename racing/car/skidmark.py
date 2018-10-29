@@ -24,7 +24,7 @@ class Skidmark(GameObject):
         nodepath.set_transparency(True)
         nodepath.set_depth_offset(1)
         self.__set_material(nodepath)
-        nodepath.get_node().set_bounds(OmniBoundingVolume())
+        nodepath.p3dnode.set_bounds(OmniBoundingVolume())
         self.add_vertices(whl_radius, car_h)
         self.add_vertices(whl_radius, car_h)
 
