@@ -38,7 +38,7 @@ class RankingPageGui(PageGui):
             cont_btn_ea = ['on_ranking_next_race']
             img = Img(
                 'assets/images/gui/trophy.txo', parent=base.a2dRightCenter,
-                pos=(-.58, 1, 0), scale=.55)
+                pos=(-.58, 0), scale=.55)
             img.set_transparency(True)
             txt = Text(
                 _('Congratulations!'), fg=(.8, .6, .2, 1), scale=.16,
@@ -141,7 +141,7 @@ class RankingGui(GuiColleague):
         gprops = page.rprops.season_props.gameprops
         img = Img(
             gprops.cars_img % car_name,
-            pos=(pos_x - .16, 1, top + .02 - i * .16), scale=.074)
+            pos=(pos_x - .16, top + .02 - i * .16), scale=.074)
         filtervpath = RankingGui.eng.curr_path + \
             'yyagl/assets/shaders/filter.vert'
         with open(filtervpath) as fvs:
@@ -153,7 +153,7 @@ class RankingGui(GuiColleague):
         shader = load_shader(vert, frag)
         if shader:
             img.set_shader(shader)
-        img.set_transparency(True)
+        img.set_transparent()
         t_s = TextureStage('ts')
         t_s.set_mode(TextureStage.MDecal)
         txt_path = gprops.drivers_img.path_sel % drv.logic.dprops.info.img_idx

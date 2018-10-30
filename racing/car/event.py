@@ -192,8 +192,8 @@ class CarEvent(EventColleague, ComputerProxy):
         wp_vec = Vec(endpos.x, endpos.y, 0).normalize()
         or_h = (wp_vec.xy).signed_angle_deg(Vec2(0, 1))
         self.mediator.gfx.nodepath.set_hpr((-or_h, 0, 0))
-        self.mediator.gfx.nodepath.get_node().set_linear_velocity(0)
-        self.mediator.gfx.nodepath.get_node().set_angular_velocity(0)
+        self.mediator.gfx.nodepath.p3dnode.set_linear_velocity(0)
+        self.mediator.gfx.nodepath.p3dnode.set_angular_velocity(0)
 
     def on_frame(self):
         _input = self._get_input()

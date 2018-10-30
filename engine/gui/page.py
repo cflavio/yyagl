@@ -189,7 +189,7 @@ class PageGui(GuiColleague):
         tra_tra = _('Quit') if exit_behav else _('Back')
         callback = self._on_quit if exit_behav else self._on_back
         self.widgets += [Btn(
-            text='', pos=(-.2, 1, -.92), command=callback,
+            text='', pos=(-.2, -.92), cmd=callback,
             tra_src=tra_src, tra_tra=tra_tra, **self.menu_args.btn_args)]
 
     def _on_back(self): self.notify('on_back', self.__class__.__name__)
@@ -202,7 +202,7 @@ class PageGui(GuiColleague):
         self.transition_enter()
 
     def hide(self):
-        for wdg in self.widgets: wdg.was_visible = not wdg.is_hidden()
+        for wdg in self.widgets: wdg.was_visible = not wdg.hidden
         self.transition_exit(False)
         self.notify('on_hide')
 

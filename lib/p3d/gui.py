@@ -11,58 +11,57 @@ from direct.gui.DirectEntry import DirectEntry
 from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
+from yyagl.facade import Facade
 
 
-class P3dImg(object):
+class P3dImg(Facade):
 
-    def __init__(self, fpath, pos=(0, 1, 0), scale=1.0, is_background=False,
-                 force_transp=None, layer='', parent=None):
-        self.img = OnscreenImage(fpath, pos=pos, scale=scale, parent=parent)
-        if is_background: self.img.set_bin('background', 10)
-        if force_transp: self.img.set_transparency(True)
-        elif force_transp is None:
-            alpha_formats = [12]  # panda3d.core.texture.Frgba
-            if self.img.get_texture().get_format() in alpha_formats:
-                self.img.set_transparency(True)
-        if layer == 'fg': self.img.set_bin('gui-popup', 50)
+    def __init__(self, filepath, pos=(0, 0), scale=1.0, background=False,
+                 force_transp=None, foreground=False, parent=None):
+        self.img = OnscreenImage(filepath, pos=(pos[0], 1, pos[1]), scale=scale,
+                                 parent=parent)
+        if background: self.img.set_bin('background', 10)
+        alpha_formats = [12]  # panda3d.core.texture.Frgba
+        if self.img.get_texture().get_format() in alpha_formats:
+            self.img.set_transparency(True)
+        if foreground: self.img.set_bin('gui-popup', 50)
+        self._fwd_mth('reparent_to', lambda obj: obj.img.reparent_to)
+        self._fwd_mth('show', lambda obj: obj.img.show)
+        self._fwd_mth('hide', lambda obj: obj.img.hide)
+        self._fwd_mth('set_shader', lambda obj: obj.img.set_shader)
+        self._fwd_mth('set_shader_input', lambda obj: obj.img.set_shader_input)
+        self._fwd_mth('set_texture', lambda obj: obj.img.set_texture)
 
-    def set_pos(self, pos): return self.img.set_pos(pos)
+    def set_pos(self, pos): return self.img.set_pos(pos[0], 1, pos[1])
 
-    def get_pos(self, pos=None):
-        return self.img.get_pos(*[pos] if pos else [])
+    def get_pos(self, pos=None): return self.img.get_pos(*[pos] if pos else [])
 
-    def reparent_to(self, parent): return self.img.reparent_to(parent)
+    @property
+    def parent(self): return self.img.get_parent()
 
-    def get_parent(self): return self.img.get_parent()
+    @property
+    def hidden(self): return self.img.is_hidden()
 
-    def show(self): return self.img.show()
-
-    def hide(self): return self.img.hide()
-
-    def is_hidden(self): return self.img.is_hidden()
-
-    def set_shader(self, shader): return self.img.set_shader(shader)
-
-    def set_shader_input(self, input_name, input_val):
-        return self.img.set_shader_input(input_name, input_val)
-
-    def set_transparency(self, val): return self.img.set_transparency(val)
-
-    def set_texture(self, tstage, tex): return self.img.set_texture(tstage, tex)
+    def set_transparent(self): return self.img.set_transparency(True)
 
     def destroy(self): self.img = self.img.destroy()
 
 
-class P3dBase(object):
+class P3dBase(Facade):
 
     def __init__(self, tra_src=None, tra_tra=None):
         if tra_src and tra_tra: self.bind_tra(tra_src, tra_tra)
+        self._fwd_mth('set_pos', lambda obj: obj.wdg.set_pos)
+        self._fwd_mth('show', lambda obj: obj.wdg.show)
+        self._fwd_mth('hide', lambda obj: obj.wdg.hide)
 
     def bind_tra(self, text_src, text_transl):
         # text_transl is not used, anyway we need it since we have this kind of
         # use: self.bind_transl('example str', _('example str'))
         # this allows to change translations on the fly keeping the source
         # text for remapping it later
+        # TODO: try reverse mapping? i.e. retrieve the src string from the
+        # translated one
         self.text_src_tra = text_src
         self.__class__.bind_transl = property(lambda self: _(self.text_src_tra))
         self['text'] = self.bind_transl
@@ -70,40 +69,30 @@ class P3dBase(object):
     def get_pos(self, pos=None):
         return self.wdg.get_pos(*[pos] if pos else [])
 
-    def set_pos(self, pos): return self.wdg.set_pos(pos)
-
     def __setitem__(self, key, value): self.wdg[key] = value
 
     def __getitem__(self, key): return self.wdg[key]
 
     def get_np(self): return self.wdg
 
-    def show(self): return self.wdg.show()
+    @property
+    def hidden(self): return self.wdg.is_hidden()
 
-    def hide(self): return self.wdg.hide()
-
-    def is_hidden(self): return self.wdg.is_hidden()
-
-    def destroy(self): return self.wdg.destroy()
+    def destroy(self): self.wdg = self.wdg.destroy()
 
 
 class P3dAbs(P3dBase):
 
-    def get_value(self): return self.wdg.getValue()
 
-    def initialiseoptions(self, cls): return self.wdg.initialiseoptions(cls)
-
-    def set_z(self, z): return self.wdg.set_z(z)
-
-    def set_shader(self, shader): return self.wdg.set_shader(shader)
-
-    def set_shader_input(self, input_name, input_val):
-        return self.wdg.set_shader_input(input_name, input_val)
-
-    def set_transparency(self, val): return self.wdg.set_transparency(val)
-
-    def bind(self, evt, callback):
-        return self.wdg.bind(evt, callback)
+    def __init__(self, tra_src=None, tra_tra=None):
+        P3dBase.__init__(self, tra_src, tra_tra)
+        self._fwd_mth('get_value', lambda obj: obj.wdg.getValue)
+        self._fwd_mth('initialiseoptions', lambda obj: obj.wdg.initialiseoptions)
+        self._fwd_mth('set_z', lambda obj: obj.wdg.set_z)
+        self._fwd_mth('set_shader', lambda obj: obj.wdg.set_shader)
+        self._fwd_mth('set_shader_input', lambda obj: obj.wdg.set_shader_input)
+        self._fwd_mth('set_transparency', lambda obj: obj.wdg.set_transparency)
+        self._fwd_mth('bind', lambda obj: obj.wdg.bind)
 
     def attachNewNode(self, gui_itm, sort_order):
         # it won't work if we name it attach_node. hopefully this will be
@@ -117,31 +106,30 @@ class P3dAbs(P3dBase):
 class P3dBtn(P3dAbs):
 
     def __init__(
-            self, text='', parent=None, pos=(0, 0, 0), scale=(1, 1, 1),
-            command=None, frameSize=(-1, 1, -1, 1), clickSound=None,
-            text_fg=(1, 1, 1, 1), frameColor=(1, 1, 1, 1), text_font=None,
-            rolloverSound=None, extraArgs=[], frameTexture=None, image=None,
+            self, text='', parent=None, pos=(0, 0), scale=(1, 1),
+            cmd=None, frameSize=(-1, 1, -1, 1), click_snd=None,
+            text_fg=(1, 1, 1, 1), frame_col=(1, 1, 1, 1), text_font=None,
+            over_snd=None, extra_args=[], frame_texture=None, img=None,
             tra_src=None, tra_tra=None, text_scale=.8):
         self.wdg = DirectButton(
-            text=text, parent=parent, pos=pos, scale=scale, command=command,
-            frameSize=frameSize, clickSound=clickSound, text_fg=text_fg,
-            frameColor=frameColor, text_font=text_font,
-            rolloverSound=rolloverSound, extraArgs=extraArgs,
-            frameTexture=frameTexture, image=image, text_scale=1.0)
+            text=text, parent=parent, pos=(pos[0], 1, pos[1]),
+            scale=(scale[0], 1, scale[1]), command=cmd,
+            frameSize=frameSize, clickSound=click_snd, text_fg=text_fg,
+            frameColor=frame_col, text_font=text_font, rolloverSound=over_snd,
+            extraArgs=extra_args, frameTexture=frame_texture, image=img,
+            text_scale=1.0)
         P3dAbs.__init__(self, tra_src, tra_tra)
         self['relief'] = FLAT
-        self.bind(ENTER, self._on_enter)
-        self.bind(EXIT, self._on_exit)
+        args = [(ENTER, self._on_enter), (EXIT, self._on_exit)]
+        map(lambda args: self.bind(*args), args)
 
     def _on_enter(self, pos): pass  # pos comes from mouse
 
     def _on_exit(self, pos): pass  # pos comes from mouse
 
-    def enable(self):
-        self['state'] = NORMAL
+    def enable(self): self['state'] = NORMAL
 
-    def disable(self):
-        self['state'] = DISABLED
+    def disable(self): self['state'] = DISABLED
 
 
 class P3dSlider(P3dAbs):
@@ -160,16 +148,16 @@ class P3dSlider(P3dAbs):
 class P3dCheckBtn(P3dAbs):
 
     def __init__(
-            self, pos=(0, 1, 0), text='', indicatorValue=False,
-            indicator_frameColor=(1, 1, 1, 1), frameColor=(1, 1, 1, 1),
-            scale=(1, 1, 1), clickSound=None, rolloverSound=None,
+            self, pos=(0, 0), text='', indicatorValue=False,
+            indicator_frameColor=(1, 1, 1, 1), frame_col=(1, 1, 1, 1),
+            scale=(1, 1, 1), click_snd=None, over_snd=None,
             text_fg=(1, 1, 1, 1), text_font=None, command=None, tra_src=None,
             tra_tra=None):
         self.wdg = DirectCheckButton(
-            pos=pos, text=text, indicatorValue=indicatorValue,
+            pos=(pos[0], 1, pos[1]), text=text, indicatorValue=indicatorValue,
             indicator_frameColor=indicator_frameColor,
-            frameColor=frameColor, scale=scale, clickSound=clickSound,
-            rolloverSound=rolloverSound, text_fg=text_fg, text_font=text_font,
+            frameColor=frame_col, scale=scale, clickSound=click_snd,
+            rolloverSound=over_snd, text_fg=text_fg, text_font=text_font,
             command=command)
         P3dAbs.__init__(self, tra_src, tra_tra)
 
@@ -179,18 +167,18 @@ class P3dOptionMenu(P3dAbs):
     def __init__(
             self, text='', items=[], pos=(0, 1, 0), scale=(1, 1, 1),
             initialitem='', command=None, frameSize=(-1, 1, -1, 1),
-            clickSound=None, rolloverSound=None, textMayChange=False,
+            click_snd=None, over_snd=None, textMayChange=False,
             text_fg=(1, 1, 1, 1), item_frameColor=(1, 1, 1, 1),
-            frameColor=(1, 1, 1, 1), highlightColor=(1, 1, 1, 1),
+            frame_col=(1, 1, 1, 1), highlightColor=(1, 1, 1, 1),
             text_scale=.05, popupMarker_frameColor=(1, 1, 1, 1),
             item_relief=None, item_text_font=None, text_font=None, tra_src=None,
             tra_tra=None):
         self.wdg = DirectOptionMenu(
             text=text, items=items, pos=pos, scale=scale,
             initialitem=initialitem, command=command, frameSize=frameSize,
-            clickSound=clickSound, rolloverSound=rolloverSound,
+            clickSound=click_snd, rolloverSound=over_snd,
             textMayChange=textMayChange, text_fg=text_fg,
-            item_frameColor=item_frameColor, frameColor=frameColor,
+            item_frameColor=item_frameColor, frameColor=frame_col,
             highlightColor=highlightColor, text_scale=text_scale,
             popupMarker_frameColor=popupMarker_frameColor,
             item_relief=item_relief, item_text_font=item_text_font,
@@ -252,14 +240,15 @@ class P3dEntry(P3dAbs, DirectObject):
 class P3dLabel(P3dAbs):
 
     def __init__(
-            self, text='', pos=(0, 1, 0), parent=None, text_wordwrap=10,
+            self, text='', pos=(0, 0), parent=None, text_wordwrap=10,
             text_align=None, text_fg=(1, 1, 1, 1), text_font=None, scale=.05,
-            frameColor=(1, 1, 1, 1), tra_src=None, tra_tra=None):
+            frame_col=(1, 1, 1, 1), tra_src=None, tra_tra=None, hpr=(0, 0, 0)):
         self.wdg = DirectLabel(
-            text=text, pos=pos, parent=parent, text_wordwrap=text_wordwrap,
+            text=text, pos=(pos[0], 1, pos[1]), parent=parent, text_wordwrap=text_wordwrap,
             text_align=text_align, text_fg=text_fg, text_font=text_font,
-            scale=scale, frameColor=frameColor)
+            scale=scale, frameColor=frame_col, hpr=hpr)
         P3dAbs.__init__(self, tra_src, tra_tra)
+        self._fwd_mth('set_bin', lambda obj: obj.wdg.set_bin)
 
 
 class P3dTxt(P3dBase):

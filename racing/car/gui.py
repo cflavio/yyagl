@@ -25,12 +25,17 @@ class CarParameter(GameObject):
         self.toggle()
 
     def toggle(self):
-        map(lambda wdg: (wdg.show if wdg.is_hidden() else wdg.hide)(),
-            self.widgets)
+        #map(lambda wdg: (wdg.show if wdg.hidden else wdg.hide)(),
+        #    self.widgets)
+        # temporary hack: we're using non-dip widgets, they've is_hidden in
+        # place of hidden, remove this when this is refactored
+        for wdg in self.widgets:
+            if hasattr(wdg, 'hidden'): (wdg.show if wdg.hidden else wdg.hide)()
+            else: (wdg.show if wdg.is_hidden() else wdg.hide)()
 
     @property
     def is_visible(self):
-        return any(not wdg.is_hidden() for wdg in self.widgets)
+        return any(not wdg.hidden for wdg in self.widgets)
 
     def __set_attr(self, val):
         try: self.__callback(float(val), *self.__args)

@@ -44,8 +44,8 @@ class LoadingPageGui(PageGui):
     def set_wld_img(self):
         self.wld_img = Img(
             'assets/images/loading/%s.txo' % self.rprops.track_name,
-            pos=(-.25, 1, -.25), scale=.24, parent=base.a2dTopRight)
-        self.wld_img.set_transparency(True)
+            pos=(-.25, -.25), scale=.24, parent=base.a2dTopRight)
+        #self.wld_img.set_transparency(True)
         self.add_widgets([self.wld_img])
 
     def set_grid(self):

@@ -54,19 +54,19 @@ class MenuArgs(GameObject):
     @property
     def btn_args(self):  # it may be used without a menu e.g. results
         return {
-            'scale': self.text_scale,
+            'scale': (self.text_scale, self.text_scale),
             'text_font': self.font,
             'text_fg': self.text_active,
-            'frameColor': self.btn_color,
+            'frame_col': self.btn_color,
             'frameSize': self.btn_size,
-            'rolloverSound': self.rollover_sfx,
-            'clickSound': self.click_sfx}
+            'over_snd': self.rollover_sfx,
+            'click_snd': self.click_sfx}
 
     @property
     def imgbtn_args(self):
         return {
-            'rolloverSound': self.rollover_sfx,
-            'clickSound': self.click_sfx}
+            'over_snd': self.rollover_sfx,
+            'click_snd': self.click_sfx}
 
     @property
     def label_args(self):
@@ -74,7 +74,7 @@ class MenuArgs(GameObject):
             'scale': self.text_scale,
             'text_fg': self.text_normal,
             'text_font': self.font,
-            'frameColor': (1, 1, 1, 0)}
+            'frame_col': (1, 1, 1, 0)}
 
     @property
     def option_args(self):
@@ -83,10 +83,10 @@ class MenuArgs(GameObject):
             'scale': self.text_scale,
             'text_font': self.font,
             'text_fg': tfg,
-            'frameColor': self.btn_color,
+            'frame_col': self.btn_color,
             'frameSize': self.btn_size,
-            'rolloverSound': self.rollover_sfx,
-            'clickSound': self.click_sfx,
+            'over_snd': self.rollover_sfx,
+            'click_snd': self.click_sfx,
             'text_scale': .85,
             'item_text_font': self.font,
             'item_frameColor': tfg,
@@ -101,9 +101,9 @@ class MenuArgs(GameObject):
             'scale': self.text_scale,
             'text_font': self.font,
             'text_fg': self.text_active,
-            'frameColor': self.btn_color,
-            'rolloverSound': self.rollover_sfx,
-            'clickSound': self.click_sfx}
+            'frame_col': self.btn_color,
+            'over_snd': self.rollover_sfx,
+            'click_snd': self.click_sfx}
 
     @property
     def text_args(self):
@@ -122,7 +122,7 @@ class MenuGui(GuiColleague):
         if not self.menu_args.background_img: return
         self.background = Img(self.menu_args.background_img,
                               scale=(1.77778, 1, 1.0),
-                              is_background=True)
+                              background=True)
 
     def destroy(self):
         GuiColleague.destroy(self)

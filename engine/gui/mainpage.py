@@ -18,12 +18,12 @@ class MainPageGui(PageGui):
         buttons = [
             ImgBtn(
                 parent=base.a2dBottomCenter,
-                scale=.06,
-                pos=(-left + i*.15, 1, .1),
-                frameColor=(1, 1, 1, 1),
-                frameTexture=menu_args.social_imgs_dpath % site[0],
-                command=self.eng.open_browser,
-                extraArgs=[site[1]],
+                scale=(.06, .06),
+                pos=(-left + i*.15, .1),
+                frame_col=(1, 1, 1, 1),
+                frame_texture=menu_args.social_imgs_dpath % site[0],
+                cmd=self.eng.open_browser,
+                extra_args=[site[1]],
                 **menu_args.imgbtn_args)
             for i, site in enumerate(sites)]
         self.widgets += buttons
