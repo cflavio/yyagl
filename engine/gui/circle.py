@@ -9,8 +9,8 @@ class Circle(Frame, GameObject):
     def __init__(self, size=.4, pos=(0, 0), parent=None, ray=.4, thickness=.05,
                  col_start=(1, 1, 1, 1), col_end=(1, 1, 1, 1)):
         GameObject.__init__(self)
-        Frame.__init__(self, pos=(pos[0], 1, pos[1]), textureCoord=True,
-                       frameSize=(-size, size, -size, size), parent=parent)
+        Frame.__init__(self, pos=(pos[0], pos[1]), texture_coord=True,
+                       frame_size=(-size, size, -size, size), parent=parent)
         path = 'yyagl/assets/shaders/'
         shader = load_shader(path + 'filter.vert', path + 'circle.frag')
         drv_lst = [self.eng.lib.driver_vendor(), self.eng.lib.driver_renderer(),

@@ -345,7 +345,7 @@ class RaceEventClient(RaceEvent):
     def __init__(self, mediator, menu_cls, keys, yorg_client):
         RaceEvent.__init__(self, mediator, menu_cls, keys, yorg_client)
         self.eng.attach_obs(self.on_frame)
-        self.eng.xmpp.attach(self.on_server_quit)
+        #self.eng.xmpp.attach(self.on_server_quit)
 
     def on_frame(self):
         from yyagl.racing.car.car import NetworkCar

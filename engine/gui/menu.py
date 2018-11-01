@@ -84,16 +84,16 @@ class MenuArgs(GameObject):
             'text_font': self.font,
             'text_fg': tfg,
             'frame_col': self.btn_color,
-            'frameSize': self.btn_size,
+            'frame_size': self.btn_size,
             'over_snd': self.rollover_sfx,
             'click_snd': self.click_sfx,
             'text_scale': .85,
             'item_text_font': self.font,
-            'item_frameColor': tfg,
+            'item_frame_col': tfg,
             'item_relief': FLAT,
-            'popupMarker_frameColor': self.btn_color,
-            'textMayChange': 1,
-            'highlightColor': (tfg[0] * 1.2, tfg[1] * 1.2, tfg[2] * 1.2, .2)}
+            'popup_marker_col': self.btn_color,
+            'text_may_change': 1,
+            'highlight_col': (tfg[0] * 1.2, tfg[1] * 1.2, tfg[2] * 1.2, .2)}
 
     @property
     def checkbtn_args(self):

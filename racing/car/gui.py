@@ -17,9 +17,9 @@ class CarParameter(GameObject):
             parent=base.a2dTopLeft, scale=.046)
         slider_pos = LVector3f(pos[0], 1, pos[1]) + (.05, 0, .01)
         self.__slider = Entry(
-            pos=slider_pos, initialText=str(init_val),
-            command=self.__set_attr, parent=base.a2dTopLeft,
-            scale=.05, frameColor=(0, 0, 0, .2), text_fg=(1, 1, 1, 1))
+            pos=slider_pos, initial_text=str(init_val),
+            cmd=self.__set_attr, parent=base.a2dTopLeft,
+            scale=.05, frame_col=(0, 0, 0, .2), text_fg=(1, 1, 1, 1))
         txt_pos = LVector3f(pos[0], pos[1], 1) + (.6, 0, 0)
         self.widgets = [self.__slider, self.__lab]
         self.toggle()

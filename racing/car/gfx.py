@@ -117,9 +117,9 @@ class CarGfx(GfxColleague, CarGfxFacade):
         self.apply_damage()
         level = 0
         curr_chassis = self.nodepath.children[0]
-        if self.chassis_np_low.get_name() in curr_chassis.get_name():
+        if self.chassis_np_low.name in curr_chassis.get_name():
             level = 1
-        if self.chassis_np_hi.get_name() in curr_chassis.get_name():
+        if self.chassis_np_hi.name in curr_chassis.get_name():
             level = 2
         self.mediator.event.on_damage(level)
         return True

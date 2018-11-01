@@ -135,101 +135,98 @@ class P3dBtn(P3dAbs):
 class P3dSlider(P3dAbs):
 
     def __init__(
-            self, parent=None, pos=(0, 0, 0), scale=1, value=0,
-            frameColor=(1, 1, 1, 1), thumb_frameColor=(1, 1, 1, 1),
-            command=None, range_=(0, 1), tra_src=None, tra_tra=None):
+            self, parent=None, pos=(0, 0), scale=1, val=0,
+            frame_col=(1, 1, 1, 1), thumb_frame_col=(1, 1, 1, 1),
+            cmd=None, range_=(0, 1), tra_src=None, tra_tra=None):
         self.wdg = DirectSlider(
-            parent=parent, pos=pos, scale=scale, value=value,
-            frameColor=frameColor, thumb_frameColor=thumb_frameColor,
-            command=command, range=range_)
+            parent=parent, pos=(pos[0], 1, pos[1]), scale=scale, value=val,
+            frameColor=frame_col, thumb_frameColor=thumb_frame_col,
+            command=cmd, range=range_)
         P3dAbs.__init__(self, tra_src, tra_tra)
 
 
 class P3dCheckBtn(P3dAbs):
 
     def __init__(
-            self, pos=(0, 0), text='', indicatorValue=False,
-            indicator_frameColor=(1, 1, 1, 1), frame_col=(1, 1, 1, 1),
+            self, pos=(0, 0), text='', indicator_val=False,
+            indicator_frame_col=(1, 1, 1, 1), frame_col=(1, 1, 1, 1),
             scale=(1, 1, 1), click_snd=None, over_snd=None,
-            text_fg=(1, 1, 1, 1), text_font=None, command=None, tra_src=None,
+            text_fg=(1, 1, 1, 1), text_font=None, cmd=None, tra_src=None,
             tra_tra=None):
         self.wdg = DirectCheckButton(
-            pos=(pos[0], 1, pos[1]), text=text, indicatorValue=indicatorValue,
-            indicator_frameColor=indicator_frameColor,
+            pos=(pos[0], 1, pos[1]), text=text, indicatorValue=indicator_val,
+            indicator_frameColor=indicator_frame_col,
             frameColor=frame_col, scale=scale, clickSound=click_snd,
             rolloverSound=over_snd, text_fg=text_fg, text_font=text_font,
-            command=command)
+            command=cmd)
         P3dAbs.__init__(self, tra_src, tra_tra)
 
 
 class P3dOptionMenu(P3dAbs):
 
     def __init__(
-            self, text='', items=[], pos=(0, 1, 0), scale=(1, 1, 1),
-            initialitem='', command=None, frameSize=(-1, 1, -1, 1),
-            click_snd=None, over_snd=None, textMayChange=False,
-            text_fg=(1, 1, 1, 1), item_frameColor=(1, 1, 1, 1),
-            frame_col=(1, 1, 1, 1), highlightColor=(1, 1, 1, 1),
-            text_scale=.05, popupMarker_frameColor=(1, 1, 1, 1),
+            self, text='', items=[], pos=(0, 0), scale=(1, 1, 1),
+            initialitem='', cmd=None, frame_size=(-1, 1, -1, 1),
+            click_snd=None, over_snd=None, text_may_change=False,
+            text_fg=(1, 1, 1, 1), item_frame_col=(1, 1, 1, 1),
+            frame_col=(1, 1, 1, 1), highlight_col=(1, 1, 1, 1),
+            text_scale=.05, popup_marker_col=(1, 1, 1, 1),
             item_relief=None, item_text_font=None, text_font=None, tra_src=None,
             tra_tra=None):
         self.wdg = DirectOptionMenu(
-            text=text, items=items, pos=pos, scale=scale,
-            initialitem=initialitem, command=command, frameSize=frameSize,
+            text=text, items=items, pos=(pos[0], 1, pos[1]), scale=scale,
+            initialitem=initialitem, command=cmd, frameSize=frame_size,
             clickSound=click_snd, rolloverSound=over_snd,
-            textMayChange=textMayChange, text_fg=text_fg,
-            item_frameColor=item_frameColor, frameColor=frame_col,
-            highlightColor=highlightColor, text_scale=text_scale,
-            popupMarker_frameColor=popupMarker_frameColor,
+            textMayChange=text_may_change, text_fg=text_fg,
+            item_frameColor=item_frame_col, frameColor=frame_col,
+            highlightColor=highlight_col, text_scale=text_scale,
+            popupMarker_frameColor=popup_marker_col,
             item_relief=item_relief, item_text_font=item_text_font,
             text_font=text_font)
         P3dAbs.__init__(self, tra_src, tra_tra)
-
-    def set(self, val, f_cmd=None): return self.wdg.set(val, f_cmd)
-
-    def get(self): return self.wdg.get()
+        self._fwd_mth('set', lambda obj: obj.wdg.set)
 
     @property
-    def selected_idx(self): return self.wdg.selectedIndex
+    def curr_val(self): return self.wdg.get()
+
+    @property
+    def curr_idx(self): return self.wdg.selectedIndex
 
 
 class P3dEntry(P3dAbs, DirectObject):
 
     def __init__(
-            self, scale=.05, pos=(0, 1, 0), entryFont=None, width=12,
-            frameColor=(1, 1, 1, 1), initialText='', obscured=False,
-            command=None, focusInCommand=None, focusInExtraArgs=[],
-            focusOutCommand=None, focusOutExtraArgs=[], parent=None,
+            self, scale=.05, pos=(0, 0), entry_font=None, width=12,
+            frame_col=(1, 1, 1, 1), initial_text='', obscured=False,
+            cmd=None, focus_in_cmd=None, focus_in_args=[],
+            focus_out_cmd=None, focus_out_args=[], parent=None,
             tra_src=None, tra_tra=None, text_fg=(1, 1, 1, 1), on_tab=None,
             on_click=None):
         DirectObject.__init__(self)
         self.wdg = DirectEntry(
-            scale=scale, pos=pos, entryFont=entryFont, width=width,
-            frameColor=frameColor, initialText=initialText, obscured=obscured,
-            command=command, focusInCommand=focusInCommand,
-            focusInExtraArgs=focusInExtraArgs, focusOutCommand=focusOutCommand,
-            focusOutExtraArgs=focusOutExtraArgs, parent=parent,
+            scale=scale, pos=(pos[0], 1, pos[1]), entryFont=entry_font, width=width,
+            frameColor=frame_col, initialText=initial_text, obscured=obscured,
+            command=cmd, focusInCommand=focus_in_cmd,
+            focusInExtraArgs=focus_in_args, focusOutCommand=focus_out_cmd,
+            focusOutExtraArgs=focus_out_args, parent=parent,
             text_fg=text_fg)
         P3dAbs.__init__(self, tra_src, tra_tra)
         if on_tab:
             self.on_tab_cb = on_tab
             self.accept('tab-up', self.on_tab)
         if on_click: self.wdg.bind(B1PRESS, on_click)
+        self._fwd_mth('set', lambda obj: obj.wdg.set)
+        self._fwd_mth('enter_text', lambda obj: obj.wdg.enterText)
 
     def on_tab(self):
         if self.wdg['focus']: self.on_tab_cb()
 
-    def get(self): return self.wdg.get()
+    @property
+    def text(self): return self.wdg.get()
 
-    def set(self, txt): return self.wdg.set(txt)
+    def enable(self): self['state'] = NORMAL
 
-    def enter_text(self, txt): return self.wdg.enterText(txt)
-
-    def enable(self):
-        self['state'] = NORMAL
-
-    def disable(self):
-        self['state'] = DISABLED
+    def disable(self): self['state'] = DISABLED
 
     def destroy(self):
         self.ignore('tab-up')
@@ -249,12 +246,14 @@ class P3dLabel(P3dAbs):
             scale=scale, frameColor=frame_col, hpr=hpr)
         P3dAbs.__init__(self, tra_src, tra_tra)
         self._fwd_mth('set_bin', lambda obj: obj.wdg.set_bin)
+        self._fwd_mth('set_x', lambda obj: obj.wdg.set_x)
+        self._fwd_mth('set_alpha_scale', lambda obj: obj.wdg.set_alpha_scale)
 
 
 class P3dTxt(P3dBase):
 
     def __init__(
-            self, txt='', pos=(0, 1, 0), scale=.05, wordwrap=12, parent=None,
+            self, txt='', pos=(0, 0), scale=.05, wordwrap=12, parent=None,
             fg=(1, 1, 1, 1), font=None, align=None, tra_src=None,
             tra_tra=None):
         str2par = {'bottomleft': base.a2dBottomLeft,
@@ -267,16 +266,14 @@ class P3dTxt(P3dBase):
             text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
             parent=parent, fg=fg, font=font, align=align)
         P3dBase.__init__(self, tra_src, tra_tra)
-
-    def set_r(self, val): return self.wdg.set_r(val)
+        self._fwd_mth('set_r', lambda obj: obj.wdg.set_r)
 
 
 class P3dFrame(P3dAbs):
 
-    def __init__(self, frameSize=(-1, 1, -1, 1), frameColor=(1, 1, 1, 1),
-                 pos=(0, 1, 0), parent=None, textureCoord=False):
+    def __init__(self, frame_size=(-1, 1, -1, 1), frame_col=(1, 1, 1, 1),
+                 pos=(0, 0), parent=None, texture_coord=False):
         P3dAbs.__init__(self)
-        self.wdg = DirectFrame(frameSize=frameSize, frameColor=frameColor,
-                               pos=pos, parent=parent)
-        if textureCoord:
-            self.wdg['frameTexture'] = Texture()
+        self.wdg = DirectFrame(frameSize=frame_size, frameColor=frame_col,
+                               pos=(pos[0], 1, pos[1]), parent=parent)
+        if texture_coord: self.wdg['frameTexture'] = Texture()
