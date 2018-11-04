@@ -7,8 +7,7 @@ class EngineGuiBase(GuiColleague):  # no win: EngineGui strictly manages win
 
     @staticmethod
     def init_cls():
-        has_win = EngineGuiBase.eng.lib.has_window()
-        return EngineGui if has_win else EngineGuiBase
+        return EngineGui if EngineGuiBase.eng.lib.has_window else EngineGuiBase
 
     @staticmethod
     def open_browser(url): Browser.open(url)

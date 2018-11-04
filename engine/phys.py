@@ -55,7 +55,7 @@ class PhysMgr(Colleague, PhysFacade):
         self.eng.attach_obs(self.on_frame, 2)
 
     def on_frame(self):
-        self.root.do_physics(self.eng.lib.last_frame_dt(), 10, 1/180.0)
+        self.root.do_physics(self.eng.lib.last_frame_dt, 10, 1/180.0)
         self.__do_collisions()
 
     def ray_test_closest(self, top, bottom):

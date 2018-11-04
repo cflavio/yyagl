@@ -13,7 +13,7 @@ from direct.directnotify.DirectNotify import DirectNotify
 class LibShowBase(ShowBase): pass
 
 
-class LibP3d(DirectObject):
+class LibP3d(DirectObject, object):
 
     task_cont = Task.cont
     runtime = not exists('main.py')
@@ -36,6 +36,7 @@ class LibP3d(DirectObject):
     @staticmethod
     def p3dpath(path): return Filename.fromOsSpecific(path)
 
+    @property
     def last_frame_dt(self): return globalClock.get_dt()
 
     @property
@@ -45,15 +46,12 @@ class LibP3d(DirectObject):
             #  first_child_element not in panda3d.core.TiXmlDocument
             return package.Attribute('version')
             #  attribute not in panda3d.core.TiXmlDocument
-        else:
-            return 'deploy-ng'
+        else: return 'deploy-ng'
 
     @property
     def curr_path(self):
-        if base.appRunner:
-            return base.appRunner.p3dFilename.get_dirname()
-        else:
-            return getcwd()
+        if base.appRunner: return base.appRunner.p3dFilename.get_dirname()
+        else: return getcwd()
 
     def send(self, msg): return messenger.send(msg)
 
@@ -74,32 +72,35 @@ class LibP3d(DirectObject):
         self.__notify = DirectNotify().newCategory('ya2')
         self.__init_win()
         self.__init_fonts(green, red)
+        self.__set_roots()
+        self.accept('aspectRatioChanged', self.on_aspect_ratio_changed)
+
+    def __set_roots(self):
         base.a2dTopQuarter = base.aspect2d.attachNewNode('a2dTopQuarter')
-        base.a2dTopQuarter.setPos(base.a2dLeft / 2, 0, base.a2dTop)
+        base.a2dTopQuarter.set_pos(base.a2dLeft / 2, 0, base.a2dTop)
         base.a2dTopThirdQuarter = \
             base.aspect2d.attachNewNode('a2dTopThirdQuarter')
-        base.a2dTopThirdQuarter.setPos(base.a2dRight / 2, 0, base.a2dTop)
+        base.a2dTopThirdQuarter.set_pos(base.a2dRight / 2, 0, base.a2dTop)
         base.a2dCenterQuarter = base.aspect2d.attachNewNode('a2dCenterQuarter')
-        base.a2dCenterQuarter.setPos(base.a2dLeft / 2, 0, 0)
+        base.a2dCenterQuarter.set_pos(base.a2dLeft / 2, 0, 0)
         base.a2dCenterThirdQuarter = \
             base.aspect2d.attachNewNode('a2dCenterThirdQuarter')
-        base.a2dCenterThirdQuarter.setPos(base.a2dRight / 2, 0, 0)
+        base.a2dCenterThirdQuarter.set_pos(base.a2dRight / 2, 0, 0)
         base.a2dBottomQuarter = base.aspect2d.attachNewNode('a2dBottomQuarter')
-        base.a2dBottomQuarter.setPos(base.a2dLeft / 2, 0, base.a2dBottom)
+        base.a2dBottomQuarter.set_pos(base.a2dLeft / 2, 0, base.a2dBottom)
         base.a2dBottomThirdQuarter = \
             base.aspect2d.attachNewNode('a2dBottomThirdQuarter')
-        base.a2dBottomThirdQuarter.setPos(base.a2dRight / 2, 0, base.a2dBottom)
-        self.accept('aspectRatioChanged', self.on_aspect_ratio_changed)
+        base.a2dBottomThirdQuarter.set_pos(base.a2dRight / 2, 0, base.a2dBottom)
 
     @staticmethod
     def on_aspect_ratio_changed():
-        base.a2dTopQuarter.setPos(base.a2dLeft / 2, 0, base.a2dTop)
-        base.a2dTopThirdQuarter.setPos(base.a2dRight / 2, 0, base.a2dTop)
-        base.a2dBottomQuarter.setPos(base.a2dLeft / 2, 0, base.a2dBottom)
-        base.a2dBottomThirdQuarter.setPos(base.a2dRight / 2, 0, base.a2dBottom)
+        base.a2dTopQuarter.set_pos(base.a2dLeft / 2, 0, base.a2dTop)
+        base.a2dTopThirdQuarter.set_pos(base.a2dRight / 2, 0, base.a2dTop)
+        base.a2dBottomQuarter.set_pos(base.a2dLeft / 2, 0, base.a2dBottom)
+        base.a2dBottomThirdQuarter.set_pos(base.a2dRight / 2, 0, base.a2dBottom)
 
-    @staticmethod
-    def has_window(): return bool(base.win)
+    @property
+    def has_window(self): return bool(base.win)
 
     @property
     def resolution(self):
@@ -141,12 +142,10 @@ class LibP3d(DirectObject):
             props = TextProperties()
             props.set_text_color(col)
             tp_mgr.set_properties(namecol, props)
-        tp_small = TextProperties()
-        tp_small.set_text_scale(.46)
-        tp_mgr.set_properties('small', tp_small)
-        tp_small = TextProperties()
-        tp_small.set_text_scale(.72)
-        tp_mgr.set_properties('smaller', tp_small)
+        for namesize, col in zip(['small', 'smaller'], [.46, .72]):
+            props = TextProperties()
+            props.set_text_scale(.46)
+            tp_mgr.set_properties(namesize, props)
         tp_italic = TextProperties()
         tp_italic.set_slant(.2)
         tp_mgr.set_properties('italic', tp_italic)
@@ -156,8 +155,8 @@ class LibP3d(DirectObject):
         if self.__end_cb: self.__end_cb()
         sys.exit()
 
-    def load_font(self, fpath, outline=True):
-        font = base.loader.loadFont(fpath)
+    def load_font(self, filepath, outline=True):
+        font = base.loader.loadFont(filepath)
         font.set_pixels_per_unit(60)
         font.set_minfilter(Texture.FTLinearMipmapLinear)
         if outline: font.set_outline((0, 0, 0, 1), .8, .2)
@@ -165,51 +164,72 @@ class LibP3d(DirectObject):
 
     def log(self, msg): self.__notify.info(msg)
 
-    @staticmethod
-    def version(): return PandaSystem.get_version_string()
+    @property
+    def version(self): return PandaSystem.get_version_string()
 
+    @property
     def lib_commit(self): return PandaSystem.get_git_commit()
 
+    @property
     def phys_version(self): return get_bullet_version()
 
+    @property
     def user_appdata_dir(self): return Filename.get_user_appdata_directory()
 
+    @property
     def driver_vendor(self): return base.win.get_gsg().get_driver_vendor()
 
+    @property
     def driver_renderer(self): return base.win.get_gsg().get_driver_renderer()
 
+    @property
     def driver_shader_version_major(self):
         return base.win.get_gsg().get_driver_shader_version_major()
 
+    @property
     def driver_shader_version_minor(self):
         return base.win.get_gsg().get_driver_shader_version_minor()
 
+    @property
     def driver_version(self): return base.win.get_gsg().get_driver_version()
 
+    @property
     def driver_version_major(self):
         return base.win.get_gsg().get_driver_version_major()
 
+    @property
     def driver_version_minor(self):
         return base.win.get_gsg().get_driver_version_minor()
 
+    @property
     def fullscreen(self): return base.win.get_properties().get_fullscreen()
 
-    def set_volume(self, vol): return base.sfxManagerList[0].set_volume(vol)
+    @property
+    def volume(self): return base.sfxManagerList[0].get_volume()
 
-    @staticmethod
-    def get_mouse():
+    @volume.setter
+    def volume(self, vol): base.sfxManagerList[0].set_volume(vol)
+
+    @property
+    def mousepos(self):
         mwn = base.mouseWatcherNode
         if not mwn.hasMouse(): return
         return mwn.get_mouse_x(), mwn.get_mouse_y()
 
-    @staticmethod
-    def aspect_ratio(): return base.getAspectRatio()
+    @property
+    def aspect_ratio(self): return base.getAspectRatio()
 
     @staticmethod
-    def set_std_cursor(show):
+    def __set_std_cursor(show):
         props = WindowProperties()
         props.set_cursor_hidden(not show)
         base.win.requestProperties(props)
+
+    @staticmethod
+    def show_std_cursor(): LibP3d.__set_std_cursor(True)
+
+    @staticmethod
+    def hide_std_cursor(): LibP3d.__set_std_cursor(False)
 
     @staticmethod
     def find_geoms(model, name):  # no need to be cached
@@ -219,7 +239,7 @@ class LibP3d(DirectObject):
         return [ng for ng in named_geoms if name in ng.get_name()]
 
     @staticmethod
-    def load_sfx(fpath, loop=False):
-        sfx = loader.loadSfx(fpath)
+    def load_sfx(filepath, loop=False):
+        sfx = loader.loadSfx(filepath)
         sfx.set_loop(loop)
         return sfx

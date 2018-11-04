@@ -67,7 +67,7 @@ class RaceEvent(EventColleague):
         self.yorg_client = yorg_client
         self.menu_cls = menu_cls
         self.ended_cars = []
-        if not (self.eng.server.is_active or self.eng.client.is_active):
+        if not (self.eng.server.is_active or yorg_client):
             self.accept(keys.pause, self.eng.toggle_pause)
         self.last_sent = globalClock.get_frame_time()  # for networking
         self.ingame_menu = None

@@ -13,8 +13,8 @@ class Circle(Frame, GameObject):
                        frame_size=(-size, size, -size, size), parent=parent)
         path = 'yyagl/assets/shaders/'
         shader = load_shader(path + 'filter.vert', path + 'circle.frag')
-        drv_lst = [self.eng.lib.driver_vendor(), self.eng.lib.driver_renderer(),
-                   self.eng.lib.driver_version()]
+        drv_lst = [self.eng.lib.driver_vendor, self.eng.lib.driver_renderer,
+                   self.eng.lib.driver_version]
         is_nvidia = any('nvidia' in drv.lower() for drv in drv_lst)
         if shader and not (name == 'nt' and is_nvidia):
             self.set_shader(shader)

@@ -11,4 +11,4 @@ class EngineAudio(AudioColleague):
         AudioColleague.__init__(self, mediator)
         self.set_volume(vol)
 
-    def set_volume(self, vol): self.eng.lib.set_volume(vol)
+    def set_volume(self, vol): self.eng.lib.volume = vol
