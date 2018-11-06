@@ -99,7 +99,7 @@ class TrackProcesser(GameObject):
 
     def __set_submodels(self):
         print 'loaded track model'
-        for submodel in self.model.get_children():
+        for submodel in self.model.children:
             if not submodel.get_name().startswith(self.props.empty_name):
                 submodel.flatten_light()
         self.model.hide(BitMask32.bit(BitMasks.general))

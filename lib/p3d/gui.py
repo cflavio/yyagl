@@ -111,6 +111,8 @@ class P3dBtn(P3dAbs):
             text_fg=(1, 1, 1, 1), frame_col=(1, 1, 1, 1), text_font=None,
             over_snd=None, extra_args=[], frame_texture=None, img=None,
             tra_src=None, tra_tra=None, text_scale=.8):
+        str2par = {'bottomcenter': base.a2dBottomCenter}
+        if parent in str2par: parent = str2par[parent]
         self.wdg = DirectButton(
             text=text, parent=parent, pos=(pos[0], 1, pos[1]),
             scale=(scale[0], 1, scale[1]), command=cmd,

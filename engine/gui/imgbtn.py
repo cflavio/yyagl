@@ -11,8 +11,8 @@ class ImgBtn(Btn):
                              shader_dirpath + 'imgbtn.frag')
         if shader:
             self.set_shader(shader)
-            self.set_shader_input('col_offset', 0)
-            self.set_shader_input('enable', 1)
+            shader_args = [('col_offset', 0), ('enable', 1)]
+            map(lambda args: self.set_shader_input(*args), shader_args)
         self.set_transparency(True)
 
     def _on_enter(self, pos):  # pos comes from mouse

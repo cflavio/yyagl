@@ -18,7 +18,7 @@ class EngineGfx(GfxColleague):
         self.root = None
         self.part2eff = {}
         if self.mediator.cfg.gui_cfg.shaders and \
-                self.eng.lib.version().startswith('1.10'):
+                self.eng.lib.version.startswith('1.10'):
             # self.set_toon()
             self.set_bloom()
             self.set_blur()
