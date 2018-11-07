@@ -8,8 +8,8 @@ from yyagl.engine.vec import Vec2
 from ...gameobject import GameObject, GuiColleague, EventColleague
 from ...facade import Facade
 from .imgbtn import ImgBtn
-from .widget import FrameWidget, ImgWidget, BtnWidget, EntryWidget, \
-    CheckBtnWidget, SliderWidget, OptionMenuWidget
+from yyagl.lib.p3d.widget import FrameMixin, ImgMixin, BtnMixin, EntryMixin, \
+    CheckBtnMixin, SliderMixin, OptionMenuMixin
 
 
 class PageGui(GuiColleague):
@@ -24,7 +24,7 @@ class PageGui(GuiColleague):
         self.translate()
         self.curr_wdgs = []
         for player in players:
-            self.curr_wdgs += [self.__next_wdg((-.1, 0, -1), player, (-3.6, 1, 1))]
+            self.curr_wdgs += [self.__next_wdg((-.1, -1), player, (-3.6, 1, 1))]
             if self.curr_wdgs[-1]: self.curr_wdgs[-1].on_wdg_enter(None, player)
 
     def build(self, back_btn=True, exit_behav=False):
@@ -60,7 +60,7 @@ class PageGui(GuiColleague):
         start_pos = start if start else self.curr_wdgs[player].get_pos(aspect2d)
         vec = wdg.get_pos(aspect2d) - start_pos
         vec = Vec2(vec.x, vec.z).normalize()
-        return vec.dot(Vec2(direction[0], direction[2]))
+        return vec.dot(Vec2(direction[0], direction[1]))
 
     def __next_weight(self, wdg, direction, player, start=None):
         start_pos = start if start else self.curr_wdgs[player].get_pos(aspect2d)
@@ -68,7 +68,7 @@ class PageGui(GuiColleague):
         wdg_pos = wdg.get_pos(aspect2d)
         # if 'Slider' in wdg.__class__ .__name__:
         #     wdg_pos = LPoint3f(wdg_pos[0], 1, wdg_pos[2])
-        axis = 0 if direction in [(-1, 0, 0), (1, 0, 0)] else 2
+        axis = 0 if direction in [(-1, 0), (1, 0)] else 2
         proj_dist = abs(wdg_pos[axis] - start_pos[axis])
         weights = [.5, .5] if not axis else [.1, .9]
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
@@ -97,13 +97,13 @@ class PageGui(GuiColleague):
     @staticmethod
     def __set_widget(wdg):
         libwdg2wdg = {
-            FrameWidget: [Frame],
-            SliderWidget: [Slider],
-            BtnWidget: [Btn, Label],
-            OptionMenuWidget: [OptionMenu],
-            CheckBtnWidget: [CheckBtn],
-            EntryWidget: [Entry],
-            ImgWidget: [Img, Text]}
+            FrameMixin: [Frame],
+            SliderMixin: [Slider],
+            BtnMixin: [Btn, Label],
+            OptionMenuMixin: [OptionMenu],
+            CheckBtnMixin: [CheckBtn],
+            EntryMixin: [Entry],
+            ImgMixin: [Img, Text]}
         for libwdg, wdgcls in libwdg2wdg.items():
             if any(cls in getmro(wdg.__class__) for cls in wdgcls):
                 par_cls = libwdg
@@ -138,10 +138,10 @@ class PageGui(GuiColleague):
         for player in players:
             nav = self.menu_args.nav.navinfo_lst[player]
             evts = [
-                (nav.left, self.on_arrow, [(-1, 0, 0), player]),
-                (nav.right, self.on_arrow, [(1, 0, 0), player]),
-                (nav.up, self.on_arrow, [(0, 0, 1), player]),
-                (nav.down, self.on_arrow, [(0, 0, -1), player]),
+                (nav.left, self.on_arrow, [(-1, 0), player]),
+                (nav.right, self.on_arrow, [(1, 0), player]),
+                (nav.up, self.on_arrow, [(0, 1), player]),
+                (nav.down, self.on_arrow, [(0, -1), player]),
                 (nav.fire, self.on_enter, [player])]
             map(lambda args: self.mediator.event.accept(*args), evts)
 

@@ -2,7 +2,7 @@ from direct.gui.DirectGuiGlobals import NORMAL, DISABLED
 from panda3d.core import LVecBase4f
 
 
-class Widget(object):
+class WidgetMixin(object):
 
     highlight_color_offset = [
         LVecBase4f(0, 0, .4, 0),
@@ -22,12 +22,12 @@ class Widget(object):
     def disable(self): pass
 
 
-class ImgWidget(Widget):
+class ImgMixin(WidgetMixin):
 
     def init(self, wdg): pass
 
 
-class FrameWidget(Widget):
+class FrameMixin(WidgetMixin):
 
     def init(self, wdg):
         self.curr_offset = LVecBase4f(0, 0, 0, 0)
@@ -42,32 +42,30 @@ class FrameWidget(Widget):
         if hasattr(self, 'set_alpha_scale'): self.set_alpha_scale(.25)
 
     def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
-        nodepath = self.get_np()
-        self.curr_offset += Widget.highlight_color_offset[player]
-        nodepath['frameColor'] = LVecBase4f(self.start_frame_color) + self.curr_offset
+        self.curr_offset += WidgetMixin.highlight_color_offset[player]
+        self.get_np()['frameColor'] = LVecBase4f(self.start_frame_color) + self.curr_offset
 
     def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
-        self.curr_offset -= Widget.highlight_color_offset[player]
+        self.curr_offset -= WidgetMixin.highlight_color_offset[player]
         self.get_np()['frameColor'] = LVecBase4f(self.start_frame_color) + self.curr_offset
 
 
-class BtnWidget(FrameWidget):
+class BtnMixin(FrameMixin):
 
     def init(self, wdg):
-        FrameWidget.init(self, wdg)
+        FrameMixin.init(self, wdg)
         wdg = wdg.get_np()
         self.start_txt_color = wdg.component('text0').textNode.get_text_color()
 
     def on_arrow(self, direction): pass
 
     def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
-        FrameWidget.on_wdg_enter(self, pos, player)
-        nodepath = self.get_np()
-        nodepath['text_fg'] = self.start_txt_color + self.curr_offset
-        nodepath.set_shader_input('col_offset', self.curr_offset)
+        FrameMixin.on_wdg_enter(self, pos, player)
+        self.get_np()['text_fg'] = self.start_txt_color + self.curr_offset
+        self.get_np().set_shader_input('col_offset', self.curr_offset)
 
     def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
-        FrameWidget.on_wdg_exit(self, pos, player)
+        FrameMixin.on_wdg_exit(self, pos, player)
         self.get_np()['text_fg'] = self.start_txt_color
         self.get_np()['frameColor'] = self.start_frame_color
         self.get_np().set_shader_input('col_offset', self.curr_offset)
@@ -78,17 +76,17 @@ class BtnWidget(FrameWidget):
             self['command'](*self['extraArgs'] + lst_arg)
 
 
-class EntryWidget(FrameWidget):
+class EntryMixin(FrameMixin):
 
     def on_arrow(self, direction): pass
 
     def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
-        FrameWidget.on_wdg_enter(self, pos, player)
+        FrameMixin.on_wdg_enter(self, pos, player)
         #self.get_np()['focus'] = 1  # it focuses it if mouse over
         #self.get_np().setFocus()
 
     def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
-        FrameWidget.on_wdg_exit(self, pos, player)
+        FrameMixin.on_wdg_exit(self, pos, player)
         #self.get_np()['focus'] = 0
         #self.get_np().setFocus()
 
@@ -97,40 +95,41 @@ class EntryWidget(FrameWidget):
             self['command'](*self['extraArgs'])
 
 
-class CheckBtnWidget(BtnWidget):
+class CheckBtnMixin(BtnMixin):
 
     def on_enter(self, player=0):
         self['indicatorValue'] = not self['indicatorValue']
-        BtnWidget.on_enter(self, player)
+        BtnMixin.on_enter(self, player)
 
 
-class SliderWidget(FrameWidget):
+class SliderMixin(FrameMixin):
 
     def on_arrow(self, direction):
-        if direction in [(-1, 0, 0), (1, 0, 0)]:
-            self.get_np()['value'] += -.1 if direction == (-1, 0, 0) else .1
+        if direction in [(-1, 0), (1, 0)]:
+            n_p = self.get_np()
+            delta = (n_p['range'][1] - n_p['range'][0]) / 10.0
+            n_p['value'] += -delta if direction == (-1, 0) else delta
             return True
 
     def on_enter(self, player=0): pass
 
 
-class OptionMenuWidget(BtnWidget):
+class OptionMenuMixin(BtnMixin):
 
     def on_arrow(self, direction):
-        is_hor = direction in [(-1, 0, 0), (1, 0, 0)]
+        is_hor = direction in [(-1, 0), (1, 0)]
         nodepath = self.get_np()
-        if not is_hor and not nodepath.popupMenu.is_hidden():
-            old_idx = nodepath.highlightedIndex
-            dir2offset = {(0, 0, -1): 1, (0, 0, 1): -1}
-            idx = nodepath.highlightedIndex + dir2offset[direction]
-            idx = min(len(nodepath['items']) - 1, max(0, idx))
-            if old_idx == idx: return True
-            fcol = nodepath.component('item%s' % idx)['frameColor']
-            old_cmp = nodepath.component('item%s' % old_idx)
-            nodepath._unhighlightItem(old_cmp, fcol)
-            curr_cmp = nodepath.component('item%s' % idx)
-            nodepath._highlightItem(curr_cmp, idx)
-            return True
+        if is_hor or nodepath.popupMenu.is_hidden(): return
+        old_idx = nodepath.highlightedIndex
+        dir2offset = {(0, -1): 1, (0, 1): -1}
+        idx = nodepath.highlightedIndex + dir2offset[direction]
+        idx = min(len(nodepath['items']) - 1, max(0, idx))
+        if old_idx == idx: return True
+        fcol = nodepath.component('item%s' % idx)['frameColor']
+        old_cmp = nodepath.component('item%s' % old_idx)
+        nodepath._unhighlightItem(old_cmp, fcol)
+        nodepath._highlightItem(nodepath.component('item%s' % idx), idx)
+        return True
 
     def on_enter(self, player=0):
         nodepath = self.get_np()
@@ -148,4 +147,4 @@ class OptionMenuWidget(BtnWidget):
             curr_name = 'item%s' % nodepath.selectedIndex
             nodepath._unhighlightItem(nodepath.component(curr_name), fcol)
             return True
-        BtnWidget.on_enter(self)
+        BtnMixin.on_enter(self)

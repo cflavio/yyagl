@@ -21,7 +21,6 @@ class EngineGfx(GfxColleague):
                 self.eng.lib.version.startswith('1.10'):
             # self.set_toon()
             self.set_bloom()
-            self.set_blur()
 
     def init(self):
         self.root = self.gfx_mgr.root.attach_node('world')
@@ -34,8 +33,6 @@ class EngineGfx(GfxColleague):
     def set_toon(self): self.gfx_mgr.set_toon()
 
     def set_bloom(self): self.gfx_mgr.set_bloom()
-
-    def set_blur(self): self.gfx_mgr.set_blur()
 
     def print_stats(self): self.gfx_mgr.print_stats()
 

@@ -17,6 +17,7 @@ class MouseCursor(GameObject, MouseCursorFacade):
     def __init__(self, filepath, scale, hotspot):
         GameObject.__init__(self)
         MouseCursorFacade.__init__(self)
+        if not filepath: return
         self.eng.lib.hide_std_cursor()
         self.cursor_img = Img(filepath, scale=scale, foreground=True)
         self.hotspot_dx = scale[0] * (1 - 2 * hotspot[0])
