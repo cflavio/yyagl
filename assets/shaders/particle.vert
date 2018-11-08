@@ -14,5 +14,6 @@ void main() {
         float t = time - start_particle_time.x;
         pos = init_vel * t + gravity * t * t;
     }
+    gl_PointSize = 10;
     gl_Position = p3d_ModelViewProjectionMatrix * vec4(pos, 1.0);
 }

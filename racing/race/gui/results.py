@@ -63,12 +63,11 @@ class Results(GameObject):
         menu_args= self.rprops.season_props.gameprops.menu_args
         self._buttons += [
             ImgBtn(
-                scale=.078,
-                pos=(.02 + i*.18, 1, -.79), frameColor=(0, 0, 0, 0),
+                scale=.078, pos=(.02 + i*.18, 1, -.79), frame_col=(0, 0, 0, 0),
                 image=menu_args.social_imgs_dpath % site[0],
-                command=self.eng.open_browser, extraArgs=[site[1]],
-                rolloverSound=menu_args.rollover_sfx,
-                clickSound=menu_args.click_sfx)
+                cmd=self.eng.open_browser, extra_args=[site[1]],
+                over_snd=menu_args.rollover_sfx,
+                click_snd=menu_args.click_sfx)
             for i, site in enumerate(sites)]
 
         def step():
@@ -78,7 +77,7 @@ class Results(GameObject):
             self.destroy()
             GameObject.destroy(self)
         cont_btn = Btn(
-            text=_('Continue'), pos=(0, 1, -.6), command=step,
+            text=_('Continue'), pos=(0, 1, -.6), cmd=step,
             **self.rprops.season_props.gameprops.menu_args.btn_args)
         self._buttons += [cont_btn]
 
