@@ -5,10 +5,10 @@ LibParticle = P3dParticle
 
 class Particle(GameObject):
 
-    def __init__(self, parent, pos, hpr, color, tot_time):
+    def __init__(self, parent, pos, hpr, texture, tot_time, npart):
         if not self.eng.lib.version.startswith('1.10'): return
         GameObject.__init__(self)
-        self.__part = LibParticle(parent, pos, hpr, color, tot_time)
+        self.__part = LibParticle(parent, pos, hpr, texture, tot_time, npart)
         self.__destroy_tsk = self.eng.do_later(tot_time, self.destroy)
 
     def destroy(self):

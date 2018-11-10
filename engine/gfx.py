@@ -37,5 +37,5 @@ class EngineGfx(GfxColleague):
     def print_stats(self): self.gfx_mgr.print_stats()
 
     @staticmethod
-    def particle(parent, pos, hpr, color, tot_time):
-        Particle(parent, pos, hpr, color, tot_time)
+    def particle(parent, pos, hpr, texture, tot_time, npart):
+        Particle(parent, pos, hpr, texture, tot_time, npart)

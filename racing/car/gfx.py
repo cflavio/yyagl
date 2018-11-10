@@ -113,7 +113,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
                 self.crash_cnt < 2:
             return False
         pos = self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75)
-        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), (1, .4, .1, 1), .8)
+        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', .8, 10000)
         self.apply_damage()
         level = 0
         curr_chassis = self.nodepath.children[0]
@@ -187,9 +187,9 @@ class SkidmarkMgr(GameObject):
             whl_pos_r = wheels[3].get_chassis_connection_point_cs() + \
                 (0, -whl_radius, -whl_radius + .05)
             self.eng.particle(self.car.gfx.nodepath, whl_pos_l, (0, 60, 0),
-                              (.5, .5, .5, 1), 1.2)
+                              'dust', 1.2, 100)
             self.eng.particle(self.car.gfx.nodepath, whl_pos_r, (0, 60, 0),
-                              (.5, .5, .5, 1), 1.2)
+                              'dust', 1.2, 100)
 
     def on_no_skidmarking(self):
         self.l_skidmark = self.r_skidmark = None
