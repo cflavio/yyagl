@@ -193,9 +193,62 @@ class CarPanel(GameObject):
             elif self.player_idx == 1: parent_bl = base.aspect2d
             elif self.player_idx == 2: parent_bl = base.a2dBottomLeft
             else: parent_bl = base.a2dBottomCenter
+        if ncars == 1: parent_t = base.a2dTopCenter
+        elif ncars == 2:
+            if mediator.player_car_idx == 0: parent_t = base.a2dTopQuarter
+            else: parent_t = base.a2dTopThirdQuarter
+        elif ncars == 3:
+            if mediator.player_car_idx == 0: parent_t = base.a2dTop
+            elif mediator.player_car_idx == 1: parent_t = base.a2dCenterQuarter
+            else: parent_t = base.a2dCenterThirdQuarter
+        elif ncars == 4:
+            if mediator.player_car_idx == 0: parent_t = base.a2dTopQuarter
+            elif mediator.player_car_idx == 1: parent_t = base.a2dTopThirdQuarter
+            elif mediator.player_car_idx == 2: parent_t = base.a2dCenterQuarter
+            else: parent_t = base.a2dCenterThirdQuarter
+        if ncars == 1: parent_b = base.a2dBottomCenter
+        elif ncars == 2:
+            if mediator.player_car_idx == 0: parent_b = base.a2dBottomQuarter
+            else: parent_b = base.a2dBottomThirdQuarter
+        elif ncars == 3:
+            if mediator.player_car_idx == 0: parent_b = base.aspect2d
+            elif mediator.player_car_idx == 1: parent_b = base.a2dBottomQuarter
+            else: parent_b = base.a2dBottomThirdQuarter
+        elif ncars == 4:
+            if mediator.player_car_idx == 0: parent_b = base.a2dCenterQuarter
+            elif mediator.player_car_idx == 1: parent_b = base.a2dCenterThirdQuarter
+            elif mediator.player_car_idx == 2: parent_b = base.a2dBottomQuarter
+            else: parent_b = base.a2dBottomThirdQuarter
         pars = {'scale': .065, 'parent': parent_tr,
                 'fg': menu_args.text_active, 'align': TextNode.A_left,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
+        self.glass_tl = OnscreenImage(
+            'assets/images/gui/topleft.txo',
+            scale=(.23, 1, .24), parent=parent_tl, pos=(.22, 1, -.23))
+        self.glass_tl.set_transparency(True)
+        self.glass_tr = OnscreenImage(
+            'assets/images/gui/topright.txo',
+            scale=(.36, 1, .36), parent=parent_tr, pos=(-.35, 1, -.35))
+        self.glass_tr.set_transparency(True)
+        self.glass_t = OnscreenImage(
+            'assets/images/gui/top.txo',
+            scale=(.24, 1, .22), parent=parent_t, pos=(0, 1, -.21))
+        self.glass_t.set_transparency(True)
+        self.glass_bl = OnscreenImage(
+            'assets/images/gui/bottomleft.txo',
+            scale=(.36, 1, .16), parent=parent_bl, pos=(.35, 1, .15))
+        self.glass_bl.set_transparency(True)
+        self.glass_br = OnscreenImage(
+            'assets/images/gui/bottomright.txo',
+            scale=(.26, 1, .26), parent=base.a2dBottomRight, pos=(-.25, 1, .25))
+        self.glass_br.set_transparency(True)
+        self.glass_b = OnscreenImage(
+            'assets/images/gui/bottom.txo',
+            scale=(1.02, 1, .26), parent=parent_b, pos=(0, 1, .25))
+        self.glass_b.set_transparency(True)
+        self.glass_tl.hide()
+        self.glass_t.hide()
+        self.glass_b.hide()
         self.speed_txt = OnscreenText(pos=(-.18, -.1), **pars)
         self.speed_txt['align'] = TextNode.A_center
         self.speed_c = Circle(
@@ -274,6 +327,7 @@ class CarPanel(GameObject):
         self.wait_lab.destroy()
 
     def set_weapon(self, wpn):
+        self.glass_tl.show()
         self.weapon_lab.show()
         ncars = len(self.race_props.season_props.player_car_names)
         if ncars == 1:
@@ -296,10 +350,13 @@ class CarPanel(GameObject):
         self.weapon_img.set_transparency(True)
 
     def unset_weapon(self):
+        self.glass_tl.hide()
         self.weapon_lab.hide()
         self.weapon_img.destroy()
 
-    def show_forward(self): self.forward_img.show()
+    def show_forward(self):
+        self.glass_t.show()
+        self.forward_img.show()
 
     def set_forward_angle(self, angle):
         curr_angle = self.forward_img.get_r()
@@ -311,7 +368,9 @@ class CarPanel(GameObject):
             tgt_val = curr_angle + curr_incr * sign
         self.forward_img.set_r(tgt_val)
 
-    def hide_forward(self): self.forward_img.hide()
+    def hide_forward(self):
+        self.glass_t.hide()
+        self.forward_img.hide()
 
     def apply_damage(self, reset=False):
         col = self.race_props.season_props.gameprops.menu_args.text_normal
@@ -330,7 +389,9 @@ class CarPanel(GameObject):
             self.speed_txt, self.speed_c, self.time_txt, self.lap_txt,
             self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
             self.best_lab, self.damages_img, self.damages_lab,
-            self.ranking_txt, self.ranking_lab, self.weapon_lab]
+            self.ranking_txt, self.ranking_lab, self.weapon_lab,
+            self.glass_tl, self.glass_tr, self.glass_t,
+            self.glass_bl, self.glass_br, self.glass_b]
         map(lambda wdg: wdg.hide(), labels)
         if self.weapon_img and not self.weapon_img.is_empty():
             self.weapon_img.hide()
@@ -341,7 +402,9 @@ class CarPanel(GameObject):
             self.speed_txt, self.speed_c, self.time_txt, self.lap_txt,
             self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
             self.best_lab, self.damages_img, self.damages_lab,
-            self.ranking_txt, self.ranking_lab, self.weapon_lab]
+            self.ranking_txt, self.ranking_lab, self.weapon_lab,
+            self.glass_tl, self.glass_tr, self.glass_t,
+            self.glass_bl, self.glass_br, self.glass_b]
         map(lambda wdg: wdg.destroy(), labels)
         if self.weapon_img and not self.weapon_img.is_empty():
             self.weapon_img.destroy()
@@ -443,14 +506,17 @@ class CarPlayerGui(CarGui):
 
     def on_wrong_way(self, way_str):
         if way_str:
+            self.panel.glass_b.show()
             self.way_txt.setText(way_str)
             self.way_img.show()
         elif not self.mediator.logic.is_moving:
+            self.panel.glass_b.show()
             keys = self.race_props.keys.players_keys[self.mediator.player_car_idx]
             txt = _('press %s to respawn') % self.eng.event.key2desc(keys.respawn)
             self.way_txt.setText(txt)
             self.way_img.hide()
         else:
+            self.panel.glass_b.hide()
             self.way_txt.setText('')
             self.way_img.hide()
 
