@@ -150,7 +150,7 @@ class CarPanel(GameObject):
         self.player_idx = player_idx
         self.ncars = ncars
         sprops = self.race_props.season_props
-        menu_args = sprops.gameprops.menu_args
+        menu_props = sprops.gameprops.menu_props
         if ncars == 1:
             parent_tr = base.a2dTopRight
         elif ncars == 2:
@@ -220,7 +220,7 @@ class CarPanel(GameObject):
             elif mediator.player_car_idx == 2: parent_b = base.a2dBottomQuarter
             else: parent_b = base.a2dBottomThirdQuarter
         pars = {'scale': .065, 'parent': parent_tr,
-                'fg': menu_args.text_active, 'align': TextNode.A_left,
+                'fg': menu_props.text_active_col, 'align': TextNode.A_left,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
         self.glass_tl = OnscreenImage(
             'assets/images/gui/topleft.txo',
@@ -263,10 +263,10 @@ class CarPanel(GameObject):
             'assets/images/gui/car_icon.txo',
             scale=(.12, 1, .12), parent=parent_bl, pos=(.46, 1, .12))
         self.damages_img.set_transparency(True)
-        self.damages_img.set_color_scale(menu_args.text_normal)
+        self.damages_img.set_color_scale(menu_props.text_normal_col)
         self.damages_img.set_r(90)
         pars = {'scale': .05, 'parent': pars['parent'],
-                'fg': menu_args.text_normal,
+                'fg': menu_props.text_normal_col,
                 'align': TextNode.A_right, 'font': pars['font']}
         self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
         self.lap_lab = OnscreenText(
@@ -278,7 +278,7 @@ class CarPanel(GameObject):
         self.damages_lab.reparent_to(parent_bl)
         self.weapon_lab = OnscreenText(
             _('weapon'), pos=(.18, -.08), scale=.05, parent=parent_tl,
-            fg=menu_args.text_normal, font=self.eng.font_mgr.load_font(sprops.font))
+            fg=menu_props.text_normal_col, font=self.eng.font_mgr.load_font(sprops.font))
         self.weapon_img = None
         if ncars == 1: parent = base.a2dTopCenter
         elif ncars == 2:
@@ -316,9 +316,9 @@ class CarPanel(GameObject):
             elif self.player_idx == 1: parent = base.a2dQuarterThirdQuarter
             elif self.player_idx == 2: parent = base.a2dTirdQuarterQuarter
             else: parent = base.a2dThirdQuarterThirdQuarter
-        menu_args = self.race_props.season_props.gameprops.menu_args
+        menu_props = self.race_props.season_props.gameprops.menu_props
         pars = {'scale': .065, 'parent': parent,
-                'fg': menu_args.text_normal,
+                'fg': menu_props.text_normal_col,
                 'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
         self.wait_lab = OnscreenText(_('waiting for the other players'),
                                      pos=(0, 0), **pars)
@@ -373,7 +373,7 @@ class CarPanel(GameObject):
         self.forward_img.hide()
 
     def apply_damage(self, reset=False):
-        col = self.race_props.season_props.gameprops.menu_args.text_normal
+        col = self.race_props.season_props.gameprops.menu_props.text_normal_col
         if reset:
             self.damages_img.set_color_scale(col)
         else:
@@ -473,7 +473,7 @@ class CarPlayerGui(CarGui):
             else: parent = base.a2dBottomThirdQuarter
         self.way_txt = OnscreenText(
             '', pos=(0, .1), scale=.1,
-            fg=self.race_props.season_props.gameprops.menu_args.text_err,
+            fg=self.race_props.season_props.gameprops.menu_props.text_err_col,
             parent=parent,
             font=self.eng.font_mgr.load_font(self.race_props.season_props.font))
         self.way_img = OnscreenImage(
@@ -537,8 +537,8 @@ class CarNetworkGui(CarGui):
                 name = drv.dprops.info.name
                 break
         sprops = self.race_props.season_props
-        menu_args = sprops.gameprops.menu_args
-        pars = {'scale': .04, 'fg': menu_args.text_normal,
+        menu_props = sprops.gameprops.menu_props
+        pars = {'scale': .04, 'fg': menu_props.text_normal_col,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
         if '@' in name: name = name[:name.index('@')]
         self.name_txt = OnscreenText(name, **pars)

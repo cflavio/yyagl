@@ -14,10 +14,10 @@ from yyagl.lib.p3d.widget import FrameMixin, ImgMixin, BtnMixin, EntryMixin, \
 
 class PageGui(GuiColleague):
 
-    def __init__(self, mediator, menu_args, players=[0]):
+    def __init__(self, mediator, menu_props, players=[0]):
         GuiColleague.__init__(self, mediator)
         self.enable_tsk = None
-        self.menu_args = menu_args
+        self.menu_props = menu_props
         self.players = players
         self.widgets = []
         self.build()
@@ -136,7 +136,7 @@ class PageGui(GuiColleague):
 
     def enable_navigation_aux(self, players):
         for player in players:
-            nav = self.menu_args.nav.navinfo_lst[player]
+            nav = self.menu_props.nav.navinfo_lst[player]
             evts = [
                 (nav.left, self.on_arrow, [(-1, 0), player]),
                 (nav.right, self.on_arrow, [(1, 0), player]),
@@ -150,7 +150,7 @@ class PageGui(GuiColleague):
             self.eng.rm_do_later(self.enable_tsk)
             self.enable_tsk = None
         for player in players:
-            nav = self.menu_args.nav.navinfo_lst[player]
+            nav = self.menu_props.nav.navinfo_lst[player]
             evts = [nav.left, nav.right, nav.up, nav.down, nav.fire]
             map(self.mediator.event.ignore, evts)
 
@@ -190,7 +190,7 @@ class PageGui(GuiColleague):
         callback = self._on_quit if exit_behav else self._on_back
         self.widgets += [Btn(
             text='', pos=(-.2, -.92), cmd=callback,
-            tra_src=tra_src, tra_tra=tra_tra, **self.menu_args.btn_args)]
+            tra_src=tra_src, tra_tra=tra_tra, **self.menu_props.btn_args)]
 
     def _on_back(self): self.notify('on_back', self.__class__.__name__)
 
@@ -208,7 +208,7 @@ class PageGui(GuiColleague):
 
     def destroy(self):
         self.transition_exit()
-        self.menu_args = None
+        self.menu_props = None
 
 
 class PageEvent(EventColleague):
@@ -238,10 +238,10 @@ class Page(GameObject, PageFacade):
     gui_cls = PageGui
     event_cls = PageEvent
 
-    def __init__(self, menu_args, players=[0]):
+    def __init__(self, menu_props, players=[0]):
         # refactor: pages e.g. yyagl/engine/gui/mainpage.py don't call this
         PageFacade.__init__(self)
-        self.menu_args = menu_args
+        self.menu_props = menu_props
         self.players = players
         GameObject.__init__(self, self.init_lst)
         self.gui.attach(self.on_hide)
@@ -252,7 +252,7 @@ class Page(GameObject, PageFacade):
     def init_lst(self):
         return [
             [('event', self.event_cls, [self])],
-            [('gui', self.gui_cls, [self, self.menu_args, self.players])]]
+            [('gui', self.gui_cls, [self, self.menu_props, self.players])]]
 
     def on_hide(self): self.event.ignoreAll()
 

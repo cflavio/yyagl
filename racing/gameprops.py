@@ -1,11 +1,11 @@
 class GameProps(object):
 
     def __init__(
-            self, menu_args, cars_names, drivers_info, season_tracks,
+            self, menu_props, cars_names, drivers_info, season_tracks,
             tracks_tr, track_img, player_name, drivers_img, cars_img, car_path,
             phys_path, model_name, damage_paths, wheel_gfx_names, xmpp_debug,
             social_sites):
-        self.menu_args = menu_args
+        self.menu_props = menu_props
         self.cars_names = cars_names
         self.drivers_info = drivers_info
         self.season_tracks = season_tracks

@@ -13,7 +13,7 @@ class MainPageGui(PageGui):
 
     def __build_social(self):
         sites = self.props.gameprops.social_sites
-        menu_props = self.props.gameprops.menu_args
+        menu_props = self.props.gameprops.menu_props
         left = (len(sites) - 1) / 2.0 * .15
         buttons = [
             ImgBtn(
@@ -21,7 +21,7 @@ class MainPageGui(PageGui):
                 scale=(.06, .06),
                 pos=(-left + i*.15, .1),
                 frame_col=(1, 1, 1, 1),
-                frame_texture=menu_props.social_imgs_dpath % site[0],
+                frame_texture=menu_props.social_imgs_dirpath % site[0],
                 cmd=self.eng.open_browser,
                 extra_args=[site[1]],
                 **menu_props.imgbtn_args)
@@ -32,7 +32,7 @@ class MainPageGui(PageGui):
         txt = Text(
             _('version: ') + self.eng.version, parent='bottomleft',
             pos=(.02, .02), scale=.04, fg=(.8, .8, .8, 1), align='left',
-            font=self.props.gameprops.menu_args.font)
+            font=self.props.gameprops.menu_props.font)
         self.add_widgets([txt])
 
 

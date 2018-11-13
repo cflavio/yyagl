@@ -16,9 +16,9 @@ class Results(GameObject):
         self.__buttons = []
         self.drivers = self.result_frm = None
         self.rprops = rprops
-        self.font = rprops.season_props.gameprops.menu_args.font
-        self.text_fg = rprops.season_props.gameprops.menu_args.text_active
-        self.text_bg = rprops.season_props.gameprops.menu_args.text_normal
+        self.font = rprops.season_props.gameprops.menu_props.font
+        self.text_fg = rprops.season_props.gameprops.menu_props.text_active_col
+        self.text_bg = rprops.season_props.gameprops.menu_props.text_normal_col
 
     def show(self, race_ranking, lap_times, drivers):
         track = self.rprops.track_path
@@ -26,9 +26,9 @@ class Results(GameObject):
         self.result_frm = DirectFrame(
             frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
         laps = len(lap_times)
-        text_bg = self.rprops.season_props.gameprops.menu_args.text_normal
+        text_bg = self.rprops.season_props.gameprops.menu_props.text_normal_col
         pars = {'scale': .1, 'fg': text_bg,
-                'font': self.rprops.season_props.gameprops.menu_args.font}
+                'font': self.rprops.season_props.gameprops.menu_props.font}
         self.__res_txts = [
             OnscreenText(str(round(lap_times[i], 2)),
                          pos=(0, .52 - .2 * (i + 1)), **pars)
@@ -60,14 +60,14 @@ class Results(GameObject):
         tumblr_url = self.rprops.share_urls[3]
         sites = [('facebook', facebook_url), ('twitter', twitter_url),
                  ('google_plus', plus_url), ('tumblr', tumblr_url)]
-        menu_args= self.rprops.season_props.gameprops.menu_args
+        menu_props= self.rprops.season_props.gameprops.menu_props
         self._buttons += [
             ImgBtn(
                 scale=.078, pos=(.02 + i*.18, 1, -.79), frame_col=(0, 0, 0, 0),
-                image=menu_args.social_imgs_dpath % site[0],
+                image=menu_props.social_imgs_dirpath % site[0],
                 cmd=self.eng.open_browser, extra_args=[site[1]],
-                over_snd=menu_args.rollover_sfx,
-                click_snd=menu_args.click_sfx)
+                over_snd=menu_props.over_sfx,
+                click_snd=menu_props.click_sfx)
             for i, site in enumerate(sites)]
 
         def step():
@@ -78,7 +78,7 @@ class Results(GameObject):
             GameObject.destroy(self)
         cont_btn = Btn(
             text=_('Continue'), pos=(0, 1, -.6), cmd=step,
-            **self.rprops.season_props.gameprops.menu_args.btn_args)
+            **self.rprops.season_props.gameprops.menu_props.btn_args)
         self._buttons += [cont_btn]
 
     def destroy(self):

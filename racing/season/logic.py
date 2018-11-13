@@ -10,8 +10,8 @@ class SeasonLogic(LogicColleague):
         LogicColleague.__init__(self, mediator)
         self.props = s_p = season_props
         self.ranking = Ranking(
-            s_p.car_names, s_p.gameprops.menu_args.background_img, s_p.font,
-            s_p.gameprops.menu_args.text_normal)
+            s_p.car_names, s_p.gameprops.menu_props.background_img_path, s_p.font,
+            s_p.gameprops.menu_props.text_normal_col)
         self.tuning = Tuning(s_p)
         self.race = None
         self.drivers = s_p.drivers

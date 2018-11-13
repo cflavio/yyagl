@@ -13,14 +13,14 @@ class LoadingPageGui(PageGui):
         self.drivers = drivers
         self.ranking = ranking
         self.tuning = tuning
-        PageGui.__init__(self, mediator, menu.gui.menu_args)
+        PageGui.__init__(self, mediator, menu.gui.menu_props)
 
     def build(self, back_btn=True):
         self.eng.init_gfx()
-        self.font = self.mediator.menu.gui.menu_args.font
-        self.text_fg = self.mediator.menu.gui.menu_args.text_active
-        self.text_bg = self.mediator.menu.gui.menu_args.text_normal
-        self.text_err = self.mediator.menu.gui.menu_args.text_err
+        self.font = self.mediator.menu.gui.menu_props.font
+        self.text_fg = self.mediator.menu.gui.menu_props.text_active_col
+        self.text_bg = self.mediator.menu.gui.menu_props.text_normal_col
+        self.text_err_col = self.mediator.menu.gui.menu_props.text_err_col
         self.load_txt = Text(
             _('LOADING...'), scale=.2, pos=(0, .78), font=self.font,
             fg=(.75, .75, .75, 1), wordwrap=12)

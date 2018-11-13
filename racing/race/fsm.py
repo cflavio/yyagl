@@ -8,7 +8,7 @@ class RaceFsm(FsmColleague):
     def __init__(self, mediator, shaders):
         self.countdown = None
         self.shaders = shaders
-        self.menu_args = None
+        self.menu_props = None
         self.countdown_sfx = None
         FsmColleague.__init__(self, mediator)
         self.defaultTransitions = {
@@ -18,7 +18,7 @@ class RaceFsm(FsmColleague):
 
     def enterLoading(self, rprops, track_name_transl, drivers, ranking, tuning):
         self.eng.log_mgr.log('entering Loading state')
-        self.menu_args = rprops.season_props.gameprops.menu_args
+        self.menu_props = rprops.season_props.gameprops.menu_props
         self.countdown_sfx = rprops.season_props.countdown_sfx
         self.mediator.gui.loading.enter_loading(rprops, track_name_transl, drivers,
                                            ranking, tuning)
@@ -55,7 +55,7 @@ class RaceFsm(FsmColleague):
         self.aux_launch_tsk = self.eng.do_later(.5, self.start_countdown)
 
     def start_countdown(self):
-        self.countdown = Countdown(self.countdown_sfx, self.menu_args.font,
+        self.countdown = Countdown(self.countdown_sfx, self.menu_props.font,
                                    self.sprops.countdown_seconds)
         self.lmb_call = lambda: self.demand('Play')
         self.countdown.attach(self.lmb_call, rename='on_start_race')

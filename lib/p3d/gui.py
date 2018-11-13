@@ -107,7 +107,7 @@ class P3dBtn(P3dAbs):
 
     def __init__(
             self, text='', parent=None, pos=(0, 0), scale=(1, 1),
-            cmd=None, frameSize=(-1, 1, -1, 1), click_snd=None,
+            cmd=None, frame_size=(-1, 1, -1, 1), click_snd=None,
             text_fg=(1, 1, 1, 1), frame_col=(1, 1, 1, 1), text_font=None,
             over_snd=None, extra_args=[], frame_texture=None, img=None,
             tra_src=None, tra_tra=None, text_scale=.8):
@@ -116,7 +116,7 @@ class P3dBtn(P3dAbs):
         self.wdg = DirectButton(
             text=text, parent=parent, pos=(pos[0], 1, pos[1]),
             scale=(scale[0], 1, scale[1]), command=cmd,
-            frameSize=frameSize, clickSound=click_snd, text_fg=text_fg,
+            frameSize=frame_size, clickSound=click_snd, text_fg=text_fg,
             frameColor=frame_col, text_font=text_font, rolloverSound=over_snd,
             extraArgs=extra_args, frameTexture=frame_texture, image=img,
             text_scale=1.0)

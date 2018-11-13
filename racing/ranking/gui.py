@@ -18,10 +18,10 @@ class RankingPageGui(PageGui):
 
     def build(self, back_btn=True):
         self.eng.init_gfx()
-        self.font = self.mediator.menu.gui.menu_args.font
-        self.text_fg = self.mediator.menu.gui.menu_args.text_active
-        self.text_bg = self.mediator.menu.gui.menu_args.text_normal
-        self.text_err = self.mediator.menu.gui.menu_args.text_err
+        self.font = self.mediator.menu.gui.menu_props.font
+        self.text_fg = self.mediator.menu.gui.menu_props.text_active_col
+        self.text_bg = self.mediator.menu.gui.menu_props.text_normal_col
+        self.text_err_col = self.mediator.menu.gui.menu_props.text_err_col
         items = self.ranking.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = Text(_('Ranking'), scale=.1, pos=(0, .76),
@@ -52,7 +52,7 @@ class RankingPageGui(PageGui):
         cont_btn = Btn(
             text=_('Continue'), pos=(0, 1, -.8), command=cont_btn_cmd,
             extraArgs=cont_btn_ea,
-            **self.rprops.season_props.gameprops.menu_args.btn_args)
+            **self.rprops.season_props.gameprops.menu_props.btn_args)
         self.add_widgets([cont_btn])
         PageGui.build(self, False)
 
@@ -84,9 +84,9 @@ class RankingMenuGui(GuiColleague):
 
     def __init__(self, mediator, rprops, sprops, ranking):
         GuiColleague.__init__(self, mediator)
-        menu_args = sprops.gameprops.menu_args
-        menu_args.btn_size = (-8.6, 8.6, -.42, .98)
-        self.menu = Menu(menu_args)
+        menu_props = sprops.gameprops.menu_props
+        menu_props.btn_size = (-8.6, 8.6, -.42, .98)
+        self.menu = Menu(menu_props)
         self.rank_page = RankingPage(rprops, sprops, self.menu, ranking)
         self.eng.do_later(.01, self.menu.push_page, [self.rank_page])
 
