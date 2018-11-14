@@ -1,5 +1,6 @@
-from direct.gui.DirectGuiGlobals import NORMAL, DISABLED
 from panda3d.core import LVecBase4f
+from direct.gui.DirectGuiGlobals import NORMAL, DISABLED
+from yyagl.engine.vec import Vec2
 
 
 class WidgetMixin(object):
@@ -20,6 +21,11 @@ class WidgetMixin(object):
     def enable(self): pass
 
     def disable(self): pass
+
+    @property
+    def pos(self):
+        pos = self.get_pos(aspect2d)
+        return Vec2(pos[0], pos[2])
 
 
 class ImgMixin(WidgetMixin):

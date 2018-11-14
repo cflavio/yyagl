@@ -1,3 +1,4 @@
+from inspect import getmro
 from panda3d.core import TextNode, Texture
 from direct.gui.DirectGuiGlobals import FLAT, ENTER, EXIT, DISABLED, NORMAL, \
     B1PRESS
@@ -12,9 +13,58 @@ from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
 from yyagl.facade import Facade
+from yyagl.lib.ivals import Seq, Wait, PosIval, Func
 
 
-class P3dImg(Facade):
+class CommonBase(object):
+
+    def set_widget(self):
+        from yyagl.lib.gui import Frame, Slider, Btn, Label, OptionMenu, \
+            CheckBtn, Entry, Img, Text
+        from yyagl.lib.p3d.widget import FrameMixin, SliderMixin, BtnMixin, \
+            OptionMenuMixin, CheckBtnMixin, EntryMixin, ImgMixin
+        libwdg2wdg = {
+            FrameMixin: [Frame],
+            SliderMixin: [Slider],
+            BtnMixin: [Btn, Label],
+            OptionMenuMixin: [OptionMenu],
+            CheckBtnMixin: [CheckBtn],
+            EntryMixin: [Entry],
+            ImgMixin: [Img, Text]}
+        for libwdg, wdgcls in libwdg2wdg.items():
+            if any(cls in getmro(self.__class__) for cls in wdgcls):
+                par_cls = libwdg
+        clsname = self.__class__.__name__ + 'Widget'
+        self.__class__ = type(clsname, (self.__class__, par_cls), {})
+        self.init(self)
+        if not hasattr(self, 'bind'): return
+        bind_args = [(ENTER, self.on_wdg_enter), (EXIT, self.on_wdg_exit)]
+        map(lambda args: self.bind(*args), bind_args)
+
+    def set_enter_transition(self):
+        start_pos = self.get_pos()
+        pos = self.pos - (3.6, 0)
+        self.set_pos((pos.x, 1, pos.y))
+        Seq(
+            Wait(abs(pos.y - 1) / 4),
+            PosIval(self.get_np(), .5, start_pos)
+        ).start()
+
+    def set_exit_transition(self, destroy):
+        start_pos = self.get_pos()
+        end_pos = (self.pos.x + 3.6, 1, self.pos.y)
+        seq = Seq(
+            Wait(abs(self.pos.y - 1) / 4),
+            PosIval(self.get_np(), .5, end_pos),
+            Func(self.destroy if destroy else self.hide))
+        if not destroy: seq.append(Func(self.set_pos, start_pos))
+        seq.start()
+
+    def translate(self):
+        if hasattr(self, 'bind_transl'): self.wdg['text'] = self.bind_transl
+
+
+class P3dImg(Facade, CommonBase):
 
     def __init__(self, filepath, pos=(0, 0), scale=1.0, background=False,
                  force_transp=None, foreground=False, parent=None):
@@ -47,7 +97,7 @@ class P3dImg(Facade):
     def destroy(self): self.img = self.img.destroy()
 
 
-class P3dBase(Facade):
+class P3dBase(Facade, CommonBase):
 
     def __init__(self, tra_src=None, tra_tra=None):
         if tra_src and tra_tra: self.bind_tra(tra_src, tra_tra)

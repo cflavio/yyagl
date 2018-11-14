@@ -21,8 +21,20 @@ class P3dVec2(object):
     @property
     def y(self): return self.vec.y
 
-    def dot(self, other): return self.vec.dot(other.vec)
+    def dot(self, other):
+        if type(other) == tuple: other = P3dVec2(other[0], other[1])
+        return self.vec.dot(other.vec)
 
+    def __sub__(self, vec):
+        if type(vec) == tuple: vec = P3dVec2(vec[0], vec[1])
+        p3dvec = self.vec - vec.vec
+        return P3dVec2(p3dvec.x, p3dvec.y)
+
+    @property
+    def norm(self):
+        vec = LVector2f(self.vec.x, self.vec.y)
+        vec.normalize()
+        return P3dVec2(vec.x, vec.y)
 
 
 class P3dVec3(P3dVec2):
