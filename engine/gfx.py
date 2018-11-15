@@ -1,3 +1,4 @@
+from math import pi
 from ..gameobject import GfxColleague
 from .particle import Particle
 from yyagl.lib.p3d.gfx import P3dGfxMgr, P3dAnimNode, P3dAmbientLight, \
@@ -37,5 +38,5 @@ class EngineGfx(GfxColleague):
     def print_stats(self): self.gfx_mgr.print_stats()
 
     @staticmethod
-    def particle(parent, pos, hpr, texture, tot_time, npart):
-        Particle(parent, pos, hpr, texture, tot_time, npart)
+    def particle(parent, pos, hpr, texture, tot_time, npart, color=(1, 1, 1, 1), ampl=pi/6, ray=.5, rate=.0001, gravity=-.85, vel=3.8, part_time=None):
+        Particle(parent, pos, hpr, texture, tot_time, npart, color, ampl, ray, rate, gravity, vel)

@@ -1,3 +1,5 @@
+from math import pi
+from yyagl.engine.vec import Vec
 from yyagl.racing.weapon.weapon.logic import WeaponLogic, WeaponLogicNetwork
 
 
@@ -15,6 +17,8 @@ class TurboLogic(WeaponLogic):
         self.car.phys.max_speed *= 1.5
         self.car.phys.engine_acc_frc *= 1.5
         self.destroy_tsk = self.eng.do_later(5, self.mediator.destroy)
+        self.eng.particle(self.car.gfx.nodepath, Vec(0, -1.8, 0), (0, 90, 0),
+                          'dust', 5, 10000, (.2, .2, .8, .24), pi/20, .6, .001, vel=3, part_time=1.0)
 
     def destroy(self):
         if self.stored_max_speed is not None:

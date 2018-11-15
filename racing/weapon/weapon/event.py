@@ -11,7 +11,8 @@ class WeaponEvent(EventColleague):
 
     def _on_coll_success(self):
         pos = self.mediator.gfx.gfx_np.get_pos(self.eng.gfx.root) + (0, 0, .5)
-        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', .8, 10000)
+        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
+        self.mediator.audio.crash_sfx.play()
         self.mediator.destroy()
 
     def _eval_wall_coll(self, tgt_obj, obj):

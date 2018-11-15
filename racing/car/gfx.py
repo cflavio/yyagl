@@ -1,3 +1,4 @@
+from math import pi
 from yaml import load as yaml_load
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
@@ -113,7 +114,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
                 self.crash_cnt < 2:
             return False
         pos = self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75)
-        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', .8, 10000)
+        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
         self.apply_damage()
         level = 0
         curr_chassis = self.nodepath.children[0]
@@ -187,9 +188,9 @@ class SkidmarkMgr(GameObject):
             whl_pos_r = wheels[3].get_chassis_connection_point_cs() + \
                 (0, -whl_radius, -whl_radius + .05)
             self.eng.particle(self.car.gfx.nodepath, whl_pos_l, (0, 60, 0),
-                              'dust', 1.2, 100)
+                              'dust', 1.2, 100, (.5, .5, .5, .24), pi/12)
             self.eng.particle(self.car.gfx.nodepath, whl_pos_r, (0, 60, 0),
-                              'dust', 1.2, 100)
+                              'dust', 1.2, 100, (.5, .5, .5, .24), pi/12)
 
     def on_no_skidmarking(self):
         self.l_skidmark = self.r_skidmark = None

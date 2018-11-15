@@ -110,7 +110,7 @@ class TrackProcesser(GameObject):
         empty_name = '**/%s*' % self.props.empty_name
         e_m = self.model.find_all_matches(empty_name)
         load_models = lambda: self.__process_models(list(e_m))
-        names = [model.get_name().split('.')[0][5:] for model in e_m]
+        names = [model.name.split('.')[0][5:] for model in e_m]
         self.__preload_models(list(set(list(names))), load_models)
 
     def __preload_models(self, models, callback, model='', time=0):
@@ -137,7 +137,7 @@ class TrackProcesser(GameObject):
         self.flattening()
 
     def __get_model_name(self, model):
-        return model.get_name().split('.')[0][len(self.props.empty_name):]
+        return model.name.split('.')[0][len(self.props.empty_name):]
 
     def __process_static(self, model):
         model_name = self.__get_model_name(model)
@@ -168,10 +168,10 @@ class TrackProcesser(GameObject):
 
     def __process_flat_models(self, model):
         model.clear_model_nodes()
-        self.loading_models += [model.get_name()]
+        self.loading_models += [model.name]
         model.flatten_strong()
         curr_t = self.eng.curr_time
-        self.__flat_models(model.get_name(), curr_t, len(model.get_children()))
+        self.__flat_models(model.name, curr_t, len(model.children))
 
     def end_flattening(self):
         print 'writing track_all.bam'

@@ -246,6 +246,7 @@ class CarPlayerEvent(CarEvent):
         self.input_bld = InputBuilder.create(state, race_props.joystick)
         keys = self.props.keys.players_keys[mediator.player_car_idx]
         self.accept(keys.respawn, self.process_respawn)
+        #self.eng.do_later(5, lambda: self.on_bonus(Turbo) and None)
 
     def on_frame(self):
         CarEvent.on_frame(self)
