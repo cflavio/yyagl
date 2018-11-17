@@ -80,6 +80,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         for _ in range(6):
             self.preload_tsk()
             base.graphicsEngine.renderFrame()
+        self.mediator.phys.ai_mesh.reparent_to(self.nodepath)
 
     def preload_tsk(self):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]

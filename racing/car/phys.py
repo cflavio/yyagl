@@ -3,6 +3,7 @@ from panda3d.bullet import BulletVehicle, ZUp, BulletBoxShape
 from panda3d.core import LPoint3f, BitMask32, Mat4, TransformState
 from yyagl.gameobject import PhysColleague
 from yyagl.racing.bitmasks import BitMasks
+from yyagl.engine.phys import GhostNode
 
 
 class CarPhys(PhysColleague):
@@ -21,6 +22,7 @@ class CarPhys(PhysColleague):
         self.cprops = car_props
         self._load_phys()
         self.__set_collision_mesh()
+        self.__set_ai_mesh()
         self.__set_phys_node()
         self.__set_vehicle()
         self.__set_wheels()
@@ -90,6 +92,20 @@ class CarPhys(PhysColleague):
         track_bit = BitMask32.bit(BitMasks.track_merged)
         mask = car_bit | ghost_bit | track_bit
         self.mediator.gfx.nodepath.set_collide_mask(mask)
+
+    def __set_ai_mesh(self):
+        boxsz = self.cfg['box_size']
+        shape = BulletBoxShape((boxsz[0], boxsz[1], 2))
+        ghost = GhostNode('Vehicle')
+        ghost.node.addShape(shape)
+        self.ai_mesh = self.eng.attach_node(ghost.node)
+        car_names = self.cprops.race_props.season_props.car_names
+        car_idx = car_names.index(self.cprops.name)
+        car_bit = BitMask32.bit(BitMasks.car(car_idx))
+        ghost_bit = BitMask32.bit(BitMasks.ghost)
+        mask = car_bit | ghost_bit
+        self.ai_mesh.set_collide_mask(mask)
+        self.eng.phys_mgr.attach_ghost(ghost.node)
 
     def __set_phys_node(self):
         self.pnode = self.mediator.gfx.nodepath.p3dnode
