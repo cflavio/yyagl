@@ -162,7 +162,6 @@ class FPCamera(Camera):
 
     def __init__(self, car_np, cam_vec, car):
         Camera.__init__(self, car_np, cam_vec, car)
-        base.camLens.set_near_far(1.0, 240.0)
 
     def _new_pos(self, back_car_vec, c_i):
         car_pos = self.car_np.get_pos()
@@ -191,7 +190,7 @@ class FPCamera(Camera):
         car_vec = self.car.logic.car_vec
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
-        car_vec_left = rot_mat_left.xformVec(car_vec)
+        car_vec_left = rot_mat_left.xformVec(car_vec.vec)
         tgt_left = tgt + car_vec_left
         pos_left = pos + car_vec_left
         occl_left = self.__closest_occl(pos_left, tgt_left)
@@ -199,7 +198,7 @@ class FPCamera(Camera):
             return
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
-        car_vec_right = rot_mat_right.xformVec(car_vec)
+        car_vec_right = rot_mat_right.xformVec(car_vec.vec)
         car_vec_right += (0, 0, 2)
         tgt_right = tgt + car_vec_right
         pos_right = pos + car_vec_right
@@ -218,7 +217,7 @@ class FPCamera(Camera):
         occl_l = self.eng.phys_mgr.root.ray_test_all(tgtv, posv)  # , mask)
         for _occl in occl_l.get_hits():
             if _occl.getNode().getName() not in ['Vehicle', 'Goal']:
-                if (_occl.getHitPos() - tgtv).length() < dist:
-                    dist = (_occl.getHitPos() - tgtv).length()
+                if (Vec(*_occl.getHitPos()) - tgtv).length() < dist:
+                    dist = (Vec(*_occl.getHitPos()) - tgtv).length()
                     occl = _occl
         return occl
