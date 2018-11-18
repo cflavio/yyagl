@@ -1,4 +1,4 @@
-from panda3d.core import loadPrcFileData, BitMask32
+from panda3d.core import loadPrcFileData, BitMask32, NodePath
 loadPrcFileData('', 'window-type none')
 loadPrcFileData('', 'audio-library-name null')
 loadPrcFileData('', 'default-model-extension .bam')
@@ -167,11 +167,23 @@ class TrackProcesser(GameObject):
             self.end_flattening()
 
     def __process_flat_models(self, model):
-        model.clear_model_nodes()
-        self.loading_models += [model.name]
-        model.flatten_strong()
+        new_model = NodePath(model.name)
+        new_model.reparent_to(model.parent)
+        for child in model.node.get_children():
+            np = NodePath('newroot')
+            np.set_pos(child.get_pos())
+            np.set_hpr(child.get_hpr())
+            np.set_scale(child.get_scale())
+            np.reparent_to(new_model)
+            for _child in child.get_children():
+                for __child in _child.get_children():
+                    __child.reparent_to(np)
+        new_model.clear_model_nodes()
+        new_model.flatten_strong()
+        model.remove_node()
+        self.loading_models += [new_model.name]
         curr_t = self.eng.curr_time
-        self.__flat_models(model.name, curr_t, len(model.children))
+        self.__flat_models(new_model.name, curr_t, len(new_model.children))
 
     def end_flattening(self):
         print 'writing track_all.bam'
