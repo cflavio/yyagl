@@ -79,7 +79,7 @@ class TrackProcesser(GameObject):
         self.models_to_load = self.loading_models = None
         self.props = Props()
         fpath = self.props.track_dir + '/' + self.props.model_name
-        #self.__egg2bams()
+        self.__egg2bams()
         self.model = self.eng.load_model(fpath)
         self.__set_submodels()
 
