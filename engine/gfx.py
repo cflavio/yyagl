@@ -18,10 +18,10 @@ class EngineGfx(GfxColleague):
         self.gfx_mgr = GfxMgr(model_path, antialiasing, shaders)
         self.root = None
         self.part2eff = {}
-        if self.mediator.cfg.gui_cfg.shaders and \
-                self.eng.lib.version.startswith('1.10'):
+        #if self.mediator.cfg.gui_cfg.shaders and \
+        #        self.eng.lib.version.startswith('1.10'):
             # self.set_toon()
-            self.set_bloom()
+            # self.set_bloom()
 
     def init(self):
         self.root = self.gfx_mgr.root.attach_node('world')

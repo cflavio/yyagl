@@ -72,7 +72,7 @@ class TrackGfx(GfxColleague):
 
     def __set_omni(self, root):
         root.set_tag(self.raceprops.omni_tag, 'True')
-        a_n = self.__anim_nodes[-1].get_name()
+        a_n = self.__anim_nodes[-1].name
         self.eng.log_mgr.log('set omni for ' + a_n)
         self.__anim_nodes[-1].set_omni()
 

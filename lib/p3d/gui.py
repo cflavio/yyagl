@@ -254,12 +254,15 @@ class P3dEntry(P3dAbs, DirectObject):
             focus_out_cmd=None, focus_out_args=[], parent=None,
             tra_src=None, tra_tra=None, text_fg=(1, 1, 1, 1), on_tab=None,
             on_click=None):
+        self.__focused = False
+        self.__focus_in_cmd = focus_in_cmd
+        self.__focus_out_cmd = focus_out_cmd
         DirectObject.__init__(self)
         self.wdg = DirectEntry(
             scale=scale, pos=(pos[0], 1, pos[1]), entryFont=entry_font, width=width,
             frameColor=frame_col, initialText=initial_text, obscured=obscured,
-            command=cmd, focusInCommand=focus_in_cmd,
-            focusInExtraArgs=focus_in_args, focusOutCommand=focus_out_cmd,
+            command=cmd, focusInCommand=self._focus_in_cmd,
+            focusInExtraArgs=focus_in_args, focusOutCommand=self._focus_out_cmd,
             focusOutExtraArgs=focus_out_args, parent=parent,
             text_fg=text_fg)
         P3dAbs.__init__(self, tra_src, tra_tra)
@@ -270,8 +273,19 @@ class P3dEntry(P3dAbs, DirectObject):
         self._fwd_mth('set', lambda obj: obj.wdg.set)
         self._fwd_mth('enter_text', lambda obj: obj.wdg.enterText)
 
+    def _focus_in_cmd(self, *args):
+        self.__focused = True
+        if self.__focus_in_cmd: self.__focus_in_cmd(*args)
+
+    def _focus_out_cmd(self, *args):
+        self.__focused = False
+        if self.__focus_out_cmd: self.__focus_out_cmd(*args)
+
     def on_tab(self):
         if self.wdg['focus']: self.on_tab_cb()
+
+    @property
+    def focused(self): return self.__focused
 
     @property
     def text(self): return self.wdg.get()

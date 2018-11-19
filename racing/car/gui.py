@@ -195,29 +195,29 @@ class CarPanel(GameObject):
             else: parent_bl = base.a2dBottomCenter
         if ncars == 1: parent_t = base.a2dTopCenter
         elif ncars == 2:
-            if mediator.player_car_idx == 0: parent_t = base.a2dTopQuarter
+            if self.player_idx == 0: parent_t = base.a2dTopQuarter
             else: parent_t = base.a2dTopThirdQuarter
         elif ncars == 3:
-            if mediator.player_car_idx == 0: parent_t = base.a2dTop
-            elif mediator.player_car_idx == 1: parent_t = base.a2dCenterQuarter
+            if self.player_idx == 0: parent_t = base.a2dTop
+            elif self.player_idx == 1: parent_t = base.a2dCenterQuarter
             else: parent_t = base.a2dCenterThirdQuarter
         elif ncars == 4:
-            if mediator.player_car_idx == 0: parent_t = base.a2dTopQuarter
-            elif mediator.player_car_idx == 1: parent_t = base.a2dTopThirdQuarter
-            elif mediator.player_car_idx == 2: parent_t = base.a2dCenterQuarter
+            if self.player_idx == 0: parent_t = base.a2dTopQuarter
+            elif self.player_idx == 1: parent_t = base.a2dTopThirdQuarter
+            elif self.player_idx == 2: parent_t = base.a2dCenterQuarter
             else: parent_t = base.a2dCenterThirdQuarter
         if ncars == 1: parent_b = base.a2dBottomCenter
         elif ncars == 2:
-            if mediator.player_car_idx == 0: parent_b = base.a2dBottomQuarter
+            if self.player_idx == 0: parent_b = base.a2dBottomQuarter
             else: parent_b = base.a2dBottomThirdQuarter
         elif ncars == 3:
-            if mediator.player_car_idx == 0: parent_b = base.aspect2d
-            elif mediator.player_car_idx == 1: parent_b = base.a2dBottomQuarter
+            if self.player_idx == 0: parent_b = base.aspect2d
+            elif self.player_idx == 1: parent_b = base.a2dBottomQuarter
             else: parent_b = base.a2dBottomThirdQuarter
         elif ncars == 4:
-            if mediator.player_car_idx == 0: parent_b = base.a2dCenterQuarter
-            elif mediator.player_car_idx == 1: parent_b = base.a2dCenterThirdQuarter
-            elif mediator.player_car_idx == 2: parent_b = base.a2dBottomQuarter
+            if self.player_idx == 0: parent_b = base.a2dCenterQuarter
+            elif self.player_idx == 1: parent_b = base.a2dCenterThirdQuarter
+            elif self.player_idx == 2: parent_b = base.a2dBottomQuarter
             else: parent_b = base.a2dBottomThirdQuarter
         pars = {'scale': .065, 'parent': parent_tr,
                 'fg': menu_props.text_active_col, 'align': TextNode.A_left,

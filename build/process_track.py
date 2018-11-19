@@ -79,7 +79,7 @@ class TrackProcesser(GameObject):
         self.models_to_load = self.loading_models = None
         self.props = Props()
         fpath = self.props.track_dir + '/' + self.props.model_name
-        self.__egg2bams()
+        #self.__egg2bams()
         self.model = self.eng.load_model(fpath)
         self.__set_submodels()
 
@@ -180,10 +180,11 @@ class TrackProcesser(GameObject):
                     __child.reparent_to(np)
         new_model.clear_model_nodes()
         new_model.flatten_strong()
+        name = model.name
         model.remove_node()
-        self.loading_models += [new_model.name]
+        self.loading_models += [name]
         curr_t = self.eng.curr_time
-        self.__flat_models(new_model.name, curr_t, len(new_model.children))
+        self.__flat_models(name, curr_t, len(new_model.get_children()))
 
     def end_flattening(self):
         print 'writing track_all.bam'

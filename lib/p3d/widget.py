@@ -96,7 +96,8 @@ class EntryMixin(FrameMixin):
         #self.get_np()['focus'] = 0
         #self.get_np().setFocus()
 
-    def on_enter(self):
+    def on_enter(self, player=0):
+        self['focus'] = 1
         if self['command'] and self['state'] == NORMAL:
             self['command'](*self['extraArgs'])
 

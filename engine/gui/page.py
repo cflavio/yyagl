@@ -38,6 +38,8 @@ class PageGui(GuiColleague):
 
     def on_arrow(self, direction, player):
         if not self.curr_wdgs[player]: return
+        if self.curr_wdgs[player].__class__.__name__ == 'P3dEntryWidget' and \
+            self.curr_wdgs[player].focused: return
         processed_cmd = self.curr_wdgs[player].on_arrow(direction)
         # e.g. up/down in a combobox or left/right in a slider
         if processed_cmd: return
