@@ -2,6 +2,7 @@ from math import pi
 from yaml import load as yaml_load
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
+from panda3d.core import NodePath
 from yyagl.gameobject import GfxColleague, GameObject
 from yyagl.facade import Facade
 from .skidmark import Skidmark
@@ -30,6 +31,14 @@ class CarGfx(GfxColleague, CarGfxFacade):
         self.cprops = car_props
         self.wheels = {'fl': None, 'fr': None, 'rl': None, 'rr': None}
         self.nodepath = self.eng.attach_node(BulletRigidBodyNode('Vehicle'))
+        self.vroot = NodePath('root')
+        self.vroot.reparent_to(self.nodepath.node)
+
+        ppath = self.cprops.race_props.season_props.gameprops.phys_path
+        fpath = ppath % self.cprops.name
+        with open(fpath) as phys_file: cfg = yaml_load(phys_file)
+
+        self.vroot.set_pos(0, 0, cfg['gfx_z'])
         self.skidmark_mgr = SkidmarkMgr(mediator)
         self.crash_cnt = 0
         self.last_crash_t = 0
@@ -68,7 +77,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         self.load_wheels(chassis)
 
     def reparent(self):
-        self.chassis_np.reparent_to(self.nodepath)
+        self.chassis_np.node.reparent_to(self.vroot)
         chas = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
         map(lambda cha: cha.set_depth_offset(-2), chas)
         wheels = self.wheels.values()
@@ -118,7 +127,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
         self.apply_damage()
         level = 0
-        curr_chassis = self.nodepath.children[0]
+        curr_chassis = self.nodepath.children[0].children[0]
         if self.chassis_np_low.name in curr_chassis.get_name():
             level = 1
         if self.chassis_np_hi.name in curr_chassis.get_name():
@@ -127,7 +136,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         return True
 
     def apply_damage(self, reset=False):
-        curr_chassis = self.nodepath.children[0]
+        curr_chassis = self.nodepath.children[0].children[0]
         if reset:
             next_chassis = self.chassis_np
         elif self.chassis_np_low.name in curr_chassis.get_name():
@@ -137,7 +146,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         else:
             next_chassis = self.chassis_np_low
         curr_chassis.remove_node()
-        next_chassis.reparent_to(self.nodepath)
+        next_chassis.node.reparent_to(self.vroot)
         if self.mediator.logic.weapon:
             self.mediator.logic.weapon.reparent(next_chassis)
         self.mediator.phys.apply_damage(reset)
