@@ -39,7 +39,7 @@ class RocketWeaponPhys(WeaponPhys):
 
     def __init__(self, mediator, car, cars):
         WeaponPhys.__init__(self, mediator, car, cars)
-        self.update_tsk = self.rot_mat = None
+        self.update_tsk = self.rot_mat = self.heading = None
         self.coll_name = self.rocket_coll_name
 
     def fire(self):
@@ -58,11 +58,6 @@ class RocketWeaponPhys(WeaponPhys):
         self.rot_mat.set_rotate_mat(rot_deg, (0, 0, 1))
         self.update_tsk = taskMgr.add(self.update_weapon, 'update_weapon')
 
-    def __new_val(self, val, tgt, incr):
-        if abs(val - tgt) <= incr:
-            return tgt
-        return val + incr if tgt > val else val - incr
-
     def update_weapon(self, tsk):
         if not self.n_p: return
         # hotfix: it may happen that
@@ -74,11 +69,14 @@ class RocketWeaponPhys(WeaponPhys):
         #   File "C:\buildslave\rtdist-windows-i386\build\built\direct\task\Task.py", line 470, in step
         #   File "yyagl/racing/weapon/weapon/phys.py", line 55, in update_weapon
         # AttributeError: 'NoneType' object has no attribute 'get_pos'
+        if not self.heading: self.heading = self.n_p.node.get_h()
         self.node.set_linear_velocity(self.rot_mat.xform_vec((0, 60, 0)))
+        self.n_p.node.set_p(0)
+        self.n_p.node.set_h(self.heading)
         node_pos = self.n_p.get_pos()
         height = self.car.phys.gnd_height(node_pos) + .8
-        new_height = self.__new_val(node_pos[2], height, globalClock.getDt() * 4.0)
-        self.n_p.set_pos(Vec(node_pos[0], node_pos[1], new_height))
+        self.n_p.set_pos(Vec(node_pos[0], node_pos[1], height))
+        # don't ease the height or it won't work on slopes
         return tsk.again
 
     def destroy(self):

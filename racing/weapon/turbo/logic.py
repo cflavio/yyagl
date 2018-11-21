@@ -16,6 +16,7 @@ class TurboLogic(WeaponLogic):
         self.stored_engine_acc_frc = self.car.phys.engine_acc_frc
         self.car.phys.max_speed *= 1.5
         self.car.phys.engine_acc_frc *= 1.5
+        self.mediator.gfx.gfx_np.hide()
         self.destroy_tsk = self.eng.do_later(5, self.mediator.destroy)
         self.eng.particle(self.car.gfx.nodepath, Vec(0, -1.8, 0), (0, 90, 0),
                           'dust', 5, 10000, (.2, .2, .8, .24), pi/20, .6, .001, vel=3, part_time=1.0)

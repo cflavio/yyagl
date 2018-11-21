@@ -63,8 +63,9 @@ class Results(GameObject):
         menu_props= self.rprops.season_props.gameprops.menu_props
         self._buttons += [
             ImgBtn(
-                scale=.078, pos=(.02 + i*.18, 1, -.79), frame_col=(0, 0, 0, 0),
-                image=menu_props.social_imgs_dirpath % site[0],
+                scale=(.078, .078), pos=(.02 + i*.18, -.79),
+                frame_col=(0, 0, 0, 0),
+                img=menu_props.social_imgs_dirpath % site[0],
                 cmd=self.eng.open_browser, extra_args=[site[1]],
                 over_snd=menu_props.over_sfx,
                 click_snd=menu_props.click_sfx)
