@@ -89,7 +89,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         for _ in range(6):
             self.preload_tsk()
             base.graphicsEngine.renderFrame()
-        self.mediator.phys.ai_mesh.reparent_to(self.nodepath)
+        map(lambda mesh: mesh.reparent_to(self.nodepath), self.mediator.phys.ai_meshes)
 
     def preload_tsk(self):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
@@ -127,7 +127,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
         self.apply_damage()
         level = 0
-        curr_chassis = self.nodepath.children[0].children[0]
+        curr_chassis = self.nodepath.children[0].get_children()[0]
         if self.chassis_np_low.name in curr_chassis.get_name():
             level = 1
         if self.chassis_np_hi.name in curr_chassis.get_name():
@@ -136,7 +136,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         return True
 
     def apply_damage(self, reset=False):
-        curr_chassis = self.nodepath.children[0].children[0]
+        curr_chassis = self.nodepath.children[0].get_children()[0]
         if reset:
             next_chassis = self.chassis_np
         elif self.chassis_np_low.name in curr_chassis.get_name():

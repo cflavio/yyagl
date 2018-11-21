@@ -1,5 +1,5 @@
 from yaml import load
-from panda3d.bullet import BulletVehicle, ZUp, BulletBoxShape
+from panda3d.bullet import BulletVehicle, ZUp, BulletBoxShape, BulletSphereShape
 from panda3d.core import LPoint3f, BitMask32, Mat4, TransformState
 from yyagl.gameobject import PhysColleague
 from yyagl.racing.bitmasks import BitMasks
@@ -13,6 +13,7 @@ class CarPhys(PhysColleague):
         self.pnode = self.vehicle = self.__track_phys = self.coll_mesh = \
             self.roll_influence = self.max_speed = self.friction_slip = \
             self.friction_slip_rear = self.cfg = None
+        self.ai_meshes = []
         self.curr_speed_mul = 1.0
         self.roll_influence_k = self.friction_slip_k = 1.0
         self.__prev_speed = 0
@@ -22,7 +23,7 @@ class CarPhys(PhysColleague):
         self.cprops = car_props
         self._load_phys()
         self.__set_collision_mesh()
-        self.__set_ai_mesh()
+        self.__set_ai_meshes()
         self.__set_phys_node()
         self.__set_vehicle()
         self.__set_wheels()
@@ -93,23 +94,33 @@ class CarPhys(PhysColleague):
         mask = car_bit | ghost_bit | track_bit
         self.mediator.gfx.nodepath.set_collide_mask(mask)
 
-    def __set_ai_mesh(self):
+    def __set_ai_meshes(self):
+        return
+        # if we attach these meshes (or even only one mesh, box, sphere,
+        # whatever) then the collision between the goal and the vehicle doesn't
+        # work properly
+        h = .5
         boxsz = self.cfg['box_size']
-        shape = BulletBoxShape((boxsz[0], boxsz[1], 2))
-        ghost = GhostNode('Vehicle')
-        ghost.node.addShape(shape)
-        self.ai_mesh = self.eng.attach_node(ghost.node)
-        car_names = self.cprops.race_props.season_props.car_names
-        car_idx = car_names.index(self.cprops.name)
-        car_bit = BitMask32.bit(BitMasks.car(car_idx))
-        ghost_bit = BitMask32.bit(BitMasks.ghost)
-        mask = car_bit | ghost_bit
-        self.ai_mesh.set_collide_mask(mask)
-        self.eng.phys_mgr.attach_ghost(ghost.node)
+        hs = []
+        hs += [h / 2 + boxsz[2] * 2 + self.cfg['box_pos'][2] + self.cfg['center_mass_offset']]
+        hs += [- h / 2 - boxsz[2] * 2 + self.cfg['box_pos'][2] + self.cfg['center_mass_offset']]
+        for _h in hs:
+            shape = BulletBoxShape((boxsz[0], boxsz[1], h))
+            ghost = GhostNode('Vehicle')
+            pos = TransformState.makePos((0, 0, _h))
+            ghost.node.addShape(shape, pos)
+            self.ai_meshes += [self.eng.attach_node(ghost.node)]
+            car_names = self.cprops.race_props.season_props.car_names
+            car_idx = car_names.index(self.cprops.name)
+            car_bit = BitMask32.bit(BitMasks.car(car_idx))
+            ghost_bit = BitMask32.bit(BitMasks.ghost)
+            mask = car_bit | ghost_bit
+            self.ai_meshes[-1].set_collide_mask(mask)
+            self.eng.phys_mgr.attach_ghost(ghost.node)
 
     def __set_phys_node(self):
         self.pnode = self.mediator.gfx.nodepath.p3dnode
-        self.pnode.set_mass(self.mass)
+        self.pnode.set_mass(self.mass)  # default 0
         self.pnode.set_deactivation_enabled(False)
         self.eng.phys_mgr.attach_rigid_body(self.pnode)
         self.eng.phys_mgr.add_collision_obj(self.pnode)
@@ -119,8 +130,8 @@ class CarPhys(PhysColleague):
         self.vehicle.set_coordinate_system(ZUp)
         self.vehicle.set_pitch_control(self.pitch_control)
         tuning = self.vehicle.get_tuning()
-        tuning.set_suspension_compression(self.suspension_compression)
-        tuning.set_suspension_damping(self.suspension_damping)
+        tuning.set_suspension_compression(self.suspension_compression)  # default .83
+        tuning.set_suspension_damping(self.suspension_damping)  # default .88
         self.eng.phys_mgr.attach_vehicle(self.vehicle)
 
     def __set_wheels(self):
@@ -160,16 +171,16 @@ class CarPhys(PhysColleague):
         whl.set_wheel_direction_cs((0, 0, -1))
         whl.set_wheel_axle_cs((1, 0, 0))
         whl.set_wheel_radius(radius)
-        whl.set_suspension_stiffness(self.suspension_stiffness[0])
-        whl.set_wheels_damping_relaxation(self.wheels_damping_relaxation[0])
-        whl.set_wheels_damping_compression(self.wheels_damping_compression[0])
+        whl.set_suspension_stiffness(self.suspension_stiffness[0])  # default 5.88
+        whl.set_wheels_damping_relaxation(self.wheels_damping_relaxation[0])  # default .88
+        whl.set_wheels_damping_compression(self.wheels_damping_compression[0])  # default .83
         idx = 0 if is_front else 1
-        whl.set_friction_slip(self.get_friction_static()[idx][0])
+        whl.set_friction_slip(self.get_friction_static()[idx][0])  # default 10.5
         # friction slip high -> more adherence
-        whl.set_roll_influence(self.roll_influence[0])  # low ->  more stability
-        whl.set_max_suspension_force(self.max_suspension_force)
-        whl.set_max_suspension_travel_cm(self.max_suspension_travel_cm)
-        whl.set_skid_info(self.skid_info)
+        whl.set_roll_influence(self.roll_influence[0])  # low ->  more stability  # default .1
+        whl.set_max_suspension_force(self.max_suspension_force)  # default 6000
+        whl.set_max_suspension_travel_cm(self.max_suspension_travel_cm) # default 500
+        whl.set_skid_info(self.skid_info)  # default 0
         self.__whl2flytime[i] = 0
 
     @property
@@ -187,6 +198,7 @@ class CarPhys(PhysColleague):
 
     @property
     def is_flying(self):  # no need to be cached
+        return False  # TEMPORARY WORKAROUND FOR is_in_contact BUG
         rays = [whl.get_raycast_info() for whl in self.vehicle.get_wheels()]
         return not any(ray.is_in_contact() for ray in rays)
 
@@ -279,7 +291,7 @@ class CarPhys(PhysColleague):
         fric = 1.0
         if gfx_node.has_tag('friction'):
             fric = float(gfx_node.get_tag('friction'))
-        if not whl.get_raycast_info().is_in_contact():
+        if False:  # not whl.get_raycast_info().is_in_contact():  # TEMPORARY WORKAROUND FOR is_in_contact BUG
             self.__whl2flytime[i] = globalClock.get_frame_time()
         gnd_time = globalClock.get_frame_time() - self.__whl2flytime[i]
         gnd_recovery_time = .2 if whl.is_front_wheel() else .1
