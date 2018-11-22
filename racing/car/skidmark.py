@@ -23,6 +23,7 @@ class Skidmark(GameObject):
         nodepath = self.eng.gfx.root.attach_node(self.node)
         nodepath.set_transparency(True)
         nodepath.set_depth_offset(1)
+        nodepath.node.set_two_sided(True)  # for self-shadowing issues
         self.__set_material(nodepath)
         nodepath.p3dnode.set_bounds(OmniBoundingVolume())
         self.add_vertices(whl_radius, car_h)

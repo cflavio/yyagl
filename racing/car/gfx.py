@@ -12,6 +12,8 @@ from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.racing.weapon.turbo.turbo import Turbo
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
 from yyagl.racing.weapon.mine.mine import Mine
+from yyagl.lib.p3d.gfx import P3dNode
+from yyagl.engine.vec import Vec
 
 
 class CarGfxFacade(Facade):
@@ -98,6 +100,15 @@ class CarGfx(GfxColleague, CarGfxFacade):
             self.mediator.event.on_bonus(wpn_classes[self.cnt - 1])
             self.cnt -= 1
         else:
+            node = P3dNode(NodePath('temp'))
+            self.eng.particle(node, Vec(0, 0, 0), (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
+            self.eng.particle(node, Vec(0, 0, 0), (0, 60, 0),
+                              'dust', 1.2, 100, (.5, .5, .5, .24), pi/12)
+            self.eng.particle(node, Vec(0, -1.8, 0), (0, 90, 0),
+                              'dust', 5, 10000, (.2, .2, .8, .24), pi/20, .6, .001, vel=3, part_time=1.0)
+            self.eng.particle(node, Vec(0, .2, 0), (0, -90, 0),
+                              'dust', 5, 10000, (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=10)
+            node.remove_node()
             self.apply_damage(True)
             self.mediator.event.on_bonus('remove')
 

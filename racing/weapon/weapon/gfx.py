@@ -28,6 +28,7 @@ class WeaponGfx(GfxColleague):
         self.gfx_np.set_h(self.mediator.deg)
         self.gfx_np.set_scale(1.5)
         self.gfx_np.set_pos(Vec(0, 0, 1.5))
+        self.gfx_np.set_depth_offset(1)
 
     def reparent(self, parent):
         self.gfx_np.reparent_to(parent)

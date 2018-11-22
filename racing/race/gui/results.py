@@ -78,7 +78,7 @@ class Results(GameObject):
             self.destroy()
             GameObject.destroy(self)
         cont_btn = Btn(
-            text=_('Continue'), pos=(0, 1, -.6), cmd=step,
+            text=_('Continue'), pos=(0, -.6), cmd=step,
             **self.rprops.season_props.gameprops.menu_props.btn_args)
         self._buttons += [cont_btn]
 

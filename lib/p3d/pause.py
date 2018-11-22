@@ -4,6 +4,7 @@ from sys import modules
 from direct.task import Task
 from direct.interval.IntervalGlobal import ivalMgr
 from yyagl.lib.p3d.p3d import LibP3d
+from yyagl.gameobject import GameObject
 
 
 class TaskDec(object):
@@ -71,9 +72,10 @@ class TaskDec(object):
         tsk.clear_delay()  # to avoid assertion error on resume
 
 
-class P3dPause(object):
+class P3dPause(GameObject):
 
     def __init__(self):
+        GameObject.__init__(self)
         TaskDec.paused_taskchain = 'yyagl paused tasks'
         taskMgr.setupTaskChain(TaskDec.paused_taskchain, frameBudget=0)
         self.__paused_ivals = []
@@ -88,9 +90,9 @@ class P3dPause(object):
         self.__paused_tasks = []
         is_tsk = lambda tsk: tsk and hasattr(tsk, 'getFunction')
         tasks = [TaskDec(tsk) for tsk in taskMgr.getTasks() if is_tsk(tsk)]
-        if LibP3d.version().startswith('1.10'):
-            tasks = [TaskDec(tsk) for tsk in tasks
-                     if tsk.get_task_chain() != 'unpausable']
+        if self.eng.lib.version.startswith('1.10'):
+            tasks = [tsk for tsk in tasks
+                     if tsk.tsk.get_task_chain() != 'unpausable']
         paused_tasks = map(lambda tsk: tsk.process(), tasks)
         self.__paused_tasks += [tsk for tsk in paused_tasks if tsk]
         for tsk in [_tsk for _tsk in taskMgr.getDoLaters()if is_tsk(_tsk)]:
@@ -111,4 +113,4 @@ class P3dPause(object):
         map(lambda tsk: TaskDec(tsk).resume(), self.__paused_tasks)
         return self.paused
 
-    def destroy(self): pass
+    def destroy(self): GameObject.destroy(self)
