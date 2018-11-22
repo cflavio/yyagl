@@ -176,6 +176,10 @@ class TrackPhys(PhysColleague, ComputerProxy):
             w_p.prevs_nogrid = self.nogrid_wps(w_p)
         for w_p in self.waypoints:
             w_p.prevs_nopitlane = self.nopitlane_wps(w_p)
+        for w_p in self.waypoints:
+            w_p.prevs_onlygrid = self.grid_wps
+        for w_p in self.waypoints:
+            w_p.prevs_onlypitlane = self.pitstop_wps
         if self.eng.cfg.dev_cfg.verbose:
             import pprint
             to_print = [self.waypoints, self.pitstop_wps, self.grid_wps]
@@ -263,8 +267,6 @@ class TrackPhys(PhysColleague, ComputerProxy):
         for hit in TrackPhys.eng.phys_mgr.ray_test_all(p3d_wp1, p3d_wp2).get_hits():
             hits += [hit.get_node().get_name()]
         return hits
-
-    def set_curr_wp(self, wayp): pass
 
     def __set_weapons(self):
         weapon_info = self.race_props.weapon_info

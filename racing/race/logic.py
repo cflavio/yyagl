@@ -156,7 +156,7 @@ class RaceLogic(LogicColleague):
         positions = [(car.name, car.get_pos()) for car in self.all_cars]
         self.mediator.gui.update_minimap(positions)
         if self.props.a_i:
-            self.track.phys.set_curr_wp(self.player_cars[0].ai.curr_logic.curr_tgt_wp)  # for debug
+            self.track.gfx.set_curr_wp(self.player_cars[0].ai.curr_logic.curr_tgt_wp)  # for debug
         if self.mediator.fsm.getCurrentOrNextState() == 'Play':
             for player_car in self.player_cars:
                 player_car.upd_ranking(self.ranking())

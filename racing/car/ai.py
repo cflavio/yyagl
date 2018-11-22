@@ -62,8 +62,8 @@ class DebugLines(object):
     def draw(self, start, end):
         segs = LineSegs()
         segs.set_color(*self.color)
-        segs.moveTo(start)
-        segs.drawTo(end)
+        segs.moveTo(start.vec)
+        segs.drawTo(end.vec)
         segs_node = segs.create()
         self.lines += [render.attachNewNode(segs_node)]
 
@@ -162,7 +162,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
             result += [(hit.get_node().get_name(), (start - hpos).length())]
         result = sorted(result, key=lambda elm: elm[1])
         if self.car.fsm.getCurrentOrNextState() != 'Results' and \
-                self.player_car == self.car.name:
+                self.player_car[0] == self.car.name:
             self.debug_lines_obst.draw(start, lookahead_pos)
         road_res = [res for res in result if any(road_n in res[0] for road_n in ['Road', 'Offroad'])][:1]
         obs_res = [res for res in result if not any(road_n in res[0] for road_n in ['Road', 'Offroad'])][:1]

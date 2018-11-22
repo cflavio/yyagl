@@ -392,8 +392,8 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     def __log_wp_info(self, curr_chassis, curr_wp, closest_wps, waypoints):
         print 'car name', self.mediator.name
-        print 'damage', self.mediator.gfx.chassis_np_hi.get_name(), \
-            curr_chassis.get_name()
+        print 'damage', self.mediator.gfx.chassis_np_hi.name, \
+            curr_chassis.name
         print 'laps', len(self.mediator.logic.lap_times), self.mediator.laps - 1
         print 'last_ai_wp', self.last_ai_wp
         print 'curr_wp', curr_wp
@@ -424,7 +424,7 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @property
     def curr_chassis_name(self):
-        return self.curr_chassis.get_name()
+        return self.curr_chassis.children[0].get_name()
 
     @property
     def hi_chassis_name(self):
@@ -478,6 +478,11 @@ class CarLogic(LogicColleague, ComputerProxy):
                                waypoints)
         prev_wp = may_prev[distances.index(min(distances))]
         may_succ = [w_p for w_p in waypoints if curr_wp in w_p.prevs]
+        if self.hi_chassis_name in self.curr_chassis_name and not_last:
+            to_remove = self.curr_wp.prevs_onlygrid
+        else: to_remove = curr_wp.prevs_onlypitlane
+        for _wp in to_remove:
+            if _wp in may_succ: may_succ.remove(_wp)
         if len(may_succ) >= 2:
             if any(wp.node.has_tag('jump') for wp in may_succ):
                 cha_name = self.mediator.gfx.chassis_np.get_name()
@@ -506,12 +511,16 @@ class CarLogic(LogicColleague, ComputerProxy):
         next_vec = Vec2(*car_np.get_pos(next_wp.node).xy).normalize()
         prev_angle = prev_vec.signed_angle_deg(curr_vec)
         next_angle = next_vec.signed_angle_deg(curr_vec)
-        if min(distances) > 10 and abs(prev_angle) > abs(next_angle):
+        if min(distances) > self.__change_wp_distance() and \
+                abs(prev_angle) > abs(next_angle):
             start_wp, end_wp = prev_wp, curr_wp
         else:
             start_wp, end_wp = curr_wp, next_wp
         self.last_ai_wp = end_wp
         return WPInfo(start_wp, end_wp)
+
+    def __change_wp_distance(self):
+        return 4 + 24 * self.mediator.phys.speed_ratio
 
     def update_waypoints(self):
         closest_wp = int(self.closest_wp().prev.get_name()[8:])  # WaypointX

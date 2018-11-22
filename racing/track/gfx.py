@@ -116,7 +116,8 @@ class TrackGfxDebug(TrackGfx):
         self.eng.attach_obs(self.on_frame)
         self.eng.do_later(2.0, self.redraw_wps)
 
-    def set_curr_wp(self, wayp): self.curr_wp = wayp.get_name()[8:]
+    def set_curr_wp(self, wayp):
+        self.curr_wp = wayp.get_name()[8:]
 
     def on_frame(self):
         if hasattr(self.mediator, 'phys') and not self.wp2txt:
