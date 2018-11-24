@@ -13,6 +13,7 @@ class CarPhys(PhysColleague):
         self.pnode = self.vehicle = self.__track_phys = self.coll_mesh = \
             self.roll_influence = self.max_speed = self.friction_slip = \
             self.friction_slip_rear = self.cfg = None
+        self.turbo = False
         self.ai_meshes = []
         self.curr_speed_mul = 1.0
         self.roll_influence_k = self.friction_slip_k = 1.0
@@ -297,7 +298,8 @@ class CarPhys(PhysColleague):
         gnd_recovery_time = .2 if whl.is_front_wheel() else .1
         gnd_factor = min(1, gnd_time / gnd_recovery_time)
         idx = 0 if whl.is_front_wheel() else 1
-        whl.setFrictionSlip(self.get_friction()[idx] * fric * gnd_factor)
+        turbo_factor = 1.24 if self.turbo else 1.0
+        whl.setFrictionSlip(self.get_friction()[idx] * fric * gnd_factor * turbo_factor)
         if gfx_node.has_tag('speed'):
             return float(gfx_node.get_tag('speed'))
 
