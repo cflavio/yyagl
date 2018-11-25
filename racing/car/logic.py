@@ -444,9 +444,10 @@ class CarLogic(LogicColleague, ComputerProxy):
         curr_wp = closest_wps[distances.index(min(distances))]
         self._pitstop_wps = curr_wp.prevs_nogrid
         self._grid_wps = curr_wp.prevs_nopitlane
-        considered_wps = self._pitstop_wps \
-            if self.hi_chassis_name in self.curr_chassis_name and not_last \
-            else self._grid_wps
+        #considered_wps = self._pitstop_wps \
+        #    if self.hi_chassis_name in self.curr_chassis_name and not_last \
+        #    else self._grid_wps
+        considered_wps = curr_wp.prevs_all
         waypoints = [wp for wp in considered_wps if wp in closest_wps
                      or any(_wp in closest_wps for _wp in wp.prevs)]
         distances = [car_np.get_distance(wp.node) for wp in waypoints]
@@ -479,7 +480,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         prev_wp = may_prev[distances.index(min(distances))]
         may_succ = [w_p for w_p in waypoints if curr_wp in w_p.prevs]
         if self.hi_chassis_name in self.curr_chassis_name and not_last:
-            to_remove = self.curr_wp.prevs_onlygrid
+            to_remove = curr_wp.prevs_onlygrid
         else: to_remove = curr_wp.prevs_onlypitlane
         for _wp in to_remove:
             if _wp in may_succ: may_succ.remove(_wp)
@@ -497,6 +498,12 @@ class CarLogic(LogicColleague, ComputerProxy):
                 else:
                     may_succ = [wp for wp in may_succ
                                 if not wp.node.has_tag('jump')]
+
+        # e.g. the car is erroneously in the pitlane and we've removed
+        # pitlane's waypoints
+        if not may_succ:
+            may_succ = [w_p for w_p in waypoints if curr_wp in w_p.prevs]
+
         distances = [self.pt_line_dst(car_np, curr_wp.node, w_p.node)
                      for w_p in may_succ]
         if not distances:  # there is a bug

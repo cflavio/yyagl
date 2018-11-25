@@ -177,6 +177,8 @@ class TrackPhys(PhysColleague, ComputerProxy):
         for w_p in self.waypoints:
             w_p.prevs_nopitlane = self.nopitlane_wps(w_p)
         for w_p in self.waypoints:
+            w_p.prevs_all = list(set(self.nogrid_wps(w_p) + self.nopitlane_wps(w_p)))
+        for w_p in self.waypoints:
             w_p.prevs_onlygrid = self.grid_wps
         for w_p in self.waypoints:
             w_p.prevs_onlypitlane = self.pitstop_wps
