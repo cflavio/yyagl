@@ -88,6 +88,7 @@ class Cfg(object):
             ('textures-power-2', 'none'),
             ('show-frame-rate-meter', int(self.gui_cfg.fps)),
             ('hardware-animated-vertices', 'true'),
+            ('x-init-threads','true'),  # temp workaround 4 mtrendering (linux)
             ('basic-shaders-only', 'false'),
             ('default-model-extension', '.bam')]
         if self.gui_cfg.win_size:
