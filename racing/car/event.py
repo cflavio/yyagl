@@ -85,7 +85,7 @@ class InputBuilderJoystick(InputBuilder):
 
 class CarEvent(EventColleague, ComputerProxy):
 
-    def __init__(self, mediator, race_props, yorg_client):
+    def __init__(self, mediator, race_props):
         EventColleague.__init__(self, mediator)
         ComputerProxy.__init__(self)
         self.eng.attach_obs(self.on_collision)
@@ -229,8 +229,8 @@ class CarEvent(EventColleague, ComputerProxy):
 
 class CarPlayerEvent(CarEvent):
 
-    def __init__(self, mediator, race_props, yorg_client):
-        CarEvent.__init__(self, mediator, race_props, yorg_client)
+    def __init__(self, mediator, race_props):
+        CarEvent.__init__(self, mediator, race_props)
         keys = race_props.keys.players_keys[mediator.player_car_idx]
         suff = str(mediator.player_car_idx)
         self.label_events = [
@@ -343,10 +343,9 @@ class CarPlayerEventServer(CarPlayerEvent):
 
 class CarPlayerEventClient(CarPlayerEvent):
 
-    def __init__(self, mediator, race_props, yorg_client):
-        CarPlayerEvent.__init__(self, mediator, race_props, yorg_client)
+    def __init__(self, mediator, race_props):
+        CarPlayerEvent.__init__(self, mediator, race_props)
         self.last_sent = self.eng.curr_time
-        self.yorg_client = yorg_client
 
     def on_frame(self):
         CarPlayerEvent.on_frame(self)
@@ -363,10 +362,10 @@ class CarPlayerEventClient(CarPlayerEvent):
         brk_frc_rear = vehicle.get_wheel(2).get_brake()
         steering = vehicle.get_steering_value(0)
         level = 0
-        curr_chassis = gfx.nodepath.get_children()[0]
-        if gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+        curr_chassis = gfx.nodepath.node.get_children()[0]
+        if gfx.chassis_np_low.name in curr_chassis.get_name():
             level = 1
-        if gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+        if gfx.chassis_np_hi.name in curr_chassis.get_name():
             level = 2
         wpn = ''
         wpn_id = 0
@@ -380,7 +379,7 @@ class CarPlayerEventClient(CarPlayerEvent):
             wpn_pos = wnode.get_pos(render)
             wpn_fwd = render.get_relative_vector(wnode, Vec3(0, 1, 0))
         packet = list(chain(
-            ['player_info', self.yorg_client.myid], pos, fwd, velocity,
+            ['player_info', self.eng.client.myid], pos, fwd, velocity,
             ang_vel, inp, [eng_frc, brk_frc_fwd, brk_frc_rear, steering],
             [level], [wpn, wpn_id], wpn_pos, wpn_fwd))
         packet += [len(self.mediator.logic.fired_weapons)]
@@ -392,7 +391,7 @@ class CarPlayerEventClient(CarPlayerEvent):
             wpn_fwd = render.get_relative_vector(wnode, Vec3(0, 1, 0))
             packet += chain([wpn, curr_wpn.id], wpn_pos, wpn_fwd)
         if self.eng.curr_time - self.last_sent > self.eng.client.rate:
-            self.eng.client.send_udp(packet, self.yorg_client.myid)
+            self.eng.client.send_udp(packet, self.eng.client.myid)
             self.last_sent = self.eng.curr_time
 
     def _process_end_goal(self):

@@ -27,7 +27,7 @@ class Engine(GameObject, EngineFacade):
 
     network_priority = -39
 
-    def __init__(self, cfg=None, end_cb=None):
+    def __init__(self, cfg=None, end_cb=None, client_cls=None):
         self.lib = LibBuilder.build()
         self.lib.configure()
         self.lib.init(end_cb=end_cb)
@@ -38,7 +38,7 @@ class Engine(GameObject, EngineFacade):
         self.profiler = AbsProfiler.build(cfg.profiling_cfg.pyprof_percall)
         self.font_mgr = FontMgr()
         self.server = Server(cfg.dev_cfg.port)
-        self.client = Client(cfg.dev_cfg.port)
+        self.client = (client_cls or Client)(cfg.dev_cfg.port, cfg.dev_cfg.server)
         self.cb_mux = CallbackMux()
         comps = [
             [('logic', EngineLogic, [self, cfg])],

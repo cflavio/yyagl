@@ -424,7 +424,7 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @property
     def curr_chassis_name(self):
-        return self.curr_chassis.children[0].get_name()
+        return self.curr_chassis.get_children()[0].get_name()
 
     @property
     def hi_chassis_name(self):
