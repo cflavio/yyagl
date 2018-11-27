@@ -158,8 +158,9 @@ class RaceEventServer(RaceEvent):
         self.eng.client.attach(self.on_end_race_player)
 
     def on_frame(self):
-        if not hasattr(self.mediator.logic, 'player_car') or \
+        if not self.mediator.logic.player_cars or \
                 not hasattr(self.mediator.logic.player_cars[0], 'phys') or \
+                not self.mediator.logic.cars or \
                 any([not hasattr(car, 'phys') for car in self.mediator.logic.cars]):
             return  # still loading; attach when the race has started
         pos = self.mediator.logic.player_cars[0].get_pos()
@@ -201,12 +202,12 @@ class RaceEventServer(RaceEvent):
             brk_frc_rear = car.phys.vehicle.get_wheel(2).get_brake()
             steering = car.phys.vehicle.get_steering_value(0)
             level = 0
-            nodes = car.gfx.nodepath.get_children()
+            nodes = car.gfx.nodepath.node.get_children()
             if len(nodes):
                 curr_chassis = nodes[0]
-                if car.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+                if car.gfx.chassis_np_low.name in curr_chassis.get_name():
                     level = 1
-                if car.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+                if car.gfx.chassis_np_hi.name in curr_chassis.get_name():
                     level = 2
             else:  # still loading cars
                 level = 0
@@ -278,10 +279,10 @@ class RaceEventServer(RaceEvent):
                 from yyagl.racing.car.event import DirKeys
                 car.logic.curr_network_input = DirKeys(*curr_inp)
                 curr_level = 0
-                curr_chassis = car.gfx.nodepath.get_children()[0]
-                if car.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+                curr_chassis = car.gfx.nodepath.node.get_children()[0]
+                if car.gfx.chassis_np_low.node.get_name() in curr_chassis.get_name():
                     curr_level = 1
-                if car.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+                if car.gfx.chassis_np_hi.node.get_name() in curr_chassis.get_name():
                     curr_level = 2
                 if curr_level != level:
                     car.logic.set_damage(level)
@@ -405,10 +406,10 @@ class RaceEventClient(RaceEvent):
                     from yyagl.racing.car.event import DirKeys
                     car.logic.curr_network_input = DirKeys(*car_inp)
                     curr_level = 0
-                    curr_chassis = car.gfx.nodepath.get_children()[0]
-                    if car.gfx.chassis_np_low.get_name() in curr_chassis.get_name():
+                    curr_chassis = car.gfx.nodepath.node.get_children()[0]
+                    if car.gfx.chassis_np_low.name in curr_chassis.get_name():
                         curr_level = 1
-                    if car.gfx.chassis_np_hi.get_name() in curr_chassis.get_name():
+                    if car.gfx.chassis_np_hi.name in curr_chassis.get_name():
                         curr_level = 2
                     if curr_level != car_level:
                         car.logic.set_damage(car_level)

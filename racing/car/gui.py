@@ -453,7 +453,7 @@ class CarPlayerGui(CarGui):
 
     def __init__(self, mediator, car_props):
         self.race_props = car_props
-        ncars = len(self.race_props.season_props.player_car_names)
+        ncars = self.ncars
         CarGui.__init__(self, mediator)
         self.pars = CarParameters(mediator.phys, mediator.logic)
         self.panel = CarPanel(car_props, mediator.player_car_idx, ncars)
@@ -481,6 +481,9 @@ class CarPlayerGui(CarGui):
             pos=(0, 1, .3))
         self.way_img.set_transparency(True)
         self.way_img.hide()
+
+    @property
+    def ncars(self): return 1
 
     def upd_ranking(self, ranking):
         r_i = ranking.index(self.mediator.name) + 1
@@ -525,6 +528,13 @@ class CarPlayerGui(CarGui):
         self.way_txt.destroy()
         self.way_img.destroy()
         GuiColleague.destroy(self)
+
+
+class CarPlayerLocalMPGui(CarPlayerGui):
+
+    @property
+    def ncars(self):
+        return len(self.race_props.season_props.player_car_names)
 
 
 class CarNetworkGui(CarGui):

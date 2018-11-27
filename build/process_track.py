@@ -56,6 +56,7 @@ class DevCfg(object):
         self.menu_joypad = False
         self.xmpp_server = ''
         self.port = 9099
+        self.server = ''
 
 
 class Conf(object):
