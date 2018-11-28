@@ -31,13 +31,12 @@ class ClientThread(NetworkThread):
 
 class Client(AbsNetwork):
 
-    def __init__(self, port):
+    def __init__(self, port, srv_addr):
         AbsNetwork.__init__(self, port)
-        self.srv_addr = None
+        self.srv_addr = srv_addr
         self._functions = []
 
-    def start(self, read_cb, srv_addr):
-        self.srv_addr = srv_addr
+    def start(self, read_cb):
         return AbsNetwork.start(self, read_cb)
 
     def _bld_netw_thr(self):
