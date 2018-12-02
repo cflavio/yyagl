@@ -196,7 +196,6 @@ class Page(GameObject, PageFacade):
     event_cls = PageEvent
 
     def __init__(self, menu_props, players=[0]):
-        # refactor: pages e.g. yyagl/engine/gui/mainpage.py don't call this
         PageFacade.__init__(self)
         self.menu_props = menu_props
         self.players = players
@@ -211,7 +210,7 @@ class Page(GameObject, PageFacade):
 
     def on_hide(self): self.event.ignoreAll()
 
-    def on_back(self, cls_name): self.event.on_back()  # unused arg
+    def on_back(self, cls_name, args=[]): self.event.on_back()  # unused arg
 
     def on_quit(self, cls_name): self.event.on_quit()  # unused arg
 

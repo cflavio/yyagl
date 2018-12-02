@@ -39,6 +39,6 @@ class MainPageGui(PageGui):
 class MainPage(Page, PageFacade):
     gui_cls = MainPageGui
 
-    def __init__(self):
-        # refactor: call Page.__init__
+    def __init__(self, mainpage_props):
+        Page.__init__(self, mainpage_props)
         PageFacade.__init__(self)
