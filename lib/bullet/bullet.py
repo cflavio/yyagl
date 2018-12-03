@@ -12,13 +12,16 @@ class BulletPhysWorld(Facade):
     def __init__(self):
         self.wld = BWorld()
         self.__debug_np = None
-        self._fwd_mth('attach_rigid_body', lambda obj: obj.wld.attach_rigid_body)
-        self._fwd_mth('remove_rigid_body', lambda obj: obj.wld.remove_rigid_body)
-        self._fwd_mth('attach_ghost', lambda obj: obj.wld.attach_ghost)
-        self._fwd_mth('remove_ghost', lambda obj: obj.wld.remove_ghost)
-        self._fwd_mth('attach_vehicle', lambda obj: obj.wld.attach_vehicle)
-        self._fwd_mth('remove_vehicle', lambda obj: obj.wld.remove_vehicle)
-        self._fwd_mth('ray_test_closest', lambda obj: obj.wld.ray_test_closest)
+        mth_lst = [
+            ('attach_rigid_body', lambda obj: obj.wld.attach_rigid_body),
+            ('remove_rigid_body', lambda obj: obj.wld.remove_rigid_body),
+            ('attach_ghost', lambda obj: obj.wld.attach_ghost),
+            ('remove_ghost', lambda obj: obj.wld.remove_ghost),
+            ('attach_vehicle', lambda obj: obj.wld.attach_vehicle),
+            ('remove_vehicle', lambda obj: obj.wld.remove_vehicle),
+            ('ray_test_closest', lambda obj: obj.wld.ray_test_closest)]
+        Facade.__init__(self, mth_lst=mth_lst)
+
 
     def set_gravity(self, vec): return self.wld.set_gravity(vec)
 

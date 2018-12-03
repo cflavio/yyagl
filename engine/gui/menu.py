@@ -181,13 +181,13 @@ class MenuLogic(LogicColleague):
 class MenuFacade(Facade):
 
     def __init__(self):
-        fwd_mths = [
+        mth_lst = [
             ('push_page', lambda obj: obj.logic.push_page),
             ('attach_obs', lambda obj: obj.gui.attach),
             ('detach_obs', lambda obj: obj.gui.detach),
             ('enable', lambda obj: obj.logic.enable),
             ('enable_navigation', lambda obj: obj.logic.enable_navigation)]
-        map(lambda args: self._fwd_mth(*args), fwd_mths)
+        Facade.__init__(self, mth_lst=mth_lst)
 
 
 class Menu(GameObject, MenuFacade):

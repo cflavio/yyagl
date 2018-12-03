@@ -125,29 +125,31 @@ class P3dNode(Facade):
     def __init__(self, nodepath):
         self.nodepath = nodepath
         self.node.set_python_tag('yyaglnode', self)
-        self._fwd_mth('set_collide_mask', lambda obj: obj.node.set_collide_mask)
-        self._fwd_mth('set_x', lambda obj: obj.node.set_x)
-        self._fwd_mth('set_y', lambda obj: obj.node.set_y)
-        self._fwd_mth('set_z', lambda obj: obj.node.set_z)
-        self._fwd_mth('set_hpr', lambda obj: obj.node.set_hpr)
-        self._fwd_mth('set_h', lambda obj: obj.node.set_h)
-        self._fwd_mth('set_p', lambda obj: obj.node.set_p)
-        self._fwd_mth('set_r', lambda obj: obj.node.set_r)
-        self._fwd_mth('set_scale', lambda obj: obj.node.set_scale)
-        self._fwd_mth('set_transparency', lambda obj: obj.node.set_transparency)
-        self._fwd_mth('set_alpha_scale', lambda obj: obj.node.set_alpha_scale)
-        self._fwd_mth('set_texture', lambda obj: obj.node.set_texture)
-        self._fwd_mth('has_tag', lambda obj: obj.node.has_tag)
-        self._fwd_mth('get_tag', lambda obj: obj.node.get_tag)
-        self._fwd_mth('get_python_tag', lambda obj: obj.node.get_python_tag)
-        self._fwd_mth('remove_node', lambda obj: obj.node.remove_node)
-        self._fwd_mth('flatten_strong', lambda obj: obj.node.flatten_strong)
-        self._fwd_mth('clear_model_nodes', lambda obj: obj.node.clear_model_nodes)
-        self._fwd_mth('show', lambda obj: obj.node.show)
-        self._fwd_mth('set_depth_offset', lambda obj: obj.node.set_depth_offset)
-        self._fwd_mth('loop', lambda obj: obj.node.loop)
-        self._fwd_mth('cleanup', lambda obj: obj.node.cleanup)
-        self._fwd_mth('write_bam_file', lambda obj: obj.node.write_bam_file)
+        mth_lst = [
+            ('set_collide_mask', lambda obj: obj.node.set_collide_mask),
+            ('set_x', lambda obj: obj.node.set_x),
+            ('set_y', lambda obj: obj.node.set_y),
+            ('set_z', lambda obj: obj.node.set_z),
+            ('set_hpr', lambda obj: obj.node.set_hpr),
+            ('set_h', lambda obj: obj.node.set_h),
+            ('set_p', lambda obj: obj.node.set_p),
+            ('set_r', lambda obj: obj.node.set_r),
+            ('set_scale', lambda obj: obj.node.set_scale),
+            ('set_transparency', lambda obj: obj.node.set_transparency),
+            ('set_alpha_scale', lambda obj: obj.node.set_alpha_scale),
+            ('set_texture', lambda obj: obj.node.set_texture),
+            ('has_tag', lambda obj: obj.node.has_tag),
+            ('get_tag', lambda obj: obj.node.get_tag),
+            ('get_python_tag', lambda obj: obj.node.get_python_tag),
+            ('remove_node', lambda obj: obj.node.remove_node),
+            ('flatten_strong', lambda obj: obj.node.flatten_strong),
+            ('clear_model_nodes', lambda obj: obj.node.clear_model_nodes),
+            ('show', lambda obj: obj.node.show),
+            ('set_depth_offset', lambda obj: obj.node.set_depth_offset),
+            ('loop', lambda obj: obj.node.loop),
+            ('cleanup', lambda obj: obj.node.cleanup),
+            ('write_bam_file', lambda obj: obj.node.write_bam_file)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
     def attach_node(self, name):
         return P3dNode(self.node.attach_new_node(name))
@@ -247,8 +249,10 @@ class P3dAnimNode(Facade):
 
     def __init__(self, filepath, anim_dct):
         self.node = Actor(filepath, anim_dct)
-        self._fwd_mth('loop', lambda obj: obj.node.loop)
-        self._fwd_mth('reparent_to', lambda obj: obj.node.reparent_to)
+        mth_lst = [
+            ('loop', lambda obj: obj.node.loop),
+            ('reparent_to', lambda obj: obj.node.reparent_to)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
     @property
     def name(self): return self.node.get_name()

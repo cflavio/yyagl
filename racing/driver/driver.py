@@ -35,8 +35,9 @@ class DriverProps(object):
 class DriverFacade(Facade):
 
     def __init__(self):
-        self._fwd_prop('dprops', lambda obj: obj.logic.dprops)
-        self._fwd_mth('to_dct', lambda obj: obj.logic.to_dct)
+        prop_lst = [('dprops', lambda obj: obj.logic.dprops)]
+        mth_lst = [('to_dct', lambda obj: obj.logic.to_dct)]
+        Facade.__init__(self, prop_lst, mth_lst)
 
 
 class Driver(GameObject, DriverFacade):

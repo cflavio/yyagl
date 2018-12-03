@@ -75,12 +75,14 @@ class P3dImg(Facade, CommonBase):
         if self.img.get_texture().get_format() in alpha_formats:
             self.img.set_transparency(True)
         if foreground: self.img.set_bin('gui-popup', 50)
-        self._fwd_mth('reparent_to', lambda obj: obj.img.reparent_to)
-        self._fwd_mth('show', lambda obj: obj.img.show)
-        self._fwd_mth('hide', lambda obj: obj.img.hide)
-        self._fwd_mth('set_shader', lambda obj: obj.img.set_shader)
-        self._fwd_mth('set_shader_input', lambda obj: obj.img.set_shader_input)
-        self._fwd_mth('set_texture', lambda obj: obj.img.set_texture)
+        mth_lst = [
+            ('reparent_to', lambda obj: obj.img.reparent_to),
+            ('show', lambda obj: obj.img.show),
+            ('hide', lambda obj: obj.img.hide),
+            ('set_shader', lambda obj: obj.img.set_shader),
+            ('set_shader_input', lambda obj: obj.img.set_shader_input),
+            ('set_texture', lambda obj: obj.img.set_texture)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
     def set_pos(self, pos): return self.img.set_pos(pos[0], 1, pos[1])
 
@@ -101,9 +103,11 @@ class P3dBase(Facade, CommonBase):
 
     def __init__(self, tra_src=None, tra_tra=None):
         if tra_src and tra_tra: self.bind_tra(tra_src, tra_tra)
-        self._fwd_mth('set_pos', lambda obj: obj.wdg.set_pos)
-        self._fwd_mth('show', lambda obj: obj.wdg.show)
-        self._fwd_mth('hide', lambda obj: obj.wdg.hide)
+        mth_lst = [
+            ('set_pos', lambda obj: obj.wdg.set_pos),
+            ('show', lambda obj: obj.wdg.show),
+            ('hide', lambda obj: obj.wdg.hide)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
     def bind_tra(self, text_src, text_transl):
         # text_transl is not used, anyway we need it since we have this kind of
@@ -136,13 +140,15 @@ class P3dAbs(P3dBase):
 
     def __init__(self, tra_src=None, tra_tra=None):
         P3dBase.__init__(self, tra_src, tra_tra)
-        self._fwd_mth('get_value', lambda obj: obj.wdg.getValue)
-        self._fwd_mth('initialiseoptions', lambda obj: obj.wdg.initialiseoptions)
-        self._fwd_mth('set_z', lambda obj: obj.wdg.set_z)
-        self._fwd_mth('set_shader', lambda obj: obj.wdg.set_shader)
-        self._fwd_mth('set_shader_input', lambda obj: obj.wdg.set_shader_input)
-        self._fwd_mth('set_transparency', lambda obj: obj.wdg.set_transparency)
-        self._fwd_mth('bind', lambda obj: obj.wdg.bind)
+        mth_lst = [
+            ('get_value', lambda obj: obj.wdg.getValue),
+            ('initialiseoptions', lambda obj: obj.wdg.initialiseoptions),
+            ('set_z', lambda obj: obj.wdg.set_z),
+            ('set_shader', lambda obj: obj.wdg.set_shader),
+            ('set_shader_input', lambda obj: obj.wdg.set_shader_input),
+            ('set_transparency', lambda obj: obj.wdg.set_transparency),
+            ('bind', lambda obj: obj.wdg.bind)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
     def attachNewNode(self, gui_itm, sort_order):
         # it won't work if we name it attach_node. hopefully this will be
@@ -236,7 +242,7 @@ class P3dOptionMenu(P3dAbs):
             item_relief=item_relief, item_text_font=item_text_font,
             text_font=text_font)
         P3dAbs.__init__(self, tra_src, tra_tra)
-        self._fwd_mth('set', lambda obj: obj.wdg.set)
+        Facade.__init__(self, mth_lst=[('set', lambda obj: obj.wdg.set)])
 
     @property
     def curr_val(self): return self.wdg.get()
@@ -270,8 +276,10 @@ class P3dEntry(P3dAbs, DirectObject):
             self.on_tab_cb = on_tab
             self.accept('tab-up', self.on_tab)
         if on_click: self.wdg.bind(B1PRESS, on_click)
-        self._fwd_mth('set', lambda obj: obj.wdg.set)
-        self._fwd_mth('enter_text', lambda obj: obj.wdg.enterText)
+        mth_lst = [
+            ('set', lambda obj: obj.wdg.set),
+            ('enter_text', lambda obj: obj.wdg.enterText)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
     def _focus_in_cmd(self, *args):
         self.__focused = True
@@ -311,9 +319,11 @@ class P3dLabel(P3dAbs):
             text_align=text_align, text_fg=text_fg, text_font=text_font,
             scale=scale, frameColor=frame_col, hpr=hpr)
         P3dAbs.__init__(self, tra_src, tra_tra)
-        self._fwd_mth('set_bin', lambda obj: obj.wdg.set_bin)
-        self._fwd_mth('set_x', lambda obj: obj.wdg.set_x)
-        self._fwd_mth('set_alpha_scale', lambda obj: obj.wdg.set_alpha_scale)
+        mth_lst = [
+            ('set_bin', lambda obj: obj.wdg.set_bin),
+            ('set_x', lambda obj: obj.wdg.set_x),
+            ('set_alpha_scale', lambda obj: obj.wdg.set_alpha_scale)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
 
 class P3dTxt(P3dBase):
@@ -332,7 +342,7 @@ class P3dTxt(P3dBase):
             text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
             parent=parent, fg=fg, font=font, align=align)
         P3dBase.__init__(self, tra_src, tra_tra)
-        self._fwd_mth('set_r', lambda obj: obj.wdg.set_r)
+        Facade.__init__(self, mth_lst=[('set_r', lambda obj: obj.wdg.set_r)])
 
 
 class P3dFrame(P3dAbs):

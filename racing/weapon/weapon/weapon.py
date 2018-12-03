@@ -7,14 +7,16 @@ from .audio import WeaponAudio
 class WeaponFacade(Facade):
 
     def __init__(self):
-        self._fwd_prop('id', lambda obj: obj.logic.wpn_id)
-        self._fwd_mth('attach_obs', lambda obj: obj.logic.attach)
-        self._fwd_mth('detach_obs', lambda obj: obj.logic.detach)
-        self._fwd_mth('fire', lambda obj: obj.logic.fire)
-        self._fwd_mth('update_props', lambda obj: obj.logic.update_props)
-        self._fwd_mth('update_fired_props', lambda obj: obj.logic.update_fired_props)
-        self._fwd_mth('ai_fire', lambda obj: obj.ai.update)
-        self._fwd_mth('reparent', lambda obj: obj.gfx.reparent)
+        prop_lst = [('id', lambda obj: obj.logic.wpn_id)]
+        mth_lst = [
+            ('attach_obs', lambda obj: obj.logic.attach),
+            ('detach_obs', lambda obj: obj.logic.detach),
+            ('fire', lambda obj: obj.logic.fire),
+            ('update_props', lambda obj: obj.logic.update_props),
+            ('update_fired_props', lambda obj: obj.logic.update_fired_props),
+            ('ai_fire', lambda obj: obj.ai.update),
+            ('reparent', lambda obj: obj.gfx.reparent)]
+        Facade.__init__(self, prop_lst, mth_lst)
 
 
 class Weapon(GameObject, WeaponFacade):

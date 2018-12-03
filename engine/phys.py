@@ -23,15 +23,16 @@ class CollInfo(object):
 class PhysFacade(Facade):
 
     def __init__(self):
-        fwd = self._fwd_mth
-        fwd('attach_rigid_body', lambda obj: obj.root.attach_rigid_body)
-        fwd('remove_rigid_body', lambda obj: obj.root.remove_rigid_body)
-        fwd('attach_ghost', lambda obj: obj.root.attach_ghost)
-        fwd('remove_ghost', lambda obj: obj.root.remove_ghost)
-        fwd('attach_vehicle', lambda obj: obj.root.attach_vehicle)
-        fwd('remove_vehicle', lambda obj: obj.root.remove_vehicle)
-        fwd('ray_test_all', lambda obj: obj.root.ray_test_all)
-        fwd('ray_test_closest', lambda obj: obj.root.ray_test_closest)
+        mth_lst = [
+            ('attach_rigid_body', lambda obj: obj.root.attach_rigid_body),
+            ('remove_rigid_body', lambda obj: obj.root.remove_rigid_body),
+            ('attach_ghost', lambda obj: obj.root.attach_ghost),
+            ('remove_ghost', lambda obj: obj.root.remove_ghost),
+            ('attach_vehicle', lambda obj: obj.root.attach_vehicle),
+            ('remove_vehicle', lambda obj: obj.root.remove_vehicle),
+            ('ray_test_all', lambda obj: obj.root.ray_test_all),
+            ('ray_test_closest', lambda obj: obj.root.ray_test_closest)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
 
 class PhysMgr(Colleague, PhysFacade):

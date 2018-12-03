@@ -31,17 +31,20 @@ class SeasonProps(object):
 class SeasonFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('attach_obs', lambda obj: obj.logic.attach)
-        self._fwd_mth('detach_obs', lambda obj: obj.logic.detach)
-        self._fwd_mth('start', lambda obj: obj.logic.start)
-        self._fwd_mth('load', lambda obj: obj.logic.load)
-        self._fwd_mth('create_race_server', lambda obj: obj.logic.create_race_server)
-        self._fwd_mth('create_race_client', lambda obj: obj.logic.create_race_client)
-        self._fwd_mth('create_race', lambda obj: obj.logic.create_race)
-        self._fwd_prop('ranking', lambda obj: obj.logic.ranking)
-        self._fwd_prop('tuning', lambda obj: obj.logic.tuning)
-        self._fwd_prop('props', lambda obj: obj.logic.props)
-        self._fwd_prop('race', lambda obj: obj.logic.race)
+        prop_lst = [
+            ('ranking', lambda obj: obj.logic.ranking),
+            ('tuning', lambda obj: obj.logic.tuning),
+            ('props', lambda obj: obj.logic.props),
+            ('race', lambda obj: obj.logic.race)]
+        mth_lst = [
+            ('attach_obs', lambda obj: obj.logic.attach),
+            ('detach_obs', lambda obj: obj.logic.detach),
+            ('start', lambda obj: obj.logic.start),
+            ('load', lambda obj: obj.logic.load),
+            ('create_race_server', lambda obj: obj.logic.create_race_server),
+            ('create_race_client', lambda obj: obj.logic.create_race_client),
+            ('create_race', lambda obj: obj.logic.create_race)]
+        Facade.__init__(self, prop_lst, mth_lst)
 
     @property
     def drivers_skills(self):

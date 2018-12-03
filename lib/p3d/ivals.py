@@ -9,7 +9,7 @@ class P3dSeq(Facade):
 
     def __init__(self, *ivals):
         self.seq = Sequence(*[ival.ival for ival in ivals])
-        self._fwd_mth('start', lambda obj: obj.seq.start)
+        Facade.__init__(self, mth_lst=[('start', lambda obj: obj.seq.start)])
 
     def append(self, ival): return self.seq.append(ival.ival)
 

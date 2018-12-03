@@ -178,7 +178,7 @@ class PageEvent(EventColleague):
 class PageFacade(Facade):
 
     def __init__(self):
-        fwds = [
+        mth_lst = [
             ('show', lambda obj: obj.gui.show),
             ('hide', lambda obj: obj.gui.hide),
             ('enable', lambda obj: obj.gui.enable),
@@ -187,7 +187,7 @@ class PageFacade(Facade):
             ('disable_navigation', lambda obj: obj.gui.disable_navigation),
             ('attach_obs', lambda obj: obj.gui.attach),
             ('detach_obs', lambda obj: obj.gui.detach)]
-        map(lambda args: self._fwd_mth(*args), fwds)
+        Facade.__init__(self, mth_lst=mth_lst)
 
 
 class Page(GameObject, PageFacade):

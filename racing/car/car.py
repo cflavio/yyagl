@@ -32,29 +32,29 @@ class CarProps(object):
 class CarFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('last_wp_not_fork',
-                      lambda obj: obj.logic.last_wp_not_fork)
-        self._fwd_mth('not_fork_wps', lambda obj: obj.logic.not_fork_wps)
-        self._fwd_mth('reparent', lambda obj: obj.gfx.reparent)
-        self._fwd_mth('attach_obs', lambda obj: obj.event.attach)
-        self._fwd_mth('detach_obs', lambda obj: obj.event.detach)
-        self._fwd_mth('reset_car', lambda obj: obj.logic.reset_car)
-        self._fwd_mth('start', lambda obj: obj.event.start)
-        self._fwd_mth('get_pos', lambda obj: obj.gfx.nodepath.get_pos)
-        self._fwd_mth('get_hpr', lambda obj: obj.gfx.nodepath.get_hpr)
-        self._fwd_mth('closest_wp', lambda obj: obj.logic.closest_wp)
-        self._fwd_mth('upd_ranking', lambda obj: obj.gui.upd_ranking)
-        self._fwd_mth(
-            'get_linear_velocity',
-            lambda obj: obj.phys.vehicle.get_chassis().get_linear_velocity)
-        self._fwd_mth('demand', lambda obj: obj.fsm.demand)
-        self._fwd_prop('lap_times', lambda obj: obj.logic.lap_times)
-        self._fwd_prop('path', lambda obj: obj.gfx.path)
-        self._fwd_prop('laps_num', lambda obj: obj.logic.laps_num)
-        self._fwd_prop('name', lambda obj: obj.logic.cprops.name)
-        self._fwd_prop('laps', lambda obj: obj.logic.cprops.race_props.laps)
-        self._fwd_prop('pos', lambda obj: obj.gfx.nodepath.get_pos())
-        self._fwd_prop('heading', lambda obj: obj.gfx.nodepath.h)
+        prop_lst = [
+            ('lap_times', lambda obj: obj.logic.lap_times),
+            ('path', lambda obj: obj.gfx.path),
+            ('laps_num', lambda obj: obj.logic.laps_num),
+            ('name', lambda obj: obj.logic.cprops.name),
+            ('laps', lambda obj: obj.logic.cprops.race_props.laps),
+            ('pos', lambda obj: obj.gfx.nodepath.get_pos()),
+            ('heading', lambda obj: obj.gfx.nodepath.h)]
+        mth_lst = [
+            ('last_wp_not_fork', lambda obj: obj.logic.last_wp_not_fork),
+            ('not_fork_wps', lambda obj: obj.logic.not_fork_wps),
+            ('reparent', lambda obj: obj.gfx.reparent),
+            ('attach_obs', lambda obj: obj.event.attach),
+            ('detach_obs', lambda obj: obj.event.detach),
+            ('reset_car', lambda obj: obj.logic.reset_car),
+            ('start', lambda obj: obj.event.start),
+            ('get_pos', lambda obj: obj.gfx.nodepath.get_pos),
+            ('get_hpr', lambda obj: obj.gfx.nodepath.get_hpr),
+            ('closest_wp', lambda obj: obj.logic.closest_wp),
+            ('upd_ranking', lambda obj: obj.gui.upd_ranking),
+            ('get_linear_velocity', lambda obj: obj.phys.vehicle.get_chassis().get_linear_velocity),
+            ('demand', lambda obj: obj.fsm.demand)]
+        Facade.__init__(self, prop_lst, mth_lst)
 
 
 class Car(GameObject, CarFacade):

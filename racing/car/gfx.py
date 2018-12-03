@@ -19,10 +19,10 @@ from yyagl.engine.vec import Vec
 class CarGfxFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('on_skidmarking',
-                      lambda obj: obj.skidmark_mgr.on_skidmarking)
-        self._fwd_mth('on_no_skidmarking',
-                      lambda obj: obj.skidmark_mgr.on_no_skidmarking)
+        mth_lst = [
+            ('on_skidmarking', lambda obj: obj.skidmark_mgr.on_skidmarking),
+            ('on_no_skidmarking', lambda obj: obj.skidmark_mgr.on_no_skidmarking)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
 
 class CarGfx(GfxColleague, CarGfxFacade):

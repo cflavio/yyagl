@@ -11,7 +11,7 @@ from .minimap import Minimap
 class RaceGuiFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('update_minimap', lambda obj: obj.minimap.update)
+        Facade.__init__(self, mth_lst=[('update_minimap', lambda obj: obj.minimap.update)])
 
 
 class RaceGui(GuiColleague, RaceGuiFacade):
