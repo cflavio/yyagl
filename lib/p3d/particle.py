@@ -1,10 +1,14 @@
 from math import pi, sin, cos
+from array import array
 from random import uniform
+from itertools import chain
 from panda3d.core import GeomVertexArrayFormat, Geom, GeomVertexFormat, \
     GeomVertexData, GeomVertexWriter, GeomPoints, OmniBoundingVolume, \
-    GeomNode, Vec3, ShaderAttrib, TexGenAttrib, TextureStage
+    GeomNode, Vec3, ShaderAttrib, TexGenAttrib, TextureStage, Texture, \
+    GeomEnums
 from yyagl.lib.p3d.shader import load_shader
 from yyagl.engine.vec import Vec
+import sys
 
 
 class P3dParticle(object):
@@ -24,48 +28,57 @@ class P3dParticle(object):
         self._nodepath.node.set_tex_gen(TextureStage.getDefault(),
                                         TexGenAttrib.MPointSprite)
         self._nodepath.node.set_depth_write(False)
+        self.upd_tsk = taskMgr.add(self._update, 'update')
 
     def __node(self, texture, part_time, npart, color, ampl, ray, rate, gravity, vel):
-        prim = GeomPoints(Geom.UH_static)
-        prim.add_next_vertices(npart)
+        prims = GeomPoints(GeomEnums.UH_static)
+        prims.add_next_vertices(npart)
         geom = Geom(self.__vdata(texture, part_time, npart, color, ampl, ray, rate, gravity, vel))
-        geom.add_primitive(prim)
+        geom.add_primitive(prims)
         geom.set_bounds(OmniBoundingVolume())
-        node = GeomNode('gnode')
+        node = GeomNode('node')
         node.add_geom(geom)
         return node
 
     def __vdata(self, texture, part_time, npart, color, ampl, ray, rate, gravity, vel):
         if (texture, part_time, npart, color, ampl, ray, rate, gravity) in P3dParticle._vdata:
-            return P3dParticle._vdata[texture, part_time, npart, color, ampl, ray, rate, gravity]
-        # TODO: use python buffer protocol in place of this
-        vdata = GeomVertexData('info', self.__format(), Geom.UHStatic)
-        vdata.set_num_rows(1)
-        vertex = GeomVertexWriter(vdata, 'init_vel')
-        vels = P3dParticle.__init_velocities(npart, ampl, vel)
-        map(lambda vtx: vertex.add_data3f(*vtx), vels)
-        start_time = GeomVertexWriter(vdata, 'start_particle_time')
-        rates = [(rate * i, 0, 0) for i in range(npart)]
-        map(lambda vtx: start_time.add_data3f(*vtx), rates)
-        start_pos = GeomVertexWriter(vdata, 'start_pos')
+            vdata, pos, times, vels = P3dParticle._vdata[texture, part_time, npart, color, ampl, ray, rate, gravity]
+            self.__set_textures(npart, pos, times, vels)
+            return vdata
+        pos, times, vels = self.__init_textures(npart, ray, rate, ampl, vel)
+        self.__set_textures(npart, pos, times, vels)
+        format_ = GeomVertexFormat.get_empty()
+        vdata = GeomVertexData('abc', format_, GeomEnums.UH_static)
+        P3dParticle._vdata[texture, part_time, npart, color, ampl, ray, rate, gravity] = vdata, pos, times, vels
+        return P3dParticle._vdata[texture, part_time, npart, color, ampl, ray, rate, gravity][0]
+
+    def __init_textures(self, npart, ray, rate, ampl, vel):
         positions = [self.__rnd_pos(ray) for i in range(npart)]
-        map(lambda vtx: start_pos.add_data3f(*vtx), positions)
-        P3dParticle._vdata[texture, part_time, npart, color, ampl, ray, rate, gravity] = vdata
-        return P3dParticle._vdata[texture, part_time, npart, color, ampl, ray, rate, gravity]
+        pos_lst = [[pos.x, pos.y, pos.z, 1] for pos in positions]
+        pos_lst = list(chain.from_iterable(pos_lst))
+        start_times = [(rate * i, 0, 0, 0) for i in range(npart)]
+        times_lst = list(chain.from_iterable(start_times))
+        velocities = P3dParticle.__init_velocities(npart, ampl, vel)
+        vel_lst = [[vel[0], vel[1], vel[2], 1] for vel in velocities]
+        vel_lst = list(chain.from_iterable(vel_lst))
+        return pos_lst, times_lst, vel_lst
+
+    def __set_textures(self, npart, pos_lst, times_lst, vel_lst):
+        self.tex_pos = self.__texture(pos_lst, 'positions', npart)
+        self.tex_times = self.__texture(times_lst, 'start_times', npart)
+        self.tex_vel = self.__texture(vel_lst, 'velocities', npart)
+
+    def __texture(self, lst, name, npart):
+        data = array('f', lst)
+        tex = Texture(name)
+        tex.setup_buffer_texture(npart, Texture.T_float, Texture.F_rgba32, GeomEnums.UH_static)
+        tex.set_ram_image(data.tostring() if sys.version_info[0] < 3 else data.tobytes())
+        return tex
 
     def __rnd_pos(self, ray):
         ro = uniform(0, ray)
         alpha = uniform(0, 2 * pi)
         return Vec3(ro * cos(alpha), ro * sin(alpha), 0)
-
-    def __format(self):
-        array = GeomVertexArrayFormat()
-        array.add_column('init_vel', 3, Geom.NTFloat32, Geom.CPoint)
-        array.add_column('start_particle_time', 3, Geom.NTFloat32, Geom.CPoint)
-        array.add_column('start_pos', 3, Geom.NTFloat32, Geom.CPoint)
-        _format = GeomVertexFormat()
-        _format.add_array(array)
-        return GeomVertexFormat.register_format(_format)
 
     @staticmethod
     def __init_velocities(npart, ampl, vel):
@@ -95,10 +108,19 @@ class P3dParticle(object):
         self._nodepath.node.set_attrib(shader_attrib)
         inputs = [('start_time', globalClock.get_frame_time()),
                   ('part_time', part_time),
+                  ('init_vel', self.tex_vel),
+                  ('start_particle_time', self.tex_times),
+                  ('start_pos', self.tex_pos),
+                  ('delta_t', 0),
                   ('col', color),
                   ('gravity', gravity),
                   ('tex_in', loader.loadTexture('yyagl/assets/images/%s.png' % texture))]
         map(lambda inp: self._nodepath.node.set_shader_input(*inp), inputs)
 
+    def _update(self, task):
+        self._nodepath.node.set_shader_input('delta_t', globalClock.get_dt())
+        return task.again
+
     def destroy(self):
+        self.upd_tsk = taskMgr.remove(self.upd_tsk)
         self._nodepath = self._nodepath.node.remove_node()
