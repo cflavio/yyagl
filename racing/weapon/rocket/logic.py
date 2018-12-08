@@ -13,8 +13,8 @@ class RocketLogic(WeaponLogic):
         WeaponLogic.fire(self, sfx)
         self.mediator.phys.fire()
         self.tsk = self.eng.do_later(10, self.mediator.destroy)
-        self.eng.particle(self.mediator.gfx.gfx_np, Vec(0, .2, 0), (0, -90, 0),
-                          'dust', 5, 10000, (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=10)
+        self.eng.particle(self.mediator.gfx.gfx_np,
+                          'dust', 5, 10000, (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=3)
 
     def destroy(self):
         if self.tsk: self.eng.rm_do_later(self.tsk)

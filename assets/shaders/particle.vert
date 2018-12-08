@@ -6,6 +6,7 @@ layout(rgba32f) uniform imageBuffer start_pos;
 uniform float gravity;
 uniform float osg_FrameTime;
 uniform float delta_t;
+uniform vec3 emitter_pos;
 uniform float start_time;  // particle system's start time
 uniform mat4 p3d_ModelViewProjectionMatrix;
 out float time;  // time relative to specific particle's beginning
@@ -21,7 +22,9 @@ void main() {
     if (time > _start_particle_time.x) {
         float t = time - _start_particle_time.x;
         ptime = t;
-        pos += vel * delta_t;
+        if (ptime < delta_t)
+            pos += vec4(emitter_pos, 0);
+        pos += vec4((vel * delta_t).xyz, 0);
         vel += vec4(.0, .0, gravity, .0) * delta_t;
     } else gl_FrontColor = vec4(0);
     gl_PointSize = 10;

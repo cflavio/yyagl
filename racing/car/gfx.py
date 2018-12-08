@@ -77,6 +77,21 @@ class CarGfx(GfxColleague, CarGfxFacade):
         with open(fpath) as phys_file:
             chassis.set_z(yaml_load(phys_file)['center_mass_offset'])
         self.load_wheels(chassis)
+        self.eng.do_later(.01, self.__set_emitters)
+
+    def __set_emitters(self):
+        wheels = self.mediator.phys.vehicle.get_wheels()
+        whl_radius = wheels[2].get_wheel_radius()
+        whl_pos_l = wheels[2].get_chassis_connection_point_cs() + \
+            (0, -whl_radius, -whl_radius + .05)
+        self.lroot = P3dNode(NodePath('lroot'))
+        self.lroot.reparent_to(self.nodepath)
+        self.lroot.set_pos(Vec(*whl_pos_l))
+        whl_pos_r = wheels[3].get_chassis_connection_point_cs() + \
+            (0, -whl_radius, -whl_radius + .05)
+        self.rroot = P3dNode(NodePath('lroot'))
+        self.rroot.reparent_to(self.nodepath)
+        self.rroot.set_pos(Vec(*whl_pos_r))
 
     def reparent(self):
         self.chassis_np.node.reparent_to(self.vroot)
@@ -101,13 +116,10 @@ class CarGfx(GfxColleague, CarGfxFacade):
             self.cnt -= 1
         else:
             node = P3dNode(NodePath('temp'))
-            self.eng.particle(node, Vec(0, 0, 0), (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
-            self.eng.particle(node, Vec(0, 0, 0), (0, 60, 0),
-                              'dust', 1.2, 100, (.5, .5, .5, .24), pi/12)
-            self.eng.particle(node, Vec(0, -1.8, 0), (0, 90, 0),
-                              'dust', 5, 10000, (.2, .2, .8, .24), pi/20, .6, .001, vel=3, part_time=1.0)
-            self.eng.particle(node, Vec(0, .2, 0), (0, -90, 0),
-                              'dust', 5, 10000, (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=10)
+            self.eng.particle(node, 'sparkle', 1.6, 1000, (1, 1, 1, .24))
+            self.eng.particle(node, 'dust', 1.2, 100, (.5, .5, .5, .24), pi/12)
+            self.eng.particle(node, 'dust', 5, 10000, (.2, .2, .8, .24), pi/20, .6, .001, vel=3, part_time=1.0)
+            self.eng.particle(node, 'dust', 5, 10000, (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=3)
             node.remove_node()
             self.apply_damage(True)
             self.mediator.event.on_bonus('remove')
@@ -166,6 +178,8 @@ class CarGfx(GfxColleague, CarGfxFacade):
         self.crash_cnt = 0
 
     def destroy(self):
+        self.lroot.remove_node()
+        self.rroot.remove_node()
         meshes = [self.nodepath, self.chassis_np] + self.wheels.values()
         map(lambda mesh: mesh.remove_node(), meshes)
         map(lambda dec: dec.destroy(), self.decorators)
@@ -202,16 +216,10 @@ class SkidmarkMgr(GameObject):
             self.r_skidmark = Skidmark(fr_pos, radius, heading)
             self.l_skidmark = Skidmark(fl_pos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
-            wheels = self.car.phys.vehicle.get_wheels()
-            whl_radius = wheels[2].get_wheel_radius()
-            whl_pos_l = wheels[2].get_chassis_connection_point_cs() + \
-                (0, -whl_radius, -whl_radius + .05)
-            whl_pos_r = wheels[3].get_chassis_connection_point_cs() + \
-                (0, -whl_radius, -whl_radius + .05)
-            self.eng.particle(self.car.gfx.nodepath, whl_pos_l, (0, 60, 0),
-                              'dust', 1.2, 100, (.5, .5, .5, .24), pi/12)
-            self.eng.particle(self.car.gfx.nodepath, whl_pos_r, (0, 60, 0),
-                              'dust', 1.2, 100, (.5, .5, .5, .24), pi/12)
+            self.eng.particle(self.car.gfx.lroot, 'dust', 1.6, 2000,
+                              (.5, .5, .5, .24), pi/12, rate=.0005)
+            self.eng.particle(self.car.gfx.rroot, 'dust', 1.6, 2000,
+                              (.5, .5, .5, .24), pi/12, rate=.0005)
 
     def on_no_skidmarking(self):
         self.l_skidmark = self.r_skidmark = None

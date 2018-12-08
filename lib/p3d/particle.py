@@ -5,29 +5,38 @@ from itertools import chain
 from panda3d.core import GeomVertexArrayFormat, Geom, GeomVertexFormat, \
     GeomVertexData, GeomVertexWriter, GeomPoints, OmniBoundingVolume, \
     GeomNode, Vec3, ShaderAttrib, TexGenAttrib, TextureStage, Texture, \
-    GeomEnums
+    GeomEnums, NodePath
 from yyagl.lib.p3d.shader import load_shader
+from yyagl.lib.p3d.gfx import P3dNode
 from yyagl.engine.vec import Vec
+from yyagl.gameobject import GameObject
 import sys
 
 
-class P3dParticle(object):
+class P3dParticle(GameObject):
 
     _vdata = {}  # don't regenerate input structures
 
     def __init__(
-            self, parent, pos, hpr, texture, part_time, npart,
+            self, emitter, texture, part_time, npart,
             color=(1, 1, 1, 1), ampl=pi/6, ray=.5, rate=.0001, gravity=-.85, vel=3.8):
-        self._nodepath = parent.attach_node(self.__node(texture, part_time, npart, color, ampl, ray, rate, gravity, vel))
+        GameObject.__init__(self)
+        self.__emitternode = None
+        if emitter.__class__ != P3dNode:  # emitter is a position
+            self.__emitternode = P3dNode(NodePath('tmp'))
+            self.__emitternode.set_pos(emitter)
+            self.__emitternode.reparent_to(self.eng.gfx.root)
+            emitter = self.__emitternode
+        self.emitter = emitter
+        #self._nodepath = parent.parent.attach_new_node(self.__node(texture, part_time, npart, color, ampl, ray, rate, gravity, vel))
+        self._nodepath = render.attach_new_node(self.__node(texture, part_time, npart, color, ampl, ray, rate, gravity, vel))
         self._nodepath.set_transparency(True)
-        self._nodepath.node.set_bin('fixed', 0)
-        self._nodepath.set_pos(Vec(pos.x, pos.y, pos.z))
-        self._nodepath.set_hpr(hpr)
+        self._nodepath.set_bin('fixed', 0)
         self.__set_shader(texture, part_time, color, gravity)
-        self._nodepath.node.set_render_mode_thickness(10)
-        self._nodepath.node.set_tex_gen(TextureStage.getDefault(),
-                                        TexGenAttrib.MPointSprite)
-        self._nodepath.node.set_depth_write(False)
+        self._nodepath.set_render_mode_thickness(10)
+        self._nodepath.set_tex_gen(TextureStage.getDefault(),
+                                   TexGenAttrib.MPointSprite)
+        self._nodepath.set_depth_write(False)
         self.upd_tsk = taskMgr.add(self._update, 'update')
 
     def __node(self, texture, part_time, npart, color, ampl, ray, rate, gravity, vel):
@@ -102,25 +111,33 @@ class P3dParticle(object):
         path = 'yyagl/assets/shaders/'
         shader = load_shader(path + 'particle.vert', path + 'particle.frag')
         if not shader: return
-        self._nodepath.node.set_shader(shader)
+        self._nodepath.set_shader(shader)
         shader_attrib = ShaderAttrib.make(shader)
         shader_attrib = shader_attrib.set_flag(ShaderAttrib.F_shader_point_size, True)
-        self._nodepath.node.set_attrib(shader_attrib)
-        inputs = [('start_time', globalClock.get_frame_time()),
-                  ('part_time', part_time),
-                  ('init_vel', self.tex_vel),
-                  ('start_particle_time', self.tex_times),
-                  ('start_pos', self.tex_pos),
-                  ('delta_t', 0),
-                  ('col', color),
-                  ('gravity', gravity),
-                  ('tex_in', loader.loadTexture('yyagl/assets/images/%s.png' % texture))]
-        map(lambda inp: self._nodepath.node.set_shader_input(*inp), inputs)
+        self._nodepath.set_attrib(shader_attrib)
+        inputs = [
+            ('start_time', globalClock.get_frame_time()),
+            ('part_time', part_time),
+            ('init_vel', self.tex_vel),
+            ('start_particle_time', self.tex_times),
+            ('start_pos', self.tex_pos),
+            ('emitter_pos', self.emitter.get_pos(P3dNode(render))),
+            ('delta_t', 0),
+            ('col', color),
+            ('gravity', gravity),
+            ('tex_in', loader.loadTexture('yyagl/assets/images/%s.txo' % texture))]
+        map(lambda inp: self._nodepath.set_shader_input(*inp), inputs)
 
     def _update(self, task):
-        self._nodepath.node.set_shader_input('delta_t', globalClock.get_dt())
+        if self.emitter and not self.emitter.is_empty:
+            pos = self.emitter.get_pos(P3dNode(render))
+        else: pos = (0, 0, 0)
+        self._nodepath.set_shader_input('emitter_pos', pos)
+        self._nodepath.set_shader_input('delta_t', globalClock.get_dt())
         return task.again
 
     def destroy(self):
         self.upd_tsk = taskMgr.remove(self.upd_tsk)
-        self._nodepath = self._nodepath.node.remove_node()
+        self._nodepath = self._nodepath.remove_node()
+        if self.__emitternode: self.__emitternode = self.__emitternode.destroy()
+        GameObject.destroy(self)

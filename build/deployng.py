@@ -35,7 +35,7 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
             'include_patterns': incl_patterns,
             'log_filename': '$USER_APPDATA/Yorg/p3d_log.log',
             'plugins': plugins,
-            'console_apps': {appname: 'main.py'},
+            'gui_apps': {appname: 'main.py'},
             'platforms': deploy_platforms,
             'include_modules': {'*': ['encodings.hex_codec']}},
         'bdist_apps': {

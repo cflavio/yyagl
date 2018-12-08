@@ -19,8 +19,9 @@ class TurboLogic(WeaponLogic):
         self.car.phys.turbo = True
         self.mediator.gfx.gfx_np.hide()
         self.destroy_tsk = self.eng.do_later(5, self.mediator.destroy)
-        self.eng.particle(self.car.gfx.nodepath, Vec(0, -1.8, 0), (0, 90, 0),
-                          'dust', 5, 10000, (.2, .2, .8, .24), pi/20, .6, .001, vel=3, part_time=1.0)
+        self.eng.particle(self.car.gfx.nodepath,
+                          'dust', 5, 10000, (.2, .2, .8, .24), pi/20, .6, .001,
+                          vel=3, part_time=1.0)
 
     def destroy(self):
         self.car.phys.turbo = False

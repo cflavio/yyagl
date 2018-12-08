@@ -1,4 +1,5 @@
 from random import choice
+from yyagl.engine.vec import Vec
 from yyagl.gameobject import EventColleague
 
 
@@ -11,7 +12,8 @@ class WeaponEvent(EventColleague):
 
     def _on_coll_success(self):
         pos = self.mediator.gfx.gfx_np.get_pos(self.eng.gfx.root) + (0, 0, .5)
-        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
+        #self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
+        self.eng.particle(self.eng.gfx.root, 'sparkle', 1.6, 1000, (1, 1, 1, .24))
         self.mediator.audio.crash_sfx.play()
         self.mediator.destroy()
 
@@ -25,7 +27,7 @@ class RocketWeaponEvent(WeaponEvent):
     def _eval_wall_coll(self, tgt_obj, obj):
         if tgt_obj.get_name() == 'Wall' and obj == self.mediator.phys.node:
             pos = self.mediator.gfx.gfx_np.get_pos(self.eng.gfx.root) + (0, 0, .5)
-            self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
+            self.eng.particle(Vec(*pos), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
             self.mediator.destroy()
 
     def on_collision(self, obj, tgt_obj):
