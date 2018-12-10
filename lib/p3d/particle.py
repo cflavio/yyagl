@@ -19,7 +19,7 @@ class P3dParticle(GameObject):
 
     def __init__(
             self, emitter, texture, part_time, npart,
-            color=(1, 1, 1, 1), ampl=pi/6, ray=.5, rate=.0001, gravity=-.85, vel=3.8):
+            color=(1, 1, 1, 1), ampl=pi/6, ray=.5, rate=.0001, gravity=-.85, vel=3.8, part_lifetime=1.0):
         GameObject.__init__(self)
         self.__emitternode = None
         if emitter.__class__ != P3dNode:  # emitter is a position
@@ -32,7 +32,7 @@ class P3dParticle(GameObject):
         self._nodepath = render.attach_new_node(self.__node(texture, part_time, npart, color, ampl, ray, rate, gravity, vel))
         self._nodepath.set_transparency(True)
         self._nodepath.set_bin('fixed', 0)
-        self.__set_shader(texture, part_time, color, gravity)
+        self.__set_shader(texture, part_time, color, gravity, part_lifetime)
         self._nodepath.set_render_mode_thickness(10)
         self._nodepath.set_tex_gen(TextureStage.getDefault(),
                                    TexGenAttrib.MPointSprite)
@@ -73,9 +73,11 @@ class P3dParticle(GameObject):
         return pos_lst, times_lst, vel_lst
 
     def __set_textures(self, npart, pos_lst, times_lst, vel_lst):
-        self.tex_pos = self.__texture(pos_lst, 'positions', npart)
+        self.tex_pos = self.__texture(pos_lst, 'start_positions', npart)
+        self.tex_curr_pos = self.__texture(pos_lst, 'positions', npart)
         self.tex_times = self.__texture(times_lst, 'start_times', npart)
-        self.tex_vel = self.__texture(vel_lst, 'velocities', npart)
+        self.tex_vel = self.__texture(vel_lst, 'start_velocities', npart)
+        self.tex_curr_vel = self.__texture(vel_lst, 'velocities', npart)
 
     def __texture(self, lst, name, npart):
         data = array('f', lst)
@@ -107,7 +109,7 @@ class P3dParticle(GameObject):
             cos(theta))
         return vec * uniform(vel * .8, vel * 1.2)
 
-    def __set_shader(self, texture, part_time, color, gravity):
+    def __set_shader(self, texture, part_time, color, gravity, part_lifetime):
         path = 'yyagl/assets/shaders/'
         shader = load_shader(path + 'particle.vert', path + 'particle.frag')
         if not shader: return
@@ -118,9 +120,12 @@ class P3dParticle(GameObject):
         inputs = [
             ('start_time', globalClock.get_frame_time()),
             ('part_time', part_time),
-            ('init_vel', self.tex_vel),
+            ('part_lifetime', part_lifetime),
+            ('start_vel', self.tex_vel),
+            ('curr_vel', self.tex_curr_vel),
             ('start_particle_time', self.tex_times),
             ('start_pos', self.tex_pos),
+            ('curr_pos', self.tex_curr_pos),
             ('emitter_pos', self.emitter.get_pos(P3dNode(render))),
             ('delta_t', 0),
             ('col', color),
