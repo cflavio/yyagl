@@ -116,10 +116,10 @@ class CarGfx(GfxColleague, CarGfxFacade):
             self.cnt -= 1
         else:
             node = P3dNode(NodePath('temp'))
-            self.eng.particle(node, 'sparkle', 1.6, 1000, (1, 1, 1, .24))
-            self.eng.particle(node, 'dust', 1.2, 100, (.5, .5, .5, .24), pi/12)
-            self.eng.particle(node, 'dust', 5, 10000, (.2, .2, .8, .24), pi/20, .6, .001, vel=3, part_time=1.0)
-            self.eng.particle(node, 'dust', 5, 10000, (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=3)
+            self.eng.particle(node, 'sparkle', 1000, (1, 1, 1, .24), part_lifetime=.01, autodestroy=.01)
+            self.eng.particle(node, 'dust', 100, (.5, .5, .5, .24), pi/12, part_lifetime=.01, autodestroy=.01)
+            self.eng.particle(node, 'dust', 10000, (.2, .2, .8, .24), pi/20, .6, .001, vel=3, part_lifetime=.01, autodestroy=.01)
+            self.eng.particle(node, 'dust', 10000, (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=3, part_lifetime=.01, autodestroy=.01)
             node.remove_node()
             self.apply_damage(True)
             self.mediator.event.on_bonus('remove')
@@ -147,7 +147,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
                 self.crash_cnt < 2:
             return False
         pos = self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75)
-        self.eng.particle(self.eng.gfx.root, pos, (0, 0, 0), 'sparkle', 1.6, 1000, (1, 1, 1, .24))
+        self.eng.particle(self.eng.gfx.root, 'sparkle', 1.6, 1000, (1, 1, 1, .24), part_lifetime=1.2, autodestroy=.4)
         self.apply_damage()
         level = 0
         curr_chassis = self.nodepath.children[0].get_children()[0]
@@ -203,6 +203,7 @@ class SkidmarkMgr(GameObject):
         self.l_skidmark = self.r_skidmark = None
         self.skidmarks = []
         self.car = car
+        self.particles = None
 
     def on_skidmarking(self):
         fr_pos = self.car.gfx.wheels['fr'].get_pos(self.eng.gfx.root)
@@ -216,15 +217,21 @@ class SkidmarkMgr(GameObject):
             self.r_skidmark = Skidmark(fr_pos, radius, heading)
             self.l_skidmark = Skidmark(fl_pos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
-            self.eng.particle(self.car.gfx.lroot, 'dust', 1.6, 2000,
-                              (.5, .5, .5, .24), pi/12, rate=.0005)
-            self.eng.particle(self.car.gfx.rroot, 'dust', 1.6, 2000,
-                              (.5, .5, .5, .24), pi/12, rate=.0005)
+            if self.particles: map(lambda part: part.destroy(), self.particles)
+            self.particles = [
+                self.eng.particle(self.car.gfx.lroot, 'dust', 2000,
+                                  (.5, .5, .5, .24), pi/12, rate=.0005, part_lifetime=1.6),
+                self.eng.particle(self.car.gfx.rroot, 'dust', 2000,
+                                  (.5, .5, .5, .24), pi/12, rate=.0005, part_lifetime=1.6)]
 
     def on_no_skidmarking(self):
+        if self.particles: map(lambda part: part.destroy(), self.particles)
+        self.particles = None
         self.l_skidmark = self.r_skidmark = None
 
     def destroy(self):
+        if self.particles: map(lambda part: part.destroy(), self.particles)
+        self.particles = None
         map(lambda skd: skd.destroy(), self.skidmarks)
         self.car = self.skidmarks = None
         GameObject.destroy(self)

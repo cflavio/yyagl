@@ -9,6 +9,7 @@ class TurboLogic(WeaponLogic):
         WeaponLogic.__init__(self, mediator, car, cars, wpn_id)
         self.stored_max_speed = self.stored_engine_acc_frc = \
             self.destroy_tsk = None
+        self.particle = None
 
     def fire(self, sfx):
         WeaponLogic.fire(self, sfx)
@@ -19,11 +20,12 @@ class TurboLogic(WeaponLogic):
         self.car.phys.turbo = True
         self.mediator.gfx.gfx_np.hide()
         self.destroy_tsk = self.eng.do_later(5, self.mediator.destroy)
-        self.eng.particle(self.car.gfx.nodepath,
-                          'dust', 5, 10000, (.2, .2, .8, .24), pi/20, .6, .001,
-                          vel=3, part_time=1.0)
+        self.particle = self.eng.particle(
+            self.car.gfx.nodepath, 'dust', 10000, (.2, .2, .8, .24), pi/20, .6,
+            .001, vel=3, part_lifetime=1.0)
 
     def destroy(self):
+        if self.particle: self.particle.destroy()
         self.car.phys.turbo = False
         if self.stored_max_speed is not None:
             self.car.phys.max_speed = self.stored_max_speed

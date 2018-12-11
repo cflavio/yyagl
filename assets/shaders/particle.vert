@@ -11,6 +11,7 @@ uniform float delta_t;
 uniform vec3 emitter_pos;
 uniform float start_time;  // particle system's start time
 uniform float part_lifetime;  // single particle's lifetime
+uniform int emitting;
 uniform mat4 p3d_ModelViewProjectionMatrix;
 out float time;  // time relative to specific particle's beginning
 out float ptime;
@@ -25,14 +26,14 @@ void main() {
     if (time > _start_particle_time.x) {
         float t = time - _start_particle_time.x;
         ptime = t;
-        if (ptime < delta_t) {
+        if (ptime <= delta_t + .01) {
             pos = imageLoad(start_pos, gl_VertexID) + vec4(emitter_pos, 0);
             vel = imageLoad(start_vel, gl_VertexID);
         }
         pos += vec4((vel * delta_t).xyz, 0);
         vel += vec4(.0, .0, gravity, .0) * delta_t;
     } else gl_FrontColor = vec4(0);
-    if (time >= _start_particle_time.x + part_lifetime)
+    if (emitting == 1 && time >= _start_particle_time.x + part_lifetime)
         imageStore(start_particle_time, gl_VertexID, vec4(time, 0, 0, 1));
     gl_PointSize = 10;
     gl_Position = p3d_ModelViewProjectionMatrix * pos;
