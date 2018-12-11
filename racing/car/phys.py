@@ -199,7 +199,6 @@ class CarPhys(PhysColleague):
 
     @property
     def is_flying(self):  # no need to be cached
-        return False  # TEMPORARY WORKAROUND FOR is_in_contact BUG
         rays = [whl.get_raycast_info() for whl in self.vehicle.get_wheels()]
         return not any(ray.is_in_contact() for ray in rays)
 
@@ -292,7 +291,7 @@ class CarPhys(PhysColleague):
         fric = 1.0
         if gfx_node.has_tag('friction'):
             fric = float(gfx_node.get_tag('friction'))
-        if False:  # not whl.get_raycast_info().is_in_contact():  # TEMPORARY WORKAROUND FOR is_in_contact BUG
+        if not whl.get_raycast_info().is_in_contact():
             self.__whl2flytime[i] = globalClock.get_frame_time()
         gnd_time = globalClock.get_frame_time() - self.__whl2flytime[i]
         gnd_recovery_time = .2 if whl.is_front_wheel() else .1
