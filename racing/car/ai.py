@@ -150,7 +150,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
         half = (self.height_bounds[0] + self.height_bounds[1]) / 4
         start = start + offset_y + Vec(0, 0, uniform(half, self.height_bounds[1]))
         lgt = 4 + 41 * self.car.phys.speed_ratio
-        lookahed_vec = self.car_vec * lgt
+        lookahed_vec = self.car.logic.car_vec_3d * lgt
         deg = uniform(*sector2bounds[direction])
         lookahed_vec.rotate(deg)
         lookahead_pos = Vec(*(self.car.pos)) + lookahed_vec + Vec(0, 0, self.height_bounds[0] - 2)

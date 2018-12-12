@@ -600,6 +600,12 @@ class CarLogic(LogicColleague, ComputerProxy):
         return Vec(-sin(car_rad), cos(car_rad), 0).normalize()
 
     @property
+    def car_vec_3d(self):  # port (or add) this to 3D
+        h_rad = deg2Rad(self.mediator.gfx.nodepath.h)
+        p_rad = deg2Rad(self.mediator.gfx.nodepath.p)
+        return Vec(-sin(h_rad), cos(h_rad), sin(p_rad)).normalize()
+
+    @property
     def direction(self):
         # car's direction dot current direction
         closest_wp = self.closest_wp()

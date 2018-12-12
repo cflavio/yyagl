@@ -147,7 +147,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
                 self.crash_cnt < 2:
             return False
         pos = self.nodepath.get_pos(self.eng.gfx.root) + (0, 1.2, .75)
-        self.eng.particle(self.eng.gfx.root, 'sparkle', 1.6, 1000, (1, 1, 1, .24), part_lifetime=1.2, autodestroy=.4)
+        self.eng.particle(self.eng.gfx.root, 'sparkle', 1000, (1, 1, 1, .24), part_lifetime=1.2, autodestroy=.4)
         self.apply_damage()
         level = 0
         curr_chassis = self.nodepath.children[0].get_children()[0]

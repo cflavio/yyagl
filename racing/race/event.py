@@ -66,7 +66,7 @@ class RaceEvent(EventColleague):
         EventColleague.__init__(self, mediator)
         self.menu_cls = menu_cls
         self.ended_cars = []
-        if not (self.eng.server.is_active or self.eng.client):
+        if not (self.eng.server.is_active or self.eng.client.is_active):
             self.accept(keys.pause, self.eng.toggle_pause)
         self.last_sent = globalClock.get_frame_time()  # for networking
         self.ingame_menu = None

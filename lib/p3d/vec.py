@@ -36,6 +36,11 @@ class P3dVec2(object):
         vec.normalize()
         return P3dVec2(vec.x, vec.y)
 
+    def __repr__(self):
+        rnd = lambda x: round(x, 3)
+        return '%s(%s,%s)' % (
+            self.__class__.__name__, rnd(self.vec.x), rnd(self.vec.y))
+
 
 class P3dVec3(P3dVec2):
 
@@ -77,3 +82,9 @@ class P3dVec3(P3dVec2):
 
     @property
     def xy(self): return P3dVec2(self.vec.x, self.vec.y)
+
+    def __repr__(self):
+        rnd = lambda x: round(x, 3)
+        return '%s(%s,%s,%s)' % (
+            self.__class__.__name__, rnd(self.vec.x), rnd(self.vec.y),
+            rnd(self.vec.z))
