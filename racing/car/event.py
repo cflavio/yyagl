@@ -185,8 +185,9 @@ class CarEvent(EventColleague, ComputerProxy):
     def process_respawn(self):
         last_wp = self.mediator.logic.last_wp
         start_wp_n, end_wp_n = last_wp.prev, last_wp.next
-        spos = start_wp_n.pos + (0, 0, 2)
-        spos = Vec(spos.x, spos.y, spos.z)
+        spos = start_wp_n.pos
+        h = self.mediator.phys.gnd_height(start_wp_n.pos)
+        spos = Vec(spos.x, spos.y, h + 1)
         self.mediator.gfx.nodepath.set_pos(spos)
         endpos = end_wp_n.node.get_pos(start_wp_n.node)
         wp_vec = Vec(endpos.x, endpos.y, 0).normalize()
