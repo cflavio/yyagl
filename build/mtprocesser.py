@@ -2,7 +2,15 @@ from datetime import datetime
 from multiprocessing import cpu_count
 from subprocess import Popen, PIPE
 from threading import Thread, RLock
-from os import system
+from os import system, getpid
+from psutil import Process, virtual_memory
+
+
+def log_mem():
+    used = Process(getpid()).get_memory_info()[0] / float(2 ** 20)
+    free = virtual_memory().available / float(2 ** 20)
+    rint = lambda val: int(round(val))
+    print 'memory: used %s MB, free %s MB' % (rint(used), rint(free))
 
 
 class Processer(Thread):
@@ -19,6 +27,7 @@ class Processer(Thread):
                     return
                 cmd = self.cmd_lst.pop(0)
             print datetime.now().strftime("%H:%M:%S"), cmd
+            log_mem()
             system(cmd)
 
 
@@ -30,6 +39,7 @@ class ProcesserNoThreaded:
     def run(self):
         for cmd in self.cmd_lst:
             print datetime.now().strftime("%H:%M:%S"), cmd
+            log_mem()
             system(cmd)
 
 

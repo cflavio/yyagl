@@ -22,6 +22,7 @@ class P3dParticle(GameObject):
             ray=.5, rate=.0001, gravity=-.85, vel=3.8, part_lifetime=1.0,
             autodestroy=None):
         GameObject.__init__(self)
+        if not self.eng.lib.version.startswith('1.10'): return
         self.__emitternode = None
         self.part_lifetime = part_lifetime
         if emitter.__class__ != P3dNode:  # emitter is a position
@@ -145,6 +146,9 @@ class P3dParticle(GameObject):
         return task.again
 
     def destroy(self, now=False):
+        if not self.eng.lib.version.startswith('1.10'):
+            GameObject.destroy(self)
+            return
         self._nodepath.set_shader_input('emitting', 0)
         self.eng.do_later(0 if now else self.part_lifetime, self.__destroy)
 

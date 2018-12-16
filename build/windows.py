@@ -4,6 +4,7 @@ from shutil import move, rmtree, copytree, copy
 from distutils.dir_util import copy_tree
 from .build import ver, bld_dpath, branch, bld_cmd, InsideDir, TempFile
 from .deployng import bld_ng
+from .mtprocesser import log_mem
 
 
 nsi_src = '''Name {full_name}
@@ -114,13 +115,13 @@ def bld_windows(target, source, env):
                     rm_ext = ['png', 'jpg']
                     if any(fname.endswith('.' + ext) for ext in rm_ext):
                         remove(fname)
-                    is_track = 'assets/models/tracks/' in fname
-                    is_bam = fname.endswith('.bam')
-                    no_conv = ['/track_all', '/collision', 'Anim']
-                    is_no_conv = any(fname.endswith(concl + '.bam')
-                                     for concl in no_conv)
-                    if is_track and is_bam and not is_no_conv:
-                        remove(fname)
+                    #is_track = 'assets/models/tracks/' in fname
+                    #is_bam = fname.endswith('.bam')
+                    #no_conv = ['/track_all', '/collision', 'Anim']
+                    #is_no_conv = any(fname.endswith(concl + '.bam')
+                    #                 for concl in no_conv)
+                    #if is_track and is_bam and not is_no_conv:
+                    #    remove(fname)
             files_lst = [
                 '\nSetOutPath "$INSTDIR\\%s"\n' % root[2:].replace('/', '\\') +
                 '\n'.join(['File ".\\%s\\%s"' % (root[2:].replace('/', '\\'),
@@ -142,6 +143,7 @@ def bld_windows(target, source, env):
                 icon_file=env['APPNAME'] + '.ico',
                 install_files=install_files,
                 uninstall_files=uninstall_files)
+            log_mem()
             with TempFile('installer.nsi', nsi_src_inst):
                 system('makensis installer.nsi')
     src = '{dst_dir}win_i386/winInstaller/{appname}-{version}{int_str}' + \
