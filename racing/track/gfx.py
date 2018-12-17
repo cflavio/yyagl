@@ -27,7 +27,7 @@ class TrackGfx(GfxColleague):
 
     def __set_meshes(self):
         self.eng.log_mgr.log('loading track model')
-        if not exists(self.__flattened_path):
+        if not exists(LibP3d.fixpath(self.__flattened_path)):
             #script_path = executable + ' yyagl/build/process_track.py'
             #system(script_path + ' ' + self.props.track_name)
             self.eng.do_later(.8, self.__launch_flattening)

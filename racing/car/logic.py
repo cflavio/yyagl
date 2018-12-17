@@ -316,7 +316,9 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     def reset_car(self):
         if self.mediator.fsm.getCurrentOrNextState() in ['Off', 'Loading']:
-            self.mediator.gfx.nodepath.set_z(self.start_pos[2] + 1.2)
+            spos = self.mediator.gfx.nodepath.get_pos()
+            h = self.mediator.phys.gnd_height(spos)
+            self.mediator.gfx.nodepath.set_z(h + 1)
         self.mediator.gfx.nodepath.set_x(self.start_pos[0])
         self.mediator.gfx.nodepath.set_y(self.start_pos[1])
         self.mediator.gfx.nodepath.set_hpr(self.start_pos_hpr)
