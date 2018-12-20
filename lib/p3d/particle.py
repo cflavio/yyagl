@@ -2,13 +2,11 @@ from math import pi, sin, cos
 from array import array
 from random import uniform
 from itertools import chain
-from panda3d.core import GeomVertexArrayFormat, Geom, GeomVertexFormat, \
-    GeomVertexData, GeomVertexWriter, GeomPoints, OmniBoundingVolume, \
-    GeomNode, Vec3, ShaderAttrib, TexGenAttrib, TextureStage, Texture, \
-    GeomEnums, NodePath
+from panda3d.core import (Geom, GeomVertexFormat, GeomVertexData, GeomPoints,
+    OmniBoundingVolume, GeomNode, Vec3, ShaderAttrib, TexGenAttrib,
+    TextureStage, Texture, GeomEnums, NodePath)
 from yyagl.lib.p3d.shader import load_shader
 from yyagl.lib.p3d.gfx import P3dNode
-from yyagl.engine.vec import Vec
 from yyagl.gameobject import GameObject
 import sys
 
@@ -23,7 +21,8 @@ class P3dParticle(GameObject):
             autodestroy=None):
         GameObject.__init__(self)
         if not self.eng.lib.version.startswith('1.10'): return
-        self.__emitternode = None
+        self.tex_pos = self.tex_curr_pos = self.tex_times = self.tex_vel = \
+            self.tex_curr_vel = self.__emitternode = None
         self.part_lifetime = part_lifetime
         if emitter.__class__ != P3dNode:  # emitter is a position
             self.__emitternode = P3dNode(NodePath('tmp'))
@@ -31,8 +30,9 @@ class P3dParticle(GameObject):
             self.__emitternode.reparent_to(self.eng.gfx.root)
             emitter = self.__emitternode
         self.emitter = emitter
-        #self._nodepath = parent.parent.attach_new_node(self.__node(texture, part_time, npart, color, ampl, ray, rate, gravity, vel))
-        self._nodepath = render.attach_new_node(self.__node(texture, npart, color, ampl, ray, rate, gravity, vel))
+        node = self.__node(texture, npart, color, ampl, ray, rate, gravity,
+                           vel)
+        self._nodepath = render.attach_new_node(node)
         self._nodepath.set_transparency(True)
         self._nodepath.set_bin('fixed', 0)
         self.__set_shader(texture, color, gravity, part_lifetime)
@@ -46,7 +46,9 @@ class P3dParticle(GameObject):
     def __node(self, texture, npart, color, ampl, ray, rate, gravity, vel):
         prims = GeomPoints(GeomEnums.UH_static)
         prims.add_next_vertices(npart)
-        geom = Geom(self.__vdata(texture, npart, color, ampl, ray, rate, gravity, vel))
+        vdata = self.__vdata(texture, npart, color, ampl, ray, rate, gravity,
+                             vel)
+        geom = Geom(vdata)
         geom.add_primitive(prims)
         geom.set_bounds(OmniBoundingVolume())
         node = GeomNode('node')
@@ -54,16 +56,20 @@ class P3dParticle(GameObject):
         return node
 
     def __vdata(self, texture, npart, color, ampl, ray, rate, gravity, vel):
-        if (texture, npart, color, ampl, ray, rate, gravity) in P3dParticle._vdata:
-            vdata, pos, times, vels = P3dParticle._vdata[texture, npart, color, ampl, ray, rate, gravity]
+        if (texture, npart, color, ampl, ray, rate, gravity) in \
+                P3dParticle._vdata:
+            vdata, pos, times, vels = P3dParticle._vdata[
+                texture, npart, color, ampl, ray, rate, gravity]
             self.__set_textures(npart, pos, times, vels)
             return vdata
         pos, times, vels = self.__init_textures(npart, ray, rate, ampl, vel)
         self.__set_textures(npart, pos, times, vels)
         format_ = GeomVertexFormat.get_empty()
         vdata = GeomVertexData('abc', format_, GeomEnums.UH_static)
-        P3dParticle._vdata[texture, npart, color, ampl, ray, rate, gravity] = vdata, pos, times, vels
-        return P3dParticle._vdata[texture, npart, color, ampl, ray, rate, gravity][0]
+        P3dParticle._vdata[texture, npart, color, ampl, ray, rate, gravity] = \
+            vdata, pos, times, vels
+        return P3dParticle._vdata[texture, npart, color, ampl, ray, rate,
+                                  gravity][0]
 
     def __init_textures(self, npart, ray, rate, ampl, vel):
         positions = [self.__rnd_pos(ray) for i in range(npart)]
@@ -72,7 +78,7 @@ class P3dParticle(GameObject):
         start_times = [(rate * i, 0, 0, 0) for i in range(npart)]
         times_lst = list(chain.from_iterable(start_times))
         velocities = P3dParticle.__init_velocities(npart, ampl, vel)
-        vel_lst = [[vel[0], vel[1], vel[2], 1] for vel in velocities]
+        vel_lst = [[v_vel[0], v_vel[1], v_vel[2], 1] for v_vel in velocities]
         vel_lst = list(chain.from_iterable(vel_lst))
         return pos_lst, times_lst, vel_lst
 
@@ -83,14 +89,18 @@ class P3dParticle(GameObject):
         self.tex_vel = self.__texture(vel_lst, 'start_velocities', npart)
         self.tex_curr_vel = self.__texture(vel_lst, 'velocities', npart)
 
-    def __texture(self, lst, name, npart):
+    @staticmethod
+    def __texture(lst, name, npart):
         data = array('f', lst)
         tex = Texture(name)
-        tex.setup_buffer_texture(npart, Texture.T_float, Texture.F_rgba32, GeomEnums.UH_static)
-        tex.set_ram_image(data.tostring() if sys.version_info[0] < 3 else data.tobytes())
+        tex.setup_buffer_texture(
+            npart, Texture.T_float, Texture.F_rgba32, GeomEnums.UH_static)
+        mth = data.tostring if sys.version_info[0] < 3 else data.tobytes
+        tex.set_ram_image(mth())
         return tex
 
-    def __rnd_pos(self, ray):
+    @staticmethod
+    def __rnd_pos(ray):
         ro = uniform(0, ray)
         alpha = uniform(0, 2 * pi)
         return Vec3(ro * cos(alpha), ro * sin(alpha), 0)
@@ -118,9 +128,10 @@ class P3dParticle(GameObject):
         shader = load_shader(path + 'particle.vert', path + 'particle.frag')
         if not shader: return
         self._nodepath.set_shader(shader)
-        shader_attrib = ShaderAttrib.make(shader)
-        shader_attrib = shader_attrib.set_flag(ShaderAttrib.F_shader_point_size, True)
-        self._nodepath.set_attrib(shader_attrib)
+        sha_attr = ShaderAttrib.make(shader)
+        sha_attr = sha_attr.set_flag(ShaderAttrib.F_shader_point_size, True)
+        self._nodepath.set_attrib(sha_attr)
+        img = loader.loadTexture('yyagl/assets/images/%s.txo' % texture)
         inputs = [
             ('start_time', globalClock.get_frame_time()),
             ('part_lifetime', part_lifetime),
@@ -134,7 +145,7 @@ class P3dParticle(GameObject):
             ('emitting', 1),
             ('col', color),
             ('gravity', gravity),
-            ('tex_in', loader.loadTexture('yyagl/assets/images/%s.txo' % texture))]
+            ('tex_in', img)]
         map(lambda inp: self._nodepath.set_shader_input(*inp), inputs)
 
     def _update(self, task):
@@ -155,5 +166,6 @@ class P3dParticle(GameObject):
     def __destroy(self):
         self.upd_tsk = taskMgr.remove(self.upd_tsk)
         self._nodepath = self._nodepath.remove_node()
-        if self.__emitternode: self.__emitternode = self.__emitternode.destroy()
+        if self.__emitternode:
+            self.__emitternode = self.__emitternode.destroy()
         GameObject.destroy(self)

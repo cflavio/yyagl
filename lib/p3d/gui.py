@@ -67,9 +67,9 @@ class CommonBase(object):
 class P3dImg(Facade, CommonBase):
 
     def __init__(self, filepath, pos=(0, 0), scale=1.0, background=False,
-                 force_transp=None, foreground=False, parent=None):
-        self.img = OnscreenImage(filepath, pos=(pos[0], 1, pos[1]), scale=scale,
-                                 parent=parent)
+                 foreground=False, parent=None):
+        self.img = OnscreenImage(
+            filepath, pos=(pos[0], 1, pos[1]), scale=scale, parent=parent)
         if background: self.img.set_bin('background', 10)
         alpha_formats = [12]  # panda3d.core.texture.Frgba
         if self.img.get_texture().get_format() in alpha_formats:
@@ -102,6 +102,7 @@ class P3dImg(Facade, CommonBase):
 class P3dBase(Facade, CommonBase):
 
     def __init__(self, tra_src=None, tra_tra=None):
+        #self.text_src_tra = None  # it breaks the gui
         if tra_src and tra_tra: self.bind_tra(tra_src, tra_tra)
         mth_lst = [
             ('set_pos', lambda obj: obj.wdg.set_pos),
@@ -117,7 +118,8 @@ class P3dBase(Facade, CommonBase):
         # TODO: try reverse mapping? i.e. retrieve the src string from the
         # translated one
         self.text_src_tra = text_src
-        self.__class__.bind_transl = property(lambda self: _(self.text_src_tra))
+        tra = lambda self: _(self.text_src_tra)
+        self.__class__.bind_transl = property(tra)
         self['text'] = self.bind_transl
 
     def get_pos(self, pos=None):
@@ -132,11 +134,10 @@ class P3dBase(Facade, CommonBase):
     @property
     def hidden(self): return self.wdg.is_hidden()
 
-    def destroy(self): self.wdg = self.wdg.destroy()
+    def destroy(self): self.wdg.destroy()
 
 
 class P3dAbs(P3dBase):
-
 
     def __init__(self, tra_src=None, tra_tra=None):
         P3dBase.__init__(self, tra_src, tra_tra)
@@ -166,7 +167,7 @@ class P3dBtn(P3dAbs):
             cmd=None, frame_size=(-1, 1, -1, 1), click_snd=None,
             text_fg=(1, 1, 1, 1), frame_col=(1, 1, 1, 1), text_font=None,
             over_snd=None, extra_args=[], frame_texture=None, img=None,
-            tra_src=None, tra_tra=None, text_scale=.8):
+            tra_src=None, tra_tra=None, text_scale=1.0):
         str2par = {'bottomcenter': base.a2dBottomCenter}
         if parent in str2par: parent = str2par[parent]
         self.wdg = DirectButton(
@@ -175,7 +176,7 @@ class P3dBtn(P3dAbs):
             frameSize=frame_size, clickSound=click_snd, text_fg=text_fg,
             frameColor=frame_col, text_font=text_font, rolloverSound=over_snd,
             extraArgs=extra_args, frameTexture=frame_texture, image=img,
-            text_scale=1.0)
+            text_scale=text_scale)
         P3dAbs.__init__(self, tra_src, tra_tra)
         self['relief'] = FLAT
         args = [(ENTER, self._on_enter), (EXIT, self._on_exit)]
@@ -229,8 +230,8 @@ class P3dOptionMenu(P3dAbs):
             text_fg=(1, 1, 1, 1), item_frame_col=(1, 1, 1, 1),
             frame_col=(1, 1, 1, 1), highlight_col=(1, 1, 1, 1),
             text_scale=.05, popup_marker_col=(1, 1, 1, 1),
-            item_relief=None, item_text_font=None, text_font=None, tra_src=None,
-            tra_tra=None):
+            item_relief=None, item_text_font=None, text_font=None,
+            tra_src=None, tra_tra=None):
         self.wdg = DirectOptionMenu(
             text=text, items=items, pos=(pos[0], 1, pos[1]), scale=scale,
             initialitem=initialitem, command=cmd, frameSize=frame_size,
@@ -265,10 +266,11 @@ class P3dEntry(P3dAbs, DirectObject):
         self.__focus_out_cmd = focus_out_cmd
         DirectObject.__init__(self)
         self.wdg = DirectEntry(
-            scale=scale, pos=(pos[0], 1, pos[1]), entryFont=entry_font, width=width,
-            frameColor=frame_col, initialText=initial_text, obscured=obscured,
-            command=cmd, focusInCommand=self._focus_in_cmd,
-            focusInExtraArgs=focus_in_args, focusOutCommand=self._focus_out_cmd,
+            scale=scale, pos=(pos[0], 1, pos[1]), entryFont=entry_font,
+            width=width, frameColor=frame_col, initialText=initial_text,
+            obscured=obscured, command=cmd, focusInCommand=self._focus_in_cmd,
+            focusInExtraArgs=focus_in_args,
+            focusOutCommand=self._focus_out_cmd,
             focusOutExtraArgs=focus_out_args, parent=parent,
             text_fg=text_fg)
         P3dAbs.__init__(self, tra_src, tra_tra)
@@ -315,9 +317,10 @@ class P3dLabel(P3dAbs):
             text_align=None, text_fg=(1, 1, 1, 1), text_font=None, scale=.05,
             frame_col=(1, 1, 1, 1), tra_src=None, tra_tra=None, hpr=(0, 0, 0)):
         self.wdg = DirectLabel(
-            text=text, pos=(pos[0], 1, pos[1]), parent=parent, text_wordwrap=text_wordwrap,
-            text_align=text_align, text_fg=text_fg, text_font=text_font,
-            scale=scale, frameColor=frame_col, hpr=hpr)
+            text=text, pos=(pos[0], 1, pos[1]), parent=parent,
+            text_wordwrap=text_wordwrap, text_align=text_align,
+            text_fg=text_fg, text_font=text_font, scale=scale,
+            frameColor=frame_col, hpr=hpr)
         P3dAbs.__init__(self, tra_src, tra_tra)
         mth_lst = [
             ('set_bin', lambda obj: obj.wdg.set_bin),

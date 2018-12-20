@@ -53,17 +53,21 @@ class LibP3d(DirectObject, object):
         if base.appRunner: return base.appRunner.p3dFilename.get_dirname()
         else: return getcwd()
 
-    def send(self, msg): return messenger.send(msg)
+    @staticmethod
+    def send(msg): return messenger.send(msg)
 
-    def do_later(self, time, meth, args=[]):
+    @staticmethod
+    def do_later(time, meth, args=None):
+        args = args or []
         return taskMgr.doMethodLater(
             time, lambda meth, args: meth(*args), meth.__name__, [meth, args])
 
-    def add_task(self, mth, priority=0):
+    @staticmethod
+    def add_task(mth, priority=0):
         return taskMgr.add(mth, mth.__name__, priority)
 
-    def remove_task(self, tsk):
-        taskMgr.remove(tsk)
+    @staticmethod
+    def remove_task(tsk): taskMgr.remove(tsk)
 
     def init(self, green=(.2, .8, .2, 1), red=(.8, .2, .2, 1), end_cb=None):
         LibShowBase()
@@ -75,7 +79,8 @@ class LibP3d(DirectObject, object):
         self.__set_roots()
         self.accept('aspectRatioChanged', self.on_aspect_ratio_changed)
 
-    def __set_roots(self):
+    @staticmethod
+    def __set_roots():
         base.a2dTopQuarter = base.aspect2d.attachNewNode('a2dTopQuarter')
         base.a2dTopQuarter.set_pos(base.a2dLeft / 2, 0, base.a2dTop)
         base.a2dTopThirdQuarter = \
@@ -90,14 +95,16 @@ class LibP3d(DirectObject, object):
         base.a2dBottomQuarter.set_pos(base.a2dLeft / 2, 0, base.a2dBottom)
         base.a2dBottomThirdQuarter = \
             base.aspect2d.attachNewNode('a2dBottomThirdQuarter')
-        base.a2dBottomThirdQuarter.set_pos(base.a2dRight / 2, 0, base.a2dBottom)
+        base.a2dBottomThirdQuarter.set_pos(
+            base.a2dRight / 2, 0, base.a2dBottom)
 
     @staticmethod
     def on_aspect_ratio_changed():
         base.a2dTopQuarter.set_pos(base.a2dLeft / 2, 0, base.a2dTop)
         base.a2dTopThirdQuarter.set_pos(base.a2dRight / 2, 0, base.a2dTop)
         base.a2dBottomQuarter.set_pos(base.a2dLeft / 2, 0, base.a2dBottom)
-        base.a2dBottomThirdQuarter.set_pos(base.a2dRight / 2, 0, base.a2dBottom)
+        base.a2dBottomThirdQuarter.set_pos(
+            base.a2dRight / 2, 0, base.a2dBottom)
 
     @property
     def has_window(self): return bool(base.win)
@@ -155,7 +162,8 @@ class LibP3d(DirectObject, object):
         if self.__end_cb: self.__end_cb()
         sys.exit()
 
-    def load_font(self, filepath, outline=True):
+    @staticmethod
+    def load_font(filepath, outline=True):
         font = base.loader.loadFont(filepath)
         font.set_pixels_per_unit(60)
         font.set_minfilter(Texture.FTLinearMipmapLinear)

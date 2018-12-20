@@ -2,7 +2,7 @@ from os.path import isfile, dirname
 from panda3d.core import AmbientLight, DirectionalLight, PointLight, \
     Spotlight, LVector4f, LVector3f, Vec3, Shader, Texture, WindowProperties,\
     FrameBufferProperties, GraphicsPipe, GraphicsOutput, NodePath, PandaNode, \
-    TextureStage, TexMatrixAttrib, Filename
+    TextureStage, TexMatrixAttrib
 from direct.filter.FilterManager import FilterManager
 
 
@@ -10,8 +10,8 @@ def load_shader(vert, frag):
 
     def is_file(path):
         joinchar = '/' if base.appRunner and not path.startswith('/') else ''
-        path = (base.appRunner and dirname(str(base.appRunner.p3dFilename)) or '') + joinchar + path
-        return isfile(path)
+        dpath = base.appRunner and dirname(str(base.appRunner.p3dFilename))
+        return isfile((dpath or '') + joinchar + path)
     if is_file(vert) and is_file(frag):
         return Shader.load(Shader.SLGLSL, vert, frag)
     else: return Shader.make(Shader.SLGLSL, vert, frag)
@@ -163,8 +163,9 @@ class P3dShaderMgr(object):
             if tstage.getSort() == 0: continue
             self.__set_slots(tstage, model, 1 if tstage.getSort() == 10 else 2)
 
-    def __set_slots(self, ts, model, slot):
-        if ts.getMode() == TextureStage.MGloss:
+    @staticmethod
+    def __set_slots(tstage, model, slot):
+        if tstage.getMode() == TextureStage.MGloss:
             model.set_shader_input('gloss_slot', slot)
         else:
             model.set_shader_input('detail_slot', slot)

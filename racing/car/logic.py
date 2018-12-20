@@ -745,8 +745,7 @@ class CarPlayerLogic(CarLogic):
         else: self.mediator.gui.hide_forward()
         tgt_vec = LVector3f(self.tgt_vec.x, self.tgt_vec.y, 0)
         tgt_vec.normalize()
-        vec_up = LVector3f(0, 0, 1)
-        angle = -self.car_vec.signed_angle_deg(tgt_vec, vec_up)
+        angle = -self.car_vec.signed_angle_deg(tgt_vec)
         self.mediator.gui.panel.set_forward_angle(angle)
 
     def fire(self):

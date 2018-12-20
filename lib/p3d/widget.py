@@ -49,11 +49,13 @@ class FrameMixin(WidgetMixin):
 
     def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
         self.curr_offset += WidgetMixin.highlight_color_offset[player]
-        self.get_np()['frameColor'] = LVecBase4f(self.start_frame_color) + self.curr_offset
+        col = LVecBase4f(self.start_frame_color)
+        self.get_np()['frameColor'] = col + self.curr_offset
 
     def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
         self.curr_offset -= WidgetMixin.highlight_color_offset[player]
-        self.get_np()['frameColor'] = LVecBase4f(self.start_frame_color) + self.curr_offset
+        col = LVecBase4f(self.start_frame_color)
+        self.get_np()['frameColor'] = col + self.curr_offset
 
 
 class BtnMixin(FrameMixin):
@@ -154,4 +156,4 @@ class OptionMenuMixin(BtnMixin):
             curr_name = 'item%s' % nodepath.selectedIndex
             nodepath._unhighlightItem(nodepath.component(curr_name), fcol)
             return True
-        BtnMixin.on_enter(self)
+        BtnMixin.on_enter(self, player)

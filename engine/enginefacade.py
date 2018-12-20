@@ -51,5 +51,5 @@ class EngineFacade(Facade):
         self.pause.remove_task(tsk)
         return self.lib.remove_task(tsk)
 
-    def load_model(self, filename, callback=None, extra_args=[], anim=None):
-        return self.gfx.load_model(filename, callback, extra_args, anim)
+    def load_model(self, filename, callback=None, anim=None):
+        return self.gfx.load_model(filename, callback, anim)

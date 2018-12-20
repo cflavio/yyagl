@@ -22,7 +22,6 @@ class BulletPhysWorld(Facade):
             ('ray_test_closest', lambda obj: obj.wld.ray_test_closest)]
         Facade.__init__(self, mth_lst=mth_lst)
 
-
     def set_gravity(self, vec): return self.wld.set_gravity(vec)
 
     def init_debug(self):
@@ -33,12 +32,12 @@ class BulletPhysWorld(Facade):
 
     def stop(self): self.__debug_np.remove_node()
 
-    def ray_test_all(self, a, b, mask=None):
-        args = [a.vec, b.vec, mask] if mask else [a.vec, b.vec]
+    def ray_test_all(self, pt_a, pt_b, mask=None):
+        args = [pt_a.vec, pt_b.vec, mask] if mask else [pt_a.vec, pt_b.vec]
         return self.wld.ray_test_all(*args)
 
-    def do_physics(self, dt, num_substeps, size_substeps):
-        return self.wld.do_physics(dt, num_substeps, size_substeps)
+    def do_physics(self, delta_t, num_substeps, size_substeps):
+        return self.wld.do_physics(delta_t, num_substeps, size_substeps)
 
     def get_contacts(self, node):
         contacts = self.wld.contact_test(node).get_contacts()

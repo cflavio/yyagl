@@ -1,8 +1,7 @@
 from os.path import exists
-from panda3d.core import get_model_path, AntialiasAttrib, PandaNode, \
-    LightRampAttrib, Camera, OrthographicLens, NodePath, OmniBoundingVolume, \
-    AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, BitMask32, \
-    Point2, Point3
+from panda3d.core import (get_model_path, AntialiasAttrib, PandaNode,
+    LightRampAttrib, Camera, OrthographicLens, NodePath, OmniBoundingVolume,
+    AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, Point2, Point3)
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.lib.p3d.p3d import LibP3d
@@ -48,7 +47,6 @@ class RenderToTexture(object):
         if base.win:  # if you close the window during a race
             base.win.remove_display_region(self.display_region)
         map(lambda node: node.remove_node(), [self.camera, self.root])
-        self.buffer = self.display_region = self.camera = self.root = None
 
 
 class P3dGfxMgr(object):
@@ -68,14 +66,15 @@ class P3dGfxMgr(object):
         if shaders and base.win:
             self.filters = CommonFilters(base.win, base.cam)
 
-    def load_model(self, filename, callback=None, extra_args=[], anim=None):
+    @staticmethod
+    def load_model(filename, callback=None, anim=None):
         ext = '.bam' if exists(filename + '.bam') else ''
         if anim:
             anim_dct = {'anim': filename + '-Anim' + ext}
             return P3dNode(Actor(filename + ext, anim_dct))
         elif callback:
-            return loader.loadModel(
-              filename + ext, callback=lambda model: callback(P3dNode(model)))
+            callb = lambda model: callback(P3dNode(model))
+            return loader.loadModel(filename + ext, callback=callb)
         else:
             return P3dNode(loader.loadModel(LibP3d.p3dpath(filename + ext)))
 
@@ -201,7 +200,7 @@ class P3dNode(Facade):
     def get_relative_vector(self, node, vec):
         return self.node.get_relative_vector(node.node, vec)
 
-    def set_material(self, material): return self.node.set_material(material, 1)
+    def set_material(self, mat): return self.node.set_material(mat, 1)
 
     def set_python_tag(self, name, val):
         return self.node.set_python_tag(name, val)

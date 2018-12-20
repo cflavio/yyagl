@@ -3,7 +3,6 @@ from os.path import dirname, abspath, join
 from sys import modules
 from direct.task import Task
 from direct.interval.IntervalGlobal import ivalMgr
-from yyagl.lib.p3d.p3d import LibP3d
 from yyagl.gameobject import GameObject
 
 

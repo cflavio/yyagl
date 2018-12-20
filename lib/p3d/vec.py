@@ -2,7 +2,6 @@ from panda3d.core import Vec2 as PVec2, Vec3 as PVec3, Mat4, LVector2f, \
     LVector3f
 
 
-
 class P3dVec2(object):
 
     def __init__(self, x, y):
@@ -45,14 +44,16 @@ class P3dVec2(object):
 class P3dVec3(P3dVec2):
 
     def __init__(self, x, y, z):
+        P3dVec2.__init__(self, x, y)
         self.vec = PVec3(x, y, z)
 
     def normalize(self):
         self.vec.normalize()
         return P3dVec3(self.vec.x, self.vec.y, self.vec.z)
 
-    def signed_angle_deg(self, vec, vec_up):
-        return self.vec.signed_angle_deg(LVector3f(vec.x, vec.y, vec.z), vec_up)
+    def signed_angle_deg(self, vec):
+        v_up = LVector3f(0, 0, 1)
+        return self.vec.signed_angle_deg(LVector3f(vec.x, vec.y, vec.z), v_up)
 
     def rotate(self, deg):
         rot_mat = Mat4()
