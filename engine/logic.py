@@ -14,10 +14,11 @@ class VersionChecker(GameObject, ComputerProxy):
 
     @compute_once
     def is_uptodate(self):
-        try:
-            ver = urlopen('http://ya2.it/yorg_version.txt').read()
-        except IOError:
-            return False
+        self.eng.client.register_rpc('srv_version')
+        try: ver = self.eng.client.srv_version()
+        except AttributeError:
+            print "can't retrieve the version"
+            return True
         major, minor, build = ver.split('.')
         major, minor, build = int(major), int(minor), int(build)
         curr_ver = self.eng.version
