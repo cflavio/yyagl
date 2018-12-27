@@ -57,7 +57,7 @@ class CommonBase(object):
             Wait(abs(self.pos.y - 1) / 4),
             PosIval(self.get_np(), .5, end_pos),
             Func(self.destroy if destroy else self.hide))
-        if not destroy: seq.append(Func(self.set_pos, start_pos))
+        if not destroy: seq += Func(self.set_pos, start_pos)
         seq.start()
 
     def translate(self):
