@@ -1,13 +1,13 @@
 #version 130
-in float time;
-in float ptime;
-uniform float part_lifetime;
+in float from_emission;
+uniform float part_duration;
 uniform vec4 col;
-uniform sampler2D tex_in;
+uniform sampler2D image;
 
 in vec3 start_particle_time;
 
 void main() {
-    vec4  _col = texture(tex_in, gl_PointCoord) * col * gl_Color;
-    gl_FragColor = vec4(_col.rgb, _col.a * clamp(1 - ptime / part_lifetime, 0, 1));
+    vec4  _col = texture(image, gl_PointCoord) * col * gl_Color;
+    float alpha = clamp(1 - from_emission / part_duration, 0, 1);
+    gl_FragColor = vec4(_col.rgb, _col.a * alpha);
 }

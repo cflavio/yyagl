@@ -15,8 +15,8 @@ class RearRocketLogic(WeaponLogic):
         self.mediator.phys.fire()
         self.tsk = self.eng.do_later(10, self.mediator.destroy)
         self.particle = self.eng.particle(self.mediator.gfx.gfx_np,
-                                          'dust', 10000, (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=3,
-                                          part_lifetime=1.2)
+                                          'dust', (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=3,
+                                          part_duration=1.2)
 
     def destroy(self):
         if self.particle: self.particle.destroy()

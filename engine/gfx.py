@@ -38,8 +38,8 @@ class EngineGfx(GfxColleague):
     def print_stats(self): self.gfx_mgr.print_stats()
 
     @staticmethod
-    def particle(parent, texture, npart, color=(1, 1, 1, 1),
-        ampl=pi/6, ray=.5, rate=.0001, gravity=-.85, vel=3.8, part_lifetime=1.0,
-        autodestroy=None):
-        return Particle(parent, texture, npart, color, ampl, ray, rate, gravity,
-                        vel, part_lifetime, autodestroy)
+    def particle(parent, texture, color=(1, 1, 1, 1), ampl=pi/6, ray=.5,
+                 rate=.0001, gravity=-.85, vel=3.8, part_duration=1.0,
+                 autodestroy=None):
+        return Particle(parent, texture, color, ampl, ray, rate, gravity, vel,
+                        part_duration, autodestroy)
