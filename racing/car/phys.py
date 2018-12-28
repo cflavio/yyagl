@@ -189,7 +189,7 @@ class CarPhys(PhysColleague):
         vel = self.vehicle.get_chassis().get_linear_velocity()
         rot_mat = Mat4()
         rot_mat.setRotateMat(-90, (0, 0, 1))
-        car_lat = rot_mat.xformVec(self.mediator.logic.car_vec.vec)
+        car_lat = rot_mat.xformVec(self.mediator.logic.car_vec._vec)
         proj_frc = vel.project(car_lat)
         return proj_frc.length()
 

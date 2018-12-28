@@ -63,7 +63,7 @@ class PageGui(GuiColleague):
     def __direction_dot_dwg(self, wdg, direction, player, start=None):
         if start: start_pos = start
         else: start_pos = self.curr_wdgs[player].pos
-        return (wdg.pos - start_pos).norm.dot(direction)
+        return (wdg.pos - start_pos).normalized.dot(direction)
 
     def __next_weight(self, wdg, direction, player, start=None):
         if start: start_pos = start

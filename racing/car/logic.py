@@ -78,21 +78,21 @@ class DriftingForce(object):
         car_vec = self.car.logic.car_vec
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
-        car_vec_left = rot_mat_left.xformVec(car_vec.vec)
+        car_vec_left = rot_mat_left.xformVec(car_vec._vec)
 
         rot_mat_drift_left = Mat4()
         deg = 45 if input_dct.forward else 90
         rot_mat_drift_left.setRotateMat(deg, (0, 0, 1))
-        drift_vec_left = rot_mat_drift_left.xformVec(car_vec.vec)
+        drift_vec_left = rot_mat_drift_left.xformVec(car_vec._vec)
 
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
-        car_vec_right = rot_mat_right.xformVec(car_vec.vec)
+        car_vec_right = rot_mat_right.xformVec(car_vec._vec)
 
         rot_mat_drift_right = Mat4()
         deg = -45 if input_dct.forward else 90
         rot_mat_drift_right.setRotateMat(deg, (0, 0, 1))
-        drift_vec_right = rot_mat_drift_right.xformVec(car_vec.vec)
+        drift_vec_right = rot_mat_drift_right.xformVec(car_vec._vec)
 
         max_intensity = 10000.0
         max_torque = 5000.0
@@ -146,7 +146,7 @@ class DriftingForce(object):
         if intensity:
             v = direction * intensity
             v = Vec(v.x, v.y, v.z)
-            phys.pnode.apply_central_force(v.vec)
+            phys.pnode.apply_central_force(v._vec)
         if intensity_torque:
             phys.pnode.apply_torque((0, 0, intensity_torque))
 
@@ -329,10 +329,10 @@ class CarLogic(LogicColleague, ComputerProxy):
         car_vec = self.car_vec
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
-        car_vec_left = rot_mat_left.xformVec(car_vec.vec)
+        car_vec_left = rot_mat_left.xformVec(car_vec._vec)
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
-        car_vec_right = rot_mat_right.xformVec(car_vec.vec)
+        car_vec_right = rot_mat_right.xformVec(car_vec._vec)
         vel = self.mediator.phys.vehicle.get_chassis().get_linear_velocity()
         vel.normalize()
         car_dot_vel_l = car_vec_left.dot(vel)

@@ -1,91 +1,85 @@
-from panda3d.core import Vec2 as PVec2, Vec3 as PVec3, Mat4, LVector2f, \
-    LVector3f
+from panda3d.core import Vec2, Vec3, Mat4, LVector2f, LVector3f
 
 
 class P3dVec2(object):
 
-    def __init__(self, x, y):
-        self.vec = PVec2(x, y)
+    attr_lst = ['x', 'y']
+    p3d_cls = Vec2
 
-    def normalize(self):
-        self.vec.normalize()
-        return P3dVec2(self.vec.x, self.vec.y)
+    def __init__(self, *args):
+        self._vec = self.p3d_cls(*args)
+
+    @property
+    def x(self): return self._vec.x
+
+    @property
+    def y(self): return self._vec.y
+
+    @property
+    def xy(self): return P3dVec2(self._vec.x, self._vec.y)
 
     def signed_angle_deg(self, vec):
-        return self.vec.signed_angle_deg(LVector2f(vec.x, vec.y))
-
-    @property
-    def x(self): return self.vec.x
-
-    @property
-    def y(self): return self.vec.y
+        return self._vec.signed_angle_deg(LVector2f(vec.x, vec.y))
 
     def dot(self, other):
-        if type(other) == tuple: other = P3dVec2(other[0], other[1])
-        return self.vec.dot(other.vec)
+        if type(other) == tuple: other = self.__class__(*other)
+        return self._vec.dot(other._vec)
+
+    def __neg__(self):
+        nvec = - self._vec
+        return self.__class__(*[getattr(nvec, attr) for attr in self.attr_lst])
+
+    def __add__(self, vec):
+        if type(vec) == tuple: vec = self.__class__(*vec)
+        svec = self._vec + vec._vec
+        return self.__class__(*[getattr(svec, attr) for attr in self.attr_lst])
 
     def __sub__(self, vec):
-        if type(vec) == tuple: vec = P3dVec2(vec[0], vec[1])
-        p3dvec = self.vec - vec.vec
-        return P3dVec2(p3dvec.x, p3dvec.y)
+        if type(vec) == tuple: vec = self.__class__(*vec)
+        svec = self._vec - vec._vec
+        return self.__class__(*[getattr(svec, attr) for attr in self.attr_lst])
 
-    @property
-    def norm(self):
-        vec = LVector2f(self.vec.x, self.vec.y)
-        vec.normalize()
-        return P3dVec2(vec.x, vec.y)
-
-    def __repr__(self):
-        rnd = lambda x: round(x, 3)
-        return '%s(%s,%s)' % (
-            self.__class__.__name__, rnd(self.vec.x), rnd(self.vec.y))
-
-
-class P3dVec3(P3dVec2):
-
-    def __init__(self, x, y, z):
-        P3dVec2.__init__(self, x, y)
-        self.vec = PVec3(x, y, z)
+    def __mul__(self, val):
+        svec = self._vec * val
+        return self.__class__(*[getattr(svec, attr) for attr in self.attr_lst])
 
     def normalize(self):
-        self.vec.normalize()
-        return P3dVec3(self.vec.x, self.vec.y, self.vec.z)
+        self._vec.normalize()
+        return self.__class__(*self.attrs)
 
-    def signed_angle_deg(self, vec):
-        v_up = LVector3f(0, 0, 1)
-        return self.vec.signed_angle_deg(LVector3f(vec.x, vec.y, vec.z), v_up)
+    @property
+    def attrs(self): return [getattr(self._vec, fld) for fld in self.attr_lst]
+
+    @property
+    def normalized(self):
+        vec = self.p3d_cls(*self.attrs)
+        vec.normalize()
+        return self.__class__(*[getattr(vec, fld) for fld in self.attr_lst])
 
     def rotate(self, deg):
         rot_mat = Mat4()
         rot_mat.set_rotate_mat(deg, (0, 0, 1))
-        self.vec = rot_mat.xform_vec(self.vec)
+        self._vec = rot_mat.xform_vec(self._vec)
 
-    def __add__(self, vec):
-        p3dvec = self.vec + vec.vec
-        return P3dVec3(p3dvec.x, p3dvec.y, p3dvec.z)
-
-    def __sub__(self, vec):
-        p3dvec = self.vec - vec.vec
-        return P3dVec3(p3dvec.x, p3dvec.y, p3dvec.z)
-
-    def __neg__(self):
-        p3dvec = - self.vec
-        return P3dVec3(p3dvec.x, p3dvec.y, p3dvec.z)
-
-    def __mul__(self, val):
-        p3dvec = self.vec * val
-        return P3dVec3(p3dvec.x, p3dvec.y, p3dvec.z)
-
-    def length(self): return self.vec.length()
-
-    @property
-    def z(self): return self.vec.z
-
-    @property
-    def xy(self): return P3dVec2(self.vec.x, self.vec.y)
+    def length(self): return self._vec.length()
 
     def __repr__(self):
+        tmpl = '%s(' + ','.join(['%s' for _ in range(len(self.attr_lst))])
         rnd = lambda x: round(x, 3)
-        return '%s(%s,%s,%s)' % (
-            self.__class__.__name__, rnd(self.vec.x), rnd(self.vec.y),
-            rnd(self.vec.z))
+        vals = [rnd(getattr(self._vec, attr)) for attr in self.attr_lst]
+        pars = tuple([self.__class__.__name__] + vals)
+        return  tmpl % pars
+
+
+
+class P3dVec3(P3dVec2):
+
+    attr_lst = ['x', 'y', 'z']
+    p3d_cls = Vec3
+
+    @property
+    def z(self): return self._vec.z
+
+    def signed_angle_deg(self, vec):
+        v_up = LVector3f(0, 0, 1)
+        return self._vec.signed_angle_deg(LVector3f(vec.x, vec.y, vec.z), v_up)

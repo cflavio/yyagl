@@ -33,7 +33,7 @@ class BulletPhysWorld(Facade):
     def stop(self): self.__debug_np.remove_node()
 
     def ray_test_all(self, pt_a, pt_b, mask=None):
-        args = [pt_a.vec, pt_b.vec, mask] if mask else [pt_a.vec, pt_b.vec]
+        args = [pt_a._vec, pt_b._vec, mask] if mask else [pt_a._vec, pt_b._vec]
         return self.wld.ray_test_all(*args)
 
     def do_physics(self, delta_t, num_substeps, size_substeps):

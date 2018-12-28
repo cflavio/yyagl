@@ -165,7 +165,7 @@ class P3dNode(Facade):
     @property
     def p3dnode(self): return self.node.node()
 
-    def set_pos(self, pos): return self.node.set_pos(pos.vec)
+    def set_pos(self, pos): return self.node.set_pos(pos._vec)
 
     def get_pos(self, other=None):
         return self.node.get_pos(* [] if other is None else [other.node])
