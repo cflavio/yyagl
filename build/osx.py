@@ -2,7 +2,6 @@ from os import system, walk, remove
 from shutil import rmtree, copytree
 from .build import ver, bld_dpath, branch, bld_cmd
 from .deployng import bld_ng
-from .mtprocesser import log_mem
 
 
 def bld_osx(target, source, env):
@@ -29,12 +28,12 @@ def bld_osx(target, source, env):
                 remove(fname)
             if any(fname.endswith('.' + ext) for ext in ['png', 'jpg']):
                 remove(fname)
-            #is_track = 'assets/models/tracks/' in fname
-            #is_bam = fname.endswith('.bam')
-            #no_conv = ['/track_all', '/collision', 'Anim']
-            #is_no_conv = any(fname.endswith(con + '.bam') for con in no_conv)
-            #if is_track and is_bam and not is_no_conv:
-            #    remove(fname)
+            is_track = 'assets/models/tracks/' in fname
+            is_bam = fname.endswith('.bam')
+            no_conv = ['/track_all', '/collision', 'Anim']
+            is_no_conv = any(fname.endswith(con + '.bam') for con in no_conv)
+            if is_track and is_bam and not is_no_conv:
+                remove(fname)
     fname = '{AppName}.app'
     pkg = '{appname}-{version}{internet_str}-osx.tar.xz'
     tmpl_args = (bld_dpath, fname, pkg)
@@ -42,6 +41,5 @@ def bld_osx(target, source, env):
     cmd = tmpl.format(
         AppName=env['APPNAME'].capitalize(), appname=env['APPNAME'],
         version=branch, internet_str=internet_str)
-    log_mem()
     system(cmd)
     rmtree('%sosx_i386' % bld_dpath)

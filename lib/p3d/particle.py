@@ -163,9 +163,6 @@ class P3dParticle(GameObject):
         return task.again
 
     def destroy(self, now=False):
-        if not self.eng.lib.version.startswith('1.10'):
-            GameObject.destroy(self)
-            return
         self._nodepath.set_shader_input('emitting', 0)
         self.eng.do_later(0 if now else self.__part_duration, self.__destroy)
 

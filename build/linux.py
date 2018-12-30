@@ -4,7 +4,6 @@ from shutil import move, rmtree, copytree, copy
 from .build import ver, bld_dpath, branch, InsideDir, size, \
     bld_cmd
 from .deployng import bld_ng
-from .mtprocesser import log_mem
 
 
 def bld_linux(target, source, env):
@@ -80,11 +79,11 @@ def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
                 remove(fpath)
             if any(fpath.endswith('.' + ext) for ext in ['png', 'jpg']):
                 remove(fpath)
-            #if 'assets/models/tracks/' in fpath and \
-            #        fpath.endswith('.bam') and not \
-            #        any(fpath.endswith(concl + '.bam')
-            #                for concl in ['/track_all', '/collision', 'Anim']):
-            #    remove(fpath)
+            if 'assets/models/tracks/' in fpath and \
+                    fpath.endswith('.bam') and not \
+                    any(fpath.endswith(concl + '.bam')
+                            for concl in ['/track_all', '/collision', 'Anim']):
+                remove(fpath)
     tmpl = 'pdeploy -o  . {nointernet} -t host_dir=./lib ' + \
         '-t verify_contents=never -n {appname} -N {AppName} -v {version} ' + \
         '-a ya2.it -A "Ya2" -l "GPLv3" -L license.txt -e flavio@ya2.it ' + \
@@ -101,11 +100,9 @@ def __bld_full_pkg(appname, platform, ico_fpath, p3d_fpath, nointernet):
 
 
 def __bld_pckgs(appname, platform, int_str):
-    log_mem()
     with InsideDir('img/data'): system('tar -cvf - * | xz > ../pdata.tar.xz')
     system('rm -rf img/data/*')
     move('img/pdata.tar.xz', 'img/data/pdata.tar.xz')
-    log_mem()
     with InsideDir('img'): system('zip -r ../pdata.zip *')
     system('cat pdata.zip >> ./mojosetup_' + platform)
     fdst = '%s-%s%s-linux_%s' % (appname, branch, int_str, platform)
