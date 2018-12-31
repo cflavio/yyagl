@@ -164,7 +164,7 @@ class P3dParticle(GameObject):
 
     def destroy(self, now=False):
         self._nodepath.set_shader_input('emitting', 0)
-        self.eng.do_later(0 if now else self.__part_duration, self.__destroy)
+        self.eng.do_later(0 if now else 1.2 * self.__part_duration, self.__destroy)
 
     def __destroy(self):
         self.upd_tsk = taskMgr.remove(self.upd_tsk)
