@@ -190,7 +190,7 @@ class FPCamera(Camera):
         car_vec = self.car.logic.car_vec
         rot_mat_left = Mat4()
         rot_mat_left.setRotateMat(90, (0, 0, 1))
-        car_vec_left = rot_mat_left.xformVec(car_vec.vec)
+        car_vec_left = rot_mat_left.xformVec(car_vec._vec)
         tgt_left = tgt + car_vec_left
         pos_left = pos + car_vec_left
         occl_left = self.__closest_occl(pos_left, tgt_left)
@@ -198,7 +198,7 @@ class FPCamera(Camera):
             return
         rot_mat_right = Mat4()
         rot_mat_right.setRotateMat(-90, (0, 0, 1))
-        car_vec_right = rot_mat_right.xformVec(car_vec.vec)
+        car_vec_right = rot_mat_right.xformVec(car_vec._vec)
         car_vec_right += (0, 0, 2)
         tgt_right = tgt + car_vec_right
         pos_right = pos + car_vec_right
