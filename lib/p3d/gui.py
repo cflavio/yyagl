@@ -118,7 +118,8 @@ class P3dBase(Facade, CommonBase):
         # TODO: try reverse mapping? i.e. retrieve the src string from the
         # translated one
         self.text_src_tra = text_src
-        tra = lambda self: _(self.text_src_tra)
+        self.text_tra_tra = text_transl
+        tra = lambda self: _(self.text_tra_tra)
         self.__class__.bind_transl = property(tra)
         self['text'] = self.bind_transl
 
