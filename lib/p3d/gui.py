@@ -12,6 +12,7 @@ from direct.gui.DirectEntry import DirectEntry
 from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
+from direct.gui.DirectScrolledFrame import DirectScrolledFrame
 from yyagl.facade import Facade
 from yyagl.lib.ivals import Seq, Wait, PosIval, Func
 
@@ -20,11 +21,13 @@ class CommonBase(object):
 
     def set_widget(self):
         from yyagl.lib.gui import Frame, Slider, Btn, Label, OptionMenu, \
-            CheckBtn, Entry, Img, Text
+            CheckBtn, Entry, Img, Text, ScrolledFrame
         from yyagl.lib.p3d.widget import FrameMixin, SliderMixin, BtnMixin, \
-            OptionMenuMixin, CheckBtnMixin, EntryMixin, ImgMixin
+            OptionMenuMixin, CheckBtnMixin, EntryMixin, ImgMixin, \
+            ScrolledFrameMixin
         libwdg2wdg = {
             FrameMixin: [Frame],
+            ScrolledFrameMixin: [ScrolledFrame],
             SliderMixin: [Slider],
             BtnMixin: [Btn, Label],
             OptionMenuMixin: [OptionMenu],
@@ -357,3 +360,22 @@ class P3dFrame(P3dAbs):
         self.wdg = DirectFrame(frameSize=frame_size, frameColor=frame_col,
                                pos=(pos[0], 1, pos[1]), parent=parent)
         if texture_coord: self.wdg['frameTexture'] = Texture()
+
+
+class P3dScrolledFrame(P3dAbs):
+
+    def __init__(self, frame_sz=(-1, 1, -1, 1), canvas_sz=(0, 1, 0, 1),
+            scrollbar_width=.05, frame_col=(1, 1, 1, 1),
+            pos=(0, 0), parent='topleft'):
+        P3dAbs.__init__(self)
+        par2p3d = {'topleft': base.a2dTopLeft}
+        self.wdg = DirectScrolledFrame(
+            frameSize=frame_sz,
+            canvasSize=canvas_sz,
+            scrollBarWidth=scrollbar_width,
+            frameColor=frame_col,
+            pos=(pos[0], 1, pos[1]),
+            parent=par2p3d[parent])
+
+    @property
+    def canvas(self): return self.wdg.getCanvas()

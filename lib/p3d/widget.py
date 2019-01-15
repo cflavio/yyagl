@@ -58,6 +58,19 @@ class FrameMixin(WidgetMixin):
         self.get_np()['frameColor'] = col + self.curr_offset
 
 
+class ScrolledFrameMixin(WidgetMixin):
+
+    def init(self, wdg): pass
+
+    def enable(self): self['state'] = NORMAL
+
+    def disable(self): self['state'] = DISABLED
+
+    def on_wdg_enter(self, pos=None, player=0): pass
+
+    def on_wdg_exit(self, pos=None, player=0): pass
+
+
 class BtnMixin(FrameMixin):
 
     def init(self, wdg):
