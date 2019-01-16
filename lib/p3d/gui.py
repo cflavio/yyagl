@@ -317,7 +317,7 @@ class P3dEntry(P3dAbs, DirectObject):
 class P3dLabel(P3dAbs):
 
     def __init__(
-            self, text='', pos=(0, 0), parent=None, text_wordwrap=10,
+            self, text='', pos=(0, 0), parent=None, text_wordwrap=12,
             text_align=None, text_fg=(1, 1, 1, 1), text_font=None, scale=.05,
             frame_col=(1, 1, 1, 1), tra_src=None, tra_tra=None, hpr=(0, 0, 0)):
         self.wdg = DirectLabel(
@@ -343,7 +343,7 @@ class P3dTxt(P3dBase):
                    'leftcenter': base.a2dLeftCenter}
         str2al = {'left': TextNode.A_left, 'right': TextNode.A_right,
                   'center': TextNode.A_center}
-        if parent: parent = str2par[parent]
+        if parent and parent in str2par: parent = str2par[parent]
         if align: align = str2al[align]
         self.wdg = OnscreenText(
             text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
@@ -369,13 +369,14 @@ class P3dScrolledFrame(P3dAbs):
             pos=(0, 0), parent='topleft'):
         P3dAbs.__init__(self)
         par2p3d = {'topleft': base.a2dTopLeft}
+        if parent and parent in par2p3d: parent = par2p3d[parent]
         self.wdg = DirectScrolledFrame(
             frameSize=frame_sz,
             canvasSize=canvas_sz,
             scrollBarWidth=scrollbar_width,
             frameColor=frame_col,
             pos=(pos[0], 1, pos[1]),
-            parent=par2p3d[parent])
+            parent=parent)
 
     @property
     def canvas(self): return self.wdg.getCanvas()
