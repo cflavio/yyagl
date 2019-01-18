@@ -39,6 +39,7 @@ class P3dParticle(GameObject):
             self.__emitternode.reparent_to(self.eng.gfx.root)
             emitter = self.__emitternode
         self.__emitter = emitter
+        self.__old_pos = (0, 0, 0)
         self._nodepath = render.attach_new_node(self.__node())
         self._nodepath.set_transparency(True)
         self._nodepath.set_bin('fixed', 0)
@@ -140,6 +141,7 @@ class P3dParticle(GameObject):
         inputs = [
             ('start_pos', self.__tex_pos),
             ('positions', self.__tex_curr_pos),
+            ('emitter_old_pos', self.__old_pos),
             ('emitter_pos', self.__emitter.get_pos(P3dNode(render))),
             ('start_vel', self.__tex_start_vel),
             ('velocities', self.__tex_curr_vel),
@@ -158,8 +160,10 @@ class P3dParticle(GameObject):
         if self.__emitter and not self.__emitter.is_empty:
             pos = self.__emitter.get_pos(P3dNode(render))
         else: pos = (0, 0, 0)
+        self._nodepath.set_shader_input('emitter_old_pos', self.__old_pos)
         self._nodepath.set_shader_input('emitter_pos', pos)
         self._nodepath.set_shader_input('delta_t', globalClock.get_dt())
+        self.__old_pos = pos
         return task.again
 
     def destroy(self, now=False):

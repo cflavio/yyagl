@@ -7,6 +7,7 @@ layout(rgba32f) uniform imageBuffer velocities;
 layout(rgba32f) uniform imageBuffer emission_times;
 uniform mat4 p3d_ModelViewProjectionMatrix;
 uniform vec3 emitter_pos;
+uniform vec3 emitter_old_pos;
 uniform vec3 accel;
 uniform float osg_FrameTime;
 uniform float delta_t;
@@ -25,7 +26,9 @@ void main() {
     if (from_start > emission_time) {
         from_emission = from_start - emission_time;
         if (from_emission <= delta_t + .01) {
-            pos = vec4(emitter_pos, 1);
+            vec3 emit_pos = mix(emitter_old_pos, emitter_pos,
+                                 from_emission / delta_t);
+            pos = vec4(emit_pos, 1);
             vel = imageLoad(start_vel, gl_VertexID);
         }
         pos += vec4((vel * delta_t).xyz, 0);
