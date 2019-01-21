@@ -38,7 +38,7 @@ class MeshBuilder(GameObject):
             ncls = RigidBodyNode
             meth = self.eng.phys_mgr.attach_rigid_body
             lst = self.rigid_bodies
-        nodepath = self.eng.attach_node(ncls(geom_name).node)
+        nodepath = self.eng.attach_node(ncls(geom_name)._node)
         self.nodes += [nodepath]
         nodepath.add_shape(shape)
         meth(nodepath.p3dnode)

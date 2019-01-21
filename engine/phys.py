@@ -1,12 +1,11 @@
 from yyagl.gameobject import Colleague
-from yyagl.lib.bullet.bullet import BulletPhysWorld, BulletContact, \
-    BulletTriangleMesh, BulletTriangleMeshShape, BulletRigidBodyNode, \
-    BulletGhostNode
+from yyagl.lib.bullet.bullet import (
+    BulletPhysWorld, BulletTriangleMesh, BulletTriangleMeshShape,
+    BulletRigidBodyNode, BulletGhostNode)
 from ..facade import Facade
 
 
 PhysWorld = BulletPhysWorld
-Contact = BulletContact
 TriangleMesh = BulletTriangleMesh
 TriangleMeshShape = BulletTriangleMeshShape
 RigidBodyNode = BulletRigidBodyNode
@@ -56,7 +55,7 @@ class PhysMgr(Colleague, PhysFacade):
         self.eng.attach_obs(self.on_frame, 2)
 
     def on_frame(self):
-        self.root.do_physics(self.eng.lib.last_frame_dt, 10, 1/180.0)
+        self.root.do_phys(self.eng.lib.last_frame_dt, 10, 1/180.0)
         self.__do_collisions()
 
     def ray_test_closest(self, top, bottom):
@@ -80,7 +79,7 @@ class PhysMgr(Colleague, PhysFacade):
             # this doesn't work in 1.9, the following works
             # odd, this doesn't work too
             # for contact in self.root.wld.contact_test(obj).get_contacts():
-            result = self.root.wld.contact_test(obj)
+            result = self.root._wld.contact_test(obj)
             for contact in result.get_contacts():
                 self.__process_contact(obj, contact.get_node0(), to_clear)
                 self.__process_contact(obj, contact.get_node1(), to_clear)
@@ -99,5 +98,5 @@ class PhysMgr(Colleague, PhysFacade):
         self.__obj2coll[obj] += [CollInfo(node, self.eng.curr_time)]
         self.eng.event.notify('on_collision', obj, node)
 
-    def toggle_debug(self):
-        self.root.toggle_debug()
+    def toggle_dbg(self):
+        self.root.toggle_dbg()

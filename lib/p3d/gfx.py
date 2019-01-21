@@ -154,7 +154,7 @@ class P3dNode(Facade):
         return P3dNode(self.node.attach_new_node(name))
 
     def add_shape(self, shape):
-        return self.node.node().add_shape(shape.mesh_shape)
+        return self.node.node().add_shape(shape._mesh_shape)
 
     @property
     def name(self): return self.node.get_name()

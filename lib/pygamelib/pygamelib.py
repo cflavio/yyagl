@@ -1,11 +1,11 @@
 import pkgutil
 
 
-def has_pygame():
+def pygame_installed():
     return pkgutil.find_loader('pygame') is not None
 
 
-if has_pygame():
+if pygame_installed():
     import pygame
     from pygame import joystick
 
@@ -14,14 +14,14 @@ class PygameJoystickMgrBase(object):  # if there is not pygame
 
     @staticmethod
     def build():
-        return (PygameJoystickMgr if has_pygame() else PygameJoystickMgrBase)()
+        return (PygameJoystickMgr if pygame_installed() else PygameJoystickMgrBase)()
 
     def init_joystick(self): pass
 
     def get_joystick(self): return 0, 0, 0, 0
 
     @staticmethod
-    def supported(): return has_pygame()
+    def supported(): return pygame_installed()
 
     def destroy(self): pass
 

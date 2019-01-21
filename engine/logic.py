@@ -52,7 +52,7 @@ class EngineLogic(LogicColleague):
 
     @property
     def is_runtime(self):
-        return self.mediator.lib.runtime
+        return self.mediator.lib.runtime()
 
     @property
     def curr_path(self):

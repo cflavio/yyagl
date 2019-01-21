@@ -127,7 +127,7 @@ class CarPhys(PhysColleague):
         self.eng.phys_mgr.add_collision_obj(self.pnode)
 
     def __set_vehicle(self):
-        self.vehicle = BulletVehicle(self.eng.phys_mgr.root.wld, self.pnode)
+        self.vehicle = BulletVehicle(self.eng.phys_mgr.root._wld, self.pnode)
         self.vehicle.set_coordinate_system(ZUp)
         self.vehicle.set_pitch_control(self.pitch_control)
         tuning = self.vehicle.get_tuning()

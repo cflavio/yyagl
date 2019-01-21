@@ -16,11 +16,13 @@ class LibShowBase(ShowBase): pass
 class LibP3d(DirectObject, object):
 
     task_cont = Task.cont
-    runtime = not exists('main.py')
 
     def __init__(self):
         DirectObject.__init__(self)
         self.__end_cb = self.__notify = None
+
+    @staticmethod
+    def runtime(): return not exists('main.py')
 
     @staticmethod
     def configure():
