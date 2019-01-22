@@ -46,7 +46,7 @@ class LogMgrBase(Colleague):  # headless log manager
         messages += ['panda version: %s %s' % (lib_ver, lib_commit)]
         messages += ['bullet version: ' + str(self.eng.lib.phys_version)]
         messages += ['appdata: ' + str(self.eng.lib.user_appdata_dir)]
-        map(self.log, messages)
+        list(map(self.log, messages))
 
     def log_tasks(self):
         self.log('tasks: %s' % taskMgr.getAllTasks())
@@ -71,4 +71,4 @@ class LogMgr(LogMgrBase):
         res_x, res_y = self.eng.lib.resolution
         res_tmpl = 'resolution: {res_x}x{res_y}'
         messages += [res_tmpl.format(res_x=res_x, res_y=res_y)]
-        map(self.log, messages)
+        list(map(self.log, messages))

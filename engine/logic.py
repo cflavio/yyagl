@@ -1,4 +1,4 @@
-from urllib import urlopen
+from urllib.request import urlopen
 from os.path import exists
 from ..gameobject import LogicColleague
 from .configuration import Cfg
@@ -17,7 +17,7 @@ class VersionChecker(GameObject, ComputerProxy):
         self.eng.client.register_rpc('srv_version')
         try: ver = self.eng.client.srv_version()
         except AttributeError:
-            print "can't retrieve the version"
+            print("can't retrieve the version")
             return True
         major, minor, build = ver.split('.')
         major, minor, build = int(major), int(minor), int(build)

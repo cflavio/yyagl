@@ -39,4 +39,4 @@ def __prepare(env):
 
 
 def __clean():
-    map(rmtree, [bld_dpath + dir_ for dir_ in ['docs_apidoc', 'docs']])
+    list(map(rmtree, [bld_dpath + dir_ for dir_ in ['docs_apidoc', 'docs']]))

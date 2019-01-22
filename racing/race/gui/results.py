@@ -87,8 +87,8 @@ class Results(GameObject):
             return
         # if it is reached by step then there are two destroys: step's one
         # and race.gui's one
-        map(lambda txt: txt.destroy(), self.__res_txts)
-        map(lambda btn: btn.destroy(), self._buttons)
+        list(map(lambda txt: txt.destroy(), self.__res_txts))
+        list(map(lambda btn: btn.destroy(), self._buttons))
         self.result_frm.destroy()
         GameObject.destroy(self)
 

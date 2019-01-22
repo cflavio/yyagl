@@ -45,7 +45,7 @@ class RocketWeaponPhys(WeaponPhys):
     def fire(self):
         WeaponPhys.fire(self)
         b_m = BitMask32.bit(BitMasks.general)
-        cars_idx = range(len(self.car.logic.cprops.race_props.season_props.car_names))
+        cars_idx = list(range(len(self.car.logic.cprops.race_props.season_props.car_names)))
         cars_idx.remove(
             self.car.logic.cprops.race_props.season_props.car_names.index(self.car.name))
         for bitn in cars_idx:

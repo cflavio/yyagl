@@ -42,7 +42,7 @@ class CommonBase(object):
         self.init(self)
         if not hasattr(self, 'bind'): return
         bind_args = [(ENTER, self.on_wdg_enter), (EXIT, self.on_wdg_exit)]
-        map(lambda args: self.bind(*args), bind_args)
+        list(map(lambda args: self.bind(*args), bind_args))
 
     def set_enter_transition(self):
         start_pos = self.get_pos()
@@ -184,7 +184,7 @@ class P3dBtn(P3dAbs):
         P3dAbs.__init__(self, tra_src, tra_tra)
         self['relief'] = FLAT
         args = [(ENTER, self._on_enter), (EXIT, self._on_exit)]
-        map(lambda args: self.bind(*args), args)
+        list(map(lambda args: self.bind(*args), args))
 
     def _on_enter(self, pos): pass  # pos comes from mouse
 

@@ -6,7 +6,7 @@ from mtprocesser import MultithreadedProcesser
 
 def bld_images(target, source, env):
     mp_mgr = MultithreadedProcesser(env['CORES'])
-    map(__bld_img, [(str(src), mp_mgr) for src in source])
+    list(map(__bld_img, [(str(src), mp_mgr) for src in source]))
     output = mp_mgr.run()
 
 

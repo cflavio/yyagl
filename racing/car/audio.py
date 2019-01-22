@@ -95,7 +95,7 @@ class CarPlayerAudio(CarAudio):
         self.turbo_sfx = AudioSound(props.sounds.turbo)
         self.rotate_all_fired_sfx = AudioSound(props.sounds.rotate_all_fired)
         self.rotate_all_hit_sfx = AudioSound(props.sounds.rotate_all_hit)
-        map(lambda sfx: sfx.set_loop(True), [self.engine_sfx, self.brake_sfx])
+        list(map(lambda sfx: sfx.set_loop(True), [self.engine_sfx, self.brake_sfx]))
         self.engine_sfx.set_volume(0)
         self.engine_sfx.play()
         self.update_state = CountDownAudioUpdate(self.engine_sfx,
@@ -119,5 +119,5 @@ class CarPlayerAudio(CarAudio):
             self.pitstop_sfx, self.rocket_fired_sfx, self.rocket_hit_sfx,
             self.turbo_sfx, self.rotate_all_fired_sfx,
             self.rotate_all_hit_sfx]
-        map(lambda sfx: sfx.stop(), effects)
+        list(map(lambda sfx: sfx.stop(), effects))
         AudioColleague.destroy(self)

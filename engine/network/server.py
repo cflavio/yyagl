@@ -1,5 +1,5 @@
 from socket import error
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from simpleubjson import encode, decode
 from .network import AbsNetwork, ConnectionError, NetworkThread
 from yyagl.gameobject import GameObject
@@ -69,7 +69,7 @@ class Server(AbsNetwork):
         dgram = encode({'payload': data_lst})
         receivers = [cln for cln in self.connections if cln == receiver]
         dests = receivers if receiver else self.connections
-        map(lambda cln: self.netw_thr.send_msg(cln, dgram), dests)
+        list(map(lambda cln: self.netw_thr.send_msg(cln, dgram), dests))
 
     def rpc_cb(self, dct, conn):
         funcname, args, kwargs = dct['payload']
@@ -93,7 +93,7 @@ class Server(AbsNetwork):
         try:
             dgram = self._fix_payload(dict(decode(dgram)))
             self.read_cb(dgram['payload'], dgram['sender'])
-        except MarkerError as e: print e
+        except MarkerError as e: print(e)
 
     def send_udp(self, data_lst, receiver):
         if receiver[0] not in self.addr2conn: return

@@ -20,7 +20,7 @@ class Circle(Frame, GameObject):
             self.set_shader(shader)
             args = [('ray', ray), ('width', thickness), ('progress', 0),
                     ('color_start', col_start), ('color_end', col_end)]
-            map(lambda arg: self.set_shader_input(*arg), args)
+            list(map(lambda arg: self.set_shader_input(*arg), args))
         else: self['frameColor'] = (1, 1, 1, 0)
         self.set_transparency(True)
 

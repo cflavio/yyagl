@@ -322,7 +322,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.mediator.gfx.nodepath.set_y(self.start_pos[1])
         self.mediator.gfx.nodepath.set_hpr(self.start_pos_hpr)
         wheels = self.mediator.phys.vehicle.get_wheels()
-        map(lambda whl: whl.set_rotation(0), wheels)
+        list(map(lambda whl: whl.set_rotation(0), wheels))
 
     @property
     def is_drifting(self):
@@ -392,24 +392,24 @@ class CarLogic(LogicColleague, ComputerProxy):
         return wps
 
     def __log_wp_info(self, curr_chassis, curr_wp, closest_wps, waypoints):
-        print 'car name', self.mediator.name
-        print 'damage', self.mediator.gfx.chassis_np_hi.name, \
-            curr_chassis.name
-        print 'laps', len(self.mediator.logic.lap_times), self.mediator.laps - 1
-        print 'last_ai_wp', self.last_ai_wp
-        print 'curr_wp', curr_wp
-        print 'closest_wps', closest_wps
+        print('car name', self.mediator.name)
+        print('damage', self.mediator.gfx.chassis_np_hi.name,
+              curr_chassis.name)
+        print('laps', len(self.mediator.logic.lap_times), self.mediator.laps - 1)
+        print('last_ai_wp', self.last_ai_wp)
+        print('curr_wp', curr_wp)
+        print('closest_wps', closest_wps)
         import pprint
         to_print = [waypoints, self._pitstop_wps, self._grid_wps,
                     self.cprops.track_waypoints]
-        map(pprint.pprint, to_print)
+        list(map(pprint.pprint, to_print))
 
     @property
     @compute_once
     def bitmask(self):
         b_m = BitMask32.bit(BitMasks.general) | BitMask32.bit(BitMasks.track)
         car_names = self.cprops.race_props.season_props.car_names
-        cars_idx = range(len(car_names))
+        cars_idx = list(range(len(car_names)))
         cars_idx.remove(car_names.index(self.mediator.name))
         for bitn in cars_idx: b_m = b_m | BitMask32.bit(BitMasks.car(bitn))
         return b_m
@@ -579,7 +579,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         wps = self.cprops.track_waypoints
         all_wp = [int(w_p.get_name()[8:]) for w_p in wps]
         f_wp = [int(w_p.get_name()[8:]) for w_p in self.__fork_wp()]
-        map(all_wp.remove, f_wp)
+        list(map(all_wp.remove, f_wp))
         is_correct = all(w_p in self.collected_wps for w_p in all_wp)
         if not is_correct:
             skipped = [str(w_p) for w_p in all_wp
@@ -680,7 +680,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.camera = None
         if self.weapon: self.weapon = self.weapon.destroy()
         f_wpn = [wpn for wpn in self.fired_weapons if wpn]
-        map(lambda wpn: wpn.destroy(), f_wpn)
+        list(map(lambda wpn: wpn.destroy(), f_wpn))
         self.fired_weapons = []
         LogicColleague.destroy(self)
         ComputerProxy.destroy(self)

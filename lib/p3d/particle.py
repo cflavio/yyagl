@@ -154,7 +154,7 @@ class P3dParticle(GameObject):
             ('col', self.__color),
             ('image', img)
             ]
-        map(lambda inp: self._nodepath.set_shader_input(*inp), inputs)
+        list(map(lambda inp: self._nodepath.set_shader_input(*inp), inputs))
 
     def _update(self, task):
         if self.__emitter and not self.__emitter.is_empty:

@@ -16,7 +16,7 @@ class MeshBuilder(GameObject):
         self.rigid_bodies = []
         self.ghosts = []
         self.nodes = []
-        map(lambda name: self.__set_mesh(name, is_ghost), geom_names)
+        list(map(lambda name: self.__set_mesh(name, is_ghost), geom_names))
 
     def __set_mesh(self, geom_name, is_ghost):
         self.eng.log_mgr.log('setting physics for: ' + geom_name)
@@ -185,7 +185,7 @@ class TrackPhys(PhysColleague, ComputerProxy):
         if self.eng.cfg.dev_cfg.verbose:
             import pprint
             to_print = [self.waypoints, self.pitstop_wps, self.grid_wps]
-            map(pprint.pprint, to_print)
+            list(map(pprint.pprint, to_print))
 
     def nopitlane_wps(self, curr_wp):
         if curr_wp in self.__grid_wps:
@@ -275,16 +275,16 @@ class TrackPhys(PhysColleague, ComputerProxy):
         weap_root = self.model.find('**/' + weapon_info.root_name)
         if not weap_root: return
         weapons = weap_root.find_all_matches('**/%s*' % weapon_info.weap_name)
-        map(lambda weap: self.create_bonus(weap.get_pos()), weapons)
+        list(map(lambda weap: self.create_bonus(weap.get_pos()), weapons))
 
     def __hide_all_models(self):
         nms = self.race_props.unmerged_names + self.race_props.merged_names + \
             self.race_props.ghost_names
-        map(self.__hide_models, nms)
+        list(map(self.__hide_models, nms))
 
     def __hide_models(self, name):
         models = self.model.find_all_matches('**/%s*' % name)
-        map(lambda mod: mod.hide(), models)
+        list(map(lambda mod: mod.hide(), models))
 
     def get_start_pos_hpr(self, i):
         start_pos = (0, 0, 0)
@@ -318,12 +318,12 @@ class TrackPhys(PhysColleague, ComputerProxy):
 
     def destroy(self):
         self.model = self.model.remove_node()
-        map(lambda node: node.remove_node(), self.nodes)
-        map(self.eng.phys_mgr.remove_rigid_body, self.rigid_bodies)
-        map(self.eng.phys_mgr.remove_ghost, self.ghosts)
-        map(lambda bon: bon.destroy(), self.bonuses)
+        list(map(lambda node: node.remove_node(), self.nodes))
+        list(map(self.eng.phys_mgr.remove_rigid_body, self.rigid_bodies))
+        list(map(self.eng.phys_mgr.remove_ghost, self.ghosts))
+        list(map(lambda bon: bon.destroy(), self.bonuses))
         self.eng.log_tasks()
-        map(self.eng.rm_do_later, self.generate_tsk)
+        list(map(self.eng.rm_do_later, self.generate_tsk))
         self.eng.log_tasks()
         self.corners = self.rigid_bodies = self.ghosts = self.nodes = \
             self.generate_tsk = self.bonuses = self.race_props = \

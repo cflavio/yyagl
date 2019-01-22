@@ -54,7 +54,7 @@ def bld_ng(appname, win=False, osx=False, linux_32=False, linux_64=False):
     system('pip install -r requirements.txt')
     system('python bsetup.py bdist_apps')  # we don't use executable but
                                            # venv's one
-    map(remove, ['bsetup.py', 'requirements.txt'])
+    list(map(remove, ['bsetup.py', 'requirements.txt']))
     chdir('build')
     # we need the following since xztar archives aren't supported in py2
     for platf in deploy_platforms:

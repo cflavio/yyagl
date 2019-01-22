@@ -1,5 +1,5 @@
 from socket import error, socket, AF_INET, SOCK_DGRAM
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from simpleubjson import encode, decode
 from .network import AbsNetwork, ConnectionError, NetworkThread
 

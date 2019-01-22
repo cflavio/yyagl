@@ -53,8 +53,8 @@ class RaceLogic(LogicColleague):
     def enter_play(self):
         self.track.detach_obs(self.on_track_loaded)
         self.track.reparent_to(self.eng.gfx.root)
-        map(lambda pcar: pcar.reparent(), self.player_cars)
-        map(lambda car: car.reparent(), self.cars)
+        list(map(lambda pcar: pcar.reparent(), self.player_cars))
+        list(map(lambda car: car.reparent(), self.cars))
         self.set_display_regions()
 
     def set_display_regions(self):
@@ -105,15 +105,15 @@ class RaceLogic(LogicColleague):
     def on_aspect_ratio_changed(self):
         if len(self.player_cars) == 2:
             a_r = base.getAspectRatio() / 2.0
-            map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras)
+            list(map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras))
         if len(self.player_cars) == 3:
             a_r = base.getAspectRatio() * 2.0
-            map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[:1])
+            list(map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[:1]))
             a_r = base.getAspectRatio()
-            map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[1:])
+            list(map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[1:]))
         if len(self.player_cars) == 4:
             a_r = base.getAspectRatio()
-            map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[1:])
+            list(map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[1:]))
 
     def start_play(self):
         self.eng.phys_mgr.start()
@@ -121,9 +121,9 @@ class RaceLogic(LogicColleague):
         for player_car in self.player_cars:
             player_car.logic.camera.render_all(self.track.gfx.model)  # workaround for prepare_scene (panda3d 1.9)
         self.track.play_music()
-        map(lambda car: car.reset_car(), self.all_cars)
-        map(lambda car: car.start(), self.all_cars)
-        map(lambda car: car.event.attach(self.on_rotate_all), self.all_cars)
+        list(map(lambda car: car.reset_car(), self.all_cars))
+        list(map(lambda car: car.start(), self.all_cars))
+        list(map(lambda car: car.event.attach(self.on_rotate_all), self.all_cars))
         self.mediator.gui.start()
         ai_cars = [car.name for car in self.all_cars if car.__class__ == AiCar]
         for player_car in self.player_cars:
@@ -132,8 +132,8 @@ class RaceLogic(LogicColleague):
 
     def on_rotate_all(self, sender):
         cars = [car for car in self.all_cars if car.name != sender.name]
-        map(lambda car: car.phys.rotate(), cars)
-        map(lambda car: car.gfx.set_decorator('rotate_all'), cars)
+        list(map(lambda car: car.phys.rotate(), cars))
+        list(map(lambda car: car.gfx.set_decorator('rotate_all'), cars))
 
     @property
     def all_cars(self):
@@ -200,8 +200,8 @@ class RaceLogic(LogicColleague):
             self.eng.client.is_server_active = False
             self.eng.client.is_client_active = False
         self.track.destroy()
-        map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars)
-        map(lambda car: car.destroy(), self.all_cars)
+        list(map(lambda car: car.event.detach(self.on_rotate_all), self.all_cars))
+        list(map(lambda car: car.destroy(), self.all_cars))
         self.ai_poller.destroy()
         self.eng.phys_mgr.stop()
         self.eng.clean_gfx()

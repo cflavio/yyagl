@@ -1,7 +1,7 @@
 import sys
 
 if len(sys.argv) != 2:
-    print 'Usage: apply_gloss.py filename.egg'
+    print('Usage: apply_gloss.py filename.egg')
     sys.exit(0)
 
 
@@ -37,4 +37,4 @@ with open(sys.argv[1]) as fin:
 
 
 with open(sys.argv[1], 'w') as fout:
-    map(lambda outl: fout.write(outl + '\n'), out_lines)
+    list(map(lambda outl: fout.write(outl + '\n'), out_lines))

@@ -38,7 +38,7 @@ class PygameJoystickMgr(PygameJoystickMgrBase):
         joystick.init()
         self.joysticks = [
             joystick.Joystick(idx) for idx in range(joystick.get_count())]
-        map(lambda joystick: joystick.init(), self.joysticks)
+        list(map(lambda joystick: joystick.init(), self.joysticks))
 
     def get_joystick(self):
         for _ in pygame.event.get(): pass

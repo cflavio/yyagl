@@ -1,13 +1,13 @@
 from socket import socket, AF_INET, SOCK_DGRAM, error, SOCK_STREAM, \
     SOL_SOCKET, SO_REUSEADDR
 from select import select
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from simpleubjson import encode, decode
 from decimal import Decimal
 from json import load
-from urllib2 import urlopen
+from urllib.request import urlopen
 from threading import Thread
-from thread import interrupt_main
+from _thread import interrupt_main
 from struct import Struct, error as unpack_error
 from simpleubjson import encode
 from yyagl.gameobject import GameObject
@@ -37,13 +37,13 @@ class NetworkThread(Thread):
                     self.connections, self.connections, self.connections, 1)
                 for sock in readable: self._process_read(sock)
                 for sock in writable: self._process_write(sock)
-                for sock in exceptional: print 'exception', sock.getpeername()
-            except (error, AttributeError) as exc: print exc
+                for sock in exceptional: print('exception', sock.getpeername())
+            except (error, AttributeError) as exc: print(exc)
             # AttributeError happens when the server user exits from a race,
             # then destroy is being called but _process_read is still alive
             # and self.eng.cb_mux.add_cb is invoked, but self.eng in None
             except Exception as exc:
-                print exc
+                print(exc)
                 interrupt_main()
 
     def _process_read(self, sock):
@@ -56,7 +56,7 @@ class NetworkThread(Thread):
                     args = [dct['payload'], sock]
                     self.eng.cb_mux.add_cb(self.read_cb, args)
         except ConnectionError as exc:
-            print exc
+            print(exc)
             self.notify('on_disconnected', sock)
             self.connections.remove(sock)
 
@@ -71,7 +71,7 @@ class NetworkThread(Thread):
         lengthbuf = self.recvall(sock, self.size_struct.size)
         try: length = self.size_struct.unpack(lengthbuf)[0]
         except unpack_error as exc:
-            print exc
+            print(exc)
             raise ConnectionError()
         return self.recvall(sock, length)
 
@@ -134,7 +134,7 @@ class AbsNetwork(GameObject):
 
         def __fix(elm):
             return float(elm) if isinstance(elm, Decimal) else elm
-        ret['payload'] = map(__fix, payload['payload'])
+        ret['payload'] = list(map(__fix, payload['payload']))
         return ret
 
     @property

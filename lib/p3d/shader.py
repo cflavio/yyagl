@@ -57,7 +57,7 @@ class P3dShaderMgr(object):
                 (pref + 'dir', LVector3f(0, 0, 0)),
                 (pref + 'exp', .0),
                 (pref + 'cutoff', .0)]
-        map(lambda _args: render.set_shader_input(*_args), args)
+        list(map(lambda _args: render.set_shader_input(*_args), args))
 
     def set_lgt_args(self, idx, lgt):
         self.set_default_args(idx)
@@ -131,7 +131,7 @@ class P3dShaderMgr(object):
         render.set_shader(self.__main_shader())
         render.set_shader_input('num_lights', len(self.lights))
         self.set_shader_pars(render)
-        map(lambda lgt: self.set_lgt_args(*lgt), enumerate(self.lights))
+        list(map(lambda lgt: self.set_lgt_args(*lgt), enumerate(self.lights)))
         mci.setShader(self.__main_shader())
         base.cam.node().set_initial_state(mci.getState())
 

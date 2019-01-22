@@ -139,7 +139,7 @@ class RaceEvent(EventColleague):
             node.look_at(node.get_pos() + interp_vec)
 
     def destroy(self):
-        map(self.ignore, ['escape-up', 'p-up'])
+        list(map(self.ignore, ['escape-up', 'p-up']))
         EventColleague.destroy(self)
 
 
@@ -192,7 +192,7 @@ class RaceEventServer(RaceEvent):
             ang_vel = car.phys.vehicle.get_chassis().get_angular_velocity()
             try: curr_inp = car.event._get_input()
             except AttributeError as e:
-                print e
+                print(e)
                 # car.event is created in the second frame
                 from yyagl.racing.car.event import DirKeys
                 curr_inp = DirKeys(False, False, False, False)
@@ -263,7 +263,7 @@ class RaceEventServer(RaceEvent):
         self.server_info[sender] = (pos, fwd, velocity, ang_vel, curr_inp, level, weapon)
         car_name = self.eng.car_mapping[sender]
         if not self.mediator:
-            print "received player_info packet while we've quit"
+            print("received player_info packet while we've quit")
             return
         for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
             if carname2id[car_name] == carname2id[car.name]:

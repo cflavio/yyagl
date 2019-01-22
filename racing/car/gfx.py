@@ -96,9 +96,9 @@ class CarGfx(GfxColleague, CarGfxFacade):
     def reparent(self):
         self.chassis_np.node.reparent_to(self.vroot)
         chas = [self.chassis_np, self.chassis_np_low, self.chassis_np_hi]
-        map(lambda cha: cha.set_depth_offset(-2), chas)
+        list(map(lambda cha: cha.set_depth_offset(-2), chas))
         wheels = self.wheels.values()
-        map(lambda whl: whl.reparent_to(self.eng.gfx.root), wheels)
+        list(map(lambda whl: whl.reparent_to(self.eng.gfx.root), wheels))
         # try RigidBodyCombiner for the wheels
         for cha in chas: cha.optimize()
         self.on_skidmarking()
@@ -106,7 +106,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         for _ in range(6):
             self.preload_tsk()
             base.graphicsEngine.renderFrame()
-        map(lambda mesh: mesh.reparent_to(self.nodepath), self.mediator.phys.ai_meshes)
+        list(map(lambda mesh: mesh.reparent_to(self.nodepath), self.mediator.phys.ai_meshes))
 
     def preload_tsk(self):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
@@ -180,12 +180,12 @@ class CarGfx(GfxColleague, CarGfxFacade):
     def destroy(self):
         self.lroot.remove_node()
         self.rroot.remove_node()
-        meshes = [self.nodepath, self.chassis_np] + self.wheels.values()
-        map(lambda mesh: mesh.remove_node(), meshes)
-        map(lambda dec: dec.destroy(), self.decorators)
+        meshes = [self.nodepath, self.chassis_np] + list(self.wheels.values())
+        list(map(lambda mesh: mesh.remove_node(), meshes))
+        list(map(lambda dec: dec.destroy(), self.decorators))
         self.wheels = self.decorators = None
         self.skidmark_mgr.destroy()
-        map(self.eng.rm_do_later, self.dec_tsk)
+        list(map(self.eng.rm_do_later, self.dec_tsk))
         GfxColleague.destroy(self)
 
 
@@ -217,7 +217,7 @@ class SkidmarkMgr(GameObject):
             self.r_skidmark = Skidmark(fr_pos, radius, heading)
             self.l_skidmark = Skidmark(fl_pos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
-            if self.particles: map(lambda part: part.destroy(), self.particles)
+            if self.particles: list(map(lambda part: part.destroy(), self.particles))
             self.particles = [
                 self.eng.particle(
                     self.car.gfx.lroot, 'dust', (.5, .5, .5, .24), pi/2,
@@ -227,13 +227,13 @@ class SkidmarkMgr(GameObject):
                     rate=.0005, vel=1.2, part_duration=1.6)]
 
     def on_no_skidmarking(self):
-        if self.particles: map(lambda part: part.destroy(), self.particles)
+        if self.particles: list(map(lambda part: part.destroy(), self.particles))
         self.particles = None
         self.l_skidmark = self.r_skidmark = None
 
     def destroy(self):
-        if self.particles: map(lambda part: part.destroy(), self.particles)
+        if self.particles: list(map(lambda part: part.destroy(), self.particles))
         self.particles = None
-        map(lambda skd: skd.destroy(), self.skidmarks)
+        list(map(lambda skd: skd.destroy(), self.skidmarks))
         self.car = self.skidmarks = None
         GameObject.destroy(self)

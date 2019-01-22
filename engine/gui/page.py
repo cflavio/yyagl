@@ -80,7 +80,7 @@ class PageGui(GuiColleague):
         iclss = [Btn, CheckBtn, Slider, OptionMenu, ImgBtn, Entry]
         inter = lambda wdg: any(pcl in iclss for pcl in getmro(wdg.__class__))
         allwdgs = [wdg for wdg in self.widgets if inter(wdg)]
-        wdgs = filter(lambda wdg: wdg.is_enabled, allwdgs)
+        wdgs = list(filter(lambda wdg: wdg.is_enabled, allwdgs))
         if player < len(self.curr_wdgs) and self.curr_wdgs[player] \
                 and self.curr_wdgs[player] in wdgs:
                 # the last check for this case: multiple players appear on the
@@ -88,19 +88,19 @@ class PageGui(GuiColleague):
             wdgs.remove(self.curr_wdgs[player])
         mth = self.__direction_dot_dwg
         in_direction = lambda wdg: mth(wdg, direction, player, start) > .1
-        dirwdgs = filter(in_direction, wdgs)
+        dirwdgs = list(filter(in_direction, wdgs))
         if not dirwdgs: return
         nextweight = lambda wdg: self.__next_weight(wdg, direction, player, start)
         return max(dirwdgs, key=nextweight)
 
-    def _set_widgets(self): map(lambda wdg: wdg.set_widget(), self.widgets)
+    def _set_widgets(self): list(map(lambda wdg: wdg.set_widget(), self.widgets))
 
     def transition_enter(self):
         self.translate()
-        map(lambda wdg: wdg.set_enter_transition(), self.widgets)
+        list(map(lambda wdg: wdg.set_enter_transition(), self.widgets))
         self.enable(self.players)
 
-    def translate(self): map(lambda wdg: wdg.translate(), self.widgets)
+    def translate(self): list(map(lambda wdg: wdg.translate(), self.widgets))
 
     def enable_navigation(self, players):
         if self.enable_tsk: self.eng.rm_do_later(self.enable_tsk)
@@ -115,7 +115,7 @@ class PageGui(GuiColleague):
                 (nav.up, self.on_arrow, [up, player]),
                 (nav.down, self.on_arrow, [down, player]),
                 (nav.fire, self.on_enter, [player])]
-            map(lambda args: self.mediator.event.accept(*args), evts)
+            list(map(lambda args: self.mediator.event.accept(*args), evts))
 
     def disable_navigation(self, players):
         if self.enable_tsk:
@@ -123,20 +123,20 @@ class PageGui(GuiColleague):
         for player in players:
             nav = self.menu_props.nav.navinfo_lst[player]
             evts = [nav.left, nav.right, nav.up, nav.down, nav.fire]
-            map(self.mediator.event.ignore, evts)
+            list(map(self.mediator.event.ignore, evts))
 
     def enable(self, players):
         self.enable_navigation(players)
-        map(lambda wdg: wdg.enable(), self.widgets)
+        list(map(lambda wdg: wdg.enable(), self.widgets))
 
     def disable(self, players):
         if self.enable_tsk:
             self.enable_tsk = self.eng.rm_do_later(self.enable_tsk)
         self.disable_navigation(players)
-        map(lambda wdg: wdg.disable(), self.widgets)
+        list(map(lambda wdg: wdg.disable(), self.widgets))
 
     def transition_exit(self, destroy=True):
-        map(lambda wdg: wdg.set_exit_transition(destroy), self.widgets)
+        list(map(lambda wdg: wdg.set_exit_transition(destroy), self.widgets))
         self.disable(self.players)
 
     def __build_back_btn(self, exit_behav):
@@ -155,7 +155,7 @@ class PageGui(GuiColleague):
 
     def show(self):
         visible_widgets = [wdg for wdg in self.widgets if wdg.was_visible]
-        map(lambda wdg: wdg.show(), visible_widgets)
+        list(map(lambda wdg: wdg.show(), visible_widgets))
         self.transition_enter()
 
     def hide(self):
@@ -200,7 +200,7 @@ class Page(GameObject, PageFacade):
         self.menu_props = menu_props
         self.players = players
         GameObject.__init__(self, self.init_lst)
-        map(self.gui.attach, [self.on_hide, self.on_back, self.on_quit])
+        list(map(self.gui.attach, [self.on_hide, self.on_back, self.on_quit]))
 
     @property
     def init_lst(self):

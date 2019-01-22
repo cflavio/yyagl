@@ -45,7 +45,7 @@ class CarPhys(PhysColleague):
         self.friction_slip_rear = self.cfg['friction_slip_rear']
         self.__log_props()
         set_a = lambda field: setattr(self, field, self.cfg[field])
-        map(set_a, self.cfg.keys())
+        list(map(set_a, self.cfg.keys()))
 
     def __log_props(self, starting=True):
         s_s = self.cfg['max_speed'] if starting else self.max_speed
@@ -251,7 +251,7 @@ class CarPhys(PhysColleague):
 
     def update_car_props(self):
         wheels = zip(self.vehicle.get_wheels(), range(4))
-        speeds = map(lambda whi: self.__update_whl_props(*whi), wheels)
+        speeds = list(map(lambda whi: self.__update_whl_props(*whi), wheels))
         speeds = [speed for speed in speeds if speed]
         if self.is_drifting:
             self.__last_drift_time = globalClock.get_frame_time()
@@ -286,7 +286,7 @@ class CarPhys(PhysColleague):
             self.__finds[gnd_name] = gnd
         gfx_node = self.__finds[gnd_name]
         if not gfx_node:
-            print 'ground error', gnd_name
+            print('ground error', gnd_name)
             return
         fric = 1.0
         if gfx_node.has_tag('friction'):
@@ -305,9 +305,9 @@ class CarPhys(PhysColleague):
     @property
     def gnd_names(self):  # no need to be cached
         whls = self.vehicle.get_wheels()
-        pos = map(lambda whl: whl.get_raycast_info().get_contact_point_ws(),
-                  whls)
-        return map(self.gnd_name, pos)
+        pos = list(map(lambda whl: whl.get_raycast_info().get_contact_point_ws(),
+                  whls))
+        return list(map(self.gnd_name, pos))
 
     @staticmethod
     def gnd_name(pos):

@@ -78,4 +78,4 @@ class TuningGui(GuiColleague):
         wdgs = [self.background, self.txt, self.hint1_txt, self.hint2_txt,
                 self.hint3_txt, self.upg1_txt, self.upg2_txt,
                 self.upg3_txt]
-        map(lambda wdg: wdg.destroy(), self.buttons + wdgs)
+        list(map(lambda wdg: wdg.destroy(), self.buttons + wdgs))

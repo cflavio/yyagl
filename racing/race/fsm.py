@@ -43,8 +43,8 @@ class RaceFsm(FsmColleague):
         if self.shaders:
             self.eng.shader_mgr.toggle_shader()
         cars = self.mediator.logic.player_cars + self.mediator.logic.cars
-        map(lambda car: car.reset_car(), cars)
-        map(lambda car: car.demand('Countdown'), cars)
+        list(map(lambda car: car.reset_car(), cars))
+        list(map(lambda car: car.demand('Countdown'), cars))
         self.aux_launch_tsk = None
         self.launch_tsk = self.eng.do_later(
             sprops.race_start_time, self.aux_start_countdown)
@@ -77,7 +77,7 @@ class RaceFsm(FsmColleague):
     def enterPlay(self):
         self.eng.log_mgr.log('entering Play state')
         cars = self.mediator.logic.player_cars + self.mediator.logic.cars
-        map(lambda car: car.demand('Play'), cars)
+        list(map(lambda car: car.demand('Play'), cars))
 
     def exitPlay(self):
         RaceFsm.eng.log_mgr.log('exiting Play state')
@@ -90,7 +90,7 @@ class RaceFsm(FsmColleague):
             race_ranking, self.mediator.logic.player_cars[0].lap_times,
             self.mediator.logic.drivers)
         cars = self.mediator.logic.player_cars + self.mediator.logic.cars
-        map(lambda car: car.demand('Results'), cars)
+        list(map(lambda car: car.demand('Results'), cars))
 
     def exitResults(self):
         self.mediator.logic.exit_play()

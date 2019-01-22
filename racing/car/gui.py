@@ -43,10 +43,10 @@ class CarParameter(GameObject):
             self.__callback(eval(val), *self.__args)
 
     def hide(self):
-        map(lambda wdg: wdg.hide(), self.widgets)
+        list(map(lambda wdg: wdg.hide(), self.widgets))
 
     def destroy(self):
-        map(lambda wdg: wdg.destroy(), self.widgets)
+        list(map(lambda wdg: wdg.destroy(), self.widgets))
         GameObject.destroy(self)
 
 
@@ -128,17 +128,17 @@ class CarParameters(GameObject):
     def assign_val(self, val, phys, field): setattr(phys, field, val)
 
     def assign_val_whl(self, val, phys, field):
-        map(lambda whl: getattr(whl, field)(val), phys.vehicle.get_wheels())
+        list(map(lambda whl: getattr(whl, field)(val), phys.vehicle.get_wheels()))
 
     def toggle(self):
-        map(lambda par: par.toggle(), self.__pars)
+        list(map(lambda par: par.toggle(), self.__pars))
         is_visible = self.__pars[0].is_visible
         (self.eng.show_cursor if is_visible else self.eng.hide_cursor)()
 
-    def hide(self): map(lambda wdg: wdg.hide(), self.__pars)
+    def hide(self): list(map(lambda wdg: wdg.hide(), self.__pars))
 
     def destroy(self):
-        map(lambda wdg: wdg.destroy(), self.__pars)
+        list(map(lambda wdg: wdg.destroy(), self.__pars))
         GameObject.destroy(self)
 
 
@@ -390,7 +390,7 @@ class CarPanel(GameObject):
             #self.glass_tl, self.glass_tr, self.glass_t,
             #self.glass_bl, self.glass_br, self.glass_b
             ]
-        map(lambda wdg: wdg.hide(), labels)
+        list(map(lambda wdg: wdg.hide(), labels))
         if self.weapon_img and not self.weapon_img.is_empty():
             self.weapon_img.hide()
         self.forward_img.hide()
@@ -404,7 +404,7 @@ class CarPanel(GameObject):
             #self.glass_tl, self.glass_tr, self.glass_t,
             #self.glass_bl, self.glass_br, self.glass_b
             ]
-        map(lambda wdg: wdg.destroy(), labels)
+        list(map(lambda wdg: wdg.destroy(), labels))
         if self.weapon_img and not self.weapon_img.is_empty():
             self.weapon_img.destroy()
         self.forward_img.destroy()
@@ -537,7 +537,7 @@ class CarPlayerGui(CarGui):
             self.way_img.hide()
 
     def destroy(self):
-        map(lambda wdg: wdg.destroy(), [self.pars, self.panel, self.ai_panel])
+        list(map(lambda wdg: wdg.destroy(), [self.pars, self.panel, self.ai_panel]))
         self.way_txt.destroy()
         self.way_img.destroy()
         GuiColleague.destroy(self)

@@ -46,7 +46,7 @@ class RenderToTexture(object):
         base.graphicsEngine.remove_window(self.buffer)
         if base.win:  # if you close the window during a race
             base.win.remove_display_region(self.display_region)
-        map(lambda node: node.remove_node(), [self.camera, self.root])
+        list(map(lambda node: node.remove_node(), [self.camera, self.root]))
 
 
 class P3dGfxMgr(object):
@@ -59,7 +59,7 @@ class P3dGfxMgr(object):
         if base.appRunner:
             root_dir = base.appRunner.p3dFilename.get_dirname()
             paths = [root_dir + '/' + model_path, root_dir]
-            map(get_model_path().append_directory, paths)
+            list(map(get_model_path().append_directory, paths))
         render.set_shader_auto()
         render.set_two_sided(True)
         if antialiasing: render.set_antialias(AntialiasAttrib.MAuto)
@@ -115,7 +115,7 @@ class P3dGfxMgr(object):
                 ('render2d.ls', base.render2d.ls),
                 ('render.ls', base.render.ls)]
         for elm in info:
-            print '\n\n#####\n%s()' % elm[0]
+            print('\n\n#####\n%s()' % elm[0])
             elm[1]()
 
 

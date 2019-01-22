@@ -56,7 +56,7 @@ class DebugLines(object):
         self.lines = []
 
     def clear(self):
-        map(lambda line: line.remove_node(), self.lines)
+        list(map(lambda line: line.remove_node(), self.lines))
         self.lines = []
 
     def draw(self, start, end):
@@ -497,7 +497,7 @@ class CarAi(AiColleague, ComputerProxy):
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
-        map(lambda logic: logic.destroy(), [self.front_logic, self.rear_logic])
+        list(map(lambda logic: logic.destroy(), [self.front_logic, self.rear_logic]))
         AiColleague.destroy(self)
         ComputerProxy.destroy(self)
 

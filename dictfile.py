@@ -16,7 +16,7 @@ class DctFile(GameObject):
 
     @staticmethod
     def __add_default(dct, upd):
-        for key, val in upd.iteritems():
+        for key, val in upd.items():
             if isinstance(val, Mapping):
                 dct[key] = DctFile.__add_default(dct.get(key, {}), val)
             else: dct[key] = upd[key]

@@ -124,4 +124,4 @@ class Cfg(object):
             else:
                 cfginfo += [
                     ('notify-level-' + verb_el[0], verb_el[1])]
-        map(lambda args: self.__set(*args), cfginfo)
+        list(map(lambda args: self.__set(*args), cfginfo))

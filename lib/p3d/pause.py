@@ -86,12 +86,12 @@ class P3dPause(GameObject):
             tasks = [tsk for tsk in tasks
                      if tsk.tsk.get_task_chain() != 'unpausable']
         not_none = lambda tsk: tsk is not None
-        paused_tasks = filter(not_none, [tsk.process() for tsk in tasks])
-        self.__paused_tasks = map(lambda tsk: TaskDec(tsk), paused_tasks)
-        for tsk in filter(is_tsk, taskMgr.getDoLaters()):
+        paused_tasks = list(filter(not_none, [tsk.process() for tsk in tasks]))
+        self.__paused_tasks = list(map(lambda tsk: TaskDec(tsk), paused_tasks))
+        for tsk in list(filter(is_tsk, taskMgr.getDoLaters())):
             self.__paused_tasks += [TaskDec(tsk)]
             tsk.remainingTime = tsk.wakeTime - globalClock.get_frame_time()
-        map(lambda tsk: tsk.pause(), self.__paused_tasks)
+        list(map(lambda tsk: tsk.pause(), self.__paused_tasks))
 
     def remove_task(self, tsk):
         if tsk in self.__paused_tasks: self.__paused_tasks.remove(tsk)
@@ -102,8 +102,8 @@ class P3dPause(GameObject):
         return self.paused
 
     def resume(self):
-        map(lambda ival: ival.resume(), self.__paused_ivals)
-        map(lambda tsk: tsk.resume(), self.__paused_tasks)
+        list(map(lambda ival: ival.resume(), self.__paused_ivals))
+        list(map(lambda tsk: tsk.resume(), self.__paused_tasks))
         return self.paused
 
     def destroy(self): GameObject.destroy(self)

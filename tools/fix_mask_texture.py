@@ -71,7 +71,7 @@ class Fixer(object):
             if not any(rep.process_line(line) for rep in self.replacers):
                 self.out_lines += [line]
         with open('track_fixed.egg', 'w') as fout:
-            map(fout.write, self.out_lines)
+            list(map(fout.write, self.out_lines))
 
 
 Fixer()

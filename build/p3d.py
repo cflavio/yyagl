@@ -20,7 +20,7 @@ def bld_p3d(target, source, env):
     with open(env['APPNAME'] + '.pdef') as fpdef:
         with open(env['APPNAME'] + 'nopygame.pdef', 'w') as fpdef_nopygame:
             fpdef_nopygame.write(fpdef.read().replace(", 'pygame'", ""))
-    map(lambda suff: __bld(suff, env), ['', 'nopygame'])
+    list(map(lambda suff: __bld(suff, env), ['', 'nopygame']))
 
 
 def __bld(suff, env):

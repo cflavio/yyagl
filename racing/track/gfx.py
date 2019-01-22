@@ -98,7 +98,7 @@ class TrackGfx(GfxColleague):
     def redraw_wps(self): pass
 
     def destroy(self):
-        map(lambda node: node.destroy(), self.__anim_nodes)
+        list(map(lambda node: node.destroy(), self.__anim_nodes))
         self.model.remove_node()
         self._destroy_lights()
         self.__anim_nodes = self.__flat_roots = None
@@ -125,7 +125,7 @@ class TrackGfxDebug(TrackGfx):
                 self.wp2txt[wayp] = OnscreenText(wayp.get_name()[8:],
                                                  fg=(1, 1, 1, 1), scale=.08)
         if not hasattr(self.mediator, 'phys'): return  # first frame, refactor
-        map(self.__process_wp, self.mediator.phys.waypoints)
+        list(map(self.__process_wp, self.mediator.phys.waypoints))
 
     def __process_wp(self, wayp):
         pos2d = self.eng.gfx.gfx_mgr.pos2d(wayp.node)
@@ -154,7 +154,7 @@ class TrackGfxDebug(TrackGfx):
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
         if self.wp_np: self.wp_np = self.wp_np.remove_node()
-        map(lambda txt: txt.destroy(), self.wp2txt.values())
+        list(map(lambda txt: txt.destroy(), self.wp2txt.values()))
         self.wp2txt = self.mediator.phys.waypoints = None
         TrackGfx.destroy(self)
 

@@ -223,7 +223,7 @@ class CarEvent(EventColleague, ComputerProxy):
         pass
 
     def destroy(self):
-        map(self.eng.detach_obs, [self.on_collision, self.on_frame])
+        list(map(self.eng.detach_obs, [self.on_collision, self.on_frame]))
         EventColleague.destroy(self)
         ComputerProxy.destroy(self)
 
@@ -238,7 +238,7 @@ class CarPlayerEvent(CarEvent):
             ('forward' + suff, keys.forward), ('left' + suff, keys.left),
             ('rear' + suff, keys.rear), ('right' + suff, keys.right)]
         watch = inputState.watchWithModifiers
-        self.toks = map(lambda (lab, evt): watch(lab, evt), self.label_events)
+        self.toks = list(map(lambda args: watch(args[0], args[1]), self.label_events))  # arg = (lab, evt)
         if not self.eng.is_runtime:
             self.accept('f11', self.mediator.gui.pars.toggle)
             suff = str(8 + mediator.player_car_idx)
@@ -331,8 +331,8 @@ class CarPlayerEvent(CarEvent):
     def destroy(self):
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
         evts = ['f11', 'f8', keys.fire, keys.respawn]
-        map(lambda tok: tok.release(), self.toks)
-        map(self.ignore, evts)
+        list(map(lambda tok: tok.release(), self.toks))
+        list(map(self.ignore, evts))
         CarEvent.destroy(self)
 
 

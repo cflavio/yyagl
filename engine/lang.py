@@ -22,4 +22,4 @@ class LangMgr(GameObject):
         args = lang, self.domain, self.dpath
         self.eng.log('setting language %s, %s, %s' % args)
         tra = translation(self.domain, self.dpath, [lang], fallback=True)
-        tra.install(unicode=1)
+        tra.install()

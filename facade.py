@@ -8,8 +8,8 @@ class Facade(object):
     #     setattr(self.__class__, prop_name, property(lambda self: tgt_prop))
 
     def __init__(self, prop_lst=[], mth_lst=[]):
-        map(lambda args: self.__fwd_prop(*args), prop_lst)
-        map(lambda args: self.__fwd_mth(*args), mth_lst)
+        list(map(lambda args: self.__fwd_prop(*args), prop_lst))
+        list(map(lambda args: self.__fwd_mth(*args), mth_lst))
         # try detecting if the forwarded item is a prop or a method, so we can
         # pass only a single list
 
