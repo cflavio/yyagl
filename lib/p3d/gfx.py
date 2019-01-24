@@ -6,6 +6,7 @@ from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.lib.p3d.p3d import LibP3d
 from yyagl.facade import Facade
+import datetime
 
 
 class RenderToTexture(object):
@@ -101,6 +102,10 @@ class P3dGfxMgr(object):
     @property
     def shader_support(self):
         return base.win.get_gsg().get_supports_basic_shaders()
+
+    def screenshot(self):
+        time = datetime.datetime.now().strftime('%y%m%d%H%M%S')
+        base.win.save_screenshot("yorg%s.jpg" % time)
 
     @staticmethod
     def enable_shader(): render.set_shader_auto()

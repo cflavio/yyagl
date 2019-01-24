@@ -241,6 +241,7 @@ class CarPlayerEvent(CarEvent):
         self.toks = list(map(lambda args: watch(args[0], args[1]), self.label_events))  # arg = (lab, evt)
         if not self.eng.is_runtime:
             self.accept('f11', self.mediator.gui.pars.toggle)
+            self.accept('f2', self.eng.gfx.gfx_mgr.screenshot)
             suff = str(8 + mediator.player_car_idx)
             self.accept('f' + suff, self._process_end_goal)
         state = self.mediator.fsm.getCurrentOrNextState()
@@ -330,7 +331,7 @@ class CarPlayerEvent(CarEvent):
 
     def destroy(self):
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
-        evts = ['f11', 'f8', keys.fire, keys.respawn]
+        evts = ['f11', 'f8', 'f2', keys.fire, keys.respawn]
         list(map(lambda tok: tok.release(), self.toks))
         list(map(self.ignore, evts))
         CarEvent.destroy(self)
