@@ -2,14 +2,13 @@ from socket import socket, AF_INET, SOCK_DGRAM, error, SOCK_STREAM, \
     SOL_SOCKET, SO_REUSEADDR
 from select import select
 from queue import Queue, Empty
-from simpleubjson import encode, decode
+from bson import dumps, loads
 from decimal import Decimal
 from json import load
 from urllib.request import urlopen
 from threading import Thread
 from _thread import interrupt_main
 from struct import Struct, error as unpack_error
-from simpleubjson import encode
 from yyagl.gameobject import GameObject
 
 
@@ -50,7 +49,7 @@ class NetworkThread(Thread):
         try:
             data = self.recv_one_msg(sock)
             if data:
-                dct = dict(decode(data))
+                dct = dict(loads(data))
                 if 'is_rpc' in dct: self._rpc_cb(dct, sock)
                 else:
                     args = [dct['payload'], sock]
@@ -124,7 +123,7 @@ class AbsNetwork(GameObject):
         self.netw_thr.read_cb = callback
 
     def send(self, data_lst, receiver=None):
-        self.netw_thr.send_msg(encode({'payload': data_lst}), receiver)
+        self.netw_thr.send_msg(dumps({'payload': data_lst}), receiver)
 
     def on_frame(self): self.process_udp()
 
@@ -156,7 +155,7 @@ class AbsNetwork(GameObject):
     def process_udp(self):
         try: dgram, conn = self.udp_sock.recvfrom(8192)
         except error: return
-        dgram = self._fix_payload(dict(decode(dgram)))
+        dgram = self._fix_payload(dict(loads(dgram)))
         self.on_udp_pck(dgram)
         self.read_cb(dgram['payload'], conn)
 
