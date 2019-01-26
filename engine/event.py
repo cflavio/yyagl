@@ -20,8 +20,10 @@ class EngineEvent(EventColleague):
         return self.eng.lib.task_cont
 
     def __on_frame_unpausable(self, task):
-        self.notify('on_frame_unpausable')
-        return task.cont
+        try:
+            self.notify('on_frame_unpausable')
+            return task.cont
+        except AttributeError: print("engine has been destroyed")
 
     @staticmethod
     def key2desc(keystr):

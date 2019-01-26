@@ -69,7 +69,7 @@ class NetworkThread(Thread):
     def recv_one_msg(self, sock):
         lengthbuf = self.recvall(sock, self.size_struct.size)
         try: length = self.size_struct.unpack(lengthbuf)[0]
-        except unpack_error as exc:
+        except (unpack_error, TypeError) as exc:
             print(exc)
             raise ConnectionError()
         return self.recvall(sock, length)
