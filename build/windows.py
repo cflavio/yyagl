@@ -2,7 +2,7 @@ from os import system, remove, rename, walk
 from os.path import exists
 from shutil import move, rmtree, copytree, copy
 from distutils.dir_util import copy_tree
-from .build import ver, bld_dpath, branch, bld_cmd, InsideDir, TempFile
+from .build import ver, bld_dpath, branch, InsideDir, TempFile
 from .deployng import bld_ng
 
 

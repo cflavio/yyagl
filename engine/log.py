@@ -23,16 +23,16 @@ class LogMgrBase(Colleague):  # headless log manager
 
     def log_cfg(self):
         messages = ['version: ' + self.eng.logic.version]
-        os_info = (system(), release(), version())
-        messages += ['operative system: %s %s %s' % os_info]
-        messages += ['architecture: ' + str(architecture())]
-        messages += ['machine: ' + machine()]
-        messages += ['platform: ' + platform()]
-        messages += ['processor: ' + processor()]
-        try:
-            messages += ['cores: ' + str(cpu_count())]
-        except NotImplementedError:  # on Windows
-            messages += ['cores: not implemented']
+        #os_info = (system(), release(), version())
+        #messages += ['operative system: %s %s %s' % os_info]
+        #messages += ['architecture: ' + str(architecture())]
+        #messages += ['machine: ' + machine()]
+        #messages += ['platform: ' + platform()]
+        #messages += ['processor: ' + processor()]
+        #try:
+        #    messages += ['cores: ' + str(cpu_count())]
+        #except NotImplementedError:  # on Windows
+        #    messages += ['cores: not implemented']
         lib_ver = self.eng.lib.version
         if lib_ver.startswith('1.10'):
             try:

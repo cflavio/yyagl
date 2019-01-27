@@ -153,7 +153,7 @@ class TrackProcesser(GameObject):
         flat_cores = 1  # max(1, multiprocessing.cpu_count() / 2)
         print('track flattening using %s cores' % flat_cores)
         self.loading_models = []
-        self.models_to_load = self.__flat_roots.values()
+        self.models_to_load = list(self.__flat_roots.values())
         [self.__flat_models() for _ in range(flat_cores)]
 
     def __flat_models(self, model='', time=0, nodes=0):

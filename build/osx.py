@@ -1,6 +1,6 @@
 from os import system, walk, remove
 from shutil import rmtree, copytree
-from .build import ver, bld_dpath, branch, bld_cmd
+from .build import ver, bld_dpath, branch
 from .deployng import bld_ng
 
 
