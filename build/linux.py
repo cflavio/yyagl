@@ -1,4 +1,4 @@
-from os import remove, system, makedirs, walk
+from os import remove, system, makedirs, walk, chdir
 from os.path import basename, dirname, realpath, exists, abspath
 from shutil import move, rmtree, copytree, copy
 from glob import glob
@@ -22,6 +22,11 @@ def __do_bld(start_dir, appname, ico_fpath):
     __bld(appname, start_dir, ico_fpath)
     __bld_full_pkg(appname, ico_fpath)
     __bld_pckgs(appname)
+    chdir('../..')
+    rmtree('dist')
+    rmtree('build/__whl_cache__')
+    rmtree('build/manylinux1_x86_64')
+    rmtree('built/linux')
 
 
 def __prepare(start_path):

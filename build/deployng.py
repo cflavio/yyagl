@@ -24,7 +24,7 @@ def bld_ng(appname, win=False, osx=False, linux=False):
     #     'https://archive.panda3d.org/branches/deploy-ng --upgrade')
     if exists('build/__whl_cache__'):
         rmtree('build/__whl_cache__')
-    tgts = ['win32', 'macosx_10_6_x86_64', 'manylinux1_x86_64']
+    tgts = ['win_amd64', 'macosx_10_6_x86_64', 'manylinux1_x86_64']
     dtgt = [win, osx, linux]
     deploy_platforms = [pl_str for (pl_str, is_pl) in zip(tgts, dtgt) if is_pl]
     opt_dct = {
@@ -39,7 +39,7 @@ def bld_ng(appname, win=False, osx=False, linux=False):
         'bdist_apps': {
             'installers': {
                 'manylinux1_x86_64': ['xztar'],
-                'win32': ['xztar'],
+                'win_amd64': ['xztar'],
                 'macosx_10_6_x86_64': ['xztar']}}}
     with open('bsetup.py', 'w') as f_setup:
         f_setup.write(setuppy % (appname, opt_dct))
