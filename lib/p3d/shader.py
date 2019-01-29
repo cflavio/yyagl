@@ -4,13 +4,14 @@ from panda3d.core import AmbientLight, DirectionalLight, PointLight, \
     FrameBufferProperties, GraphicsPipe, GraphicsOutput, NodePath, PandaNode, \
     TextureStage, TexMatrixAttrib
 from direct.filter.FilterManager import FilterManager
+from yyagl.lib.builder import LibP3d
 
 
 def load_shader(vert, frag):
 
     def is_file(path):
-        joinchar = '/' if base.appRunner and not path.startswith('/') else ''
-        dpath = base.appRunner and dirname(str(base.appRunner.p3dFilename))
+        joinchar = '/' if LibP3d.runtime() and not path.startswith('/') else ''
+        dpath = LibP3d.runtime() and dirname(__file__)
         return isfile((dpath or '') + joinchar + path)
     if is_file(vert) and is_file(frag):
         return Shader.load(Shader.SLGLSL, vert, frag)

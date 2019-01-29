@@ -1,4 +1,4 @@
-from os.path import exists
+from os.path import exists, dirname
 from panda3d.core import (get_model_path, AntialiasAttrib, PandaNode,
     LightRampAttrib, Camera, OrthographicLens, NodePath, OmniBoundingVolume,
     AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, Point2, Point3)
@@ -57,8 +57,8 @@ class P3dGfxMgr(object):
         self.callbacks = {}
         self.filters = None
         get_model_path().append_directory(model_path)
-        if base.appRunner:
-            root_dir = base.appRunner.p3dFilename.get_dirname()
+        if LibP3d.runtime():
+            root_dir = LibP3d.p3dpath(dirname(__file__))
             paths = [root_dir + '/' + model_path, root_dir]
             list(map(get_model_path().append_directory, paths))
         render.set_shader_auto()

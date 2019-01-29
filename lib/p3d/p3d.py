@@ -1,5 +1,5 @@
 import sys
-from os.path import exists
+from os.path import exists, dirname
 from os import getcwd
 from panda3d.core import loadPrcFileData, Texture, TextPropertiesManager, \
     TextProperties, PandaSystem, Filename, WindowProperties
@@ -51,9 +51,7 @@ class LibP3d(DirectObject, object):
         else: return 'deploy-ng'
 
     @property
-    def curr_path(self):
-        if base.appRunner: return base.appRunner.p3dFilename.get_dirname()
-        else: return getcwd()
+    def curr_path(self): return dirname(__file__)
 
     @staticmethod
     def send(msg): return messenger.send(msg)
