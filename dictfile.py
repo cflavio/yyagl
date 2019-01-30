@@ -1,12 +1,17 @@
+import sys
+from os.path import dirname
 from collections import Mapping
 from yaml import load, dump
 from .gameobject import GameObject
+from yyagl.lib.builder import LibP3d
 
 
 class DctFile(GameObject):
 
     def __init__(self, fpath, default_dct={}, persistent=True):
         GameObject.__init__(self)
+        if sys.platform == 'darwin' and LibP3d.runtime():
+            fpath = dirname(__file__) + fpath
         self.fpath = fpath
         self.persistent = persistent
         try:

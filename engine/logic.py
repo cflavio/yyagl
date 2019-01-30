@@ -1,5 +1,6 @@
 from urllib.request import urlopen
 from os.path import exists
+from sys import argv
 from ..gameobject import LogicColleague
 from .configuration import Cfg
 from yyagl.gameobject import GameObject
@@ -37,6 +38,10 @@ class VersionChecker(GameObject, ComputerProxy):
 
 
 class EngineLogic(LogicColleague):
+
+    @staticmethod
+    def cmd_line():
+        return [arg for arg in iter(argv[1:]) if not arg.startswith('-psn_')]
 
     def __init__(self, mediator, cfg=None):
         LogicColleague.__init__(self, mediator)
