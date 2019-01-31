@@ -17,7 +17,10 @@ def __version():
     if exists('assets/version.txt'):
         with open('assets/version.txt') as fver:
             pref = fver.read().strip() + '-'
-    return pref + exec_cmd('git rev-parse HEAD')[:7]
+    bld_ver = pref + exec_cmd('git rev-parse HEAD')[:7]
+    with open('assets/bld_version.txt', 'w') as fver:
+        fver.write(bld_ver)
+    return bld_ver
 
 
 def img_tgt_names(files_):  # list of images' target filenames

@@ -43,12 +43,8 @@ class LibP3d(DirectObject, object):
 
     @property
     def build_version(self):
-        if base.appRunner:
-            package = base.appRunner.p3dInfo.FirstChildElement('package')
-            #  first_child_element not in panda3d.core.TiXmlDocument
-            return package.Attribute('version')
-            #  attribute not in panda3d.core.TiXmlDocument
-        else: return 'deploy-ng'
+        with open(self.curr_path + '/assets/bld_version.txt') as fver:
+            return fver.read().strip()
 
     @property
     def curr_path(self): return dirname(__file__)
