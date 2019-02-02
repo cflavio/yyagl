@@ -7,7 +7,6 @@ from panda3d.bullet import get_bullet_version
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task.Task import Task
-from direct.directnotify.DirectNotify import DirectNotify
 
 
 class LibShowBase(ShowBase): pass
@@ -69,7 +68,6 @@ class LibP3d(DirectObject, object):
         LibShowBase()
         base.disableMouse()
         self.__end_cb = end_cb
-        self.__notify = DirectNotify().newCategory('ya2')
         self.__init_win()
         self.__init_fonts(green, red)
         self.__set_roots()
@@ -166,7 +164,7 @@ class LibP3d(DirectObject, object):
         if outline: font.set_outline((0, 0, 0, 1), .8, .2)
         return font
 
-    def log(self, msg): self.__notify.info(msg)
+    def log(self, msg): print(msg)
 
     @property
     def version(self): return PandaSystem.get_version_string()
