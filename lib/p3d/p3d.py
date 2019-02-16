@@ -1,6 +1,6 @@
 import sys
 from os.path import exists, dirname
-from os import getcwd
+from os import getcwd, _exit
 from panda3d.core import loadPrcFileData, Texture, TextPropertiesManager, \
     TextProperties, PandaSystem, Filename, WindowProperties
 from panda3d.bullet import get_bullet_version
@@ -154,7 +154,7 @@ class LibP3d(DirectObject, object):
     def __on_end(self):
         base.closeWindow(base.win)
         if self.__end_cb: self.__end_cb()
-        sys.exit()
+        _exit(1)
 
     @staticmethod
     def load_font(filepath, outline=True):

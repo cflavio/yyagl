@@ -54,7 +54,7 @@ class NetworkThread(Thread):
                 else:
                     args = [dct['payload'], sock]
                     self.eng.cb_mux.add_cb(self.read_cb, args)
-        except ConnectionError as exc:
+        except (ConnectionError, TypeError) as exc:
             print(exc)
             self.notify('on_disconnected', sock)
             self.connections.remove(sock)
@@ -69,7 +69,7 @@ class NetworkThread(Thread):
     def recv_one_msg(self, sock):
         lengthbuf = self.recvall(sock, self.size_struct.size)
         try: length = self.size_struct.unpack(lengthbuf)[0]
-        except (unpack_error, TypeError) as exc:
+        except unpack_error as exc:
             print(exc)
             raise ConnectionError()
         return self.recvall(sock, length)
