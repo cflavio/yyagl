@@ -1,6 +1,5 @@
 from yyagl.gameobject import GameObject
-from yyagl.lib.pygamelib.pygamelib import PygameJoystickMgr as \
-    JoystickMgrLib
+from yyagl.lib.p3d.joystick import P3dJoystickMgr as JoystickMgrLib
 
 
 class JoystickMgr(GameObject):
@@ -9,14 +8,14 @@ class JoystickMgr(GameObject):
         GameObject.__init__(self)
         self.emulate_keyboard = emulate_keyboard
         self.old_x = self.old_y = self.old_b0 = self.old_b1 = 0
-        self.joystick_lib = JoystickMgrLib.build()
+        self.joystick_lib = JoystickMgrLib()
         self.joystick_lib.init_joystick()
         self.eng.do_later(.01, self.eng.attach_obs, [self.on_frame])
         # eng.event doesn't exist
 
     def on_frame(self):
         if not self.emulate_keyboard: return
-        j_x, j_y, btn0, btn1 = self.joystick_lib.get_joystick()
+        j_x, j_y, btn0, btn1 = self.joystick_lib.get_joystick(0)
         if self.old_x <= -.4 <= j_x: self.eng.send('arrow_left-up')
         if self.old_x >= .4 >= j_x: self.eng.send('arrow_right-up')
         if self.old_y >= .4 >= j_y: self.eng.send('arrow_down-up')
@@ -24,7 +23,8 @@ class JoystickMgr(GameObject):
         if self.old_b0 and not btn0: self.eng.send('enter-up')
         self.old_x, self.old_y, self.old_b0, self.old_b1 = j_x, j_y, btn0, btn1
 
-    def get_joystick(self): return self.joystick_lib.get_joystick()
+    def get_joystick(self, player_idx):
+        return self.joystick_lib.get_joystick(player_idx)
 
     @staticmethod
     def supported(): return JoystickMgrLib.supported()

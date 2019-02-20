@@ -155,7 +155,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
 
     turn_time = .1  # after this time the steering is at its max value
 
-    def input2forces(self, car_input, joystick_mgr, is_drifting):
+    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx):
         phys = self.car.phys
         eng_frc = brake_frc = 0
         f_t = globalClock.get_frame_time()
@@ -199,10 +199,10 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
 
 class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
 
-    def input2forces(self, car_input, joystick_mgr, is_drifting):
+    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx):
         phys = self.car.phys
         eng_frc = brake_frc = 0
-        j_x, j_y, j_a, j_b = joystick_mgr.get_joystick()
+        j_x, j_y, j_a, j_b = joystick_mgr.get_joystick(player_car_idx)
         scale = lambda val: min(1, max(-1, val * 1.2))
         j_x, j_y = scale(j_x), scale(j_y)
         if j_y <= - .1:
@@ -266,7 +266,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         phys = self.mediator.phys
         jmgr = self.eng.joystick_mgr
         eng_f, brake_f, brake_r, steering = \
-            self.input_strat.input2forces(input2forces, jmgr, self.is_drifting)
+            self.input_strat.input2forces(input2forces, jmgr, self.is_drifting,
+                                          self.mediator.player_car_idx)
         phys.set_forces(eng_f, brake_f, brake_r, steering)
         self.__update_roll_info()
         gfx = self.mediator.gfx

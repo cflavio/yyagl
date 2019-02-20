@@ -59,13 +59,13 @@ class InputBuilder(object):
 
 class InputBuilderAi(InputBuilder):
 
-    def build(self, ai, joystick_mgr, player_car_idx):
+    def build(self, ai, joystick_mgr, player_car_idx, car_evt):
         return ai.get_input()
 
 
 class InputBuilderKeyboard(InputBuilder):
 
-    def build(self, ai, joystick_mgr, player_car_idx):
+    def build(self, ai, joystick_mgr, player_car_idx, car_evt):
         keys = ['forward', 'rear', 'left', 'right']
         keys = [key + str(player_car_idx) for key in keys]
         return DirKeys(*[inputState.isSet(key) for key in keys])
@@ -73,10 +73,9 @@ class InputBuilderKeyboard(InputBuilder):
 
 class InputBuilderJoystick(InputBuilder):
 
-    def build(self, ai, joystick_mgr):
-        j_x, j_y, j_a, j_b = joystick_mgr.get_joystick()
-        if j_b and self.mediator.logic.weapon:
-            self.on_fire()
+    def build(self, ai, joystick_mgr, player_car_idx, car_evt):
+        j_x, j_y, j_a, j_b = joystick_mgr.get_joystick(player_car_idx)
+        if j_b and car_evt.mediator.logic.weapon: car_evt.on_fire()
         inp = {'forward': j_y < -.4, 'rear': j_y > .4 or j_a,
                'left': j_x < -.4, 'right': j_x > .4}
         keys = ['forward', 'rear', 'left', 'right']
@@ -327,7 +326,7 @@ class CarPlayerEvent(CarEvent):
     @once_a_frame
     def _get_input(self):
         return self.input_bld.build(self.mediator.ai, self.eng.joystick_mgr,
-                                    self.mediator.player_car_idx)
+                                    self.mediator.player_car_idx, self)
 
     def destroy(self):
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
