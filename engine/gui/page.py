@@ -143,7 +143,7 @@ class PageGui(GuiColleague):
         tra_src = 'Quit' if exit_behav else 'Back'
         tra_tra = _('Quit') if exit_behav else _('Back')
         callback = self._on_quit if exit_behav else self._on_back
-        btn = Btn(text='', pos=(-.2, -.92), cmd=callback,
+        btn = Btn(text='', pos=(0, -.92), cmd=callback,
                   tra_src=tra_src, tra_tra=tra_tra, **self.menu_props.btn_args)
         self.widgets += [btn]
 
