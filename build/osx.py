@@ -50,6 +50,6 @@ def bld_osx(target, source, env):
     tgt_fmt = tgt_file.format(dst_dir=bld_dpath, appname=env['APPNAME'],
                               version=branch)
     move(src_fmt, tgt_fmt)
-    rmtree('dist')
+    #rmtree('dist')
     rmtree('build/__whl_cache__')
     rmtree('build/macosx_10_6_x86_64')

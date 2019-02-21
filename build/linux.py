@@ -23,7 +23,7 @@ def __do_bld(start_dir, appname, ico_fpath):
     __bld_full_pkg(appname, ico_fpath)
     __bld_pckgs(appname)
     chdir('../..')
-    rmtree('dist')
+    #rmtree('dist')
     rmtree('build/__whl_cache__')
     rmtree('build/manylinux1_x86_64')
     rmtree('built/linux')

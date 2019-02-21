@@ -148,6 +148,6 @@ def bld_windows(target, source, env):
     tgt_fmt = tgt_file.format(dst_dir=bld_dpath, appname=env['APPNAME'],
                               version=branch)
     move(src_fmt, tgt_fmt)
-    rmtree('dist')
+    #rmtree('dist')
     rmtree('build/__whl_cache__')
     rmtree('build/win_amd64')
