@@ -202,15 +202,15 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
     def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx):
         phys = self.car.phys
         eng_frc = brake_frc = 0
-        j_x, j_y, j_a, j_b = joystick_mgr.get_joystick(player_car_idx)
+        j_x, j_y, j_a, j_b, j_bx, j_by = joystick_mgr.get_joystick(player_car_idx)
         scale = lambda val: min(1, max(-1, val * 1.2))
         j_x, j_y = scale(j_x), scale(j_y)
-        if j_y <= - .1:
-            eng_frc = phys.engine_acc_frc * abs(j_y)
-        if j_y >= .1:
+        if j_a:
+            eng_frc = phys.engine_acc_frc
+        if j_b:
             eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
             brake_frc = phys.brake_frc * j_y
-        if -.1 <= j_y <= .1:
+        if not j_a and not j_b:
             brake_frc = phys.eng_brk_frc
         clamp = self.steering_clamp
         if j_x < -.1:

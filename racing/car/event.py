@@ -74,9 +74,9 @@ class InputBuilderKeyboard(InputBuilder):
 class InputBuilderJoystick(InputBuilder):
 
     def build(self, ai, joystick_mgr, player_car_idx, car_evt):
-        j_x, j_y, j_a, j_b = joystick_mgr.get_joystick(player_car_idx)
-        if j_b and car_evt.mediator.logic.weapon: car_evt.on_fire()
-        inp = {'forward': j_y < -.4, 'rear': j_y > .4 or j_a,
+        j_x, j_y, j_a, j_b, j_bx, j_by = joystick_mgr.get_joystick(player_car_idx)
+        if j_bx and car_evt.mediator.logic.weapon: car_evt.on_fire()
+        inp = {'forward': j_a, 'rear': j_b,
                'left': j_x < -.4, 'right': j_x > .4}
         keys = ['forward', 'rear', 'left', 'right']
         return DirKeys(*[inp[key] for key in keys])
