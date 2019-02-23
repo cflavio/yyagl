@@ -24,7 +24,8 @@ class WidgetMixin(object):
 
     @property
     def pos(self):
-        pos = self.get_pos(aspect2d)
+        try: pos = self.get_pos(self.wdg.get_parent())
+        except AttributeError: pos = self.get_pos(self.img.get_parent())
         return Vec2(pos[0], pos[2])
 
 

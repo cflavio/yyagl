@@ -87,6 +87,16 @@ class P3dImg(Facade, CommonBase):
             ('set_texture', lambda obj: obj.img.set_texture)]
         Facade.__init__(self, mth_lst=mth_lst)
 
+    def set_exit_transition(self, destroy):
+        start_pos = self.get_pos()
+        end_pos = (self.pos.x + 3.6, 1, self.pos.y)
+        seq = Seq(
+            Wait(abs(self.pos.y - 1) / 4),
+            PosIval(self.get_np(), .5, end_pos),
+            Func(self.destroy if destroy else self.hide))
+        if not destroy: seq += Func(self.set_pos, (start_pos[0], start_pos[2]))
+        seq.start()
+
     def set_pos(self, pos): return self.img.set_pos(pos[0], 1, pos[1])
 
     def get_pos(self, pos=None): return self.img.get_pos(*[pos] if pos else [])
