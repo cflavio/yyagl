@@ -64,7 +64,7 @@ class P3dVec2(object):
     def length(self): return self._vec.length()
 
     def __repr__(self):
-        tmpl = '%s(' + ','.join(['%s' for _ in range(len(self.attr_lst))])
+        tmpl = '%s(' + ', '.join(['%s' for _ in range(len(self.attr_lst))]) + ')'
         rnd = lambda x: round(x, 3)
         vals = [rnd(getattr(self._vec, attr)) for attr in self.attr_lst]
         pars = tuple([self.__class__.__name__] + vals)
