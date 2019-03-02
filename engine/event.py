@@ -38,7 +38,7 @@ class EngineEvent(EventColleague):
         map = base.win.get_keyboard_map()
         for i in range(map.get_num_buttons()):
             if map.get_mapped_button_label(i).lower() == desc:
-                return map.get_mapped_button(i)
+                return str(map.get_mapped_button(i))
 
     def destroy(self):
         self.joystick_mgr.destroy()
