@@ -68,7 +68,7 @@ class RaceEvent(EventColleague):
         self.ended_cars = []
         if not (self.eng.server.is_active or self.eng.client.is_active):
             self.accept(keys.pause, self.eng.toggle_pause)
-        self.last_sent = globalClock.get_frame_time()  # for networking
+        self.last_sent = self.eng.curr_time  # for networking
         self.ingame_menu = None
 
     def network_register(self):
@@ -112,7 +112,7 @@ class RaceEvent(EventColleague):
 
     def _move_car(self, car):
         if not hasattr(car, 'logic'): return  # it's created in the second frame
-        t = globalClock.get_frame_time() - car.logic.last_network_packet
+        t = self.eng.curr_time - car.logic.last_network_packet
         t = t / RaceEvent.eng.server.rate
         node = car.gfx.nodepath.node
         start_pos = car.logic.curr_network_start_pos
@@ -126,7 +126,7 @@ class RaceEvent(EventColleague):
 
     def _rotate_car(self, car):
         if not hasattr(car, 'logic'): return  # it's created in the second frame
-        t = globalClock.get_frame_time() - car.logic.last_network_packet
+        t = self.eng.curr_time - car.logic.last_network_packet
         t = t / RaceEvent.eng.server.rate
         node = car.gfx.nodepath.node
         start_vec = car.logic.curr_network_start_vec
@@ -176,10 +176,10 @@ class RaceEventServer(RaceEvent):
             fwd = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
             velocity = car.get_linear_velocity()
             self.server_info[car] = (pos, fwd, velocity)
-        if globalClock.get_frame_time() - self.last_sent > self.eng.server.rate:
+        if self.eng.curr_time - self.last_sent > self.eng.server.rate:
             #for conn in self.eng.server.connections:
             self.eng.client.send_udp(self.__prepare_game_packet(), self.eng.client.myid)
-            self.last_sent = globalClock.get_frame_time()
+            self.last_sent = self.eng.curr_time
         self.check_end()
 
     def __prepare_game_packet(self):
@@ -267,7 +267,7 @@ class RaceEventServer(RaceEvent):
             return
         for car in [car for car in self.mediator.logic.cars if car.__class__ == NetworkCar]:
             if carname2id[car_name] == carname2id[car.name]:
-                car.logic.last_network_packet = globalClock.getFrameTime()
+                car.logic.last_network_packet = self.eng.curr_time
                 car.logic.curr_network_start_pos = car.gfx.nodepath.get_pos()
                 car.logic.curr_network_end_pos = pos
                 car.logic.curr_network_start_vec = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))
@@ -394,7 +394,7 @@ class RaceEventClient(RaceEvent):
             netcars = [car for car in cars if car.__class__ == NetworkCar]
             for car in netcars:
                 if car_name == car.name:
-                    car.logic.last_network_packet = globalClock.getFrameTime()
+                    car.logic.last_network_packet = self.eng.curr_time
                     car.logic.curr_network_start_pos = car.gfx.nodepath.get_pos()
                     car.logic.curr_network_end_pos = car_pos
                     car.logic.curr_network_start_vec = render.get_relative_vector(car.gfx.nodepath.node, Vec3(0, 1, 0))

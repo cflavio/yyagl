@@ -155,10 +155,10 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
 
     turn_time = .1  # after this time the steering is at its max value
 
-    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx):
+    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
         phys = self.car.phys
         eng_frc = brake_frc = 0
-        f_t = globalClock.get_frame_time()
+        f_t = curr_time
         if car_input.forward and car_input.rear:
             eng_frc = phys.engine_acc_frc
             brake_frc = phys.brake_frc
@@ -180,7 +180,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
             self.start_left_t = None
         if car_input.right:
             if self.start_right_t is None:
-                self.start_right_t = globalClock.getFrameTime()
+                self.start_right_t = curr_time
             steer_fact = min(1, (f_t - self.start_right_t) / self.turn_time)
             self._steering -= self.steering_inc * steer_fact
             self._steering = max(self._steering, -clamp(is_drifting))
@@ -199,7 +199,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
 
 class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
 
-    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx):
+    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
         phys = self.car.phys
         eng_frc = brake_frc = 0
         j_x, j_y, j_a, j_b, j_bx, j_by = joystick_mgr.get_joystick(player_car_idx)
@@ -236,8 +236,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         ComputerProxy.__init__(self)
         self.cprops = car_props
         self.lap_time_start = 0
-        self.last_roll_ok_time = globalClock.get_frame_time()
-        self.last_roll_ko_time = globalClock.get_frame_time()
+        self.last_roll_ok_time = self.eng.curr_time
+        self.last_roll_ko_time = self.eng.curr_time
         self.lap_times = []
         self.__pitstop_wps = {}
         self.__grid_wps = {}
@@ -266,8 +266,9 @@ class CarLogic(LogicColleague, ComputerProxy):
         phys = self.mediator.phys
         jmgr = self.eng.joystick_mgr
         eng_f, brake_f, brake_r, steering = \
-            self.input_strat.input2forces(input2forces, jmgr, self.is_drifting,
-                                          self.mediator.player_car_idx)
+            self.input_strat.input2forces(
+                input2forces, jmgr, self.is_drifting,
+                self.mediator.player_car_idx, self.eng.curr_time)
         phys.set_forces(eng_f, brake_f, brake_r, steering)
         self.__update_roll_info()
         gfx = self.mediator.gfx
@@ -279,7 +280,7 @@ class CarLogic(LogicColleague, ComputerProxy):
     def __update_roll_info(self):
         roll = self.mediator.gfx.nodepath.r
         status = 'ok' if -45 <= roll < 45 else 'ko'
-        curr_t = globalClock.get_frame_time()
+        curr_t = self.eng.curr_time
         setattr(self, 'last_roll_%s_time' % status, curr_t)
 
     def __clamp_orientation(self):
@@ -618,11 +619,11 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @property
     def is_upside_down(self):
-        return globalClock.get_frame_time() - self.last_roll_ok_time > 5.0
+        return self.eng.curr_time - self.last_roll_ok_time > 5.0
 
     @property
     def is_rolling(self):
-        return globalClock.get_frame_time() - self.last_roll_ko_time < 1.0
+        return self.eng.curr_time - self.last_roll_ko_time < 1.0
 
     @property
     def is_rotating(self):
@@ -640,7 +641,7 @@ class CarLogic(LogicColleague, ComputerProxy):
 
     @property
     def lap_time(self):
-        return globalClock.get_frame_time() - self.lap_time_start
+        return self.eng.curr_time - self.lap_time_start
 
     @property
     def laps_num(self):
@@ -702,7 +703,7 @@ class CarPlayerLogic(CarLogic):
     def _update_dist(self):
         states = ['Loading', 'Countdown']
         if self.mediator.fsm.getCurrentOrNextState() in states: return
-        curr_time = globalClock.get_frame_time()
+        curr_time = self.eng.curr_time
         if curr_time - self.last_upd_dist_time < 1: return
         self.last_upd_dist_time = curr_time
         self.car_positions += [self.mediator.gfx.nodepath.get_pos()]
@@ -720,7 +721,7 @@ class CarPlayerLogic(CarLogic):
         if self.mediator.fsm.getCurrentOrNextState() == 'Results': return
         panel = self.mediator.gui.panel
         if self.lap_time_start:
-            f_t = globalClock.get_frame_time()
+            f_t = self.eng.curr_time
             d_t = round(f_t - self.lap_time_start, 2)
             panel.time_txt.setText(str(d_t))
         if self.lap_time_start:

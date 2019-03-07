@@ -14,7 +14,7 @@ class EngineFacade(Facade):
             ('resolutions', lambda obj: obj.gui.resolutions),
             ('closest_resolution', lambda obj: obj.gui.closest_resolution),
             ('joystick_mgr', lambda obj: obj.event.joystick_mgr),
-            ('curr_time', lambda obj: globalClock.get_frame_time())]
+            ('curr_time', lambda obj: self.clock.time)]
         mth_lst = [
             ('attach_obs', lambda obj: obj.event.attach),
             ('detach_obs', lambda obj: obj.event.detach),

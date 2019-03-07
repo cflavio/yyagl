@@ -21,6 +21,7 @@ from ..gameobject import GameObject, Colleague
 from .enginefacade import EngineFacade
 from .configuration import Cfg
 from .cbmux import CallbackMux
+from .clock import Clock
 
 
 class Engine(GameObject, EngineFacade):
@@ -55,6 +56,7 @@ class Engine(GameObject, EngineFacade):
                                     cfg.lang_cfg.lang_domain,
                                     cfg.lang_cfg.lang_path))]]
         GameObject.__init__(self, comps)
+        self.clock = Clock(self.pause)
 
     def destroy(self):
         GameObject.destroy(self)

@@ -254,7 +254,7 @@ class CarPhys(PhysColleague):
         speeds = list(map(lambda whi: self.__update_whl_props(*whi), wheels))
         speeds = [speed for speed in speeds if speed]
         if self.is_drifting:
-            self.__last_drift_time = globalClock.get_frame_time()
+            self.__last_drift_time = self.eng.curr_time
         self.curr_speed_mul = (sum(speeds) / len(speeds)) if speeds else 1.0
 
     def __update_whl_props(self, whl, i):
@@ -292,8 +292,8 @@ class CarPhys(PhysColleague):
         if gfx_node.has_tag('friction'):
             fric = float(gfx_node.get_tag('friction'))
         if not whl.get_raycast_info().is_in_contact():
-            self.__whl2flytime[i] = globalClock.get_frame_time()
-        gnd_time = globalClock.get_frame_time() - self.__whl2flytime[i]
+            self.__whl2flytime[i] = self.eng.curr_time
+        gnd_time = self.eng.curr_time - self.__whl2flytime[i]
         gnd_recovery_time = .2 if whl.is_front_wheel() else .1
         gnd_factor = min(1, gnd_time / gnd_recovery_time)
         idx = 0 if whl.is_front_wheel() else 1

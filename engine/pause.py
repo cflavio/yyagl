@@ -34,9 +34,11 @@ class PauseLogic(LogicColleague):
         self._pause.remove_task(tsk)
 
     def pause(self):
+        self.notify('on_pause')
         return self._pause.pause()
 
     def resume(self):
+        self.notify('on_resume')
         return self._pause.resume()
 
     def toggle(self, show_frm=True):
