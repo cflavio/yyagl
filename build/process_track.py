@@ -30,6 +30,7 @@ class GuiCfg(object):
         self.antialiasing = False
         self.shaders = False
         self.volume = 1
+        self.fixed_fps = 0
 
 
 class ProfilingCfg(object):

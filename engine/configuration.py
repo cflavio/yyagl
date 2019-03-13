@@ -6,7 +6,7 @@ class GuiCfg(object):
 
     def __init__(self, fps=False, win_size='1280 720', win_orig=None,
                  win_title='yyagl', fullscreen=False, sync_video=None,
-                 antialiasing=False, shaders=True, volume=1):
+                 antialiasing=False, shaders=True, volume=1, fixed_fps=0):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title
@@ -17,6 +17,7 @@ class GuiCfg(object):
         self.antialiasing = antialiasing
         self.shaders = shaders
         self.volume = volume
+        self.fixed_fps = fixed_fps
 
 
 class ProfilingCfg(object):
