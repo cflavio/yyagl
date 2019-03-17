@@ -39,6 +39,7 @@ class EngineEvent(EventColleague):
         for i in range(map.get_num_buttons()):
             if map.get_mapped_button_label(i).lower() == desc:
                 return str(map.get_mapped_button(i))
+            return desc
 
     def destroy(self):
         self.joystick_mgr.destroy()
