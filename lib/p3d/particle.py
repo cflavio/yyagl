@@ -104,8 +104,7 @@ class P3dParticle(GameObject):
         tex = Texture('tex')
         tex.setup_buffer_texture(
             self.__npart, Texture.T_float, Texture.F_rgba32, GeomEnums.UH_static)
-        conv_mth = 'tostring' if sys.version_info[0] < 3 else 'tobytes'
-        tex.set_ram_image(getattr(data, conv_mth)())
+        tex.set_ram_image(data)
         return tex
 
     def __rnd_pos(self):
@@ -138,31 +137,28 @@ class P3dParticle(GameObject):
         sha_attr = sha_attr.set_flag(ShaderAttrib.F_shader_point_size, True)
         self._nodepath.set_attrib(sha_attr)
         img = loader.loadTexture('yyagl/assets/images/%s.txo' % self.__texture)
-        inputs = [
-            ('start_pos', self.__tex_pos),
-            ('positions', self.__tex_curr_pos),
-            ('emitter_old_pos', self.__old_pos),
-            ('emitter_pos', self.__emitter.get_pos(P3dNode(render))),
-            ('start_vel', self.__tex_start_vel),
-            ('velocities', self.__tex_curr_vel),
-            ('accel', (0, 0, self.__gravity)),
-            ('start_time', globalClock.get_frame_time()),
-            ('emission_times', self.__tex_times),
-            ('part_duration', self.__part_duration),
-            ('delta_t', 0),
-            ('emitting', 1),
-            ('col', self.__color),
-            ('image', img)
-            ]
-        list(map(lambda inp: self._nodepath.set_shader_input(*inp), inputs))
+        self._nodepath.set_shader_inputs(
+            start_pos=self.__tex_pos,
+            positions=self.__tex_curr_pos,
+            emitter_old_pos=self.__old_pos,
+            emitter_pos=self.__emitter.get_pos(P3dNode(render)),
+            start_vel=self.__tex_start_vel,
+            velocities=self.__tex_curr_vel,
+            accel=(0, 0, self.__gravity),
+            start_time=globalClock.get_frame_time(),
+            emission_times=self.__tex_times,
+            part_duration=self.__part_duration,
+            emitting=1,
+            col=self.__color,
+            image=img)
 
     def _update(self, task):
         if self.__emitter and not self.__emitter.is_empty:
             pos = self.__emitter.get_pos(P3dNode(render))
         else: pos = (0, 0, 0)
-        self._nodepath.set_shader_input('emitter_old_pos', self.__old_pos)
-        self._nodepath.set_shader_input('emitter_pos', pos)
-        self._nodepath.set_shader_input('delta_t', globalClock.get_dt())
+        self._nodepath.set_shader_inputs(
+            emitter_old_pos=self.__old_pos,
+            emitter_pos=pos)
         self.__old_pos = pos
         return task.again
 
