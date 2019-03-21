@@ -62,8 +62,8 @@ class DebugLines(object):
     def draw(self, start, end):
         segs = LineSegs()
         segs.set_color(*self.color)
-        segs.moveTo(start.vec)
-        segs.drawTo(end.vec)
+        segs.moveTo(start._vec)
+        segs.drawTo(end._vec)
         segs_node = segs.create()
         self.lines += [render.attachNewNode(segs_node)]
 
@@ -73,7 +73,7 @@ class DebugLines(object):
 
 class AbsAiLogic(ComputerProxy, GameObject):
 
-    def __init__(self, car, cars, player_car):
+    def __init__(self, car, cars, player_car, debug=False):
         GameObject.__init__(self)
         self.car = car
         self.cars = cars
@@ -88,8 +88,10 @@ class AbsAiLogic(ComputerProxy, GameObject):
                          for whl in car.phys.vehicle.get_wheels())
         self.height_bounds = (bnds[0].z - whl_height * 1.15,
                               bnds[1].z + whl_height * 1.15)
-        self.debug_lines_gnd = DebugLines((0, 1, 0))
-        self.debug_lines_obst = DebugLines((1, 0, 0))
+        self.__debug = debug
+        if debug:
+            self.debug_lines_gnd = DebugLines((0, 1, 0))
+            self.debug_lines_obst = DebugLines((1, 0, 0))
         ComputerProxy.__init__(self)
 
     @property
@@ -162,7 +164,7 @@ class AbsAiLogic(ComputerProxy, GameObject):
             result += [(hit.get_node().get_name(), (start - hpos).length())]
         result = sorted(result, key=lambda elm: elm[1])
         if self.car.fsm.getCurrentOrNextState() != 'Results' and \
-                self.player_car[0] == self.car.name:
+                self.player_car[0] == self.car.name and self.__debug:
             self.debug_lines_obst.draw(start, lookahead_pos)
         road_res = [res for res in result if any(road_n in res[0] for road_n in ['Road', 'Offroad'])][:1]
         obs_res = [res for res in result if not any(road_n in res[0] for road_n in ['Road', 'Offroad'])][:1]
@@ -170,8 +172,9 @@ class AbsAiLogic(ComputerProxy, GameObject):
 
     def destroy(self):
         self.car = None
-        self.debug_lines_gnd.destroy()
-        self.debug_lines_obst.destroy()
+        if self.__debug:
+            self.debug_lines_gnd.destroy()
+            self.debug_lines_obst.destroy()
         ComputerProxy.destroy(self)
         GameObject.destroy(self)
 
@@ -231,8 +234,9 @@ class CarAi(AiColleague, ComputerProxy):
         self.waypoints = car_props.track_waypoints
         self.ai_poller = car_props.ai_poller
         self.cars = race_props.season_props.car_names
-        self.front_logic = FrontAiLogic(self.mediator, self.cars, player_car_name)
-        self.rear_logic = RearAiLogic(self.mediator, self.cars, player_car_name)
+        self.__debug = race_props.ai_debug
+        self.front_logic = FrontAiLogic(self.mediator, self.cars, player_car_name, race_props.ai_debug)
+        self.rear_logic = RearAiLogic(self.mediator, self.cars, player_car_name, race_props.ai_debug)
         self.last_positions = []
         # last 12 positions (a position a second) for respawning if the car
         # can't move
@@ -267,9 +271,10 @@ class CarAi(AiColleague, ComputerProxy):
     def on_frame(self):
         if self.ai_poller.current != self.mediator.name: return
         self._eval_respawn()
-        for logic in [self.front_logic, self.rear_logic]:
-            logic.debug_lines_gnd.clear()
-            logic.debug_lines_obst.clear()
+        if self.__debug:
+            for logic in [self.front_logic, self.rear_logic]:
+                logic.debug_lines_gnd.clear()
+                logic.debug_lines_obst.clear()
         directions = [self.front_logic._sectors[self.front_logic._curr_sector]]
         self.front_logic._curr_sector = (self.front_logic._curr_sector + 1) % 3
         hit_res = self.front_logic.hit_res(directions[0])

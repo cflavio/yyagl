@@ -156,12 +156,12 @@ class RaceLogic(LogicColleague):
             self.track.gfx.update(player_car.get_pos())
         positions = [(car.name, car.get_pos()) for car in self.all_cars]
         self.mediator.gui.update_minimap(positions)
-        if self.props.a_i:
+        if self.props.a_i and self.props.ai_debug:
             self.track.gfx.set_curr_wp(self.player_cars[0].ai.curr_logic.curr_tgt_wp)  # for debug
         if self.mediator.fsm.getCurrentOrNextState() == 'Play':
             for player_car in self.player_cars:
                 player_car.upd_ranking(self.ranking())
-                if self.props.a_i:
+                if self.props.a_i and self.props.ai_debug:
                     player_car.gui.ai_panel.curr_wp = player_car.ai.curr_logic.curr_tgt_wp.get_name()[8:]
                     player_car.gui.ai_panel.curr_logic = player_car.ai.curr_logic.__class__.__name__
                     player_car.gui.ai_panel.curr_car_dot_traj = round(player_car.ai.curr_logic.car_dot_traj, 3)
