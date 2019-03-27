@@ -26,7 +26,7 @@ class LibP3d(DirectObject, object):
     @staticmethod
     def configure():
         loadPrcFileData('', 'notify-level-ya2 info')
-        loadPrcFileData('', 'gl-version 3 2')
+        #loadPrcFileData('', 'gl-version 3 2')
 
     @staticmethod
     def fixpath(path):
