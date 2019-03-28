@@ -6,7 +6,7 @@ from .build import ver, bld_dpath, branch, InsideDir, TempFile
 from .deployng import bld_ng
 
 
-nsi_src = '''Name {full_name}
+nsi_src = r'''Name {full_name}
 OutFile {out_file}
 InstallDir "$PROGRAMFILES\\{full_name}"
 InstallDirRegKey HKCU "Yorg" ""

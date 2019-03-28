@@ -1,7 +1,6 @@
 from os import system, remove
 from sys import executable
-from build import exec_cmd
-from mtprocesser import MultithreadedProcesser
+from yyagl.build.mtprocesser import MultithreadedProcesser
 
 
 def bld_images(target, source, env):

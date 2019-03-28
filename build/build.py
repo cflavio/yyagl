@@ -5,7 +5,7 @@ from subprocess import Popen, PIPE
 
 def exec_cmd(cmd):
     ret = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True).communicate()
-    return '\n'.join(ret)
+    return ret[0].decode('utf-8').strip()  # '\n'.join(ret)
 
 
 def __branch():
