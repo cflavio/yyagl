@@ -238,6 +238,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.lap_time_start = 0
         self.last_roll_ok_time = self.eng.curr_time
         self.last_roll_ko_time = self.eng.curr_time
+        self.last_ground_time = self.eng.curr_time
         self.lap_times = []
         self.__pitstop_wps = {}
         self.__grid_wps = {}
@@ -276,6 +277,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         (gfx.on_skidmarking if is_skid else gfx.on_no_skidmarking)()
         self.__clamp_orientation()
         self.__adjust_car()
+        if not self.mediator.phys.is_flying: self.last_ground_time = self.eng.curr_time
 
     def __update_roll_info(self):
         roll = self.mediator.gfx.nodepath.r
@@ -624,6 +626,9 @@ class CarLogic(LogicColleague, ComputerProxy):
     @property
     def is_rolling(self):
         return self.eng.curr_time - self.last_roll_ko_time < 1.0
+
+    @property
+    def fly_time(self): return self.eng.curr_time - self.last_ground_time
 
     @property
     def is_rotating(self):

@@ -301,7 +301,8 @@ class CarAi(AiColleague, ComputerProxy):
         center_y = sum(pos.y for pos in self.last_positions) / npos
         center_z = sum(pos.z for pos in self.last_positions) / npos
         center = LPoint3f(center_x, center_y, center_z)
-        if all((pos - center).length() < 6 for pos in self.last_positions):
+        if all((pos - center).length() < 6 for pos in self.last_positions) or \
+                self.mediator.logic.fly_time > 10:
             self.last_positions = []
             self.mediator.event.process_respawn()
 

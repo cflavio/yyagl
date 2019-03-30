@@ -317,23 +317,24 @@ class CarPanel(GameObject):
         return all(abs(b - a) < .01 for a, b in zip(vec1, vec2))
 
     def enter_waiting(self):
-        if self.ncars == 1: parent = base.aspect2d
-        elif self.ncars == 2:
-            if self.player_idx == 0: parent = base.a2dCenterQuarter
-            else: parent = base.a2dCenterThirdQuarter
-        elif self.ncars == 3:
-            if self.player_idx == 0: parent = base.a2dQuarterCenter
-            elif self.player_idx == 1: parent = base.a2dThirdQuarterQuarter
-            else: parent = base.a2dThirdQuarterThirdQuarter
-        elif self.ncars == 4:
-            if self.player_idx == 0: parent = base.a2dQuarterQuarter
-            elif self.player_idx == 1: parent = base.a2dQuarterThirdQuarter
-            elif self.player_idx == 2: parent = base.a2dThirdQuarterQuarter
-            else: parent = base.a2dThirdQuarterThirdQuarter
-        menu_props = self.race_props.season_props.gameprops.menu_props
-        pars = {'scale': .065, 'parent': parent,
-                'fg': menu_props.text_normal_col,
-                'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
+        pass
+        #if self.ncars == 1: parent = base.aspect2d
+        #elif self.ncars == 2:
+        #    if self.player_idx == 0: parent = base.a2dCenterQuarter
+        #    else: parent = base.a2dCenterThirdQuarter
+        #elif self.ncars == 3:
+        #    if self.player_idx == 0: parent = base.a2dQuarterCenter
+        #    elif self.player_idx == 1: parent = base.a2dThirdQuarterQuarter
+        #    else: parent = base.a2dThirdQuarterThirdQuarter
+        #elif self.ncars == 4:
+        #    if self.player_idx == 0: parent = base.a2dQuarterQuarter
+        #    elif self.player_idx == 1: parent = base.a2dQuarterThirdQuarter
+        #    elif self.player_idx == 2: parent = base.a2dThirdQuarterQuarter
+        #    else: parent = base.a2dThirdQuarterThirdQuarter
+        #menu_props = self.race_props.season_props.gameprops.menu_props
+        #pars = {'scale': .065, 'parent': parent,
+        #        'fg': menu_props.text_normal_col,
+        #        'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
 
     def exit_waiting(self): pass
 
@@ -543,7 +544,7 @@ class CarPlayerGui(CarGui):
             #self.panel.glass_b.show()
             self.way_txt.setText(way_str)
             self.way_img.show()
-        elif not self.mediator.logic.is_moving:
+        elif not self.mediator.logic.is_moving or self.mediator.logic.fly_time > 10:
             #self.panel.glass_b.show()
             keys = self.race_props.keys.players_keys[self.mediator.player_car_idx]
             txt = _('press %s to respawn') % self.eng.event.key2desc(keys.respawn)
