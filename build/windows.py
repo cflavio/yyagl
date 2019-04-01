@@ -8,7 +8,7 @@ from .deployng import bld_ng
 
 nsi_src = r'''Name {full_name}
 OutFile {out_file}
-InstallDir "$PROGRAMFILES\\{full_name}"
+InstallDir "$PROGRAMFILES\{full_name}"
 InstallDirRegKey HKCU "Yorg" ""
 SetCompress auto
 SetCompressor lzma
@@ -17,7 +17,7 @@ ShowUninstDetails nevershow
 InstType "Typical"
 RequestExecutionLevel admin
 Function launch
-  ExecShell "open" "$INSTDIR\\{short_name}.exe"
+  ExecShell "open" "$INSTDIR\{short_name}.exe"
 FunctionEnd
 !include "MUI2.nsh"
 !define MUI_HEADERIMAGE
@@ -26,8 +26,8 @@ FunctionEnd
 !define MUI_FINISHPAGE_RUN_FUNCTION launch
 !define MUI_FINISHPAGE_RUN_TEXT "Run Yorg"
 Function finishpageaction
-CreateShortcut "$DESKTOP\\{short_name}.lnk" "$INSTDIR\\{short_name}.exe"\
-  "" "$INSTDIR\\{icon_file}"
+CreateShortcut "$DESKTOP\{short_name}.lnk" "$INSTDIR\{short_name}.exe"\
+  "" "$INSTDIR\{icon_file}"
 FunctionEnd
 !define MUI_FINISHPAGE_SHOWREADME ""
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
@@ -54,25 +54,25 @@ WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg" \
                  "DisplayName" "Yorg"
 WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg" \
                  "UninstallString" '"$INSTDIR\Uninstall.exe"'
-WriteUninstaller "$INSTDIR\\Uninstall.exe"
+WriteUninstaller "$INSTDIR\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-    CreateDirectory "$SMPROGRAMS\\$StartMenuFolder"
-    CreateShortCut "$SMPROGRAMS\\$StartMenuFolder\\{full_name}.lnk"\
-      "$INSTDIR\\{short_name}.exe" "" "$INSTDIR\\{icon_file}"
-    CreateShortCut "$SMPROGRAMS\\$StartMenuFolder\\Uninstall.lnk" \
-      "$INSTDIR\\Uninstall.exe"
+    CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\{full_name}.lnk"\
+      "$INSTDIR\{short_name}.exe" "" "$INSTDIR\{icon_file}"
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" \
+      "$INSTDIR\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 Section Uninstall
-  Delete "$INSTDIR\\{short_name}.exe"
+  Delete "$INSTDIR\{short_name}.exe"
   {uninstall_files}
-  Delete "$INSTDIR\\Uninstall.exe"
+  Delete "$INSTDIR\Uninstall.exe"
   RMDir /r "$INSTDIR"
   !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
-  Delete "$DESKTOP\\{short_name}.lnk"
-  Delete "$SMPROGRAMS\\$StartMenuFolder\\Uninstall.lnk"
-  Delete "$SMPROGRAMS\\$StartMenuFolder\\{full_name}.lnk"
-  RMDir "$SMPROGRAMS\\$StartMenuFolder"
+  Delete "$DESKTOP\{short_name}.lnk"
+  Delete "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk"
+  Delete "$SMPROGRAMS\$StartMenuFolder\{full_name}.lnk"
+  RMDir "$SMPROGRAMS\$StartMenuFolder"
   DeleteRegKey /ifempty HKCU "Yorg"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg"
 SectionEnd'''
@@ -102,6 +102,7 @@ def bld_windows(target, source, env):
             copy('../../license.txt', './license.txt')
             copytree('../../assets', './assets')
             copytree('../../yyagl/assets', './yyagl/assets')
+            move('./assets/images/icon/yorg.ico', './yorg.ico')
             for root, _, fnames in walk('./assets'):
                 for _fname in fnames:
                     fname = root + '/' + _fname
