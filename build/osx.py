@@ -1,5 +1,5 @@
 from os import system, walk, remove
-from shutil import rmtree, copytree, move
+from shutil import rmtree, copytree, move, copy
 from .build import ver, bld_dpath, branch
 from .deployng import bld_ng
 
@@ -21,6 +21,19 @@ def bld_osx(target, source, env):
     pmacos = '../build/macosx_10_6_x86_64/%s.app/Contents/MacOS/' % appname.lower()
     copytree('assets', bld_dpath + pmacos + 'assets')
     copytree('yyagl/assets', bld_dpath + pmacos + 'yyagl/assets')
+    copy('assets/images/icon/AppIcon.icns', bld_dpath + '../build/macosx_10_6_x86_64/%s.app/Contents/Resources/AppIcon.icns' % appname.lower())
+    infolines = []
+    with open(bld_dpath + '../build/macosx_10_6_x86_64/%s.app/Contents/Info.plist' % appname.lower()) as finfo:
+        infolines = finfo.readlines()
+    winfolines = []
+    for line in infolines:
+        if '</dict>' in line:
+            winfolines += [
+                '\t<key>CFBundleIconFile</key>\n',
+                '\t<string>AppIcon</string>\n']
+        winfolines += [line]
+    with open(bld_dpath + '../build/macosx_10_6_x86_64/%s.app/Contents/Info.plist' % appname.lower(), 'w') as finfo:
+        finfo.writelines(winfolines)
     for root, _, fnames in walk(bld_dpath + pmacos + 'assets'):
         for _fname in fnames:
             fname = root + '/' + _fname
