@@ -110,8 +110,8 @@ class LoadingPageGui(PageGui):
         _key = getattr(self.rprops.keys.players_keys[0], key)
         txt = Text(
             text + ': ' + self.eng.event.key2desc(_key),  #.decode('utf-8'),
-            align='left', scale=.072, pos=(.8, pos_z), font=self.font,
-            fg=self.text_bg)
+            align='left', scale=.064, pos=(.8, pos_z), font=self.font,
+            fg=self.text_bg, wordwrap=24)
         self.widgets += [txt]
 
 
