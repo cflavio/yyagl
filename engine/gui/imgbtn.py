@@ -22,9 +22,9 @@ class ImgBtn(Btn):
         self.set_shader_input('col_offset', 0)
 
     def enable(self):
-        Btn.enable(self)
+        super().enable()
         self.set_shader_input('enable', 1)
 
     def disable(self):
-        Btn.disable(self)
+        super().disable()
         self.set_shader_input('enable', .2)

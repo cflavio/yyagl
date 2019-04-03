@@ -3,7 +3,7 @@ from direct.gui.DirectGuiGlobals import NORMAL, DISABLED
 from yyagl.engine.vec import Vec2
 
 
-class WidgetMixin(object):
+class WidgetMixin:
 
     highlight_color_offset = [
         LVecBase4f(0, 0, .4, 0),
@@ -43,10 +43,13 @@ class FrameMixin(WidgetMixin):
     def enable(self):
         self['state'] = NORMAL
         if hasattr(self, 'set_alpha_scale'): self.set_alpha_scale(1)
+        self.get_np()['frameColor'] = self.start_frame_color
 
     def disable(self):
         self['state'] = DISABLED
         if hasattr(self, 'set_alpha_scale'): self.set_alpha_scale(.25)
+        col = self.start_frame_color
+        self.get_np()['frameColor'] = (col[0], col[1], col[2], col[3] * .4)
 
     def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
         self.curr_offset += WidgetMixin.highlight_color_offset[player]
@@ -96,6 +99,16 @@ class BtnMixin(FrameMixin):
         if self['command'] and self['state'] == NORMAL:
             lst_arg = [player] if player is not None else []
             self['command'](*self['extraArgs'] + lst_arg)
+
+    def enable(self):
+        FrameMixin.enable(self)
+        self.get_np().component('text0').textNode.set_text_color(self.start_txt_color)
+
+    def disable(self):
+        FrameMixin.disable(self)
+        col = self.start_txt_color
+        self.get_np()['text_fg'] = (col[0], col[1], col[2], col[3] * .4)
+
 
 
 class EntryMixin(FrameMixin):

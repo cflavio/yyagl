@@ -17,7 +17,7 @@ from yyagl.facade import Facade
 from yyagl.lib.ivals import Seq, Wait, PosIval, Func
 
 
-class CommonBase(object):
+class CommonBase:
 
     def set_widget(self):
         from yyagl.lib.gui import Frame, Slider, Btn, Label, OptionMenu, \
@@ -200,9 +200,11 @@ class P3dBtn(P3dAbs):
 
     def _on_exit(self, pos): pass  # pos comes from mouse
 
-    def enable(self): self['state'] = NORMAL
+    # we add these with the mixins
+    #def enable(self): self['state'] = NORMAL
 
-    def disable(self): self['state'] = DISABLED
+    #def disable(self): self['state'] = DISABLED
+
 
 
 class P3dSlider(P3dAbs):
