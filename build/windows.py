@@ -102,7 +102,7 @@ def bld_windows(target, source, env):
             copy('../../license.txt', './license.txt')
             copytree('../../assets', './assets')
             copytree('../../yyagl/assets', './yyagl/assets')
-            move('./assets/images/icon/yorg.ico', './yorg.ico')
+            copy('./assets/images/icon/yorg.ico', './yorg.ico')
             for root, _, fnames in walk('./assets'):
                 for _fname in fnames:
                     fname = root + '/' + _fname

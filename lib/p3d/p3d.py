@@ -223,6 +223,12 @@ class LibP3d(DirectObject, object):
     def aspect_ratio(self): return base.getAspectRatio()
 
     @staticmethod
+    def set_icon(filename):
+        props = WindowProperties()
+        props.set_icon_filename(filename)
+        base.win.requestProperties(props)
+
+    @staticmethod
     def __set_std_cursor(show):
         props = WindowProperties()
         props.set_cursor_hidden(not show)
