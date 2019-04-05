@@ -51,15 +51,9 @@ class FrameMixin(WidgetMixin):
         col = self.start_frame_color
         self.get_np()['frameColor'] = (col[0], col[1], col[2], col[3] * .4)
 
-    def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
-        self.curr_offset += WidgetMixin.highlight_color_offset[player]
-        col = LVecBase4f(self.start_frame_color)
-        self.get_np()['frameColor'] = col + self.curr_offset
+    def on_wdg_enter(self, pos=None, player=0): pass
 
-    def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
-        self.curr_offset -= WidgetMixin.highlight_color_offset[player]
-        col = LVecBase4f(self.start_frame_color)
-        self.get_np()['frameColor'] = col + self.curr_offset
+    def on_wdg_exit(self, pos=None, player=0): pass
 
 
 class ScrolledFrameMixin(WidgetMixin):
@@ -85,12 +79,16 @@ class BtnMixin(FrameMixin):
     def on_arrow(self, direction): pass
 
     def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
-        FrameMixin.on_wdg_enter(self, pos, player)
+        self.curr_offset += WidgetMixin.highlight_color_offset[player]
+        col = LVecBase4f(self.start_frame_color)
+        self.get_np()['frameColor'] = col + self.curr_offset
         self.get_np()['text_fg'] = self.start_txt_color + self.curr_offset
         self.get_np().set_shader_input('col_offset', self.curr_offset)
 
     def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
-        FrameMixin.on_wdg_exit(self, pos, player)
+        self.curr_offset -= WidgetMixin.highlight_color_offset[player]
+        col = LVecBase4f(self.start_frame_color)
+        self.get_np()['frameColor'] = col + self.curr_offset
         self.get_np()['text_fg'] = self.start_txt_color
         self.get_np()['frameColor'] = self.start_frame_color
         self.get_np().set_shader_input('col_offset', self.curr_offset)
