@@ -50,7 +50,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         CarGfxFacade.__init__(self)
         self.load()
 
-    def set_decorator(self, dec_code):
+    def set_decorator(self, dec_code, remove=True):
         deccode2info = {
             'pitstop': ('PitStop/PitStopAnim', 5.0),
             'rotate_all': ('RotateAllHit/RotateAllHitAnim', 3.0)}
@@ -58,7 +58,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         fpath = 'assets/models/misc/' + info[0]
         self.decorators += [Decorator(fpath, self.nodepath)]
         args = info[1], self.unset_decorator, [self.decorators[-1]]
-        self.dec_tsk += [self.eng.do_later(*args)]
+        if remove: self.dec_tsk += [self.eng.do_later(*args)]
 
     def unset_decorator(self, dec):
         self.decorators.remove(dec)
@@ -102,15 +102,23 @@ class CarGfx(GfxColleague, CarGfxFacade):
         # try RigidBodyCombiner for the wheels
         for cha in chas: cha.optimize()
         self.on_skidmarking()
-        self.cnt = 5
-        for _ in range(6):
+        self.cnt = 7
+        for _ in range(8):
             self.preload_tsk()
             base.graphicsEngine.renderFrame()
         list(map(lambda mesh: mesh.reparent_to(self.nodepath), self.mediator.phys.ai_meshes))
 
     def preload_tsk(self):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
-        if self.cnt:
+        if self.cnt == 7:
+            self.set_decorator('pitstop', False)
+            self.cnt -= 1
+        elif self.cnt == 6:
+            self.unset_decorator(self.decorators[-1])
+            self.set_decorator('rotate_all', False)
+            self.cnt -= 1
+        elif self.cnt:
+            if self.cnt == 5: self.unset_decorator(self.decorators[-1])
             self.apply_damage()
             self.mediator.event.on_bonus(wpn_classes[self.cnt - 1])
             self.cnt -= 1
