@@ -19,20 +19,20 @@ class TuningGui(GuiColleague):
             self.sprops.gameprops.menu_props.background_img_path,
             scale=(1.77778, 1, 1))
         self.background.setBin('background', 10)
-        bprops = {'scale': .4, 'command': self.on_btn}
+        bprops = {'scale': (.4, .4), 'cmd': self.on_btn}
         self.txt = OnscreenText(
             text=_('What do you want to upgrade?'), scale=.1, pos=(0, .76),
             font=loader.loadFont(self.sprops.font),
             fg=self.sprops.gameprops.menu_props.text_normal_col)
         self.buttons = [ImgBtn(
-            pos=(-1.2, 1, .1), image=self.sprops.tuning_imgs[0],
-            extraArgs=['f_engine'], **bprops)]
+            pos=(-1.2, .1), img=self.sprops.tuning_imgs[0],
+            extra_args=['f_engine'], **bprops)]
         self.buttons += [ImgBtn(
-            pos=(0, 1, .1), image=self.sprops.tuning_imgs[1],
-            extraArgs=['f_tires'], **bprops)]
+            pos=(0, .1), img=self.sprops.tuning_imgs[1],
+            extra_args=['f_tires'], **bprops)]
         self.buttons += [ImgBtn(
-            pos=(1.2, 1, .1), image=self.sprops.tuning_imgs[2],
-            extraArgs=['f_suspensions'], **bprops)]
+            pos=(1.2, .1), img=self.sprops.tuning_imgs[2],
+            extra_args=['f_suspensions'], **bprops)]
         tuning = self.mediator.car2tuning[self.sprops.player_car_name]
         self.upg1_txt = OnscreenText(
             text=_('current upgrades: +') + str(tuning.f_engine),

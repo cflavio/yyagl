@@ -9,19 +9,20 @@ from yyagl.engine.gui.menu import Menu
 
 class RankingPageGui(PageGui):
 
-    def __init__(self, mediator, menu, rprops, sprops, ranking):
+    def __init__(self, mediator, menu_props, rprops, sprops, ranking):
         self.rprops = rprops
         self.sprops = sprops
         self.drivers = sprops.drivers
         self.ranking = ranking
-        PageGui.__init__(self, mediator, menu)
+        self.menu_props = menu_props
+        PageGui.__init__(self, mediator, menu_props)
 
     def build(self, back_btn=True):
         self.eng.init_gfx()
-        self.font = self.mediator.menu.gui.menu_props.font
-        self.text_fg = self.mediator.menu.gui.menu_props.text_active_col
-        self.text_bg = self.mediator.menu.gui.menu_props.text_normal_col
-        self.text_err_col = self.mediator.menu.gui.menu_props.text_err_col
+        self.font = self.menu_props.font
+        self.text_fg = self.menu_props.text_active_col
+        self.text_bg = self.menu_props.text_normal_col
+        self.text_err_col = self.menu_props.text_err_col
         items = self.ranking.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = Text(_('Ranking'), scale=.1, pos=(0, .76),
@@ -39,7 +40,7 @@ class RankingPageGui(PageGui):
             img = Img(
                 'assets/images/gui/trophy.txo', parent=base.a2dRightCenter,
                 pos=(-.58, 0), scale=.55)
-            img.set_transparency(True)
+            img.set_transparent()
             txt = Text(
                 _('Congratulations!'), fg=(.8, .6, .2, 1), scale=.16,
                 pos=(0, -.3), font=loader.loadFont(self.sprops.font),
@@ -50,21 +51,21 @@ class RankingPageGui(PageGui):
             cont_btn_cmd = self.notify
             cont_btn_ea = ['on_ranking_end']
         cont_btn = Btn(
-            text=_('Continue'), pos=(0, 1, -.8), command=cont_btn_cmd,
-            extraArgs=cont_btn_ea,
-            **self.rprops.season_props.gameprops.menu_props.btn_args)
+            text=_('Continue'), pos=(0, -.8), cmd=cont_btn_cmd,
+            extra_args=cont_btn_ea,
+            **self.menu_props.btn_args)
         self.add_widgets([cont_btn])
         PageGui.build(self, False)
 
 
 class RankingPage(Page):
 
-    def __init__(self, rprops, sprops, menu, ranking):
+    def __init__(self, rprops, sprops, menu_props, ranking):
         self.rprops = rprops
-        self.menu = menu
+        self.menu_props = menu_props
         init_lst = [
             [('event', PageEvent, [self]),
-             ('gui', RankingPageGui, [self, menu, rprops, sprops, ranking])]]
+             ('gui', RankingPageGui, [self, menu_props, rprops, sprops, ranking])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)
         # invece Page's __init__
@@ -87,7 +88,7 @@ class RankingMenuGui(GuiColleague):
         menu_props = sprops.gameprops.menu_props
         menu_props.btn_size = (-8.6, 8.6, -.42, .98)
         self.menu = Menu(menu_props)
-        self.rank_page = RankingPage(rprops, sprops, self.menu, ranking)
+        self.rank_page = RankingPage(rprops, sprops, menu_props, ranking)
         self.eng.do_later(.01, self.menu.push_page, [self.rank_page])
 
     def destroy(self):
