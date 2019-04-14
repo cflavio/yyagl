@@ -34,12 +34,11 @@ class LogMgrBase(Colleague):  # headless log manager
         #except NotImplementedError:  # on Windows
         #    messages += ['cores: not implemented']
         lib_ver = self.eng.lib.version
-        if lib_ver.startswith('1.10'):
-            try:
-                import psutil
-                mem = psutil.virtual_memory().total / 1000000000.0
-                messages += ['memory: %s GB' % round(mem, 2)]
-            except ImportError: self.log("can't import psutil")  # windows
+        try:
+            import psutil
+            mem = psutil.virtual_memory().total / 1000000000.0
+            messages += ['memory: %s GB' % round(mem, 2)]
+        except ImportError: self.log("can't import psutil")  # windows
         lib_commit = self.eng.lib.lib_commit
         py_ver = [str(elm) for elm in version_info[:3]]
         messages += ['python version: %s' % '.'.join(py_ver)]

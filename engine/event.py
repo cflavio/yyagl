@@ -7,10 +7,9 @@ class EngineEvent(EventColleague):
     def __init__(self, mediator, emulate_keyboard):
         EventColleague.__init__(self, mediator)
         self.eng.add_task(self.__on_frame)
-        if self.eng.lib.version.startswith('1.10'):
-            taskMgr.setupTaskChain('unpausable')
-            mth = self.__on_frame_unpausable
-            taskMgr.add(mth, 'unpausable', taskChain='unpausable')
+        taskMgr.setupTaskChain('unpausable')
+        mth = self.__on_frame_unpausable
+        taskMgr.add(mth, 'unpausable', taskChain='unpausable')
         self.joystick_mgr = JoystickMgr(emulate_keyboard)
 
     def __on_frame(self, task):  # unused task

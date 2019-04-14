@@ -82,9 +82,8 @@ class P3dPause(GameObject):
     def pause_tasks(self):
         is_tsk = lambda tsk: tsk and hasattr(tsk, 'getFunction')
         tasks = [TaskDec(tsk) for tsk in taskMgr.getTasks() if is_tsk(tsk)]
-        if self.eng.lib.version.startswith('1.10'):
-            tasks = [tsk for tsk in tasks
-                     if tsk.tsk.get_task_chain() != 'unpausable']
+        tasks = [tsk for tsk in tasks
+                 if tsk.tsk.get_task_chain() != 'unpausable']
         not_none = lambda tsk: tsk is not None
         paused_tasks = list(filter(not_none, [tsk.process() for tsk in tasks]))
         self.__paused_tasks = list(map(lambda tsk: TaskDec(tsk), paused_tasks))

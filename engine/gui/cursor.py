@@ -23,8 +23,7 @@ class MouseCursor(GameObject, MouseCursorFacade):
         self.hotspot_dx = scale[0] * (1 - 2 * hotspot[0])
         self.hotspot_dy = scale[2] * (1 - 2 * hotspot[1])
         self.eng.attach_obs(self.on_frame)
-        if self.eng.lib.version.startswith('1.10'):
-            self.eng.attach_obs(self.on_frame_unpausable)
+        self.eng.attach_obs(self.on_frame_unpausable)
 
     def show_standard(self): self.eng.lib.show_std_cursor()
 

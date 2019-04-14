@@ -20,7 +20,6 @@ class P3dParticle(GameObject):
             ray=.5, rate=.001, gravity=-9.81, vel=1.0, part_duration=1.0,
             autodestroy=None):
         GameObject.__init__(self)
-        if not self.eng.lib.version.startswith('1.10'): return
         self.__tex_pos = self.__tex_curr_pos = self.__tex_times = \
             self.__tex_start_vel = self.__tex_curr_vel = self.__emitternode = \
             None
