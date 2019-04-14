@@ -467,8 +467,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         if self.alt_jmp_wp:
             dist_wp = (car_np.get_pos() - curr_wp.pos).length()
             dist_alt = (car_np.get_pos() - self.alt_jmp_wp.pos).length()
-            dist_h_wp = abs(car_np.get_z() - curr_wp.node.get_z())
-            dist_h_alt = abs(car_np.get_z() - self.alt_jmp_wp.node.get_z())
+            dist_h_wp = abs(car_np.z - curr_wp.node.z)
+            dist_h_alt = abs(car_np.z - self.alt_jmp_wp.node.z)
             if dist_wp > .5 * dist_alt and dist_h_wp > 1.5 * dist_h_alt:
                 curr_wp = self.alt_jmp_wp
                 curr_wp.prevs = curr_wp.prevs_nopitlane
@@ -491,14 +491,14 @@ class CarLogic(LogicColleague, ComputerProxy):
             if _wp in may_succ: may_succ.remove(_wp)
         if len(may_succ) >= 2:
             if any(wp.node.has_tag('jump') for wp in may_succ):
-                cha_name = self.mediator.gfx.chassis_np.get_name()
+                cha_name = self.mediator.gfx.chassis_np.name
                 if cha_name in self.curr_chassis_name:
                     may_succ = [wp for wp in may_succ
                                 if wp.node.has_tag('jump')]
                     if not self.alt_jmp_wp:
                         jmp_wp_str = may_succ[0].node.get_tag('jump')
                         for cwp in self._grid_wps:
-                            if cwp.name == 'Waypoint' + jmp_wp_str:
+                            if cwp.get_name() == 'Waypoint' + jmp_wp_str:
                                 self.alt_jmp_wp = cwp
                 else:
                     may_succ = [wp for wp in may_succ
