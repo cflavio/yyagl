@@ -13,23 +13,24 @@ def bld_linux(target, source, env):
     if exists(bld_dpath + 'linux'): rmtree(bld_dpath + 'linux')
     makedirs(bld_dpath + 'linux')
     with InsideDir(bld_dpath + 'linux'):
-        __do_bld(start_dir, env['APPNAME'], ico_fpath)
+        _do_bld(start_dir, env['APPNAME'], ico_fpath)
     #rmtree(bld_dpath + 'linux')
 
 
-def __do_bld(start_dir, appname, ico_fpath):
-    __prepare(start_dir)
-    __bld(appname, start_dir, ico_fpath)
-    __bld_full_pkg(appname, ico_fpath)
-    __bld_pckgs(appname)
+def _do_bld(start_dir, appname, ico_fpath, clean=True):
+    _prepare(start_dir)
+    _bld(appname, start_dir, ico_fpath)
+    _bld_full_pkg(appname, ico_fpath)
+    _bld_pckgs(appname)
     chdir('../..')
+    if not clean: return
     #rmtree('dist')
     rmtree('build/__whl_cache__')
     rmtree('build/manylinux1_x86_64')
     rmtree('built/linux')
 
 
-def __prepare(start_path):
+def _prepare(start_path):
     makedirs('img/data')
     curr_path = dirname(realpath(__file__)) + '/'
     copytree(curr_path + 'mojosetup/meta', 'img/meta')
@@ -44,7 +45,7 @@ def __prepare(start_path):
     copy(libfpath, dst_dpath)
 
 
-def __bld(appname, start_path, ico_fpath):
+def _bld(appname, start_path, ico_fpath):
     arch = {'i386': 'i686', 'amd64': 'x86_64'}
     #system('tar -zxvf %s-0.0.0_manylinux1_x86_64.tar.xz' % (appname))
     #remove('.PKGINFO')
@@ -59,7 +60,7 @@ def __bld(appname, start_path, ico_fpath):
     system(cmd)
 
 
-def __bld_full_pkg(appname, ico_fpath):
+def _bld_full_pkg(appname, ico_fpath):
     #copytree('usr/lib/' + appname, 'img/data/lib')
     for fname in glob('../../build/manylinux1_x86_64/*.*'):
         copy(fname, 'img/data/')
@@ -94,7 +95,7 @@ def __bld_full_pkg(appname, ico_fpath):
     #move('linux_' + platform + '/' + appname, 'img/data/' + appname)
 
 
-def __bld_pckgs(appname):
+def _bld_pckgs(appname):
     with InsideDir('img/data'): system('tar -cvf - * | xz > ../pdata.tar.xz')
     system('rm -rf img/data/*')
     move('img/pdata.tar.xz', 'img/data/pdata.tar.xz')
