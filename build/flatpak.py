@@ -58,6 +58,6 @@ def __do_flatpak(dst, name):
     import pprint; pprint.pprint(json)
     with open('org.ya2.Yorg.json', 'w') as f: f.write(dumps(json))
     repo_name = 'flatpak_' + name + '_repo'
-    system('flatpak-builder --repo=%s --force-clean built org.ya2.Yorg.json' % repo_name)
+    system('flatpak-builder --repo=%s --force-clean --disable-rofiles-fuse built org.ya2.Yorg.json' % repo_name)
     move(repo_name, dst)
     #flatpak-builder --run build-dir org.flatpak.Hello.json hello.sh
