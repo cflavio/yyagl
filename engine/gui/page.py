@@ -31,6 +31,7 @@ class PageGui(GuiColleague):
     def build(self, back_btn=True, exit_behav=False):
         if back_btn: self.__build_back_btn(exit_behav)
         self._set_widgets()
+        self._set_entries()
         self.transition_enter()
         self.eng.cursor_top()
 
@@ -94,6 +95,16 @@ class PageGui(GuiColleague):
         return max(dirwdgs, key=nextweight)
 
     def _set_widgets(self): list(map(lambda wdg: wdg.set_widget(), self.widgets))
+
+    def _set_entries(self):
+        for wdg in self.widgets:
+            if wdg.__class__.__name__ == 'P3dEntryWidget':
+                wdg.attach(self.on_entry_enter)
+                wdg.attach(self.on_entry_exit)
+
+    def on_entry_enter(self): self.disable_navigation(self.players)
+
+    def on_entry_exit(self): self.enable_navigation(self.players)
 
     def transition_enter(self):
         self.translate()

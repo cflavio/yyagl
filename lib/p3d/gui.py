@@ -14,6 +14,7 @@ from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectScrolledFrame import DirectScrolledFrame
 from yyagl.facade import Facade
+from yyagl.observer import Subject
 from yyagl.lib.ivals import Seq, Wait, PosIval, Func
 
 
@@ -268,7 +269,7 @@ class P3dOptionMenu(P3dAbs):
     def curr_idx(self): return self.wdg.selectedIndex
 
 
-class P3dEntry(P3dAbs, DirectObject):
+class P3dEntry(P3dAbs, DirectObject, Subject):
 
     def __init__(
             self, scale=.05, pos=(0, 0), entry_font=None, width=12,
@@ -281,6 +282,7 @@ class P3dEntry(P3dAbs, DirectObject):
         self.__focus_in_cmd = focus_in_cmd
         self.__focus_out_cmd = focus_out_cmd
         DirectObject.__init__(self)
+        Subject.__init__(self)
         self.wdg = DirectEntry(
             scale=scale, pos=(pos[0], 1, pos[1]), entryFont=entry_font,
             width=width, frameColor=frame_col, initialText=initial_text,
@@ -302,10 +304,12 @@ class P3dEntry(P3dAbs, DirectObject):
     def _focus_in_cmd(self, *args):
         self.__focused = True
         if self.__focus_in_cmd: self.__focus_in_cmd(*args)
+        self.notify('on_entry_enter')
 
     def _focus_out_cmd(self, *args):
         self.__focused = False
         if self.__focus_out_cmd: self.__focus_out_cmd(*args)
+        self.notify('on_entry_exit')
 
     def on_tab(self):
         if self.wdg['focus']: self.on_tab_cb()
@@ -323,6 +327,7 @@ class P3dEntry(P3dAbs, DirectObject):
     def destroy(self):
         self.ignore('tab-up')
         self.on_tab_cb = None
+        Subject.destroy(self)
         P3dAbs.destroy(self)
 
 

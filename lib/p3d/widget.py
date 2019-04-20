@@ -115,11 +115,17 @@ class EntryMixin(FrameMixin):
 
     def on_wdg_enter(self, pos=None, player=0):  # pos: mouse's position
         FrameMixin.on_wdg_enter(self, pos, player)
+        self.curr_offset += WidgetMixin.highlight_color_offset[player]
+        col = LVecBase4f(self.start_frame_color)
+        self.get_np()['frameColor'] = col + self.curr_offset
         #self.get_np()['focus'] = 1  # it focuses it if mouse over
         #self.get_np().setFocus()
 
     def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
         FrameMixin.on_wdg_exit(self, pos, player)
+        self.curr_offset -= WidgetMixin.highlight_color_offset[player]
+        col = LVecBase4f(self.start_frame_color)
+        self.get_np()['frameColor'] = col + self.curr_offset
         #self.get_np()['focus'] = 0
         #self.get_np().setFocus()
 
