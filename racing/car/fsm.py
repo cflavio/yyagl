@@ -23,7 +23,7 @@ class CarFsm(FsmColleague):
         self.mediator.ai.destroy()
         self.mediator.ai = CarResultsAi(self.mediator, self.cprops)
         self.mediator.gui.hide()
-        self.mediator.gui.panel.enter_waiting()
+        #self.mediator.gui.panel.enter_waiting()
 
 
 class CarPlayerFsm(CarFsm):

@@ -429,6 +429,23 @@ class CarMultiPlayerPanel(CarPanel):
 
     def enter_waiting(self):
         CarPanel.enter_waiting(self)
+        if self.ncars == 1: parent = base.aspect2d
+        elif self.ncars == 2:
+            if self.player_idx == 0: parent = base.a2dCenterQuarter
+            else: parent = base.a2dCenterThirdQuarter
+        elif self.ncars == 3:
+            if self.player_idx == 0: parent = base.a2dQuarterCenter
+            elif self.player_idx == 1: parent = base.a2dThirdQuarterQuarter
+            else: parent = base.a2dThirdQuarterThirdQuarter
+        elif self.ncars == 4:
+            if self.player_idx == 0: parent = base.a2dQuarterQuarter
+            elif self.player_idx == 1: parent = base.a2dQuarterThirdQuarter
+            elif self.player_idx == 2: parent = base.a2dThirdQuarterQuarter
+            else: parent = base.a2dThirdQuarterThirdQuarter
+        menu_props = self.race_props.season_props.gameprops.menu_props
+        pars = {'scale': .065, 'parent': parent,
+                'fg': menu_props.text_normal_col,
+                'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
         self.wait_lab = OnscreenText(_('waiting for the other players'),
                                      pos=(0, 0), **pars)
 
