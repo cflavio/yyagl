@@ -158,7 +158,7 @@ class PageGui(GuiColleague):
                   tra_src=tra_src, tra_tra=tra_tra, **self.menu_props.btn_args)
         self.widgets += [btn]
 
-    def _on_back(self): self.notify('on_back', self.__class__.__name__)
+    def _on_back(self, player=0): self.notify('on_back', self.__class__.__name__)
     # refactor: notify should pass the sender, so these arguments would be
     # useless
 
