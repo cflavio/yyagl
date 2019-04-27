@@ -19,17 +19,18 @@ class DriverInfo(object):
 
 class DriverProps(object):
 
-    def __init__(self, info, car_name, f_engine, f_tires, f_suspensions):
+    def __init__(self, info, car_name, player_idx, f_engine, f_tires, f_suspensions):
         self.info = info
         self.car_name = car_name
+        self.player_idx = player_idx
         self.f_engine = f_engine
         self.f_tires = f_tires
         self.f_suspensions = f_suspensions
 
     def __repr__(self):
-        return 'driver(%s %s %s %s %s)' % (
-            self.info, self.car_name, self.f_engine, self.f_tires,
-            self.f_suspensions)
+        return 'driver(%s %s %s %s %s %s)' % (
+            self.info, self.car_name, self.player_idx, self.f_engine,
+            self.f_tires, self.f_suspensions)
 
 
 class DriverFacade(Facade):
