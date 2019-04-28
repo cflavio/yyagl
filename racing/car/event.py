@@ -287,8 +287,9 @@ class CarPlayerEvent(CarEvent):
         if not cls: return  # if removing
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
         self.accept(keys.fire, self.on_fire)
-        self.mediator.gui.panel.set_weapon(
-            self.props.season_props.wpn2img[cls.__name__])
+        if self.mediator.fsm.getCurrentOrNextState() != 'Waiting':
+            self.mediator.gui.panel.set_weapon(
+                self.props.season_props.wpn2img[cls.__name__])
         return cls
 
     def on_fire(self):
