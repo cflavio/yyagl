@@ -102,9 +102,13 @@ class PageGui(GuiColleague):
                 wdg.attach(self.on_entry_enter)
                 wdg.attach(self.on_entry_exit)
 
-    def on_entry_enter(self): self.disable_navigation(self.players)
+    def on_entry_enter(self):
+        if self.menu_props:  # i.e. not destroyed
+            self.disable_navigation(self.players)
 
-    def on_entry_exit(self): self.enable_navigation(self.players)
+    def on_entry_exit(self):
+        if self.menu_props:  # i.e. not destroyed
+            self.enable_navigation(self.players)
 
     def transition_enter(self):
         self.translate()
