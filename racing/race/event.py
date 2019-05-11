@@ -453,7 +453,7 @@ class RaceEventClient(RaceEvent):
         if data_lst[0] == NetMsgs.game_packet:
             self.__process_game_packet(data_lst)
 
-    def on_end_race(self):
+    def on_end_race(self, uid):
         if self.mediator.fsm.getCurrentOrNextState() != 'Results':
             points = [10, 8, 6, 4, 3, 2, 1, 0]
             zipped = zip(self.mediator.logic.race_ranking(), points)
