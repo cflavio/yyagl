@@ -454,6 +454,12 @@ class CarMultiPlayerPanel(CarPanel):
         self.wait_lab.destroy()
 
 
+class CarOnlineMPPanel(CarPanel):
+
+    def __init__(self, race_props, player_idx, ncars):
+        CarPanel.__init__(self, race_props, 0, 1)
+
+
 class CarAIPanel(GameObject):
 
     def __init__(self):
@@ -590,7 +596,7 @@ class CarPlayerLocalMPGui(CarPlayerGui):
 
 class CarPlayerMPGui(CarPlayerGui):
 
-    panel_cls = CarMultiPlayerPanel
+    panel_cls = CarOnlineMPPanel
 
 
 class CarNetworkGui(CarGui):
