@@ -155,7 +155,7 @@ class LibP3d(DirectObject, object):
     def __on_end(self):
         base.closeWindow(base.win)
         if self.__end_cb: self.__end_cb()
-        _exit(1)
+        _exit()
 
     @staticmethod
     def load_font(filepath, outline=True):
