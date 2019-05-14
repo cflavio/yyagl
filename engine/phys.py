@@ -99,4 +99,4 @@ class PhysMgr(Colleague, PhysFacade):
         self.eng.event.notify('on_collision', obj, node)
 
     def toggle_dbg(self):
-        self.root.toggle_dbg()
+        if self.root: self.root.toggle_dbg()

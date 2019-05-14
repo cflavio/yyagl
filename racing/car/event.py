@@ -340,6 +340,7 @@ class CarPlayerEvent(CarEvent):
 class CarPlayerEventServer(CarPlayerEvent):
 
     def _process_end_goal(self):
+        self.eng.client.send(['end_race_player'])
         CarPlayerEvent._process_end_goal(self)
 
 

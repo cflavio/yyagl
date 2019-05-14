@@ -323,6 +323,14 @@ class RaceEventServer(RaceEvent):
         for wpn in notfound_wpn:
             car.event.unset_fired_weapon(wpn)
 
+    def on_end_race(self, player_name):
+        self.ended_cars += [player_name]
+        points = [10, 8, 6, 4, 3, 2, 1, 0]
+        zipped = zip(self.mediator.logic.race_ranking(), points)
+        race_ranking = {car: point for car, point in zipped}
+        if self.mediator.fsm.getCurrentOrNextState() != 'Results':
+            self.mediator.fsm.demand('Results', race_ranking)
+
     def on_end_race_player(self, uid):
         self.players_ended += [uid]
 
