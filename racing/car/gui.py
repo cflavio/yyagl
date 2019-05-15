@@ -509,19 +509,6 @@ class CarPlayerGui(CarGui):
         self.pars = CarParameters(mediator.phys, mediator.logic)
         self.panel = self.panel_cls(car_props, mediator.player_car_idx, ncars)
         self.ai_panel = CarAIPanel()
-        if ncars == 1: parent = base.a2dBottomCenter
-        elif ncars == 2:
-            if mediator.player_car_idx == 0: parent = base.a2dBottomQuarter
-            else: parent = base.a2dBottomThirdQuarter
-        elif ncars == 3:
-            if mediator.player_car_idx == 0: parent = base.aspect2d
-            elif mediator.player_car_idx == 1: parent = base.a2dBottomQuarter
-            else: parent = base.a2dBottomThirdQuarter
-        elif ncars == 4:
-            if mediator.player_car_idx == 0: parent = base.a2dCenterQuarter
-            elif mediator.player_car_idx == 1: parent = base.a2dCenterThirdQuarter
-            elif mediator.player_car_idx == 2: parent = base.a2dBottomQuarter
-            else: parent = base.a2dBottomThirdQuarter
         way_txt_pos = (0, .1) if ncars == 1 else (0, .04)
         way_txt_scale = .1 if ncars == 1 else .06
         way_img_pos = (0, 1, .3) if ncars == 1 else (0, 1, .16)
@@ -529,16 +516,33 @@ class CarPlayerGui(CarGui):
         self.way_txt = OnscreenText(
             '', pos=way_txt_pos, scale=way_txt_scale,
             fg=self.race_props.season_props.gameprops.menu_props.text_err_col,
-            parent=parent,
+            parent=self.parent,
             font=self.eng.font_mgr.load_font(self.race_props.season_props.font))
         self.way_img = OnscreenImage(
             'assets/images/gui/arrow_circle.txo', scale=way_img_scale,
-            parent=parent, pos=way_img_pos)
+            parent=self.parent, pos=way_img_pos)
         self.way_img.set_transparency(True)
         self.way_img.hide()
 
     @property
     def ncars(self): return len(self.race_props.season_props.player_car_names)
+
+    @property
+    def parent(self):
+        if self.ncars == 1: parent = base.a2dBottomCenter
+        elif self.ncars == 2:
+            if mediator.player_car_idx == 0: parent = base.a2dBottomQuarter
+            else: parent = base.a2dBottomThirdQuarter
+        elif self.ncars == 3:
+            if mediator.player_car_idx == 0: parent = base.aspect2d
+            elif mediator.player_car_idx == 1: parent = base.a2dBottomQuarter
+            else: parent = base.a2dBottomThirdQuarter
+        elif self.ncars == 4:
+            if mediator.player_car_idx == 0: parent = base.a2dCenterQuarter
+            elif mediator.player_car_idx == 1: parent = base.a2dCenterThirdQuarter
+            elif mediator.player_car_idx == 2: parent = base.a2dBottomQuarter
+            else: parent = base.a2dBottomThirdQuarter
+        return parent
 
     def upd_ranking(self, ranking):
         r_i = ranking.index(self.mediator.name) + 1
@@ -597,6 +601,9 @@ class CarPlayerLocalMPGui(CarPlayerGui):
 class CarPlayerMPGui(CarPlayerGui):
 
     panel_cls = CarOnlineMPPanel
+
+    @property
+    def parent(self): return base.a2dBottomCenter
 
 
 class CarNetworkGui(CarGui):
