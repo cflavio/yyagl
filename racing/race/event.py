@@ -345,6 +345,7 @@ class RaceEventServer(RaceEvent):
 
     def destroy(self):
         self.eng.detach_obs(self.on_frame)
+        self.eng.client.detach(self.on_player_info)
         RaceEvent.destroy(self)
 
 

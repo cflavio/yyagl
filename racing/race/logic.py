@@ -255,6 +255,8 @@ class RaceLogicServer(RaceLogic):
 
     def destroy(self):
         if self.eval_tsk: self.eval_tsk = self.eng.remove_task(self.eval_tsk)
+        self.eng.client.register_rpc('leave_room')
+        self.eng.client.leave_room(self.props.season_props.room)
         RaceLogic.destroy(self)
 
 
@@ -297,4 +299,6 @@ class RaceLogicClient(RaceLogic):
     def destroy(self):
         if self.send_tsk:
             self.send_tsk = self.eng.rm_do_later(self.send_tsk)
+        self.eng.client.register_rpc('leave_room')
+        self.eng.client.leave_room(self.props.season_props.room)
         RaceLogic.destroy(self)
