@@ -160,7 +160,7 @@ class RaceEventServer(RaceEvent):
     def on_frame(self):
         if not self.mediator.logic.player_cars or \
                 not hasattr(self.mediator.logic.player_cars[0], 'phys') or \
-                not self.mediator.logic.cars or \
+                self.mediator.logic.cars is None or \
                 any([not hasattr(car, 'phys') for car in self.mediator.logic.cars]):
             return  # still loading; attach when the race has started
         pos = self.mediator.logic.player_cars[0].get_pos()
