@@ -531,16 +531,16 @@ class CarPlayerGui(CarGui):
     def parent(self):
         if self.ncars == 1: parent = base.a2dBottomCenter
         elif self.ncars == 2:
-            if mediator.player_car_idx == 0: parent = base.a2dBottomQuarter
+            if self.mediator.player_car_idx == 0: parent = base.a2dBottomQuarter
             else: parent = base.a2dBottomThirdQuarter
         elif self.ncars == 3:
-            if mediator.player_car_idx == 0: parent = base.aspect2d
-            elif mediator.player_car_idx == 1: parent = base.a2dBottomQuarter
+            if self.mediator.player_car_idx == 0: parent = base.aspect2d
+            elif self.mediator.player_car_idx == 1: parent = base.a2dBottomQuarter
             else: parent = base.a2dBottomThirdQuarter
         elif self.ncars == 4:
-            if mediator.player_car_idx == 0: parent = base.a2dCenterQuarter
-            elif mediator.player_car_idx == 1: parent = base.a2dCenterThirdQuarter
-            elif mediator.player_car_idx == 2: parent = base.a2dBottomQuarter
+            if self.mediator.player_car_idx == 0: parent = base.a2dCenterQuarter
+            elif self.mediator.player_car_idx == 1: parent = base.a2dCenterThirdQuarter
+            elif self.mediator.player_car_idx == 2: parent = base.a2dBottomQuarter
             else: parent = base.a2dBottomThirdQuarter
         return parent
 
