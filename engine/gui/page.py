@@ -130,6 +130,7 @@ class PageGui(GuiColleague):
                 (nav.up, self.on_arrow, [up, player]),
                 (nav.down, self.on_arrow, [down, player]),
                 (nav.fire, self.on_enter, [player])]
+            if player == 0: self.eng.joystick_mgr.bind_keyboard(nav)
             list(map(lambda args: self.mediator.event.accept(*args), evts))
 
     def disable_navigation(self, players):
@@ -138,6 +139,7 @@ class PageGui(GuiColleague):
         for player in players:
             nav = self.menu_props.nav.navinfo_lst[player]
             evts = [nav.left, nav.right, nav.up, nav.down, nav.fire]
+            if player == 0: self.eng.joystick_mgr.unbind_keyboard(nav)
             list(map(self.mediator.event.ignore, evts))
 
     def enable(self, players):

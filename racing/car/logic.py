@@ -247,8 +247,10 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.fired_weapons = []
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
+        joystick = car_props.race_props.joystick and \
+            car_props.name == car_props.race_props.season_props.player_car_names[0]
         self.input_strat = Input2ForcesStrategy.build(
-            self.__class__ == CarPlayerLogic, car_props.race_props.joystick,
+            self.__class__ == CarPlayerLogic, joystick,
             self.mediator)
         self.start_pos = car_props.pos
         self.start_pos_hpr = car_props.hpr
