@@ -41,6 +41,8 @@ class Subject(object):
                     print('Quit')
                     import sys; sys.exit()
 
+    def observing(self, obs_meth): return obs_meth in self.observers
+
     def destroy(self): self.observers = None
 
 

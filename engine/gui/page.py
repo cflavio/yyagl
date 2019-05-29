@@ -163,6 +163,7 @@ class PageGui(GuiColleague):
         btn = Btn(text='', pos=(0, -.92), cmd=callback,
                   tra_src=tra_src, tra_tra=tra_tra, **self.menu_props.btn_args)
         self.widgets += [btn]
+        self._back_btn = btn
 
     def _on_back(self, player=0): self.notify('on_back', self.__class__.__name__)
     # refactor: notify should pass the sender, so these arguments would be
