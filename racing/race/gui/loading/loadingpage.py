@@ -72,7 +72,7 @@ class LoadingPageGui(PageGui):
         txt = Text(_('Controls'), scale=.1, pos=(1.0, .38),
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
-        if self.rprops.joystick:
+        if self.rprops.joysticks[0]:
             txt = Text(_('joypad'), scale=.08, pos=(1.0, .22),
                                font=self.font, fg=self.text_bg)
             self.add_widgets([txt])

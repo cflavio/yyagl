@@ -247,8 +247,9 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.fired_weapons = []
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
-        joystick = car_props.race_props.joystick and \
-            car_props.name == car_props.race_props.season_props.player_car_names[0]
+        joystick = car_props.race_props.joysticks[mediator.player_car_idx] and \
+            car_props.name == car_props.race_props.season_props.player_car_names[mediator.player_car_idx] and \
+            mediator.player_car_idx < self.eng.joystick_mgr.joystick_lib.num_joysticks
         self.input_strat = Input2ForcesStrategy.build(
             self.__class__ == CarPlayerLogic, joystick,
             self.mediator)

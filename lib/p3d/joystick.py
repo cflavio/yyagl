@@ -15,6 +15,10 @@ class P3dJoystickMgr:
         #    joystick.Joystick(idx) for idx in range(joystick.get_count())]
         #list(map(lambda joystick: joystick.init(), self.joysticks))
 
+    @property
+    def num_joysticks(self):
+        return len(base.devices.getDevices(InputDevice.DeviceClass.gamepad))
+
     def get_joystick(self, player_idx):
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
         if player_idx > len(devices) - 1: return 0, 0, 0, 0, 0, 0
