@@ -9,7 +9,7 @@ class SeasonProps(object):
             self, gameprops, car_names, player_car_name, player_car_names,
             drivers, tuning_imgs, font, countdown_sfx, single_race, wpn2img,
             tuning_engine, tuning_tires, tuning_suspensions, race_start_time,
-            countdown_seconds, camera, room=None):
+            countdown_seconds, camera, kind, room=None):
         self.gameprops = gameprops
         self.car_names = car_names
         self.player_car_name = player_car_name
@@ -26,6 +26,7 @@ class SeasonProps(object):
         self.race_start_time = race_start_time
         self.countdown_seconds = countdown_seconds
         self.camera = camera
+        self.kind = kind
         self.room = room
 
 

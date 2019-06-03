@@ -115,15 +115,39 @@ class LoadingPageGui(PageGui):
         self.widgets += [txt]
 
 
+class LoadingPageLocalMPGui(LoadingPageGui):
+
+    def set_controls(self):
+        txt = Text(_('Controls'), scale=.1, pos=(1.0, .38),
+                           font=self.font, fg=self.text_bg)
+        self.add_widgets([txt])
+        txts = []
+        not_j = 0
+        for i in range(len(self.rprops.season_props.player_car_names)):
+            if self.rprops.joysticks[i] and i - not_j < self.eng.joystick_mgr.joystick_lib.num_joysticks:
+                txts += [str(i + 1) + ': joypad']
+            else:
+                not_j += 1
+                keys = ['forward', 'rear', 'left', 'right', 'fire', 'respawn']
+                _keys = [getattr(self.rprops.keys.players_keys[i], key) for key in keys]
+                tkeys = [self.eng.event.key2desc(_key) for _key in _keys]
+                txts += [str(i + 1) + ': ' + ', '.join(tkeys)]
+        txt = '\n'.join(txts)
+        txt = Text(txt, scale=.056, pos=(.8, .22), font=self.font,
+                       fg=self.text_bg, wordwrap=12, align='left')
+        self.add_widgets([txt])
+
+
 class LoadingPage(Page):
 
     def __init__(self, rprops, menu, track_name_transl, drivers, ranking, tuning):
         self.rprops = rprops
         self.menu = menu
+        gui_cls = LoadingPageLocalMPGui if rprops.season_props.kind == 'localmp' else LoadingPageGui
         init_lst = [
             [('event', EventColleague, [self])],
-            [('gui', LoadingPageGui, [self, menu, rprops, track_name_transl,
-                                      drivers, ranking, tuning])]]
+            [('gui', gui_cls, [self, menu, rprops, track_name_transl,
+                               drivers, ranking, tuning])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)
         # call Page's __init__
