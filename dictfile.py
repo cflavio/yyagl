@@ -27,6 +27,13 @@ class DctFile(GameObject):
             else: dct[key] = upd[key]
         return dct
 
+    @staticmethod
+    def deepupdate(d, u):
+        for k, v in u.items():
+            if isinstance(v, Mapping): d[k] = DctFile.deepupdate(d.get(k, {}), v)
+            else: d[k] = v
+        return d
+
     def store(self):
         self.eng.log('storing %s' % self.fpath)
         if not self.persistent: return
