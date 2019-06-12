@@ -66,7 +66,8 @@ class RaceEvent(EventColleague):
         EventColleague.__init__(self, mediator)
         self.menu_cls = menu_cls
         self.ended_cars = []
-        if not (self.eng.server.is_active or self.eng.client.is_active):
+        self.__keys = keys
+        if self.mediator.logic.props.season_props.kind == 'single':
             self.accept(keys.pause, self.eng.toggle_pause)
         self.last_sent = self.eng.curr_time  # for networking
         self.ingame_menu = None
@@ -139,7 +140,7 @@ class RaceEvent(EventColleague):
             node.look_at(node.get_pos() + interp_vec)
 
     def destroy(self):
-        list(map(self.ignore, ['escape-up', 'p-up']))
+        list(map(self.ignore, ['escape-up', self.__keys.pause]))
         EventColleague.destroy(self)
 
 
