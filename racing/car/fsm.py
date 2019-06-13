@@ -18,7 +18,7 @@ class CarFsm(FsmColleague):
 
     def enterWaiting(self):
         state = self.getCurrentOrNextState()
-        has_j = self.mediator.event.props.joystick
+        has_j = self.mediator.event.props.joysticks[self.mediator.player_car_idx]
         self.mediator.event.input_bld = InputBuilder.create(state, has_j)
         self.mediator.ai.destroy()
         self.mediator.ai = CarResultsAi(self.mediator, self.cprops)
