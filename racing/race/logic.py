@@ -58,7 +58,9 @@ class RaceLogic(LogicColleague):
         self.set_display_regions()
 
     def set_display_regions(self):
-        if len(self.player_cars) == 1: return
+        if len(self.player_cars) == 1:
+            d_r = [base.win.get_active_display_regions()[0]]
+            d_r[0].set_dimensions(0, 1, 0, 1)
         if len(self.player_cars) == 2:
             d_r = [base.win.get_active_display_regions()[0]]
             d_r[0].set_dimensions(0, .5, 0, 1)
@@ -103,6 +105,9 @@ class RaceLogic(LogicColleague):
         self.on_aspect_ratio_changed()
 
     def on_aspect_ratio_changed(self):
+        if len(self.player_cars) == 1:
+            a_r = base.getAspectRatio()
+            list(map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras))
         if len(self.player_cars) == 2:
             a_r = base.getAspectRatio() / 2.0
             list(map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras))
