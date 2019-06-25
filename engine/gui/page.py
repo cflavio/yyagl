@@ -121,6 +121,10 @@ class PageGui(GuiColleague):
         if self.enable_tsk: self.eng.rm_do_later(self.enable_tsk)
         self.enable_tsk = self.eng.do_later(.01, self.enable_navigation_aux, [players])
 
+    def update_navigation(self):
+        self.disable_navigation(self.players)
+        self.enable_navigation(self.players)
+
     def enable_navigation_aux(self, players):
         navs = []
         for player in players:
