@@ -21,7 +21,7 @@ def auto_classes():
     if exists('built/tmp_uml'): rmtree('built/tmp_uml')
     if exists('built/uml_classes'): rmtree('built/uml_classes')
     if exists('built/uml_classes.zip'): remove('built/uml_classes.zip')
-    for root, dirname, filenames in walk('.'):
+    for root, dirname, filenames in walk('./menu/multiplayer'):
         if not exists('built/tmp_uml'): makedirs('built/tmp_uml')
         py_cnt = 0
         for filename in filenames:
@@ -38,10 +38,25 @@ def auto_classes():
                 if exists(fname): move(fname, 'built/tmp_uml/' + fname)
         pkgname = root.lstrip('./').replace('/', '_')
         buildpkg(pkgname)
+    pdfs = [f for f in listdir('built/uml_classes') if isfile(join('built/uml_classes', f))]
+    for pdf in pdfs: print pdf
+    pdfs = [f for f in pdfs if f.endswith('.pdf') and f != '.pdf']
+    pdfs = ['built/uml_classes/' + f for f in pdfs]
+    system('echo "" | ps2pdf -sPAPERSIZE=a4 - built/uml_classes/blank.pdf')
+    for pdf in pdfs:
+        numpages = exec_cmd('pdftk %s dump_data | grep NumberOfPages' % pdf)
+        numpages = int(numpages.lstrip('NumberOfPages: '))
+        if numpages % 2:
+            system('pdftk %s built/uml_classes/blank.pdf cat output %s2 && mv %s2 %s' % (pdf, pdf, pdf, pdf))
+    remove('built/uml_classes/blank.pdf')
+    system('pdftk built/uml_classes/*.pdf cat output built/uml_classes/all.pdf')
     system('zip -r built/uml_classes.zip built/uml_classes')
     rmtree('built/uml_classes')
+    rmtree('built/tmp_uml')
 
 def nextfile(finfo, posx, posy, width, height):
+    fnames = [finfo_[0] for finfo_ in finfo]
+    finfo = get_finfo(fnames, width, height)
     for info in finfo:
         if info[1][0] + posx <= width and info[1][1] + posy <= height:
             finfo.remove(info)
@@ -53,14 +68,10 @@ def nextfile(finfo, posx, posy, width, height):
     info = finfo.pop(0)
     return info, finfo
 
-def buildpkg(pkgname):
-    fnames = [f for f in listdir('built/tmp_uml') if isfile(join('built/tmp_uml', f))]
-    if not fnames: return
-    finfo = []
-    width = 1200
-    height = int(round(width * 297.0 / 210.0))
+def get_finfo(fnames, width, height):
+    _finfo = []
     for fname in fnames:
-        fname = 'built/tmp_uml/' + fname
+        fname = fname
         geometry = exec_cmd('identify -verbose "%s" | grep Geometry' % fname)
         split_dim = lambda geom: geom.split()[1].split('+')[0].split('x')
         size = [int(dim) for dim in split_dim(geometry)]
@@ -70,9 +81,20 @@ def buildpkg(pkgname):
         geometry = exec_cmd('identify -verbose "%s" | grep Geometry' % fname)
         split_dim = lambda geom: geom.split()[1].split('+')[0].split('x')
         size = [int(dim) for dim in split_dim(geometry)]
-        finfo += [(fname, size)]
-    finfo = list(sorted(finfo, key=lambda elm: elm[1][0]))
-    finfo = list(reversed(sorted(finfo, key=lambda elm: elm[1][1])))
+        _finfo += [(fname, size)]
+    #finfo = list(sorted(finfo, key=lambda elm: elm[1][0]))
+    #finfo = list(reversed(sorted(finfo, key=lambda elm: elm[1][1])))
+    _finfo = list(reversed(sorted(_finfo, key=lambda elm: elm[1][0] * elm[1][1])))
+    return _finfo
+
+def buildpkg(pkgname):
+    fnames = [f for f in listdir('built/tmp_uml') if isfile(join('built/tmp_uml', f))]
+    fnames = ['built/tmp_uml/' + f for f in fnames]
+    if not fnames: return
+    finfo = []
+    width = 1200
+    height = int(round(width * 297.0 / 210.0))
+    finfo = get_finfo(fnames, width, height)
     page = 0
     posx = posy = lineh = 0
     def newpage(page):
@@ -91,7 +113,7 @@ def buildpkg(pkgname):
             cmd = 'composite -geometry +%s+%s -gravity NorthWest %s %s %s' % (posx, posy, new_img, dst_img, dst_img)
             exec_cmd(cmd)
             posx += info[1][0] + margin
-            if lineh == 0: lineh = info[1][1]
+            if info[1][1] > lineh: lineh = info[1][1]
         else:
             posx = 0
             posy += lineh + margin
