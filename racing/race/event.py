@@ -67,7 +67,7 @@ class RaceEvent(EventColleague):
         self.menu_cls = menu_cls
         self.ended_cars = []
         self.__keys = keys
-        if self.mediator.logic.props.season_props.kind in ['single', 'season']:
+        if self.mediator.logic.props.season_props.kind in ['single', 'season', 'localmp']:
             self.accept(keys.pause, self.eng.toggle_pause)
         self.last_sent = self.eng.curr_time  # for networking
         self.ingame_menu = None
