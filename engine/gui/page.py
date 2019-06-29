@@ -130,11 +130,11 @@ class PageGui(GuiColleague):
         for player in players:
             nav = self.menu_props.nav.navinfo_lst[player]
             evts = [
-                (nav.left, self.on_arrow, [left, player]),
-                (nav.right, self.on_arrow, [right, player]),
-                (nav.up, self.on_arrow, [up, player]),
-                (nav.down, self.on_arrow, [down, player]),
-                (nav.fire, self.on_enter, [player])]
+                (self.eng.lib.remap_str(nav.left), self.on_arrow, [left, player]),
+                (self.eng.lib.remap_str(nav.right), self.on_arrow, [right, player]),
+                (self.eng.lib.remap_str(nav.up), self.on_arrow, [up, player]),
+                (self.eng.lib.remap_str(nav.down), self.on_arrow, [down, player]),
+                (self.eng.lib.remap_str(nav.fire), self.on_enter, [player])]
             navs += [nav]
             list(map(lambda args: self.mediator.event.accept(*args), evts))
         self.eng.joystick_mgr.bind_keyboard(navs)

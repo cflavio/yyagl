@@ -68,7 +68,7 @@ class RaceEvent(EventColleague):
         self.ended_cars = []
         self.__keys = keys
         if self.mediator.logic.props.season_props.kind in ['single', 'season', 'localmp']:
-            self.accept(keys.pause, self.eng.toggle_pause)
+            self.accept(self.eng.lib.remap_str(keys.pause), self.eng.toggle_pause)
         self.last_sent = self.eng.curr_time  # for networking
         self.ingame_menu = None
 

@@ -19,6 +19,7 @@ class LibP3d(DirectObject, object):
     def __init__(self):
         DirectObject.__init__(self)
         self.__end_cb = self.__notify = None
+        self.__logged_keys = {}
 
     @staticmethod
     def runtime(): return not exists('main.py')
@@ -252,3 +253,34 @@ class LibP3d(DirectObject, object):
         sfx = loader.loadSfx(filepath)
         sfx.set_loop(loop)
         return sfx
+
+    def remap_code(self, key):
+        map = base.win.get_keyboard_map()
+        for i in range(map.get_num_buttons()):
+            if key.lower() == map.get_mapped_button_label(i).lower():
+                self.__log_key('code mapping %s to key %s' % (key, map.get_mapped_button(i)), key, map.get_mapped_button(i))
+                return map.get_mapped_button(i)
+        for i in range(map.get_num_buttons()):
+            if key.lower() == map.get_mapped_button(i).get_name().lower():
+                self.__log_key('code mapping %s to key %s' % (key, map.get_mapped_button(i)), key, map.get_mapped_button(i))
+                return map.get_mapped_button(i)
+        self.__log_key('not found a code mapping for %s' % key, key, 'not_found')
+        return key
+
+    def remap_str(self, key):
+        map = base.win.get_keyboard_map()
+        for i in range(map.get_num_buttons()):
+            if key.lower() == map.get_mapped_button_label(i).lower():
+                self.__log_key('string mapping %s to key %s' % (key, map.get_mapped_button(i).get_name()), key, map.get_mapped_button(i).get_name())
+                return map.get_mapped_button(i).get_name()
+        for i in range(map.get_num_buttons()):
+            if key.lower() == map.get_mapped_button(i).get_name().lower():
+                self.__log_key('string mapping %s to key %s' % (key, map.get_mapped_button(i).get_name()), key, map.get_mapped_button(i).get_name())
+                return map.get_mapped_button(i).get_name()
+        self.__log_key('not found a string mapping for %s' % key, key, map.get_mapped_button(i).get_name())
+        return key
+
+    def __log_key(self, msg, key1, key2):
+        if key1 in self.__logged_keys and self.__logged_keys[key1] == key2: return
+        self.__logged_keys[key1] = key2
+        print(msg)

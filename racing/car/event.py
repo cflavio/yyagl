@@ -237,7 +237,7 @@ class CarPlayerEvent(CarEvent):
             ('forward' + suff, keys.forward), ('left' + suff, keys.left),
             ('rear' + suff, keys.rear), ('right' + suff, keys.right)]
         watch = inputState.watchWithModifiers
-        self.toks = list(map(lambda args: watch(args[0], args[1]), self.label_events))  # arg = (lab, evt)
+        self.toks = list(map(lambda args: watch(args[0], self.eng.lib.remap_code(args[1])), self.label_events))  # arg = (lab, evt)
         if not self.eng.is_runtime:
             self.accept('f11', self.mediator.gui.pars.toggle)
             self.accept('f2', self.eng.gfx.gfx_mgr.screenshot)
@@ -249,7 +249,7 @@ class CarPlayerEvent(CarEvent):
             mediator.player_car_idx < self.eng.joystick_mgr.joystick_lib.num_joysticks
         self.input_bld = InputBuilder.create(state, joystick)
         keys = self.props.keys.players_keys[mediator.player_car_idx]
-        self.accept(keys.respawn, self.process_respawn)
+        self.accept(self.eng.lib.remap_str(keys.respawn), self.process_respawn)
         #self.eng.do_later(5, lambda: self.on_bonus(Turbo) and None)
 
     def on_frame(self):
@@ -289,7 +289,7 @@ class CarPlayerEvent(CarEvent):
             return
         if not cls: return  # if removing
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
-        self.accept(keys.fire, self.on_fire)
+        self.accept(self.eng.lib.remap_str(keys.fire), self.on_fire)
         if self.mediator.fsm.getCurrentOrNextState() != 'Waiting':
             self.mediator.gui.panel.set_weapon(
                 self.props.season_props.wpn2img[cls.__name__])
