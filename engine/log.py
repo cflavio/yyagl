@@ -45,7 +45,7 @@ class LogMgrBase(Colleague):  # headless log manager
         messages += ['panda version: %s %s' % (lib_ver, lib_commit)]
         messages += ['bullet version: ' + str(self.eng.lib.phys_version)]
         messages += ['appdata: ' + str(self.eng.lib.user_appdata_dir)]
-        print(base.win.get_keyboard_map())
+        if base.win: print(base.win.get_keyboard_map())
         list(map(self.log, messages))
 
     def log_tasks(self):
