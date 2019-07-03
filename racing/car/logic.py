@@ -209,7 +209,7 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
             eng_frc = phys.engine_acc_frc
         if j_b:
             eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
-            brake_frc = phys.brake_frc * j_y
+            brake_frc = phys.brake_frc
         if not j_a and not j_b:
             brake_frc = phys.eng_brk_frc
         clamp = self.steering_clamp
