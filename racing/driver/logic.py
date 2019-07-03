@@ -16,7 +16,7 @@ class DriverLoaderStrategy(GameObject):
         no_p = car not in player_car_names
         car_cls = AiCar if no_p and race.__class__.__name__ == 'RaceSinglePlayer' else car_cls
         race.logic.cars += [DriverLoaderStrategy.actual_load(
-            cars, car, r_p, track, race, car_cls, player_car_name, player_car_names, s_p, aipoller, cb)]
+            cars, car, r_p, track, race, car_cls, player_car_name, player_car_names, s_p, aipoller, cb, 0)]
 
     @staticmethod
     def actual_load(cars, load_car_name, r_p, track, race, car_cls,
@@ -51,7 +51,7 @@ class DriverPlayerLoaderStrategy(GameObject):
         car = loadcars.pop(0)
         local_mp = not DriverPlayerLoaderStrategy.eng.client.is_client_active and not DriverPlayerLoaderStrategy.eng.client.is_server_active
         if local_mp and car in player_car_names or not local_mp and car == player_car_name:
-            if r_p.a_i:
+            if r_p.a_i == 1 or r_p.a_i == 2 and car != player_car_names[0]:
                 car_cls = AiCarPlayer
             else:
                 car_cls = CarPlayerLocalMP if car in player_car_names and player_car_names != [player_car_name] else CarPlayer

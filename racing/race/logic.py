@@ -133,8 +133,12 @@ class RaceLogic(LogicColleague):
         self.mediator.gui.start()
         ai_cars = [car.name for car in self.all_cars if car.__class__ == AiCar]
         for player_car in self.player_cars:
-            if self.props.a_i: ai_cars += [player_car.name]
+            if self.is_ai_car(player_car):
+                ai_cars += [player_car.name]
         self.ai_poller.set_cars(ai_cars)
+
+    def is_ai_car(self, player_car):
+        return self.props.a_i == 1 or self.props.a_i == 2 and player_car.name != self.props.season_props.player_car_names[0]
 
     def on_rotate_all(self, sender):
         cars = [car for car in self.all_cars if car.name != sender.name]
