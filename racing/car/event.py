@@ -76,6 +76,7 @@ class InputBuilderJoystick(InputBuilder):
     def build(self, ai, joystick_mgr, player_car_idx, car_evt):
         j_x, j_y, j_a, j_b, j_bx, j_by = joystick_mgr.get_joystick(player_car_idx)
         if j_bx and car_evt.mediator.logic.weapon: car_evt.on_fire()
+        if j_by: car_evt.process_respawn()
         inp = {'forward': j_a, 'rear': j_b,
                'left': j_x < -.4, 'right': j_x > .4}
         keys = ['forward', 'rear', 'left', 'right']
