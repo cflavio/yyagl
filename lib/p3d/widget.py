@@ -75,6 +75,7 @@ class BtnMixin(FrameMixin):
         FrameMixin.init(self, wdg)
         wdg = wdg.get_np()
         self.start_txt_color = wdg.component('text0').textNode.get_text_color()
+        self.start_txt_scale = wdg.component('text0').textNode.get_text_scale()
 
     def on_arrow(self, direction): pass
 
@@ -83,6 +84,7 @@ class BtnMixin(FrameMixin):
         col = LVecBase4f(self.start_frame_color)
         self.get_np()['frameColor'] = col + self.curr_offset
         self.get_np()['text_fg'] = self.start_txt_color + self.curr_offset
+        self.get_np()['text_scale'] = self.start_txt_scale * 1.04
         self.get_np().set_shader_input('col_offset', self.curr_offset)
 
     def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
@@ -90,6 +92,7 @@ class BtnMixin(FrameMixin):
         col = LVecBase4f(self.start_frame_color)
         self.get_np()['frameColor'] = col + self.curr_offset
         self.get_np()['text_fg'] = self.start_txt_color
+        self.get_np()['text_scale'] = self.start_txt_scale
         self.get_np()['frameColor'] = self.start_frame_color
         self.get_np().set_shader_input('col_offset', self.curr_offset)
 
@@ -101,12 +104,13 @@ class BtnMixin(FrameMixin):
     def enable(self):
         FrameMixin.enable(self)
         self.get_np().component('text0').textNode.set_text_color(self.start_txt_color)
+        self.get_np().component('text0').textNode.set_text_scale(self.start_txt_scale)
 
     def disable(self):
         FrameMixin.disable(self)
         col = self.start_txt_color
         self.get_np()['text_fg'] = (col[0], col[1], col[2], col[3] * .4)
-
+        self.get_np().component('text0').textNode.set_text_scale(self.start_txt_scale)
 
 
 class EntryMixin(FrameMixin):
