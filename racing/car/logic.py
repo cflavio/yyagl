@@ -31,6 +31,8 @@ class Input2ForcesStrategy(object):
         self.start_left_t = self.start_right_t = None
         self.curr_clamp = 0
         self.tgt_clamp = 0
+        self.brake_start_time = 0
+        self.prev_frame_braking = False
 
     @property
     def steering_inc(self):
@@ -59,10 +61,14 @@ class Input2ForcesStrategy(object):
                                        clamp_incr_speed, clamp_decr_speed)
         return self.curr_clamp
 
-    def get_eng_frc(self, eng_frc):
+    def get_eng_frc(self, eng_frc, fwd, brk):
         m_s = self.car.phys.max_speed
-        actual_max_speed = m_s * self.car.phys.curr_speed_mul
-        eng_frc = eng_frc * (1.05 - self.car.phys.lin_vel / actual_max_speed)
+        if fwd:
+            actual_max_speed = m_s * self.car.phys.curr_speed_mul
+            eng_frc = eng_frc * (1.05 - self.car.phys.speed / actual_max_speed)
+        elif brk:
+            actual_max_speed = - m_s * self.car.phys.curr_speed_mul * .4
+            eng_frc = eng_frc * (1.05 - self.car.phys.speed / actual_max_speed)
         return eng_frc
 
 
@@ -169,6 +175,12 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
             brake_frc = phys.brake_frc
         if not car_input.forward and not car_input.rear:
             brake_frc = phys.eng_brk_frc
+        if car_input.rear and not self.prev_frame_braking:
+            self.brake_start_time = globalClock.getFrameTime()
+        self.prev_frame_braking = car_input.rear
+        if car_input.rear:
+            brake_frc = brake_frc * (1 + .4 * (globalClock.getFrameTime() - self.brake_start_time))
+        brake_frc = min(brake_frc, 1.4 * phys.brake_frc)
         clamp = self.steering_clamp
         if car_input.left:
             if self.start_left_t is None:
@@ -193,7 +205,7 @@ class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
                 steering_sign = (-1 if self._steering > 0 else 1)
                 self._steering += steering_sign * self.steering_dec
         self.drift.process(car_input)
-        return self.get_eng_frc(eng_frc), brake_frc, phys.brake_ratio, \
+        return self.get_eng_frc(eng_frc, car_input.forward, car_input.rear), brake_frc, phys.brake_ratio, \
             self._steering
 
 
@@ -212,20 +224,14 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
             brake_frc = phys.brake_frc
         if not j_a and not j_b:
             brake_frc = phys.eng_brk_frc
-        clamp = self.steering_clamp
-        if j_x < -.1:
-            self._steering += self.steering_inc * abs(j_x)
-            self._steering = min(self._steering, clamp(is_drifting))
-        if j_x > .1:
-            self._steering -= self.steering_inc * j_x
-            self._steering = max(self._steering, -clamp(is_drifting))
-        if -.1 < j_x < .1:
-            if abs(self._steering) <= self.steering_dec:
-                self._steering = 0
-            else:
-                steering_sign = (-1 if self._steering > 0 else 1)
-                self._steering += steering_sign * self.steering_dec
-        return self.get_eng_frc(eng_frc), brake_frc, phys.brake_ratio, \
+        if j_b and not self.prev_frame_braking:
+            self.brake_start_time = globalClock.getFrameTime()
+        self.prev_frame_braking = j_b
+        if j_b:
+            brake_frc = brake_frc * (1 + .4 * (globalClock.getFrameTime() - self.brake_start_time))
+        brake_frc = min(brake_frc, 1.4 * phys.brake_frc)
+        self._steering = -j_x * self.steering_clamp(is_drifting)
+        return self.get_eng_frc(eng_frc, j_a, j_b), brake_frc, phys.brake_ratio, \
             self._steering
 
 
