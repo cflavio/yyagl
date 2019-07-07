@@ -8,7 +8,7 @@ from direct.gui.DirectCheckButton import DirectCheckButton
 from direct.gui.DirectOptionMenu import DirectOptionMenu
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.gui.DirectSlider import DirectSlider
-from direct.gui.DirectEntry import DirectEntry
+from direct.gui.DirectEntry import DirectEntry, ENTRY_FOCUS_STATE
 from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
@@ -312,7 +312,7 @@ class P3dEntry(P3dAbs, DirectObject, Subject):
         self.notify('on_entry_exit')
 
     def on_tab(self):
-        if self.wdg['focus']: self.on_tab_cb()
+        if self.wdg['focus'] == ENTRY_FOCUS_STATE: self.on_tab_cb()
 
     @property
     def focused(self): return self.__focused
