@@ -18,6 +18,7 @@ class PageGui(GuiColleague):
     def __init__(self, mediator, menu_props, players=[0]):
         GuiColleague.__init__(self, mediator)
         self.enable_tsk = None
+        self._back_btn = None
         self.menu_props = menu_props
         self.players = players
         self.widgets = []
@@ -138,6 +139,8 @@ class PageGui(GuiColleague):
             navs += [nav]
             list(map(lambda args: self.mediator.event.accept(*args), evts))
         self.eng.joystick_mgr.bind_keyboard(navs)
+        if self.eng.cfg.dev_cfg.menu_joypad and self._back_btn:
+            self.mediator.event.accept('joypad_b1', self._back_btn['command'])
 
     def disable_navigation(self, players):
         if self.enable_tsk:
@@ -147,6 +150,7 @@ class PageGui(GuiColleague):
             evts = [nav.left, nav.right, nav.up, nav.down, nav.fire]
             self.eng.joystick_mgr.unbind_keyboard(player)
             list(map(self.mediator.event.ignore, evts))
+        self.mediator.event.ignore('joypad_b1')
 
     def enable(self, players):
         self.enable_navigation(players)

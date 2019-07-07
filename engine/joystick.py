@@ -36,6 +36,8 @@ class JoystickMgr(GameObject):
             if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].up)
         if self.old[i].b0 and not btn0:
             if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].fire)
+        if self.old[i].b1 and not btn1:
+            self.eng.send('joypad_b1')
         self.old[i].x, self.old[i].y, self.old[i].b0, self.old[i].b1, self.oldb2, self.old[i].b3 = \
             j_x, j_y, btn0, btn1, btn2, btn3
 
