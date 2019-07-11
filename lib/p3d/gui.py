@@ -238,6 +238,83 @@ class P3dCheckBtn(P3dAbs):
         P3dAbs.__init__(self, tra_src, tra_tra)
 
 
+# the following is a temporary for a p3d's crash which will be fixed in 1.10.4
+# remove it after that release
+from direct.gui import DirectGuiGlobals as DGG
+class TempDirectOptionMenu(DirectOptionMenu):
+
+    def __init__(self, parent = None, **kw):
+        # Inherits from DirectButton
+        optiondefs = (
+            # List of items to display on the popup menu
+            ('items',       [],             self.setItems),
+            # Initial item to display on menu button
+            # Can be an integer index or the same string as the button
+            ('initialitem', None,           DGG.INITOPT),
+            # Amount of padding to place around popup button indicator
+            ('popupMarkerBorder', (.1, .1), None),
+            # The initial position of the popup marker
+            ('popupMarker_pos', None, None),
+            # Background color to use to highlight popup menu items
+            ('highlightColor', (.5, .5, .5, 1), None),
+            # Extra scale to use on highlight popup menu items
+            ('highlightScale', (1, 1), None),
+            # Alignment to use for text on popup menu button
+            # Changing this breaks button layout
+            ('text_align',  TextNode.ALeft, None),
+            # Remove press effect because it looks a bit funny
+            ('pressEffect',     0,          DGG.INITOPT),
+           )
+        # Merge keyword options with default options
+        self.defineoptions(kw, optiondefs)
+        # Initialize superclasses
+        DirectButton.__init__(self, parent)
+        # Record any user specified frame size
+        self.initFrameSize = self['frameSize']
+        # Create a small rectangular marker to distinguish this button
+        # as a popup menu button
+        self.popupMarker = self.createcomponent(
+            'popupMarker', (), None,
+            DirectFrame, (self,),
+            frameSize = (-0.5, 0.5, -0.2, 0.2),
+            scale = 0.4,
+            relief = DGG.RAISED)
+        # Record any user specified popup marker position
+        self.initPopupMarkerPos = self['popupMarker_pos']
+        # This needs to popup the menu too
+        self.popupMarker.bind(DGG.B1PRESS, self.showPopupMenu)
+        # Check if item is highlighted on release and select it if it is
+        self.popupMarker.bind(DGG.B1RELEASE, self.selectHighlightedIndex)
+        # Make popup marker have the same click sound
+        if self['clickSound']:
+            self.popupMarker.guiItem.setSound(
+                DGG.B1PRESS + self.popupMarker.guiId, self['clickSound'])
+        else:
+            self.popupMarker.guiItem.clearSound(DGG.B1PRESS + self.popupMarker.guiId)
+        # This is created when you set the menu's items
+        self.popupMenu = None
+        self.selectedIndex = None
+        self.highlightedIndex = None
+        # A big screen encompassing frame to catch the cancel clicks
+        self.cancelFrame = self.createcomponent(
+            'cancelframe', (), None,
+            DirectFrame, (self,),
+            frameSize = (-1, 1, -1, 1),
+            relief = None,
+            state = 'normal')
+        # Make sure this is on top of all the other widgets
+        self.cancelFrame.setBin('gui-popup', 0)
+        self.cancelFrame.bind(DGG.B1PRESS, self.hidePopupMenu)
+        # Default action on press is to show popup menu
+        self.bind(DGG.B1PRESS, self.showPopupMenu)
+        # Check if item is highlighted on release and select it if it is
+        self.bind(DGG.B1RELEASE, self.selectHighlightedIndex)
+        # Call option initialization functions
+        self.initialiseoptions(TempDirectOptionMenu)
+        # Need to call this since we explicitly set frame size
+        self.resetFrameSize()
+
+
 class P3dOptionMenu(P3dAbs):
 
     def __init__(
@@ -249,7 +326,7 @@ class P3dOptionMenu(P3dAbs):
             text_scale=.05, popup_marker_col=(1, 1, 1, 1),
             item_relief=None, item_text_font=None, text_font=None,
             tra_src=None, tra_tra=None):
-        self.wdg = DirectOptionMenu(
+        self.wdg = TempDirectOptionMenu(
             text=text, items=items, pos=(pos[0], 1, pos[1]), scale=scale,
             initialitem=initialitem, command=cmd, frameSize=frame_size,
             clickSound=click_snd, rolloverSound=over_snd,
