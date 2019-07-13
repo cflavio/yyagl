@@ -51,7 +51,7 @@ class DevCfg(object):
 
     def __init__(self, model_path='assets/models', shaders_dev=False,
                  gamma=1.0, menu_joypad=True):
-        self.model_path = 'assets/models/tracks/'
+        self.model_path = ''
         self.shaders_dev = False
         self.gamma = 1.0
         self.menu_joypad = False
@@ -80,16 +80,16 @@ class TrackProcesser(GameObject):
         self.__flat_roots = {}
         self.models_to_load = self.loading_models = None
         self.props = Props()
-        fpath = self.props.track_dir + '/' + self.props.model_name
+        fpath = self.props.track_dir + '/models/' + self.props.model_name
         self.__egg2bams()
         self.model = self.eng.load_model(fpath)
         self.__set_submodels()
 
     def __egg2bams(self):
-        troot = 'assets/models/tracks/'
+        troot = 'assets/tracks/'
         mp_mgr = MultithreadedProcesser(self.props.cores)
         cmds = []
-        for root, _, filenames in walk(troot + self.props.track_dir):
+        for root, _, filenames in walk(self.props.track_dir):
             for filename in filenames:
                 fname = root + '/' + filename
                 if fname.endswith('.egg'):
@@ -123,7 +123,7 @@ class TrackProcesser(GameObject):
             callback()
             return
         model = models.pop(0)
-        fpath = self.props.track_dir + '/' + model
+        fpath = self.props.track_dir + '/models/' + model
         if model.endswith(self.props.anim_name):
             anim_path = '%s-%s' % (fpath, self.props.anim_name)
             self.__actors += [Actor(fpath, {'anim': anim_path})]
@@ -146,7 +146,7 @@ class TrackProcesser(GameObject):
         if model_name not in self.__flat_roots:
             flat_root = self.model.attach_node(model_name)
             self.__flat_roots[model_name] = flat_root
-        fpath = '%s/%s' % (self.props.track_dir, model_name)
+        fpath = '%s/models/%s' % (self.props.track_dir, model_name)
         self.eng.load_model(fpath).reparent_to(model)
         model.reparent_to(self.__flat_roots[model_name])
 
@@ -190,8 +190,8 @@ class TrackProcesser(GameObject):
 
     def end_flattening(self):
         print('writing track_all.bam')
-        fpath = 'assets/models/tracks/' + self.props.track_dir + \
-            '/track_all.bam'
+        fpath = self.props.track_dir + \
+            '/models/track_all.bam'
         self.model.write_bam_file(fpath)
 
 

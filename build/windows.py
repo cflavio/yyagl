@@ -112,7 +112,7 @@ def bld_windows(target, source, env):
                     rm_ext = ['png', 'jpg']
                     if any(fname.endswith('.' + ext) for ext in rm_ext):
                         remove(fname)
-                    is_track = 'assets/models/tracks/' in fname
+                    is_track = 'assets/tracks/' in fname
                     is_bam = fname.endswith('.bam')
                     no_conv = ['/track_all', '/collision', 'Anim']
                     is_no_conv = any(fname.endswith(concl + '.bam')

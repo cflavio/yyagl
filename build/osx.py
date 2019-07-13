@@ -42,7 +42,7 @@ def bld_osx(target, source, env):
                 remove(fname)
             if any(fname.endswith('.' + ext) for ext in ['png', 'jpg']):
                 remove(fname)
-            is_track = 'assets/models/tracks/' in fname
+            is_track = 'assets/tracks/' in fname
             is_bam = fname.endswith('.bam')
             no_conv = ['/track_all', '/collision', 'Anim']
             is_no_conv = any(fname.endswith(con + '.bam') for con in no_conv)

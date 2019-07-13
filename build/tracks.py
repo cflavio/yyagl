@@ -10,9 +10,9 @@ def bld_models(target, source, env):
             for fname in [fname for fname in fnames if fname.endswith('.egg')]:
                 __process_model(root, fname, mp_mgr)
     mp_mgr.run()
-    for root, dnames, fnames in walk('assets/models/tracks'):
+    for root, dnames, fnames in walk('assets/tracks'):
         for dname in dnames:
-            if root == env['TRACKS_DIR_PATH']: __process_track(dname, env['CORES'])
+            if root == env['TRACKS_DIR_PATH']: __process_track(root + '/' + dname, env['CORES'])
 
 
 def __process_model(root, fname, mp_mgr):

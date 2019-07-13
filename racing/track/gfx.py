@@ -41,7 +41,7 @@ class TrackGfx(GfxColleague):
             cloned_root = self.__cloned_root(model)
             model_subname = model.name[len(rpr.empty_name):]
             # filenames are like EmptyModelName
-            path = '%s/%s' % (rpr.track_path, model_subname)
+            path = '%s/models/%s' % (rpr.track_path, model_subname)
             if '.' in path: path = path.split('.')[0]
             # e.g. desert/Model.001 (Blender appends that)
             self.__set_anim_node(path, cloned_root, model)

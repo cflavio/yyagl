@@ -75,7 +75,7 @@ def _bld_full_pkg(appname, ico_fpath):
                 remove(fpath)
             if any(fpath.endswith('.' + ext) for ext in ['png', 'jpg']):
                 remove(fpath)
-            if 'assets/models/tracks/' in fpath and \
+            if 'assets/tracks/' in fpath and \
                     fpath.endswith('.bam') and not \
                     any(fpath.endswith(concl + '.bam')
                             for concl in ['/track_all', '/collision', 'Anim']):
