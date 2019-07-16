@@ -1,4 +1,7 @@
 from itertools import chain
+from os import walk
+from os.path import dirname
+from yaml import load
 from panda3d.core import Vec3, LPoint3f, NodePath
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
@@ -38,26 +41,34 @@ id2wpnclasses = {
     5: MineNetwork}
 
 
-carname2id = {
-    'themis': 1,
-    'kronos': 2,
-    'diones': 3,
-    'iapeto': 4,
-    'phoibe': 5,
-    'rea': 6,
-    'iperion': 7,
-    'teia': 8}
+def __carname2id():
+    cars = [r for r in next(walk('assets/cars'))[1]]
+    car2id = {}
+    # curr_path = self.eng.curr_path
+    curr_path = dirname(__file__) + '/../../../'
+    for car in cars:
+        with open(curr_path + 'assets/cars/' + car + '/phys.yml') as fcar:
+            sorting = load(fcar)['sorting']
+        car2id[car] = sorting
+    return car2id
 
 
-id2carname = {
-    1: 'themis',
-    2: 'kronos',
-    3: 'diones',
-    4: 'iapeto',
-    5: 'phoibe',
-    6: 'rea',
-    7: 'iperion',
-    8: 'teia'}
+carname2id = __carname2id()
+
+
+def __id2carname():
+    cars = [r for r in next(walk('assets/cars'))[1]]
+    id2car = {}
+    # curr_path = self.eng.curr_path
+    curr_path = dirname(__file__) + '/../../../'
+    for car in cars:
+        with open(curr_path + 'assets/cars/' + car + '/phys.yml') as fcar:
+            sorting = load(fcar)['sorting']
+        id2car[sorting] = car
+    return id2car
+
+
+id2carname = __id2carname()
 
 
 class RaceEvent(EventColleague):
