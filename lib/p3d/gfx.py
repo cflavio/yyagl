@@ -1,7 +1,7 @@
 from os.path import exists, dirname
 from panda3d.core import (get_model_path, AntialiasAttrib, PandaNode,
     LightRampAttrib, Camera, OrthographicLens, NodePath, OmniBoundingVolume,
-    AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, Point2, Point3)
+                          AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, Point2, Point3, Texture)
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.lib.p3d.p3d import LibP3d
@@ -52,8 +52,9 @@ class RenderToTexture(object):
 
 class P3dGfxMgr(object):
 
-    def __init__(self, model_path, antialiasing, shaders):
+    def __init__(self, model_path, antialiasing, shaders, srgb):
         self.root = P3dNode(render)
+        self.__srgb = srgb
         self.callbacks = {}
         self.filters = None
         get_model_path().append_directory(model_path)
@@ -67,17 +68,23 @@ class P3dGfxMgr(object):
         if shaders and base.win:
             self.filters = CommonFilters(base.win, base.cam)
 
-    @staticmethod
-    def load_model(filename, callback=None, anim=None):
+    def load_model(self, filename, callback=None, anim=None):
         ext = '.bam' if exists(filename + '.bam') else ''
         if anim:
             anim_dct = {'anim': filename + '-Anim' + ext}
-            return P3dNode(Actor(filename + ext, anim_dct))
+            return P3dNode(self.__set_srgb(Actor(filename + ext, anim_dct)))
         elif callback:
-            callb = lambda model: callback(P3dNode(model))
+            callb = lambda model: callback(P3dNode(self.__set_srgb(model)))
             return loader.loadModel(filename + ext, callback=callb)
         else:
-            return P3dNode(loader.loadModel(LibP3d.p3dpath(filename + ext)))
+            return P3dNode(self.__set_srgb(loader.loadModel(LibP3d.p3dpath(filename + ext))))
+
+    def __set_srgb(self, model):
+        if self.__srgb:
+            for texture in model.find_all_textures():
+                texture.set_format(Texture.F_srgb)
+        return model
+
 
     def set_toon(self):
         tmp_node = NodePath(PandaNode('temp node'))

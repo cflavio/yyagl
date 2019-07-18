@@ -14,9 +14,9 @@ Spotlight = P3dSpotlight
 
 class EngineGfx(GfxColleague):
 
-    def __init__(self, mediator, model_path, antialiasing, shaders, fps):
+    def __init__(self, mediator, model_path, antialiasing, shaders, fps, srgb):
         GfxColleague.__init__(self, mediator)
-        self.gfx_mgr = GfxMgr(model_path, antialiasing, shaders)
+        self.gfx_mgr = GfxMgr(model_path, antialiasing, shaders, srgb)
         self.root = None
         self.part2eff = {}
         if fps: self.set_frame_rate(fps)
