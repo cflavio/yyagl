@@ -52,7 +52,7 @@ class DevCfg(object):
     def __init__(self, mt_render=False, model_path='assets/models',
                  shaders_dev=False, gamma=1.0, menu_joypad=True, verbose='',
                  verbose_log=False, xmpp_server='', start_wp='', port=9099,
-                 server='localhost:9098', srgb=False):
+                 server='localhost:9098', srgb=False, opengl_3_2=False):
         self.multithreaded_render = mt_render  # multithreaded rendering
         self.model_path = model_path
         self.shaders_dev = shaders_dev
@@ -65,6 +65,7 @@ class DevCfg(object):
         self.server = server
         self.start_wp = start_wp
         self.srgb = srgb
+        self.opengl_3_2 = opengl_3_2
 
 
 class Cfg(object):
@@ -99,6 +100,8 @@ class Cfg(object):
             cfginfo += [('win-origin', self.gui_cfg.win_orig)]
         if self.dev_cfg.srgb:
             cfginfo += [('framebuffer-srgb', 'true')]
+        if self.dev_cfg.opengl_3_2:
+            cfginfo += [('gl-version', '3 2')]
         cfginfo += [
             ('window-title', self.gui_cfg.win_title),
             ('cursor-hidden', int(self.cursor_cfg.cursor_hidden)),
