@@ -28,7 +28,7 @@ class TrackGfx(GfxColleague):
         filename = self.raceprops.gfx_track_path
         if not exists(filename):
             script_path = executable + ' yyagl/build/process_track.py'
-            system(script_path + ' ' + self.raceprops.track_name)
+            system(script_path + ' assets/tracks/' + self.raceprops.track_name)
         self.eng.log_mgr.log('loading ' + filename)
         self.eng.gfx.gfx_mgr.load_model(filename, callback=self.end_loading)
 
