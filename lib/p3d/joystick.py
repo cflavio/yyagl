@@ -27,10 +27,15 @@ class P3dJoystickMgr:
         btn_1 = gamepad.findButton('face_b')
         btn_2 = gamepad.findButton('face_x')
         btn_3 = gamepad.findButton('face_y')
+        dpad_l = gamepad.findButton('dpad_left')
+        dpad_r = gamepad.findButton('dpad_right')
+        dpad_u = gamepad.findButton('dpad_up')
+        dpad_d = gamepad.findButton('dpad_down')
         left_x = gamepad.findAxis(InputDevice.Axis.left_x)
         left_y = gamepad.findAxis(InputDevice.Axis.left_y)
         return (left_x.value, -left_y.value, btn_0.pressed, btn_1.pressed,
-                btn_2.pressed, btn_3.pressed)
+                btn_2.pressed, btn_3.pressed,
+                dpad_l.pressed, dpad_r.pressed, dpad_u.pressed, dpad_d.pressed)
         #for _ in pygame.event.get(): pass
         #if not self.joysticks: return 0, 0, 0, 0
         #jstick = self.joysticks[0]
