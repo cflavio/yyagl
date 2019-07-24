@@ -69,11 +69,11 @@ class PageGui(GuiColleague):
 
     def __next_weight(self, wdg, direction, player, start=None):
         if start: start_pos = start
-        else: start_pos = self.curr_wdgs[player].pos
+        else: start_pos = self.curr_wdgs[player].global_pos
         dot = self.__direction_dot_dwg(wdg, direction, player, start)
         if direction in [(-1, 0), (1, 0)]:
-            proj_dist = abs(wdg.pos.x - start_pos.x)
-        else: proj_dist = abs(wdg.pos.y - start_pos.y)
+            proj_dist = abs(wdg.global_pos.x - start_pos.x)
+        else: proj_dist = abs(wdg.global_pos.y - start_pos.y)
         weights = [.5, .5] if direction in [left, right] else [.1, .9]
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
 

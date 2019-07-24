@@ -28,6 +28,11 @@ class WidgetMixin:
         except AttributeError: pos = self.get_pos(self.img.get_parent())
         return Vec2(pos[0], pos[2])
 
+    @property
+    def global_pos(self):
+        pos = self.get_pos(render2d)
+        return Vec2(pos[0], pos[2])
+
 
 class ImgMixin(WidgetMixin):
 
