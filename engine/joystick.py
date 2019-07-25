@@ -5,7 +5,7 @@ from yyagl.lib.p3d.joystick import P3dJoystickMgr as JoystickMgrLib
 class JoystickState:
 
     def __init__(self):
-        self.x = self.y = self.b0 = self.b1 = self.b2 = self.b3 = 0
+        self.x = self.y = self.b0 = self.b1 = self.b2 = self.b3 = self.dpad_l = self.dpad_r = self.dpad_u = self.dpad_d = 0
 
 
 class JoystickMgr(GameObject):
@@ -25,21 +25,21 @@ class JoystickMgr(GameObject):
         for i in range(self.joystick_lib.num_joysticks): self.__process(i)
 
     def __process(self, i):
-        j_x, j_y, btn0, btn1, btn2, btn3 = self.joystick_lib.get_joystick(i)
-        if self.old[i].x <= -.4 <= j_x:
+        j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d = self.joystick_lib.get_joystick(i)
+        if self.old[i].x <= -.4 <= j_x or self.old[i].dpad_l and not dpad_l:
             if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].left)
-        if self.old[i].x >= .4 >= j_x:
+        if self.old[i].x >= .4 >= j_x or self.old[i].dpad_r and not dpad_r:
             if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].right)
-        if self.old[i].y >= .4 >= j_y:
+        if self.old[i].y >= .4 >= j_y or self.old[i].dpad_d and not dpad_d:
             if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].down)
-        if self.old[i].y <= -.4 <= j_y:
+        if self.old[i].y <= -.4 <= j_y or self.old[i].dpad_u and not dpad_u:
             if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].up)
         if self.old[i].b0 and not btn0:
             if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].fire)
         if self.old[i].b1 and not btn1:
             self.eng.send('joypad_b1')
-        self.old[i].x, self.old[i].y, self.old[i].b0, self.old[i].b1, self.oldb2, self.old[i].b3 = \
-            j_x, j_y, btn0, btn1, btn2, btn3
+        self.old[i].x, self.old[i].y, self.old[i].b0, self.old[i].b1, self.oldb2, self.old[i].b3, self.old[i].dpad_l, self.old[i].dpad_r, self.old[i].dpad_u, self.old[i].dpad_d = \
+            j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d
 
     def get_joystick(self, player_idx):
         return self.joystick_lib.get_joystick(player_idx)

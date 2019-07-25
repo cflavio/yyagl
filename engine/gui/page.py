@@ -47,9 +47,7 @@ class PageGui(GuiColleague):
         if processed_cmd: return
         next_wdg = self.__next_wdg(direction, player)
         if not next_wdg: return
-        self.curr_wdgs[player].on_wdg_exit(None, player)
-        self.curr_wdgs[player] = next_wdg
-        self.curr_wdgs[player].on_wdg_enter(None, player)
+        self.focus(next_wdg, player)
 
     def on_enter(self, player):
         if not self.curr_wdgs[player]: return
@@ -62,6 +60,11 @@ class PageGui(GuiColleague):
         is_btn = lambda wdg: Btn in getmro(wdg.__class__)
         return [wdg for wdg in self.widgets if is_btn(wdg)]
 
+    def focus(self, wdg, player):
+        self.curr_wdgs[player].on_wdg_exit(None, player)
+        self.curr_wdgs[player] = wdg
+        self.curr_wdgs[player].on_wdg_enter(None, player)
+
     def __direction_dot_dwg(self, wdg, direction, player, start=None):
         if start: start_pos = start
         else: start_pos = self.curr_wdgs[player].pos
@@ -69,11 +72,11 @@ class PageGui(GuiColleague):
 
     def __next_weight(self, wdg, direction, player, start=None):
         if start: start_pos = start
-        else: start_pos = self.curr_wdgs[player].pos
+        else: start_pos = self.curr_wdgs[player].global_pos
         dot = self.__direction_dot_dwg(wdg, direction, player, start)
         if direction in [(-1, 0), (1, 0)]:
-            proj_dist = abs(wdg.pos.x - start_pos.x)
-        else: proj_dist = abs(wdg.pos.y - start_pos.y)
+            proj_dist = abs(wdg.global_pos.x - start_pos.x)
+        else: proj_dist = abs(wdg.global_pos.y - start_pos.y)
         weights = [.5, .5] if direction in [left, right] else [.1, .9]
         return weights[0] * (dot * dot) + weights[1] * (1 - proj_dist)
 

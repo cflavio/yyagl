@@ -62,6 +62,7 @@ class Input2ForcesStrategy(object):
         return self.curr_clamp
 
     def get_eng_frc(self, eng_frc, fwd, brk):
+        if self.car.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']: return 0
         m_s = self.car.phys.max_speed
         if fwd:
             actual_max_speed = m_s * self.car.phys.curr_speed_mul
@@ -214,7 +215,7 @@ class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
     def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
         phys = self.car.phys
         eng_frc = brake_frc = 0
-        j_x, j_y, j_a, j_b, j_bx, j_by = joystick_mgr.get_joystick(player_car_idx)
+        j_x, j_y, j_a, j_b, j_bx, j_by, d_l, d_r, d_u, d_d = joystick_mgr.get_joystick(player_car_idx)
         scale = lambda val: min(1, max(-1, val * 1.2))
         j_x, j_y = scale(j_x), scale(j_y)
         if j_a:
