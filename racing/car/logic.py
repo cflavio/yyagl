@@ -62,6 +62,7 @@ class Input2ForcesStrategy(object):
         return self.curr_clamp
 
     def get_eng_frc(self, eng_frc, fwd, brk):
+        if self.car.fsm.getCurrentOrNextState() in ['Loading', 'Countdown']: return 0
         m_s = self.car.phys.max_speed
         if fwd:
             actual_max_speed = m_s * self.car.phys.curr_speed_mul
