@@ -146,6 +146,9 @@ class CarGfx(GfxColleague, CarGfxFacade):
         self.wheels['fl'] = load(front_path)
         self.wheels['rr'] = load(rear_path)
         self.wheels['rl'] = load(rear_path)
+        for whl in [self.wheels['fl'], self.wheels['rl']]:
+            whl.set_h(180)
+            whl.node.flatten_light()
         GfxColleague._end_async(self)
 
     def crash_sfx(self):

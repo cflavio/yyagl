@@ -31,7 +31,8 @@ class EngineGfx(GfxColleague):
     def clean(self): self.root.remove_node()
 
     def load_model(self, filename, callback=None, anim=None):
-        return self.gfx_mgr.load_model(filename, callback, anim)
+        try: return self.gfx_mgr.load_model(filename, callback, anim)
+        except OSError: return self.gfx_mgr.load_model(filename + '.egg', callback, anim)
 
     def set_toon(self): self.gfx_mgr.set_toon()
 

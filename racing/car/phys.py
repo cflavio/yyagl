@@ -11,9 +11,10 @@ class CarPhys(PhysColleague):
     def __init__(self, mediator, car_props):
         PhysColleague.__init__(self, mediator)
         self.pnode = self.vehicle = self.__track_phys = self.coll_mesh = \
-            self.roll_influence = self.max_speed = self.friction_slip = \
+            self.max_speed = self.friction_slip = \
             self.friction_slip_rear = self.cfg = None
         self.turbo = False
+        self.roll_influence = []
         self.ai_meshes = []
         self.curr_speed_mul = 1.0
         self.roll_influence_k = self.friction_slip_k = 1.0
@@ -75,7 +76,9 @@ class CarPhys(PhysColleague):
 
     def __set_collision_mesh(self):
         fpath = self.cprops.race_props.coll_path % self.cprops.name
-        self.coll_mesh = self.eng.load_model(fpath)
+        try: self.coll_mesh = self.eng.load_model(fpath)
+        except OSError:  # new cars don't have collision meshes
+            self.coll_mesh = self.eng.load_model(fpath.replace('capsule', 'car'))
         #chassis_shape = BulletConvexHullShape()
         #for geom in self.eng.lib.find_geoms(
         #        self.coll_mesh, self.cprops.race_props.coll_name):
@@ -151,6 +154,12 @@ class CarPhys(PhysColleague):
         fl_node = ffl if ffl else meth('**/' + wheel_names.both.fl)
         rr_node = rrr if rrr else meth('**/' + wheel_names.both.rr)
         rl_node = rrl if rrl else meth('**/' + wheel_names.both.rl)
+        self.coll_mesh.node.ls()
+        if not fr_node:  # new cars
+            fr_node = meth('**/w_fr')
+            fl_node = meth('**/w_fl')
+            rr_node = meth('**/w_rr')
+            rl_node = meth('**/w_rl')
         offset = self.cfg['center_mass_offset']
         fr_pos = fr_node.get_pos() + (0, 0, f_radius + offset)
         fl_pos = fl_node.get_pos() + (0, 0, f_radius + offset)

@@ -11,10 +11,10 @@ class Camera(GameObject):
     speed_slow = 20
     speed_fast = 5000
     dist_min = 24
-    dist_max = 48
-    look_dist_min = 2
-    look_dist_max = 16
-    overwrite = [0, 0, 0]
+    dist_max = 48  # 24
+    look_dist_min = 2  # 0
+    look_dist_max = 16  # 0
+    overwrite = [0, 0, 0]  # [8, 8, 1]
 
     def __init__(self, car_np, cam_vec, car):
         GameObject.__init__(self)
