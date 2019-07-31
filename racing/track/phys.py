@@ -1,4 +1,4 @@
-from panda3d.core import BitMask32
+from panda3d.core import BitMask32, LPoint3f
 from yyagl.computer_proxy import ComputerProxy, compute_once
 from yyagl.gameobject import PhysColleague, GameObject
 from yyagl.racing.weapon.bonus.bonus import Bonus
@@ -94,6 +94,8 @@ class Waypoint(object):
     def set_prevs(self, waypoints, prev_name, wp_root, wpstr):
         prevs = self.node.get_tag(prev_name).split(',')
         prev_nodes = [wp_root.find(wpstr + idx) for idx in prevs]
+        if all(not node for node in prev_nodes):  # new tracks
+            prev_nodes = [wp_root.find('wp' + idx) for idx in prevs]
 
         def find_wp(name):
             for wayp in waypoints:
@@ -163,6 +165,8 @@ class TrackPhys(PhysColleague, ComputerProxy):
         wp_info = self.race_props.wp_info
         wp_root = self.model.find('**/' + wp_info.root_name)
         waypoints = wp_root.find_all_matches('**/%s*' % wp_info.wp_name)
+        if not waypoints:  # new tracks
+            waypoints = wp_root.find_all_matches('**/wp*')
         for wayp in waypoints:
             wpstr = '**/' + wp_info.wp_name
             neww = Waypoint(wayp)
@@ -287,19 +291,28 @@ class TrackPhys(PhysColleague, ComputerProxy):
         list(map(lambda mod: mod.hide(), models))
 
     def get_start_pos_hpr(self, i):
-        start_pos = (0, 0, 0)
+        start_pos = LPoint3f(0, 0, 0)
         start_hpr = (0, 0, 0)
         node_str = '**/' + self.race_props.start_name + str(i + 1)
         start_node = self.model.find(node_str)
         if start_node:
             start_pos = start_node.get_pos()
             start_hpr = start_node.hpr
+        else:  # new tracks
+            node_str = '**/start' + str(i)
+            start_node = self.model.find(node_str)
+            if start_node:
+                start_pos = start_node.get_pos()
+                start_hpr = start_node.hpr
         return start_pos, start_hpr
 
     @property
     def bounds(self):
         crn = self.corners
-        return crn[0].x, crn[1].x, crn[0].y, crn[3].y
+        try: return crn[0].x, crn[1].x, crn[0].y, crn[3].y
+        except AttributeError:
+            print('TRACK ERROR: MISSING CORNERS')
+            return 0, 100, 0, 100
 
     def create_bonus(self, pos):
         self.eng.log('created bonus', True)

@@ -154,7 +154,6 @@ class CarPhys(PhysColleague):
         fl_node = ffl if ffl else meth('**/' + wheel_names.both.fl)
         rr_node = rrr if rrr else meth('**/' + wheel_names.both.rr)
         rl_node = rrl if rrl else meth('**/' + wheel_names.both.rl)
-        self.coll_mesh.node.ls()
         if not fr_node:  # new cars
             fr_node = meth('**/w_fr')
             fl_node = meth('**/w_fl')

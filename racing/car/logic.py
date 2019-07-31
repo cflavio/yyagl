@@ -357,8 +357,12 @@ class CarLogic(LogicColleague, ComputerProxy):
     def last_wp_not_fork(self):
         # make a Waypoint class which contains the nodepath and facades stuff
         for pwp in reversed(self.collected_wps):
-            _wp = [__wp for __wp in self.cprops.track_waypoints
-                   if __wp.get_name()[8:] == str(pwp)][0]  # facade wp's name
+            try:
+                _wp = [__wp for __wp in self.cprops.track_waypoints
+                       if __wp.get_name()[8:] == str(pwp)][0]  # facade wp's name
+            except IndexError:  # new tracks
+                _wp = [__wp for __wp in self.cprops.track_waypoints
+                       if __wp.get_name()[2:] == "{:02d}".format(pwp)][0]  # facade wp's name
             if _wp in self.not_fork_wps():
                 return _wp
         if self.not_fork_wps():  # if the track has a goal
@@ -387,9 +391,9 @@ class CarLogic(LogicColleague, ComputerProxy):
         def parents(w_p):
             return [_wp for _wp in self.cprops.track_waypoints
                     if w_p in _wp.prevs]
-        wps = []
         if not goal_wp:
             return wps
+        wps = []
         processed = [goal_wp]
         while any(pwp not in processed for pwp in parents(processed[-1])):
             pwp = [pwp for pwp in parents(processed[-1])
@@ -545,7 +549,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         return 4 + 24 * self.mediator.phys.speed_ratio
 
     def update_waypoints(self):
-        closest_wp = int(self.closest_wp().prev.get_name()[8:])  # WaypointX
+        try: closest_wp = int(self.closest_wp().prev.get_name()[8:])  # WaypointX
+        except ValueError: closest_wp = int(self.closest_wp().prev.get_name()[2:])  # wpXY (new tracks)
         # facade: wp.num in Waypoint's class
         if closest_wp not in self.collected_wps:
             self.collected_wps += [closest_wp]
@@ -584,9 +589,14 @@ class CarLogic(LogicColleague, ComputerProxy):
         return self.__wp_num
 
     def __recompute_wp_num(self):  # wp_num is used for ranking
-        self.__wp_num = len(
-            [vwp for vwp in self.collected_wps if vwp in [
-                int(wp.get_name()[8:]) for wp in self.not_fork_wps()]])
+        try:
+            self.__wp_num = len(
+                [vwp for vwp in self.collected_wps if vwp in [
+                    int(wp.get_name()[8:]) for wp in self.not_fork_wps()]])
+        except ValueError:  # new tracks
+            self.__wp_num = len(
+                [vwp for vwp in self.collected_wps if vwp in [
+                    int(wp.get_name()[2:]) for wp in self.not_fork_wps()]])
 
     @property
     def correct_lap(self):
