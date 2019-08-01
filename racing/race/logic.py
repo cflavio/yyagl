@@ -58,7 +58,8 @@ class RaceLogic(LogicColleague):
         self.set_display_regions()
 
     def set_display_regions(self):
-        list(map(base.win.remove_display_region, base.win.get_active_display_regions()[1:-2]))
+        if len(base.win.get_active_display_regions()) > 4:
+            list(map(base.win.remove_display_region, base.win.get_active_display_regions()[1:-2]))
         if len(self.player_cars) == 1:
             d_r = [base.win.get_active_display_regions()[0]]
             d_r[0].set_dimensions(0, 1, 0, 1)
