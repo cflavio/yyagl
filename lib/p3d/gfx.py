@@ -85,6 +85,10 @@ class P3dGfxMgr(object):
                 texture.set_format(Texture.F_srgb)
         return model
 
+    def toggle_aa(self, val=None):
+        if render.has_antialias() and render.get_antialias() != AntialiasAttrib.MNone:
+            render.clear_antialias()
+        else: render.set_antialias(AntialiasAttrib.MAuto, 1)
 
     def set_toon(self):
         tmp_node = NodePath(PandaNode('temp node'))

@@ -105,11 +105,9 @@ class Cfg(object):
         cfginfo += [
             ('window-title', self.gui_cfg.win_title),
             ('cursor-hidden', int(self.cursor_cfg.cursor_hidden)),
-            ('sync-video', int(self.gui_cfg.sync_video))]
-        if self.gui_cfg.antialiasing:
-            cfginfo += [
-                ('framebuffer-multisample', 1),
-                ('multisamples', 2)]
+            ('sync-video', int(self.gui_cfg.sync_video)),
+            ('framebuffer-multisample', 1),
+            ('multisamples', 2)]
         if self.dev_cfg.multithreaded_render:
             cfginfo += [('threading-model', '/Draw')]
         if self.profiling_cfg.profiling:
