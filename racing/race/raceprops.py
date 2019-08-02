@@ -8,7 +8,7 @@ class RaceProps(object):
             show_waypoints, weapon_info, start_name, track_name, track_path,
             track_model_name, empty_name, anim_name, omni_tag, sign_cb,
             sign_name, minimap_path, minimap_image, col_dct, camera_vec,
-            shadow_src, laps, rocket_path, turbo_path, rotate_all_path,
+            shadow_src, laps, skidmark_col, rocket_path, turbo_path, rotate_all_path,
             mine_path, bonus_model, bonus_suff, a_i, ingame_menu, share_urls,
             respawn_name, pitstop_name, wall_name, goal_name, bonus_name,
             roads_names, grid, start_wp, ai_debug):
@@ -50,6 +50,7 @@ class RaceProps(object):
         self.camera_vec = camera_vec
         self.shadow_src = shadow_src
         self.laps = laps
+        self.skidmark_col = skidmark_col
         self.rocket_path = rocket_path
         self.turbo_path = turbo_path
         self.rotate_all_path = rotate_all_path

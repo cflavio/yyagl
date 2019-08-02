@@ -35,7 +35,7 @@ class DriverLoaderStrategy(GameObject):
             lambda: DriverPlayerLoaderStrategy.load(cars, r_p, load_car_name, track,
                                               race, player_car_name, player_car_names, seas_p, aipoller, cb),
             race, drv.dprops.f_engine, drv.dprops.f_tires,
-            drv.dprops.f_suspensions, race.track.phys.waypoints, aipoller)
+            drv.dprops.f_suspensions, race.track.phys.waypoints, race.track.phys.skidmark_col, aipoller)
         if player_car_idx == -1:
             return car_cls(car_props, player_car_idx)
         else:

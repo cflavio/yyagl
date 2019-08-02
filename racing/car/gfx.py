@@ -229,12 +229,13 @@ class SkidmarkMgr(GameObject):
             self.l_skidmark = Skidmark(fl_pos, radius, heading)
             self.skidmarks += [self.l_skidmark, self.r_skidmark]
             if self.particles: list(map(lambda part: part.destroy(), self.particles))
+            col = self.car.logic.cprops.track_skidmark_col()
             self.particles = [
                 self.eng.particle(
-                    self.car.gfx.lroot, 'dust', (.5, .5, .5, .24), pi/2,
+                    self.car.gfx.lroot, 'dust', (col[0], col[1], col[2], .24), pi/2,
                     rate=.0005, vel=1.2, part_duration=1.6),
                 self.eng.particle(
-                    self.car.gfx.rroot, 'dust', (.5, .5, .5, .24), pi/2,
+                    self.car.gfx.rroot, 'dust', (col[0], col[1], col[2], .24), pi/2,
                     rate=.0005, vel=1.2, part_duration=1.6)]
 
     def on_no_skidmarking(self):

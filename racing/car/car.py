@@ -16,7 +16,7 @@ class CarProps(object):
 
     def __init__(
             self, race_props, name, pos, hpr, callback, race, driver_engine,
-            driver_tires, driver_suspensions, track_waypoints, ai_poller):
+            driver_tires, driver_suspensions, track_waypoints, track_skidmark_col, ai_poller):
         self.race_props = race_props
         self.name = name
         self.pos = pos
@@ -27,6 +27,7 @@ class CarProps(object):
         self.driver_tires = driver_tires
         self.driver_suspensions = driver_suspensions
         self.track_waypoints = track_waypoints
+        self.track_skidmark_col = track_skidmark_col
         self.ai_poller = ai_poller
 
 

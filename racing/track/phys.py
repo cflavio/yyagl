@@ -306,6 +306,10 @@ class TrackPhys(PhysColleague, ComputerProxy):
                 start_hpr = start_node.hpr
         return start_pos, start_hpr
 
+    def skidmark_col(self):
+        # it will be dynamic depending on the current terrain
+        return self.race_props.skidmark_col
+
     @property
     def bounds(self):
         crn = self.corners
