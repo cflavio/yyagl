@@ -5,6 +5,7 @@ class P3dJoystickMgr:
 
     def __init__(self):
         self.joysticks = []
+        self.curr_vibration = {}
 
     def init_joystick(self):
         for dev in base.devices.getDevices(InputDevice.DeviceClass.gamepad):
@@ -41,6 +42,24 @@ class P3dJoystickMgr:
         #jstick = self.joysticks[0]
         #axis, btn = jstick.get_axis, jstick.get_button
         #return axis(0), axis(1), btn(0), btn(1)
+
+    def set_vibration(self, player_idx, strong=False):
+        devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
+        if player_idx > len(devices) - 1: return
+        state = 'strong' if strong else 'weak'
+        if player_idx in self.curr_vibration and self.curr_vibration[player_idx] == state: return
+        self.curr_vibration[player_idx] = state
+        gamepad = devices[player_idx]
+        vals = (.64, .64) if strong else (.2, .4)
+        gamepad.set_vibration(*vals)
+
+    def clear_vibration(self, player_idx):
+        devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
+        if player_idx > len(devices) - 1: return
+        if player_idx in self.curr_vibration and self.curr_vibration[player_idx] == 'no': return
+        self.curr_vibration[player_idx] = 'no'
+        gamepad = devices[player_idx]
+        gamepad.set_vibration(0, 0)
 
     def destroy(self):
         pass
