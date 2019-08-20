@@ -9,7 +9,7 @@ bson
 pyyaml
 feedparser'''
 requirements = '''
-panda3d==1.10.3'''
+panda3d==1.10.4'''
 excl_patterns = ['build/*', 'built/*', 'setup.py', 'requirements.txt', '*.swp',
                  'SConstruct', 'venv/*', '.git*', '*.pyc', 'options.yml']
 incl_patterns = ['*.txo', '*.txt', '*.ttf', '*.bam', '*.vert', '*.frag', '*.yml']
