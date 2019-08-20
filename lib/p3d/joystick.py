@@ -45,7 +45,7 @@ class P3dJoystickMgr:
 
     def set_vibration(self, player_idx, strong=False):
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
-        if player_idx > len(devices) - 1: return
+        if player_idx < 0 or player_idx > len(devices) - 1: return
         state = 'strong' if strong else 'weak'
         if player_idx in self.curr_vibration and self.curr_vibration[player_idx] == state: return
         self.curr_vibration[player_idx] = state
@@ -55,7 +55,7 @@ class P3dJoystickMgr:
 
     def clear_vibration(self, player_idx):
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
-        if player_idx > len(devices) - 1: return
+        if player_idx < 0 or player_idx > len(devices) - 1: return
         if player_idx in self.curr_vibration and self.curr_vibration[player_idx] == 'no': return
         self.curr_vibration[player_idx] = 'no'
         gamepad = devices[player_idx]
