@@ -8,7 +8,7 @@ class WeaponAi(AiColleague):
 
     def __init__(self, mediator, car):
         AiColleague.__init__(self, mediator)
-        self.collect_time = globalClock.get_frame_time()
+        self.collect_time = self.eng.curr_time
         self.car = car
         self.fire_time = uniform(*self.fire_times)
 

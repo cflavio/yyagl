@@ -35,5 +35,5 @@ def __process(src, cond, fout):
     out_pyflakes = exec_cmd('pyflakes ' + str(src))
     out_pep8 = exec_cmd('pep8 ' + str(src))
     outs = [out.strip() for out in [out_pylint, out_pyflakes, out_pep8]]
-    map(lambda out: fout.write(out + '\n'), [out for out in outs if out])
+    list(map(lambda out: fout.write(out + '\n'), [out for out in outs if out]))
     fout.write('\n')

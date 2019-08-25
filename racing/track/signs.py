@@ -1,4 +1,4 @@
-from yyagl.library.panda.gfx import RenderToTexture
+from yyagl.lib.p3d.gfx import RenderToTexture
 from panda3d.core import TextureStage
 
 
@@ -9,7 +9,7 @@ class Signs(object):  # signs where we write supporters' names
         self.draw_cb = draw_cb
         self.rtts = []
 
-    def set_signs(self): map(self.__set_sign, self.nodes)
+    def set_signs(self): list(map(self.__set_sign, self.nodes))
 
     def __set_sign(self, node):
         self.rtts += [RenderToTexture()]
@@ -19,5 +19,5 @@ class Signs(object):  # signs where we write supporters' names
         node.set_texture(t_s, self.rtts[-1].texture)
 
     def destroy(self):
-        map(lambda rtt: rtt.destroy(), self.rtts)
+        list(map(lambda rtt: rtt.destroy(), self.rtts))
         self.rtts = None

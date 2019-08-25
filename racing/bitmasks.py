@@ -1,4 +1,4 @@
-class BitMasks:
+class BitMasks(object):
 
     general = 0
     track = 1
@@ -7,3 +7,5 @@ class BitMasks:
 
     @staticmethod
     def car(idx): return 2 + idx
+
+    def __init__(self): pass

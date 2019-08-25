@@ -1,5 +1,5 @@
 from panda3d.core import TextNode, LVector3f, Point2, Point3, TextNode
-from yyagl.library.gui import Entry
+from yyagl.lib.gui import Entry
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import GuiColleague, GameObject
@@ -17,20 +17,25 @@ class CarParameter(GameObject):
             parent=base.a2dTopLeft, scale=.046)
         slider_pos = LVector3f(pos[0], 1, pos[1]) + (.05, 0, .01)
         self.__slider = Entry(
-            pos=slider_pos, initialText=str(init_val),
-            command=self.__set_attr, parent=base.a2dTopLeft,
-            scale=.05, frameColor=(0, 0, 0, .2), text_fg=(1, 1, 1, 1))
+            pos=slider_pos, initial_text=str(init_val),
+            cmd=self.__set_attr, parent=base.a2dTopLeft,
+            scale=.05, frame_col=(0, 0, 0, .2), text_fg=(1, 1, 1, 1))
         txt_pos = LVector3f(pos[0], pos[1], 1) + (.6, 0, 0)
         self.widgets = [self.__slider, self.__lab]
         self.toggle()
 
     def toggle(self):
-        map(lambda wdg: (wdg.show if wdg.is_hidden() else wdg.hide)(),
-            self.widgets)
+        #map(lambda wdg: (wdg.show if wdg.hidden else wdg.hide)(),
+        #    self.widgets)
+        # temporary hack: we're using non-dip widgets, they've is_hidden in
+        # place of hidden, remove this when this is refactored
+        for wdg in self.widgets:
+            if hasattr(wdg, 'hidden'): (wdg.show if wdg.hidden else wdg.hide)()
+            else: (wdg.show if wdg.is_hidden() else wdg.hide)()
 
     @property
     def is_visible(self):
-        return any(not wdg.is_hidden() for wdg in self.widgets)
+        return any(not wdg.hidden for wdg in self.widgets)
 
     def __set_attr(self, val):
         try: self.__callback(float(val), *self.__args)
@@ -38,10 +43,10 @@ class CarParameter(GameObject):
             self.__callback(eval(val), *self.__args)
 
     def hide(self):
-        map(lambda wdg: wdg.hide(), self.widgets)
+        list(map(lambda wdg: wdg.hide(), self.widgets))
 
     def destroy(self):
-        map(lambda wdg: wdg.destroy(), self.widgets)
+        list(map(lambda wdg: wdg.destroy(), self.widgets))
         GameObject.destroy(self)
 
 
@@ -123,82 +128,247 @@ class CarParameters(GameObject):
     def assign_val(self, val, phys, field): setattr(phys, field, val)
 
     def assign_val_whl(self, val, phys, field):
-        map(lambda whl: getattr(whl, field)(val), phys.vehicle.get_wheels())
+        list(map(lambda whl: getattr(whl, field)(val), phys.vehicle.get_wheels()))
 
     def toggle(self):
-        map(lambda par: par.toggle(), self.__pars)
+        list(map(lambda par: par.toggle(), self.__pars))
         is_visible = self.__pars[0].is_visible
         (self.eng.show_cursor if is_visible else self.eng.hide_cursor)()
 
-    def hide(self): map(lambda wdg: wdg.hide(), self.__pars)
+    def hide(self): list(map(lambda wdg: wdg.hide(), self.__pars))
 
     def destroy(self):
-        map(lambda wdg: wdg.destroy(), self.__pars)
+        list(map(lambda wdg: wdg.destroy(), self.__pars))
         GameObject.destroy(self)
 
 
 class CarPanel(GameObject):
 
-    def __init__(self, race_props):
+    def __init__(self, race_props, player_idx, ncars):
         GameObject.__init__(self)
         self.race_props = race_props
+        self.player_idx = player_idx
+        self.ncars = ncars
         sprops = self.race_props.season_props
-        menu_args = sprops.gameprops.menu_args
-        pars = {'scale': .065, 'parent': base.a2dTopRight,
-                'fg': menu_args.text_active, 'align': TextNode.A_left,
+        menu_props = sprops.gameprops.menu_props
+        if ncars == 1:
+            parent_tr = base.a2dTopRight
+        elif ncars == 2:
+            if self.player_idx == 0: parent_tr = base.a2dTopCenter
+            else: parent_tr = base.a2dTopRight
+        elif ncars == 3:
+            if self.player_idx == 0: parent_tr = base.a2dTopRight
+            elif self.player_idx == 1: parent_tr = base.aspect2d
+            else: parent_tr = base.a2dRightCenter
+        elif ncars == 4:
+            if self.player_idx == 0: parent_tr = base.a2dTopCenter
+            elif self.player_idx == 1: parent_tr = base.a2dTopRight
+            elif self.player_idx == 2: parent_tr = base.aspect2d
+            else: parent_tr = base.a2dRightCenter
+        if ncars == 1:
+            parent_tl = base.a2dTopLeft
+        elif ncars == 2:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            else: parent_tl = base.a2dTopCenter
+        elif ncars == 3:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            elif self.player_idx == 1: parent_tl = base.a2dLeftCenter
+            else: parent_tl = base.aspect2d
+        elif ncars == 4:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            elif self.player_idx == 1: parent_tl = base.a2dTopCenter
+            elif self.player_idx == 2: parent_tl = base.a2dLeftCenter
+            else: parent_tl = base.aspect2d
+        if ncars == 1:
+            parent_bl = base.a2dBottomLeft
+        elif ncars == 2:
+            if self.player_idx == 0: parent_bl = base.a2dBottomLeft
+            else: parent_bl = base.a2dBottomCenter
+        elif ncars == 3:
+            if self.player_idx == 0: parent_bl = base.a2dLeftCenter
+            elif self.player_idx == 1: parent_bl = base.a2dBottomLeft
+            else: parent_bl = base.a2dBottomCenter
+        elif ncars == 4:
+            if self.player_idx == 0: parent_bl = base.a2dLeftCenter
+            elif self.player_idx == 1: parent_bl = base.aspect2d
+            elif self.player_idx == 2: parent_bl = base.a2dBottomLeft
+            else: parent_bl = base.a2dBottomCenter
+        if ncars == 1: parent_t = base.a2dTopCenter
+        elif ncars == 2:
+            if self.player_idx == 0: parent_t = base.a2dTopQuarter
+            else: parent_t = base.a2dTopThirdQuarter
+        elif ncars == 3:
+            if self.player_idx == 0: parent_t = base.a2dTop
+            elif self.player_idx == 1: parent_t = base.a2dCenterQuarter
+            else: parent_t = base.a2dCenterThirdQuarter
+        elif ncars == 4:
+            if self.player_idx == 0: parent_t = base.a2dTopQuarter
+            elif self.player_idx == 1: parent_t = base.a2dTopThirdQuarter
+            elif self.player_idx == 2: parent_t = base.a2dCenterQuarter
+            else: parent_t = base.a2dCenterThirdQuarter
+        if ncars == 1: parent_b = base.a2dBottomCenter
+        elif ncars == 2:
+            if self.player_idx == 0: parent_b = base.a2dBottomQuarter
+            else: parent_b = base.a2dBottomThirdQuarter
+        elif ncars == 3:
+            if self.player_idx == 0: parent_b = base.aspect2d
+            elif self.player_idx == 1: parent_b = base.a2dBottomQuarter
+            else: parent_b = base.a2dBottomThirdQuarter
+        elif ncars == 4:
+            if self.player_idx == 0: parent_b = base.a2dCenterQuarter
+            elif self.player_idx == 1: parent_b = base.a2dCenterThirdQuarter
+            elif self.player_idx == 2: parent_b = base.a2dBottomQuarter
+            else: parent_b = base.a2dBottomThirdQuarter
+        yellow_scale = .065 if ncars == 1 else .042
+        white_scale = .05 if ncars == 1 else .038
+        damages_img_scale = (.12, 1, .12) if ncars == 1 else (.08, 1, .08)
+        self.__weap_scale = .12 if ncars == 1 else .08
+        txt_x = -.24 if ncars == 1 else -.18
+        lab_x = -.3 if ncars == 1 else -.24
+        offset_z = .1 if ncars == 1 else .08
+        top_z = -.1
+        damages_txt_pos = (.3, .1) if ncars == 1 else (.24, .06)
+        damages_img_pos = (.46, 1, .12) if ncars == 1 else (.36, 1, .07)
+        weapon_txt_pos = (.18, -.08) if ncars == 1 else (.14, -.08)
+        self.__weapon_img_pos = (.18, 1, -.24) if ncars == 1 else (.14, 1, -.18)
+        fwd_img_pos = (0, 1, -.2) if ncars == 1 else (0, 1, -.16)
+        fwd_img_scale = .15 if ncars == 1 else .12
+        pars = {'scale': yellow_scale, 'parent': parent_tr,
+                'fg': menu_props.text_active_col, 'align': TextNode.A_left,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
-        self.speed_txt = OnscreenText(pos=(-.18, -.1), **pars)
+        #self.glass_tl = OnscreenImage(
+        #    'assets/images/gui/topleft.txo',
+        #    scale=(.23, 1, .24), parent=parent_tl, pos=(.22, 1, -.23))
+        #self.glass_tl.set_transparency(True)
+        #self.glass_tr = OnscreenImage(
+        #    'assets/images/gui/topright.txo',
+        #    scale=(.36, 1, .36), parent=parent_tr, pos=(-.35, 1, -.35))
+        #self.glass_tr.set_transparency(True)
+        #self.glass_t = OnscreenImage(
+        #    'assets/images/gui/top.txo',
+        #    scale=(.24, 1, .22), parent=parent_t, pos=(0, 1, -.21))
+        #self.glass_t.set_transparency(True)
+        #self.glass_bl = OnscreenImage(
+        #    'assets/images/gui/bottomleft.txo',
+        #    scale=(.36, 1, .16), parent=parent_bl, pos=(.35, 1, .15))
+        #self.glass_bl.set_transparency(True)
+        #self.glass_br = OnscreenImage(
+        #    'assets/images/gui/bottomright.txo',
+        #    scale=(.26, 1, .26), parent=base.a2dBottomRight, pos=(-.25, 1, .25))
+        #self.glass_br.set_transparency(True)
+        #self.glass_b = OnscreenImage(
+        #    'assets/images/gui/bottom.txo',
+        #    scale=(1.02, 1, .26), parent=parent_b, pos=(0, 1, .25))
+        #self.glass_b.set_transparency(True)
+        #self.glass_tl.hide()
+        #self.glass_t.hide()
+        #self.glass_b.hide()
+        self.speed_txt = OnscreenText(pos=(txt_x + .06, top_z), **pars)
         self.speed_txt['align'] = TextNode.A_center
         self.speed_c = Circle(
-            size=.1, pos=(-.18, -.1), parent=base.a2dTopRight, ray=.4,
-            width=.05, color_start=(.9, .6, .1, 1), color_end=(.2, .8, .2, 1))
+            size=.1, pos=(txt_x + .06, top_z), parent=parent_tr, ray=.4,
+            thickness=.05, col_start=(.9, .6, .1, 1), col_end=(.2, .8, .2, 1))
         lap_str = '1/' + str(self.race_props.laps)
-        self.lap_txt = OnscreenText(text=lap_str, pos=(-.24, -.2), **pars)
-        self.time_txt = OnscreenText(pos=(-.24, -.5), **pars)
-        self.best_txt = OnscreenText(pos=(-.24, -.6), **pars)
-        self.ranking_txt = OnscreenText(pos=(-.24, -.3), **pars)
+        self.lap_txt = OnscreenText(text=lap_str, pos=(txt_x, top_z - offset_z), **pars)
+        self.time_txt = OnscreenText(pos=(txt_x, top_z - offset_z * 4), **pars)
+        self.best_txt = OnscreenText(pos=(txt_x, top_z - offset_z * 5), **pars)
+        self.ranking_txt = OnscreenText(pos=(txt_x, top_z - offset_z * 2), **pars)
         self.damages_img = OnscreenImage(
             'assets/images/gui/car_icon.txo',
-            scale=(.12, 1, .12), parent=base.a2dBottomLeft, pos=(.46, 1, .12))
+            scale=damages_img_scale, parent=parent_bl, pos=damages_img_pos)
         self.damages_img.set_transparency(True)
-        self.damages_img.set_color_scale(menu_args.text_normal)
+        self.damages_img.set_color_scale(menu_props.text_normal_col)
         self.damages_img.set_r(90)
-        pars = {'scale': .05, 'parent': pars['parent'],
-                'fg': menu_args.text_normal,
+        pars = {'scale': white_scale, 'parent': pars['parent'],
+                'fg': menu_props.text_normal_col,
                 'align': TextNode.A_right, 'font': pars['font']}
-        self.speed_lab = OnscreenText(_('speed:'), pos=(-.3, -.1), **pars)
+        self.speed_lab = OnscreenText(_('speed:'), pos=(lab_x, top_z), **pars)
         self.lap_lab = OnscreenText(
-            text=_('lap:'), pos=(-.3, -.2), **pars)
-        self.time_lab = OnscreenText(_('time:'), pos=(-.3, -.5), **pars)
-        self.best_lab = OnscreenText(_('best lap:'), pos=(-.3, -.6), **pars)
-        self.ranking_lab = OnscreenText(_('ranking:'), pos=(-.3, -.3), **pars)
-        self.damages_lab = OnscreenText(_('damages:'), pos=(.3, .1), **pars)
-        self.damages_lab.reparent_to(base.a2dBottomLeft)
+            text=_('lap:'), pos=(lab_x, top_z - offset_z), **pars)
+        self.time_lab = OnscreenText(_('time:'), pos=(lab_x, top_z - offset_z * 4), **pars)
+        self.best_lab = OnscreenText(_('best lap:'), pos=(lab_x, top_z - offset_z * 5), **pars)
+        self.ranking_lab = OnscreenText(_('ranking:'), pos=(lab_x, top_z - offset_z * 2), **pars)
+        self.damages_lab = OnscreenText(_('damages:'), pos=damages_txt_pos, **pars)
+        self.damages_lab.reparent_to(parent_bl)
         self.weapon_lab = OnscreenText(
-            _('weapon'), pos=(.18, -.08), scale=.05, parent=base.a2dTopLeft,
-            fg=menu_args.text_normal, font=self.eng.font_mgr.load_font(sprops.font))
+            _('weapon'), pos=weapon_txt_pos, scale=white_scale, parent=parent_tl,
+            fg=menu_props.text_normal_col, font=self.eng.font_mgr.load_font(sprops.font))
         self.weapon_img = None
+        if ncars == 1: parent = base.a2dTopCenter
+        elif ncars == 2:
+            if player_idx == 0: parent = base.a2dTopQuarter
+            else: parent = base.a2dTopThirdQuarter
+        elif ncars == 3:
+            if player_idx == 0: parent = base.a2dTopCenter
+            elif player_idx == 0: parent = base.a2dCenterQuarter
+            else: parent = base.a2dCenterThirdQuarter
+        elif ncars == 4:
+            if player_idx == 0: parent = base.a2dTopQuarter
+            elif player_idx == 1: parent = base.a2dTopThirdQuarter
+            elif player_idx == 2: parent = base.a2dCenterQuarter
+            else: parent = base.a2dCenterThirdQuarter
         self.forward_img = OnscreenImage(
             'assets/images/gui/direction.txo',
-            scale=.15, parent=base.a2dTopCenter, pos=(0, 1, -.2))
+            scale=fwd_img_scale, parent=parent, pos=fwd_img_pos)
         self.forward_img.set_transparency(True)
         self.forward_img.hide()
 
     def __close_vec(self, vec1, vec2):
         return all(abs(b - a) < .01 for a, b in zip(vec1, vec2))
 
+    def enter_waiting(self):
+        pass
+        #if self.ncars == 1: parent = base.aspect2d
+        #elif self.ncars == 2:
+        #    if self.player_idx == 0: parent = base.a2dCenterQuarter
+        #    else: parent = base.a2dCenterThirdQuarter
+        #elif self.ncars == 3:
+        #    if self.player_idx == 0: parent = base.a2dQuarterCenter
+        #    elif self.player_idx == 1: parent = base.a2dThirdQuarterQuarter
+        #    else: parent = base.a2dThirdQuarterThirdQuarter
+        #elif self.ncars == 4:
+        #    if self.player_idx == 0: parent = base.a2dQuarterQuarter
+        #    elif self.player_idx == 1: parent = base.a2dQuarterThirdQuarter
+        #    elif self.player_idx == 2: parent = base.a2dThirdQuarterQuarter
+        #    else: parent = base.a2dThirdQuarterThirdQuarter
+        #menu_props = self.race_props.season_props.gameprops.menu_props
+        #pars = {'scale': .065, 'parent': parent,
+        #        'fg': menu_props.text_normal_col,
+        #        'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
+
+    def exit_waiting(self): pass
+
     def set_weapon(self, wpn):
+        #self.glass_tl.show()
         self.weapon_lab.show()
+        ncars = len(self.race_props.season_props.player_car_names)
+        if ncars == 1:
+            parent_tl = base.a2dTopLeft
+        elif ncars == 2:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            else: parent_tl = base.a2dTopCenter
+        elif ncars == 3:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            elif self.player_idx == 1: parent_tl = base.a2dLeftCenter
+            else: parent_tl = base.aspect2d
+        elif ncars == 4:
+            if self.player_idx == 0: parent_tl = base.a2dTopLeft
+            elif self.player_idx == 1: parent_tl = base.a2dTopCenter
+            elif self.player_idx == 2: parent_tl = base.a2dLeftCenter
+            else: parent_tl = base.aspect2d
         self.weapon_img = OnscreenImage(
             'assets/images/weapons/%s.txo' % wpn,
-            scale=.12, parent=base.a2dTopLeft, pos=(.18, 1, -.24))
+            scale=self.__weap_scale, parent=parent_tl, pos=self.__weapon_img_pos)
         self.weapon_img.set_transparency(True)
 
     def unset_weapon(self):
+        #self.glass_tl.hide()
         self.weapon_lab.hide()
         self.weapon_img.destroy()
 
-    def show_forward(self): self.forward_img.show()
+    def show_forward(self):
+        #self.glass_t.show()
+        self.forward_img.show()
 
     def set_forward_angle(self, angle):
         curr_angle = self.forward_img.get_r()
@@ -210,10 +380,12 @@ class CarPanel(GameObject):
             tgt_val = curr_angle + curr_incr * sign
         self.forward_img.set_r(tgt_val)
 
-    def hide_forward(self): self.forward_img.hide()
+    def hide_forward(self):
+        #self.glass_t.hide()
+        self.forward_img.hide()
 
     def apply_damage(self, reset=False):
-        col = self.race_props.season_props.gameprops.menu_args.text_normal
+        col = self.race_props.season_props.gameprops.menu_props.text_normal_col
         if reset:
             self.damages_img.set_color_scale(col)
         else:
@@ -229,8 +401,11 @@ class CarPanel(GameObject):
             self.speed_txt, self.speed_c, self.time_txt, self.lap_txt,
             self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
             self.best_lab, self.damages_img, self.damages_lab,
-            self.ranking_txt, self.ranking_lab, self.weapon_lab]
-        map(lambda wdg: wdg.hide(), labels)
+            self.ranking_txt, self.ranking_lab, self.weapon_lab,
+            #self.glass_tl, self.glass_tr, self.glass_t,
+            #self.glass_bl, self.glass_br, self.glass_b
+            ]
+        list(map(lambda wdg: wdg.hide(), labels))
         if self.weapon_img and not self.weapon_img.is_empty():
             self.weapon_img.hide()
         self.forward_img.hide()
@@ -240,11 +415,49 @@ class CarPanel(GameObject):
             self.speed_txt, self.speed_c, self.time_txt, self.lap_txt,
             self.best_txt, self.speed_lab, self.time_lab, self.lap_lab,
             self.best_lab, self.damages_img, self.damages_lab,
-            self.ranking_txt, self.ranking_lab, self.weapon_lab]
-        map(lambda wdg: wdg.destroy(), labels)
+            self.ranking_txt, self.ranking_lab, self.weapon_lab,
+            #self.glass_tl, self.glass_tr, self.glass_t,
+            #self.glass_bl, self.glass_br, self.glass_b
+            ]
+        list(map(lambda wdg: wdg.destroy(), labels))
         if self.weapon_img and not self.weapon_img.is_empty():
             self.weapon_img.destroy()
         self.forward_img.destroy()
+
+
+class CarMultiPlayerPanel(CarPanel):
+
+    def enter_waiting(self):
+        CarPanel.enter_waiting(self)
+        if self.ncars == 1: parent = base.aspect2d
+        elif self.ncars == 2:
+            if self.player_idx == 0: parent = base.a2dCenterQuarter
+            else: parent = base.a2dCenterThirdQuarter
+        elif self.ncars == 3:
+            if self.player_idx == 0: parent = base.a2dQuarterCenter
+            elif self.player_idx == 1: parent = base.a2dThirdQuarterQuarter
+            else: parent = base.a2dThirdQuarterThirdQuarter
+        elif self.ncars == 4:
+            if self.player_idx == 0: parent = base.a2dQuarterQuarter
+            elif self.player_idx == 1: parent = base.a2dQuarterThirdQuarter
+            elif self.player_idx == 2: parent = base.a2dThirdQuarterQuarter
+            else: parent = base.a2dThirdQuarterThirdQuarter
+        menu_props = self.race_props.season_props.gameprops.menu_props
+        pars = {'scale': .065, 'parent': parent,
+                'fg': menu_props.text_normal_col,
+                'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
+        self.wait_lab = OnscreenText(_('waiting for the other players'),
+                                     pos=(0, 0), **pars)
+
+    def exit_waiting(self):
+        CarPanel.exit_waiting(self)
+        self.wait_lab.destroy()
+
+
+class CarOnlineMPPanel(CarPanel):
+
+    def __init__(self, race_props, player_idx, ncars):
+        CarPanel.__init__(self, race_props, 0, 1)
 
 
 class CarAIPanel(GameObject):
@@ -287,12 +500,49 @@ class CarGui(GuiColleague):
 
 class CarPlayerGui(CarGui):
 
+    panel_cls = CarPanel
+
     def __init__(self, mediator, car_props):
         self.race_props = car_props
+        ncars = self.ncars
         CarGui.__init__(self, mediator)
         self.pars = CarParameters(mediator.phys, mediator.logic)
-        self.panel = CarPanel(car_props)
+        self.panel = self.panel_cls(car_props, mediator.player_car_idx, ncars)
         self.ai_panel = CarAIPanel()
+        way_txt_pos = (0, .1) if ncars == 1 else (0, .04)
+        way_txt_scale = .1 if ncars == 1 else .06
+        way_img_pos = (0, 1, .3) if ncars == 1 else (0, 1, .16)
+        way_img_scale = .12 if ncars == 1 else .06
+        self.way_txt = OnscreenText(
+            '', pos=way_txt_pos, scale=way_txt_scale,
+            fg=self.race_props.season_props.gameprops.menu_props.text_err_col,
+            parent=self.parent,
+            font=self.eng.font_mgr.load_font(self.race_props.season_props.font))
+        self.way_img = OnscreenImage(
+            'assets/images/gui/arrow_circle.txo', scale=way_img_scale,
+            parent=self.parent, pos=way_img_pos)
+        self.way_img.set_transparency(True)
+        self.way_img.hide()
+
+    @property
+    def ncars(self): return len(self.race_props.season_props.player_car_names)
+
+    @property
+    def parent(self):
+        if self.ncars == 1: parent = base.a2dBottomCenter
+        elif self.ncars == 2:
+            if self.mediator.player_car_idx == 0: parent = base.a2dBottomQuarter
+            else: parent = base.a2dBottomThirdQuarter
+        elif self.ncars == 3:
+            if self.mediator.player_car_idx == 0: parent = base.aspect2d
+            elif self.mediator.player_car_idx == 1: parent = base.a2dBottomQuarter
+            else: parent = base.a2dBottomThirdQuarter
+        elif self.ncars == 4:
+            if self.mediator.player_car_idx == 0: parent = base.a2dCenterQuarter
+            elif self.mediator.player_car_idx == 1: parent = base.a2dCenterThirdQuarter
+            elif self.mediator.player_car_idx == 2: parent = base.a2dBottomQuarter
+            else: parent = base.a2dBottomThirdQuarter
+        return parent
 
     def upd_ranking(self, ranking):
         r_i = ranking.index(self.mediator.name) + 1
@@ -316,9 +566,44 @@ class CarPlayerGui(CarGui):
         self.panel.hide()
         self.ai_panel.hide()
 
+    def on_wrong_way(self, way_str):
+        if way_str:
+            #self.panel.glass_b.show()
+            self.way_txt.setText(way_str)
+            self.way_img.show()
+        elif not self.mediator.logic.is_moving or self.mediator.logic.fly_time > 10:
+            #self.panel.glass_b.show()
+            keys = self.race_props.keys.players_keys[self.mediator.player_car_idx]
+            txt = _('press %s to respawn') % self.eng.event.key2desc(keys.respawn)
+            self.way_txt.setText(txt)
+            self.way_img.hide()
+        else:
+            #self.panel.glass_b.hide()
+            self.way_txt.setText('')
+            self.way_img.hide()
+
     def destroy(self):
-        map(lambda wdg: wdg.destroy(), [self.pars, self.panel, self.ai_panel])
+        list(map(lambda wdg: wdg.destroy(), [self.pars, self.panel, self.ai_panel]))
+        self.way_txt.destroy()
+        self.way_img.destroy()
         GuiColleague.destroy(self)
+
+
+class CarPlayerLocalMPGui(CarPlayerGui):
+
+    panel_cls = CarMultiPlayerPanel
+
+    @property
+    def ncars(self):
+        return len(self.race_props.season_props.player_car_names)
+
+
+class CarPlayerMPGui(CarPlayerGui):
+
+    panel_cls = CarOnlineMPPanel
+
+    @property
+    def parent(self): return base.a2dBottomCenter
 
 
 class CarNetworkGui(CarGui):
@@ -331,8 +616,8 @@ class CarNetworkGui(CarGui):
                 name = drv.dprops.info.name
                 break
         sprops = self.race_props.season_props
-        menu_args = sprops.gameprops.menu_args
-        pars = {'scale': .04, 'fg': menu_args.text_normal,
+        menu_props = sprops.gameprops.menu_props
+        pars = {'scale': .04, 'fg': menu_props.text_normal_col,
                 'font': self.eng.font_mgr.load_font(sprops.font)}
         if '@' in name: name = name[:name.index('@')]
         self.name_txt = OnscreenText(name, **pars)

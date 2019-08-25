@@ -1,7 +1,7 @@
 class RaceProps(object):
 
     def __init__(
-            self, season_props, keys, joystick, sounds, coll_path, coll_name,
+            self, season_props, keys, joysticks, sounds, coll_path, coll_name,
             car_path, wheel_names, road_name, particle_path, drivers,
             shaders_dev, shaders, music_path, gfx_track_path, track_coll_path,
             unmerged_names, merged_names, ghost_names, corner_names, wp_info,
@@ -11,10 +11,10 @@ class RaceProps(object):
             shadow_src, laps, rocket_path, turbo_path, rotate_all_path,
             mine_path, bonus_model, bonus_suff, a_i, ingame_menu, share_urls,
             respawn_name, pitstop_name, wall_name, goal_name, bonus_name,
-            roads_names, grid, start_wp):
+            roads_names, grid, start_wp, ai_debug):
         self.season_props = season_props
         self.keys = keys
-        self.joystick = joystick
+        self.joysticks = joysticks
         self.sounds = sounds
         self.coll_path = coll_path
         self.coll_name = coll_name
@@ -57,6 +57,7 @@ class RaceProps(object):
         self.bonus_model = bonus_model
         self.bonus_suff = bonus_suff
         self.a_i = a_i
+        self.ai_debug = ai_debug
         self.ingame_menu = ingame_menu
         self.share_urls = share_urls
         self.respawn_name = respawn_name

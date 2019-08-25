@@ -1,8 +1,8 @@
 from ..gameobject import AudioColleague
-from yyagl.library.panda.audio import PandaAudioSound
+from yyagl.lib.p3d.audio import P3dSound
 
 
-AudioSound = PandaAudioSound
+AudioSound = P3dSound
 
 
 class EngineAudio(AudioColleague):
@@ -11,4 +11,4 @@ class EngineAudio(AudioColleague):
         AudioColleague.__init__(self, mediator)
         self.set_volume(vol)
 
-    def set_volume(self, vol): self.eng.lib.set_volume(vol)
+    def set_volume(self, vol): self.eng.lib.volume = vol

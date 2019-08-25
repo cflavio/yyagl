@@ -18,6 +18,7 @@ class BonusGfx(GfxColleague):
         self.model.set_pos(self.pos)
         self.model.loop('anim')
         self.model.setPlayRate(.5, 'anim')
+        self.model.set_depth_offset(1)
 
     def destroy(self):
         self.model.cleanup()

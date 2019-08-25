@@ -11,7 +11,7 @@ from .minimap import Minimap
 class RaceGuiFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('update_minimap', lambda obj: obj.minimap.update)
+        Facade.__init__(self, mth_lst=[('update_minimap', lambda obj: obj.minimap.update)])
 
 
 class RaceGui(GuiColleague, RaceGuiFacade):
@@ -23,16 +23,6 @@ class RaceGui(GuiColleague, RaceGuiFacade):
         r_p = self.props = rprops
         self.results = self.result_cls(rprops)
         self.loading = Loading()
-        self.way_txt = OnscreenText(
-            '', pos=(0, .1), scale=.1,
-            fg=r_p.season_props.gameprops.menu_args.text_err,
-            parent=base.a2dBottomCenter,
-            font=self.eng.font_mgr.load_font(r_p.season_props.font))
-        self.way_img = OnscreenImage(
-            'assets/images/gui/arrow_circle.txo',
-            scale=.12, parent=base.a2dBottomCenter, pos=(0, 1, .3))
-        self.way_img.set_transparency(True)
-        self.way_img.hide()
         self.minimap = None
         RaceGuiFacade.__init__(self)
 
@@ -45,8 +35,6 @@ class RaceGui(GuiColleague, RaceGuiFacade):
 
     def destroy(self):
         self.results.destroy()
-        self.way_txt.destroy()
-        self.way_img.destroy()
         if self.minimap: self.minimap.destroy()  # e.g. server has quit on loading
         GuiColleague.destroy(self)
 

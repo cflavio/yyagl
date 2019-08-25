@@ -1,9 +1,9 @@
 from yaml import load
-from panda3d.bullet import BulletVehicle, ZUp, BulletConvexHullShape, \
-    BulletBoxShape
+from panda3d.bullet import BulletVehicle, ZUp, BulletBoxShape, BulletSphereShape
 from panda3d.core import LPoint3f, BitMask32, Mat4, TransformState
 from yyagl.gameobject import PhysColleague
 from yyagl.racing.bitmasks import BitMasks
+from yyagl.engine.phys import GhostNode
 
 
 class CarPhys(PhysColleague):
@@ -12,7 +12,9 @@ class CarPhys(PhysColleague):
         PhysColleague.__init__(self, mediator)
         self.pnode = self.vehicle = self.__track_phys = self.coll_mesh = \
             self.roll_influence = self.max_speed = self.friction_slip = \
-            self.friction_slip_rear = None
+            self.friction_slip_rear = self.cfg = None
+        self.turbo = False
+        self.ai_meshes = []
         self.curr_speed_mul = 1.0
         self.roll_influence_k = self.friction_slip_k = 1.0
         self.__prev_speed = 0
@@ -22,6 +24,7 @@ class CarPhys(PhysColleague):
         self.cprops = car_props
         self._load_phys()
         self.__set_collision_mesh()
+        self.__set_ai_meshes()
         self.__set_phys_node()
         self.__set_vehicle()
         self.__set_wheels()
@@ -42,13 +45,16 @@ class CarPhys(PhysColleague):
         self.friction_slip_rear = self.cfg['friction_slip_rear']
         self.__log_props()
         set_a = lambda field: setattr(self, field, self.cfg[field])
-        map(set_a, self.cfg.keys())
+        list(map(set_a, self.cfg.keys()))
 
     def __log_props(self, starting=True):
         s_s = self.cfg['max_speed'] if starting else self.max_speed
-        s_f = self.cfg['friction_slip'] if starting else self.get_friction_static()[0]
-        s_fr = self.cfg['friction_slip_rear'] if starting else self.get_friction_static()[1]
-        s_r = self.cfg['roll_influence'] if starting else self.get_roll_influence_static()
+        s_f = self.cfg['friction_slip'] if starting else \
+            self.get_friction_static()[0]
+        s_fr = self.cfg['friction_slip_rear'] if starting else \
+            self.get_friction_static()[1]
+        s_r = self.cfg['roll_influence'] if starting else \
+            self.get_roll_influence_static()
         log_info = [
             ('speed', self.cprops.name, round(s_s, 2),
              self.cprops.driver_engine),
@@ -77,36 +83,63 @@ class CarPhys(PhysColleague):
         #                           geom.get_transform())
         #self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape)
         chassis_shape = BulletBoxShape(tuple(self.cfg['box_size']))
-        p = self.cfg['box_pos']
-        p[2] += self.cfg['center_mass_offset']
-        ts = TransformState.makePos(tuple(p))
-        self.mediator.gfx.nodepath.get_node().add_shape(chassis_shape, ts)
+        boxpos = self.cfg['box_pos']
+        boxpos[2] += self.cfg['center_mass_offset']
+        pos = TransformState.makePos(tuple(boxpos))
+        self.mediator.gfx.nodepath.p3dnode.add_shape(chassis_shape, pos)
         car_names = self.cprops.race_props.season_props.car_names
         car_idx = car_names.index(self.cprops.name)
-        mask = BitMask32.bit(BitMasks.car(car_idx)) | BitMask32.bit(BitMasks.ghost) | BitMask32.bit(BitMasks.track_merged)
+        car_bit = BitMask32.bit(BitMasks.car(car_idx))
+        ghost_bit = BitMask32.bit(BitMasks.ghost)
+        track_bit = BitMask32.bit(BitMasks.track_merged)
+        mask = car_bit | ghost_bit | track_bit
         self.mediator.gfx.nodepath.set_collide_mask(mask)
 
+    def __set_ai_meshes(self):
+        return
+        # if we attach these meshes (or even only one mesh, box, sphere,
+        # whatever) then the collision between the goal and the vehicle doesn't
+        # work properly
+        h = .5
+        boxsz = self.cfg['box_size']
+        hs = []
+        hs += [h / 2 + boxsz[2] * 2 + self.cfg['box_pos'][2] + self.cfg['center_mass_offset']]
+        hs += [- h / 2 - boxsz[2] * 2 + self.cfg['box_pos'][2] + self.cfg['center_mass_offset']]
+        for _h in hs:
+            shape = BulletBoxShape((boxsz[0], boxsz[1], h))
+            ghost = GhostNode('Vehicle')
+            pos = TransformState.makePos((0, 0, _h))
+            ghost.node.addShape(shape, pos)
+            self.ai_meshes += [self.eng.attach_node(ghost.node)]
+            car_names = self.cprops.race_props.season_props.car_names
+            car_idx = car_names.index(self.cprops.name)
+            car_bit = BitMask32.bit(BitMasks.car(car_idx))
+            ghost_bit = BitMask32.bit(BitMasks.ghost)
+            mask = car_bit | ghost_bit
+            self.ai_meshes[-1].set_collide_mask(mask)
+            self.eng.phys_mgr.attach_ghost(ghost.node)
+
     def __set_phys_node(self):
-        self.pnode = self.mediator.gfx.nodepath.get_node()
-        self.pnode.set_mass(self.mass)
+        self.pnode = self.mediator.gfx.nodepath.p3dnode
+        self.pnode.set_mass(self.mass)  # default 0
         self.pnode.set_deactivation_enabled(False)
         self.eng.phys_mgr.attach_rigid_body(self.pnode)
         self.eng.phys_mgr.add_collision_obj(self.pnode)
 
     def __set_vehicle(self):
-        self.vehicle = BulletVehicle(self.eng.phys_mgr.root.wld, self.pnode)
+        self.vehicle = BulletVehicle(self.eng.phys_mgr.root._wld, self.pnode)
         self.vehicle.set_coordinate_system(ZUp)
         self.vehicle.set_pitch_control(self.pitch_control)
         tuning = self.vehicle.get_tuning()
-        tuning.set_suspension_compression(self.suspension_compression)
-        tuning.set_suspension_damping(self.suspension_damping)
+        tuning.set_suspension_compression(self.suspension_compression)  # default .83
+        tuning.set_suspension_damping(self.suspension_damping)  # default .88
         self.eng.phys_mgr.attach_vehicle(self.vehicle)
 
     def __set_wheels(self):
         wheels = self.mediator.gfx.wheels
-        f_bounds = wheels['fr'].get_tight_bounds()
+        f_bounds = wheels['fr'].tight_bounds
         f_radius = (f_bounds[1][2] - f_bounds[0][2]) / 2.0 + .01
-        r_bounds = wheels['rr'].get_tight_bounds()
+        r_bounds = wheels['rr'].tight_bounds
         r_radius = (r_bounds[1][2] - r_bounds[0][2]) / 2.0 + .01
         wheel_names = self.cprops.race_props.wheel_names
         ffr = self.coll_mesh.find('**/' + wheel_names.frontrear.fr)
@@ -129,7 +162,7 @@ class CarPhys(PhysColleague):
             (rr_pos, False, wheels['rr'], r_radius),
             (rl_pos, False, wheels['rl'], r_radius)]
         for i, (pos, front, nodepath, radius) in enumerate(wheels_info):
-            self.__add_wheel(pos, front, nodepath.get_node(), radius, i)
+            self.__add_wheel(pos, front, nodepath.p3dnode, radius, i)
 
     def __add_wheel(self, pos, is_front, node, radius, i):
         whl = self.vehicle.create_wheel()
@@ -139,14 +172,16 @@ class CarPhys(PhysColleague):
         whl.set_wheel_direction_cs((0, 0, -1))
         whl.set_wheel_axle_cs((1, 0, 0))
         whl.set_wheel_radius(radius)
-        whl.set_suspension_stiffness(self.suspension_stiffness[0])
-        whl.set_wheels_damping_relaxation(self.wheels_damping_relaxation[0])
-        whl.set_wheels_damping_compression(self.wheels_damping_compression[0])
-        whl.set_friction_slip(self.get_friction_static()[0 if is_front else 1][0])  # high -> more adherence
-        whl.set_roll_influence(self.roll_influence[0])  # low ->  more stability
-        whl.set_max_suspension_force(self.max_suspension_force)
-        whl.set_max_suspension_travel_cm(self.max_suspension_travel_cm)
-        whl.set_skid_info(self.skid_info)
+        whl.set_suspension_stiffness(self.suspension_stiffness[0])  # default 5.88
+        whl.set_wheels_damping_relaxation(self.wheels_damping_relaxation[0])  # default .88
+        whl.set_wheels_damping_compression(self.wheels_damping_compression[0])  # default .83
+        idx = 0 if is_front else 1
+        whl.set_friction_slip(self.get_friction_static()[idx][0])  # default 10.5
+        # friction slip high -> more adherence
+        whl.set_roll_influence(self.roll_influence[0])  # low ->  more stability  # default .1
+        whl.set_max_suspension_force(self.max_suspension_force)  # default 6000
+        whl.set_max_suspension_travel_cm(self.max_suspension_travel_cm) # default 500
+        whl.set_skid_info(self.skid_info)  # default 0
         self.__whl2flytime[i] = 0
 
     @property
@@ -154,7 +189,7 @@ class CarPhys(PhysColleague):
         vel = self.vehicle.get_chassis().get_linear_velocity()
         rot_mat = Mat4()
         rot_mat.setRotateMat(-90, (0, 0, 1))
-        car_lat = rot_mat.xformVec(self.mediator.logic.car_vec)
+        car_lat = rot_mat.xformVec(self.mediator.logic.car_vec._vec)
         proj_frc = vel.project(car_lat)
         return proj_frc.length()
 
@@ -201,7 +236,8 @@ class CarPhys(PhysColleague):
         return max(0, min(1.0, self.lin_vel / self.max_speed))
 
     def set_forces(self, eng_frc, brake_frc, brk_ratio, steering):
-        eng_frc_ratio = self.engine_acc_frc_ratio[1 if self.mediator.logic.is_drifting else 0]
+        idx = 1 if self.mediator.logic.is_drifting else 0
+        eng_frc_ratio = self.engine_acc_frc_ratio[idx]
         self.vehicle.set_steering_value(steering, 0)
         self.vehicle.set_steering_value(steering, 1)
         self.vehicle.apply_engine_force(eng_frc * eng_frc_ratio, 0)
@@ -215,10 +251,10 @@ class CarPhys(PhysColleague):
 
     def update_car_props(self):
         wheels = zip(self.vehicle.get_wheels(), range(4))
-        speeds = map(lambda whi: self.__update_whl_props(*whi), wheels)
+        speeds = list(map(lambda whi: self.__update_whl_props(*whi), wheels))
         speeds = [speed for speed in speeds if speed]
         if self.is_drifting:
-            self.__last_drift_time = globalClock.get_frame_time()
+            self.__last_drift_time = self.eng.curr_time
         self.curr_speed_mul = (sum(speeds) / len(speeds)) if speeds else 1.0
 
     def __update_whl_props(self, whl, i):
@@ -229,15 +265,18 @@ class CarPhys(PhysColleague):
         relax_min = self.wheels_damping_relaxation[0]
         relax_max = self.wheels_damping_relaxation[1]
         relax_diff = relax_max - relax_min
-        whl.set_wheels_damping_relaxation(relax_min + self.speed_ratio * relax_diff)
+        relax = relax_min + self.speed_ratio * relax_diff
+        whl.set_wheels_damping_relaxation(relax)
         compr_min = self.wheels_damping_compression[0]
         compr_max = self.wheels_damping_compression[1]
         compr_diff = compr_max - compr_min
-        whl.set_wheels_damping_compression(compr_min + self.speed_ratio * compr_diff)
+        compr = compr_min + self.speed_ratio * compr_diff
+        whl.set_wheels_damping_compression(compr)
         roll_infl_min = self.roll_influence[0]
         roll_infl_max = self.roll_influence[1]
         roll_infl_diff = roll_infl_max - roll_infl_min
-        whl.set_roll_influence(self.roll_influence_k * (roll_infl_min + self.speed_ratio * roll_infl_diff))
+        roll_infl = roll_infl_min + self.speed_ratio * roll_infl_diff
+        whl.set_roll_influence(self.roll_influence_k * roll_infl)
         contact_pt = whl.get_raycast_info().getContactPointWs()
         gnd_name = self.gnd_name(contact_pt)
         if not gnd_name or gnd_name in ['Vehicle', 'Wall', 'Respawn']:
@@ -247,25 +286,28 @@ class CarPhys(PhysColleague):
             self.__finds[gnd_name] = gnd
         gfx_node = self.__finds[gnd_name]
         if not gfx_node:
-            print 'ground error', gnd_name
+            print('ground error', gnd_name)
             return
         fric = 1.0
         if gfx_node.has_tag('friction'):
             fric = float(gfx_node.get_tag('friction'))
-        if not whl.get_raycast_info().is_in_contact(): self.__whl2flytime[i] = globalClock.get_frame_time()
-        gnd_time = globalClock.get_frame_time() - self.__whl2flytime[i]
+        if not whl.get_raycast_info().is_in_contact():
+            self.__whl2flytime[i] = self.eng.curr_time
+        gnd_time = self.eng.curr_time - self.__whl2flytime[i]
         gnd_recovery_time = .2 if whl.is_front_wheel() else .1
         gnd_factor = min(1, gnd_time / gnd_recovery_time)
-        whl.setFrictionSlip(self.get_friction()[0 if whl.is_front_wheel() else 1] * fric * gnd_factor)
+        idx = 0 if whl.is_front_wheel() else 1
+        turbo_factor = 1.24 if self.turbo else 1.0
+        whl.setFrictionSlip(self.get_friction()[idx] * fric * gnd_factor * turbo_factor)
         if gfx_node.has_tag('speed'):
             return float(gfx_node.get_tag('speed'))
 
     @property
     def gnd_names(self):  # no need to be cached
         whls = self.vehicle.get_wheels()
-        pos = map(lambda whl: whl.get_raycast_info().get_contact_point_ws(),
-                  whls)
-        return map(self.gnd_name, pos)
+        pos = list(map(lambda whl: whl.get_raycast_info().get_contact_point_ws(),
+                  whls))
+        return list(map(self.gnd_name, pos))
 
     @staticmethod
     def gnd_name(pos):
@@ -282,7 +324,7 @@ class CarPhys(PhysColleague):
         return hit_pos.z if hit_pos else None
 
     def apply_damage(self, reset=False):
-        wheels = self.vehicle.get_wheels()
+        #wheels = self.vehicle.get_wheels()
         if reset:
             self.max_speed = self.get_speed()
             self.friction_slip_k = 1.0
@@ -309,9 +351,10 @@ class CarPhys(PhysColleague):
 
     def get_friction_static(self):
         k = 1 + .01 * self.cprops.driver_tires
+        fstr = 'friction_slip'
         return [
-            (self.cfg['friction_slip'][0] * k, self.cfg['friction_slip'][1] * k),
-            (self.cfg['friction_slip_rear'][0] * k, self.cfg['friction_slip_rear'][1] * k)]
+            (self.cfg[fstr][0] * k, self.cfg[fstr][1] * k),
+            (self.cfg[fstr + '_rear'][0] * k, self.cfg[fstr + '_rear'][1] * k)]
 
     def get_roll_influence(self):
         min_r = self.cfg['roll_influence'][0]
@@ -342,21 +385,22 @@ class CarPlayerPhys(CarPhys):
     def get_friction(self):
         tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_tires
         drv_c = 1 + .01 * self.cprops.driver_tires
-        h = 1.0 if self.mediator.logic.is_drifting else .0
+        slip = 1.0 if self.mediator.logic.is_drifting else .0
         k = tun_c * drv_c * self.friction_slip_k
         fdiff = self.friction_slip[1] - self.friction_slip[0]
         rdiff = self.friction_slip_rear[1] - self.friction_slip_rear[0]
-        fslip = self.friction_slip[0] + h * fdiff
-        rslip = self.friction_slip_rear[0] + h * rdiff
+        fslip = self.friction_slip[0] + slip * fdiff
+        rslip = self.friction_slip_rear[0] + slip * rdiff
         return fslip * k, rslip * k
 
     def get_friction_static(self):
         tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_tires
         drv_c = 1 + .01 * self.cprops.driver_tires
         k = tun_c * drv_c
+        fstr = 'friction_slip'
         return [
-            (self.cfg['friction_slip'][0] * k, self.cfg['friction_slip'][1] * k),
-            (self.cfg['friction_slip_rear'][0] * k, self.cfg['friction_slip_rear'][1] * k)]
+            (self.cfg[fstr][0] * k, self.cfg[fstr][1] * k),
+            (self.cfg[fstr + '_rear'][0] * k, self.cfg[fstr + '_rear'][1] * k)]
 
     def get_roll_influence_static(self):
         tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_suspensions

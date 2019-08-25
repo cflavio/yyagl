@@ -18,7 +18,7 @@ class Processer(Thread):
                 if not self.cmd_lst:
                     return
                 cmd = self.cmd_lst.pop(0)
-            print datetime.now().strftime("%H:%M:%S"), cmd
+            print(datetime.now().strftime("%H:%M:%S"), cmd)
             system(cmd)
 
 
@@ -29,7 +29,7 @@ class ProcesserNoThreaded:
 
     def run(self):
         for cmd in self.cmd_lst:
-            print datetime.now().strftime("%H:%M:%S"), cmd
+            print(datetime.now().strftime("%H:%M:%S"), cmd)
             system(cmd)
 
 
@@ -38,8 +38,8 @@ class MultithreadedProcesser(object):
     def __init__(self, cores):
         try: self.cores = cpu_count()
         except NotImplementedError: self.cores = 1
-        self.cores = cores if cores else self.cores / 4 + 1
-        print 'mt-processer: using %s cores' % self.cores
+        self.cores = cores if cores else int(self.cores / 4 + 1)
+        print('mt-processer: using %s cores' % self.cores)
         self.cmd_lst = []
 
     def add(self, cmd):

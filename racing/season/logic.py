@@ -10,8 +10,8 @@ class SeasonLogic(LogicColleague):
         LogicColleague.__init__(self, mediator)
         self.props = s_p = season_props
         self.ranking = Ranking(
-            s_p.car_names, s_p.gameprops.menu_args.background_img, s_p.font,
-            s_p.gameprops.menu_args.text_normal)
+            s_p.car_names, s_p.gameprops.menu_props.background_img_path, s_p.font,
+            s_p.gameprops.menu_props.text_normal_col)
         self.tuning = Tuning(s_p)
         self.race = None
         self.drivers = s_p.drivers
@@ -47,11 +47,11 @@ class SeasonLogic(LogicColleague):
             self.notify('on_season_cont', next_track,
                         self.props.player_car_name, self.props.drivers)
 
-    def create_race_server(self, race_props, yorg_client):
-        self.race = RaceServer(race_props, yorg_client)
+    def create_race_server(self, race_props):
+        self.race = RaceServer(race_props)
 
-    def create_race_client(self, race_props, yorg_client):
-        self.race = RaceClient(race_props, yorg_client)
+    def create_race_client(self, race_props):
+        self.race = RaceClient(race_props)
 
     def create_race(self, race_props):
         self.race = RaceSinglePlayer(race_props)

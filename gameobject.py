@@ -126,5 +126,5 @@ class GameObject(Subject):
         return [elm[0]] if isinstance(elm, tuple) else self.__comp_lst(elm)
 
     def destroy(self):
-        map(lambda cmp: getattr(self, cmp).destroy(), self.comp_names)
+        list(map(lambda cmp: getattr(self, cmp).destroy(), self.comp_names))
         Subject.destroy(self)

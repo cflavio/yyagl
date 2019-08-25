@@ -3,14 +3,13 @@ from os import environ, system
 from webbrowser import open_new_tab
 
 
-class BrowserOpener(object):
+class BrowserStrategy(object):
 
     @staticmethod
-    def open(url):
-        open_new_tab(url)
+    def open(url): open_new_tab(url)
 
 
-class BrowserOpenerLinux(BrowserOpener):
+class BrowserStrategyLinux(BrowserStrategy):
 
     @staticmethod
     def open(url):
@@ -22,6 +21,6 @@ class Browser(object):
 
     @staticmethod
     def open(url):
-        cls = BrowserOpenerLinux if platform.startswith('linux') else \
-            BrowserOpener
+        cls = BrowserStrategyLinux if platform.startswith('linux') else \
+            BrowserStrategy
         cls.open(url)

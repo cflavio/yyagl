@@ -4,7 +4,7 @@ from os.path import exists
 if not exists('main.pyo'):  # we don't deploy cProfile
     from cProfile import Profile
     from pstats import Stats
-    from StringIO import StringIO
+    from io import StringIO
 
 
 class AbsProfiler(object):
@@ -54,7 +54,7 @@ class Profiler(AbsProfiler):
         self._print_lines(sio)
 
     @staticmethod
-    def _print_lines(sio): print sio.getvalue()
+    def _print_lines(sio): print(sio.getvalue())
 
 
 class PerCallProfiler(Profiler):
@@ -67,4 +67,4 @@ class PerCallProfiler(Profiler):
         sorted_lines = reversed(sorted_lines)
         # line[4] is the percall value
         joined_lines = ['\t'.join(line) for line in sorted_lines]
-        print '\n'.join(header_lines + joined_lines)
+        print('\n'.join(header_lines + joined_lines))

@@ -8,13 +8,15 @@ from .gui import RankingGui
 class RankingFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('load', lambda obj: obj.logic.load)
-        self._fwd_mth('show', lambda obj: obj.gui.show)
-        self._fwd_mth('hide', lambda obj: obj.gui.hide)
-        self._fwd_mth('reset', lambda obj: obj.logic.reset)
-        self._fwd_mth('attach_obs', lambda obj: obj.gui.attach_obs)
-        self._fwd_mth('detach_obs', lambda obj: obj.gui.detach_obs)
-        self._fwd_prop('carname2points', lambda obj: obj.logic.carname2points)
+        prop_lst = [('carname2points', lambda obj: obj.logic.carname2points)]
+        mth_lst = [
+            ('load', lambda obj: obj.logic.load),
+            ('show', lambda obj: obj.gui.show),
+            ('hide', lambda obj: obj.gui.hide),
+            ('reset', lambda obj: obj.logic.reset),
+            ('attach_obs', lambda obj: obj.gui.attach_obs),
+            ('detach_obs', lambda obj: obj.gui.detach_obs)]
+        Facade.__init__(self, prop_lst, mth_lst)
 
 
 class Ranking(GameObject, RankingFacade):

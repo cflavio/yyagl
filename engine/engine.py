@@ -2,7 +2,7 @@ from sys import path
 from os.path import dirname, realpath
 path.append(dirname(realpath(__file__)) + '/../thirdparty')
 
-from ..library.builder import LibraryBuilder
+from ..lib.builder import LibBuilder
 from .pause import PauseMgr
 from .profiler import AbsProfiler
 from .shader import ShaderMgr
@@ -12,7 +12,6 @@ from .phys import PhysMgr
 from .gfx import EngineGfx
 from .network.server import Server
 from .network.client import Client
-from .network.xmpp import XMPP
 from .gui.gui import EngineGui
 from .logic import EngineLogic
 from .event import EngineEvent
@@ -22,14 +21,15 @@ from ..gameobject import GameObject, Colleague
 from .enginefacade import EngineFacade
 from .configuration import Cfg
 from .cbmux import CallbackMux
+from .clock import Clock
 
 
 class Engine(GameObject, EngineFacade):
 
     network_priority = -39
 
-    def __init__(self, cfg=None, end_cb=None):
-        self.lib = LibraryBuilder.build()
+    def __init__(self, cfg=None, end_cb=None, client_cls=None):
+        self.lib = LibBuilder.build()
         self.lib.configure()
         self.lib.init(end_cb=end_cb)
         Colleague.eng = GameObject.eng = self
@@ -39,15 +39,15 @@ class Engine(GameObject, EngineFacade):
         self.profiler = AbsProfiler.build(cfg.profiling_cfg.pyprof_percall)
         self.font_mgr = FontMgr()
         self.server = Server(cfg.dev_cfg.port)
-        self.client = Client(cfg.dev_cfg.port)
+        self.client = (client_cls or Client)(cfg.dev_cfg.port, cfg.dev_cfg.server)
         self.cb_mux = CallbackMux()
-        self.xmpp = XMPP(cfg.dev_cfg.xmpp_server)
         comps = [
             [('logic', EngineLogic, [self, cfg])],
             [('log_mgr', LogMgr.init_cls(), [self])],
             [('gfx', EngineGfx, [self, cfg.dev_cfg.model_path,
                                  cfg.gui_cfg.antialiasing,
-                                 cfg.gui_cfg.shaders])],
+                                 cfg.gui_cfg.shaders,
+                                 cfg.gui_cfg.fixed_fps])],
             [('phys_mgr', PhysMgr, [self])],
             [('event', EngineEvent, [self, cfg.dev_cfg.menu_joypad])],
             [('gui', EngineGui.init_cls(), [self])],
@@ -57,6 +57,7 @@ class Engine(GameObject, EngineFacade):
                                     cfg.lang_cfg.lang_domain,
                                     cfg.lang_cfg.lang_path))]]
         GameObject.__init__(self, comps)
+        self.clock = Clock(self.pause)
 
     def destroy(self):
         GameObject.destroy(self)

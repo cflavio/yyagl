@@ -1,4 +1,4 @@
-from panda3d.core import loadPrcFileData, BitMask32
+from panda3d.core import loadPrcFileData, BitMask32, NodePath
 loadPrcFileData('', 'window-type none')
 loadPrcFileData('', 'audio-library-name null')
 loadPrcFileData('', 'default-model-extension .bam')
@@ -30,6 +30,7 @@ class GuiCfg(object):
         self.antialiasing = False
         self.shaders = False
         self.volume = 1
+        self.fixed_fps = 0
 
 
 class ProfilingCfg(object):
@@ -56,6 +57,7 @@ class DevCfg(object):
         self.menu_joypad = False
         self.xmpp_server = ''
         self.port = 9099
+        self.server = ''
 
 
 class Conf(object):
@@ -94,29 +96,29 @@ class TrackProcesser(GameObject):
                     cmd_args = fname, fname[:-3] + 'bam'
                     cmds += [('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args, getsize(fname))]
         cmds = reversed(sorted(cmds, key=lambda pair: pair[1]))
-        map(mp_mgr.add, [cmd[0] for cmd in cmds])
+        list(map(mp_mgr.add, [cmd[0] for cmd in cmds]))
         mp_mgr.run()
 
     def __set_submodels(self):
-        print 'loaded track model'
-        for submodel in self.model.get_children():
+        print('loaded track model')
+        for submodel in self.model.children:
             if not submodel.get_name().startswith(self.props.empty_name):
                 submodel.flatten_light()
         self.model.hide(BitMask32.bit(BitMasks.general))
         self.__load_empties()
 
     def __load_empties(self):
-        print 'loading track submodels'
+        print('loading track submodels')
         empty_name = '**/%s*' % self.props.empty_name
         e_m = self.model.find_all_matches(empty_name)
         load_models = lambda: self.__process_models(list(e_m))
-        names = [model.get_name().split('.')[0][5:] for model in e_m]
+        names = [model.name.split('.')[0][5:] for model in e_m]
         self.__preload_models(list(set(list(names))), load_models)
 
     def __preload_models(self, models, callback, model='', time=0):
         curr_t = self.eng.curr_time
         if model:
-            print 'loaded model: %s (%s seconds)' % (model, curr_t - time)
+            print('loaded model: %s (%s seconds)' % (model, curr_t - time))
         if not models:
             callback()
             return
@@ -137,7 +139,7 @@ class TrackProcesser(GameObject):
         self.flattening()
 
     def __get_model_name(self, model):
-        return model.get_name().split('.')[0][len(self.props.empty_name):]
+        return model.name.split('.')[0][len(self.props.empty_name):]
 
     def __process_static(self, model):
         model_name = self.__get_model_name(model)
@@ -150,9 +152,9 @@ class TrackProcesser(GameObject):
 
     def flattening(self):
         flat_cores = 1  # max(1, multiprocessing.cpu_count() / 2)
-        print 'track flattening using %s cores' % flat_cores
+        print('track flattening using %s cores' % flat_cores)
         self.loading_models = []
-        self.models_to_load = self.__flat_roots.values()
+        self.models_to_load = list(self.__flat_roots.values())
         [self.__flat_models() for _ in range(flat_cores)]
 
     def __flat_models(self, model='', time=0, nodes=0):
@@ -160,21 +162,34 @@ class TrackProcesser(GameObject):
             msg_tmpl = 'flattened model: %s (%s seconds, %s nodes)'
             self.loading_models.remove(model)
             d_t = round(self.eng.curr_time - time, 2)
-            print msg_tmpl % (model, d_t, nodes)
+            print(msg_tmpl % (model, d_t, nodes))
         if self.models_to_load:
             self.__process_flat_models(self.models_to_load.pop())
         elif not self.loading_models:
             self.end_flattening()
 
     def __process_flat_models(self, model):
-        model.clear_model_nodes()
-        self.loading_models += [model.get_name()]
-        model.flatten_strong()
+        new_model = NodePath(model.name)
+        new_model.reparent_to(model.parent)
+        for child in model.node.get_children():
+            np = NodePath('newroot')
+            np.set_pos(child.get_pos())
+            np.set_hpr(child.get_hpr())
+            np.set_scale(child.get_scale())
+            np.reparent_to(new_model)
+            for _child in child.get_children():
+                for __child in _child.get_children():
+                    __child.reparent_to(np)
+        new_model.clear_model_nodes()
+        new_model.flatten_strong()
+        name = model.name
+        model.remove_node()
+        self.loading_models += [name]
         curr_t = self.eng.curr_time
-        self.__flat_models(model.get_name(), curr_t, len(model.get_children()))
+        self.__flat_models(name, curr_t, len(new_model.get_children()))
 
     def end_flattening(self):
-        print 'writing track_all.bam'
+        print('writing track_all.bam')
         fpath = 'assets/models/tracks/' + self.props.track_dir + \
             '/track_all.bam'
         self.model.write_bam_file(fpath)

@@ -1,22 +1,23 @@
 from panda3d.core import load_prc_file_data
-from yyagl.library.builder import LibraryBuilder
+from yyagl.lib.builder import LibP3d
 
 
 class GuiCfg(object):
 
     def __init__(self, fps=False, win_size='1280 720', win_orig=None,
                  win_title='yyagl', fullscreen=False, sync_video=None,
-                 antialiasing=False, shaders=True, volume=1):
+                 antialiasing=False, shaders=True, volume=1, fixed_fps=0):
         self.fps = fps
         self.win_size = win_size
         self.win_title = win_title
         self.win_orig = win_orig
         self.fullscreen = fullscreen
-        self.sync_video = LibraryBuilder.cls.runtime if sync_video is None \
+        self.sync_video = LibP3d.runtime() if sync_video is None \
             else sync_video
         self.antialiasing = antialiasing
         self.shaders = shaders
         self.volume = volume
+        self.fixed_fps = fixed_fps
 
 
 class ProfilingCfg(object):
@@ -88,6 +89,7 @@ class Cfg(object):
             ('textures-power-2', 'none'),
             ('show-frame-rate-meter', int(self.gui_cfg.fps)),
             ('hardware-animated-vertices', 'true'),
+            ('x-init-threads','true'),  # temp workaround 4 mtrendering (linux)
             ('basic-shaders-only', 'false'),
             ('default-model-extension', '.bam')]
         if self.gui_cfg.win_size:
@@ -123,4 +125,4 @@ class Cfg(object):
             else:
                 cfginfo += [
                     ('notify-level-' + verb_el[0], verb_el[1])]
-        map(lambda args: self.__set(*args), cfginfo)
+        list(map(lambda args: self.__set(*args), cfginfo))

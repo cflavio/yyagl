@@ -2,13 +2,13 @@ from os import system, remove, rename, walk
 from os.path import exists
 from shutil import move, rmtree, copytree, copy
 from distutils.dir_util import copy_tree
-from .build import ver, bld_dpath, branch, bld_cmd, InsideDir, TempFile
+from .build import ver, bld_dpath, branch, InsideDir, TempFile
 from .deployng import bld_ng
 
 
-nsi_src = '''Name {full_name}
+nsi_src = r'''Name {full_name}
 OutFile {out_file}
-InstallDir "$PROGRAMFILES\\{full_name}"
+InstallDir "$PROGRAMFILES\{full_name}"
 InstallDirRegKey HKCU "Yorg" ""
 SetCompress auto
 SetCompressor lzma
@@ -17,7 +17,7 @@ ShowUninstDetails nevershow
 InstType "Typical"
 RequestExecutionLevel admin
 Function launch
-  ExecShell "open" "$INSTDIR\\{short_name}.exe"
+  ExecShell "open" "$INSTDIR\{short_name}.exe"
 FunctionEnd
 !include "MUI2.nsh"
 !define MUI_HEADERIMAGE
@@ -26,8 +26,8 @@ FunctionEnd
 !define MUI_FINISHPAGE_RUN_FUNCTION launch
 !define MUI_FINISHPAGE_RUN_TEXT "Run Yorg"
 Function finishpageaction
-CreateShortcut "$DESKTOP\\{short_name}.lnk" "$INSTDIR\\{short_name}.exe"\
-  "" "$INSTDIR\\{icon_file}"
+CreateShortcut "$DESKTOP\{short_name}.lnk" "$INSTDIR\{short_name}.exe"\
+  "" "$INSTDIR\{icon_file}"
 FunctionEnd
 !define MUI_FINISHPAGE_SHOWREADME ""
 !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
@@ -54,57 +54,55 @@ WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg" \
                  "DisplayName" "Yorg"
 WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg" \
                  "UninstallString" '"$INSTDIR\Uninstall.exe"'
-WriteUninstaller "$INSTDIR\\Uninstall.exe"
+WriteUninstaller "$INSTDIR\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-    CreateDirectory "$SMPROGRAMS\\$StartMenuFolder"
-    CreateShortCut "$SMPROGRAMS\\$StartMenuFolder\\{full_name}.lnk"\
-      "$INSTDIR\\{short_name}.exe" "" "$INSTDIR\\{icon_file}"
-    CreateShortCut "$SMPROGRAMS\\$StartMenuFolder\\Uninstall.lnk" \
-      "$INSTDIR\\Uninstall.exe"
+    CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\{full_name}.lnk"\
+      "$INSTDIR\{short_name}.exe" "" "$INSTDIR\{icon_file}"
+    CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" \
+      "$INSTDIR\Uninstall.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 Section Uninstall
-  Delete "$INSTDIR\\{short_name}.exe"
+  Delete "$INSTDIR\{short_name}.exe"
   {uninstall_files}
-  Delete "$INSTDIR\\Uninstall.exe"
+  Delete "$INSTDIR\Uninstall.exe"
   RMDir /r "$INSTDIR"
   !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
-  Delete "$DESKTOP\\{short_name}.lnk"
-  Delete "$SMPROGRAMS\\$StartMenuFolder\\Uninstall.lnk"
-  Delete "$SMPROGRAMS\\$StartMenuFolder\\{full_name}.lnk"
-  RMDir "$SMPROGRAMS\\$StartMenuFolder"
+  Delete "$DESKTOP\{short_name}.lnk"
+  Delete "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk"
+  Delete "$SMPROGRAMS\$StartMenuFolder\{full_name}.lnk"
+  RMDir "$SMPROGRAMS\$StartMenuFolder"
   DeleteRegKey /ifempty HKCU "Yorg"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Yorg"
 SectionEnd'''
 
 
 def bld_windows(target, source, env):
-    if env['DEPLOYNG']:
-        bld_ng(env['APPNAME'], win=True)
-        return
-    internet_switch = '-s' if env['NOINTERNET'] else ''
-    int_str = '-nointernet' if env['NOINTERNET'] else ''
-    cmd = bld_cmd.format(
-        dst_dir=bld_dpath, appname=env['APPNAME'],
-        AppName=env['APPNAME'].capitalize(), version=ver,
-        p3d_fpath=env['P3D_PATH'][:-4] + 'nopygame.p3d', platform='win_i386',
-        nointernet=internet_switch)
-    system(cmd)
-    with InsideDir('%swin_i386' % bld_dpath):
-        fname = '{app_name} {version}.exe'.format(
-            app_name=env['APPNAME'].capitalize(), version=ver)
-        system('7z x -owinInstaller %s' % fname.replace(' ', '\\ '))
-        remove(fname)
-        with InsideDir('winInstaller'):
-            copytree('../../../yyagl/licenses', './licenses')
-            copy_tree('../../../licenses', './licenses')
-            copy('../../../license.txt', './license.txt')
-            if exists('./panda3d/cmu_1.9/win_i386/panda3d/'):
-                src = '../../../yyagl/assets/core.pyd'
-                copy(src, './panda3d/cmu_1.9/win_i386/panda3d/core.pyd')
-            rename('$PLUGINSDIR', 'NSIS Plugins Directory')
-            copytree('../../../assets', './assets')
-            copytree('../../../yyagl/assets', './yyagl/assets')
+    #if env['DEPLOYNG']:
+    #    bld_ng(env['APPNAME'], win=True)
+    #    return
+    #internet_switch = '-s' if env['NOINTERNET'] else ''
+    #int_str = '-nointernet' if env['NOINTERNET'] else ''
+    #cmd = bld_cmd.format(
+    #    dst_dir=bld_dpath, appname=env['APPNAME'],
+    #    AppName=env['APPNAME'].capitalize(), version=ver,
+    #    p3d_fpath=env['P3D_PATH'][:-4] + 'nopygame.p3d', platform='win_i386',
+    #    nointernet=internet_switch)
+    #system(cmd)
+    bld_ng(env['APPNAME'], win=True)
+    with InsideDir('%swin_amd64' % (bld_dpath + '../build/')):
+        #fname = '{app_name} {version}.exe'.format(
+        #    app_name=env['APPNAME'].capitalize(), version=ver)
+        #system('7z x -owinInstaller %s' % fname.replace(' ', '\\ '))
+        #remove(fname)
+        #with InsideDir('winInstaller'):
+            copytree('../../yyagl/licenses', './licenses')
+            copy_tree('../../licenses', './licenses')
+            copy('../../license.txt', './license.txt')
+            copytree('../../assets', './assets')
+            copytree('../../yyagl/assets', './yyagl/assets')
+            copy('./assets/images/icon/yorg.ico', './yorg.ico')
             for root, _, fnames in walk('./assets'):
                 for _fname in fnames:
                     fname = root + '/' + _fname
@@ -132,9 +130,9 @@ def bld_windows(target, source, env):
                 'Delete "$INSTDIR\\%s\\%s"' % (root[2:].replace('/', '\\'),
                                                fnm)
                 for root, dirs, files in walk('.') for fnm in files)
-            out_file_tmpl = '{name}-{version}{int_str}-windows.exe'
+            out_file_tmpl = '{name}-{version}-windows.exe'
             out_file = out_file_tmpl.format(name=env['APPNAME'],
-                                            version=branch, int_str=int_str)
+                                            version=branch)
             nsi_src_inst = nsi_src.format(
                 full_name=env['APPNAME'].capitalize(),
                 out_file=out_file,
@@ -144,12 +142,13 @@ def bld_windows(target, source, env):
                 uninstall_files=uninstall_files)
             with TempFile('installer.nsi', nsi_src_inst):
                 system('makensis installer.nsi')
-    src = '{dst_dir}win_i386/winInstaller/{appname}-{version}{int_str}' + \
-        '-windows.exe'
-    tgt_file = '{dst_dir}{appname}-{version}{int_str}-windows.exe'
+    src = '{dst_dir}../build/win_amd64/{appname}-{version}-windows.exe'
+    tgt_file = '{dst_dir}{appname}-{version}-windows.exe'
     src_fmt = src.format(dst_dir=bld_dpath, appname=env['APPNAME'],
-                         version=branch, int_str=int_str)
+                         version=branch)
     tgt_fmt = tgt_file.format(dst_dir=bld_dpath, appname=env['APPNAME'],
-                              version=branch, int_str=int_str)
+                              version=branch)
     move(src_fmt, tgt_fmt)
-    rmtree('%swin_i386' % bld_dpath)
+    #rmtree('dist')
+    rmtree('build/__whl_cache__')
+    rmtree('build/win_amd64')

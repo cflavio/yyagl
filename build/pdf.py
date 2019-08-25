@@ -6,7 +6,7 @@ from .build import bld_dpath, branch, pdf_fpath
 
 def bld_pdfs(target, source, env):
     pdfconf = env['PDF_CONF'].items()
-    map(lambda name_opts: __bld_pdf(*name_opts), pdfconf)
+    list(map(lambda name_opts: __bld_pdf(*name_opts), pdfconf))
     __bld_pkg(env)
 
 
@@ -24,7 +24,7 @@ def __bld_pdf(name, opts):
         __process(opt, cont_tmpl if suff else tmpl, name + suff, i)
     pdf_tmpl = 'pdfnup --nup 2x1 -o {name}.pdf {name}.pdf'
     suffixes = [name + '', name + '_cont']
-    map(lambda name_suff: system(pdf_tmpl.format(name=name_suff)), suffixes)
+    list(map(lambda name_suff: system(pdf_tmpl.format(name=name_suff)), suffixes))
 
 
 def __process(opt, tmpl, name, i):
@@ -43,7 +43,7 @@ def __process_step(name, cmd):
     cmd = 'gs -q -sPAPERSIZE=a4 -dNOPAUSE -dBATCH -sDEVICE=pdfwrite ' + \
         '-sOutputFile={name}-joined.pdf {name}_append.pdf {name}.pdf'
     system(cmd.format(name=name))  # concat the pdf
-    map(remove, ['%s%s.pdf' % (name, suff) for suff in ['', '_append']])
+    list(map(remove, ['%s%s.pdf' % (name, suff) for suff in ['', '_append']]))
     move(name + '-joined.pdf', name + '.pdf')
 
 

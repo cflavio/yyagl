@@ -11,9 +11,11 @@ from .fsm import RaceFsm, RaceFsmServer, RaceFsmClient
 class RaceFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('attach_obs', lambda obj: obj.event.attach)
-        self._fwd_mth('detach_obs', lambda obj: obj.event.detach)
-        self._fwd_prop('results', lambda obj: obj.gui.results)
+        prop_lst = [('results', lambda obj: obj.gui.results)]
+        mth_lst = [
+            ('attach_obs', lambda obj: obj.event.attach),
+            ('detach_obs', lambda obj: obj.event.detach)]
+        Facade.__init__(self, prop_lst, mth_lst)
 
 
 class Race(GameObject, RaceFacade):
@@ -23,13 +25,13 @@ class Race(GameObject, RaceFacade):
     fsm_cls = RaceFsm
     gui_cls = RaceGui
 
-    def __init__(self, race_props, yorg_client=None):
+    def __init__(self, race_props):
         rpr = race_props
         init_lst = [
             [('fsm', self.fsm_cls, [self, rpr.shaders_dev])],
             [('gui', self.gui_cls, [self, rpr])],
-            [('logic', self.logic_cls, [self, rpr, yorg_client])],
-            [('event', self.event_cls, [self, rpr.ingame_menu, rpr.keys, yorg_client])]]
+            [('logic', self.logic_cls, [self, rpr])],
+            [('event', self.event_cls, [self, rpr.ingame_menu, rpr.keys])]]
         GameObject.__init__(self, init_lst)
         RaceFacade.__init__(self)
 

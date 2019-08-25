@@ -28,14 +28,20 @@ class Subject(object):
             onm = obs_meth.__name__
             observers = [obs for obs in self.observers[onm] if obs.mth == obs_meth]
         if not observers: raise Exception
-        map(self.observers[onm].remove, observers)
+        list(map(self.observers[onm].remove, observers))
 
     def notify(self, meth, *args, **kwargs):
         if meth not in self.observers: return  # no obs for this notification
         for obs in self.observers[meth][:]:
             if obs in self.observers[meth]:  # if an obs removes another one
-                act_args = obs.args + list(args)
-                obs.mth(*act_args, **kwargs)
+                try:
+                    act_args = obs.args + list(args)
+                    obs.mth(*act_args, **kwargs)
+                except SystemError:
+                    print('Quit')
+                    import sys; sys.exit()
+
+    def observing(self, obs_meth): return obs_meth in self.observers
 
     def destroy(self): self.observers = None
 

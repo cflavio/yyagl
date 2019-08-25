@@ -1,6 +1,6 @@
 from panda3d.core import TextNode, Shader, TextureStage
-from yyagl.library.gui import Btn, Text, Img
-from yyagl.library.panda.shader import load_shader
+from yyagl.lib.gui import Btn, Text, Img
+from yyagl.lib.p3d.shader import load_shader
 from yyagl.gameobject import GuiColleague
 from yyagl.engine.gui.page import Page, PageGui, PageEvent, PageFacade
 from yyagl.gameobject import GameObject
@@ -9,19 +9,20 @@ from yyagl.engine.gui.menu import Menu
 
 class RankingPageGui(PageGui):
 
-    def __init__(self, mediator, menu, rprops, sprops, ranking):
+    def __init__(self, mediator, menu_props, rprops, sprops, ranking):
         self.rprops = rprops
         self.sprops = sprops
         self.drivers = sprops.drivers
         self.ranking = ranking
-        PageGui.__init__(self, mediator, menu)
+        self.menu_props = menu_props
+        PageGui.__init__(self, mediator, menu_props)
 
     def build(self, back_btn=True):
         self.eng.init_gfx()
-        self.font = self.mediator.menu.gui.menu_args.font
-        self.text_fg = self.mediator.menu.gui.menu_args.text_active
-        self.text_bg = self.mediator.menu.gui.menu_args.text_normal
-        self.text_err = self.mediator.menu.gui.menu_args.text_err
+        self.font = self.menu_props.font
+        self.text_fg = self.menu_props.text_active_col
+        self.text_bg = self.menu_props.text_normal_col
+        self.text_err_col = self.menu_props.text_err_col
         items = self.ranking.carname2points.items()
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = Text(_('Ranking'), scale=.1, pos=(0, .76),
@@ -38,8 +39,8 @@ class RankingPageGui(PageGui):
             cont_btn_ea = ['on_ranking_next_race']
             img = Img(
                 'assets/images/gui/trophy.txo', parent=base.a2dRightCenter,
-                pos=(-.58, 1, 0), scale=.55)
-            img.set_transparency(True)
+                pos=(-.58, 0), scale=.55)
+            img.set_transparent()
             txt = Text(
                 _('Congratulations!'), fg=(.8, .6, .2, 1), scale=.16,
                 pos=(0, -.3), font=loader.loadFont(self.sprops.font),
@@ -50,21 +51,21 @@ class RankingPageGui(PageGui):
             cont_btn_cmd = self.notify
             cont_btn_ea = ['on_ranking_end']
         cont_btn = Btn(
-            text=_('Continue'), pos=(0, 1, -.8), command=cont_btn_cmd,
-            extraArgs=cont_btn_ea,
-            **self.rprops.season_props.gameprops.menu_args.btn_args)
+            text=_('Continue'), pos=(0, -.8), cmd=cont_btn_cmd,
+            extra_args=cont_btn_ea,
+            **self.menu_props.btn_args)
         self.add_widgets([cont_btn])
         PageGui.build(self, False)
 
 
 class RankingPage(Page):
 
-    def __init__(self, rprops, sprops, menu, ranking):
+    def __init__(self, rprops, sprops, menu_props, ranking):
         self.rprops = rprops
-        self.menu = menu
+        self.menu_props = menu_props
         init_lst = [
             [('event', PageEvent, [self]),
-             ('gui', RankingPageGui, [self, menu, rprops, sprops, ranking])]]
+             ('gui', RankingPageGui, [self, menu_props, rprops, sprops, ranking])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)
         # invece Page's __init__
@@ -84,10 +85,10 @@ class RankingMenuGui(GuiColleague):
 
     def __init__(self, mediator, rprops, sprops, ranking):
         GuiColleague.__init__(self, mediator)
-        menu_args = sprops.gameprops.menu_args
-        menu_args.btn_size = (-8.6, 8.6, -.42, .98)
-        self.menu = Menu(menu_args)
-        self.rank_page = RankingPage(rprops, sprops, self.menu, ranking)
+        menu_props = sprops.gameprops.menu_props
+        menu_props.btn_size = (-8.6, 8.6, -.42, .98)
+        self.menu = Menu(menu_props)
+        self.rank_page = RankingPage(rprops, sprops, menu_props, ranking)
         self.eng.do_later(.01, self.menu.push_page, [self.rank_page])
 
     def destroy(self):
@@ -130,7 +131,7 @@ class RankingGui(GuiColleague):
         drv = next(
             driver for driver in page.drivers
             if driver.dprops.car_name == car_name)
-        is_player_car = car_name == page.rprops.season_props.player_car_name
+        is_player_car = car_name in page.rprops.season_props.player_car_names
         RankingGui.eng.log_mgr.log('%s %s %s %s' % (text % drv.logic.dprops.info.name, car_name, drv.logic.dprops.info.img_idx, is_player_car))
         name = text % drv.logic.dprops.info.name
         if '@' in name: name = name.split('@')[0] + '\1smaller\1@' + name.split('@')[1] + '\2'
@@ -141,7 +142,7 @@ class RankingGui(GuiColleague):
         gprops = page.rprops.season_props.gameprops
         img = Img(
             gprops.cars_img % car_name,
-            pos=(pos_x - .16, 1, top + .02 - i * .16), scale=.074)
+            pos=(pos_x - .16, top + .02 - i * .16), scale=.074)
         filtervpath = RankingGui.eng.curr_path + \
             'yyagl/assets/shaders/filter.vert'
         with open(filtervpath) as fvs:
@@ -153,7 +154,7 @@ class RankingGui(GuiColleague):
         shader = load_shader(vert, frag)
         if shader:
             img.set_shader(shader)
-        img.set_transparency(True)
+        img.set_transparent()
         t_s = TextureStage('ts')
         t_s.set_mode(TextureStage.MDecal)
         txt_path = gprops.drivers_img.path_sel % drv.logic.dprops.info.img_idx

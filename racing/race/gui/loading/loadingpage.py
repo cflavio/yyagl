@@ -1,5 +1,5 @@
 from panda3d.core import TextNode
-from yyagl.library.gui import Text, Img
+from yyagl.lib.gui import Text, Img
 from yyagl.engine.gui.page import Page, PageGui, PageFacade
 from yyagl.gameobject import GameObject, EventColleague
 from yyagl.racing.ranking.gui import RankingGui
@@ -13,14 +13,14 @@ class LoadingPageGui(PageGui):
         self.drivers = drivers
         self.ranking = ranking
         self.tuning = tuning
-        PageGui.__init__(self, mediator, menu)
+        PageGui.__init__(self, mediator, menu.gui.menu_props)
 
     def build(self, back_btn=True):
         self.eng.init_gfx()
-        self.font = self.mediator.menu.gui.menu_args.font
-        self.text_fg = self.mediator.menu.gui.menu_args.text_active
-        self.text_bg = self.mediator.menu.gui.menu_args.text_normal
-        self.text_err = self.mediator.menu.gui.menu_args.text_err
+        self.font = self.mediator.menu.gui.menu_props.font
+        self.text_fg = self.mediator.menu.gui.menu_props.text_active_col
+        self.text_bg = self.mediator.menu.gui.menu_props.text_normal_col
+        self.text_err_col = self.mediator.menu.gui.menu_props.text_err_col
         self.load_txt = Text(
             _('LOADING...'), scale=.2, pos=(0, .78), font=self.font,
             fg=(.75, .75, .75, 1), wordwrap=12)
@@ -44,8 +44,8 @@ class LoadingPageGui(PageGui):
     def set_wld_img(self):
         self.wld_img = Img(
             'assets/images/loading/%s.txo' % self.rprops.track_name,
-            pos=(-.25, 1, -.25), scale=.24, parent=base.a2dTopRight)
-        self.wld_img.set_transparency(True)
+            pos=(-.25, -.25), scale=.24, parent=base.a2dTopRight)
+        #self.wld_img.set_transparency(True)
         self.add_widgets([self.wld_img])
 
     def set_grid(self):
@@ -72,7 +72,7 @@ class LoadingPageGui(PageGui):
         txt = Text(_('Controls'), scale=.1, pos=(1.0, .38),
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
-        if self.rprops.joystick:
+        if self.rprops.joysticks[0]:
             txt = Text(_('joypad'), scale=.08, pos=(1.0, .22),
                                font=self.font, fg=self.text_bg)
             self.add_widgets([txt])
@@ -89,7 +89,7 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         tuning = self.tuning.car2tuning[
-            self.rprops.season_props.player_car_name]
+            self.rprops.season_props.player_car_names[0]]
         txt = Text(
             _('engine: +') + str(tuning.f_engine),
             align='left', scale=.072, pos=(.8, -.7), font=self.font,
@@ -107,11 +107,35 @@ class LoadingPageGui(PageGui):
         self.widgets += [txt]
 
     def __cmd_label(self, text, key, pos_z):
+        _key = getattr(self.rprops.keys.players_keys[0], key)
         txt = Text(
-            text + ': ' + getattr(self.rprops.keys, key),
-            align='left', scale=.072, pos=(.8, pos_z), font=self.font,
-            fg=self.text_bg)
+            text + ': ' + self.eng.event.key2desc(_key),  #.decode('utf-8'),
+            align='left', scale=.064, pos=(.8, pos_z), font=self.font,
+            fg=self.text_bg, wordwrap=24)
         self.widgets += [txt]
+
+
+class LoadingPageLocalMPGui(LoadingPageGui):
+
+    def set_controls(self):
+        txt = Text(_('Controls'), scale=.1, pos=(1.0, .38),
+                           font=self.font, fg=self.text_bg)
+        self.add_widgets([txt])
+        txts = []
+        not_j = 0
+        for i in range(len(self.rprops.season_props.player_car_names)):
+            if self.rprops.joysticks[i] and i - not_j < self.eng.joystick_mgr.joystick_lib.num_joysticks:
+                txts += [str(i + 1) + ': joypad']
+            else:
+                not_j += 1
+                keys = ['forward', 'rear', 'left', 'right', 'fire', 'respawn']
+                _keys = [getattr(self.rprops.keys.players_keys[i], key) for key in keys]
+                tkeys = [self.eng.event.key2desc(_key) for _key in _keys]
+                txts += [str(i + 1) + ': ' + ', '.join(tkeys)]
+        txt = '\n'.join(txts)
+        txt = Text(txt, scale=.056, pos=(.8, .22), font=self.font,
+                       fg=self.text_bg, wordwrap=12, align='left')
+        self.add_widgets([txt])
 
 
 class LoadingPage(Page):
@@ -119,10 +143,11 @@ class LoadingPage(Page):
     def __init__(self, rprops, menu, track_name_transl, drivers, ranking, tuning):
         self.rprops = rprops
         self.menu = menu
+        gui_cls = LoadingPageLocalMPGui if rprops.season_props.kind == 'localmp' else LoadingPageGui
         init_lst = [
             [('event', EventColleague, [self])],
-            [('gui', LoadingPageGui, [self, menu, rprops, track_name_transl,
-                                      drivers, ranking, tuning])]]
+            [('gui', gui_cls, [self, menu, rprops, track_name_transl,
+                               drivers, ranking, tuning])]]
         GameObject.__init__(self, init_lst)
         PageFacade.__init__(self)
         # call Page's __init__

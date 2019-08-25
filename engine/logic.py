@@ -1,5 +1,6 @@
-from urllib import urlopen
+from urllib.request import urlopen
 from os.path import exists
+from sys import argv
 from ..gameobject import LogicColleague
 from .configuration import Cfg
 from yyagl.gameobject import GameObject
@@ -14,13 +15,15 @@ class VersionChecker(GameObject, ComputerProxy):
 
     @compute_once
     def is_uptodate(self):
-        try:
-            ver = urlopen('http://ya2.it/yorg_version.txt').read()
-        except IOError:
-            return False
+        self.eng.client.register_rpc('srv_version')
+        try: ver = self.eng.client.srv_version()
+        except AttributeError:
+            print("can't retrieve the version")
+            return True
         major, minor, build = ver.split('.')
         major, minor, build = int(major), int(minor), int(build)
         curr_ver = self.eng.version
+        if curr_ver == 'deploy-ng': return True
         curr_major, curr_minor, curr_build = curr_ver.split('-')[0].split('.')
         curr_major = int(curr_major)
         curr_minor = int(curr_minor)
@@ -36,6 +39,10 @@ class VersionChecker(GameObject, ComputerProxy):
 
 class EngineLogic(LogicColleague):
 
+    @staticmethod
+    def cmd_line():
+        return [arg for arg in iter(argv[1:]) if not arg.startswith('-psn_')]
+
     def __init__(self, mediator, cfg=None):
         LogicColleague.__init__(self, mediator)
         self.cfg = cfg or Cfg()  # use a default conf if not provided
@@ -50,7 +57,7 @@ class EngineLogic(LogicColleague):
 
     @property
     def is_runtime(self):
-        return self.mediator.lib.runtime
+        return self.mediator.lib.runtime()
 
     @property
     def curr_path(self):

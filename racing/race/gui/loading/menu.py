@@ -12,9 +12,9 @@ class LoadingGui(GuiColleague):
         GuiColleague.__init__(self, mediator)
         pbackground = 'assets/images/loading/%s%s.txo'
         pbackground = pbackground % (rprops.track_name, randint(1, 4))
-        menu_args = deepcopy(rprops.season_props.gameprops.menu_args)
-        menu_args.background_img = pbackground
-        self.menu = Menu(menu_args)
+        menu_props = deepcopy(rprops.season_props.gameprops.menu_props)
+        menu_props.background_img_path = pbackground
+        self.menu = Menu(menu_props)
         self.menu.loading = loading
         self.menu.push_page(LoadingPage(
             rprops, self.menu, track_name_transl, drivers, ranking, tuning))

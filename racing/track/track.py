@@ -8,14 +8,16 @@ from .audio import TrackAudio
 class TrackFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('get_start_pos_hpr', lambda obj: obj.phys.get_start_pos_hpr)
-        self._fwd_mth('play_music', lambda obj: obj.audio.music.play)
-        self._fwd_mth('stop_music', lambda obj: obj.audio.music.stop)
-        self._fwd_mth('update', lambda obj: obj.event.update)
-        self._fwd_mth('attach_obs', lambda obj: obj.attach)
-        self._fwd_mth('detach_obs', lambda obj: obj.detach)
-        self._fwd_mth('reparent_to', lambda obj: obj.gfx.model.reparent_to)
-        self._fwd_prop('bounds', lambda obj: obj.phys.bounds)
+        prop_lst = [('bounds', lambda obj: obj.phys.bounds)]
+        mth_lst = [
+            ('get_start_pos_hpr', lambda obj: obj.phys.get_start_pos_hpr),
+            ('play_music', lambda obj: obj.audio.music.play),
+            ('stop_music', lambda obj: obj.audio.music.stop),
+            ('update', lambda obj: obj.event.update),
+            ('attach_obs', lambda obj: obj.attach),
+            ('detach_obs', lambda obj: obj.detach),
+            ('reparent_to', lambda obj: obj.gfx.model.reparent_to)]
+        Facade.__init__(self, prop_lst, mth_lst)
 
 
 class Track(GameObject, TrackFacade):

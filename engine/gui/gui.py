@@ -1,14 +1,19 @@
-from ...gameobject import GuiColleague
-from .cursor import MouseCursor
-from .browser import Browser
+from yyagl.gameobject import GuiColleague
+from yyagl.engine.gui.cursor import MouseCursor
+from yyagl.engine.gui.browser import Browser
 
 
-class EngineGuiBase(GuiColleague):
+up = (0, 1)
+down = (0, -1)
+left = (-1, 0)
+right = (1, 0)
+
+
+class EngineGuiBase(GuiColleague):  # no win: EngineGui strictly manages win
 
     @staticmethod
     def init_cls():
-        has_win = GuiColleague.eng.lib.has_window()
-        return EngineGui if has_win else EngineGuiBase
+        return EngineGui if EngineGuiBase.eng.lib.has_window else EngineGuiBase
 
     @staticmethod
     def open_browser(url): Browser.open(url)
@@ -46,9 +51,9 @@ class EngineGui(EngineGuiBase):
     def __init__(self, mediator):
         EngineGuiBase.__init__(self, mediator)
         cfg = self.eng.cfg
-        resol = cfg.gui_cfg.win_size.split()
-        res = tuple(int(size) for size in resol)
-        self.set_resolution(res, fullscreen=cfg.gui_cfg.fullscreen)
+        res_strings = cfg.gui_cfg.win_size.split()
+        res_ints = tuple(int(size) for size in res_strings)
+        self.set_resolution(res_ints, fullscreen=cfg.gui_cfg.fullscreen)
         cur_cfg = cfg.cursor_cfg
         self.cursor = MouseCursor(
             cur_cfg.cursor_path, cur_cfg.cursor_scale, cur_cfg.cursor_hotspot)

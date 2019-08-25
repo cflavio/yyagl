@@ -24,7 +24,7 @@ def __prepare(env):
     cmd_tmpl = 'sed -i.bak %s {dst_path}docs_apidoc/index.rst' % ' '.join(args)
     cmd = cmd_tmpl.format(
         appname=env['APPNAME'].capitalize(), DevName='Ya2',
-        devsite='http://www.ya2.it', prjsite='http://www.ya2.it/pages/yorg.html',
+        devsite='https://www.ya2.it', prjsite='https://www.ya2.it/pages/yorg.html',
         dst_path=bld_dpath)
     system(cmd)
     curr_dir = abspath('.').replace('/', '\/')
@@ -39,4 +39,4 @@ def __prepare(env):
 
 
 def __clean():
-    map(rmtree, [bld_dpath + dir_ for dir_ in ['docs_apidoc', 'docs']])
+    list(map(rmtree, [bld_dpath + dir_ for dir_ in ['docs_apidoc', 'docs']]))

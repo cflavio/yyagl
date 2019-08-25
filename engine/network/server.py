@@ -1,6 +1,6 @@
 from socket import error
-from Queue import Queue, Empty
-from simpleubjson import encode, decode
+from queue import Queue, Empty
+from bson import dumps, loads
 from .network import AbsNetwork, ConnectionError, NetworkThread
 from yyagl.gameobject import GameObject
 
@@ -66,10 +66,10 @@ class Server(AbsNetwork):
     def _configure_udp(self): self.udp_sock.bind(('', self.port))
 
     def send(self, data_lst, receiver=None):
-        dgram = encode({'payload': data_lst})
+        dgram = dumps({'payload': data_lst})
         receivers = [cln for cln in self.connections if cln == receiver]
         dests = receivers if receiver else self.connections
-        map(lambda cln: self.netw_thr.send_msg(cln, dgram), dests)
+        list(map(lambda cln: self.netw_thr.send_msg(cln, dgram), dests))
 
     def rpc_cb(self, dct, conn):
         funcname, args, kwargs = dct['payload']
@@ -77,7 +77,7 @@ class Server(AbsNetwork):
         kwargs['sender'] = conn
         ret = self.fname2ref[funcname](*args, **kwargs)
         dct = {'is_rpc': True, 'result': ret}
-        self.netw_thr.send_msg(conn, encode(dct))
+        self.netw_thr.send_msg(conn, dumps(dct))
 
     def register_rpc(self, func): self.fname2ref[func.__name__] = func
 
@@ -91,11 +91,11 @@ class Server(AbsNetwork):
         try: dgram, conn = self.udp_sock.recvfrom(8192)
         except error: return
         try:
-            dgram = self._fix_payload(dict(decode(dgram)))
+            dgram = self._fix_payload(dict(loads(dgram)))
             self.read_cb(dgram['payload'], dgram['sender'])
-        except MarkerError as e: print e
+        except (MarkerError, IndexError) as e: print(e)
 
     def send_udp(self, data_lst, receiver):
         if receiver[0] not in self.addr2conn: return
         dgram = {'sender': 'server', 'payload': data_lst}
-        self.udp_sock.sendto(encode(dgram), self.addr2conn[receiver[0]])
+        self.udp_sock.sendto(dumps(dgram), self.addr2conn[receiver[0]])

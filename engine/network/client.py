@@ -1,6 +1,6 @@
 from socket import error, socket, AF_INET, SOCK_DGRAM
-from Queue import Queue, Empty
-from simpleubjson import encode, decode
+from queue import Queue, Empty
+from bson import dumps
 from .network import AbsNetwork, ConnectionError, NetworkThread
 
 
@@ -25,19 +25,18 @@ class ClientThread(NetworkThread):
 
     def do_rpc(self, funcname, args, kwargs):
         msg = {'is_rpc': True, 'payload': [funcname, args, kwargs]}
-        self.msgs.put(encode(msg))
+        self.msgs.put(dumps(msg))
         return self.rpc_ret.get()
 
 
 class Client(AbsNetwork):
 
-    def __init__(self, port):
+    def __init__(self, port, srv_addr):
         AbsNetwork.__init__(self, port)
-        self.srv_addr = None
+        self.srv_addr = srv_addr
         self._functions = []
 
-    def start(self, read_cb, srv_addr):
-        self.srv_addr = srv_addr
+    def start(self, read_cb):
         return AbsNetwork.start(self, read_cb)
 
     def _bld_netw_thr(self):
@@ -49,7 +48,7 @@ class Client(AbsNetwork):
     def send_udp(self, data_lst, sender):
         dgram = {'sender': sender, 'payload': data_lst}
         host, port = self.srv_addr.split(':')
-        self.udp_sock.sendto(encode(dgram), (host, int(port)))
+        self.udp_sock.sendto(dumps(dgram), (host, int(port)))
 
     def register_rpc(self, funcname): self._functions += [funcname]
 

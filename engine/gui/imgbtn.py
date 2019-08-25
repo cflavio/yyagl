@@ -1,5 +1,5 @@
-from yyagl.library.gui import Btn
-from yyagl.library.panda.shader import load_shader
+from yyagl.lib.gui import Btn
+from yyagl.lib.p3d.shader import load_shader
 
 
 class ImgBtn(Btn):
@@ -11,8 +11,8 @@ class ImgBtn(Btn):
                              shader_dirpath + 'imgbtn.frag')
         if shader:
             self.set_shader(shader)
-            self.set_shader_input('col_offset', 0)
-            self.set_shader_input('enable', 1)
+            shader_args = [('col_offset', 0), ('enable', 1)]
+            list(map(lambda args: self.set_shader_input(*args), shader_args))
         self.set_transparency(True)
 
     def _on_enter(self, pos):  # pos comes from mouse
@@ -22,9 +22,9 @@ class ImgBtn(Btn):
         self.set_shader_input('col_offset', 0)
 
     def enable(self):
-        Btn.enable(self)
+        super().enable()
         self.set_shader_input('enable', 1)
 
     def disable(self):
-        Btn.disable(self)
+        super().disable()
         self.set_shader_input('enable', .2)

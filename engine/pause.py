@@ -1,8 +1,8 @@
 from direct.gui.DirectFrame import DirectFrame
 from ..gameobject import GuiColleague, LogicColleague, GameObject, Colleague
 from ..facade import Facade
-from yyagl.library.panda.pause import PandaPause
-LibPause = PandaPause
+from yyagl.lib.p3d.pause import P3dPause
+LibPause = P3dPause
 
 
 class PauseGui(GuiColleague):
@@ -12,7 +12,7 @@ class PauseGui(GuiColleague):
         self.pause_frm = None
 
     def toggle(self, show_frm=True):
-        if not self.mediator.logic.pause.is_paused:
+        if not self.mediator.logic._pause.paused:
             if show_frm:
                 self.pause_frm = DirectFrame(frameColor=(.3, .3, .3, .7),
                                              frameSize=(-1.8, 1.8, -1, 1))
@@ -34,14 +34,16 @@ class PauseLogic(LogicColleague):
         self._pause.remove_task(tsk)
 
     def pause(self):
+        self.notify('on_pause')
         return self._pause.pause()
 
     def resume(self):
+        self.notify('on_resume')
         return self._pause.resume()
 
     def toggle(self, show_frm=True):
         self.mediator.gui.toggle(show_frm)
-        (self.resume if self._pause.is_paused else self.pause)()
+        (self.resume if self._pause.paused else self.pause)()
 
     def destroy(self):
         self._pause.destroy()
@@ -51,7 +53,7 @@ class PauseLogic(LogicColleague):
 class PauseFacade(Facade):
 
     def __init__(self):
-        self._fwd_prop('is_paused', lambda obj: obj.logic._pause.is_paused)
+        Facade.__init__(self, [('paused', lambda obj: obj.logic._pause.paused)])
 
 
 class PauseMgr(GameObject, Colleague, PauseFacade):

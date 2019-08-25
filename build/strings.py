@@ -41,7 +41,7 @@ def __prepare(lng_base_dir, lng, appname):
     lng_dir = lng_base_dir + lng + '/LC_MESSAGES/'
     if not exists('assets/po/' + lng + '.po'):
         lines_to_fix = ['CHARSET/UTF-8', 'ENCODING/8bit']
-        map(lambda line: __fix_line(line, lng_dir, appname), lines_to_fix)
+        list(map(lambda line: __fix_line(line, lng_dir, appname), lines_to_fix))
         copy(lng_dir + appname + '.pot', lng_dir + appname + '.po')
     return lng_dir
 

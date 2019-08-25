@@ -8,14 +8,16 @@ from .gui import TuningGui
 class TuningFacade(Facade):
 
     def __init__(self):
-        self._fwd_mth('attach_obs', lambda obj: obj.gui.attach)
-        self._fwd_mth('detach_obs', lambda obj: obj.gui.detach)
-        self._fwd_mth('load', lambda obj: obj.logic.load)
-        self._fwd_mth('show_gui', lambda obj: obj.gui.show)
-        self._fwd_mth('hide_gui', lambda obj: obj.gui.hide)
-        self._fwd_mth('reset', lambda obj: obj.logic.reset)
-        self._fwd_prop('to_dct', lambda obj: obj.logic.to_dct)
-        self._fwd_prop('car2tuning', lambda obj: obj.logic.car2tuning)
+        prop_lst = [('car2tuning', lambda obj: obj.logic.car2tuning),
+                    ('to_dct', lambda obj: obj.logic.to_dct)]
+        mth_lst = [
+            ('attach_obs', lambda obj: obj.gui.attach),
+            ('detach_obs', lambda obj: obj.gui.detach),
+            ('load', lambda obj: obj.logic.load),
+            ('show_gui', lambda obj: obj.gui.show),
+            ('hide_gui', lambda obj: obj.gui.hide),
+            ('reset', lambda obj: obj.logic.reset)]
+        Facade.__init__(self, prop_lst, mth_lst)
 
 
 class Tuning(GameObject, TuningFacade):

@@ -15,7 +15,7 @@ class Minimap(GameObject):
         self.car_handles = {}
         for car_name in sorted(cars, key=lambda car: car == player_car):
             self.__set_car(car_name, player_car, handle_img, col_dct)
-        map(lambda car: car.set_transparency(True), self.car_handles.values())
+        list(map(lambda car: car.set_transparency(True), self.car_handles.values()))
         self.width = self.minimap.get_scale()[0] * 2.0
         self.height = self.minimap.get_scale()[2] * 2.0
         center_x, center_y = self.minimap.get_x(), self.minimap.get_z()
@@ -30,7 +30,7 @@ class Minimap(GameObject):
         self.car_handles[car_name].set_color_scale(col_dct[car_name])
 
     def update(self, car_info):
-        map(self.__update_car, car_info)
+        list(map(self.__update_car, car_info))
 
     def __update_car(self, car_i):
         left, right, top, bottom = self.bounds
@@ -43,5 +43,5 @@ class Minimap(GameObject):
 
     def destroy(self):
         des = lambda wdg: wdg.destroy()
-        map(des, [self.minimap] + self.car_handles.values())
+        list(map(des, [self.minimap] + list(self.car_handles.values())))
         GameObject.destroy(self)

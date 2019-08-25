@@ -8,7 +8,7 @@ class RaceFsm(FsmColleague):
     def __init__(self, mediator, shaders):
         self.countdown = None
         self.shaders = shaders
-        self.menu_args = None
+        self.menu_props = None
         self.countdown_sfx = None
         FsmColleague.__init__(self, mediator)
         self.defaultTransitions = {
@@ -18,7 +18,7 @@ class RaceFsm(FsmColleague):
 
     def enterLoading(self, rprops, track_name_transl, drivers, ranking, tuning):
         self.eng.log_mgr.log('entering Loading state')
-        self.menu_args = rprops.season_props.gameprops.menu_args
+        self.menu_props = rprops.season_props.gameprops.menu_props
         self.countdown_sfx = rprops.season_props.countdown_sfx
         self.mediator.gui.loading.enter_loading(rprops, track_name_transl, drivers,
                                            ranking, tuning)
@@ -30,9 +30,9 @@ class RaceFsm(FsmColleague):
         self.mediator.gui.loading.exit_loading()
         self.mediator.event.notify('on_race_loaded')
         # eng.set_cam_pos((0, 0, 0))
-        if not self.mediator.logic.player_car: return  # we've closed the window
-        self.mediator.logic.player_car.attach_obs(self.mediator.event.on_wrong_way)
-        self.mediator.logic.player_car.attach_obs(self.mediator.event.on_end_race)
+        if not all(self.mediator.logic.player_cars): return  # we've closed the window
+        for player_car in self.mediator.logic.player_cars:
+            player_car.attach_obs(self.mediator.event.on_end_race)
 
     def enterCountdown(self, sprops):
         self.eng.log_mgr.log('entering Countdown state')
@@ -42,9 +42,9 @@ class RaceFsm(FsmColleague):
         self.mediator.logic.enter_play()
         if self.shaders:
             self.eng.shader_mgr.toggle_shader()
-        cars = [self.mediator.logic.player_car] + self.mediator.logic.cars
-        map(lambda car: car.reset_car(), cars)
-        map(lambda car: car.demand('Countdown'), cars)
+        cars = self.mediator.logic.player_cars + self.mediator.logic.cars
+        list(map(lambda car: car.reset_car(), cars))
+        list(map(lambda car: car.demand('Countdown'), cars))
         self.aux_launch_tsk = None
         self.launch_tsk = self.eng.do_later(
             sprops.race_start_time, self.aux_start_countdown)
@@ -55,7 +55,7 @@ class RaceFsm(FsmColleague):
         self.aux_launch_tsk = self.eng.do_later(.5, self.start_countdown)
 
     def start_countdown(self):
-        self.countdown = Countdown(self.countdown_sfx, self.menu_args.font,
+        self.countdown = Countdown(self.countdown_sfx, self.menu_props.font,
                                    self.sprops.countdown_seconds)
         self.lmb_call = lambda: self.demand('Play')
         self.countdown.attach(self.lmb_call, rename='on_start_race')
@@ -76,8 +76,8 @@ class RaceFsm(FsmColleague):
 
     def enterPlay(self):
         self.eng.log_mgr.log('entering Play state')
-        cars = [self.mediator.logic.player_car] + self.mediator.logic.cars
-        map(lambda car: car.demand('Play'), cars)
+        cars = self.mediator.logic.player_cars + self.mediator.logic.cars
+        list(map(lambda car: car.demand('Play'), cars))
 
     def exitPlay(self):
         RaceFsm.eng.log_mgr.log('exiting Play state')
@@ -87,10 +87,10 @@ class RaceFsm(FsmColleague):
 
     def enterResults(self, race_ranking):
         self.mediator.gui.results.show(
-            race_ranking, self.mediator.logic.player_car.lap_times,
+            race_ranking, self.mediator.logic.player_cars[0].lap_times,
             self.mediator.logic.drivers)
-        cars = [self.mediator.logic.player_car] + self.mediator.logic.cars
-        map(lambda car: car.demand('Results'), cars)
+        cars = self.mediator.logic.player_cars + self.mediator.logic.cars
+        list(map(lambda car: car.demand('Results'), cars))
 
     def exitResults(self):
         self.mediator.logic.exit_play()

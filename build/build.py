@@ -3,18 +3,9 @@ from os.path import join, getsize, exists
 from subprocess import Popen, PIPE
 
 
-bld_cmd = (
-    'pdeploy -o  {dst_dir} {nointernet} -n {appname} -N {AppName} ' +
-    '-v {version} -a ya2.it -A "Ya2" -l "GPLv3" -L license.txt ' +
-    "-t width=800 -t height=600 -P {platform} -i '%s16_png.png' " +
-    "-i '%s32_png.png' -i '%s48_png.png' -i '%s128_png.png' " +
-    "-i '%s256_png.png' {p3d_fpath} installer") % (
-        ('assets/images/icon/icon',) * 5)
-
-
 def exec_cmd(cmd):
     ret = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True).communicate()
-    return '\n'.join(ret)
+    return ret[0].decode('utf-8').strip()  # '\n'.join(ret)
 
 
 def __branch():
@@ -26,7 +17,10 @@ def __version():
     if exists('assets/version.txt'):
         with open('assets/version.txt') as fver:
             pref = fver.read().strip() + '-'
-    return pref + exec_cmd('git rev-parse HEAD')[:7]
+    bld_ver = pref + exec_cmd('git rev-parse HEAD')[:7]
+    with open('assets/bld_version.txt', 'w') as fver:
+        fver.write(bld_ver)
+    return bld_ver
 
 
 def img_tgt_names(files_):  # list of images' target filenames
@@ -99,14 +93,10 @@ bld_dpath = 'built/'
 branch2ver = {'master': 'dev', 'stable': 'stable'}
 branch = branch2ver[__branch()] if __branch() in branch2ver else __branch()
 ver = __version()
-p3d_fpath = '{dst_dir}{appname}-%s.p3d' % branch
 win_fpath = '{dst_dir}{appname}-%s-windows.exe' % branch
 osx_fpath = '{dst_dir}{appname}-%s-osx.zip' % branch
-linux_fpath = '{dst_dir}{appname}-%s-linux_{platform}' % branch
-win_noint_fpath = '{dst_dir}{appname}-%s-nointernet-windows.exe' % branch
-osx_noint_fpath = '{dst_dir}{appname}-%s-nointernet-osx.tar.xz' % branch
-linux_noint_tmpl = '{dst_dir}{appname}-%s-nointernet-linux_{platform}'
-linux_noint_fpath = linux_noint_tmpl % branch
+linux_fpath = '{dst_dir}{appname}-%s-linux' % branch
+flatpak_fpath = '{dst_dir}{appname}-%s-flatpak' % branch
 src_fpath = '{dst_dir}{appname}-%s-src.tar.gz' % branch
 devinfo_fpath = '{dst_dir}{appname}-%s-devinfo.tar.gz' % branch
 test_fpath = '{dst_dir}{appname}-%s-tests.tar.gz' % branch
