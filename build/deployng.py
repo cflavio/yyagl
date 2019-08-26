@@ -34,6 +34,10 @@ def bld_ng(appname, win=False, osx=False, linux=False):
             'log_filename': '$USER_APPDATA/Yorg/p3d_log.log',
             'plugins': plugins,
             'gui_apps': {appname: 'main.py'},
+            'icons': {appname: [
+                'assets/images/icon/icon256_png.png', 'assets/images/icon/icon128_png.png',
+                'assets/images/icon/icon48_png.png', 'assets/images/icon/icon32_png.png',
+                'assets/images/icon/icon16_png.png']},
             'platforms': deploy_platforms,
             'include_modules': {'*': ['encodings.hex_codec']}},
         'bdist_apps': {
