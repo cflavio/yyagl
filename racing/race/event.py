@@ -45,7 +45,8 @@ def __carname2id():
     cars = [r for r in next(walk('assets/cars'))[1]]
     car2id = {}
     # curr_path = self.eng.curr_path
-    curr_path = dirname(__file__) + '/../../../'
+    curr_path = dirname(__file__) + '/'
+    if __file__.endswith('.py'): curr_path += '../../../'
     for car in cars:
         with open(curr_path + 'assets/cars/' + car + '/phys.yml') as fcar:
             sorting = load(fcar)['sorting']
@@ -60,7 +61,8 @@ def __id2carname():
     cars = [r for r in next(walk('assets/cars'))[1]]
     id2car = {}
     # curr_path = self.eng.curr_path
-    curr_path = dirname(__file__) + '/../../../'
+    curr_path = dirname(__file__) + '/'
+    if __file__.endswith('.py'): curr_path += '../../../'
     for car in cars:
         with open(curr_path + 'assets/cars/' + car + '/phys.yml') as fcar:
             sorting = load(fcar)['sorting']

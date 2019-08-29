@@ -6,9 +6,11 @@ def bld_models(target, source, env):
     system('pip install psutil')
     mp_mgr = MultithreadedProcesser(env['CORES'])
     for root, dnames, fnames in walk(env['MODELS_DIR_PATH']):
-        if not root.startswith(env['TRACKS_DIR_PATH']):
-            for fname in [fname for fname in fnames if fname.endswith('.egg')]:
-                __process_model(root, fname, mp_mgr)
+        for fname in [fname for fname in fnames if fname.endswith('.egg')]:
+            __process_model(root, fname, mp_mgr)
+    for root, dnames, fnames in walk(env['CARS_DIR_PATH']):
+        for fname in [fname for fname in fnames if fname.endswith('.egg')]:
+            __process_model(root, fname, mp_mgr)
     mp_mgr.run()
     for root, dnames, fnames in walk('assets/tracks'):
         for dname in dnames:
