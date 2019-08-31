@@ -48,7 +48,9 @@ class LibP3d(DirectObject, object):
             return fver.read().strip()
 
     @property
-    def curr_path(self): return dirname(__file__)
+    def curr_path(self):
+        if sys.platform == 'darwin': return dirname(__file__) + '/../Resources/'
+        return dirname(__file__)
 
     @staticmethod
     def send(msg): return messenger.send(msg)

@@ -12,6 +12,7 @@ from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNe
 from yyagl.racing.weapon.turbo.turbo import Turbo, TurboNetwork
 from yyagl.racing.weapon.rotate_all.rotate_all import RotateAll
 from yyagl.racing.weapon.mine.mine import Mine, MineNetwork
+import sys
 
 
 class NetMsgs(object):
@@ -42,11 +43,12 @@ id2wpnclasses = {
 
 
 def __carname2id():
-    cars = [r for r in next(walk('assets/cars'))[1]]
-    car2id = {}
     # curr_path = self.eng.curr_path
     curr_path = dirname(__file__) + '/'
     if __file__.endswith('.py'): curr_path += '../../../'
+    if sys.platform == 'darwin': curr_path += '../Resources/'
+    cars = [r for r in next(walk(curr_path + 'assets/cars'))[1]]
+    car2id = {}
     for car in cars:
         with open(curr_path + 'assets/cars/' + car + '/phys.yml') as fcar:
             sorting = load(fcar)['sorting']
@@ -58,11 +60,12 @@ carname2id = __carname2id()
 
 
 def __id2carname():
-    cars = [r for r in next(walk('assets/cars'))[1]]
-    id2car = {}
     # curr_path = self.eng.curr_path
     curr_path = dirname(__file__) + '/'
     if __file__.endswith('.py'): curr_path += '../../../'
+    if sys.platform == 'darwin': curr_path += '../Resources/'
+    cars = [r for r in next(walk(curr_path + 'assets/cars'))[1]]
+    id2car = {}
     for car in cars:
         with open(curr_path + 'assets/cars/' + car + '/phys.yml') as fcar:
             sorting = load(fcar)['sorting']

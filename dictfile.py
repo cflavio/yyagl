@@ -11,7 +11,7 @@ class DctFile(GameObject):
     def __init__(self, fpath, default_dct={}, persistent=True):
         GameObject.__init__(self)
         if sys.platform == 'darwin' and LibP3d.runtime():
-            fpath = dirname(__file__) + fpath
+            fpath = dirname(__file__) + '/' + fpath
         self.fpath = fpath
         self.persistent = persistent
         try:
