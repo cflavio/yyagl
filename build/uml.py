@@ -39,7 +39,7 @@ def auto_classes():
         pkgname = root.lstrip('./').replace('/', '_')
         buildpkg(pkgname)
     pdfs = [f for f in listdir('built/uml_classes') if isfile(join('built/uml_classes', f))]
-    for pdf in pdfs: print pdf
+    for pdf in pdfs: print(pdf)
     pdfs = [f for f in pdfs if f.endswith('.pdf') and f != '.pdf']
     pdfs = ['built/uml_classes/' + f for f in pdfs]
     system('echo "" | ps2pdf -sPAPERSIZE=a4 - built/uml_classes/blank.pdf')
