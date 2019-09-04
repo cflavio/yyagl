@@ -86,6 +86,7 @@ class Cfg(object):
         cfginfo = [
             ('texture-anosotropic-degree', 2),
             ('texture-magfilter', 'linear'),
+            #('client-sleep', 0.001),
             ('texture-minfilter', 'mipmap'),
             ('gl-coordinate-system', 'default'),
             ('textures-power-2', 'none'),

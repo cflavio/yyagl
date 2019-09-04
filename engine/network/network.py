@@ -1,6 +1,7 @@
 from socket import socket, AF_INET, SOCK_DGRAM, error, SOCK_STREAM, \
     SOL_SOCKET, SO_REUSEADDR
 from select import select
+from time import sleep
 from queue import Queue, Empty
 from bson import dumps, loads
 from decimal import Decimal
@@ -31,6 +32,7 @@ class NetworkThread(Thread):
 
     def run(self):
         while self.is_running:
+            sleep(.001)
             try:
                 readable, writable, exceptional = select(
                     self.connections, self.connections, self.connections, 1)
