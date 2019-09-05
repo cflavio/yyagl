@@ -58,7 +58,7 @@ class DevCfg(object):
         self.xmpp_server = ''
         self.port = 9099
         self.server = ''
-        self.srgb = True
+        self.srgb = False
 
 
 class Conf(object):
