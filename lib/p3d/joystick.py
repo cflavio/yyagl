@@ -10,6 +10,7 @@ class P3dJoystickMgr:
     def init_joystick(self):
         for dev in base.devices.getDevices(InputDevice.DeviceClass.gamepad):
             base.attachInputDevice(dev)
+        taskMgr.add(self._update, 'update joysticks')
         #pygame.init()
         #joystick.init()
         #self.joysticks = [
@@ -43,23 +44,38 @@ class P3dJoystickMgr:
         #axis, btn = jstick.get_axis, jstick.get_button
         #return axis(0), axis(1), btn(0), btn(1)
 
-    def set_vibration(self, player_idx, strong=False):
+    def set_vibration(self, player_idx, code, time=-1):
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
         if player_idx < 0 or player_idx > len(devices) - 1: return
-        state = 'strong' if strong else 'weak'
-        if player_idx in self.curr_vibration and self.curr_vibration[player_idx] == state: return
-        self.curr_vibration[player_idx] = state
-        gamepad = devices[player_idx]
-        vals = (.64, .64) if strong else (.2, .4)
-        gamepad.set_vibration(*vals)
+        if player_idx in self.curr_vibration and code in self.curr_vibration[player_idx]: return
+        if not player_idx in self.curr_vibration: self.curr_vibration[player_idx] = {}
+        self.curr_vibration[player_idx][code] = time
 
-    def clear_vibration(self, player_idx):
+    def clear_vibration(self, player_idx, code=None):
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
         if player_idx < 0 or player_idx > len(devices) - 1: return
-        if player_idx in self.curr_vibration and self.curr_vibration[player_idx] == 'no': return
-        self.curr_vibration[player_idx] = 'no'
-        gamepad = devices[player_idx]
-        gamepad.set_vibration(0, 0)
+        if player_idx not in self.curr_vibration or code not in self.curr_vibration[player_idx]: return
+        if code is None: del self.curr_vibration[player_idx]
+        else: del self.curr_vibration[player_idx][code]
+
+    def _update(self, task):
+        devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
+        for player_idx in self.curr_vibration:
+            for code in self.curr_vibration[player_idx]:
+                if self.curr_vibration[player_idx][code] != -1: self.curr_vibration[player_idx][code] -= globalClock.getDt()
+        for player_idx in self.curr_vibration:
+            for code in list(self.curr_vibration[player_idx])[:]:
+                if self.curr_vibration[player_idx][code] != -1:
+                    if self.curr_vibration[player_idx][code] < 0:
+                        del self.curr_vibration[player_idx][code]
+        for player_idx in list(self.curr_vibration)[:]:
+            if len(self.curr_vibration[player_idx]) == 0:
+                del self.curr_vibration[player_idx]
+        for player_idx in range(len(devices)):
+            gamepad = devices[player_idx]
+            if player_idx in self.curr_vibration: gamepad.set_vibration(.2, .4)
+            else: gamepad.set_vibration(0, 0)
+        return task.cont
 
     def destroy(self):
         pass

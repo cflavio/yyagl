@@ -286,12 +286,12 @@ class CarLogic(LogicColleague, ComputerProxy):
         is_skid = self.is_skidmarking
         (gfx.on_skidmarking if is_skid else gfx.on_no_skidmarking)()
         if is_skid:
-            self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx)
-        else: self.eng.joystick_mgr.joystick_lib.clear_vibration(self.mediator.player_car_idx)
+            self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx, 'skid')
+        else: self.eng.joystick_mgr.joystick_lib.clear_vibration(self.mediator.player_car_idx, 'skid')
         if not is_skid:
             if self.mediator.phys.curr_speed_mul < .64:
-                self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx)
-            else: self.eng.joystick_mgr.joystick_lib.clear_vibration(self.mediator.player_car_idx)
+                self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx, 'offroad')
+            else: self.eng.joystick_mgr.joystick_lib.clear_vibration(self.mediator.player_car_idx, 'offroad')
         self.__clamp_orientation()
         self.__adjust_car()
         if not self.mediator.phys.is_flying: self.last_ground_time = self.eng.curr_time
