@@ -280,6 +280,8 @@ class CarPlayerEvent(CarEvent):
         if 'Rocket' in obj_name:
             if obj != tgt_obj.get_python_tag('car').phys.pnode:
                 self.mediator.audio.rocket_hit_sfx.play()
+        if any(wpnname in obj_name for wpnname in ['Rocket', 'Mine']):
+            self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx, 'crash', .8)
 
     def on_bonus(self, cls=None, wpn_id=None):
         if self.mediator.logic.weapon: self.mediator.gui.panel.unset_weapon()
@@ -306,6 +308,7 @@ class CarPlayerEvent(CarEvent):
     def _process_wall(self):
         CarEvent._process_wall(self)
         self.mediator.audio.crash_sfx.play()
+        self.eng.joystick_mgr.joystick_lib.set_vibration(self.mediator.player_car_idx, 'crash', .5)
 
     def _process_nonstart_goals(self, lap_number, laps):
         CarEvent._process_nonstart_goals(self, lap_number, laps)

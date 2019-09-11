@@ -6,6 +6,7 @@ class P3dJoystickMgr:
     def __init__(self):
         self.joysticks = []
         self.curr_vibration = {}
+        self.__is_vibrating = [False, False, False, False]
 
     def init_joystick(self):
         for dev in base.devices.getDevices(InputDevice.DeviceClass.gamepad):
@@ -73,8 +74,12 @@ class P3dJoystickMgr:
                 del self.curr_vibration[player_idx]
         for player_idx in range(len(devices)):
             gamepad = devices[player_idx]
-            if player_idx in self.curr_vibration: gamepad.set_vibration(.2, .4)
-            else: gamepad.set_vibration(0, 0)
+            if player_idx in self.curr_vibration and not self.__is_vibrating[player_idx]:
+                gamepad.set_vibration(.2, .4)
+                self.__is_vibrating[player_idx] = True
+            elif player_idx not in self.curr_vibration:
+                gamepad.set_vibration(0, 0)
+                self.__is_vibrating[player_idx] = False
         return task.cont
 
     def destroy(self):
