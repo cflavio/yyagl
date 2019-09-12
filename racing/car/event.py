@@ -51,10 +51,8 @@ class InputBuilder(object):
     def create(state, joystick):
         if state in ['Waiting', 'Results']:
             return InputBuilderAi()
-        elif joystick:
-            return InputBuilderJoystick()
         else:
-            return InputBuilderKeyboard()
+            return InputBuilderPlayer()
 
 
 class InputBuilderAi(InputBuilder):
@@ -63,17 +61,13 @@ class InputBuilderAi(InputBuilder):
         return ai.get_input()
 
 
-class InputBuilderKeyboard(InputBuilder):
+class InputBuilderPlayer(InputBuilder):
 
     def build(self, ai, joystick_mgr, player_car_idx, car_evt):
         keys = ['forward', 'rear', 'left', 'right']
         keys = [key + str(player_car_idx) for key in keys]
-        return DirKeys(*[inputState.isSet(key) for key in keys])
-
-
-class InputBuilderJoystick(InputBuilder):
-
-    def build(self, ai, joystick_mgr, player_car_idx, car_evt):
+        if any(inputState.isSet(key) for key in keys):
+            return DirKeys(*[inputState.isSet(key) for key in keys])
         j_x, j_y, j_a, j_b, j_bx, j_by, d_l, d_r, d_u, d_d = joystick_mgr.get_joystick(player_car_idx)
         if j_bx and car_evt.mediator.logic.weapon: car_evt.on_fire()
         if j_by: car_evt.process_respawn()
@@ -245,8 +239,7 @@ class CarPlayerEvent(CarEvent):
             suff = str(8 + mediator.player_car_idx)
             self.accept('f' + suff, self._process_end_goal)
         state = self.mediator.fsm.getCurrentOrNextState()
-        joystick = race_props.joysticks[mediator.player_car_idx] and \
-            self.mediator.name == race_props.season_props.player_car_names[mediator.player_car_idx] and \
+        joystick = self.mediator.name == race_props.season_props.player_car_names[mediator.player_car_idx] and \
             mediator.player_car_idx < self.eng.joystick_mgr.joystick_lib.num_joysticks
         self.input_bld = InputBuilder.create(state, joystick)
         keys = self.props.keys.players_keys[mediator.player_car_idx]

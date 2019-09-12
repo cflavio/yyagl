@@ -1,5 +1,6 @@
 from math import sin, cos, pi
 from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32, LVector3f
+from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import LogicColleague
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera, FPCamera
@@ -18,13 +19,16 @@ class WPInfo(object):
 
 class Input2ForcesStrategy(object):
 
-    @staticmethod
-    def build(is_player, joystick, car):
-        return (DiscreteInput2ForcesStrategy
-                if not joystick or not is_player
-                else AnalogicInput2ForcesStrategy)(car)
+    turn_time = .1  # after this time the steering is at its max value
 
-    def __init__(self, car):
+    #@staticmethod
+    #def build(is_player, joystick, car):
+    #    return (DiscreteInput2ForcesStrategy
+    #            if not joystick or not is_player
+    #            else AnalogicInput2ForcesStrategy)(car)
+
+    def __init__(self, is_player, car):
+        self.__is_player = is_player
         self._steering = 0  # degrees
         self.car = car
         self.drift = DriftingForce(car)
@@ -71,6 +75,83 @@ class Input2ForcesStrategy(object):
             actual_max_speed = - m_s * self.car.phys.curr_speed_mul * .4
             eng_frc = eng_frc * (1.05 - self.car.phys.speed / actual_max_speed)
         return eng_frc
+
+    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
+        keys = ['forward', 'rear', 'left', 'right']
+        keys = [key + str(player_car_idx) for key in keys]
+        joystick = not any(inputState.isSet(key) for key in keys)
+        if not joystick or not self.__is_player: return self.input2forces_discrete(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time)
+        else: return self.input2forces_analog(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time)
+
+    def input2forces_discrete(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
+        phys = self.car.phys
+        eng_frc = brake_frc = 0
+        f_t = curr_time
+        if car_input.forward and car_input.rear:
+            eng_frc = phys.engine_acc_frc
+            brake_frc = phys.brake_frc
+        if car_input.forward and not car_input.rear:
+            eng_frc = phys.engine_acc_frc
+        if car_input.rear and not car_input.forward:
+            eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
+            brake_frc = phys.brake_frc
+        if not car_input.forward and not car_input.rear:
+            brake_frc = phys.eng_brk_frc
+        if car_input.rear and not self.prev_frame_braking:
+            self.brake_start_time = globalClock.getFrameTime()
+        self.prev_frame_braking = car_input.rear
+        if car_input.rear:
+            brake_frc = brake_frc * (1 + .4 * (globalClock.getFrameTime() - self.brake_start_time))
+        brake_frc = min(brake_frc, 1.4 * phys.brake_frc)
+        clamp = self.steering_clamp
+        if car_input.left:
+            if self.start_left_t is None:
+                self.start_left_t = f_t
+            steer_fact = min(1, (f_t - self.start_left_t) / self.turn_time)
+            self._steering += self.steering_inc * steer_fact
+            self._steering = min(self._steering, clamp(is_drifting))
+        else:
+            self.start_left_t = None
+        if car_input.right:
+            if self.start_right_t is None:
+                self.start_right_t = curr_time
+            steer_fact = min(1, (f_t - self.start_right_t) / self.turn_time)
+            self._steering -= self.steering_inc * steer_fact
+            self._steering = max(self._steering, -clamp(is_drifting))
+        else:
+            self.start_right_t = None
+        if not car_input.left and not car_input.right:
+            if abs(self._steering) <= self.steering_dec:
+                self._steering = 0
+            else:
+                steering_sign = (-1 if self._steering > 0 else 1)
+                self._steering += steering_sign * self.steering_dec
+        self.drift.process(car_input)
+        return self.get_eng_frc(eng_frc, car_input.forward, car_input.rear), brake_frc, phys.brake_ratio, \
+            self._steering
+
+    def input2forces_analog(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
+        phys = self.car.phys
+        eng_frc = brake_frc = 0
+        j_x, j_y, j_a, j_b, j_bx, j_by, d_l, d_r, d_u, d_d = joystick_mgr.get_joystick(player_car_idx)
+        scale = lambda val: min(1, max(-1, val * 1.2))
+        j_x, j_y = scale(j_x), scale(j_y)
+        if j_a:
+            eng_frc = phys.engine_acc_frc
+        if j_b:
+            eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
+            brake_frc = phys.brake_frc
+        if not j_a and not j_b:
+            brake_frc = phys.eng_brk_frc
+        if j_b and not self.prev_frame_braking:
+            self.brake_start_time = globalClock.getFrameTime()
+        self.prev_frame_braking = j_b
+        if j_b:
+            brake_frc = brake_frc * (1 + .4 * (globalClock.getFrameTime() - self.brake_start_time))
+        brake_frc = min(brake_frc, 1.4 * phys.brake_frc)
+        self._steering = -j_x * self.steering_clamp(is_drifting)
+        return self.get_eng_frc(eng_frc, j_a, j_b), brake_frc, phys.brake_ratio, \
+            self._steering
 
 
 class DriftingForce(object):
@@ -158,84 +239,6 @@ class DriftingForce(object):
             phys.pnode.apply_torque((0, 0, intensity_torque))
 
 
-class DiscreteInput2ForcesStrategy(Input2ForcesStrategy):
-
-    turn_time = .1  # after this time the steering is at its max value
-
-    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
-        phys = self.car.phys
-        eng_frc = brake_frc = 0
-        f_t = curr_time
-        if car_input.forward and car_input.rear:
-            eng_frc = phys.engine_acc_frc
-            brake_frc = phys.brake_frc
-        if car_input.forward and not car_input.rear:
-            eng_frc = phys.engine_acc_frc
-        if car_input.rear and not car_input.forward:
-            eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
-            brake_frc = phys.brake_frc
-        if not car_input.forward and not car_input.rear:
-            brake_frc = phys.eng_brk_frc
-        if car_input.rear and not self.prev_frame_braking:
-            self.brake_start_time = globalClock.getFrameTime()
-        self.prev_frame_braking = car_input.rear
-        if car_input.rear:
-            brake_frc = brake_frc * (1 + .4 * (globalClock.getFrameTime() - self.brake_start_time))
-        brake_frc = min(brake_frc, 1.4 * phys.brake_frc)
-        clamp = self.steering_clamp
-        if car_input.left:
-            if self.start_left_t is None:
-                self.start_left_t = f_t
-            steer_fact = min(1, (f_t - self.start_left_t) / self.turn_time)
-            self._steering += self.steering_inc * steer_fact
-            self._steering = min(self._steering, clamp(is_drifting))
-        else:
-            self.start_left_t = None
-        if car_input.right:
-            if self.start_right_t is None:
-                self.start_right_t = curr_time
-            steer_fact = min(1, (f_t - self.start_right_t) / self.turn_time)
-            self._steering -= self.steering_inc * steer_fact
-            self._steering = max(self._steering, -clamp(is_drifting))
-        else:
-            self.start_right_t = None
-        if not car_input.left and not car_input.right:
-            if abs(self._steering) <= self.steering_dec:
-                self._steering = 0
-            else:
-                steering_sign = (-1 if self._steering > 0 else 1)
-                self._steering += steering_sign * self.steering_dec
-        self.drift.process(car_input)
-        return self.get_eng_frc(eng_frc, car_input.forward, car_input.rear), brake_frc, phys.brake_ratio, \
-            self._steering
-
-
-class AnalogicInput2ForcesStrategy(Input2ForcesStrategy):
-
-    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
-        phys = self.car.phys
-        eng_frc = brake_frc = 0
-        j_x, j_y, j_a, j_b, j_bx, j_by, d_l, d_r, d_u, d_d = joystick_mgr.get_joystick(player_car_idx)
-        scale = lambda val: min(1, max(-1, val * 1.2))
-        j_x, j_y = scale(j_x), scale(j_y)
-        if j_a:
-            eng_frc = phys.engine_acc_frc
-        if j_b:
-            eng_frc = phys.engine_dec_frc if phys.speed < .05 else 0
-            brake_frc = phys.brake_frc
-        if not j_a and not j_b:
-            brake_frc = phys.eng_brk_frc
-        if j_b and not self.prev_frame_braking:
-            self.brake_start_time = globalClock.getFrameTime()
-        self.prev_frame_braking = j_b
-        if j_b:
-            brake_frc = brake_frc * (1 + .4 * (globalClock.getFrameTime() - self.brake_start_time))
-        brake_frc = min(brake_frc, 1.4 * phys.brake_frc)
-        self._steering = -j_x * self.steering_clamp(is_drifting)
-        return self.get_eng_frc(eng_frc, j_a, j_b), brake_frc, phys.brake_ratio, \
-            self._steering
-
-
 class CarLogic(LogicColleague, ComputerProxy):
 
     def __init__(self, mediator, car_props):
@@ -254,12 +257,9 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.fired_weapons = []
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
-        joystick = car_props.race_props.joysticks[mediator.player_car_idx] and \
-            car_props.name == car_props.race_props.season_props.player_car_names[mediator.player_car_idx] and \
+        joystick = car_props.name == car_props.race_props.season_props.player_car_names[mediator.player_car_idx] and \
             mediator.player_car_idx < self.eng.joystick_mgr.joystick_lib.num_joysticks
-        self.input_strat = Input2ForcesStrategy.build(
-            self.__class__ == CarPlayerLogic, joystick,
-            self.mediator)
+        self.input_strat = Input2ForcesStrategy(self.__class__ == CarPlayerLogic, self.mediator)
         self.start_pos = car_props.pos
         self.start_pos_hpr = car_props.hpr
         self.last_ai_wp = None

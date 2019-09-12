@@ -24,7 +24,7 @@ class P3dJoystickMgr:
 
     def get_joystick(self, player_idx):
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
-        if player_idx > len(devices) - 1: return 0, 0, 0, 0, 0, 0
+        if player_idx > len(devices) - 1: return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         gamepad = devices[player_idx]
         btn_0 = gamepad.findButton('face_a')
         btn_1 = gamepad.findButton('face_b')
