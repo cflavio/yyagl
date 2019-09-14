@@ -143,7 +143,10 @@ class PageGui(GuiColleague):
             list(map(lambda args: self.mediator.event.accept(*args), evts))
         self.eng.joystick_mgr.bind_keyboard(navs)
         if self.eng.cfg.dev_cfg.menu_joypad and self._back_btn:
-            self.mediator.event.accept('joypad_b1', self._back_btn['command'])
+            self.mediator.event.accept('joypad_b1', self.__back_wrapper)
+
+    def __back_wrapper(self):
+        if not self.eng.joystick_mgr.is_recording: self._back_btn['command']()
 
     def disable_navigation(self, players):
         if self.enable_tsk:
