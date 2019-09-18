@@ -63,12 +63,14 @@ class InputBuilderAi(InputBuilder):
 
 class InputBuilderPlayer(InputBuilder):
 
-    def build(self, ai, joystick_mgr, player_car_idx, car_evt):
+    def build(self, ai, joystick_mgr, player_car_idx, car_evt, fire_key, respawn_key):
         keys = ['forward', 'rear', 'left', 'right']
         keys = [key + str(player_car_idx) for key in keys]
         if any(inputState.isSet(key) for key in keys):
             return DirKeys(*[inputState.isSet(key) for key in keys])
-        j_x, j_y, j_a, j_b, j_bx, j_by, d_l, d_r, d_u, d_d = joystick_mgr.get_joystick(player_car_idx)
+        j_x, j_y, j_a, j_b, j_bx, j_by, d_l, d_r, d_u, d_d, tl, tr, shl, shr, sl, sr = joystick_mgr.get_joystick(player_car_idx)
+        j_bx = joystick_mgr.get_joystick_val(player_car_idx, fire_key)
+        j_by = joystick_mgr.get_joystick_val(player_car_idx, respawn_key)
         if j_bx and car_evt.mediator.logic.weapon: car_evt.on_fire()
         if j_by: car_evt.process_respawn()
         inp = {'forward': j_a, 'rear': j_b,
@@ -326,8 +328,12 @@ class CarPlayerEvent(CarEvent):
 
     @once_a_frame
     def _get_input(self):
-        return self.input_bld.build(self.mediator.ai, self.eng.joystick_mgr,
-                                    self.mediator.player_car_idx, self)
+        player_car_idx = self.mediator.player_car_idx
+        joystick_mgr = self.eng.joystick_mgr
+        fire_key = self.props.joystick['fire' + str(player_car_idx + 1)]
+        respawn_key = self.props.joystick['respawn' + str(player_car_idx + 1)]
+        return self.input_bld.build(self.mediator.ai, joystick_mgr,
+                                    player_car_idx, self, fire_key, respawn_key)
 
     def destroy(self):
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]

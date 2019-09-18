@@ -81,6 +81,26 @@ class JoystickMgr(GameObject):
     def get_joystick(self, player_idx):
         return self.joystick_lib.get_joystick(player_idx)
 
+    def get_joystick_val(self, player_idx, code):
+        j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d, \
+            trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r = self.joystick_lib.get_joystick(player_idx)
+        code2val = {
+            'face_x': btn0,
+            'face_y': btn1,
+            'face_a': btn2,
+            'face_b': btn3,
+            'dpad_l': dpad_l,
+            'dpad_r': dpad_r,
+            'dpad_u': dpad_u,
+            'dpad_d': dpad_d,
+            'trigger_l': trigger_l,
+            'trigger_r': trigger_r,
+            'shoulder_l': shoulder_l,
+            'shoulder_r': shoulder_r,
+            'stick_l': stick_l,
+            'stick_r': stick_r}
+        return code2val[code]
+
     @staticmethod
     def supported(): return JoystickMgrLib.supported()
 

@@ -76,12 +76,12 @@ class Input2ForcesStrategy(object):
             eng_frc = eng_frc * (1.05 - self.car.phys.speed / actual_max_speed)
         return eng_frc
 
-    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
+    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time, acc_key, brk_key):
         keys = ['forward', 'rear', 'left', 'right']
         keys = [key + str(player_car_idx) for key in keys]
         joystick = not any(inputState.isSet(key) for key in keys)
         if not joystick or not self.__is_player: return self.input2forces_discrete(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time)
-        else: return self.input2forces_analog(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time)
+        else: return self.input2forces_analog(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time, acc_key, brk_key)
 
     def input2forces_discrete(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
         phys = self.car.phys
@@ -130,10 +130,12 @@ class Input2ForcesStrategy(object):
         return self.get_eng_frc(eng_frc, car_input.forward, car_input.rear), brake_frc, phys.brake_ratio, \
             self._steering
 
-    def input2forces_analog(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
+    def input2forces_analog(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time, acc_key, brk_key):
         phys = self.car.phys
         eng_frc = brake_frc = 0
-        j_x, j_y, j_a, j_b, j_bx, j_by, d_l, d_r, d_u, d_d = joystick_mgr.get_joystick(player_car_idx)
+        j_x, j_y, j_a, j_b, j_bx, j_by, d_l, d_r, d_u, d_d, tl, tr, shl, shr, sl, sr = joystick_mgr.get_joystick(player_car_idx)
+        j_a = joystick_mgr.get_joystick_val(player_car_idx, acc_key)
+        j_b = joystick_mgr.get_joystick_val(player_car_idx, brk_key)
         scale = lambda val: min(1, max(-1, val * 1.2))
         j_x, j_y = scale(j_x), scale(j_y)
         if j_a:
@@ -276,10 +278,13 @@ class CarLogic(LogicColleague, ComputerProxy):
     def update(self, input2forces):
         phys = self.mediator.phys
         jmgr = self.eng.joystick_mgr
+        player_car_idx = self.mediator.player_car_idx
+        acc_key = self.cprops.race_props.joystick['forward' + str(player_car_idx + 1)]
+        brk_key = self.cprops.race_props.joystick['rear' + str(player_car_idx + 1)]
         eng_f, brake_f, brake_r, steering = \
             self.input_strat.input2forces(
                 input2forces, jmgr, self.is_drifting,
-                self.mediator.player_car_idx, self.eng.curr_time)
+                self.mediator.player_car_idx, self.eng.curr_time, acc_key, brk_key)
         phys.set_forces(eng_f, brake_f, brake_r, steering)
         self.__update_roll_info()
         gfx = self.mediator.gfx
