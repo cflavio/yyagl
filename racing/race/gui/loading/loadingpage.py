@@ -77,12 +77,18 @@ class LoadingPageGui(PageGui):
         #                       font=self.font, fg=self.text_bg)
         #    self.add_widgets([txt])
         #    return
-        self.__cmd_label(_('accelerate'), 'forward', .22)
-        self.__cmd_label(_('brake/reverse'), 'rear', .12)
-        self.__cmd_label(_('left'), 'left', .02)
-        self.__cmd_label(_('right'), 'right', -.08)
-        self.__cmd_label(_('fire'), 'fire', -.18)
-        self.__cmd_label(_('respawn'), 'respawn', -.28)
+        if self.eng.joystick_mgr.joystick_lib.num_joysticks:
+            self.__cmd_label(_('accelerate'), 'forward', .22)
+            self.__cmd_label(_('brake/reverse'), 'rear', .12)
+            self.__cmd_label(_('left'), 'left', .02)
+            self.__cmd_label(_('right'), 'right', -.08)
+            self.__cmd_label(_('fire'), 'fire', -.18)
+            self.__cmd_label(_('respawn'), 'respawn', -.28)
+        else:
+            self.__cmd_label(_('accelerate'), 'forward', .22)
+            self.__cmd_label(_('brake/reverse'), 'rear', .12)
+            self.__cmd_label(_('fire'), 'fire', .02)
+            self.__cmd_label(_('respawn'), 'respawn', -.08)
 
     def set_upgrades(self):
         txt = Text(_('Upgrades'), scale=.1, pos=(1.0, -.56),
@@ -108,6 +114,8 @@ class LoadingPageGui(PageGui):
 
     def __cmd_label(self, text, key, pos_z):
         _key = getattr(self.rprops.keys.players_keys[0], key)
+        if self.eng.joystick_mgr.joystick_lib.num_joysticks:
+            _key = self.rprops.joystick[key + '1']
         txt = Text(
             text + ': ' + self.eng.event.key2desc(_key),  #.decode('utf-8'),
             align='left', scale=.064, pos=(.8, pos_z), font=self.font,
