@@ -279,8 +279,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         phys = self.mediator.phys
         jmgr = self.eng.joystick_mgr
         player_car_idx = self.mediator.player_car_idx
-        acc_key = self.cprops.race_props.joystick['forward' + str(player_car_idx + 1)]
-        brk_key = self.cprops.race_props.joystick['rear' + str(player_car_idx + 1)]
+        acc_key = '' if player_car_idx == -1 else self.cprops.race_props.joystick['forward' + str(player_car_idx + 1)]
+        brk_key = '' if player_car_idx == -1 else self.cprops.race_props.joystick['rear' + str(player_car_idx + 1)]
         eng_f, brake_f, brake_r, steering = \
             self.input_strat.input2forces(
                 input2forces, jmgr, self.is_drifting,

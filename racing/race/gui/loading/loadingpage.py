@@ -77,7 +77,7 @@ class LoadingPageGui(PageGui):
         #                       font=self.font, fg=self.text_bg)
         #    self.add_widgets([txt])
         #    return
-        if self.eng.joystick_mgr.joystick_lib.num_joysticks:
+        if self.eng.joystick_mgr.joystick_lib.num_joysticks == 0:
             self.__cmd_label(_('accelerate'), 'forward', .22)
             self.__cmd_label(_('brake/reverse'), 'rear', .12)
             self.__cmd_label(_('left'), 'left', .02)
@@ -130,12 +130,12 @@ class LoadingPageLocalMPGui(LoadingPageGui):
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         txts = []
-        not_j = 0
         for i in range(len(self.rprops.season_props.player_car_names)):
-            if self.rprops.joysticks[i] and i - not_j < self.eng.joystick_mgr.joystick_lib.num_joysticks:
-                txts += [str(i + 1) + ': joypad']
+            if i < self.eng.joystick_mgr.joystick_lib.num_joysticks:
+                keys = ['forward', 'rear', 'fire', 'respawn']
+                keys = [self.rprops.joystick[key + str(i + 1)] for key in keys]
+                txts += [str(i + 1) + ': ' + ', '.join(keys)]
             else:
-                not_j += 1
                 keys = ['forward', 'rear', 'left', 'right', 'fire', 'respawn']
                 _keys = [getattr(self.rprops.keys.players_keys[i], key) for key in keys]
                 tkeys = [self.eng.event.key2desc(_key) for _key in _keys]
