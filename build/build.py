@@ -104,6 +104,7 @@ win_fpath = '{dst_dir}{appname}-%s-windows.exe' % branch
 osx_fpath = '{dst_dir}{appname}-%s-osx.zip' % branch
 linux_fpath = '{dst_dir}{appname}-%s-linux' % branch
 flatpak_fpath = '{dst_dir}{appname}-%s-flatpak' % branch
+appimage_fpath = '{dst_dir}{appname}-%s-appimage' % branch
 src_fpath = '{dst_dir}{appname}-%s-src.tar.gz' % branch
 devinfo_fpath = '{dst_dir}{appname}-%s-devinfo.tar.gz' % branch
 test_fpath = '{dst_dir}{appname}-%s-tests.tar.gz' % branch
