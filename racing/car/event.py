@@ -68,13 +68,13 @@ class InputBuilderPlayer(InputBuilder):
         keys = [key + str(player_car_idx) for key in keys]
         if any(inputState.isSet(key) for key in keys):
             return DirKeys(*[inputState.isSet(key) for key in keys])
-        j_x, j_y, j_a, j_b, j_bx, j_by, d_l, d_r, d_u, d_d, tl, tr, shl, shr, sl, sr = joystick_mgr.get_joystick(player_car_idx)
+        jstate = joystick_mgr.get_joystick(player_car_idx)
         j_bx = joystick_mgr.get_joystick_val(player_car_idx, fire_key)
         j_by = joystick_mgr.get_joystick_val(player_car_idx, respawn_key)
         if j_bx and car_evt.mediator.logic.weapon: car_evt.on_fire()
         if j_by: car_evt.process_respawn()
-        inp = {'forward': j_a, 'rear': j_b,
-               'left': j_x < -.4, 'right': j_x > .4}
+        inp = {'forward': jstate.b0, 'rear': jstate.b1,
+               'left': jstate.x < -.4, 'right': jstate.x > .4}
         keys = ['forward', 'rear', 'left', 'right']
         return DirKeys(*[inp[key] for key in keys])
 

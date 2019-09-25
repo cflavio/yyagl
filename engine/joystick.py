@@ -79,7 +79,25 @@ class JoystickMgr(GameObject):
             trigger_r, shoulder_l, shoulder_r, stick_l, stick_r
 
     def get_joystick(self, player_idx):
-        return self.joystick_lib.get_joystick(player_idx)
+        x, y, b0, b1, b2, b3, dl, dr, du, dd, tl, tr, shl, shr, sl, sr = self.joystick_lib.get_joystick(player_idx)
+        jstate = JoystickState()
+        jstate.x = x
+        jstate.y = y
+        jstate.b0 = b0
+        jstate.b1 = b1
+        jstate.b2 = b2
+        jstate.b3 = b3
+        jstate.dpad_l = dl
+        jstate.dpad_r = dr
+        jstate.dpad_u = du
+        jstate.dpad_d = dd
+        jstate.trigger_l = tl
+        jstate.trigger_r = tr
+        jstate.shoulder_l = shl
+        jstate.shoulder_r = shr
+        jstate.stick_l = sl
+        jstate.stick_r = sr
+        return jstate
 
     def get_joystick_val(self, player_idx, code):
         j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d, \
