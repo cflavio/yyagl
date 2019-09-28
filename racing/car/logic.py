@@ -1,3 +1,4 @@
+from logging import info
 from math import sin, cos, pi
 from panda3d.core import deg2Rad, LPoint3f, Mat4, BitMask32, LVector3f
 from direct.showbase.InputStateGlobal import inputState
@@ -620,7 +621,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         if not is_correct:
             skipped = [str(w_p) for w_p in all_wp
                        if w_p not in self.collected_wps]
-            self.eng.log_mgr.log('skipped waypoints: ' + ', '.join(skipped))
+            info('skipped waypoints: ' + ', '.join(skipped))
         return is_correct
 
     @staticmethod

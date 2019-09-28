@@ -1,3 +1,4 @@
+from logging import info
 from math import cos, pi
 from panda3d.core import Vec3, LVector3f, Mat4
 from yyagl.gameobject import GameObject
@@ -144,7 +145,7 @@ class Camera(GameObject):
         self.get_camera().set_pos(0, 0, 10000)
         self.get_camera().look_at(0, 0, 0)
         skydome = track_model.find('**/OBJSkydome*')
-        Camera.eng.log('skydome %sfound' % ('' if skydome else 'not '))
+        info('skydome %sfound' % ('' if skydome else 'not '))
         if skydome: skydome.hide()
         base.graphicsEngine.render_frame()
         base.graphicsEngine.render_frame()

@@ -1,9 +1,13 @@
+from logging import basicConfig, info, INFO
 from datetime import datetime
 from sys import version_info
 from platform import system, release, architecture, platform, processor, \
     version, machine
 from multiprocessing import cpu_count
 from yyagl.gameobject import Colleague
+
+
+basicConfig(level=INFO, format='%(asctime)s %(message)s', datefmt='%H:%M:%S')
 
 
 class LogMgrBase(Colleague):  # headless log manager
@@ -18,8 +22,7 @@ class LogMgrBase(Colleague):  # headless log manager
 
     def log(self, msg, verbose=False):
         if verbose and not self.eng.cfg.dev_cfg.verbose_log: return
-        time = datetime.now().strftime("%H:%M:%S")
-        self.eng.lib.log('{time} {msg}'.format(time=time, msg=msg))
+        info(msg)
 
     def log_cfg(self):
         messages = ['version: ' + self.eng.logic.version]
@@ -38,7 +41,7 @@ class LogMgrBase(Colleague):  # headless log manager
             import psutil
             mem = psutil.virtual_memory().total / 1000000000.0
             messages += ['memory: %s GB' % round(mem, 2)]
-        except ImportError: self.log("can't import psutil")  # windows
+        except ImportError: info("can't import psutil")  # windows
         lib_commit = self.eng.lib.lib_commit
         py_ver = [str(elm) for elm in version_info[:3]]
         messages += ['python version: %s' % '.'.join(py_ver)]
@@ -49,8 +52,8 @@ class LogMgrBase(Colleague):  # headless log manager
         list(map(self.log, messages))
 
     def log_tasks(self):
-        self.log('tasks: %s' % taskMgr.getAllTasks())
-        self.log('do-laters: %s' % taskMgr.getDoLaters())
+        info('tasks: %s' % taskMgr.getAllTasks())
+        info('do-laters: %s' % taskMgr.getDoLaters())
 
 
 class LogMgr(LogMgrBase):

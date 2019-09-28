@@ -1,5 +1,6 @@
 from socket import socket, AF_INET, SOCK_DGRAM, error, SOCK_STREAM, \
     SOL_SOCKET, SO_REUSEADDR
+from logging import info
 from select import select
 from time import sleep
 from queue import Queue, Empty
@@ -115,10 +116,10 @@ class AbsNetwork(GameObject):
             self.netw_thr.start()
             self.netw_thr.read_cb = read_cb
             args = self.__class__.__name__, self.port
-            self.eng.log('%s is up, port %s' % args)
+            info('%s is up, port %s' % args)
             return True
         except ValueError:  # e.g. empty server
-            self.eng.log("can't start the network")
+            info("can't start the network")
 
     def register_cb(self, callback):
         self.read_cb = callback
@@ -145,14 +146,14 @@ class AbsNetwork(GameObject):
 
     def stop(self):
         if not self.netw_thr:
-            self.eng.log('%s was already stopped' % self.__class__.__name__)
+            info('%s was already stopped' % self.__class__.__name__)
             return
         self.udp_sock.close()
         self.netw_thr.destroy()
         self.udp_sock = self.tcp_sock = self.netw_thr = None
         self.eng.detach_obs(self.on_frame)
         self.addr2conn = {}
-        self.eng.log('%s has been stopped' % self.__class__.__name__)
+        info('%s has been stopped' % self.__class__.__name__)
 
     def process_udp(self):
         try: dgram, conn = self.udp_sock.recvfrom(8192)
@@ -165,5 +166,5 @@ class AbsNetwork(GameObject):
 
     def destroy(self):
         self.stop()
-        self.eng.log('%s has been destroyed' % self.__class__.__name__)
+        info('%s has been destroyed' % self.__class__.__name__)
         GameObject.destroy(self)

@@ -1,3 +1,4 @@
+from logging import info, debug
 from panda3d.core import BitMask32, LPoint3f
 from yyagl.computer_proxy import ComputerProxy, compute_once
 from yyagl.gameobject import PhysColleague, GameObject
@@ -19,7 +20,7 @@ class MeshBuilder(GameObject):
         list(map(lambda name: self.__set_mesh(name, is_ghost), geom_names))
 
     def __set_mesh(self, geom_name, is_ghost):
-        self.eng.log_mgr.log('setting physics for: ' + geom_name)
+        info('setting physics for: ' + geom_name)
         geoms = self.eng.lib.find_geoms(self.model, geom_name)
         if geoms: self._process_meshes(geoms, geom_name, is_ghost)
 
@@ -319,7 +320,7 @@ class TrackPhys(PhysColleague, ComputerProxy):
             return 0, 100, 0, 100
 
     def create_bonus(self, pos):
-        self.eng.log('created bonus', True)
+        debug('created bonus')
         prs = self.race_props
         bonus = Bonus(pos, prs.bonus_model, prs.bonus_suff, self,
                       self.mediator.gfx)
@@ -331,7 +332,7 @@ class TrackPhys(PhysColleague, ComputerProxy):
         self.bonuses.remove(bonus)
         gen_tsk = self.eng.do_later(20, self.create_bonus, [bonus.pos])
         self.generate_tsk += [gen_tsk]
-        self.eng.log('created task for bonus', True)
+        debug('created task for bonus')
 
     def destroy(self):
         self.model = self.model.remove_node()

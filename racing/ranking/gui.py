@@ -1,3 +1,4 @@
+from logging import info
 from panda3d.core import TextNode, Shader, TextureStage
 from yyagl.lib.gui import Btn, Text, Img
 from yyagl.lib.p3d.shader import load_shader
@@ -125,14 +126,14 @@ class RankingGui(GuiColleague):
 
     @staticmethod
     def set_drv_txt_img(page, i, car_name, pos_x, top, text):
-        RankingGui.eng.log_mgr.log('drivers: ' + str([drv.dprops for drv in page.drivers]))
-        RankingGui.eng.log_mgr.log('i: %s  - carname: %s - text: %s' % (
+        info('drivers: ' + str([drv.dprops for drv in page.drivers]))
+        info('i: %s  - carname: %s - text: %s' % (
             i, car_name, text))
         drv = next(
             driver for driver in page.drivers
             if driver.dprops.car_name == car_name)
         is_player_car = car_name in page.rprops.season_props.player_car_names
-        RankingGui.eng.log_mgr.log('%s %s %s %s' % (text % drv.logic.dprops.info.name, car_name, drv.logic.dprops.info.img_idx, is_player_car))
+        info('%s %s %s %s' % (text % drv.logic.dprops.info.name, car_name, drv.logic.dprops.info.img_idx, is_player_car))
         name = text % drv.logic.dprops.info.name
         if '@' in name: name = name.split('@')[0] + '\1smaller\1@' + name.split('@')[1] + '\2'
         txt = Text(

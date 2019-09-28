@@ -1,3 +1,4 @@
+from logging import info
 from yaml import load
 from panda3d.bullet import BulletVehicle, ZUp, BulletBoxShape, BulletSphereShape
 from panda3d.core import LPoint3f, BitMask32, Mat4, TransformState
@@ -72,7 +73,7 @@ class CarPhys(PhysColleague):
             ('roll max', self.cprops.name, round(s_r[1], 2),
              self.cprops.driver_suspensions)]
         for l_i in log_info:
-            self.eng.log_mgr.log('%s %s: %s (%s)' % l_i)
+            info('%s %s: %s (%s)' % l_i)
 
     def __set_collision_mesh(self):
         fpath = self.cprops.race_props.coll_path % self.cprops.name

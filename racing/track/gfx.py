@@ -1,3 +1,4 @@
+from logging import info
 from os.path import exists
 from os import system
 from sys import executable
@@ -24,12 +25,12 @@ class TrackGfx(GfxColleague):
         self._set_light()
 
     def __set_meshes(self):
-        self.eng.log_mgr.log('loading track model')
+        info('loading track model')
         filename = self.raceprops.gfx_track_path
         if not exists(filename):
             script_path = executable + ' yyagl/build/process_track.py'
             system(script_path + ' assets/tracks/' + self.raceprops.track_name)
-        self.eng.log_mgr.log('loading ' + filename)
+        info('loading ' + filename)
         self.eng.gfx.gfx_mgr.load_model(filename, callback=self.end_loading)
 
     def end_loading(self, model):
@@ -73,7 +74,7 @@ class TrackGfx(GfxColleague):
     def __set_omni(self, root):
         root.set_tag(self.raceprops.omni_tag, 'True')
         a_n = self.__anim_nodes[-1].name
-        self.eng.log_mgr.log('set omni for ' + a_n)
+        info('set omni for ' + a_n)
         self.__anim_nodes[-1].set_omni()
 
     def _set_light(self):

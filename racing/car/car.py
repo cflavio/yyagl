@@ -1,3 +1,4 @@
+from logging import info
 from yyagl.gameobject import GameObject, AiColleague
 from yyagl.facade import Facade
 from .fsm import CarFsm, CarPlayerFsm
@@ -70,7 +71,7 @@ class Car(GameObject, CarFacade):
     audio_cls = CarAudio
 
     def __init__(self, car_props, player_car_idx):
-        self.eng.log_mgr.log('init car ' + car_props.name)
+        info('init car ' + car_props.name)
         init_lst = [
             [('fsm', self.fsm_cls, [self, car_props])],
             [('gfx', self.gfx_cls, [self, car_props]),

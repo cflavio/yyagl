@@ -1,3 +1,4 @@
+from logging import info
 from yyagl.gameobject import GameObject
 from yyagl.facade import Facade
 from .gfx import TrackGfx, TrackGfxShader, TrackGfxDebug
@@ -23,7 +24,7 @@ class TrackFacade(Facade):
 class Track(GameObject, TrackFacade):
 
     def __init__(self, race_props):
-        self.eng.log_mgr.log('init track')
+        info('init track')
         self.race_props = rpr = race_props
         gfx_cls = TrackGfxShader if rpr.shaders_dev else TrackGfx
         gfx_cls = TrackGfxDebug if rpr.show_waypoints else gfx_cls

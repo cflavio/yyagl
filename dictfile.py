@@ -1,4 +1,5 @@
 import sys
+from logging import info
 from os.path import dirname
 from collections import Mapping
 from yaml import load, dump
@@ -35,7 +36,7 @@ class DctFile(GameObject):
         return d
 
     def store(self):
-        self.eng.log('storing %s' % self.fpath)
+        info('storing %s' % self.fpath)
         if not self.persistent: return
         with open(self.fpath, 'w') as fyaml:
             dump(self.dct, fyaml, default_flow_style=False)

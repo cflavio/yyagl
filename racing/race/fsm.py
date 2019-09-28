@@ -1,3 +1,4 @@
+from logging import info
 from yyagl.gameobject import FsmColleague
 from yyagl.racing.race.logic import NetMsgs
 from yyagl.racing.race.gui.countdown import Countdown
@@ -17,7 +18,7 @@ class RaceFsm(FsmColleague):
             'Play': ['Results']}
 
     def enterLoading(self, rprops, track_name_transl, drivers, ranking, tuning):
-        self.eng.log_mgr.log('entering Loading state')
+        info('entering Loading state')
         self.menu_props = rprops.season_props.gameprops.menu_props
         self.countdown_sfx = rprops.season_props.countdown_sfx
         self.mediator.gui.loading.enter_loading(rprops, track_name_transl, drivers,
@@ -26,7 +27,7 @@ class RaceFsm(FsmColleague):
         self.eng.do_later(1.0, self.mediator.logic.load_stuff, args)
 
     def exitLoading(self):
-        self.eng.log_mgr.log('exiting Loading state')
+        info('exiting Loading state')
         self.mediator.gui.loading.exit_loading()
         self.mediator.event.notify('on_race_loaded')
         # eng.set_cam_pos((0, 0, 0))
@@ -35,7 +36,7 @@ class RaceFsm(FsmColleague):
             player_car.attach_obs(self.mediator.event.on_end_race)
 
     def enterCountdown(self, sprops):
-        self.eng.log_mgr.log('entering Countdown state')
+        info('entering Countdown state')
         self.eng.hide_cursor()
         self.sprops = sprops
         self.mediator.event.register_menu()
@@ -61,7 +62,7 @@ class RaceFsm(FsmColleague):
         self.countdown.attach(self.lmb_call, rename='on_start_race')
 
     def exitCountdown(self):
-        self.eng.log_mgr.log('exiting Countdown state')
+        info('exiting Countdown state')
         if self.countdown:
             self.countdown.detach('on_start_race', self.lmb_call)
             self.countdown.destroy()
@@ -75,12 +76,12 @@ class RaceFsm(FsmColleague):
             self.mediator.logic.exit_play()
 
     def enterPlay(self):
-        self.eng.log_mgr.log('entering Play state')
+        info('entering Play state')
         cars = self.mediator.logic.player_cars + self.mediator.logic.cars
         list(map(lambda car: car.demand('Play'), cars))
 
     def exitPlay(self):
-        RaceFsm.eng.log_mgr.log('exiting Play state')
+        info('exiting Play state')
         RaceFsm.eng.show_cursor()
         if self.getCurrentOrNextState() != 'Results':
             self.mediator.logic.exit_play()
