@@ -43,16 +43,16 @@ class JoystickMgr(GameObject):
         if self.old[i].b0 and not btn0:
             if self.nav and i < len(self.nav) and self.nav[i] and not self.is_recording:
                 self.eng.send(self.nav[i].fire)
-            self.eng.send('joypad%s_b0' % i)
+            self.eng.send('joypad%s_face_x' % i)
         if self.old[i].b1 and not btn1:
-            self.eng.send('joypad_b1')
-            self.eng.send('joypad%s_b1' % i)
+            #self.eng.send('joypad_face_y' % i)
+            self.eng.send('joypad%s_face_y' % i)
         if self.old[i].b2 and not btn2:
-            self.eng.send('joypad_b2')
-            self.eng.send('joypad%s_b2' % i)
+            #self.eng.send('joypad_face_a' % i)
+            self.eng.send('joypad%s_face_a' % i)
         if self.old[i].b3 and not btn3:
-            self.eng.send('joypad_b3')
-            self.eng.send('joypad%s_b3' % i)
+            #self.eng.send('joypad_face_b' % i)
+            self.eng.send('joypad%s_face_b' % i)
         if self.old[i].trigger_l and not trigger_l:
             self.eng.send('joypad_trigger_l')
             self.eng.send('joypad%s_trigger_l' % i)
