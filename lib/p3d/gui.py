@@ -123,7 +123,10 @@ class P3dBase(Facade, CommonBase):
             ('set_pos', lambda obj: obj.wdg.set_pos),
             ('show', lambda obj: obj.wdg.show),
             ('hide', lambda obj: obj.wdg.hide)]
-        Facade.__init__(self, mth_lst=mth_lst)
+        Facade.__init__(self, mth_lst=mth_lst + self._mth_lst)
+
+    @property
+    def _mth_lst(self): return []
 
     def bind_tra(self, text_src, text_transl):
         # text_transl is not used, anyway we need it since we have this kind of
@@ -155,9 +158,9 @@ class P3dBase(Facade, CommonBase):
 
 class P3dAbs(P3dBase):
 
-    def __init__(self, tra_src=None, tra_tra=None):
-        P3dBase.__init__(self, tra_src, tra_tra)
-        mth_lst = [
+    @property
+    def _mth_lst(self):
+        return [
             ('get_value', lambda obj: obj.wdg.getValue),
             ('initialiseoptions', lambda obj: obj.wdg.initialiseoptions),
             ('set_z', lambda obj: obj.wdg.set_z),
@@ -165,7 +168,6 @@ class P3dAbs(P3dBase):
             ('set_shader_input', lambda obj: obj.wdg.set_shader_input),
             ('set_transparency', lambda obj: obj.wdg.set_transparency),
             ('bind', lambda obj: obj.wdg.bind)]
-        Facade.__init__(self, mth_lst=mth_lst)
 
     def attachNewNode(self, gui_itm, sort_order):
         # it won't work if we name it attach_node. hopefully this will be
@@ -261,7 +263,9 @@ class P3dOptionMenu(P3dAbs):
             item_relief=item_relief, item_text_font=item_text_font,
             text_font=text_font)
         P3dAbs.__init__(self, tra_src, tra_tra)
-        Facade.__init__(self, mth_lst=[('set', lambda obj: obj.wdg.set)])
+
+    @property
+    def _mth_lst(self): return [('set', lambda obj: obj.wdg.set)]
 
     @property
     def curr_val(self): return self.wdg.get()
@@ -297,10 +301,12 @@ class P3dEntry(P3dAbs, DirectObject, Subject):
             self.on_tab_cb = on_tab
             self.accept('tab-up', self.on_tab)
         if on_click: self.wdg.bind(B1PRESS, on_click)
-        mth_lst = [
+
+    @property
+    def _mth_lst(self):
+        return [
             ('set', lambda obj: obj.wdg.set),
             ('enter_text', lambda obj: obj.wdg.enterText)]
-        Facade.__init__(self, mth_lst=mth_lst)
 
     def _focus_in_cmd(self, *args):
         self.__focused = True
@@ -344,11 +350,12 @@ class P3dLabel(P3dAbs):
             text_fg=text_fg, text_font=text_font, scale=scale,
             frameColor=frame_col, hpr=hpr)
         P3dAbs.__init__(self, tra_src, tra_tra)
-        mth_lst = [
-            ('set_bin', lambda obj: obj.wdg.set_bin),
-            ('set_x', lambda obj: obj.wdg.set_x),
-            ('set_alpha_scale', lambda obj: obj.wdg.set_alpha_scale)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    @property
+    def _mth_lst(self): return [
+        ('set_bin', lambda obj: obj.wdg.set_bin),
+        ('set_x', lambda obj: obj.wdg.set_x),
+        ('set_alpha_scale', lambda obj: obj.wdg.set_alpha_scale)]
 
 
 class P3dTxt(P3dBase):
@@ -367,7 +374,9 @@ class P3dTxt(P3dBase):
             text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
             parent=parent, fg=fg, font=font, align=align)
         P3dBase.__init__(self, tra_src, tra_tra)
-        Facade.__init__(self, mth_lst=[('set_r', lambda obj: obj.wdg.set_r)])
+
+    @property
+    def _mth_lst(self): return [('set_r', lambda obj: obj.wdg.set_r)]
 
 
 class P3dFrame(P3dAbs):
