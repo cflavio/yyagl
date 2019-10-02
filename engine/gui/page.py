@@ -182,8 +182,6 @@ class PageGui(GuiColleague):
         self._back_btn = btn
 
     def _on_back(self, player=0): self.notify('on_back', self.__class__.__name__)
-    # refactor: notify should pass the sender, so these arguments would be
-    # useless
 
     def _on_quit(self): self.notify('on_quit', self.__class__.__name__)
 

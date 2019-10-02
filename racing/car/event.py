@@ -69,10 +69,10 @@ class InputBuilderPlayer(InputBuilder):
         if any(inputState.isSet(key) for key in keys):
             return DirKeys(*[inputState.isSet(key) for key in keys])
         jstate = joystick_mgr.get_joystick(player_car_idx)
-        j_bx = joystick_mgr.get_joystick_val(player_car_idx, fire_key)
-        j_by = joystick_mgr.get_joystick_val(player_car_idx, respawn_key)
-        if j_bx and car_evt.mediator.logic.weapon: car_evt.on_fire()
-        if j_by: car_evt.process_respawn()
+        #j_bx = joystick_mgr.get_joystick_val(player_car_idx, fire_key)
+        #j_by = joystick_mgr.get_joystick_val(player_car_idx, respawn_key)
+        #if j_bx and car_evt.mediator.logic.weapon: car_evt.on_fire()
+        #if j_by: car_evt.process_respawn()
         inp = {'forward': jstate.b0, 'rear': jstate.b1,
                'left': jstate.x < -.4, 'right': jstate.x > .4}
         keys = ['forward', 'rear', 'left', 'right']
@@ -246,6 +246,9 @@ class CarPlayerEvent(CarEvent):
         self.input_bld = InputBuilder.create(state, joystick)
         keys = self.props.keys.players_keys[mediator.player_car_idx]
         self.accept(self.eng.lib.remap_str(keys.respawn), self.process_respawn)
+        evtrespawn = self.props.joystick['respawn' + str(mediator.player_car_idx + 1)]
+        evtrespawn = 'joypad' + str(mediator.player_car_idx) + '_' + evtrespawn
+        self.accept(evtrespawn, self.process_respawn)
         #self.eng.do_later(5, lambda: self.on_bonus(Turbo) and None)
 
     def on_frame(self):
@@ -288,6 +291,9 @@ class CarPlayerEvent(CarEvent):
         if not cls: return  # if removing
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
         self.accept(self.eng.lib.remap_str(keys.fire), self.on_fire)
+        evtfire = self.props.joystick['fire' + str(self.mediator.player_car_idx + 1)]
+        evtfire = 'joypad' + str(self.mediator.player_car_idx) + '_' + evtfire
+        self.accept(evtfire, self.on_fire)
         if self.mediator.fsm.getCurrentOrNextState() != 'Waiting':
             self.mediator.gui.panel.set_weapon(
                 self.props.season_props.wpn2img[cls.__name__])
@@ -295,7 +301,10 @@ class CarPlayerEvent(CarEvent):
 
     def on_fire(self):
         keys = self.props.keys.players_keys[self.mediator.player_car_idx]
-        self.ignore(keys.fire)
+        #self.ignore(keys.fire)
+        evtfire = self.props.joystick['fire' + str(self.mediator.player_car_idx + 1)]
+        evtfire = 'joypad' + str(self.mediator.player_car_idx) + '_' + evtfire
+        self.ignore(evtfire)
         self.mediator.logic.fire()
         self.mediator.gui.panel.unset_weapon()
         self.ignore(keys.fire)
