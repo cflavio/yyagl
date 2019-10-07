@@ -77,11 +77,11 @@ class Input2ForcesStrategy(object):
             eng_frc = eng_frc * (1.05 - self.car.phys.speed / actual_max_speed)
         return eng_frc
 
-    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time, acc_key, brk_key):
+    def input2forces(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time, acc_key, brk_key, a_i):
         keys = ['forward', 'rear', 'left', 'right']
         keys = [key + str(player_car_idx) for key in keys]
         joystick = not any(inputState.isSet(key) for key in keys)
-        if not joystick or not self.__is_player: return self.input2forces_discrete(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time)
+        if a_i or not joystick or not self.__is_player: return self.input2forces_discrete(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time)
         else: return self.input2forces_analog(car_input, joystick_mgr, is_drifting, player_car_idx, curr_time, acc_key, brk_key)
 
     def input2forces_discrete(self, car_input, joystick_mgr, is_drifting, player_car_idx, curr_time):
@@ -285,7 +285,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         eng_f, brake_f, brake_r, steering = \
             self.input_strat.input2forces(
                 input2forces, jmgr, self.is_drifting,
-                self.mediator.player_car_idx, self.eng.curr_time, acc_key, brk_key)
+                self.mediator.player_car_idx, self.eng.curr_time, acc_key, brk_key,
+                self.cprops.race_props.a_i)
         phys.set_forces(eng_f, brake_f, brake_r, steering)
         self.__update_roll_info()
         gfx = self.mediator.gfx
@@ -462,6 +463,52 @@ class CarLogic(LogicColleague, ComputerProxy):
     def hi_chassis_name(self):
         return self.mediator.gfx.chassis_np_hi.name
 
+    @staticmethod
+    def dist_to_segment(p, p0, p1):
+        px = p1.x - p0.x
+        py = p1.y - p0.y
+        pz = p1.z - p0.z
+        norm = px * px + py * py + pz * pz
+        u =  ((p.x - p0.x) * px + (p.y - p0.y) * py + (p.z - p0.z) * pz) / norm
+        if u > 1: u = 1
+        elif u < 0: u = 0
+        _x = p0.x + u * px
+        _y = p0.y + u * py
+        _z = p0.z + u * py
+        dx = _x - p.x
+        dy = _y - p.y
+        dz = _z - p.z
+        return (dx * dx + dy * dy + dz * dz) ** .5
+
+    def __get_closest_wp(self):
+        w2p = self.cprops.track_waypoints
+        closest_wps = w2p
+        if self.last_ai_wp:
+            closest_wps = [self.last_ai_wp] + \
+                self.last_ai_wp.prevs + \
+                [wp for wp in w2p if self.last_ai_wp in wp.prevs]
+        car_np = self.mediator.gfx.nodepath
+        curr_min_dist = 9999
+        for wp in closest_wps:
+            for other_wp in w2p:
+                if wp in other_wp.prevs:
+                    dist = self.dist_to_segment(car_np.get_pos(), wp.pos, other_wp.pos)
+                    if dist < curr_min_dist:
+                        curr_min_dist = dist
+                        curr_min_wp = wp
+        return curr_min_wp
+
+    def __get_dist(self, _wp):
+        car_np = self.mediator.gfx.nodepath
+        w2p = self.cprops.track_waypoints
+        curr_min_dist = 9999
+        for wp in w2p:
+            if _wp in wp.prevs:
+                dist = self.dist_to_segment(car_np.get_pos(), _wp.pos, wp.pos)
+                if dist < curr_min_dist:
+                    curr_min_dist = dist
+        return curr_min_dist
+
     @once_a_frame
     def closest_wp(self):
         w2p = self.cprops.track_waypoints
@@ -472,8 +519,9 @@ class CarLogic(LogicColleague, ComputerProxy):
                 [wp for wp in w2p if self.last_ai_wp in wp.prevs]
         not_last = len(self.mediator.logic.lap_times) < self.mediator.laps - 1
         car_np = self.mediator.gfx.nodepath
-        distances = [car_np.get_distance(wp.node) for wp in closest_wps]
-        curr_wp = closest_wps[distances.index(min(distances))]
+        #distances = [car_np.get_distance(wp.node) for wp in closest_wps]
+        #curr_wp = closest_wps[distances.index(min(distances))]
+        curr_wp = self.__get_closest_wp()
         self._pitstop_wps = curr_wp.prevs_nogrid
         self._grid_wps = curr_wp.prevs_nopitlane
         #considered_wps = self._pitstop_wps \
@@ -482,7 +530,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         considered_wps = curr_wp.prevs_all
         waypoints = [wp for wp in considered_wps if wp in closest_wps
                      or any(_wp in closest_wps for _wp in wp.prevs)]
-        distances = [car_np.get_distance(wp.node) for wp in waypoints]
+        #distances = [car_np.get_distance(wp.node) for wp in waypoints]
+        distances = [self.__get_dist(wp) for wp in waypoints]
         if not distances:  # there is a bug
             self.__log_wp_info(self.curr_chassis, curr_wp, closest_wps,
                                waypoints)
