@@ -508,7 +508,4 @@ class CarAi(AiColleague, ComputerProxy):
         ComputerProxy.destroy(self)
 
 
-class CarResultsAi(CarAi):
-
-    def _end_async(self):
-        pass
+class CarResultsAi(CarAi): pass

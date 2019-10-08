@@ -8,6 +8,7 @@ from yyagl.engine.gfx import AnimNode, AmbientLight, Spotlight
 from yyagl.gameobject import GfxColleague
 from yyagl.racing.bitmasks import BitMasks
 from .signs import Signs
+from yyagl.lib.p3d.gfx import P3dNode
 
 
 class TrackGfx(GfxColleague):
@@ -19,22 +20,18 @@ class TrackGfx(GfxColleague):
         self.__flat_roots = {}
         self.raceprops = race_props
         GfxColleague.__init__(self, mediator)
-
-    def async_bld(self):
-        self.__set_meshes()
+        taskMgr.add(self.__set_meshes())
         self._set_light()
 
-    def __set_meshes(self):
+    async def __set_meshes(self):
         info('loading track model')
         filename = self.raceprops.gfx_track_path
         if not exists(filename):
             script_path = executable + ' yyagl/build/process_track.py'
             system(script_path + ' assets/tracks/' + self.raceprops.track_name)
         info('loading ' + filename)
-        self.eng.gfx.gfx_mgr.load_model(filename, callback=self.end_loading)
-
-    def end_loading(self, model):
-        self.model = model
+        self.model = await loader.load_model(filename, blocking=False)
+        self.model = P3dNode(self.eng.gfx.gfx_mgr.set_srgb(self.model))
         rpr = self.raceprops
         anim_name = '**/%s*%s*' % (rpr.empty_name, rpr.anim_name)
         for model in self.model.find_all_matches(anim_name):
@@ -51,7 +48,6 @@ class TrackGfx(GfxColleague):
         self.signs = Signs(roots, rpr.sign_cb)
         self.signs.set_signs()
         self.model.optimize()
-        GfxColleague.async_bld(self)
 
     @staticmethod
     def __cloned_root(model):

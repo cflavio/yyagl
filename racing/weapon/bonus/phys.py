@@ -11,8 +11,6 @@ class BonusPhys(PhysColleague):
         self.pos = pos
         self.ghost = None
         PhysColleague.__init__(self, mediator)
-
-    def sync_bld(self):
         self.ghost = BulletGhostNode('Bonus')
         self.ghost.add_shape(BulletBoxShape((1, 1, 2.5)))
         ghost_np = self.eng.attach_node(self.ghost)

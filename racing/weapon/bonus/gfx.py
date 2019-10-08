@@ -10,8 +10,6 @@ class BonusGfx(GfxColleague):
         self.model_path = model_path
         self.anim_suff = anim_suff
         GfxColleague.__init__(self, mediator)
-
-    def sync_bld(self):
         path = self.model_path
         self.model = Actor(path, {'anim': path + '-' + self.anim_suff})
         self.model.reparent_to(render)

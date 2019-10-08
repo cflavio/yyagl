@@ -12,24 +12,8 @@ class Colleague(Subject):
         Subject.__init__(self)
         self.notify_tsk = None
         self.mediator = mediator  # refactor: remove it
-        self.async_bld(*args, **kwargs)
-
-    def async_bld(self, *args, **kwargs):
-        self._end_async(*args, **kwargs)
-
-    def _end_async(self, *args, **kwargs):
-        self.sync_bld(*args, **kwargs)
         args = 'on_comp_blt', self
         self.notify_tsk = self.eng.do_later(.001, self.mediator.notify, args)
-        # since on_comp_blt is fired from __init__, when it's catched by
-        # GODirector's on_comp_blt, it triggers __process_lst, but since
-        # __init__ it's not finished, __process_lst's setattrs is not
-        # concluded, so the following components don't see the previous one.
-        # maybe it's better to remove this kind of creation process, and use
-        # a more standard one
-
-    def sync_bld(self, *args, **kwargs):
-        pass
 
     def destroy(self):
         if self.notify_tsk:

@@ -137,8 +137,6 @@ class TrackPhys(PhysColleague, ComputerProxy):
         self.race_props = race_props
         self.__grid_wps = {}
         PhysColleague.__init__(self, mediator)
-
-    def sync_bld(self):
         self.model = self.eng.load_model(self.race_props.track_coll_path)
         self.__set_meshes()
         self.__set_corners()

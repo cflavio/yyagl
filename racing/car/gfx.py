@@ -149,7 +149,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         for whl in [self.wheels['fl'], self.wheels['rl']]:
             whl.set_h(180)
             whl.node.flatten_light()
-        GfxColleague._end_async(self)
+        #GfxColleague._end_async(self)
 
     def crash_sfx(self):
         self.crash_cnt += 1

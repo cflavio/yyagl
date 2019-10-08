@@ -72,14 +72,14 @@ class P3dGfxMgr(object):
         ext = '.bam' if exists(filename + '.bam') else ''
         if anim:
             anim_dct = {'anim': filename + '-Anim' + ext}
-            return P3dNode(self.__set_srgb(Actor(filename + ext, anim_dct)))
+            return P3dNode(self.set_srgb(Actor(filename + ext, anim_dct)))
         elif callback:
-            callb = lambda model: callback(P3dNode(self.__set_srgb(model)))
+            callb = lambda model: callback(P3dNode(self.set_srgb(model)))
             return loader.loadModel(filename + ext, callback=callb)
         else:
-            return P3dNode(self.__set_srgb(loader.loadModel(LibP3d.p3dpath(filename + ext))))
+            return P3dNode(self.set_srgb(loader.loadModel(LibP3d.p3dpath(filename + ext))))
 
-    def __set_srgb(self, model):
+    def set_srgb(self, model):
         if self.__srgb:
             for texture in model.find_all_textures():
                 texture.set_format(Texture.F_srgb)

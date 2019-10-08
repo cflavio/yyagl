@@ -13,14 +13,6 @@ class WeaponGfx(GfxColleague):
         self.parent = parent
         self.fpath = fpath
         GfxColleague.__init__(self, mediator)
-
-    def update_props(self, pos, fwd):
-        pass
-
-    def update_fired_props(self, pos, fwd):
-        pass
-
-    def sync_bld(self):
         self.gfx_np = self.eng.load_model(self.fpath, anim={'anim': self.fpath + '-Anim'})
         self.gfx_np.loop('anim')
         #self.gfx_np.flatten_light()
@@ -29,6 +21,12 @@ class WeaponGfx(GfxColleague):
         self.gfx_np.set_scale(1.5)
         self.gfx_np.set_pos(Vec(0, 0, 1.5))
         self.gfx_np.set_depth_offset(1)
+
+    def update_props(self, pos, fwd):
+        pass
+
+    def update_fired_props(self, pos, fwd):
+        pass
 
     def reparent(self, parent):
         self.gfx_np.reparent_to(parent)
