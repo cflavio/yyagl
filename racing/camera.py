@@ -141,15 +141,15 @@ class Camera(GameObject):
             if any(hit.getNode().getName().startswith(pref) for pref in prefs):
                 return hit.getHitPos().z
 
-    def render_all(self, track_model):  # workaround for premunge_scene in 1.9
-        self.get_camera().set_pos(0, 0, 10000)
-        self.get_camera().look_at(0, 0, 0)
-        skydome = track_model.find('**/OBJSkydome*')
-        info('skydome %sfound' % ('' if skydome else 'not '))
-        if skydome: skydome.hide()
-        base.graphicsEngine.render_frame()
-        base.graphicsEngine.render_frame()
-        if skydome: skydome.show()
+    #def render_all(self, track_model):  # workaround for premunge_scene in 1.9
+        #self.get_camera().set_pos(0, 0, 10000)
+        #self.get_camera().look_at(0, 0, 0)
+        #skydome = track_model.find('**/OBJSkydome*')
+        #info('skydome %sfound' % ('' if skydome else 'not '))
+        #if skydome: skydome.hide()
+        #base.graphicsEngine.render_frame()
+        #base.graphicsEngine.render_frame()
+        #if skydome: skydome.show()
 
     def destroy(self):
         GameObject.destroy(self)

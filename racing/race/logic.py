@@ -126,8 +126,9 @@ class RaceLogic(LogicColleague):
     def start_play(self):
         self.eng.phys_mgr.start()
         self.eng.attach_obs(self.on_frame)
-        for player_car in self.player_cars:
-            player_car.logic.camera.render_all(self.track.gfx.model)  # workaround for prepare_scene (panda3d 1.9)
+        self.track.gfx.model.optimize()
+        #for player_car in self.player_cars:
+        #    player_car.logic.camera.render_all(self.track.gfx.model)  # workaround for prepare_scene (panda3d 1.9)
         self.track.play_music()
         list(map(lambda car: car.reset_car(), self.all_cars))
         list(map(lambda car: car.start(), self.all_cars))
