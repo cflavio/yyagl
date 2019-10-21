@@ -68,10 +68,26 @@ class Camera(GameObject):
         dist_diff = self.dist_max - self.dist_min
         return self.dist_min + dist_diff * self.curr_speed_ratio
 
-    def _new_pos(self, back_car_vec, c_i):
-        car_pos = self.car_np.get_pos()
+    def _new_pos(self, look_at_pos, back_car_vec, curr_l, c_i_length, c_i_rot):
+        d_t = globalClock.get_dt()
         cam_pos = self.get_camera().get_pos()
-        return self.new_val_vec(cam_pos, car_pos + back_car_vec, c_i)
+        vec = cam_pos - look_at_pos
+        prj_vec = Vec3(vec.x, vec.y, 0).normalized()
+        prj_back_car_vec = Vec3(back_car_vec.x, back_car_vec.y, 0).normalized()
+        angle = prj_vec.signed_angle_deg(prj_back_car_vec, (0, 0, 1))
+        rot_angle = self.new_val(0, angle, c_i_rot)
+        new_vec = prj_vec.normalized()
+        rot_new_vec = self.__rotate(new_vec, rot_angle * d_t)
+        new_vec_l = self.new_val(prj_vec.length(), prj_back_car_vec.length(), c_i_length * d_t)
+        new_vec = rot_new_vec * curr_l
+        new_pos = look_at_pos + new_vec
+        new_pos.z = self.new_val(cam_pos.z, look_at_pos.z + back_car_vec.z, 8 * d_t)
+        return new_pos
+
+    def __rotate(self, vec, deg):
+        rot_mat = Mat4()
+        rot_mat.set_rotate_mat(deg, (0, 0, 1))
+        return rot_mat.xform_vec(vec)
 
     def update(self, speed_ratio, is_rolling, is_fast, is_rotating):
         d_t = globalClock.get_dt()
@@ -118,7 +134,8 @@ class Camera(GameObject):
             back_car_vec = cam_forced_vec
 
         c_i = curr_incr_slow if is_fast else curr_incr
-        new_pos = self._new_pos(back_car_vec, c_i)
+        look_at_pos = car_pos + tgt_vec
+        new_pos = self._new_pos(look_at_pos, back_car_vec, self.curr_dist, c_i, 20)
         # overwrite camera's position to set the physics
         if any(val for val in self.overwrite):
             ovw = self.overwrite
@@ -174,7 +191,9 @@ class FPCamera(Camera):
             back_car_vec = occl_pos - car_pos
             is_occl = True
         if not is_occl:
-            new_pos = Camera._new_pos(self, back_car_vec, c_i)
+            cam_vec = car_pos - curr_cam_pos
+            look_at_pos = car_pos  # + tgt_vec
+            new_pos = Camera._new_pos(self, look_at_pos, back_car_vec, self.curr_dist, c_i, 20)
         else:
             new_pos = occl_pos
         return new_pos
