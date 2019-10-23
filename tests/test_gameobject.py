@@ -1,9 +1,8 @@
-from mock import patch, create_autospec
+from unittest.mock import patch, create_autospec
 from panda3d.core import loadPrcFileData
 from unittest import TestCase
-
-from racing.game.engine.engine import Engine
-from racing.game.gameobject import AiColleague, AudioColleague, EventColleague, FsmColleague, GameObject, GfxColleague, GuiColleague, \
+from yyagl.engine.engine import Engine
+from yyagl.gameobject import AiColleague, AudioColleague, EventColleague, FsmColleague, GameObject, GfxColleague, GuiColleague, \
     LogicColleague, PhysColleague, Colleague
 
 
@@ -150,6 +149,20 @@ class PhysicsTests(TestCase):
         phys = PhysColleague(game_obj)
         self.assertIsInstance(phys, PhysColleague)
 
+class GameObjectInstance(GameObject):
+
+    def __init__(self):
+        init_lst = [
+            [('fsm', FsmColleague, [self])],
+            [('event', EventColleague, [self])],
+            [('ai', AiColleague, [self])],
+            [('phys', PhysColleague, [self])],
+            [('audio', AudioColleague, [self])],
+            [('logic', LogicColleague, [self])],
+            [('gui', GuiColleague, [self])],
+            [('gfx', GfxColleague, [self])]
+        ]
+        GameObject.__init__(self, init_lst)
 
 class GameObjectTests(TestCase):
 
@@ -175,7 +188,7 @@ class GameObjectTests(TestCase):
             ):
         self.engine = Engine()
         mock_event_destroy.__name__ = 'destroy'
-        game_obj = GameObject()
+        game_obj = GameObjectInstance()
         self.assertIsInstance(game_obj, GameObject)
         game_obj.destroy()
         assert mock_fsm_destroy.called

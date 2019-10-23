@@ -1,11 +1,10 @@
 from direct.showbase.DirectObject import DirectObject
-from mock import create_autospec
+from unittest.mock import create_autospec
 from panda3d.core import loadPrcFileData, NodePath, ConfigVariableBool,\
     MouseWatcher, Lens, GraphicsWindow
 from unittest import TestCase
-
-from racing.game.engine.engine import Engine
-from racing.game.engine.configuration import Cfg
+from yyagl.engine.engine import Engine
+from yyagl.engine.configuration import Cfg, CursorCfg
 
 
 class ConfigurationTests(TestCase):
@@ -18,7 +17,7 @@ class ConfigurationTests(TestCase):
         self.engine.destroy()
 
     def test_init(self):
-        self.engine = Engine(Cfg(cursor_hidden=True))
+        self.engine = Engine(Cfg(cursor_cfg=CursorCfg(cursor_hidden=True)))
         self.assertTrue(ConfigVariableBool('cursor-hidden'))
         self.assertFalse(ConfigVariableBool('fullscreen'))
 

@@ -22,6 +22,8 @@ class AbsProfiler(object):
 
     def toggle(self): pass
 
+    def destroy(self): pass
+
 
 class Profiler(AbsProfiler):
 

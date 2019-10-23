@@ -127,6 +127,10 @@ class JoystickMgr(GameObject):
     def unbind_keyboard(self, i): self.nav[i] = None
 
     def destroy(self):
-        self.eng.detach_obs(self.on_frame)
+        try: self.eng.detach_obs(self.on_frame)
+        except KeyError: pass
+        # it happens in unit tests since it destroys in the same frame
+        # remove this catch when i've refactored the object's building
+        # and i don't use the director anymore
         self.joystick_lib.destroy()
         GameObject.destroy(self)

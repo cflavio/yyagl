@@ -69,7 +69,7 @@ class Engine(GameObject, EngineFacade):
         self.font_mgr.destroy()
         self.server.destroy()
         self.client.destroy()
-        self.xmpp.destroy()
+        #self.xmpp.destroy()
         self.lib = self.shader_mgr = self.profiler = self.font_mgr = \
             self.server = self.client = None
         base.destroy()

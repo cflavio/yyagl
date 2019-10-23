@@ -2,8 +2,7 @@ from os import getcwd, makedirs
 from os.path import basename
 from shutil import rmtree
 from unittest import TestCase
-
-from racing.game.build.build import InsideDir, get_files, get_size, exec_cmd, set_path
+from yyagl.build.build import InsideDir, files, size, exec_cmd, set_path
 
 
 class BuildTests(TestCase):
@@ -25,21 +24,21 @@ class BuildTests(TestCase):
 
     def test_inside_dir(self):
         self.assertNotEqual(basename(getcwd()), 'tests')
-        with InsideDir('racing/game/tests'):
+        with InsideDir('yyagl/tests'):
             self.assertEqual(basename(getcwd()), 'tests')
         self.assertNotEqual(basename(getcwd()), 'tests')
 
     def test_get_files(self):
-        files = get_files(['ext2'], 'c')
-        self.assertSetEqual(set(files),
+        _files = files(['ext2'], 'c')
+        self.assertSetEqual(set(_files),
                             set(['./test_get_files/a/d.ext2',
                                  './test_get_files/b/e.ext2']))
 
     def test_get_size(self):
-        self.assertEqual(get_size('test_get_files'), 20)
+        self.assertEqual(size('test_get_files'), 20)
 
     def test_exec_cmd(self):
-        self.assertEqual(exec_cmd('echo abc'), 'abc\n\n')
+        self.assertEqual(exec_cmd('echo abc'), 'abc')
 
     def test_path(self):
         self.assertEqual(set_path('abc'), 'abc/')

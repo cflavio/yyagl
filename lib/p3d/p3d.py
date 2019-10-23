@@ -286,3 +286,5 @@ class LibP3d(DirectObject, object):
         if key1 in self.__logged_keys and self.__logged_keys[key1] == key2: return
         self.__logged_keys[key1] = key2
         print(msg)
+
+    def destroy(self): pass
