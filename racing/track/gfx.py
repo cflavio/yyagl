@@ -47,6 +47,7 @@ class TrackGfx(GfxColleague):
         roots = self.model.find_all_matches('**/%s*' % rpr.sign_name)
         self.signs = Signs(roots, rpr.sign_cb)
         self.signs.set_signs()
+        list(map(lambda sign: sign.optimize()), roots)
         self.model.optimize()
 
     @staticmethod
@@ -63,6 +64,7 @@ class TrackGfx(GfxColleague):
         self.__anim_nodes += [AnimNode(path, {'anim': anim_path})]
         self.__anim_nodes[-1].loop('anim')
         self.__anim_nodes[-1].reparent_to(cloned_root)
+        self.__anim_nodes[-1].optimize()
         has_omni = model.has_tag(self.raceprops.omni_tag)
         if has_omni and model.get_tag(self.raceprops.omni_tag):
             self.__set_omni(cloned_root)

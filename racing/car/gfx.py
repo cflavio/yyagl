@@ -112,15 +112,19 @@ class CarGfx(GfxColleague, CarGfxFacade):
         wpn_classes = [Rocket, RearRocket, Turbo, RotateAll, Mine]
         if self.cnt == 7:
             self.set_decorator('pitstop', False)
+            self.decorators[-1].gfx_np.optimize()
             self.cnt -= 1
         elif self.cnt == 6:
             self.unset_decorator(self.decorators[-1])
             self.set_decorator('rotate_all', False)
+            self.decorators[-1].gfx_np.optimize()
             self.cnt -= 1
         elif self.cnt:
             if self.cnt == 5: self.unset_decorator(self.decorators[-1])
             self.apply_damage()
+            self.nodepath.optimize()
             self.mediator.event.on_bonus(wpn_classes[self.cnt - 1])
+            self.mediator.logic.weapon.gfx.gfx_np.optimize()
             self.cnt -= 1
         else:
             node = P3dNode(NodePath('temp'))
@@ -130,6 +134,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
             self.eng.particle(node, 'dust', (.9, .7, .2, .6), pi/20, .1, .001, 0, vel=3, part_duration=.01, autodestroy=.01)
             node.remove_node()
             self.apply_damage(True)
+            self.nodepath.optimize()
             self.mediator.event.on_bonus('remove')
 
     def load_wheels(self, chassis_model):

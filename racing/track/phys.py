@@ -279,6 +279,8 @@ class TrackPhys(PhysColleague, ComputerProxy):
         if not weap_root: return
         weapons = weap_root.find_all_matches('**/%s*' % weapon_info.weap_name)
         list(map(lambda weap: self.create_bonus(weap.get_pos()), weapons))
+        self.bonuses[-1].gfx.model.prepare_scene(base.win.get_gsg())
+        self.bonuses[-1].gfx.model.premunge_scene(base.win.get_gsg())
 
     def __hide_all_models(self):
         nms = self.race_props.unmerged_names + self.race_props.merged_names + \
