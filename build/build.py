@@ -8,11 +8,11 @@ def exec_cmd(cmd):
     return ret[0].decode('utf-8').strip()  # '\n'.join(ret)
 
 
-def __branch():
+def _branch():
     return exec_cmd('git symbolic-ref HEAD').split('/')[-1].strip()
 
 
-def __version():
+def _version():
     pref = ''
     if exists('assets/version.txt'):
         with open('assets/version.txt') as fver:
@@ -70,19 +70,6 @@ def size(start_dir='.'):
     return sum(sizes)
 
 
-class TempFile(object):
-
-    def __init__(self, fname, content):
-        self.fname, self.content = fname, content
-
-    def __enter__(self):
-        with open(self.fname, 'w') as outfile:
-            outfile.write(self.content)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        remove(self.fname)
-
-
 class InsideDir(object):
 
     def __init__(self, dir_):
@@ -98,8 +85,8 @@ class InsideDir(object):
 
 bld_dpath = 'built/'
 branch2ver = {'master': 'dev', 'stable': 'stable'}
-branch = branch2ver[__branch()] if __branch() in branch2ver else __branch()
-ver = __version()
+branch = branch2ver[_branch()] if _branch() in branch2ver else _branch()
+ver = _version()
 win_fpath = '{dst_dir}{appname}-%s-windows.exe' % branch
 osx_fpath = '{dst_dir}{appname}-%s-osx.zip' % branch
 linux_fpath = '{dst_dir}{appname}-%s-linux' % branch
