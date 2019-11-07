@@ -231,14 +231,16 @@ class Page(GameObject, PageFacade):
         PageFacade.__init__(self)
         self.menu_props = menu_props
         self.players = players
-        GameObject.__init__(self, self.init_lst)
+        GameObject.__init__(self)
+        self._build_event()
+        self._build_gui()
         list(map(self.gui.attach, [self.on_hide, self.on_back, self.on_quit]))
 
-    @property
-    def init_lst(self):
-        return [
-            [('event', self.event_cls, [self])],
-            [('gui', self.gui_cls, [self, self.menu_props, self.players])]]
+    def _build_event(self):
+        self.event = self.event_cls(self)
+
+    def _build_gui(self):
+        self.gui = self.gui_cls(self, self.menu_props, self.players)
 
     def on_hide(self): self.event.ignoreAll()
 
@@ -247,4 +249,6 @@ class Page(GameObject, PageFacade):
     def on_quit(self, cls_name): self.event.on_quit()  # unused arg
 
     def destroy(self):
+        self.event.destroy()
+        self.gui.destroy()
         for cls in Page.__bases__: cls.destroy(self)

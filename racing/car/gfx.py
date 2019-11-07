@@ -77,9 +77,9 @@ class CarGfx(GfxColleague, CarGfxFacade):
         with open(fpath) as phys_file:
             chassis.set_z(yaml_load(phys_file)['center_mass_offset'])
         self.load_wheels(chassis)
-        self.eng.do_later(.01, self.__set_emitters)
+        #self.eng.do_later(.01, self.__set_emitters)
 
-    def __set_emitters(self):
+    def set_emitters(self):
         wheels = self.mediator.phys.vehicle.get_wheels()
         whl_radius = wheels[2].get_wheel_radius()
         whl_pos_l = wheels[2].get_chassis_connection_point_cs() + \

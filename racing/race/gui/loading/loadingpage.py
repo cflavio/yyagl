@@ -152,14 +152,15 @@ class LoadingPage(Page):
         self.rprops = rprops
         self.menu = menu
         gui_cls = LoadingPageLocalMPGui if rprops.season_props.kind == 'localmp' else LoadingPageGui
-        init_lst = [
-            [('event', EventColleague, [self])],
-            [('gui', gui_cls, [self, menu, rprops, track_name_transl,
-                               drivers, ranking, tuning])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.event = EventColleague(self)
+        self.gui = gui_cls(self, menu, rprops, track_name_transl,
+                           drivers, ranking, tuning)
         PageFacade.__init__(self)
         # call Page's __init__
 
     def destroy(self):
+        self.event.destroy()
+        self.gui.destroy()
         GameObject.destroy(self)
         PageFacade.destroy(self)

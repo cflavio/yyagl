@@ -61,11 +61,12 @@ class Season(GameObject, SeasonFacade):
     logic_cls = SeasonLogic
 
     def __init__(self, season_props):
-        init_lst = [[('logic', self.logic_cls, [self, season_props])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.logic = self.logic_cls(self, season_props)
         SeasonFacade.__init__(self)
 
     def destroy(self):
+        self.logic.destroy()
         GameObject.destroy(self)
         SeasonFacade.destroy(self)
 

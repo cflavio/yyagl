@@ -19,12 +19,14 @@ class GameFacade(Facade):
 class GameBase(GameObject, GameFacade):  # it doesn't manage the window
     __metaclass__ = ABCMeta
 
-    def __init__(self, init_lst, cfg, client_cls=None):
+    def __init__(self, cfg, client_cls=None):
         GameFacade.__init__(self)
+        self.logic = LogicColleague(self)
         self.eng = Engine(cfg, self.destroy, client_cls)
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
 
     def destroy(self):
+        self.logic.destroy()
         GameFacade.destroy(self)
         GameObject.destroy(self)
         # self.eng = self.eng.destroy()

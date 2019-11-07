@@ -272,6 +272,10 @@ class P3dAnimNode(Facade):
     @property
     def name(self): return self.node.get_name()
 
+    def optimize(self):
+        self.node.prepare_scene(base.win.get_gsg())
+        self.node.premunge_scene(base.win.get_gsg())
+
     def set_omni(self):
         self.node.node().set_bounds(OmniBoundingVolume())
         self.node.node().set_final(True)

@@ -27,15 +27,18 @@ class Race(GameObject, RaceFacade):
 
     def __init__(self, race_props):
         rpr = race_props
-        init_lst = [
-            [('fsm', self.fsm_cls, [self, rpr.shaders_dev])],
-            [('gui', self.gui_cls, [self, rpr])],
-            [('logic', self.logic_cls, [self, rpr])],
-            [('event', self.event_cls, [self, rpr.ingame_menu, rpr.keys])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.fsm = self.fsm_cls(self, rpr.shaders_dev)
+        self.gui = self.gui_cls(self, rpr)
+        self.logic = self.logic_cls(self, rpr)
+        self.event = self.event_cls(self, rpr.ingame_menu, rpr.keys)
         RaceFacade.__init__(self)
 
     def destroy(self):
+        self.fsm.destroy()
+        self.gui.destroy()
+        self.logic.destroy()
+        self.event.destroy()
         GameObject.destroy(self)
         RaceFacade.destroy(self)
 

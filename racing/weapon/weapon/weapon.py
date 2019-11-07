@@ -26,15 +26,18 @@ class Weapon(GameObject, WeaponFacade):
     deg = 0
 
     def __init__(self, car, path, cars, part_path, wpn_id):
-        init_lst = [
-            [('gfx', self.gfx_cls, [self, car.gfx.nodepath, path])],
-            [('audio', self.audio_cls, [self])],
-            [('logic', self.logic_cls, [self, car, cars, wpn_id])],
-            [('ai', self.ai_cls, [self, car])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.gfx = self.gfx_cls(self, car.gfx.nodepath, path)
+        self.audio = self.audio_cls(self)
+        self.logic = self.logic_cls(self, car, cars, wpn_id)
+        self.ai = self.ai_cls(self, car)
         WeaponFacade.__init__(self)
 
     def destroy(self):
+        self.gfx.destroy()
+        self.audio.destroy()
+        self.logic.destroy()
+        self.ai.destroy()
         GameObject.destroy(self)
         WeaponFacade.destroy(self)
 
@@ -42,13 +45,17 @@ class Weapon(GameObject, WeaponFacade):
 class PhysWeapon(Weapon):
 
     def __init__(self, car, path, cars, part_path, wpn_id):
-        init_lst = [
-            [('gfx', self.gfx_cls, [self, car.gfx.nodepath, path])],
-            [('phys', self.phys_cls, [self, car, cars])],
-            [('audio', self.audio_cls, [self])],
-            [('logic', self.logic_cls, [self, car, cars, wpn_id])],
-            [('event', self.event_cls, [self, part_path])],
-            [('ai', self.ai_cls, [self, car])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.gfx = self.gfx_cls(self, car.gfx.nodepath, path)
+        self.phys = self.phys_cls(self, car, cars)
+        self.audio = self.audio_cls(self)
+        self.logic = self.logic_cls(self, car, cars, wpn_id)
+        self.event = self.event_cls(self, part_path)
+        self.ai = self.ai_cls(self, car)
         WeaponFacade.__init__(self)
         # refactor: call Weapon.__init__
+
+    def destroy(self):
+        self.phys.destroy()
+        self.event.destroy()
+        Weapon.destroy(self)

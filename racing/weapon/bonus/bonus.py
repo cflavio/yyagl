@@ -20,14 +20,17 @@ class BonusFacade(Facade):
 class Bonus(GameObject, BonusFacade):
 
     def __init__(self, pos, model_name, model_suff, track_phys, track_gfx):
-        init_lst = [
-            [('gfx', BonusGfx, [self, pos, model_name, model_suff])],
-            [('event', BonusEvent, [self])],
-            [('phys', BonusPhys, [self, pos])],
-            [('logic', BonusLogic, [self, track_phys, track_gfx])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.gfx = BonusGfx(self, pos, model_name, model_suff)
+        self.event = BonusEvent(self)
+        self.phys = BonusPhys(self, pos)
+        self.logic = BonusLogic(self, track_phys, track_gfx)
         BonusFacade.__init__(self)
 
     def destroy(self):
+        self.gfx.destroy()
+        self.event.destroy()
+        self.phys.destroy()
+        self.logic.destroy()
         GameObject.destroy(self)
         BonusFacade.destroy(self)

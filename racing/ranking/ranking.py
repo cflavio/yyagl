@@ -23,12 +23,13 @@ class Ranking(GameObject, RankingFacade):
     __metaclass__ = ABCMeta
 
     def __init__(self, car_names, background_fpath, font, fg_col):
-        init_lst = [
-            [('gui', RankingGui, [self, background_fpath, font, fg_col])],
-            [('logic', RankingLogic, [self, car_names])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.gui = RankingGui(self, background_fpath, font, fg_col)
+        self.logic = RankingLogic(self, car_names)
         RankingFacade.__init__(self)
 
     def destroy(self):
+        self.gui.destroy()
+        self.logic.destroy()
         GameObject.destroy(self)
         RankingFacade.destroy(self)

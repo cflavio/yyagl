@@ -24,12 +24,13 @@ class Tuning(GameObject, TuningFacade):
     __metaclass__ = ABCMeta
 
     def __init__(self, props):
-        init_lst = [
-            [('gui', TuningGui, [self, props])],
-            [('logic', TuningLogic, [self, props.car_names])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.gui = TuningGui(self, props)
+        self.logic = TuningLogic(self, props.car_names)
         TuningFacade.__init__(self)
 
     def destroy(self):
+        self.gui.destroy()
+        self.logic.destroy()
         GameObject.destroy(self)
         TuningFacade.destroy(self)

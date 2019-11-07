@@ -44,8 +44,8 @@ class DriverFacade(Facade):
 class Driver(GameObject, DriverFacade):
 
     def __init__(self, driver_props):
-        init_lst = [[('logic', DriverLogic, [self, driver_props])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.logic = DriverLogic(self, driver_props)
         DriverFacade.__init__(self)
 
     def __repr__(self):
@@ -55,5 +55,6 @@ class Driver(GameObject, DriverFacade):
             dpr.f_suspensions)
 
     def destroy(self):
+        self.logic.destroy(self)
         GameObject.destroy(self)
         DriverFacade.destroy(self)

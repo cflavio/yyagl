@@ -20,17 +20,20 @@ class TrackGfx(GfxColleague):
         self.__flat_roots = {}
         self.raceprops = race_props
         GfxColleague.__init__(self, mediator)
-        taskMgr.add(self.__set_meshes())
+        #taskMgr.add(self.__set_meshes())
+        self.__set_meshes()
         self._set_light()
 
-    async def __set_meshes(self):
+    #async def __set_meshes(self):
+    def __set_meshes(self):
         info('loading track model')
         filename = self.raceprops.gfx_track_path
         if not exists(filename):
             script_path = executable + ' yyagl/build/process_track.py'
             system(script_path + ' assets/tracks/' + self.raceprops.track_name)
         info('loading ' + filename)
-        self.model = await loader.load_model(filename, blocking=False)
+        #self.model = await loader.load_model(filename, blocking=False)
+        self.model = loader.load_model(filename)
         self.model = P3dNode(self.eng.gfx.gfx_mgr.set_srgb(self.model))
         rpr = self.raceprops
         anim_name = '**/%s*%s*' % (rpr.empty_name, rpr.anim_name)
@@ -47,7 +50,7 @@ class TrackGfx(GfxColleague):
         roots = self.model.find_all_matches('**/%s*' % rpr.sign_name)
         self.signs = Signs(roots, rpr.sign_cb)
         self.signs.set_signs()
-        list(map(lambda sign: sign.optimize()), roots)
+        list(map(lambda sign: sign.optimize(), roots))
         self.model.optimize()
 
     @staticmethod

@@ -64,10 +64,9 @@ class RankingPage(Page):
     def __init__(self, rprops, sprops, menu_props, ranking):
         self.rprops = rprops
         self.menu_props = menu_props
-        init_lst = [
-            [('event', PageEvent, [self]),
-             ('gui', RankingPageGui, [self, menu_props, rprops, sprops, ranking])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.event = PageEvent(self)
+        self.gui = RankingPageGui(self, menu_props, rprops, sprops, ranking)
         PageFacade.__init__(self)
         # invece Page's __init__
 
@@ -78,6 +77,8 @@ class RankingPage(Page):
         self.gui.detach_obs(mth)
 
     def destroy(self):
+        self.event.destroy()
+        self.gui.destroy()
         GameObject.destroy(self)
         PageFacade.destroy(self)
 
@@ -101,8 +102,8 @@ class RankingMenu(GameObject):
     gui_cls = RankingMenuGui
 
     def __init__(self, rprops, sprops, ranking):
-        init_lst = [[('gui', self.gui_cls, [self, rprops, sprops, ranking])]]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.gui = self.gui_cls(self, rprops, sprops, ranking)
 
     def attach_obs(self, mth):
         self.gui.rank_page.attach_obs(mth)
@@ -111,6 +112,7 @@ class RankingMenu(GameObject):
         self.gui.rank_page.detach_obs(mth)
 
     def destroy(self):
+        self.gui.destroy()
         GameObject.destroy(self)
 
 

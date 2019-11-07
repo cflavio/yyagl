@@ -25,18 +25,26 @@ class Track(GameObject, TrackFacade):
 
     def __init__(self, race_props):
         info('init track')
-        self.race_props = rpr = race_props
-        gfx_cls = TrackGfxShader if rpr.shaders_dev else TrackGfx
-        gfx_cls = TrackGfxDebug if rpr.show_waypoints else gfx_cls
-        init_lst = [
-            [('gfx', gfx_cls, [self, rpr]),
-             ('phys', TrackPhys, [self, rpr])],
-            [('audio', TrackAudio, [self, rpr.music_path])]]
-        GameObject.__init__(self, init_lst, self.__on_track_loaded)
+        self.race_props = self.__rpr = race_props
+        self.__gfx_cls = TrackGfxShader if self.__rpr.shaders_dev else TrackGfx
+        self.__gfx_cls = TrackGfxDebug if self.__rpr.show_waypoints else self.__gfx_cls
+        GameObject.__init__(self)
+        taskMgr.add(self.__build_comps())
         TrackFacade.__init__(self)
 
-    def __on_track_loaded(self): self.notify('on_track_loaded')
+    async def __build_comps(self):
+        gfx_task = taskMgr.add(self.__build_gfx)
+        await gfx_task
+        self.phys = TrackPhys(self, self.__rpr)
+        self.audio = TrackAudio(self, self.__rpr.music_path)
+        self.notify('on_track_loaded')
+
+    def __build_gfx(self, task):
+        self.gfx = self.__gfx_cls(self, self.__rpr)
 
     def destroy(self):
+        self.gfx.destroy()
+        self.phys.destroy()
+        self.audio.destroy()
         GameObject.destroy(self)
         TrackFacade.destroy(self)

@@ -72,20 +72,38 @@ class Car(GameObject, CarFacade):
 
     def __init__(self, car_props, player_car_idx):
         info('init car ' + car_props.name)
-        init_lst = [
-            [('fsm', self.fsm_cls, [self, car_props])],
-            [('gfx', self.gfx_cls, [self, car_props]),
-             ('phys', self.phys_cls, [self, car_props]),
-             ('logic', self.logic_cls, [self, car_props]),
-             ('gui', self.gui_cls, [self, car_props.race_props]),
-             ('event', self.event_cls, [self, car_props.race_props]),
-             ('ai', self.ai_cls, [self, car_props])],
-            [('audio', self.audio_cls, [self, car_props.race_props])]]
+        self.name = car_props.name
         self.player_car_idx = player_car_idx
-        GameObject.__init__(self, init_lst, car_props.callback)
+        self.__car_props = car_props
+        GameObject.__init__(self)
+        taskMgr.add(self.__build_comps())
+
+    async def __build_comps(self):
+        self.fsm = self.fsm_cls(self, self.__car_props)
+        gfx_task = taskMgr.add(self.__build_gfx)
+        await gfx_task
+        self.phys = self.phys_cls(self, self.__car_props)
+        self.gfx.set_emitters()
+        self.logic = self.logic_cls(self, self.__car_props)
+        self.gui = self.gui_cls(self, self.__car_props.race_props)
+        self.event = self.event_cls(self, self.__car_props.race_props)
+        self.ai = self.ai_cls(self, self.__car_props)
+        self.audio = self.audio_cls(self, self.__car_props.race_props)
         CarFacade.__init__(self)
+        self.__car_props.callback()
+
+    def __build_gfx(self, task):
+        self.gfx = self.gfx_cls(self, self.__car_props)
 
     def destroy(self):
+        self.fsm.destroy()
+        self.gfx.destroy()
+        self.phys.destroy()
+        self.logic.destroy()
+        self.gui.destroy()
+        self.event.destroy()
+        self.ai.destroy()
+        self.audio.destroy()
         GameObject.destroy(self)
         CarFacade.destroy(self)
 
