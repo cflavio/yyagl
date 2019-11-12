@@ -93,7 +93,7 @@ class Server(AbsNetwork):
         try:
             dgram = self._fix_payload(dict(loads(dgram)))
             self.read_cb(dgram['payload'], dgram['sender'])
-        except (MarkerError, IndexError) as e: print(e)
+        except IndexError as e: print(e)
 
     def send_udp(self, data_lst, receiver):
         if receiver[0] not in self.addr2conn: return
