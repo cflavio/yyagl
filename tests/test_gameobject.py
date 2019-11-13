@@ -152,17 +152,26 @@ class PhysicsTests(TestCase):
 class GameObjectInstance(GameObject):
 
     def __init__(self):
-        init_lst = [
-            [('fsm', FsmColleague, [self])],
-            [('event', EventColleague, [self])],
-            [('ai', AiColleague, [self])],
-            [('phys', PhysColleague, [self])],
-            [('audio', AudioColleague, [self])],
-            [('logic', LogicColleague, [self])],
-            [('gui', GuiColleague, [self])],
-            [('gfx', GfxColleague, [self])]
-        ]
-        GameObject.__init__(self, init_lst)
+        GameObject.__init__(self)
+        self.fsm = FsmColleague(self)
+        self.event = EventColleague(self)
+        self.ai = AiColleague(self)
+        self.phys = PhysColleague(self)
+        self.audio = AudioColleague(self)
+        self.logic = LogicColleague(self)
+        self.gui = GuiColleague(self)
+        self.gfx = GfxColleague(self)
+
+    def destroy(self):
+        self.fsm.destroy()
+        self.event.destroy()
+        self.ai.destroy()
+        self.phys.destroy()
+        self.audio.destroy()
+        self.logic.destroy()
+        self.gui.destroy()
+        self.gfx.destroy()
+
 
 class GameObjectTests(TestCase):
 

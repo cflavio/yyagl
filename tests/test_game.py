@@ -29,12 +29,18 @@ class GameInstance(Game):
 
     def __init__(self):
         conf = Cfg()
-        init_lst = [
-            [('fsm', FsmColleague, [self])],
-            [('logic', LogicColleague, [self])],
-            [('audio', AudioColleague, [self])],
-            [('event', EventColleague, [self])]]
-        Game.__init__(self, init_lst, conf)
+        Game.__init__(self, conf)
+        self.fsm = FsmColleague(self)
+        self.logic = LogicColleague(self)
+        self.audio = AudioColleague(self)
+        self.event = EventColleague(self)
+
+    def destroy(self):
+        self.fsm.destroy()
+        self.logic.destroy()
+        self.audio.destroy()
+        self.event.destroy()
+
 
 class GameTests(TestCase):
 
