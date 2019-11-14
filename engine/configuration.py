@@ -89,7 +89,8 @@ class Cfg(object):
             #('client-sleep', 0.001),
             ('texture-minfilter', 'mipmap'),
             ('gl-coordinate-system', 'default'),
-            ('textures-power-2', 'none'),
+            ('textures-power-2', 'down'),
+            ('textures-auto-power-2', 1),
             ('show-frame-rate-meter', int(self.gui_cfg.fps)),
             ('hardware-animated-vertices', 'true'),
             ('x-init-threads','true'),  # temp workaround 4 mtrendering (linux)
