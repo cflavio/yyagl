@@ -72,11 +72,11 @@ class Car(GameObject, CarFacade):
 
     def __init__(self, car_props, player_car_idx):
         info('init car ' + car_props.name)
-        self.name = car_props.name
         self.player_car_idx = player_car_idx
         self.__car_props = car_props
         GameObject.__init__(self)
         taskMgr.add(self.__build_comps())
+        self.name = car_props.name
 
     async def __build_comps(self):
         self.fsm = self.fsm_cls(self, self.__car_props)
