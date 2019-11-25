@@ -72,19 +72,19 @@ class P3dShaderMgr(object):
 
     def setup_post_fx(self):
         self.filter_mgr = FilterManager(base.win, base.cam)
-        rendered_scene = Texture()
-        aa_scene = Texture()
-        filtered_scene = Texture()
-        filter_quad = self.filter_mgr.renderQuadInto(colortex=filtered_scene)
-        aa_quad = self.filter_mgr.renderQuadInto(colortex=aa_scene)
-        final_quad = self.filter_mgr.renderSceneInto(colortex=rendered_scene)
-        filter_quad.set_shader(self.__load_shader('filter', 'sobel_filter'))
-        filter_quad.set_shader_input('in_tex', rendered_scene)
-        aa_quad.set_shader(self.__load_shader('fxaa', 'fxaa'))
-        aa_quad.set_shader_input('in_tex', filtered_scene)
-        final_quad.set_shader(self.__load_shader('filter', 'pass'))
-        final_quad.set_shader_input('gamma', self.gamma)
-        final_quad.set_shader_input('in_tex', aa_scene)
+        #rendered_scene = Texture()
+        #aa_scene = Texture()
+        #filtered_scene = Texture()
+        #filter_quad = self.filter_mgr.renderQuadInto(colortex=filtered_scene)
+        #aa_quad = self.filter_mgr.renderQuadInto(colortex=aa_scene)
+        #final_quad = self.filter_mgr.renderSceneInto(colortex=rendered_scene)
+        #filter_quad.set_shader(self.__load_shader('filter', 'sobel_filter'))
+        #filter_quad.set_shader_input('in_tex', rendered_scene)
+        #aa_quad.set_shader(self.__load_shader('fxaa', 'fxaa'))
+        #aa_quad.set_shader_input('in_tex', filtered_scene)
+        #final_quad.set_shader(self.__load_shader('filter', 'pass'))
+        #final_quad.set_shader_input('gamma', self.gamma)
+        #final_quad.set_shader_input('in_tex', aa_scene)
 
     @staticmethod
     def __load_shader(vshad, fshad):
@@ -95,50 +95,50 @@ class P3dShaderMgr(object):
         return load_shader(fvert, ffrag)
 
     def apply(self):
-        winprops = WindowProperties.size(2048, 2048)
-        props = FrameBufferProperties()
-        props.set_rgb_color(1)
-        props.set_alpha_bits(1)
-        props.set_depth_bits(1)
-        lbuffer = base.graphicsEngine.make_output(
-            base.pipe, 'offscreen buffer', -2, props, winprops,
-            GraphicsPipe.BFRefuseWindow, base.win.getGsg(), base.win)
-        self.buffer = lbuffer
-        ldepthmap = Texture()
-        lbuffer.addRenderTexture(ldepthmap, GraphicsOutput.RTMBindOrCopy,
-                                 GraphicsOutput.RTPDepthStencil)
-        ldepthmap.set_minfilter(Texture.FTShadow)
-        ldepthmap.set_magfilter(Texture.FTShadow)
+        # winprops = WindowProperties.size(2048, 2048)
+        # props = FrameBufferProperties()
+        # props.set_rgb_color(1)
+        # props.set_alpha_bits(1)
+        # props.set_depth_bits(1)
+        # lbuffer = base.graphicsEngine.make_output(
+        #     base.pipe, 'offscreen buffer', -2, props, winprops,
+        #     GraphicsPipe.BFRefuseWindow, base.win.getGsg(), base.win)
+        # self.buffer = lbuffer
+        # ldepthmap = Texture()
+        # lbuffer.addRenderTexture(ldepthmap, GraphicsOutput.RTMBindOrCopy,
+        #                          GraphicsOutput.RTPDepthStencil)
+        # ldepthmap.set_minfilter(Texture.FTShadow)
+        # ldepthmap.set_magfilter(Texture.FTShadow)
 
-        base.camLens.set_near_far(1.0, 10000)
-        base.camLens.set_fov(75)
+        # base.camLens.set_near_far(1.0, 10000)
+        # base.camLens.set_fov(75)
 
-        self.lcam = base.makeCamera(lbuffer)
-        self.lcam.node().set_scene(render)
-        self.lcam.node().get_lens().set_fov(45)
-        self.lcam.node().get_lens().set_near_far(1, 100)
+        # self.lcam = base.makeCamera(lbuffer)
+        # self.lcam.node().set_scene(render)
+        # self.lcam.node().get_lens().set_fov(45)
+        # self.lcam.node().get_lens().set_near_far(1, 100)
 
-        render.set_shader_input('light', self.lcam)
-        render.set_shader_input('depthmap', ldepthmap)
-        render.set_shader_input('ambient', .15, .15, .15, 1.0)
+        # render.set_shader_input('light', self.lcam)
+        # render.set_shader_input('depthmap', ldepthmap)
+        # render.set_shader_input('ambient', .15, .15, .15, 1.0)
 
-        lci = NodePath(PandaNode('light camera initializer'))
-        lci.set_shader(self.__load_shader('caster', 'caster'))
-        self.lcam.node().set_initial_state(lci.get_state())
+        # lci = NodePath(PandaNode('light camera initializer'))
+        # lci.set_shader(self.__load_shader('caster', 'caster'))
+        # self.lcam.node().set_initial_state(lci.get_state())
 
-        mci = NodePath(PandaNode('main camera initializer'))
-        # use PTALVecBaseX instead
-        # setShaderInput('vec3argname', PTALVecBase3(((0, 0, 0), (1, 1, 1))))
+        # mci = NodePath(PandaNode('main camera initializer'))
+        # # use PTALVecBaseX instead
+        # # setShaderInput('vec3argname', PTALVecBase3(((0, 0, 0), (1, 1, 1))))
         render.set_shader(self.__main_shader())
-        render.set_shader_input('num_lights', len(self.lights))
-        self.set_shader_pars(render)
-        list(map(lambda lgt: self.set_lgt_args(*lgt), enumerate(self.lights)))
-        mci.setShader(self.__main_shader())
-        base.cam.node().set_initial_state(mci.getState())
+        # render.set_shader_input('num_lights', len(self.lights))
+        # self.set_shader_pars(render)
+        # list(map(lambda lgt: self.set_lgt_args(*lgt), enumerate(self.lights)))
+        # mci.setShader(self.__main_shader())
+        # base.cam.node().set_initial_state(mci.getState())
 
-        self.lcam.set_pos(15, 30, 45)
-        self.lcam.look_at(0, 15, 0)
-        self.lcam.node().get_lens().set_near_far(1, 100)
+        # self.lcam.set_pos(15, 30, 45)
+        # self.lcam.look_at(0, 15, 0)
+        # self.lcam.node().get_lens().set_near_far(1, 100)
 
     def __main_shader(self):
         with open('yyagl/assets/shaders/main.vert') as fvert:
