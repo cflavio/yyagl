@@ -6,16 +6,18 @@ from yyagl.gameobject import GuiColleague
 from yyagl.engine.gui.page import Page, PageGui, PageEvent, PageFacade
 from yyagl.gameobject import GameObject
 from yyagl.engine.gui.menu import Menu
+from yyagl.racing.player.player import Player
 
 
 class RankingPageGui(PageGui):
 
-    def __init__(self, mediator, menu_props, rprops, sprops, ranking):
+    def __init__(self, mediator, menu_props, rprops, sprops, ranking, players):
         self.rprops = rprops
         self.sprops = sprops
         self.drivers = sprops.drivers
         self.ranking = ranking
         self.menu_props = menu_props
+        self.__players = players
         PageGui.__init__(self, mediator, menu_props)
 
     def build(self, back_btn=True):
@@ -31,7 +33,7 @@ class RankingPageGui(PageGui):
         self.add_widgets([txt])
         for i, car in enumerate(sorted_ranking):
             txt, img = RankingGui.set_drv_txt_img(self, i, car[0], 0, .52,
-                                                  str(car[1]) + ' %s')
+                                                  str(car[1]) + ' %s', self.__players)
             self.add_widgets([txt, img])
         track = self.rprops.track_name
         ntracks = len(self.sprops.gameprops.season_tracks)
@@ -61,12 +63,12 @@ class RankingPageGui(PageGui):
 
 class RankingPage(Page):
 
-    def __init__(self, rprops, sprops, menu_props, ranking):
+    def __init__(self, rprops, sprops, menu_props, ranking, players):
         self.rprops = rprops
         self.menu_props = menu_props
         GameObject.__init__(self)
         self.event = PageEvent(self)
-        self.gui = RankingPageGui(self, menu_props, rprops, sprops, ranking)
+        self.gui = RankingPageGui(self, menu_props, rprops, sprops, ranking, players)
         PageFacade.__init__(self)
         # invece Page's __init__
 
@@ -85,12 +87,12 @@ class RankingPage(Page):
 
 class RankingMenuGui(GuiColleague):
 
-    def __init__(self, mediator, rprops, sprops, ranking):
+    def __init__(self, mediator, rprops, sprops, ranking, players):
         GuiColleague.__init__(self, mediator)
         menu_props = sprops.gameprops.menu_props
         menu_props.btn_size = (-8.6, 8.6, -.42, .98)
         self.menu = Menu(menu_props)
-        self.rank_page = RankingPage(rprops, sprops, menu_props, ranking)
+        self.rank_page = RankingPage(rprops, sprops, menu_props, ranking, players)
         self.eng.do_later(.01, self.menu.push_page, [self.rank_page])
 
     def destroy(self):
@@ -101,9 +103,9 @@ class RankingMenuGui(GuiColleague):
 class RankingMenu(GameObject):
     gui_cls = RankingMenuGui
 
-    def __init__(self, rprops, sprops, ranking):
+    def __init__(self, rprops, sprops, ranking, players):
         GameObject.__init__(self)
-        self.gui = self.gui_cls(self, rprops, sprops, ranking)
+        self.gui = self.gui_cls(self, rprops, sprops, ranking, players)
 
     def attach_obs(self, mth):
         self.gui.rank_page.attach_obs(mth)
@@ -127,16 +129,18 @@ class RankingGui(GuiColleague):
         self.rank_menu = self.background = None
 
     @staticmethod
-    def set_drv_txt_img(page, i, car_name, pos_x, top, text):
-        info('drivers: ' + str([drv.dprops for drv in page.drivers]))
+    def set_drv_txt_img(page, i, car_name, pos_x, top, text, players):
+        drivers = [player.driver for player in players]
+        info('drivers: ' + str([drv for drv in drivers]))
         info('i: %s  - carname: %s - text: %s' % (
             i, car_name, text))
         drv = next(
-            driver for driver in page.drivers
-            if driver.dprops.car_name == car_name)
-        is_player_car = car_name in page.rprops.season_props.player_car_names
-        info('%s %s %s %s' % (text % drv.logic.dprops.info.name, car_name, drv.logic.dprops.info.img_idx, is_player_car))
-        name = text % drv.logic.dprops.info.name
+            player.driver for player in players
+            if player.car == car_name)
+        player_car_names = [player.car for player in players if player.kind == Player.human]
+        is_player_car = car_name in player_car_names
+        info('%s %s %s %s' % (text % drv.name, car_name, drv.img_idx, is_player_car))
+        name = text % drv.name
         if '@' in name: name = name.split('@')[0] + '\1smaller\1@' + name.split('@')[1] + '\2'
         txt = Text(
             name, align='left',
@@ -160,12 +164,12 @@ class RankingGui(GuiColleague):
         img.set_transparent()
         t_s = TextureStage('ts')
         t_s.set_mode(TextureStage.MDecal)
-        txt_path = gprops.drivers_img.path_sel % drv.logic.dprops.info.img_idx
+        txt_path = gprops.drivers_img.path_sel % drv.img_idx
         img.set_texture(t_s, loader.loadTexture(txt_path))
         return txt, img
 
-    def show(self, rprops, sprops, ranking):
-        self.rank_menu = RankingMenu(rprops, sprops, ranking)
+    def show(self, rprops, sprops, ranking, players):
+        self.rank_menu = RankingMenu(rprops, sprops, ranking, players)
 
     def hide(self):
         self.rank_menu.destroy()

@@ -2,7 +2,7 @@ class RaceProps(object):
 
     def __init__(
             self, season_props, keys, joystick, sounds, coll_path, coll_name,
-            car_path, wheel_names, road_name, particle_path, drivers,
+            car_path, wheel_names, road_name, particle_path,
             shaders_dev, shaders, music_path, gfx_track_path, track_coll_path,
             unmerged_names, merged_names, ghost_names, corner_names, wp_info,
             show_waypoints, weapon_info, start_name, track_name, track_path,
@@ -22,7 +22,6 @@ class RaceProps(object):
         self.wheel_names = wheel_names
         self.road_name = road_name
         self.particle_path = particle_path
-        self.drivers = drivers
         self.shaders_dev = shaders_dev
         self.shaders = shaders
         self.music_path = music_path

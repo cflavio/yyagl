@@ -1,6 +1,7 @@
 from random import uniform
 from panda3d.core import Vec3, LineSegs, LPoint3f
 from yyagl.gameobject import AiColleague, GameObject
+from yyagl.racing.player.player import Player
 from yyagl.computer_proxy import ComputerProxy, once_a_frame
 from yyagl.engine.vec import Vec
 
@@ -225,15 +226,15 @@ class RearAiLogic(AbsAiLogic):
 
 class CarAi(AiColleague, ComputerProxy):
 
-    def __init__(self, mediator, car_props):
+    def __init__(self, mediator, car_props, players):
         AiColleague.__init__(self, mediator)
         ComputerProxy.__init__(self)
         race_props = car_props.race_props
-        player_car_name = race_props.season_props.player_car_name
+        player_car_name = [player.car for player in players if player.kind == Player.human][0]
         self.road_name = race_props.road_name
         self.waypoints = car_props.track_waypoints
         self.ai_poller = car_props.ai_poller
-        self.cars = race_props.season_props.car_names
+        self.cars = [player.car for player in players]
         self.__debug = race_props.ai_debug
         self.front_logic = FrontAiLogic(self.mediator, self.cars, player_car_name, race_props.ai_debug)
         self.rear_logic = RearAiLogic(self.mediator, self.cars, player_car_name, race_props.ai_debug)

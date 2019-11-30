@@ -4,6 +4,7 @@ from panda3d.core import Vec3, Vec2
 from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import EventColleague
 from yyagl.racing.race.event import wpnclasses2id
+from yyagl.racing.player.player import Player
 from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, \
     RearRocketNetwork
@@ -81,11 +82,12 @@ class InputBuilderPlayer(InputBuilder):
 
 class CarEvent(EventColleague, ComputerProxy):
 
-    def __init__(self, mediator, race_props):
+    def __init__(self, mediator, race_props, players):
         EventColleague.__init__(self, mediator)
         ComputerProxy.__init__(self)
         self.eng.attach_obs(self.on_collision)
         self.props = race_props
+        self._players = players
         self.curr_wpn_id = 0
 
     def start(self):
@@ -144,9 +146,10 @@ class CarEvent(EventColleague, ComputerProxy):
             Mine: self.props.mine_path,
             MineNetwork: self.props.mine_path}
         path = wpn2path[wpn_cls]
+        car_names = [player.car for player in self._players]
         self.mediator.logic.weapon = wpn_cls(
-            self.mediator, path, self.props.season_props.car_names, part_path,
-            wpn_id or self.curr_wpn_id)
+            self.mediator, path, car_names, part_path,
+            wpn_id or self.curr_wpn_id, self._players)
         self.curr_wpn_id += 1
         self.mediator.logic.weapon.attach_obs(self.on_rotate_all)
         return wpn_cls
@@ -226,8 +229,8 @@ class CarEvent(EventColleague, ComputerProxy):
 
 class CarPlayerEvent(CarEvent):
 
-    def __init__(self, mediator, race_props):
-        CarEvent.__init__(self, mediator, race_props)
+    def __init__(self, mediator, race_props, players):
+        CarEvent.__init__(self, mediator, race_props, players)
         keys = race_props.keys.players_keys[mediator.player_car_idx]
         suff = str(mediator.player_car_idx)
         self.label_events = [
@@ -241,7 +244,8 @@ class CarPlayerEvent(CarEvent):
             suff = str(8 + mediator.player_car_idx)
             self.accept('f' + suff, self._process_end_goal)
         state = self.mediator.fsm.getCurrentOrNextState()
-        joystick = self.mediator.name == race_props.season_props.player_car_names[mediator.player_car_idx] and \
+        player_car_names = [player.car for player in self._players if player.kind == Player.human]
+        joystick = self.mediator._car_props.name == player_car_names[mediator.player_car_idx] and \
             mediator.player_car_idx < self.eng.joystick_mgr.joystick_lib.num_joysticks
         self.input_bld = InputBuilder.create(state, joystick)
         keys = self.props.keys.players_keys[mediator.player_car_idx]
@@ -361,8 +365,8 @@ class CarPlayerEventServer(CarPlayerEvent):
 
 class CarPlayerEventClient(CarPlayerEvent):
 
-    def __init__(self, mediator, race_props):
-        CarPlayerEvent.__init__(self, mediator, race_props)
+    def __init__(self, mediator, race_props, players):
+        CarPlayerEvent.__init__(self, mediator, race_props, players)
         self.last_sent = self.eng.curr_time
 
     def on_frame(self):

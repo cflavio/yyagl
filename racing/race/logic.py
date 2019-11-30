@@ -5,6 +5,7 @@ from yyagl.racing.track.track import Track
 from yyagl.racing.car.ai import CarAiPoller
 from yyagl.racing.car.car import AiCar
 from yyagl.racing.driver.logic import DriverPlayerLoaderStrategy
+from yyagl.racing.player.player import Player
 
 
 class NetMsgs(object):
@@ -26,21 +27,25 @@ class RaceLogic(LogicColleague):
         LogicColleague.__init__(self, mediator)
         self.ai_poller = CarAiPoller()
 
-    def load_stuff(self, car_name, player_car_names):
+    def load_stuff(self, car_name, player_car_names, players):
         r_p = self.props
         self.eng.phys_mgr.reset()
         #player_car_names = player_car_names[1::2]
         self.track = Track(r_p)
         self.track.attach_obs(self.on_track_loaded)
-        for driver in self.props.drivers:
+        drivers = [player.driver for player in players]
+        car_names = [player.car for player in players]
+        player_car_names = [player.car for player in players if player.kind == Player.human]
+        player_car_name = player_car_names[0]
+        for player in players:
             local_mp = self.props.season_props.kind == 'localmp'
-            if local_mp and driver.dprops.car_name == r_p.season_props.player_car_names[0] or \
-                    not local_mp and driver.dprops.car_name == r_p.season_props.player_car_name:
+            if local_mp and player.car == player_car_names[0] or \
+                    not local_mp and player.car == player_car_name:
                 self.load_car = lambda: DriverPlayerLoaderStrategy.load(
-                    self.props.season_props.car_names[:],
+                    car_names,
                     r_p, car_name, self.track, self.mediator,
-                    r_p.season_props.player_car_name, player_car_names,
-                    self.props.season_props, self.ai_poller, self._on_loaded)
+                    player_car_name, player_car_names,
+                    self.props.season_props, self.ai_poller, self._on_loaded, players)
                 break
         self.mediator.track = self.track  # facade this
 
@@ -124,6 +129,11 @@ class RaceLogic(LogicColleague):
             list(map(lambda cam: cam.node().get_lens().set_aspect_ratio(a_r), self.cameras[1:]))
 
     def start_play(self):
+        ai_cars = [car.name for car in self.all_cars if car.__class__ == AiCar]
+        for player_car in self.player_cars:
+            if self.is_ai_car(player_car):
+                ai_cars += [player_car.name]
+        self.ai_poller.set_cars(ai_cars)
         self.eng.phys_mgr.start()
         self.eng.attach_obs(self.on_frame)
         self.track.gfx.model.optimize()
@@ -134,11 +144,6 @@ class RaceLogic(LogicColleague):
         list(map(lambda car: car.start(), self.all_cars))
         list(map(lambda car: car.event.attach(self.on_rotate_all), self.all_cars))
         self.mediator.gui.start()
-        ai_cars = [car.name for car in self.all_cars if car.__class__ == AiCar]
-        for player_car in self.player_cars:
-            if self.is_ai_car(player_car):
-                ai_cars += [player_car.name]
-        self.ai_poller.set_cars(ai_cars)
 
     def is_ai_car(self, player_car):
         return self.props.a_i == 1 or self.props.a_i == 2 and player_car.name != self.props.season_props.player_car_names[0]

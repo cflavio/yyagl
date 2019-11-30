@@ -3,16 +3,16 @@ from yyagl.lib.gui import Text, Img
 from yyagl.engine.gui.page import Page, PageGui, PageFacade
 from yyagl.gameobject import GameObject, EventColleague
 from yyagl.racing.ranking.gui import RankingGui
+from yyagl.racing.player.player import Player, TuningPlayer
 
 
 class LoadingPageGui(PageGui):
 
-    def __init__(self, mediator, menu, rprops, track_name_transl, drivers, ranking, tuning):
+    def __init__(self, mediator, menu, rprops, track_name_transl, ranking, players):
         self.rprops = rprops
         self.track_name_transl = track_name_transl
-        self.drivers = drivers
         self.ranking = ranking
-        self.tuning = tuning
+        self._players = players
         PageGui.__init__(self, mediator, menu.gui.menu_props)
 
     def build(self, back_btn=True):
@@ -53,7 +53,7 @@ class LoadingPageGui(PageGui):
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         for i, car_name in enumerate(self.rprops.grid):
-            pars = i, car_name, -1.28, .22, str(i + 1) + '. %s'
+            pars = i, car_name, -1.28, .22, str(i + 1) + '. %s', self._players
             txt, img = RankingGui.set_drv_txt_img(self, *pars)
             self.add_widgets([txt, img])
 
@@ -65,7 +65,7 @@ class LoadingPageGui(PageGui):
         self.add_widgets([txt])
         for i, car in enumerate(sorted_ranking):
             txt, img = RankingGui.set_drv_txt_img(self, i, car[0], -.2,
-                                                  .22, str(car[1]) + ' %s')
+                                                  .22, str(car[1]) + ' %s', self._players)
             self.add_widgets([txt, img])
 
     def set_controls(self):
@@ -94,20 +94,24 @@ class LoadingPageGui(PageGui):
         txt = Text(_('Upgrades'), scale=.1, pos=(1.0, -.56),
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
-        tuning = self.tuning.car2tuning[
-            self.rprops.season_props.player_car_names[0]]
+        #tuning = self.tuning.car2tuning[
+        #    self.rprops.season_props.player_car_names[0]]
+        first_human = [
+            player for player in self._players
+            if player.kind == Player.human][0]
+        tuning = TuningPlayer(first_human.tuning.engine, first_human.tuning.tires, first_human.tuning.suspensions)
         txt = Text(
-            _('engine: +') + str(tuning.f_engine),
+            _('engine: +') + str(tuning.engine),
             align='left', scale=.072, pos=(.8, -.7), font=self.font,
             fg=self.text_bg)
         self.widgets += [txt]
         txt = Text(
-            _('tires: +') + str(tuning.f_tires),
+            _('tires: +') + str(tuning.tires),
             align='left', scale=.072, pos=(.8, -.8), font=self.font,
             fg=self.text_bg)
         self.widgets += [txt]
         txt = Text(
-            _('suspensions: +') + str(tuning.f_suspensions),
+            _('suspensions: +') + str(tuning.suspensions),
             align='left', scale=.072, pos=(.8, -.9), font=self.font,
             fg=self.text_bg)
         self.widgets += [txt]
@@ -130,7 +134,8 @@ class LoadingPageLocalMPGui(LoadingPageGui):
                            font=self.font, fg=self.text_bg)
         self.add_widgets([txt])
         txts = []
-        for i in range(len(self.rprops.season_props.player_car_names)):
+        player_car_names = [player.car for player in self._players if player.kind == Player.human]
+        for i in range(len(player_car_names)):
             if i < self.eng.joystick_mgr.joystick_lib.num_joysticks:
                 keys = ['forward', 'rear', 'fire', 'respawn']
                 keys = [self.rprops.joystick[key + str(i + 1)] for key in keys]
@@ -148,14 +153,13 @@ class LoadingPageLocalMPGui(LoadingPageGui):
 
 class LoadingPage(Page):
 
-    def __init__(self, rprops, menu, track_name_transl, drivers, ranking, tuning):
+    def __init__(self, rprops, menu, track_name_transl, ranking, players):
         self.rprops = rprops
         self.menu = menu
         gui_cls = LoadingPageLocalMPGui if rprops.season_props.kind == 'localmp' else LoadingPageGui
         GameObject.__init__(self)
         self.event = EventColleague(self)
-        self.gui = gui_cls(self, menu, rprops, track_name_transl,
-                           drivers, ranking, tuning)
+        self.gui = gui_cls(self, menu, rprops, track_name_transl, ranking, players)
         PageFacade.__init__(self)
         # call Page's __init__
 

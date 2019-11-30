@@ -4,6 +4,7 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import GuiColleague, GameObject
 from yyagl.engine.gui.circle import Circle
+from yyagl.racing.player.player import Player
 
 
 class CarParameter(GameObject):
@@ -144,12 +145,13 @@ class CarParameters(GameObject):
 
 class CarPanel(GameObject):
 
-    def __init__(self, race_props, player_idx, ncars):
+    def __init__(self, car_props, player_idx, ncars, players):
         GameObject.__init__(self)
-        self.race_props = race_props
+        self._players = players
+        self.car_props = car_props
         self.player_idx = player_idx
         self.ncars = ncars
-        sprops = self.race_props.season_props
+        sprops = self.car_props.race_props.season_props
         menu_props = sprops.gameprops.menu_props
         if ncars == 1:
             parent_tr = base.a2dTopRight
@@ -235,7 +237,8 @@ class CarPanel(GameObject):
         fwd_img_scale = .15 if ncars == 1 else .12
         pars = {'scale': yellow_scale, 'parent': parent_tr,
                 'fg': menu_props.text_active_col, 'align': TextNode.A_left,
-                'font': self.eng.font_mgr.load_font(sprops.font)}
+                'font': self.eng.font_mgr.load_font(sprops.font)
+        }
         #self.glass_tl = OnscreenImage(
         #    'assets/images/gui/topleft.txo',
         #    scale=(.23, 1, .24), parent=parent_tl, pos=(.22, 1, -.23))
@@ -268,7 +271,7 @@ class CarPanel(GameObject):
         self.speed_c = Circle(
             size=.1, pos=(txt_x + .06, top_z), parent=parent_tr, ray=.4,
             thickness=.05, col_start=(.9, .6, .1, 1), col_end=(.2, .8, .2, 1))
-        lap_str = '1/' + str(self.race_props.laps)
+        lap_str = '1/' + str(self.car_props.race_props.laps)
         self.lap_txt = OnscreenText(text=lap_str, pos=(txt_x, top_z - offset_z), **pars)
         self.time_txt = OnscreenText(pos=(txt_x, top_z - offset_z * 4), **pars)
         self.best_txt = OnscreenText(pos=(txt_x, top_z - offset_z * 5), **pars)
@@ -341,7 +344,7 @@ class CarPanel(GameObject):
     def set_weapon(self, wpn):
         #self.glass_tl.show()
         self.weapon_lab.show()
-        ncars = len(self.race_props.season_props.player_car_names)
+        ncars = len(self._players)
         if ncars == 1:
             parent_tl = base.a2dTopLeft
         elif ncars == 2:
@@ -385,7 +388,7 @@ class CarPanel(GameObject):
         self.forward_img.hide()
 
     def apply_damage(self, reset=False):
-        col = self.race_props.season_props.gameprops.menu_props.text_normal_col
+        col = self.car_props.race_props.season_props.gameprops.menu_props.text_normal_col
         if reset:
             self.damages_img.set_color_scale(col)
         else:
@@ -442,10 +445,10 @@ class CarMultiPlayerPanel(CarPanel):
             elif self.player_idx == 1: parent = base.a2dQuarterThirdQuarter
             elif self.player_idx == 2: parent = base.a2dThirdQuarterQuarter
             else: parent = base.a2dThirdQuarterThirdQuarter
-        menu_props = self.race_props.season_props.gameprops.menu_props
+        menu_props = self.car_props.race_props.season_props.gameprops.menu_props
         pars = {'scale': .065, 'parent': parent,
                 'fg': menu_props.text_normal_col,
-                'font': self.eng.font_mgr.load_font(self.race_props.season_props.font)}
+                'font': self.eng.font_mgr.load_font(self.car_props.race_props.season_props.font)}
         self.wait_lab = OnscreenText(_('waiting for the other players'),
                                      pos=(0, 0), **pars)
 
@@ -456,8 +459,8 @@ class CarMultiPlayerPanel(CarPanel):
 
 class CarOnlineMPPanel(CarPanel):
 
-    def __init__(self, race_props, player_idx, ncars):
-        CarPanel.__init__(self, race_props, 0, 1)
+    def __init__(self, race_props, player_idx, ncars, players):
+        CarPanel.__init__(self, race_props, 0, 1, players)
 
 
 class CarAIPanel(GameObject):
@@ -502,12 +505,13 @@ class CarPlayerGui(CarGui):
 
     panel_cls = CarPanel
 
-    def __init__(self, mediator, car_props):
-        self.race_props = car_props
+    def __init__(self, mediator, car_props, players):
+        self.car_props = car_props
+        self._players = players
         ncars = self.ncars
         CarGui.__init__(self, mediator)
         self.pars = CarParameters(mediator.phys, mediator.logic)
-        self.panel = self.panel_cls(car_props, mediator.player_car_idx, ncars)
+        self.panel = self.panel_cls(car_props, mediator.player_car_idx, ncars, players)
         self.ai_panel = CarAIPanel()
         way_txt_pos = (0, .1) if ncars == 1 else (0, .04)
         way_txt_scale = .1 if ncars == 1 else .06
@@ -515,9 +519,9 @@ class CarPlayerGui(CarGui):
         way_img_scale = .12 if ncars == 1 else .06
         self.way_txt = OnscreenText(
             '', pos=way_txt_pos, scale=way_txt_scale,
-            fg=self.race_props.season_props.gameprops.menu_props.text_err_col,
+            fg=self.car_props.race_props.season_props.gameprops.menu_props.text_err_col,
             parent=self.parent,
-            font=self.eng.font_mgr.load_font(self.race_props.season_props.font))
+            font=self.eng.font_mgr.load_font(self.car_props.race_props.season_props.font))
         self.way_img = OnscreenImage(
             'assets/images/gui/arrow_circle.txo', scale=way_img_scale,
             parent=self.parent, pos=way_img_pos)
@@ -525,7 +529,9 @@ class CarPlayerGui(CarGui):
         self.way_img.hide()
 
     @property
-    def ncars(self): return len(self.race_props.season_props.player_car_names)
+    def ncars(self):
+        player_car_names = [player.car for player in self._players if player.kind == Player.human]
+        return len(player_car_names)
 
     @property
     def parent(self):
@@ -573,7 +579,7 @@ class CarPlayerGui(CarGui):
             self.way_img.show()
         elif not self.mediator.logic.is_moving or self.mediator.logic.fly_time > 10:
             #self.panel.glass_b.show()
-            keys = self.race_props.keys.players_keys[self.mediator.player_car_idx]
+            keys = self.car_props.race_props.keys.players_keys[self.mediator.player_car_idx]
             txt = _('press %s to respawn') % self.eng.event.key2desc(keys.respawn)
             self.way_txt.setText(txt)
             self.way_img.hide()
@@ -595,7 +601,8 @@ class CarPlayerLocalMPGui(CarPlayerGui):
 
     @property
     def ncars(self):
-        return len(self.race_props.season_props.player_car_names)
+        player_car_names = [player.car for player in self._players if player.kind == Player.human]
+        return len(player_car_names)
 
 
 class CarPlayerMPGui(CarPlayerGui):
@@ -608,14 +615,14 @@ class CarPlayerMPGui(CarPlayerGui):
 
 class CarNetworkGui(CarGui):
 
-    def __init__(self, mediator, car_props):
-        self.race_props = car_props
+    def __init__(self, mediator, car_props, players):
+        self.car_props = car_props
         CarGui.__init__(self, mediator)
-        for drv in self.race_props.drivers:
-            if drv.dprops.car_name == self.mediator.name:
-                name = drv.dprops.info.name
+        for player in players:
+            if player.car == car_props.name:
+                name = player.name
                 break
-        sprops = self.race_props.season_props
+        sprops = self.car_props.race_props.season_props
         menu_props = sprops.gameprops.menu_props
         pars = {'scale': .04, 'fg': menu_props.text_normal_col,
                 'font': self.eng.font_mgr.load_font(sprops.font)}

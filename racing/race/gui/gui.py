@@ -3,6 +3,7 @@ from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from yyagl.gameobject import GuiColleague
 from yyagl.facade import Facade
+from yyagl.racing.player.player import Player
 from .results import Results, ResultsServer
 from .loading.loading import Loading
 from .minimap import Minimap
@@ -18,8 +19,9 @@ class RaceGui(GuiColleague, RaceGuiFacade):
 
     result_cls = Results
 
-    def __init__(self, mediator, rprops):
+    def __init__(self, mediator, rprops, players):
         GuiColleague.__init__(self, mediator)
+        self._players = players
         r_p = self.props = rprops
         self.results = self.result_cls(rprops)
         self.loading = Loading()
@@ -27,11 +29,12 @@ class RaceGui(GuiColleague, RaceGuiFacade):
         RaceGuiFacade.__init__(self)
 
     def start(self):
+        car_names = [player.car for player in self._players]
+        player_car_name = [player.car for player in self._players if player.kind == Player.human]
         self.minimap = Minimap(
             self.mediator.track.bounds, self.props.minimap_path,
             self.props.minimap_image, self.props.col_dct,
-            self.props.season_props.car_names,
-            self.props.season_props.player_car_name)
+            car_names, player_car_name)
 
     def destroy(self):
         self.results.destroy()

@@ -1,5 +1,7 @@
 from logging import basicConfig, info, INFO
 from datetime import datetime
+from pprint import pprint
+from traceback import print_stack
 from sys import version_info
 from platform import system, release, architecture, platform, processor, \
     version, machine
@@ -54,6 +56,12 @@ class LogMgrBase(Colleague):  # headless log manager
     def log_tasks(self):
         info('tasks: %s' % taskMgr.getAllTasks())
         info('do-laters: %s' % taskMgr.getDoLaters())
+
+    def plog(self, obj):
+        print('\n\n')
+        print_stack()
+        pprint(obj)
+        print('\n\n')
 
 
 class LogMgr(LogMgrBase):

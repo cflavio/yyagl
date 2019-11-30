@@ -4,17 +4,20 @@ from panda3d.bullet import BulletVehicle, ZUp, BulletBoxShape, BulletSphereShape
 from panda3d.core import LPoint3f, BitMask32, Mat4, TransformState
 from yyagl.gameobject import PhysColleague
 from yyagl.racing.bitmasks import BitMasks
+from yyagl.racing.player.player import Player
 from yyagl.engine.phys import GhostNode
 
 
 class CarPhys(PhysColleague):
 
-    def __init__(self, mediator, car_props):
+    def __init__(self, mediator, car_props, tuning, players):
         PhysColleague.__init__(self, mediator)
         self.pnode = self.vehicle = self.__track_phys = self.coll_mesh = \
             self.max_speed = self.friction_slip = \
             self.friction_slip_rear = self.cfg = None
         self.turbo = False
+        self._tuning = tuning
+        self._players = players
         self.roll_influence = []
         self.ai_meshes = []
         self.curr_speed_mul = 1.0
@@ -91,7 +94,7 @@ class CarPhys(PhysColleague):
         boxpos[2] += self.cfg['center_mass_offset']
         pos = TransformState.makePos(tuple(boxpos))
         self.mediator.gfx.nodepath.p3dnode.add_shape(chassis_shape, pos)
-        car_names = self.cprops.race_props.season_props.car_names
+        car_names = [player.car for player in self._players]
         car_idx = car_names.index(self.cprops.name)
         car_bit = BitMask32.bit(BitMasks.car(car_idx))
         ghost_bit = BitMask32.bit(BitMasks.ghost)
@@ -387,12 +390,14 @@ class CarPhys(PhysColleague):
 class CarPlayerPhys(CarPhys):
 
     def get_speed(self):
-        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_engine
+        tuning_engine = self._tuning.engine
+        tun_c = 1 + .1 * tuning_engine
         drv_c = 1 + .01 * self.cprops.driver_engine
         return self.cfg['max_speed'] * tun_c * drv_c
 
     def get_friction(self):
-        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_tires
+        tuning_tires = self._tuning.tires
+        tun_c = 1 + .1 * tuning_tires
         drv_c = 1 + .01 * self.cprops.driver_tires
         slip = 1.0 if self.mediator.logic.is_drifting else .0
         k = tun_c * drv_c * self.friction_slip_k
@@ -403,7 +408,8 @@ class CarPlayerPhys(CarPhys):
         return fslip * k, rslip * k
 
     def get_friction_static(self):
-        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_tires
+        tuning_tires = self._tuning.tires
+        tun_c = 1 + .1 * tuning_tires
         drv_c = 1 + .01 * self.cprops.driver_tires
         k = tun_c * drv_c
         fstr = 'friction_slip'
@@ -412,7 +418,8 @@ class CarPlayerPhys(CarPhys):
             (self.cfg[fstr + '_rear'][0] * k, self.cfg[fstr + '_rear'][1] * k)]
 
     def get_roll_influence_static(self):
-        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_suspensions
+        tuning_suspensions = self._tuning.suspensions
+        tun_c = 1 + .1 * tuning_suspensions
         drv_c = 1 + .01 * self.cprops.driver_suspensions
         min_r = self.cfg['roll_influence'][0]
         max_r = self.cfg['roll_influence'][1]
@@ -420,7 +427,7 @@ class CarPlayerPhys(CarPhys):
         return [min_r * k, max_r * k]
 
     def get_roll_influence(self):
-        tun_c = 1 + .1 * self.cprops.race_props.season_props.tuning_suspensions
+        tun_c = 1 + .1 * self._tuning.suspensions
         drv_c = 1 + .01 * self.cprops.driver_suspensions
         min_r = self.cfg['roll_influence'][0]
         max_r = self.cfg['roll_influence'][1]

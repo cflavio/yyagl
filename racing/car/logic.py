@@ -5,6 +5,7 @@ from direct.showbase.InputStateGlobal import inputState
 from yyagl.gameobject import LogicColleague
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame
 from yyagl.racing.camera import Camera, FPCamera
+from yyagl.racing.player.player import Player
 from yyagl.racing.car.event import DirKeys
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket
 from yyagl.racing.bitmasks import BitMasks
@@ -244,7 +245,7 @@ class DriftingForce(object):
 
 class CarLogic(LogicColleague, ComputerProxy):
 
-    def __init__(self, mediator, car_props):
+    def __init__(self, mediator, car_props, players):
         LogicColleague.__init__(self, mediator)
         ComputerProxy.__init__(self)
         self.cprops = car_props
@@ -260,7 +261,8 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.fired_weapons = []
         self.camera = None
         self._grid_wps = self._pitstop_wps = None
-        joystick = car_props.name == car_props.race_props.season_props.player_car_names[mediator.player_car_idx] and \
+        player_car_names = [player.car for player in players if player.kind == Player.human]
+        joystick = car_props.name == player_car_names[mediator.player_car_idx] and \
             mediator.player_car_idx < self.eng.joystick_mgr.joystick_lib.num_joysticks
         self.input_strat = Input2ForcesStrategy(self.__class__ == CarPlayerLogic, self.mediator)
         self.start_pos = car_props.pos
@@ -275,6 +277,7 @@ class CarLogic(LogicColleague, ComputerProxy):
         self.curr_network_start_vec = (0, 0, 0)
         self.curr_network_end_vec = (0, 0, 0)
         self.curr_network_input = DirKeys(False, False, False, False)
+        self.__players = players
 
     def update(self, input2forces):
         phys = self.mediator.phys
@@ -440,7 +443,7 @@ class CarLogic(LogicColleague, ComputerProxy):
     @compute_once
     def bitmask(self):
         b_m = BitMask32.bit(BitMasks.general) | BitMask32.bit(BitMasks.track)
-        car_names = self.cprops.race_props.season_props.car_names
+        car_names = [player.car for player in self.__players]
         cars_idx = list(range(len(car_names)))
         cars_idx.remove(car_names.index(self.mediator.name))
         for bitn in cars_idx: b_m = b_m | BitMask32.bit(BitMasks.car(bitn))
@@ -777,8 +780,8 @@ class CarLogic(LogicColleague, ComputerProxy):
 
 class CarPlayerLogic(CarLogic):
 
-    def __init__(self, mediator, car_props):
-        CarLogic.__init__(self, mediator, car_props)
+    def __init__(self, mediator, car_props, players):
+        CarLogic.__init__(self, mediator, car_props, players)
         is_top = car_props.race_props.season_props.camera == 'top'
         camera_cls = Camera if is_top else FPCamera
         self.camera = camera_cls(mediator.gfx.nodepath,

@@ -7,7 +7,7 @@ from yyagl.engine.vec import Vec
 
 class WeaponPhys(PhysColleague):
 
-    def __init__(self, mediator, car, cars):
+    def __init__(self, mediator, car, cars, players):
         PhysColleague.__init__(self, mediator)
         self.parent, self.car, self.cars = car.gfx.nodepath, car, cars
         self.n_p = self.node = None
@@ -37,17 +37,18 @@ class WeaponPhys(PhysColleague):
 
 class RocketWeaponPhys(WeaponPhys):
 
-    def __init__(self, mediator, car, cars):
-        WeaponPhys.__init__(self, mediator, car, cars)
+    def __init__(self, mediator, car, cars, players):
+        WeaponPhys.__init__(self, mediator, car, cars, players)
+        self._players = players
         self.update_tsk = self.rot_mat = self.heading = None
         self.coll_name = self.rocket_coll_name
 
     def fire(self):
         WeaponPhys.fire(self)
         b_m = BitMask32.bit(BitMasks.general)
-        cars_idx = list(range(len(self.car.logic.cprops.race_props.season_props.car_names)))
-        cars_idx.remove(
-            self.car.logic.cprops.race_props.season_props.car_names.index(self.car.name))
+        car_names = [player.car for player in self._players]
+        cars_idx = list(range(len(car_names)))
+        cars_idx.remove(car_names.index(self.car.name))
         for bitn in cars_idx:
             b_m = b_m | BitMask32.bit(BitMasks.car(bitn))
         self.n_p.set_collide_mask(b_m)

@@ -25,7 +25,7 @@ class Weapon(GameObject, WeaponFacade):
     audio_cls = WeaponAudio
     deg = 0
 
-    def __init__(self, car, path, cars, part_path, wpn_id):
+    def __init__(self, car, path, cars, part_path, wpn_id, players):
         GameObject.__init__(self)
         self.gfx = self.gfx_cls(self, car.gfx.nodepath, path)
         self.audio = self.audio_cls(self)
@@ -44,10 +44,10 @@ class Weapon(GameObject, WeaponFacade):
 
 class PhysWeapon(Weapon):
 
-    def __init__(self, car, path, cars, part_path, wpn_id):
+    def __init__(self, car, path, cars, part_path, wpn_id, players):
         GameObject.__init__(self)
         self.gfx = self.gfx_cls(self, car.gfx.nodepath, path)
-        self.phys = self.phys_cls(self, car, cars)
+        self.phys = self.phys_cls(self, car, cars, players)
         self.audio = self.audio_cls(self)
         self.logic = self.logic_cls(self, car, cars, wpn_id)
         self.event = self.event_cls(self, part_path)

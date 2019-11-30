@@ -9,17 +9,18 @@ class SeasonLogic(LogicColleague):
     def __init__(self, mediator, season_props):
         LogicColleague.__init__(self, mediator)
         self.props = s_p = season_props
+        self.players = []
+        car_names = [player.car for player in self.players]
         self.ranking = Ranking(
-            s_p.car_names, s_p.gameprops.menu_props.background_img_path, s_p.font,
+            car_names, s_p.gameprops.menu_props.background_img_path, s_p.font,
             s_p.gameprops.menu_props.text_normal_col)
         self.tuning = Tuning(s_p)
         self.race = None
-        self.drivers = s_p.drivers
 
     def start(self, reset=True):
         if reset:
             self.ranking.reset()
-            self.tuning.reset()
+            #self.tuning.reset()
         self.tuning.attach_obs(self.on_tuning_sel)
 
     def on_tuning_sel(self, val):
@@ -47,14 +48,14 @@ class SeasonLogic(LogicColleague):
             self.notify('on_season_cont', next_track,
                         self.props.player_car_name, self.props.drivers)
 
-    def create_race_server(self, race_props):
-        self.race = RaceServer(race_props)
+    def create_race_server(self, race_props, players):
+        self.race = RaceServer(race_props, players)
 
-    def create_race_client(self, race_props):
-        self.race = RaceClient(race_props)
+    def create_race_client(self, race_props, players):
+        self.race = RaceClient(race_props, players)
 
-    def create_race(self, race_props):
-        self.race = RaceSinglePlayer(race_props)
+    def create_race(self, race_props, players):
+        self.race = RaceSinglePlayer(race_props, players)
 
     def destroy(self):
         self.tuning.detach_obs(self.on_tuning_sel)

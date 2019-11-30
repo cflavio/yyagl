@@ -2,6 +2,7 @@ from logging import info
 from yyagl.gameobject import FsmColleague
 from yyagl.racing.race.logic import NetMsgs
 from yyagl.racing.race.gui.countdown import Countdown
+from yyagl.racing.player.player import Player
 
 
 class RaceFsm(FsmColleague):
@@ -17,13 +18,14 @@ class RaceFsm(FsmColleague):
             'Countdown': ['Play'],
             'Play': ['Results']}
 
-    def enterLoading(self, rprops, track_name_transl, drivers, ranking, tuning):
+    def enterLoading(self, rprops, track_name_transl, ranking, players):
         info('entering Loading state')
         self.menu_props = rprops.season_props.gameprops.menu_props
         self.countdown_sfx = rprops.season_props.countdown_sfx
-        self.mediator.gui.loading.enter_loading(rprops, track_name_transl, drivers,
-                                           ranking, tuning)
-        args = [rprops.season_props.player_car_name, rprops.season_props.player_car_names]
+        self.mediator.gui.loading.enter_loading(rprops, track_name_transl, ranking, players)
+        player_car_names = [player.car for player in players if player.kind == Player.human]
+        player_car_name = player_car_names[0]
+        args = [player_car_name, player_car_names, players]
         self.eng.do_later(1.0, self.mediator.logic.load_stuff, args)
 
     def exitLoading(self):
