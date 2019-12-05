@@ -212,6 +212,11 @@ class CarPlayerGfx(CarGfx):
             self.mediator.audio.crash_high_speed_sfx.play()
 
 
+class CarNetworkGfx(CarGfx):
+
+    def preload_tsk(self): pass
+
+
 class SkidmarkMgr(GameObject):
 
     def __init__(self, car):

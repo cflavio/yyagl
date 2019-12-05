@@ -2,7 +2,7 @@ from logging import info
 from yyagl.gameobject import GameObject, AiColleague
 from yyagl.facade import Facade
 from .fsm import CarFsm, CarPlayerFsm
-from .gfx import CarGfx, CarPlayerGfx
+from .gfx import CarGfx, CarPlayerGfx, CarNetworkGfx
 from .phys import CarPhys, CarPlayerPhys
 from .event import CarEvent, CarPlayerEvent, CarPlayerEventServer, \
     CarPlayerEventClient, CarNetworkEvent, CarAiEvent, CarAiPlayerEvent
@@ -138,6 +138,7 @@ class CarPlayerLocalMP(CarPlayer):
 
 
 class NetworkCar(Car):
+    gfx_cls = CarNetworkGfx
     event_cls = CarNetworkEvent
     gui_cls = CarNetworkGui
 
