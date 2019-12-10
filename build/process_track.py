@@ -73,18 +73,18 @@ class Conf(object):
 eng = Engine(Conf())
 
 
-class TrackProcesser(GameObject):
+class LegacyTrackProcesser(GameObject):
 
     def __init__(self):
         GameObject.__init__(self)
         self.__actors = []
-        self.__flat_roots = {}
+        self._flat_roots = {}
         self.models_to_load = self.loading_models = None
         self.props = Props()
         fpath = self.props.track_dir + '/models/' + self.props.model_name
         self.__egg2bams()
         self.model = self.eng.load_model(fpath)
-        self.__set_submodels()
+        self._set_submodels()
 
     def __egg2bams(self):
         troot = 'assets/tracks/'
@@ -100,23 +100,23 @@ class TrackProcesser(GameObject):
         list(map(mp_mgr.add, [cmd[0] for cmd in cmds]))
         mp_mgr.run()
 
-    def __set_submodels(self):
+    def _set_submodels(self):
         print('loaded track model')
         for submodel in self.model.children:
             if not submodel.get_name().startswith(self.props.empty_name):
                 submodel.flatten_light()
         self.model.hide(BitMask32.bit(BitMasks.general))
-        self.__load_empties()
+        self._load_empties()
 
-    def __load_empties(self):
+    def _load_empties(self):
         print('loading track submodels')
         empty_name = '**/%s*' % self.props.empty_name
         e_m = self.model.find_all_matches(empty_name)
-        load_models = lambda: self.__process_models(list(e_m))
+        load_models = lambda: self._process_models(list(e_m))
         names = [model.name.split('.')[0][5:] for model in e_m]
-        self.__preload_models(list(set(list(names))), load_models)
+        self._preload_models(list(set(list(names))), load_models)
 
-    def __preload_models(self, models, callback, model='', time=0):
+    def _preload_models(self, models, callback, model='', time=0):
         curr_t = self.eng.curr_time
         if model:
             print('loaded model: %s (%s seconds)' % (model, curr_t - time))
@@ -130,32 +130,32 @@ class TrackProcesser(GameObject):
             self.__actors += [Actor(fpath, {'anim': anim_path})]
         else:
             model = loader.loadModel(fpath)
-        self.__preload_models(models, callback, model, curr_t)
+        self._preload_models(models, callback, model, curr_t)
 
-    def __process_models(self, models):
+    def _process_models(self, models):
         for model in models:
-            model_name = self.__get_model_name(model)
+            model_name = self._get_model_name(model)
             if not model_name.endswith(self.props.anim_name):
-                self.__process_static(model)
+                self._process_static(model)
         self.flattening()
 
-    def __get_model_name(self, model):
+    def _get_model_name(self, model):
         return model.name.split('.')[0][len(self.props.empty_name):]
 
-    def __process_static(self, model):
-        model_name = self.__get_model_name(model)
-        if model_name not in self.__flat_roots:
+    def _process_static(self, model):
+        model_name = self._get_model_name(model)
+        if model_name not in self._flat_roots:
             flat_root = self.model.attach_node(model_name)
-            self.__flat_roots[model_name] = flat_root
+            self._flat_roots[model_name] = flat_root
         fpath = '%s/models/%s' % (self.props.track_dir, model_name)
         self.eng.load_model(fpath).reparent_to(model)
-        model.reparent_to(self.__flat_roots[model_name])
+        model.reparent_to(self._flat_roots[model_name])
 
     def flattening(self):
         flat_cores = 1  # max(1, multiprocessing.cpu_count() / 2)
         print('track flattening using %s cores' % flat_cores)
         self.loading_models = []
-        self.models_to_load = list(self.__flat_roots.values())
+        self.models_to_load = list(self._flat_roots.values())
         [self.__flat_models() for _ in range(flat_cores)]
 
     def __flat_models(self, model='', time=0, nodes=0):
@@ -196,4 +196,31 @@ class TrackProcesser(GameObject):
         self.model.write_bam_file(fpath)
 
 
-TrackProcesser()
+class TrackProcesser(LegacyTrackProcesser):
+
+    def _set_submodels(self):
+        print('loaded track model')
+        for submodel in self.model.children:
+            if not submodel.get_name().startswith(self.props.empty_name) and not \
+               submodel.get_name().startswith('Instanced') and not \
+               submodel.get_name().startswith('Empties'):
+                submodel.flatten_light()
+        self.model.hide(BitMask32.bit(BitMasks.general))
+        self._load_empties()
+
+    def _get_model_name(self, model): return model.parent.get_tag('path')
+
+    def __get_path(self, model): return model.parent.get_tag('path') + '.egg'
+
+    def _load_empties(self):
+        print('loading track submodels')
+        empty_name = '**/%s*' % self.props.empty_name
+        e_m = self.model.find_all_matches(empty_name)
+        load_models = lambda: self._process_models(list(e_m))
+        names = [self.__get_path(model) for model in e_m]
+        self._preload_models(list(set(list(names))), load_models)
+
+
+legacy_tracks = ['dubai', 'moon', 'nagano', 'orlando', 'rome', 'sheffield', 'toronto']
+cls = LegacyTrackProcesser if sys.argv[1] in legacy_tracks else TrackProcesser
+cls()
