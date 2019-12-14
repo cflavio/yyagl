@@ -7,6 +7,7 @@ from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
 from yyagl.gameobject import EventColleague
 from yyagl.racing.car.ai import CarAi
+from yyagl.racing.player.player import Player
 from yyagl.racing.weapon.rocket.rocket import Rocket, RocketNetwork
 from yyagl.racing.weapon.rear_rocket.rear_rocket import RearRocket, RearRocketNetwork
 from yyagl.racing.weapon.turbo.turbo import Turbo, TurboNetwork
@@ -78,8 +79,9 @@ id2carname = __id2carname()
 
 class RaceEvent(EventColleague):
 
-    def __init__(self, mediator, menu_cls, keys):
+    def __init__(self, mediator, menu_cls, keys, players):
         EventColleague.__init__(self, mediator)
+        self.__players = players
         self.menu_cls = menu_cls
         self.ended_cars = []
         self.__keys = keys
@@ -120,12 +122,13 @@ class RaceEvent(EventColleague):
 
     def on_end_race(self, player_name):
         self.ended_cars += [player_name]
-        if not all(pcar in self.ended_cars for pcar in self.mediator.logic.props.season_props.player_car_names): return
+        player_car_names = [player.car for player in self.__players if player.kind == Player.human]
+        if not all(pcar in self.ended_cars for pcar in player_car_names): return
         points = [10, 8, 6, 4, 3, 2, 1, 0]
         zipped = zip(self.mediator.logic.race_ranking(), points)
         race_ranking = {car: point for car, point in zipped}
         if self.mediator.fsm.getCurrentOrNextState() != 'Results':
-            self.mediator.fsm.demand('Results', race_ranking)
+            self.mediator.fsm.demand('Results', race_ranking, self.__players)
 
     def _move_car(self, car):
         if not hasattr(car, 'logic'): return  # it's created in the second frame
@@ -162,8 +165,8 @@ class RaceEvent(EventColleague):
 
 class RaceEventServer(RaceEvent):
 
-    def __init__(self, mediator, menu_cls, keys):
-        RaceEvent.__init__(self, mediator, menu_cls, keys)
+    def __init__(self, mediator, menu_cls, keys, players):
+        RaceEvent.__init__(self, mediator, menu_cls, keys, players)
         self.server_info = {}
         self.eng.attach_obs(self.on_frame)
         self.players_ended = []
@@ -346,7 +349,7 @@ class RaceEventServer(RaceEvent):
         zipped = zip(self.mediator.logic.race_ranking(), points)
         race_ranking = {car: point for car, point in zipped}
         if self.mediator.fsm.getCurrentOrNextState() != 'Results':
-            self.mediator.fsm.demand('Results', race_ranking)
+            self.mediator.fsm.demand('Results', race_ranking, self.__players)
 
     def on_end_race_player(self, uid):
         self.players_ended += [uid]
@@ -368,8 +371,8 @@ class RaceEventServer(RaceEvent):
 
 class RaceEventClient(RaceEvent):
 
-    def __init__(self, mediator, menu_cls, keys):
-        RaceEvent.__init__(self, mediator, menu_cls, keys)
+    def __init__(self, mediator, menu_cls, keys, players):
+        RaceEvent.__init__(self, mediator, menu_cls, keys, players)
         self.eng.attach_obs(self.on_frame)
         #self.eng.xmpp.attach(self.on_server_quit)
 
@@ -484,7 +487,7 @@ class RaceEventClient(RaceEvent):
             points = [10, 8, 6, 4, 3, 2, 1, 0]
             zipped = zip(self.mediator.logic.race_ranking(), points)
             race_ranking = {car: point for car, point in zipped}
-            self.mediator.fsm.demand('Results', race_ranking)
+            self.mediator.fsm.demand('Results', race_ranking, self.__players)
 
     def destroy(self):
         self.eng.client.detach(self.on_game_packet)

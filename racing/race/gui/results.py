@@ -14,15 +14,15 @@ class Results(GameObject):
         GameObject.__init__(self)
         self.__res_txts = []
         self.__buttons = []
-        self.drivers = self.result_frm = None
+        self.players = self.result_frm = None
         self.rprops = rprops
         self.font = rprops.season_props.gameprops.menu_props.font
         self.text_fg = rprops.season_props.gameprops.menu_props.text_active_col
         self.text_bg = rprops.season_props.gameprops.menu_props.text_normal_col
 
-    def show(self, race_ranking, lap_times, drivers):
+    def show(self, race_ranking, lap_times, players):
         track = self.rprops.track_path
-        self.drivers = drivers
+        self.players = players
         self.result_frm = DirectFrame(
             frameColor=(.8, .8, .8, .64), frameSize=(-2, 2, -1, 1))
         laps = len(lap_times)
@@ -45,7 +45,7 @@ class Results(GameObject):
 
         for i, car in enumerate(race_ranking_sorted):
             dpars = i, car, .76, .54, str(i + 1) + '. %s'
-            txt, img = RankingGui.set_drv_txt_img(self, *dpars)
+            txt, img = RankingGui.set_drv_txt_img(self, *dpars, self.players)
             self.__res_txts += [txt, img]
         self.__res_txts += [
             OnscreenText(_('share:'), pos=(-.1, -.82), align=TextNode.A_right,
@@ -95,8 +95,8 @@ class Results(GameObject):
 
 class ResultsServer(Results):
 
-    def show(self, race_ranking, lap_times, drivers):
-        Results.show(self, race_ranking, lap_times, drivers)
+    def show(self, race_ranking, lap_times, players):
+        Results.show(self, race_ranking, lap_times, players)
         self._buttons[-1].hide()
 
     def show_continue_btn(self): self._buttons[-1].show()

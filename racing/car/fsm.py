@@ -5,13 +5,14 @@ from .event import InputBuilder
 
 class CarFsm(FsmColleague):
 
-    def __init__(self, mediator, car_props):
+    def __init__(self, mediator, car_props, players):
         FsmColleague.__init__(self, mediator)
         self.defaultTransitions = {'Loading': ['Countdown'],
                                    'Countdown': ['Play'],
                                    'Play': ['Waiting', 'Results'],
                                    'Waiting': ['Results']}
         self.cprops = car_props
+        self.__players = players
 
     def enterPlay(self):
         self.mediator.audio.on_play()
@@ -20,7 +21,7 @@ class CarFsm(FsmColleague):
         state = self.getCurrentOrNextState()
         #self.mediator.event.input_bld = InputBuilder.create(state, has_j)
         self.mediator.ai.destroy()
-        self.mediator.ai = CarResultsAi(self.mediator, self.cprops)
+        self.mediator.ai = CarResultsAi(self.mediator, self.cprops, self.__players)
         self.mediator.gui.hide()
         #self.mediator.gui.panel.enter_waiting()
 

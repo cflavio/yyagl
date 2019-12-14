@@ -58,7 +58,8 @@ class LoadingPageGui(PageGui):
             self.add_widgets([txt, img])
 
     def set_ranking(self):
-        items = self.ranking.carname2points.items()
+        #items = self.ranking.carname2points.items()
+        items = [(player.car, player.points) for player in self._players]
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = Text(_('Ranking'), scale=.1, pos=(0, .38),
                            font=self.font, fg=self.text_bg)

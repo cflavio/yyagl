@@ -80,7 +80,7 @@ class Car(GameObject, CarFacade):
         taskMgr.add(self.__build_comps())
 
     async def __build_comps(self):
-        self.fsm = self.fsm_cls(self, self._car_props)
+        self.fsm = self.fsm_cls(self, self._car_props, self.__players)
         gfx_task = taskMgr.add(self.__build_gfx)
         await gfx_task
         self.phys = self.phys_cls(self, self._car_props, self.__tuning, self.__players)

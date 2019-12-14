@@ -31,7 +31,7 @@ class Race(GameObject, RaceFacade):
         self.fsm = self.fsm_cls(self, rpr.shaders_dev)
         self.gui = self.gui_cls(self, rpr, players)
         self.logic = self.logic_cls(self, rpr)
-        self.event = self.event_cls(self, rpr.ingame_menu, rpr.keys)
+        self.event = self.event_cls(self, rpr.ingame_menu, rpr.keys, players)
         RaceFacade.__init__(self)
 
     def destroy(self):

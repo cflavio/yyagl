@@ -88,10 +88,9 @@ class RaceFsm(FsmColleague):
         if self.getCurrentOrNextState() != 'Results':
             self.mediator.logic.exit_play()
 
-    def enterResults(self, race_ranking):
+    def enterResults(self, race_ranking, players):
         self.mediator.gui.results.show(
-            race_ranking, self.mediator.logic.player_cars[0].lap_times,
-            self.mediator.logic.drivers)
+            race_ranking, self.mediator.logic.player_cars[0].lap_times, players)
         cars = self.mediator.logic.player_cars + self.mediator.logic.cars
         list(map(lambda car: car.demand('Results'), cars))
 

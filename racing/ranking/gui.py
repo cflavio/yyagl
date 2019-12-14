@@ -14,7 +14,7 @@ class RankingPageGui(PageGui):
     def __init__(self, mediator, menu_props, rprops, sprops, ranking, players):
         self.rprops = rprops
         self.sprops = sprops
-        self.drivers = sprops.drivers
+        #self.drivers = sprops.drivers
         self.ranking = ranking
         self.menu_props = menu_props
         self.__players = players
@@ -26,7 +26,8 @@ class RankingPageGui(PageGui):
         self.text_fg = self.menu_props.text_active_col
         self.text_bg = self.menu_props.text_normal_col
         self.text_err_col = self.menu_props.text_err_col
-        items = self.ranking.carname2points.items()
+        #items = self.ranking.carname2points.items()
+        items = [(player.car, player.points) for player in self.__players]
         sorted_ranking = reversed(sorted(items, key=lambda el: el[1]))
         txt = Text(_('Ranking'), scale=.1, pos=(0, .76),
                            font=self.font, fg=self.text_bg)
@@ -52,7 +53,7 @@ class RankingPageGui(PageGui):
             self.add_widgets([txt, img])
         else:
             cont_btn_cmd = self.notify
-            cont_btn_ea = ['on_ranking_end']
+            cont_btn_ea = ['on_ranking_end', self.__players]
         cont_btn = Btn(
             text=_('Continue'), pos=(0, -.8), cmd=cont_btn_cmd,
             extra_args=cont_btn_ea,
