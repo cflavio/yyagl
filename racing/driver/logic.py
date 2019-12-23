@@ -56,7 +56,8 @@ class DriverPlayerLoaderStrategy(GameObject):
         eng = DriverLoaderStrategy.eng
         car = loadcars.pop(0)
         local_mp = s_p.kind == 'localmp'
-        if local_mp and car in player_car_names or not local_mp and car == player_car_name:
+        if local_mp and car in player_car_names or not local_mp and car == player_car_name or \
+               s_p.kind == 'onlinemp' and car in player_car_names:
             if r_p.a_i == 1 or r_p.a_i == 2 and car != player_car_names[0]:
                 car_cls = AiCarPlayer
             else:

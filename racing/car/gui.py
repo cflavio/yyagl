@@ -344,7 +344,7 @@ class CarPanel(GameObject):
     def set_weapon(self, wpn):
         #self.glass_tl.show()
         self.weapon_lab.show()
-        ncars = len(self._players)
+        ncars = len([player for player in self._players if player.kind == Player.human])
         if ncars == 1:
             parent_tl = base.a2dTopLeft
         elif ncars == 2:
