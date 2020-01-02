@@ -70,7 +70,8 @@ class Conf(object):
         self.dev_cfg = DevCfg()
 
 
-eng = Engine(Conf())
+if __name__ == '__main__':
+    eng = Engine(Conf())
 
 
 class LegacyTrackProcesser(GameObject):
@@ -221,6 +222,7 @@ class TrackProcesser(LegacyTrackProcesser):
         self._preload_models(list(set(list(names))), load_models)
 
 
-legacy_tracks = ['dubai', 'moon', 'nagano', 'orlando', 'rome', 'sheffield', 'toronto']
-cls = LegacyTrackProcesser if sys.argv[1] in legacy_tracks else TrackProcesser
-cls()
+if __name__ == '__main__':
+    legacy_tracks = ['dubai', 'moon', 'nagano', 'orlando', 'rome', 'sheffield', 'toronto']
+    cls = LegacyTrackProcesser if sys.argv[1] in legacy_tracks else TrackProcesser
+    cls()

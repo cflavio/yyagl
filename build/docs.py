@@ -7,7 +7,7 @@ from .build import bld_dpath, branch, docs_fpath
 def bld_docs(target, source, env):
     __prepare(env)
     system('sphinx-apidoc -o %sdocs_apidoc .' % bld_dpath)
-    system('sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst' % bld_dpath)
+    #system('sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst' % bld_dpath)
     system('sphinx-build -b html %sdocs_apidoc %sdocs' % ((bld_dpath,) * 2))
     cmd = 'tar -C {path} -czf {fpath} ./docs'
     fpath = docs_fpath.format(dst_dir=bld_dpath, appname=env['APPNAME'],
@@ -24,7 +24,7 @@ def __prepare(env):
     cmd_tmpl = 'sed -i.bak %s {dst_path}docs_apidoc/index.rst' % ' '.join(args)
     cmd = cmd_tmpl.format(
         appname=env['APPNAME'].capitalize(), DevName='Ya2',
-        devsite='https://www.ya2.it', prjsite='https://www.ya2.it/pages/yorg.html',
+        devsite='https:\/\/www.ya2.it', prjsite='https:\/\/www.ya2.it\/pages\/yorg.html',
         dst_path=bld_dpath)
     system(cmd)
     curr_dir = abspath('.').replace('/', '\/')

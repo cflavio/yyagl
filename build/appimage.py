@@ -2,7 +2,7 @@ from os import walk, system, makedirs, chmod, stat, remove
 from os.path import exists, basename, abspath
 from shutil import rmtree, move, copy, copytree
 from json import dumps
-from urllib import urlretrieve
+from urllib.request import urlretrieve
 from stat import S_IEXEC
 from yyagl.build.linux import _do_bld
 from .deployng import bld_ng
