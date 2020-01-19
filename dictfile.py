@@ -2,7 +2,7 @@ import sys
 from logging import info
 from os.path import dirname
 from collections import Mapping
-from yaml import load, dump
+from yaml import load, dump, FullLoader
 from .gameobject import GameObject
 from yyagl.lib.builder import LibP3d
 
@@ -16,7 +16,7 @@ class DctFile(GameObject):
         self.fpath = fpath
         self.persistent = persistent
         try:
-            with open(fpath) as fyaml: fdct = load(fyaml)
+            with open(fpath) as fyaml: fdct = load(fyaml, Loader=FullLoader)
             self.dct = self.__add_default(default_dct, fdct)
         except IOError: self.dct = default_dct
 
