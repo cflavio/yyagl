@@ -1,5 +1,5 @@
 from logging import info
-from yaml import load
+from json import load
 from panda3d.bullet import BulletVehicle, ZUp, BulletBoxShape, BulletSphereShape
 from panda3d.core import LPoint3f, BitMask32, Mat4, TransformState
 from yyagl.gameobject import PhysColleague

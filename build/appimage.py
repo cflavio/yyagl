@@ -71,7 +71,7 @@ def __do_appimage(name):
 #     for root, _, files_ in walk('.'):
 #         if len(root.split('/')) == 1 or not root.split('/')[1].startswith('.'):
 #             for file_ in files_:
-#                 if file_ != 'pdata.tar.xz' and not (file_.startswith('options') and file_.endswith('yml')):
+#                 if file_ != 'pdata.tar.xz' and not (file_.startswith('options') and file_.endswith('json')):
 #                     files += [root[2:] + ('/' if len(root) > 1 else '') + file_]
 #     json = {
 #         'app-id': 'org.ya2.Yorg',

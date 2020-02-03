@@ -2,7 +2,7 @@ import sys
 from logging import info
 from os.path import dirname
 from collections import Mapping
-from yaml import load, dump, FullLoader
+from json import load, dumps
 from .gameobject import GameObject
 from yyagl.lib.builder import LibP3d
 
@@ -16,7 +16,7 @@ class DctFile(GameObject):
         self.fpath = fpath
         self.persistent = persistent
         try:
-            with open(fpath) as fyaml: fdct = load(fyaml, Loader=FullLoader)
+            with open(fpath) as json: fdct = load(json)
             self.dct = self.__add_default(default_dct, fdct)
         except IOError: self.dct = default_dct
 
@@ -38,8 +38,8 @@ class DctFile(GameObject):
     def store(self):
         info('storing %s' % self.fpath)
         if not self.persistent: return
-        with open(self.fpath, 'w') as fyaml:
-            dump(self.dct, fyaml, default_flow_style=False)
+        with open(self.fpath, 'w') as json:
+            json.write(dumps(self.dct, sort_keys=True, indent=4, separators=(',', ': ')))
 
     def __getitem__(self, arg): return self.dct[arg]
 

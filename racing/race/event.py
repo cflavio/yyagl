@@ -1,7 +1,7 @@
 from itertools import chain
 from os import walk
 from os.path import dirname
-from yaml import load, FullLoader
+from json import load
 from panda3d.core import Vec3, LPoint3f, NodePath
 from direct.interval.LerpInterval import LerpPosInterval, LerpHprInterval
 from direct.interval.IntervalGlobal import LerpFunc
@@ -51,8 +51,8 @@ def __carname2id():
     cars = [r for r in next(walk(curr_path + 'assets/cars'))[1]]
     car2id = {}
     for car in cars:
-        with open(curr_path + 'assets/cars/' + car + '/phys.yml') as fcar:
-            sorting = load(fcar, Loader=FullLoader)['sorting']
+        with open(curr_path + 'assets/cars/' + car + '/phys.json') as fcar:
+            sorting = load(fcar)['sorting']
         car2id[car] = sorting
     return car2id
 
@@ -68,8 +68,8 @@ def __id2carname():
     cars = [r for r in next(walk(curr_path + 'assets/cars'))[1]]
     id2car = {}
     for car in cars:
-        with open(curr_path + 'assets/cars/' + car + '/phys.yml') as fcar:
-            sorting = load(fcar, Loader=FullLoader)['sorting']
+        with open(curr_path + 'assets/cars/' + car + '/phys.json') as fcar:
+            sorting = load(fcar)['sorting']
         id2car[sorting] = car
     return id2car
 

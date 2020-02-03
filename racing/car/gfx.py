@@ -1,5 +1,5 @@
 from math import pi
-from yaml import load as yaml_load
+from json import load as json_load
 from os.path import exists
 from panda3d.bullet import BulletRigidBodyNode
 from panda3d.core import NodePath
@@ -38,7 +38,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
 
         ppath = self.cprops.race_props.season_props.gameprops.phys_path
         fpath = ppath % self.cprops.name
-        with open(fpath) as phys_file: cfg = yaml_load(phys_file)
+        with open(fpath) as phys_file: cfg = json_load(phys_file)
 
         self.vroot.set_pos(0, 0, cfg['gfx_z'])
         self.skidmark_mgr = SkidmarkMgr(mediator)
@@ -75,7 +75,7 @@ class CarGfx(GfxColleague, CarGfxFacade):
         ppath = self.cprops.race_props.season_props.gameprops.phys_path
         fpath = ppath % self.cprops.name
         with open(fpath) as phys_file:
-            chassis.set_z(yaml_load(phys_file)['center_mass_offset'])
+            chassis.set_z(json_load(phys_file)['center_mass_offset'])
         self.load_wheels(chassis)
         #self.eng.do_later(.01, self.__set_emitters)
 

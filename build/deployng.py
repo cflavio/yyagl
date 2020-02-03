@@ -7,13 +7,11 @@ from yyagl.build.build import InsideDir
 
 
 prereq = '''psutil
-bson
-pyyaml
-feedparser'''
+bson'''
 requirements = '''
 panda3d==1.10.4.1'''
 excl_patterns = ['build/*', 'built/*', 'setup.py', 'requirements.txt', '*.swp',
-                 'SConstruct', 'venv/*', '.git*', '*.pyc', 'options.yml',
+                 'SConstruct', 'venv/*', '.git*', '*.pyc', 'options.json',
                  '__pycache__']
 plugins = ['pandagl', 'p3openal_audio']
 setuppy = '''
@@ -25,7 +23,7 @@ def bld_ng(appname, win=False, osx=False, linux=False):
     if exists('tmp_bld'): rmtree('tmp_bld')
     copytree('.', 'tmp_bld', ignore=ignore_patterns(
         '*.pyc', '*.pyd', 'tmp_bld', '*.egg', '.git*', 'built', 'dist',
-        '.scons*', 'SCons*', 'README*', 'options*.yml', '*.po', '*.pot', '__pycache__', '*.pdf'))
+        '.scons*', 'SCons*', 'README*', 'options*.json', '*.po', '*.pot', '__pycache__', '*.pdf'))
     with InsideDir('tmp_bld'):
         copy_tree('../yyagl/licenses', './licenses')
         copy_tree('../licenses', './licenses')
@@ -58,7 +56,7 @@ def bld_ng(appname, win=False, osx=False, linux=False):
                     '**/licenses/*',
                     '**/*.bam',
                     '**/*.txo',
-                    '**/*.yml',
+                    '**/*.json',
                     '**/track_tr.py',
                     '**/*.txt',
                     '**/*.ttf',
