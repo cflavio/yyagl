@@ -11,7 +11,7 @@ from yyagl.engine.engine import Engine
 from yyagl.gameobject import GameObject
 from direct.actor.Actor import Actor
 from yyagl.build.mtprocesser import MultithreadedProcesser
-from yyagl.racing.bitmasks import BitMasks
+from yracing.bitmasks import BitMasks
 
 
 class Props(object):
