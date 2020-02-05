@@ -1,4 +1,4 @@
-from os import system, walk, remove, makedirs, listdir
+from os import system, walk, remove, makedirs, listdir, chdir
 from os.path import exists, isfile, join
 from shutil import move, rmtree
 from .build import bld_dpath, branch, exec_cmd, test_fpath
@@ -10,24 +10,25 @@ def exec_cmd(cmd):
 
 
 def bld_uml(target, source, env):
-    system('plantuml yyagl/assets/uml/class_diagram.txt')
-    system('plantuml yyagl/assets/uml/sequence_diagrams.txt')
-    system('convert yyagl/assets/uml/sequence_diagrams*.png yyagl/assets/uml/sequence_diagrams.pdf')
-    system('rm yyagl/assets/uml/sequence_diagrams*.png')
-    system('pdfnup --nup 3x2 -o yyagl/assets/uml/sequence_diagrams.pdf yyagl/assets/uml/sequence_diagrams.pdf')
+    system('plantuml assets/uml/class_diagram.txt')
+    system('plantuml assets/uml/sequence_diagrams.txt')
+    system('convert assets/uml/sequence_diagrams*.png assets/uml/sequence_diagrams.pdf')
+    system('rm assets/uml/sequence_diagrams*.png')
+    system('pdfnup --nup 3x2 -o assets/uml/sequence_diagrams.pdf assets/uml/sequence_diagrams.pdf')
     auto_classes()
 
 def auto_classes():
     if exists('built/tmp_uml'): rmtree('built/tmp_uml')
     if exists('built/uml_classes'): rmtree('built/uml_classes')
     if exists('built/uml_classes.zip'): remove('built/uml_classes.zip')
+    chdir('..')
     for root, dirname, filenames in walk('./menu/multiplayer'):
         if not exists('built/tmp_uml'): makedirs('built/tmp_uml')
         py_cnt = 0
         for filename in filenames:
             if not root.startswith('./wvenv/') and \
                     not root.startswith('./venv/')and \
-                    not root.startswith('./yyagl/thirdparty/') and \
+                    not root.startswith('./thirdparty/') and \
                     filename.endswith('.py') and \
                     not filename.endswith('__init__.py'):
                 _root = root[2:]

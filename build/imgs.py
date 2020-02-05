@@ -1,6 +1,6 @@
 from os import system, remove
 from sys import executable
-from yyagl.build.mtprocesser import MultithreadedProcesser
+from mtprocesser import MultithreadedProcesser
 
 
 def bld_images(target, source, env):
@@ -11,4 +11,4 @@ def bld_images(target, source, env):
 
 def __bld_img(fname_mp_mgr):
     fname, mp_mgr = fname_mp_mgr
-    mp_mgr.add(executable + ' ./yyagl/build/img2txo.py "%s"' % fname)
+    mp_mgr.add(executable + ' ./build/img2txo.py "%s"' % fname)
