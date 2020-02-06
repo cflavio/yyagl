@@ -86,7 +86,7 @@ class InsideDir(object):
 bld_dpath = 'built/'
 branch2ver = {'master': 'dev', 'stable': 'stable'}
 branch = branch2ver[_branch()] if _branch() in branch2ver else _branch()
-ver = _version()
+#ver = _version()
 win_fpath = '{dst_dir}{appname}-%s-windows.exe' % branch
 osx_fpath = '{dst_dir}{appname}-%s-osx.zip' % branch
 linux_fpath = '{dst_dir}{appname}-%s-linux' % branch

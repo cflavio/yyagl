@@ -10,11 +10,12 @@ def exec_cmd(cmd):
 
 
 def bld_uml(target, source, env):
-    system('plantuml assets/uml/class_diagram.txt')
-    system('plantuml assets/uml/sequence_diagrams.txt')
-    system('convert assets/uml/sequence_diagrams*.png assets/uml/sequence_diagrams.pdf')
-    system('rm assets/uml/sequence_diagrams*.png')
-    system('pdfnup --nup 3x2 -o assets/uml/sequence_diagrams.pdf assets/uml/sequence_diagrams.pdf')
+    if exists('assets/uml'):
+        system('plantuml assets/uml/class_diagram.txt')
+        system('plantuml assets/uml/sequence_diagrams.txt')
+        system('convert assets/uml/sequence_diagrams*.png assets/uml/sequence_diagrams.pdf')
+        system('rm assets/uml/sequence_diagrams*.png')
+        system('pdfnup --nup 3x2 -o assets/uml/sequence_diagrams.pdf assets/uml/sequence_diagrams.pdf')
     auto_classes()
 
 def auto_classes():
