@@ -1,5 +1,5 @@
 from os import walk, chdir, getcwd, remove
-from os.path import join, getsize, exists
+from os.path import join, getsize, exists, dirname
 from subprocess import Popen, PIPE
 
 
@@ -14,11 +14,12 @@ def _branch():
 
 def _version():
     pref = ''
-    if exists('assets/version.txt'):
-        with open('assets/version.txt') as fver:
+    root = dirname(dirname(__file__)) + '/'
+    if exists(root + 'assets/version.txt'):
+        with open(root + 'assets/version.txt') as fver:
             pref = fver.read().strip() + '-'
     bld_ver = pref + exec_cmd('git rev-parse HEAD')[:7]
-    with open('assets/bld_version.txt', 'w') as fver:
+    with open(root + 'assets/bld_version.txt', 'w') as fver:
         fver.write(bld_ver)
     return bld_ver
 
@@ -86,7 +87,7 @@ class InsideDir(object):
 bld_dpath = 'built/'
 branch2ver = {'master': 'dev', 'stable': 'stable'}
 branch = branch2ver[_branch()] if _branch() in branch2ver else _branch()
-#ver = _version()
+ver = _version()
 win_fpath = '{dst_dir}{appname}-%s-windows.exe' % branch
 osx_fpath = '{dst_dir}{appname}-%s-osx.zip' % branch
 linux_fpath = '{dst_dir}{appname}-%s-linux' % branch
