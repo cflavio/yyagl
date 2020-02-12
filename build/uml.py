@@ -1,5 +1,5 @@
-from os import system, walk, remove, makedirs, listdir, chdir
-from os.path import exists, isfile, join
+from os import system, walk, remove, makedirs, listdir, chdir, getcwd
+from os.path import exists, isfile, join, basename
 from shutil import move, rmtree
 from .build import bld_dpath, branch, exec_cmd, test_fpath
 from subprocess import Popen, PIPE
@@ -11,19 +11,20 @@ def exec_cmd(cmd):
 
 def bld_uml(target, source, env):
     if exists('assets/uml'):
-        system('plantuml assets/uml/class_diagram.txt')
-        system('plantuml assets/uml/sequence_diagrams.txt')
-        system('convert assets/uml/sequence_diagrams*.png assets/uml/sequence_diagrams.pdf')
-        system('rm assets/uml/sequence_diagrams*.png')
-        system('pdfnup --nup 3x2 -o assets/uml/sequence_diagrams.pdf assets/uml/sequence_diagrams.pdf')
-    auto_classes()
+        if exists('assets/uml/class_diagram.txt'):
+            system('plantuml assets/uml/class_diagram.txt')
+        if exists('assets/uml/sequence_diagrams.txt'):
+            system('plantuml assets/uml/sequence_diagrams.txt')
+            system('convert assets/uml/sequence_diagrams*.png assets/uml/sequence_diagrams.pdf')
+            system('rm assets/uml/sequence_diagrams*.png')
+            system('pdfnup --nup 3x2 -o assets/uml/sequence_diagrams.pdf assets/uml/sequence_diagrams.pdf')
+    auto_classes(env)
 
-def auto_classes():
+def auto_classes(env):
     if exists('built/tmp_uml'): rmtree('built/tmp_uml')
     if exists('built/uml_classes'): rmtree('built/uml_classes')
     if exists('built/uml_classes.zip'): remove('built/uml_classes.zip')
-    chdir('..')
-    for root, dirname, filenames in walk('./menu/multiplayer'):
+    for root, dirname, filenames in walk('.'):
         if not exists('built/tmp_uml'): makedirs('built/tmp_uml')
         py_cnt = 0
         for filename in filenames:
@@ -31,7 +32,8 @@ def auto_classes():
                     not root.startswith('./venv/')and \
                     not root.startswith('./thirdparty/') and \
                     filename.endswith('.py') and \
-                    not filename.endswith('__init__.py'):
+                    not filename.endswith('__init__.py') and \
+                    not any(root == './' + filtered or root.startswith('./%s/' % filtered) for filtered in env['UML_FILTER']):
                 _root = root[2:]
                 path = _root + ('/' if _root else '') + filename
                 name = path[:-3].replace('/', '_')
@@ -39,15 +41,15 @@ def auto_classes():
                 fname = 'classes_' + name + '.png'
                 if exists(fname): move(fname, 'built/tmp_uml/' + fname)
         pkgname = root.lstrip('./').replace('/', '_')
+        if not pkgname: pkgname = basename(getcwd())
         buildpkg(pkgname)
     pdfs = [f for f in listdir('built/uml_classes') if isfile(join('built/uml_classes', f))]
-    for pdf in pdfs: print(pdf)
     pdfs = [f for f in pdfs if f.endswith('.pdf') and f != '.pdf']
     pdfs = ['built/uml_classes/' + f for f in pdfs]
     system('echo "" | ps2pdf -sPAPERSIZE=a4 - built/uml_classes/blank.pdf')
     for pdf in pdfs:
-        numpages = exec_cmd('pdftk %s dump_data | grep NumberOfPages' % pdf)
-        numpages = int(numpages.lstrip('NumberOfPages: '))
+        numpages = exec_cmd(b'pdftk %s dump_data | grep NumberOfPages' % bytes(pdf, 'utf-8'))
+        numpages = int(numpages.lstrip(b'NumberOfPages: '))
         if numpages % 2:
             system('pdftk %s built/uml_classes/blank.pdf cat output %s2 && mv %s2 %s' % (pdf, pdf, pdf, pdf))
     remove('built/uml_classes/blank.pdf')
@@ -75,13 +77,13 @@ def get_finfo(fnames, width, height):
     for fname in fnames:
         fname = fname
         geometry = exec_cmd('identify -verbose "%s" | grep Geometry' % fname)
-        split_dim = lambda geom: geom.split()[1].split('+')[0].split('x')
+        split_dim = lambda geom: geom.split()[1].split(b'+')[0].split(b'x')
         size = [int(dim) for dim in split_dim(geometry)]
         if size[0] > width or size[1] > height:
             cmd = 'convert %s -resize %sx%s\> %s' % (fname, width, height, fname)
             exec_cmd(cmd)
         geometry = exec_cmd('identify -verbose "%s" | grep Geometry' % fname)
-        split_dim = lambda geom: geom.split()[1].split('+')[0].split('x')
+        split_dim = lambda geom: geom.split()[1].split(b'+')[0].split(b'x')
         size = [int(dim) for dim in split_dim(geometry)]
         _finfo += [(fname, size)]
     #finfo = list(sorted(finfo, key=lambda elm: elm[1][0]))
@@ -110,7 +112,6 @@ def buildpkg(pkgname):
         info, finfo = nextfile(finfo, posx, posy + lineh + margin, width, height)
         new_img = info[0]
         dst_img = 'built/tmp_uml/page%s.png' % page
-        #print info
         if posx + info[1][0] <= width and posy + info[1][1] <= height:
             cmd = 'composite -geometry +%s+%s -gravity NorthWest %s %s %s' % (posx, posy, new_img, dst_img, dst_img)
             exec_cmd(cmd)

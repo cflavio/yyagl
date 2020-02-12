@@ -71,6 +71,8 @@ def cond_yyagl(src):
 dev_conf = {'devinfo_yyagl': cond_yyagl}
 env['DEV_CONF'] = dev_conf
 
+env['UML_FILTER'] = []
+
 VariantDir(path, '.')
 
 img_files = img_tgt_names(files(['jpg', 'png'], ['models'], ['_png.png']))
@@ -89,9 +91,4 @@ if args['docs']:
 if args['pdf']:
     env.pdf([pdf_path], files(['py'], ['venv', 'thirdparty']))
 if args['uml']:
-    env.uml(
-        ['assets/uml/class_diagram.png',
-         'assets/uml/sequence_diagrams.pdf',
-         'built/uml_classes.pdf'],
-        ['assets/uml/class_diagram.txt',
-         'assets/uml/sequence_diagrams.txt'])
+    env.uml(['built/uml_classes.zip'], general_src)
