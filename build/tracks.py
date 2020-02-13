@@ -1,5 +1,5 @@
 from os import system, walk
-from .mtprocesser import MultithreadedProcesser
+from yyagl.build.mtprocesser import MultithreadedProcesser
 
 
 def bld_models(target, source, env):

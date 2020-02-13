@@ -31,13 +31,13 @@ def img_tgt_names(files_):  # list of images' target filenames
 
 def tracks_tgt_fnames():
     ret = []
-    tr_root = 'assets/tracks/'
+    tr_root = '../assets/tracks/'
     for droot, dnames, _ in walk(tr_root):
         ret += [tr_root + dname + '/models/track_all.bam' for dname in dnames if droot == tr_root and dname != '__pycache__']
-    tr_root = 'assets/cars/'
+    tr_root = '../assets/cars/'
     for droot, _, filenames in walk(tr_root):
         ret += [droot + '/' + filename.replace('.egg', '.bam') for filename in filenames if filename.endswith('.egg')]
-    tr_root = 'assets/models/'
+    tr_root = '../assets/models/'
     for droot, _, filename in walk(tr_root):
         ret += [droot + '/' + filename.replace('.egg', '.bam') for filename in filenames if filename.endswith('.egg')]
     return ret

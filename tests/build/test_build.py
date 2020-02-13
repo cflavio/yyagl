@@ -1,3 +1,7 @@
+from pathlib import Path
+import sys
+if '' in sys.path: sys.path.remove('')
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 from os import getcwd, makedirs
 from os.path import basename
 from shutil import rmtree
@@ -42,13 +46,13 @@ class BuildTests(TestCase):
         self.assertEqual(expected, img_tgt_names(files))
 
     def test_tracks_tgt_fnames(self):
-        tracks_tmpl ='assets/tracks/%s/models/track_all.bam'
+        tracks_tmpl ='../assets/tracks/%s/models/track_all.bam'
         tracks = ['dubai', 'orlando', 'moon', 'sheffield', 'nagano', 'rome', 'toronto']
         cars_tmpl = [
-            'assets/cars/%s/models/cardamage1.bam',
-            'assets/cars/%s/models/cardamage2.bam',
-            'assets/cars/%s/models/capsule.bam',
-            'assets/cars/%s/models/car.bam']
+            '../assets/cars/%s/models/cardamage1.bam',
+            '../assets/cars/%s/models/cardamage2.bam',
+            '../assets/cars/%s/models/capsule.bam',
+            '../assets/cars/%s/models/car.bam']
         cars = ['iapeto', 'teia', 'phoibe', 'themis', 'iperion', 'kronos', 'rea', 'diones']
         expected = [tracks_tmpl % track for track in tracks]
         expected += [ctl % car for ctl in cars_tmpl for car in cars]
@@ -69,6 +73,6 @@ class BuildTests(TestCase):
 
     def test_inside_dir(self):
         self.assertNotEqual(basename(getcwd()), 'tests')
-        with InsideDir('yyagl/tests'):
+        with InsideDir('tests'):
             self.assertEqual(basename(getcwd()), 'tests')
         self.assertNotEqual(basename(getcwd()), 'tests')

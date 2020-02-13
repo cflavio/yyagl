@@ -1,7 +1,7 @@
 from math import pi
 from panda3d.core import ClockObject
-from ..gameobject import GfxColleague
-from .particle import Particle
+from yyagl.gameobject import GfxColleague
+from yyagl.engine.particle import Particle
 from yyagl.lib.p3d.gfx import P3dGfxMgr, P3dAnimNode, P3dAmbientLight, \
     P3dSpotlight
 

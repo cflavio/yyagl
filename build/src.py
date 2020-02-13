@@ -1,5 +1,5 @@
 from os import system
-from .build import src_fpath, branch, bld_dpath
+from yyagl.build.build import src_fpath, branch, bld_dpath
 
 
 def bld_src(target, source, env):

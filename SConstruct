@@ -1,9 +1,11 @@
+import sys
+sys.path.append('..')
 from collections import namedtuple
 from build.build import extensions, files, img_tgt_names, \
     set_path, src_fpath, devinfo_fpath, docs_fpath, pdf_fpath, test_fpath
 from build.src import bld_src
 from build.devinfo import bld_devinfo
-from build.test import bld_ut
+from build.unittests import bld_ut
 from build.docs import bld_docs
 from build.imgs import bld_images
 from build.pdf import bld_pdfs

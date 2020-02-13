@@ -3,7 +3,7 @@ from logging import info
 from os.path import dirname
 from collections import Mapping
 from json import load, dumps
-from .gameobject import GameObject
+from yyagl.gameobject import GameObject
 from yyagl.lib.builder import LibP3d
 
 

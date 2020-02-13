@@ -1,7 +1,7 @@
 from abc import ABCMeta
-from .gameobject import LogicColleague, GameObject
-from .engine.engine import Engine
-from .facade import Facade
+from yyagl.gameobject import LogicColleague, GameObject
+from yyagl.engine.engine import Engine
+from yyagl.facade import Facade
 
 
 class GameLogic(LogicColleague):

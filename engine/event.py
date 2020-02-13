@@ -1,5 +1,5 @@
-from ..gameobject import EventColleague
-from .joystick import JoystickMgr
+from yyagl.gameobject import EventColleague
+from yyagl.engine.joystick import JoystickMgr
 
 
 class EngineEvent(EventColleague):

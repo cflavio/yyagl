@@ -50,7 +50,8 @@ class LibP3d(DirectObject, object):
     @property
     def curr_path(self):
         if sys.platform == 'darwin': return dirname(__file__) + '/../Resources/'
-        return dirname(__file__)
+        #return dirname(__file__)
+        return getcwd()
 
     @staticmethod
     def send(msg): return messenger.send(msg)

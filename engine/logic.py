@@ -1,8 +1,8 @@
 from urllib.request import urlopen
 from os.path import exists
 from sys import argv
-from ..gameobject import LogicColleague
-from .configuration import Cfg
+from yyagl.gameobject import LogicColleague
+from yyagl.engine.configuration import Cfg
 from yyagl.gameobject import GameObject
 from yyagl.computer_proxy import ComputerProxy, compute_once
 

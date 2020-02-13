@@ -1,4 +1,4 @@
-from ..gameobject import AudioColleague
+from yyagl.gameobject import AudioColleague
 from yyagl.lib.p3d.audio import P3dSound
 
 

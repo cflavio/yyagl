@@ -1,6 +1,6 @@
 from direct.gui.DirectFrame import DirectFrame
-from ..gameobject import GuiColleague, LogicColleague, GameObject, Colleague
-from ..facade import Facade
+from yyagl.gameobject import GuiColleague, LogicColleague, GameObject, Colleague
+from yyagl.facade import Facade
 from yyagl.lib.p3d.pause import P3dPause
 LibPause = P3dPause
 

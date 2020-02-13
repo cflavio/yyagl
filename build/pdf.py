@@ -2,7 +2,7 @@ from os import system, rename, remove
 from os.path import exists, dirname, basename
 from itertools import product
 from shutil import move
-from .build import bld_dpath, branch, pdf_fpath, exec_cmd
+from yyagl.build.build import bld_dpath, branch, pdf_fpath, exec_cmd
 
 
 def bld_pdfs(target, source, env):

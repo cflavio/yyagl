@@ -1,12 +1,8 @@
 from os import system, walk, remove, makedirs, listdir, chdir, getcwd
 from os.path import exists, isfile, join, basename
 from shutil import move, rmtree
-from .build import bld_dpath, branch, exec_cmd, test_fpath
+from yyagl.build.build import bld_dpath, branch, exec_cmd, test_fpath
 from subprocess import Popen, PIPE
-
-
-def exec_cmd(cmd):
-    return Popen([cmd], shell=True, stdout=PIPE).communicate()[0]
 
 
 def bld_uml(target, source, env):

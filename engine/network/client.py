@@ -1,7 +1,7 @@
 from socket import error, socket, AF_INET, SOCK_DGRAM
 from queue import Queue, Empty
 from bson import dumps
-from .network import AbsNetwork, ConnectionError, NetworkThread
+from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread
 
 
 class ClientThread(NetworkThread):

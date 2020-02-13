@@ -1,3 +1,7 @@
+from pathlib import Path
+import sys
+if '' in sys.path: sys.path.remove('')
+sys.path.append(str(Path(__file__).parent.parent.parent))
 from os import system, remove
 from os.path import exists
 from unittest import TestCase
@@ -7,14 +11,14 @@ from yyagl.dictfile import DctFile
 class DictFileTests(TestCase):
 
     def setUp(self):
-        if exists('./yyagl/tests/yyagl/test.yml'): remove('./yyagl/tests/yyagl/test.yml')
+        if exists('./tests/test.json'): remove('./tests/test.json')
         self.dctfile = DctFile(
-            './yyagl/tests/yyagl/test.yml',
+            './tests/test.json',
             {'a': 0, 'b': 1, 'c': 2})
         self.dctfile.store()
 
     def tearDown(self):
-        remove('./yyagl/tests/yyagl/test.yml')
+        remove('./tests/test.json')
 
     def test_init(self):
         self.assertIsNotNone(self.dctfile)
@@ -27,12 +31,12 @@ class DictFileTests(TestCase):
 
     def test_store(self):
         self.assertEqual(self.dctfile['c'], 2)
-        other = DctFile('./yyagl/tests/yyagl/test.yml')
+        other = DctFile('./tests/test.json')
         self.dctfile['c'] = 3
         self.assertEqual(self.dctfile['c'], 3)
         self.assertEqual(other['c'], 2)
         self.dctfile.store()
-        other = DctFile('./yyagl/tests/yyagl/test.yml')
+        other = DctFile('./tests/test.json')
         self.assertEqual(other['c'], 3)
 
     def test_operations(self):

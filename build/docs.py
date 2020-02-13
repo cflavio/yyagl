@@ -1,7 +1,7 @@
 from os import system
 from os.path import dirname, realpath, abspath
 from shutil import rmtree, copytree
-from .build import bld_dpath, branch, docs_fpath
+from yyagl.build.build import bld_dpath, branch, docs_fpath
 
 
 def bld_docs(target, source, env):

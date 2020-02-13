@@ -159,10 +159,10 @@ class AbsNetwork(GameObject):
         try: dgram, conn = self.udp_sock.recvfrom(8192)
         except error: return
         dgram = self._fix_payload(dict(loads(dgram)))
-        self.on_udp_pck(dgram)
+        self.on_udp_pck(dgram, conn)
         self.read_cb(dgram['payload'], conn)
 
-    def on_udp_pck(self, dgram): pass
+    def on_udp_pck(self, dgram, conn): pass
 
     def destroy(self):
         self.stop()

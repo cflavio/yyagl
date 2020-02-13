@@ -1,3 +1,7 @@
+from pathlib import Path
+import sys
+if '' in sys.path: sys.path.remove('')
+sys.path.append(str(Path(__file__).parent.parent.parent))
 from direct.showbase.DirectObject import DirectObject
 from unittest.mock import create_autospec
 from panda3d.core import loadPrcFileData, NodePath, ConfigVariableBool,\

@@ -3,8 +3,8 @@ from os.path import exists, basename, abspath
 from shutil import rmtree, move
 from json import dumps
 from yyagl.build.linux import _do_bld
-from .deployng import bld_ng
-from .build import bld_dpath, InsideDir
+from yyagl.build.deployng import bld_ng
+from yyagl.build.build import bld_dpath, InsideDir
 
 def bld_flatpak(target, source, env):
     ico_fpath = env['ICO_FPATH']

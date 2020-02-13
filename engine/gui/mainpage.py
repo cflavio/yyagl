@@ -1,6 +1,6 @@
 from yyagl.lib.gui import Text
-from .page import Page, PageGui, PageFacade
-from .imgbtn import ImgBtn
+from yyagl.engine.gui.page import Page, PageGui, PageFacade
+from yyagl.engine.gui.imgbtn import ImgBtn
 
 
 class MainPageGui(PageGui):

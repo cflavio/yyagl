@@ -3,8 +3,8 @@ from os.path import basename, dirname, realpath, exists, abspath
 from shutil import move, rmtree, copytree, copy
 from glob import glob
 from distutils.dir_util import copy_tree
-from .build import ver, bld_dpath, branch, InsideDir, size
-from .deployng import bld_ng
+from yyagl.build.build import ver, bld_dpath, branch, InsideDir, size
+from yyagl.build.deployng import bld_ng
 
 
 def bld_linux(target, source, env):

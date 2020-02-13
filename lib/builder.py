@@ -1,4 +1,4 @@
-from .p3d.p3d import LibP3d
+from yyagl.lib.p3d.p3d import LibP3d
 
 
 class LibBuilder(object):

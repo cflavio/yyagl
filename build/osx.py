@@ -1,7 +1,7 @@
 from os import system, walk, remove
 from shutil import rmtree, copytree, move, copy
-from .build import ver, bld_dpath, branch
-from .deployng import bld_ng
+from yyagl.build.build import ver, bld_dpath, branch
+from yyagl.build.deployng import bld_ng
 
 
 def bld_osx(target, source, env):

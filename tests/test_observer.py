@@ -1,3 +1,7 @@
+from pathlib import Path
+import sys
+if '' in sys.path: sys.path.remove('')
+sys.path.append(str(Path(__file__).parent.parent.parent))
 from unittest import TestCase
 from unittest.mock import MagicMock
 from yyagl.observer import Subject

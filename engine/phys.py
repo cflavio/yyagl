@@ -2,7 +2,7 @@ from yyagl.gameobject import Colleague
 from yyagl.lib.bullet.bullet import (
     BulletPhysWorld, BulletTriangleMesh, BulletTriangleMeshShape,
     BulletRigidBodyNode, BulletGhostNode)
-from ..facade import Facade
+from yyagl.facade import Facade
 
 
 PhysWorld = BulletPhysWorld

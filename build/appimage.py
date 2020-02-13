@@ -5,8 +5,8 @@ from json import dumps
 from urllib.request import urlretrieve
 from stat import S_IEXEC
 from yyagl.build.linux import _do_bld
-from .deployng import bld_ng
-from .build import bld_dpath, InsideDir, linux_fpath
+from yyagl.build.deployng import bld_ng
+from yyagl.build.build import bld_dpath, InsideDir, linux_fpath
 
 def bld_appimage(target, source, env):
     ico_fpath = env['ICO_FPATH']

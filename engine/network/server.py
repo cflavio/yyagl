@@ -1,7 +1,7 @@
 from socket import error
 from queue import Queue, Empty
 from bson import dumps, loads
-from .network import AbsNetwork, ConnectionError, NetworkThread
+from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread
 from yyagl.gameobject import GameObject
 
 
@@ -83,7 +83,7 @@ class Server(AbsNetwork):
 
     def unregister_rpc(self, func): del self.fname2ref[func.__name__]
 
-    def on_udp_pck(self, dgram):
+    def on_udp_pck(self, dgram, conn):
         sender = dgram['sender']
         if sender not in self.addr2conn: self.addr2conn[sender] = conn
 

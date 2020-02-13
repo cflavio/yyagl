@@ -1,7 +1,7 @@
 from os import system, makedirs, remove
 from os.path import exists
 from shutil import move, copy
-from .build import files
+from yyagl.build.build import files
 
 
 def bld_mo(target, source, env):

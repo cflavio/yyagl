@@ -1,4 +1,4 @@
-from ..facade import Facade
+from yyagl.facade import Facade
 
 
 class EngineFacade(Facade):

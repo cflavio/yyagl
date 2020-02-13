@@ -2,26 +2,26 @@ from sys import path
 from os.path import dirname, realpath
 path.append(dirname(realpath(__file__)) + '/../thirdparty')
 
-from ..lib.builder import LibBuilder
-from .pause import PauseMgr
-from .profiler import AbsProfiler
-from .shader import ShaderMgr
-from .log import LogMgr
-from .font import FontMgr
-from .phys import PhysMgr
-from .gfx import EngineGfx
-from .network.server import Server
-from .network.client import Client
-from .gui.gui import EngineGui
-from .logic import EngineLogic
-from .event import EngineEvent
-from .audio import EngineAudio
-from .lang import LangMgr
-from ..gameobject import GameObject, Colleague
-from .enginefacade import EngineFacade
-from .configuration import Cfg
-from .cbmux import CallbackMux
-from .clock import Clock
+from yyagl.lib.builder import LibBuilder
+from yyagl.engine.pause import PauseMgr
+from yyagl.engine.profiler import AbsProfiler
+from yyagl.engine.shader import ShaderMgr
+from yyagl.engine.log import LogMgr
+from yyagl.engine.font import FontMgr
+from yyagl.engine.phys import PhysMgr
+from yyagl.engine.gfx import EngineGfx
+from yyagl.engine.network.server import Server
+from yyagl.engine.network.client import Client
+from yyagl.engine.gui.gui import EngineGui
+from yyagl.engine.logic import EngineLogic
+from yyagl.engine.event import EngineEvent
+from yyagl.engine.audio import EngineAudio
+from yyagl.engine.lang import LangMgr
+from yyagl.gameobject import GameObject, Colleague
+from yyagl.engine.enginefacade import EngineFacade
+from yyagl.engine.configuration import Cfg
+from yyagl.engine.cbmux import CallbackMux
+from yyagl.engine.clock import Clock
 
 
 class Engine(GameObject, EngineFacade):
