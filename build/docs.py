@@ -27,7 +27,7 @@ def __prepare(env):
         devsite='https:\/\/www.ya2.it', prjsite='https:\/\/www.ya2.it\/pages\/yorg.html',
         dst_path=bld_dpath)
     system(cmd)
-    curr_dir = abspath('.').replace('/', '\/')
+    curr_dir = env['DOCS_PATH'].replace('/', '\/')
     curr_dir = curr_dir.replace('\\', '\\\\')
     args = ['appname', 'src_dpath', 'version', 'DevName', 'htmltheme']
     args = ['-e "s/<%s>/{%s}/"' % ((arg,) * 2) for arg in args]
