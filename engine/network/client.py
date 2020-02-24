@@ -1,7 +1,8 @@
 from socket import error, socket, AF_INET, SOCK_DGRAM
 from queue import Queue, Empty
 from bson import dumps
-from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread
+from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread, msg_rpc_call, msg_rpc_answ
+from yyagl.engine.network.binary import BinaryData
 
 
 class ClientThread(NetworkThread):
@@ -15,17 +16,18 @@ class ClientThread(NetworkThread):
     def _configure_socket(self):
         self.tcp_sock.connect((self.srv_addr, self.port))
 
-    def _rpc_cb(self, dct, sock):
-        self.rpc_ret.put(dct['result'])
+    def _rpc_cb(self, data, sock):
+        self.rpc_ret.put(data)
 
     def _queue(self, sock):
         return self.msgs
 
     def send_msg(self, msg, receiver=None): self.msgs.put(msg)
 
-    def do_rpc(self, funcname, args, kwargs):
-        msg = {'is_rpc': True, 'payload': [funcname, args, kwargs]}
-        self.msgs.put(dumps(msg))
+    def do_rpc(self, funcname, *args, **kwargs):
+        args = list(args)
+        msg_size, msg_data = BinaryData.pack([msg_rpc_call, funcname, args, kwargs])
+        self.msgs.put((msg_size, msg_data))
         return self.rpc_ret.get()
 
 
@@ -58,5 +60,5 @@ class Client(AbsNetwork):
         if attr not in self._functions: raise AttributeError(attr)
 
         def do_rpc(*args, **kwargs):
-            return self.netw_thr.do_rpc(attr, args, kwargs)
+            return self.netw_thr.do_rpc(attr, *args, **kwargs)
         return do_rpc

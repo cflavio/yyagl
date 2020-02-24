@@ -1,5 +1,6 @@
 from socket import socket, AF_INET, SOCK_DGRAM, error, SOCK_STREAM, \
     SOL_SOCKET, SO_REUSEADDR
+from traceback import print_exc
 from logging import info
 from select import select
 from time import sleep
@@ -12,6 +13,10 @@ from threading import Thread
 from _thread import interrupt_main
 from struct import Struct, error as unpack_error
 from yyagl.gameobject import GameObject
+from yyagl.engine.network.binary import BinaryData
+
+
+msg_rpc_call, msg_rpc_answ = range(2)
 
 
 class ConnectionError(Exception): pass
@@ -40,33 +45,37 @@ class NetworkThread(Thread):
                 for sock in readable: self._process_read(sock)
                 for sock in writable: self._process_write(sock)
                 for sock in exceptional: print('exception', sock.getpeername())
-            except (error, AttributeError) as exc: print(exc)
+            except (error, AttributeError) as exc: print_exc()
             # AttributeError happens when the server user exits from a race,
             # then destroy is being called but _process_read is still alive
             # and self.eng.cb_mux.add_cb is invoked, but self.eng in None
             except Exception as exc:
-                print(exc)
+                print_exc()
                 interrupt_main()
 
     def _process_read(self, sock):
         try:
             data = self.recv_one_msg(sock)
             if data:
-                dct = dict(loads(data))
-                if 'is_rpc' in dct: self._rpc_cb(dct, sock)
+                msg = BinaryData.unpack(data)
+                if msg[0] == msg_rpc_call:
+                    funcname, args, kwargs = msg[1:]
+                    self._rpc_cb(funcname, args, kwargs, sock)
+                elif msg[0] == msg_rpc_answ:
+                    self._rpc_cb(msg[1], sock)
                 else:
-                    args = [dct['payload'], sock]
+                    args = [msg, sock]
                     self.eng.cb_mux.add_cb(self.read_cb, args)
         except (ConnectionError, TypeError) as exc:
-            print(exc)
+            print_exc()
             self.notify('on_disconnected', sock)
             self.connections.remove(sock)
 
     def _process_write(self, sock):
         try:
-            msg = self._queue(sock).get_nowait()
-            sock.sendall(self.size_struct.pack(len(msg)))
-            sock.sendall(msg)
+            msg_size, msg_data = self._queue(sock).get_nowait()
+            sock.sendall(self.size_struct.pack(msg_size))
+            sock.sendall(msg_data)
         except Empty: pass
 
     def recv_one_msg(self, sock):
@@ -126,7 +135,8 @@ class AbsNetwork(GameObject):
         self.netw_thr.read_cb = callback
 
     def send(self, data_lst, receiver=None):
-        self.netw_thr.send_msg(dumps({'payload': data_lst}), receiver)
+        dgram = BinaryData.pack(data_lst)
+        self.netw_thr.send_msg(dgram, receiver)
 
     def on_frame(self): self.process_udp()
 

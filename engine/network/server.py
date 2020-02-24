@@ -1,7 +1,8 @@
 from socket import error
 from queue import Queue, Empty
 from bson import dumps, loads
-from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread
+from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread, msg_rpc_call, msg_rpc_answ
+from yyagl.engine.network.binary import BinaryData
 from yyagl.gameobject import GameObject
 
 
@@ -28,8 +29,8 @@ class ServerThread(NetworkThread, GameObject):
         else:
             NetworkThread._process_read(self, sock)
 
-    def _rpc_cb(self, dct, sock):
-        self.eng.cb_mux.add_cb(self.rpc_cb, [dct, sock])
+    def _rpc_cb(self, funcname, args, kwargs, sock):
+        self.eng.cb_mux.add_cb(self.rpc_cb, [funcname, args, kwargs, sock])
 
     def _queue(self, sock):
         return self.conn2msgs[sock]
@@ -66,18 +67,17 @@ class Server(AbsNetwork):
     def _configure_udp(self): self.udp_sock.bind(('', self.port))
 
     def send(self, data_lst, receiver=None):
-        dgram = dumps({'payload': data_lst})
         receivers = [cln for cln in self.connections if cln == receiver]
         dests = receivers if receiver else self.connections
+        dgram = BinaryData.pack(data_lst)
         list(map(lambda cln: self.netw_thr.send_msg(cln, dgram), dests))
 
-    def rpc_cb(self, dct, conn):
-        funcname, args, kwargs = dct['payload']
+    def rpc_cb(self, funcname, args, kwargs, conn):
         kwargs = kwargs or {}
         kwargs['sender'] = conn
         ret = self.fname2ref[funcname](*args, **kwargs)
-        dct = {'is_rpc': True, 'result': ret}
-        self.netw_thr.send_msg(conn, dumps(dct))
+        msg_size, msg_data = BinaryData.pack([msg_rpc_answ, ret])
+        self.netw_thr.send_msg(conn, (msg_size, msg_data))
 
     def register_rpc(self, func): self.fname2ref[func.__name__] = func
 
