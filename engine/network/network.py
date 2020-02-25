@@ -5,8 +5,6 @@ from logging import info
 from select import select
 from time import sleep
 from queue import Queue, Empty
-from bson import dumps, loads
-from decimal import Decimal
 from json import load
 from urllib.request import urlopen
 from threading import Thread
@@ -140,15 +138,6 @@ class AbsNetwork(GameObject):
 
     def on_frame(self): self.process_udp()
 
-    @staticmethod
-    def _fix_payload(payload):
-        ret = {'sender': payload['sender']}
-
-        def __fix(elm):
-            return float(elm) if isinstance(elm, Decimal) else elm
-        ret['payload'] = list(map(__fix, payload['payload']))
-        return ret
-
     @property
     def is_active(self):
         observers = self.eng.event.observers.values()
@@ -168,9 +157,10 @@ class AbsNetwork(GameObject):
     def process_udp(self):
         try: dgram, conn = self.udp_sock.recvfrom(8192)
         except error: return
-        dgram = self._fix_payload(dict(loads(dgram)))
         self.on_udp_pck(dgram, conn)
-        self.read_cb(dgram['payload'], conn)
+        dgram = BinaryData.unpack(dgram)
+        sender, payload = dgram[0], dgram[1:]
+        self.read_cb(payload, conn)
 
     def on_udp_pck(self, dgram, conn): pass
 

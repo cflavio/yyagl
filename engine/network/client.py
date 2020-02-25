@@ -1,6 +1,5 @@
 from socket import error, socket, AF_INET, SOCK_DGRAM
 from queue import Queue, Empty
-from bson import dumps
 from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread, msg_rpc_call, msg_rpc_answ
 from yyagl.engine.network.binary import BinaryData
 
@@ -48,9 +47,9 @@ class Client(AbsNetwork):
     def _configure_udp(self): pass
 
     def send_udp(self, data_lst, sender):
-        dgram = {'sender': sender, 'payload': data_lst}
         host, port = self.srv_addr.split(':')
-        self.udp_sock.sendto(dumps(dgram), (host, int(port)))
+        msg_size, msg_data = BinaryData.pack([sender] + data_lst)
+        self.udp_sock.sendto(msg_data, (host, int(port)))
 
     def register_rpc(self, funcname): self._functions += [funcname]
 

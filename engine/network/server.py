@@ -1,6 +1,5 @@
 from socket import error
 from queue import Queue, Empty
-from bson import dumps, loads
 from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread, msg_rpc_call, msg_rpc_answ
 from yyagl.engine.network.binary import BinaryData
 from yyagl.gameobject import GameObject
@@ -84,18 +83,19 @@ class Server(AbsNetwork):
     def unregister_rpc(self, func): del self.fname2ref[func.__name__]
 
     def on_udp_pck(self, dgram, conn):
-        sender = dgram['sender']
+        sender = BinaryData.unpack(dgram)[0]
         if sender not in self.addr2conn: self.addr2conn[sender] = conn
 
     def process_udp(self):
         try: dgram, conn = self.udp_sock.recvfrom(8192)
         except error: return
         try:
-            dgram = self._fix_payload(dict(loads(dgram)))
-            self.read_cb(dgram['payload'], dgram['sender'])
+            dgram = BinaryData.unpack(dgram)
+            sender, payload = dgram[0], dgram[1:]
+            self.read_cb(payload, sender)
         except IndexError as e: print(e)
 
     def send_udp(self, data_lst, receiver):
         if receiver[0] not in self.addr2conn: return
-        dgram = {'sender': 'server', 'payload': data_lst}
-        self.udp_sock.sendto(dumps(dgram), self.addr2conn[receiver[0]])
+        msg_size, msg_data = BinaryData.pack(['server'] + data_lst)
+        self.udp_sock.sendto(msg_data, self.addr2conn[receiver[0]])
