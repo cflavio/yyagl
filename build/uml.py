@@ -45,7 +45,7 @@ def auto_classes(env):
     system('echo "" | ps2pdf -sPAPERSIZE=a4 - built/uml_classes/blank.pdf')
     for pdf in pdfs:
         numpages = exec_cmd(b'pdftk %s dump_data | grep NumberOfPages' % bytes(pdf, 'utf-8'))
-        numpages = int(numpages.lstrip(b'NumberOfPages: '))
+        numpages = int(numpages.lstrip('NumberOfPages: '))
         if numpages % 2:
             system('pdftk %s built/uml_classes/blank.pdf cat output %s2 && mv %s2 %s' % (pdf, pdf, pdf, pdf))
     remove('built/uml_classes/blank.pdf')
@@ -73,13 +73,13 @@ def get_finfo(fnames, width, height):
     for fname in fnames:
         fname = fname
         geometry = exec_cmd('identify -verbose "%s" | grep Geometry' % fname)
-        split_dim = lambda geom: geom.split()[1].split(b'+')[0].split(b'x')
+        split_dim = lambda geom: geom.split()[1].split('+')[0].split('x')
         size = [int(dim) for dim in split_dim(geometry)]
         if size[0] > width or size[1] > height:
             cmd = 'convert %s -resize %sx%s\> %s' % (fname, width, height, fname)
             exec_cmd(cmd)
         geometry = exec_cmd('identify -verbose "%s" | grep Geometry' % fname)
-        split_dim = lambda geom: geom.split()[1].split(b'+')[0].split(b'x')
+        split_dim = lambda geom: geom.split()[1].split('+')[0].split('x')
         size = [int(dim) for dim in split_dim(geometry)]
         _finfo += [(fname, size)]
     #finfo = list(sorted(finfo, key=lambda elm: elm[1][0]))
