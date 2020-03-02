@@ -6,7 +6,7 @@ from yyagl.build.build import files
 
 def bld_mo(target, source, env):
     lng_dir_code, appname = env['LNG'], env['APPNAME']
-    lng_code = str(target[0])[len(lng_dir_code):].split('/')[0]
+    lng_code = str(target)[len(lng_dir_code):].split('/')[0]
     __bld_mo(lng_code, lng_code, env)
 
 
@@ -25,7 +25,7 @@ def bld_pot(target, source, env):
 
 def bld_merge(target, source, env):
     lng_dir, appname = env['LNG'], env['APPNAME']
-    lng_code = str(target[0])[len('assets/po/'):].split('.po')[0]
+    lng_code = str(target)[len('assets/po/'):].split('.po')[0]
     __bld_tmpl_merge(lng_dir, lng_code, lng_code, appname)
 
 
