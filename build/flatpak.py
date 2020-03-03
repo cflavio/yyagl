@@ -35,7 +35,7 @@ def __do_flatpak(dst, name):
     json = {
         'app-id': 'org.ya2.Yorg',
         'runtime': 'org.freedesktop.Platform',
-        'runtime-version': '18.08',
+        'runtime-version': '19.08',
         'sdk': 'org.freedesktop.Sdk',
         'command': 'yorg',
         'modules': [
