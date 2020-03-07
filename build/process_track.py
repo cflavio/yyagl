@@ -49,10 +49,11 @@ class LangCfg(object):
 
 class DevCfg(object):
 
-    def __init__(self, model_path='assets/models', shaders_dev=False,
+    def __init__(self, model_path='assets/models', shaders_dev=False, pbr=False,
                  gamma=1.0, menu_joypad=True):
         self.model_path = ''
         self.shaders_dev = False
+        self.pbr = False
         self.gamma = 1.0
         self.menu_joypad = False
         self.xmpp_server = ''

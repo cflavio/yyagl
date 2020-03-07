@@ -50,12 +50,13 @@ class CursorCfg(object):
 class DevCfg(object):
 
     def __init__(self, mt_render=False, model_path='assets/models',
-                 shaders_dev=False, gamma=1.0, menu_joypad=True, verbose='',
+                 shaders_dev=False, pbr=False, gamma=1.0, menu_joypad=True, verbose='',
                  verbose_log=False, xmpp_server='', start_wp='', port=9099,
                  server='localhost:9098', srgb=False, opengl_3_2=False):
         self.multithreaded_render = mt_render  # multithreaded rendering
         self.model_path = model_path
         self.shaders_dev = shaders_dev
+        self.pbr = pbr
         self.gamma = gamma
         self.menu_joypad = menu_joypad
         self.verbose = verbose
