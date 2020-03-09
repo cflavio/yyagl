@@ -1,5 +1,5 @@
 from yyagl.lib.gui import Text
-from yyagl.engine.gui.page import Page, PageGui, PageFacade
+from yyagl.engine.gui.page import Page, PageGui
 from yyagl.engine.gui.imgbtn import ImgBtn
 
 
@@ -36,9 +36,5 @@ class MainPageGui(PageGui):
         self.add_widgets([txt])
 
 
-class MainPage(Page, PageFacade):
+class MainPage(Page):
     gui_cls = MainPageGui
-
-    def __init__(self, mainpage_props):
-        Page.__init__(self, mainpage_props)
-        PageFacade.__init__(self)

@@ -137,12 +137,12 @@ class MenuLogic(LogicColleague):
 
     def push_page(self, page):
         if self.pages:
-            self.pages[-1].hide()
+            self.pages[-1].gui.hide()
             if len(self.pages) > 1:  # first page doesn't go back
-                self.pages[-1].detach_obs(self.on_back)
-                self.pages[-1].detach_obs(self.on_quit)
+                self.pages[-1].gui.detach(self.on_back)
+                self.pages[-1].gui.detach(self.on_quit)
         self.pages += [page]
-        list(map(page.attach_obs, [self.on_back, self.on_quit, self.on_push_page]))
+        list(map(page.gui.attach, [self.on_back, self.on_quit, self.on_push_page]))
 
     def enable(self): self.pages[-1].enable()
 
@@ -156,11 +156,11 @@ class MenuLogic(LogicColleague):
 
     def __back_quit_tmpl(self, idx, fun):
         page = self.pages.pop()
-        list(map(page.detach_obs, [self.on_back, self.on_quit]))
+        list(map(page.gui.detach, [self.on_back, self.on_quit]))
         page.destroy()
         fun()
-        self.pages[idx].show()
-        list(map(self.pages[idx].attach_obs, [self.on_back, self.on_quit]))
+        self.pages[idx].gui.show()
+        list(map(self.pages[idx].gui.attach, [self.on_back, self.on_quit]))
 
     def on_back(self):
         self.__back_quit_tmpl(-1, lambda: None)
