@@ -207,27 +207,28 @@ class PageEvent(EventColleague):
     def on_quit(self): pass
 
 
-#class PageFacade(Facade):
+class PageFacade(Facade):
 
-#    def __init__(self):
-#        mth_lst = [
-#            ('show', lambda obj: obj.gui.show),
-#            ('hide', lambda obj: obj.gui.hide),
-#            ('enable', lambda obj: obj.gui.enable),
-#            ('disable', lambda obj: obj.gui.disable),
-#            ('enable_navigation', lambda obj: obj.gui.enable_navigation),
-#            ('disable_navigation', lambda obj: obj.gui.disable_navigation),
-#            ('attach_obs', lambda obj: obj.gui.attach),
-#            ('detach_obs', lambda obj: obj.gui.detach)]
-#        Facade.__init__(self, mth_lst=mth_lst)
+    def __init__(self):
+        mth_lst = [
+            ('show', lambda obj: obj.gui.show),
+            ('hide', lambda obj: obj.gui.hide),
+            ('enable', lambda obj: obj.gui.enable),
+            ('disable', lambda obj: obj.gui.disable),
+            ('enable_navigation', lambda obj: obj.gui.enable_navigation),
+            ('disable_navigation', lambda obj: obj.gui.disable_navigation),
+            ('attach_obs', lambda obj: obj.gui.attach),
+            ('detach_obs', lambda obj: obj.gui.detach)]
+        Facade.__init__(self, mth_lst=mth_lst)
 
 
-class Page(GameObject):
+class Page(GameObject, PageFacade):
 
     gui_cls = PageGui
     event_cls = PageEvent
 
     def __init__(self, menu_props, players=[0]):
+        PageFacade.__init__(self)
         self.menu_props = menu_props
         self.players = players
         GameObject.__init__(self)
