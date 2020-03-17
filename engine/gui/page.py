@@ -209,17 +209,16 @@ class PageEvent(EventColleague):
 
 class PageFacade(Facade):
 
-    def __init__(self):
-        mth_lst = [
-            ('show', lambda obj: obj.gui.show),
-            ('hide', lambda obj: obj.gui.hide),
-            ('enable', lambda obj: obj.gui.enable),
-            ('disable', lambda obj: obj.gui.disable),
-            ('enable_navigation', lambda obj: obj.gui.enable_navigation),
-            ('disable_navigation', lambda obj: obj.gui.disable_navigation),
-            ('attach_obs', lambda obj: obj.gui.attach),
-            ('detach_obs', lambda obj: obj.gui.detach)]
-        Facade.__init__(self, mth_lst=mth_lst)
+    def show(self): self.gui.show()
+    def hide(self): self.gui.hide()
+    def enable(self, players): self.gui.enable(players)
+    def disable(self, players): self.gui.disable(players)
+    def enable_navigation(self, players): self.gui.enable_navigation(players)
+    def disable_navigation(self): self.gui.disable_navigation(players)
+    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
+        self.gui.attach(obs_meth, sort, rename, args)
+    def detach_obs(self, obs_meth, lambda_call=None):
+        self.gui.detach(obs_meth, lambda_call)
 
 
 class Page(GameObject, PageFacade):
