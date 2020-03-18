@@ -180,14 +180,13 @@ class MenuLogic(LogicColleague):
 
 class MenuFacade(Facade):
 
-    def __init__(self):
-        mth_lst = [
-            ('push_page', lambda obj: obj.logic.push_page),
-            ('attach_obs', lambda obj: obj.gui.attach),
-            ('detach_obs', lambda obj: obj.gui.detach),
-            ('enable', lambda obj: obj.logic.enable),
-            ('enable_navigation', lambda obj: obj.logic.enable_navigation)]
-        Facade.__init__(self, mth_lst=mth_lst)
+    def push_page(self, page): return self.logic.push_page(page)
+    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
+        return self.gui.attach(obs_meth, sort, rename, args)
+    def detach_obs(self, obs_meth, lambda_call=None):
+        return self.gui.detach(obs_meth, lambda_call)
+    def enable(self): return self.gui.enable()
+    def enable_navigation(self): return self.gui.enable_navigation()
 
 
 class Menu(GameObject, MenuFacade):

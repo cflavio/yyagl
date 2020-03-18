@@ -52,8 +52,8 @@ class PauseLogic(LogicColleague):
 
 class PauseFacade(Facade):
 
-    def __init__(self):
-        Facade.__init__(self, [('paused', lambda obj: obj.logic._pause.paused)])
+    @property
+    def paused(self): return self.logic._pause.paused
 
 
 class PauseMgr(GameObject, Colleague, PauseFacade):

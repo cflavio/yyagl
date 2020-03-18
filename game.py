@@ -11,9 +11,7 @@ class GameLogic(LogicColleague):
 
 class GameFacade(Facade):
 
-    def __init__(self):
-        mth_lst = [('demand', lambda obj: obj.fsm.demand)]
-        Facade.__init__(self, mth_lst=mth_lst)
+    def demand(self, tgt_state, *args): return self.fsm.demand(tgt_state, *args)
 
 
 class GameBase(GameObject, GameFacade):  # it doesn't manage the window

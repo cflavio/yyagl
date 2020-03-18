@@ -209,16 +209,16 @@ class PageEvent(EventColleague):
 
 class PageFacade(Facade):
 
-    def show(self): self.gui.show()
-    def hide(self): self.gui.hide()
-    def enable(self, players): self.gui.enable(players)
-    def disable(self, players): self.gui.disable(players)
-    def enable_navigation(self, players): self.gui.enable_navigation(players)
-    def disable_navigation(self): self.gui.disable_navigation(players)
+    def show(self): return self.gui.show()
+    def hide(self): return self.gui.hide()
+    def enable(self, players): return self.gui.enable(players)
+    def disable(self, players): return self.gui.disable(players)
+    def enable_navigation(self, players): return self.gui.enable_navigation(players)
+    def disable_navigation(self): return self.gui.disable_navigation(players)
     def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
-        self.gui.attach(obs_meth, sort, rename, args)
+        return self.gui.attach(obs_meth, sort, rename, args)
     def detach_obs(self, obs_meth, lambda_call=None):
-        self.gui.detach(obs_meth, lambda_call)
+        return self.gui.detach(obs_meth, lambda_call)
 
 
 class Page(GameObject, PageFacade):

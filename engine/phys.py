@@ -21,17 +21,14 @@ class CollInfo(object):
 
 class PhysFacade(Facade):
 
-    def __init__(self):
-        mth_lst = [
-            ('attach_rigid_body', lambda obj: obj.root.attach_rigid_body),
-            ('remove_rigid_body', lambda obj: obj.root.remove_rigid_body),
-            ('attach_ghost', lambda obj: obj.root.attach_ghost),
-            ('remove_ghost', lambda obj: obj.root.remove_ghost),
-            ('attach_vehicle', lambda obj: obj.root.attach_vehicle),
-            ('remove_vehicle', lambda obj: obj.root.remove_vehicle),
-            ('ray_test_all', lambda obj: obj.root.ray_test_all),
-            ('ray_test_closest', lambda obj: obj.root.ray_test_closest)]
-        Facade.__init__(self, mth_lst=mth_lst)
+    def attach_rigid_body(self, rbnode): return self.root.attach_rigid_body(rbnode)
+    def remove_rigid_body(self, rbnode): return self.root.remove_rigid_body(rbnode)
+    def attach_ghost(self, gnode): return self.root.attach_ghost(gnode)
+    def remove_ghost(self, gnode): return self.root.remove_ghost(gnode)
+    def attach_vehicle(self, vehicle): return self.root.attach_vehicle(vehicle)
+    def remove_vehicle(self, vehicle): return self.root.remove_vehicle(vehicle)
+    def ray_test_all(self, from_pos, to_pos, mask=None): return self.root.ray_test_all(from_pos, to_pos, mask)
+    def ray_test_closest(self, from_pos, to_pos, mask=None): return self.root.ray_test_closest(from_pos, to_pos, mask)
 
 
 class PhysMgr(Colleague, PhysFacade):
