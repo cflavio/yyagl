@@ -69,7 +69,7 @@ class CommonBase:
         if hasattr(self, 'bind_transl'): self.wdg['text'] = self.bind_transl
 
 
-class P3dImg(Facade, CommonBase):
+class P3dImg(CommonBase):
 
     def __init__(self, filepath, pos=(0, 0), scale=1.0, background=False,
                  foreground=False, parent=None):
@@ -80,14 +80,14 @@ class P3dImg(Facade, CommonBase):
         if self.img.get_texture().get_format() in alpha_formats:
             self.img.set_transparency(True)
         if foreground: self.img.set_bin('gui-popup', 50)
-        mth_lst = [
-            ('reparent_to', lambda obj: obj.img.reparent_to),
-            ('show', lambda obj: obj.img.show),
-            ('hide', lambda obj: obj.img.hide),
-            ('set_shader', lambda obj: obj.img.set_shader),
-            ('set_shader_input', lambda obj: obj.img.set_shader_input),
-            ('set_texture', lambda obj: obj.img.set_texture)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+
+    def reparent_to(self, node): return self.img.reparent_to(node)
+    def show(self): return self.img.show()
+    def hide(self): return self.img.hide()
+    def set_shader(self, shader): return self.img.set_shader(shader)
+    def set_shader_input(self, name, val): return self.img.set_shader_input(name, val)
+    def set_texture(self, ts, texture): return self.img.set_texture(ts, texture)
 
     def set_exit_transition(self, destroy):
         start_pos = self.get_pos()
@@ -114,16 +114,15 @@ class P3dImg(Facade, CommonBase):
     def destroy(self): self.img = self.img.destroy()
 
 
-class P3dBase(Facade, CommonBase):
+class P3dBase(CommonBase):
 
     def __init__(self, tra_src=None, tra_tra=None):
         #self.text_src_tra = None  # it breaks the gui
         if tra_src and tra_tra: self.bind_tra(tra_src, tra_tra)
-        mth_lst = [
-            ('set_pos', lambda obj: obj.wdg.set_pos),
-            ('show', lambda obj: obj.wdg.show),
-            ('hide', lambda obj: obj.wdg.hide)]
-        Facade.__init__(self, mth_lst=mth_lst + self._mth_lst)
+
+    def set_pos(self, pos): return self.wdg.set_pos(pos)
+    def show(self): return self.wdg.show()
+    def hide(self): return self.wdg.hide()
 
     @property
     def _mth_lst(self): return []
@@ -158,16 +157,13 @@ class P3dBase(Facade, CommonBase):
 
 class P3dAbs(P3dBase):
 
-    @property
-    def _mth_lst(self):
-        return [
-            ('get_value', lambda obj: obj.wdg.getValue),
-            ('initialiseoptions', lambda obj: obj.wdg.initialiseoptions),
-            ('set_z', lambda obj: obj.wdg.set_z),
-            ('set_shader', lambda obj: obj.wdg.set_shader),
-            ('set_shader_input', lambda obj: obj.wdg.set_shader_input),
-            ('set_transparency', lambda obj: obj.wdg.set_transparency),
-            ('bind', lambda obj: obj.wdg.bind)]
+    def get_value(self): return self.wdg.getValue()
+    def initialiseoptions(self): return self.wdg.initialiseoptions()
+    def set_z(self, val): return self.wdg.set_z(val)
+    def set_shader(self, shader): return self.wdg.set_shader(shader)
+    def set_shader_input(self, name, val): return self.wdg.set_shader_input(name, val)
+    def set_transparency(self, val): return self.wdg.set_transparency(val)
+    def bind(self, evt, mth): return self.wdg.bind(evt, mth)
 
     def attachNewNode(self, gui_itm, sort_order):
         # it won't work if we name it attach_node. hopefully this will be

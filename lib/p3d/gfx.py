@@ -135,36 +135,35 @@ class P3dGfxMgr(object):
             elm[1]()
 
 
-class P3dNode(Facade):
+class P3dNode:
 
     def __init__(self, nodepath):
         self.nodepath = nodepath
         self.node.set_python_tag('yyaglnode', self)
-        mth_lst = [
-            ('set_collide_mask', lambda obj: obj.node.set_collide_mask),
-            ('set_x', lambda obj: obj.node.set_x),
-            ('set_y', lambda obj: obj.node.set_y),
-            ('set_z', lambda obj: obj.node.set_z),
-            ('set_hpr', lambda obj: obj.node.set_hpr),
-            ('set_h', lambda obj: obj.node.set_h),
-            ('set_p', lambda obj: obj.node.set_p),
-            ('set_r', lambda obj: obj.node.set_r),
-            ('set_scale', lambda obj: obj.node.set_scale),
-            ('set_transparency', lambda obj: obj.node.set_transparency),
-            ('set_alpha_scale', lambda obj: obj.node.set_alpha_scale),
-            ('set_texture', lambda obj: obj.node.set_texture),
-            ('has_tag', lambda obj: obj.node.has_tag),
-            ('get_tag', lambda obj: obj.node.get_tag),
-            ('get_python_tag', lambda obj: obj.node.get_python_tag),
-            ('remove_node', lambda obj: obj.node.remove_node),
-            ('flatten_strong', lambda obj: obj.node.flatten_strong),
-            ('clear_model_nodes', lambda obj: obj.node.clear_model_nodes),
-            ('show', lambda obj: obj.node.show),
-            ('set_depth_offset', lambda obj: obj.node.set_depth_offset),
-            ('loop', lambda obj: obj.node.loop),
-            ('cleanup', lambda obj: obj.node.cleanup),
-            ('write_bam_file', lambda obj: obj.node.write_bam_file)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    def set_collide_mask(self, mask): return self.node.set_collide_mask(mask)
+    def set_x(self, val): return self.node.set_x(val)
+    def set_y(self, val): return self.node.set_y(val)
+    def set_z(self, val): return self.node.set_z(val)
+    def set_hpr(self, val): return self.node.set_hpr(val)
+    def set_h(self, val): return self.node.set_h(val)
+    def set_p(self, val): return self.node.set_p(val)
+    def set_r(self, val): return self.node.set_r(val)
+    def set_scale(self, val): return self.node.set_scale(val)
+    def set_transparency(self, val): return self.node.set_transparency(val)
+    def set_alpha_scale(self, val): return self.node.set_alpha_scale(val)
+    def set_texture(self, ts, texture): return self.node.set_texture(ts, texture)
+    def has_tag(self, name): return self.node.has_tag(name)
+    def get_tag(self, name): return self.node.get_tag(name)
+    def get_python_tag(self, name): return self.node.get_python_tag(name)
+    def remove_node(self): return self.node.remove_node()
+    def flatten_strong(self): return self.node.flatten_strong()
+    def clear_model_nodes(self): return self.node.clear_model_nodes()
+    def show(self): return self.node.show()
+    def set_depth_offset(self, val): return self.node.set_depth_offset(val)
+    def loop(self, val): return self.node.loop(val)
+    def cleanup(self): return self.node.cleanup()
+    def write_bam_file(self, fname): return self.node.write_bam_file(fname)
 
     def attach_node(self, name):
         return P3dNode(self.node.attach_new_node(name))
@@ -260,14 +259,13 @@ class P3dNode(Facade):
     def children(self): return self.node.get_children()
 
 
-class P3dAnimNode(Facade):
+class P3dAnimNode:
 
     def __init__(self, filepath, anim_dct):
         self.node = Actor(filepath, anim_dct)
-        mth_lst = [
-            ('loop', lambda obj: obj.node.loop),
-            ('reparent_to', lambda obj: obj.node.reparent_to)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    def loop(self, val): return self.node.loop(val)
+    def reparent_to(self, node): self.node.reparent_to(node)
 
     @property
     def name(self): return self.node.get_name()

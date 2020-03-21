@@ -1,14 +1,14 @@
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Func, Wait
 from direct.interval.LerpInterval import LerpPosInterval
-from yyagl.facade import Facade
 
 
-class P3dSeq(Facade):
+class P3dSeq:
 
     def __init__(self, *ivals):
         self.seq = Sequence(*[ival._ival for ival in ivals])
-        Facade.__init__(self, mth_lst=[('start', lambda obj: obj.seq.start)])
+
+    def start(self): return self.seq.start()
 
     def __add__(self, ival):
         self.seq.append(ival._ival)
