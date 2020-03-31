@@ -1,6 +1,5 @@
 from direct.gui.DirectFrame import DirectFrame
 from yyagl.gameobject import GuiColleague, LogicColleague, GameObject, Colleague
-from yyagl.facade import Facade
 from yyagl.lib.p3d.pause import P3dPause
 LibPause = P3dPause
 
@@ -50,7 +49,7 @@ class PauseLogic(LogicColleague):
         LogicColleague.destroy(self)
 
 
-class PauseFacade(Facade):
+class PauseFacade:
 
     @property
     def paused(self): return self.logic._pause.paused
@@ -61,7 +60,6 @@ class PauseMgr(GameObject, Colleague, PauseFacade):
     def __init__(self, mediator):
         GameObject.__init__(self)
         Colleague.__init__(self, mediator)
-        PauseFacade.__init__(self)
         self.gui = PauseGui(self)
         self.logic = PauseLogic(self)
 
@@ -71,6 +69,5 @@ class PauseMgr(GameObject, Colleague, PauseFacade):
     def destroy(self):
         self.gui = self.gui.destroy()
         self.logic = self.logic.destroy()
-        PauseFacade.destroy(self)
         GameObject.destroy(self)
         Colleague.destroy(self)

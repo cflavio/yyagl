@@ -59,17 +59,20 @@ class PDFCmd(AbsCmd):
             PDFInfo('c', '.', '*.vert *.frag', yyagl_fil)]
         binfo_lst = [
             ('python', '*.py *.pdef'), ('lua', 'config.lua'),
-            ('', '*.rst *.css_t *.conf'), ('html', '*.html'), ('javascript', '*.js')]
+            ('', '*.rst *.css_t *.conf'), ('html', '*.html'),
+            ('javascript', '*.js')]
         build_lst = [PDFInfo(binfo[0], 'build', binfo[1], [])
                      for binfo in binfo_lst]
         pdf_conf = {
             'yyagl': yyagl_lst,
             'lib': [PDFInfo('python', './lib', '*.py', [])],
             'build': build_lst,
-            'engine': [PDFInfo('python', './engine', '*.py',
-                       ['./engine/gui/*', './engine/network/*'])],
+            'engine': [
+                PDFInfo('python', './engine', '*.py',
+                        ['./engine/gui/*', './engine/network/*'])],
             'engine_gui': [PDFInfo('python', './engine/gui', '*.py', [])],
-            'engine_network': [PDFInfo('python', './engine/network', '*.py', [])],
+            'engine_network': [
+                PDFInfo('python', './engine/network', '*.py', [])],
             'tests': [PDFInfo('python', './tests', '*.py', [])]}
         AbsCmd.env['PDF_CONF'] = pdf_conf
         bld_pdfs(None, None, AbsCmd.env)

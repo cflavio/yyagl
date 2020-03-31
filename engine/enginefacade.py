@@ -1,8 +1,7 @@
 from math import pi
-from yyagl.facade import Facade
 
 
-class EngineFacade(Facade):
+class EngineFacade:
 
     @property
     def version(self): return self.logic.version

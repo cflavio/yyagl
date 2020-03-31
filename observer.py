@@ -21,12 +21,14 @@ class Subject(object):
         self.observers[onm] = sorted_obs
 
     def detach(self, obs_meth, lambda_call=None):
-        if type(obs_meth) == str :
+        if type(obs_meth) == str:
             onm = obs_meth
-            observers = [obs for obs in self.observers[onm] if obs.mth == lambda_call]
+            observers = [obs for obs in self.observers[onm]
+                         if obs.mth == lambda_call]
         else:
             onm = obs_meth.__name__
-            observers = [obs for obs in self.observers[onm] if obs.mth == obs_meth]
+            observers = [obs for obs in self.observers[onm]
+                         if obs.mth == obs_meth]
         if not observers: raise Exception
         list(map(self.observers[onm].remove, observers))
 

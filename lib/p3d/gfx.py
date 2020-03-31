@@ -5,7 +5,6 @@ from panda3d.core import (get_model_path, AntialiasAttrib, PandaNode,
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.lib.p3d.p3d import LibP3d
-from yyagl.facade import Facade
 import datetime
 
 
@@ -294,7 +293,7 @@ class P3dAmbientLight(object):
         self.ambient_np.remove_node()
 
 
-class P3dSpotlight(Facade):
+class P3dSpotlight:
 
     def __init__(self, mask=None):
         self.spot_lgt = render.attach_new_node(P3DSpotlight('spot'))

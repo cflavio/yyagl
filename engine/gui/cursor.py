@@ -1,9 +1,8 @@
 from yyagl.lib.gui import Img
 from yyagl.gameobject import GameObject
-from yyagl.facade import Facade
 
 
-class MouseCursorFacade(Facade):
+class MouseCursorFacade:
 
     def show(self): return self.cursor_img.show()
     def hide(self): return self.cursor_img.hide()

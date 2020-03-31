@@ -7,7 +7,6 @@ from yyagl.lib.ivals import Seq, Wait, PosIval, Func
 from yyagl.engine.vec import Vec2
 from yyagl.engine.gui.gui import left, right, up, down
 from yyagl.gameobject import GameObject, GuiColleague, EventColleague
-from yyagl.facade import Facade
 from yyagl.engine.gui.imgbtn import ImgBtn
 from yyagl.lib.p3d.widget import FrameMixin, ImgMixin, BtnMixin, EntryMixin, \
     CheckBtnMixin, SliderMixin, OptionMenuMixin
@@ -207,7 +206,7 @@ class PageEvent(EventColleague):
     def on_quit(self): pass
 
 
-class PageFacade(Facade):
+class PageFacade:
 
     def show(self): return self.gui.show()
     def hide(self): return self.gui.hide()
@@ -250,4 +249,5 @@ class Page(GameObject, PageFacade):
     def destroy(self):
         self.event.destroy()
         self.gui.destroy()
-        for cls in Page.__bases__: cls.destroy(self)
+        bases = [basecls for basecls in Page.__bases__ if basecls != PageFacade]
+        for cls in bases: cls.destroy(self)

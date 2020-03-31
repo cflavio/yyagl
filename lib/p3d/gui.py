@@ -13,7 +13,6 @@ from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectScrolledFrame import DirectScrolledFrame
-from yyagl.facade import Facade
 from yyagl.observer import Subject
 from yyagl.lib.ivals import Seq, Wait, PosIval, Func
 

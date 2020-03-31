@@ -1,6 +1,5 @@
 from direct.gui.DirectGuiGlobals import FLAT
 from yyagl.gameobject import GuiColleague, LogicColleague, GameObject
-from yyagl.facade import Facade
 from yyagl.lib.gui import Img
 from yyagl.engine.audio import AudioSound
 
@@ -178,7 +177,7 @@ class MenuLogic(LogicColleague):
         LogicColleague.destroy(self)
 
 
-class MenuFacade(Facade):
+class MenuFacade:
 
     def push_page(self, page): return self.logic.push_page(page)
     def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
@@ -197,10 +196,8 @@ class Menu(GameObject, MenuFacade):
         GameObject.__init__(self)
         self.logic = self.logic_cls(self)
         self.gui = self.gui_cls(self, menu_props)
-        MenuFacade.__init__(self)
 
     def destroy(self):
         self.logic.destroy()
         self.gui.destroy()
         GameObject.destroy(self)
-        MenuFacade.destroy(self)

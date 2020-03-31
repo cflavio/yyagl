@@ -2,7 +2,6 @@ from yyagl.gameobject import Colleague
 from yyagl.lib.bullet.bullet import (
     BulletPhysWorld, BulletTriangleMesh, BulletTriangleMeshShape,
     BulletRigidBodyNode, BulletGhostNode)
-from yyagl.facade import Facade
 
 
 PhysWorld = BulletPhysWorld
@@ -19,7 +18,7 @@ class CollInfo(object):
         self.time = time
 
 
-class PhysFacade(Facade):
+class PhysFacade:
 
     def attach_rigid_body(self, rbnode): return self.root.attach_rigid_body(rbnode)
     def remove_rigid_body(self, rbnode): return self.root.remove_rigid_body(rbnode)

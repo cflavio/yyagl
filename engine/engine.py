@@ -33,7 +33,6 @@ class Engine(GameObject, EngineFacade):
         self.lib.configure()
         self.lib.init(end_cb=end_cb)
         Colleague.eng = GameObject.eng = self
-        EngineFacade.__init__(self)
         cfg = cfg or Cfg()  # use a default conf if not provided
         self.shader_mgr = ShaderMgr(cfg.dev_cfg.shaders_dev, cfg.dev_cfg.gamma)
         self.profiler = AbsProfiler.build(cfg.profiling_cfg.pyprof_percall)
@@ -61,7 +60,6 @@ class Engine(GameObject, EngineFacade):
 
     def destroy(self):
         GameObject.destroy(self)
-        EngineFacade.destroy(self)
         self.lib.destroy()
         self.shader_mgr.destroy()
         self.profiler.destroy()
