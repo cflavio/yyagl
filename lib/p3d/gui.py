@@ -259,8 +259,7 @@ class P3dOptionMenu(P3dAbs):
             text_font=text_font)
         P3dAbs.__init__(self, tra_src, tra_tra)
 
-    @property
-    def _mth_lst(self): return [('set', lambda obj: obj.wdg.set)]
+    def set(self, idx, f_cmd=1): return self.wdg.set(idx, f_cmd)
 
     @property
     def curr_val(self): return self.wdg.get()
