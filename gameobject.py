@@ -7,17 +7,12 @@ class Colleague(Subject):
 
     eng = None
 
-    def __init__(self, mediator, *args, **kwargs):
+    def __init__(self, mediator):
         Subject.__init__(self)
-        # self.notify_tsk = None
         self.mediator = mediator  # refactor: remove it
-        # args = 'on_comp_blt', self
-        # self.notify_tsk = self.eng.do_later(.001, self.mediator.notify, args)
 
     def destroy(self):
-        # if self.notify_tsk:
-        #    taskMgr.remove(self.notify_tsk)
-        self.mediator = None  # self.notify_tsk = None
+        self.mediator = None
         Subject.destroy(self)
 
 
@@ -93,23 +88,4 @@ class GODirector:
         self.__obj = self.end_cb = self.__init_lst = None
 
 
-class GameObject(Subject):
-    # __metaclass__ = ABCMeta
-
-    def __init__(self):  #, init_lst=[], end_cb=None):
-        Subject.__init__(self)
-        # self.comp_names = self.__comp_lst(init_lst)
-        # GODirector(self, init_lst, end_cb)
-        # in Panda 1.10 change the approach: use async/await in place
-        # of this
-
-    # def __comp_lst(self, init_lst):
-    #    if not init_lst: return []
-    #    return self.__process_elm(init_lst[0]) + self.__comp_lst(init_lst[1:])
-
-    # def __process_elm(self, elm):
-    #    return [elm[0]] if isinstance(elm, tuple) else self.__comp_lst(elm)
-
-    def destroy(self):
-        # list(map(lambda cmp: getattr(self, cmp).destroy(), self.comp_names))
-        Subject.destroy(self)
+class GameObject(Subject): pass

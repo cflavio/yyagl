@@ -1,4 +1,4 @@
-class ObsInfo(object):
+class ObsInfo:
 
     def __init__(self, mth, sort, args):
         self.mth = mth
@@ -8,12 +8,13 @@ class ObsInfo(object):
     def __repr__(self): return str(self.mth)
 
 
-class Subject(object):
+class Subject:
 
     def __init__(self):
         self.observers = {}
 
-    def attach(self, obs_meth, sort=10, rename='', args=[]):
+    def attach(self, obs_meth, sort=10, rename='', args=None):
+        args = args or []
         onm = rename or obs_meth.__name__
         if onm not in self.observers: self.observers[onm] = []
         self.observers[onm] += [ObsInfo(obs_meth, sort, args)]
@@ -21,7 +22,7 @@ class Subject(object):
         self.observers[onm] = sorted_obs
 
     def detach(self, obs_meth, lambda_call=None):
-        if type(obs_meth) == str:
+        if isinstance(obs_meth, str):
             onm = obs_meth
             observers = [obs for obs in self.observers[onm]
                          if obs.mth == lambda_call]
@@ -50,4 +51,4 @@ class Subject(object):
     def destroy(self): self.observers = None
 
 
-class Observer(object): pass
+class Observer: pass

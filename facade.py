@@ -10,8 +10,8 @@
 #     def __init__(self, prop_lst=[], mth_lst=[]):
 #         list(map(lambda args: self.__fwd_prop(*args), prop_lst))
 #         list(map(lambda args: self.__fwd_mth(*args), mth_lst))
-#         # try detecting if the forwarded item is a prop or a method, so we can
-#         # pass only a single list
+#         # try detecting if the forwarded item is a prop or a method, so we
+#         # can pass only a single list
 
 #     def __fwd_mth(self, mth_name, tgt_mth):
 #         def fun(*args, **kwargs): return tgt_mth(self)(*args, **kwargs)

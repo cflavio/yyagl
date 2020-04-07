@@ -1,4 +1,4 @@
-class BlockReplacer(object):
+class BlockReplacer:
 
     def __init__(self, out_lines, start_line, end_line, new_lines):
         self.out_lines = out_lines
@@ -17,7 +17,7 @@ class BlockReplacer(object):
         return self.is_replacing
 
 
-class Fixer(object):
+class Fixer:
 
     def __init__(self):
         self.out_lines = []
@@ -64,7 +64,11 @@ class Fixer(object):
         new_lines = [
             '      <TRef> { TEXREPOBJTrack1 }\n',
             '      <TRef> { MASKOBJTrack }\n']
-        rep = BlockReplacer(self.out_lines, '      <TRef> { MASKOBJTrack }', '      <TRef> { TEXREPOBJTrack1 }', new_lines)
+        rep = BlockReplacer(
+            self.out_lines,
+            '      <TRef> { MASKOBJTrack }',
+            '      <TRef> { TEXREPOBJTrack1 }',
+            new_lines)
         self.replacers += [rep]
 
         for line in self.lines:

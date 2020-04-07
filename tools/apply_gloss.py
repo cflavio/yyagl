@@ -7,9 +7,9 @@ if len(sys.argv) != 2:
 
 def __process_line(idx, line, _out_lines):
     if line.strip() != '<Scalar> envtype { GLOSS }':
-        return __process_nongloss_line(idx, line, _out_lines)
-    else:
-        return __process_gloss_line(idx, line, _out_lines)
+        mth = __process_nongloss_line
+    else: mth = __process_gloss_line
+    return mth(idx, line, _out_lines)
 
 
 def __process_nongloss_line(idx, line, _out_lines):
