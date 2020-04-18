@@ -13,6 +13,7 @@ class P3dSound:
 
     def play(self):
         if self.snd.status() != AudioSound.PLAYING: return self.snd.play()
+        return None
 
     @property
     def playing(self): return self.snd.status() == AudioSound.PLAYING

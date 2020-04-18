@@ -1,7 +1,7 @@
 from yyagl.lib.p3d.p3d import LibP3d
 
 
-class LibBuilder(object):
+class LibBuilder:
     '''This classe builds the implementation of the library abstraction  (for
     the Dependency Inversion Principle).'''
 

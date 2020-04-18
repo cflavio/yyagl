@@ -108,14 +108,16 @@ class BtnMixin(FrameMixin):
 
     def enable(self):
         FrameMixin.enable(self)
-        self.get_np().component('text0').textNode.set_text_color(self.start_txt_color)
-        self.get_np().component('text0').textNode.set_text_scale(self.start_txt_scale)
+        t0n = self.get_np().component('text0').textNode
+        t0n.set_text_color(self.start_txt_color)
+        t0n.set_text_scale(self.start_txt_scale)
 
     def disable(self):
         FrameMixin.disable(self)
         col = self.start_txt_color
         self.get_np()['text_fg'] = (col[0], col[1], col[2], col[3] * .4)
-        self.get_np().component('text0').textNode.set_text_scale(self.start_txt_scale)
+        t0n = self.get_np().component('text0').textNode
+        t0n.set_text_scale(self.start_txt_scale)
 
 
 class EntryMixin(FrameMixin):
@@ -127,16 +129,16 @@ class EntryMixin(FrameMixin):
         self.curr_offset += WidgetMixin.highlight_color_offset[player]
         col = LVecBase4f(self.start_frame_color)
         self.get_np()['frameColor'] = col + self.curr_offset
-        #self.get_np()['focus'] = 1  # it focuses it if mouse over
-        #self.get_np().setFocus()
+        # self.get_np()['focus'] = 1  # it focuses it if mouse over
+        # self.get_np().setFocus()
 
     def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
         FrameMixin.on_wdg_exit(self, pos, player)
         self.curr_offset -= WidgetMixin.highlight_color_offset[player]
         col = LVecBase4f(self.start_frame_color)
         self.get_np()['frameColor'] = col + self.curr_offset
-        #self.get_np()['focus'] = 0
-        #self.get_np().setFocus()
+        # self.get_np()['focus'] = 0
+        # self.get_np().setFocus()
 
     def on_enter(self, player=0):
         self['focus'] = 1
@@ -158,7 +160,7 @@ class SliderMixin(FrameMixin):
             n_p = self.get_np()
             delta = (n_p['range'][1] - n_p['range'][0]) / 10.0
             n_p['value'] += -delta if direction == (-1, 0) else delta
-            return True
+        return direction in [(-1, 0), (1, 0)]
 
     def on_enter(self, player=0): pass
 
@@ -168,7 +170,7 @@ class OptionMenuMixin(BtnMixin):
     def on_arrow(self, direction):
         is_hor = direction in [(-1, 0), (1, 0)]
         nodepath = self.get_np()
-        if is_hor or nodepath.popupMenu.is_hidden(): return
+        if is_hor or nodepath.popupMenu.is_hidden(): return False
         old_idx = nodepath.highlightedIndex
         dir2offset = {(0, -1): 1, (0, 1): -1}
         idx = nodepath.highlightedIndex + dir2offset[direction]
@@ -185,7 +187,6 @@ class OptionMenuMixin(BtnMixin):
         if nodepath.popupMenu.is_hidden():
             nodepath.showPopupMenu()
             nodepath._highlightItem(nodepath.component('item0'), 0)
-            return
         else:
             nodepath.selectHighlightedIndex()
             idx = nodepath.selectedIndex
@@ -195,5 +196,4 @@ class OptionMenuMixin(BtnMixin):
             fcol = nodepath.component('item%s' % idx)['frameColor']
             curr_name = 'item%s' % nodepath.selectedIndex
             nodepath._unhighlightItem(nodepath.component(curr_name), fcol)
-            return True
-        BtnMixin.on_enter(self, player)
+        return not nodepath.popupMenu.is_hidden()
