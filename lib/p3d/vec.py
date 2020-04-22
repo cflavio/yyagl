@@ -1,7 +1,7 @@
 from panda3d.core import Vec2, Vec3, Mat4, LVector2f, LVector3f
 
 
-class P3dVec2(object):
+class P3dVec2:
 
     attr_lst = ['x', 'y']
     p3d_cls = Vec2
@@ -22,21 +22,22 @@ class P3dVec2(object):
         return self._vec.signed_angle_deg(LVector2f(vec.x, vec.y))
 
     def dot(self, other):
-        if type(other) == tuple: other = self.__class__(*other)
+        if isinstance(other, tuple): other = self.__class__(*other)
         return self._vec.dot(other._vec)
+        #TODO: don't access a protected member
 
     def __neg__(self):
         nvec = - self._vec
         return self.__class__(*[getattr(nvec, attr) for attr in self.attr_lst])
 
     def __add__(self, vec):
-        if type(vec) == tuple: vec = self.__class__(*vec)
-        svec = self._vec + vec._vec
+        if isinstance(vec, tuple): vec = self.__class__(*vec)
+        svec = self._vec + vec._vec  #TODO: don't access a protected member
         return self.__class__(*[getattr(svec, attr) for attr in self.attr_lst])
 
     def __sub__(self, vec):
-        if type(vec) == tuple: vec = self.__class__(*vec)
-        svec = self._vec - vec._vec
+        if isinstance(vec, tuple): vec = self.__class__(*vec)
+        svec = self._vec - vec._vec  #TODO: don't access a protected member
         return self.__class__(*[getattr(svec, attr) for attr in self.attr_lst])
 
     def __mul__(self, val):
@@ -64,12 +65,12 @@ class P3dVec2(object):
     def length(self): return self._vec.length()
 
     def __repr__(self):
-        tmpl = '%s(' + ', '.join(['%s' for _ in range(len(self.attr_lst))]) + ')'
+        tmpl = '%s(' + \
+               ', '.join(['%s' for _ in range(len(self.attr_lst))]) + ')'
         rnd = lambda x: round(x, 3)
         vals = [rnd(getattr(self._vec, attr)) for attr in self.attr_lst]
         pars = tuple([self.__class__.__name__] + vals)
-        return  tmpl % pars
-
+        return tmpl % pars
 
 
 class P3dVec3(P3dVec2):

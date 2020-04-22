@@ -1,14 +1,15 @@
+import datetime
 from os.path import exists, dirname
-from panda3d.core import (get_model_path, AntialiasAttrib, PandaNode,
-    LightRampAttrib, Camera, OrthographicLens, NodePath, OmniBoundingVolume,
-                          AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, Point2, Point3, Texture)
+from panda3d.core import get_model_path, AntialiasAttrib, PandaNode, \
+    LightRampAttrib, Camera, OrthographicLens, NodePath, OmniBoundingVolume, \
+    AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, Point2, \
+    Point3, Texture
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.lib.p3d.p3d import LibP3d
-import datetime
 
 
-class RenderToTexture(object):
+class RenderToTexture:
 
     def __init__(self, size=(256, 256)):
         self.__set_buffer(size)
@@ -49,7 +50,7 @@ class RenderToTexture(object):
         list(map(lambda node: node.remove_node(), [self.camera, self.root]))
 
 
-class P3dGfxMgr(object):
+class P3dGfxMgr:
 
     def __init__(self, model_path, antialiasing, shaders, srgb):
         self.root = P3dNode(render)
@@ -71,12 +72,14 @@ class P3dGfxMgr(object):
         ext = '.bam' if exists(filename + '.bam') else ''
         if anim:
             anim_dct = {'anim': filename + '-Anim' + ext}
-            return P3dNode(self.set_srgb(Actor(filename + ext, anim_dct)))
+            node = P3dNode(self.set_srgb(Actor(filename + ext, anim_dct)))
         elif callback:
             callb = lambda model: callback(P3dNode(self.set_srgb(model)))
-            return loader.loadModel(filename + ext, callback=callb)
+            node = loader.loadModel(filename + ext, callback=callb)
         else:
-            return P3dNode(self.set_srgb(loader.loadModel(LibP3d.p3dpath(filename + ext))))
+            node = P3dNode(self.set_srgb(
+                loader.loadModel(LibP3d.p3dpath(filename + ext))))
+        return node
 
     def set_srgb(self, model):
         if self.__srgb:
@@ -84,8 +87,10 @@ class P3dGfxMgr(object):
                 texture.set_format(Texture.F_srgb)
         return model
 
-    def toggle_aa(self, val=None):
-        if render.has_antialias() and render.get_antialias() != AntialiasAttrib.MNone:
+    @staticmethod
+    def toggle_aa():
+        aa_not_none = render.get_antialias() != AntialiasAttrib.MNone
+        if render.has_antialias() and aa_not_none:
             render.clear_antialias()
         else: render.set_antialias(AntialiasAttrib.MAuto, 1)
 
@@ -151,7 +156,8 @@ class P3dNode:
     def set_scale(self, val): return self.node.set_scale(val)
     def set_transparency(self, val): return self.node.set_transparency(val)
     def set_alpha_scale(self, val): return self.node.set_alpha_scale(val)
-    def set_texture(self, ts, texture): return self.node.set_texture(ts, texture)
+    def set_texture(self, texturestage, texture):
+        return self.node.set_texture(texturestage, texture)
     def has_tag(self, name): return self.node.has_tag(name)
     def get_tag(self, name): return self.node.get_tag(name)
     def get_python_tag(self, name): return self.node.get_python_tag(name)
@@ -169,6 +175,7 @@ class P3dNode:
 
     def add_shape(self, shape):
         return self.node.node().add_shape(shape._mesh_shape)
+        #TODO: don't access a protected member
 
     @property
     def name(self): return self.node.get_name()
@@ -180,6 +187,7 @@ class P3dNode:
     def p3dnode(self): return self.node.node()
 
     def set_pos(self, pos): return self.node.set_pos(pos._vec)
+        #TODO: don't access a protected member
 
     def get_pos(self, other=None):
         return self.node.get_pos(* [] if other is None else [other.node])
@@ -264,6 +272,7 @@ class P3dAnimNode:
         self.node = Actor(filepath, anim_dct)
 
     def loop(self, val): return self.node.loop(val)
+
     def reparent_to(self, node): self.node.reparent_to(node)
 
     @property
@@ -280,7 +289,7 @@ class P3dAnimNode:
     def destroy(self): self.node.cleanup()
 
 
-class P3dAmbientLight(object):
+class P3dAmbientLight:
 
     def __init__(self, color):
         ambient_lgt = P3DAmbientLight('ambient light')

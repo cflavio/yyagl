@@ -1,8 +1,7 @@
 from os.path import isfile, dirname
 from panda3d.core import AmbientLight, DirectionalLight, PointLight, \
-    Spotlight, LVector4f, LVector3f, Vec3, Shader, Texture, WindowProperties,\
-    FrameBufferProperties, GraphicsPipe, GraphicsOutput, NodePath, PandaNode, \
-    TextureStage, TexMatrixAttrib
+    Spotlight, LVector4f, LVector3f, Vec3, Shader, TextureStage, \
+    TexMatrixAttrib
 from direct.filter.FilterManager import FilterManager
 from yyagl.lib.builder import LibP3d
 
@@ -14,11 +13,12 @@ def load_shader(vert, frag):
         dpath = LibP3d.runtime() and dirname(__file__)
         return isfile((dpath or '') + joinchar + path)
     if is_file(vert) and is_file(frag):
-        return Shader.load(Shader.SLGLSL, vert, frag)
-    else: return Shader.make(Shader.SLGLSL, vert, frag)
+        shader = Shader.load(Shader.SLGLSL, vert, frag)
+    else: shader = Shader.make(Shader.SLGLSL, vert, frag)
+    return shader
 
 
-class P3dShaderMgr(object):
+class P3dShaderMgr:
 
     def __init__(self, shaders, gamma):
         self.filter_mgr = None
@@ -72,19 +72,19 @@ class P3dShaderMgr(object):
 
     def setup_post_fx(self):
         self.filter_mgr = FilterManager(base.win, base.cam)
-        #rendered_scene = Texture()
-        #aa_scene = Texture()
-        #filtered_scene = Texture()
-        #filter_quad = self.filter_mgr.renderQuadInto(colortex=filtered_scene)
-        #aa_quad = self.filter_mgr.renderQuadInto(colortex=aa_scene)
-        #final_quad = self.filter_mgr.renderSceneInto(colortex=rendered_scene)
-        #filter_quad.set_shader(self.__load_shader('filter', 'sobel_filter'))
-        #filter_quad.set_shader_input('in_tex', rendered_scene)
-        #aa_quad.set_shader(self.__load_shader('fxaa', 'fxaa'))
-        #aa_quad.set_shader_input('in_tex', filtered_scene)
-        #final_quad.set_shader(self.__load_shader('filter', 'pass'))
-        #final_quad.set_shader_input('gamma', self.gamma)
-        #final_quad.set_shader_input('in_tex', aa_scene)
+        # rendered_scene = Texture()
+        # aa_scene = Texture()
+        # filtered_scene = Texture()
+        # filter_quad = self.filter_mgr.renderQuadInto(colortex=filtered_scene)
+        # aa_quad = self.filter_mgr.renderQuadInto(colortex=aa_scene)
+        # final_quad = self.filter_mgr.renderSceneInto(colortex=rendered_scene)
+        # filter_quad.set_shader(self.__load_shader('filter', 'sobel_filter'))
+        # filter_quad.set_shader_input('in_tex', rendered_scene)
+        # aa_quad.set_shader(self.__load_shader('fxaa', 'fxaa'))
+        # aa_quad.set_shader_input('in_tex', filtered_scene)
+        # final_quad.set_shader(self.__load_shader('filter', 'pass'))
+        # final_quad.set_shader_input('gamma', self.gamma)
+        # final_quad.set_shader_input('in_tex', aa_scene)
 
     @staticmethod
     def __load_shader(vshad, fshad):
@@ -132,7 +132,8 @@ class P3dShaderMgr(object):
         render.set_shader(self.__main_shader())
         # render.set_shader_input('num_lights', len(self.lights))
         # self.set_shader_pars(render)
-        # list(map(lambda lgt: self.set_lgt_args(*lgt), enumerate(self.lights)))
+        # list(map(
+        #     lambda lgt: self.set_lgt_args(*lgt), enumerate(self.lights)))
         # mci.setShader(self.__main_shader())
         # base.cam.node().set_initial_state(mci.getState())
 
@@ -185,7 +186,7 @@ class P3dShaderMgr(object):
     def destroy(self): self.clear_lights()
 
 
-class ShaderSetter(object):
+class ShaderSetter:
 
     @staticmethod
     def build(lgt):
