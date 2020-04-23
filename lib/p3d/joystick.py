@@ -12,19 +12,21 @@ class P3dJoystickMgr:
         for dev in base.devices.getDevices(InputDevice.DeviceClass.gamepad):
             base.attachInputDevice(dev)
         taskMgr.add(self._update, 'update joysticks')
-        #pygame.init()
-        #joystick.init()
-        #self.joysticks = [
-        #    joystick.Joystick(idx) for idx in range(joystick.get_count())]
-        #list(map(lambda joystick: joystick.init(), self.joysticks))
+        # pygame.init()
+        # joystick.init()
+        # self.joysticks = [
+        #     joystick.Joystick(idx) for idx in range(joystick.get_count())]
+        # list(map(lambda joystick: joystick.init(), self.joysticks))
 
     @property
     def num_joysticks(self):
         return len(base.devices.getDevices(InputDevice.DeviceClass.gamepad))
 
-    def get_joystick(self, player_idx):
+    @staticmethod
+    def get_joystick(player_idx):
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
-        if player_idx > len(devices) - 1: return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        if player_idx > len(devices) - 1:
+            return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         gamepad = devices[player_idx]
         btn_0 = gamepad.findButton('face_a')
         btn_1 = gamepad.findButton('face_b')
@@ -47,23 +49,26 @@ class P3dJoystickMgr:
                 dpad_l.pressed, dpad_r.pressed, dpad_u.pressed, dpad_d.pressed,
                 trigger_l.pressed, trigger_r.pressed, shoulder_l.pressed,
                 shoulder_r.pressed, stick_l.pressed, stick_r.pressed)
-        #for _ in pygame.event.get(): pass
-        #if not self.joysticks: return 0, 0, 0, 0
-        #jstick = self.joysticks[0]
-        #axis, btn = jstick.get_axis, jstick.get_button
-        #return axis(0), axis(1), btn(0), btn(1)
+        # for _ in pygame.event.get(): pass
+        # if not self.joysticks: return 0, 0, 0, 0
+        # jstick = self.joysticks[0]
+        # axis, btn = jstick.get_axis, jstick.get_button
+        # return axis(0), axis(1), btn(0), btn(1)
 
     def set_vibration(self, player_idx, code, time=-1):
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
         if player_idx < 0 or player_idx > len(devices) - 1: return
-        if player_idx in self.curr_vibration and code in self.curr_vibration[player_idx]: return
-        if not player_idx in self.curr_vibration: self.curr_vibration[player_idx] = {}
+        if player_idx in self.curr_vibration and \
+               code in self.curr_vibration[player_idx]: return
+        if player_idx not in self.curr_vibration:
+            self.curr_vibration[player_idx] = {}
         self.curr_vibration[player_idx][code] = time
 
     def clear_vibration(self, player_idx, code=None):
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
         if player_idx < 0 or player_idx > len(devices) - 1: return
-        if player_idx not in self.curr_vibration or code not in self.curr_vibration[player_idx]: return
+        if player_idx not in self.curr_vibration or \
+           code not in self.curr_vibration[player_idx]: return
         if code is None: del self.curr_vibration[player_idx]
         else: del self.curr_vibration[player_idx][code]
 
@@ -71,18 +76,21 @@ class P3dJoystickMgr:
         devices = base.devices.getDevices(InputDevice.DeviceClass.gamepad)
         for player_idx in self.curr_vibration:
             for code in self.curr_vibration[player_idx]:
-                if self.curr_vibration[player_idx][code] != -1: self.curr_vibration[player_idx][code] -= globalClock.getDt()
+                if self.curr_vibration[player_idx][code] != -1:
+                    dt = globalClock.getDt()
+                    self.curr_vibration[player_idx][code] -= dt
         for player_idx in self.curr_vibration:
             for code in list(self.curr_vibration[player_idx])[:]:
                 if self.curr_vibration[player_idx][code] != -1:
                     if self.curr_vibration[player_idx][code] < 0:
                         del self.curr_vibration[player_idx][code]
         for player_idx in list(self.curr_vibration)[:]:
-            if len(self.curr_vibration[player_idx]) == 0:
+            if not self.curr_vibration[player_idx]:
                 del self.curr_vibration[player_idx]
-        for player_idx in range(len(devices)):
+        for player_idx, dev in enumerate(devices):
             gamepad = devices[player_idx]
-            if player_idx in self.curr_vibration and not self.__is_vibrating[player_idx]:
+            if player_idx in self.curr_vibration and \
+                    not self.__is_vibrating[player_idx]:
                 gamepad.set_vibration(.2, .4)
                 self.__is_vibrating[player_idx] = True
             elif player_idx not in self.curr_vibration:
@@ -92,6 +100,6 @@ class P3dJoystickMgr:
 
     def destroy(self):
         pass
-        #joystick.quit()
-        #pygame.quit()
-        #self.joysticks = []
+        # joystick.quit()
+        # pygame.quit()
+        # self.joysticks = []
