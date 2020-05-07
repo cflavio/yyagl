@@ -12,7 +12,7 @@ class EngineAudioTests(TestCase):
 
     def setUp(self):
         loadPrcFileData('', 'window-type none')
-        #loadPrcFileData('', 'audio-library-name null')
+        # loadPrcFileData('', 'audio-library-name null')
         self.eng = Engine()
         EngineAudio(self.eng, .4)
 

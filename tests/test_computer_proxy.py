@@ -2,9 +2,8 @@ from pathlib import Path
 import sys
 if '' in sys.path: sys.path.remove('')
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from unittest.mock import patch, create_autospec
-from panda3d.core import loadPrcFileData
 from unittest import TestCase
+from panda3d.core import loadPrcFileData
 from yyagl.gameobject import GameObject
 from yyagl.engine.engine import Engine
 from yyagl.computer_proxy import ComputerProxy, compute_once, once_a_frame

@@ -51,7 +51,9 @@ if __name__ == '__main__':
     textured_egg = textured_egg.format(texture=argv[1])
     nameid = argv[1].replace('/', '_')
     dummyname = 'dummy_' + nameid
-    with open(dummyname + '.egg', 'w') as dummyegg: dummyegg.write(textured_egg)
-    system('egg2bam -txo -mipmap -ctex %s.egg -o %s.bam' % (dummyname, dummyname))
+    with open(dummyname + '.egg', 'w') as dummyegg:
+        dummyegg.write(textured_egg)
+    system(
+        'egg2bam -txo -mipmap -ctex %s.egg -o %s.bam' % (dummyname, dummyname))
     remove(dummyname + '.egg')
     remove(dummyname + '.bam')

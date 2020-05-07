@@ -2,12 +2,13 @@ from pathlib import Path
 import sys
 if '' in sys.path: sys.path.remove('')
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from unittest.mock import patch, create_autospec
-from panda3d.core import loadPrcFileData
+from unittest.mock import patch
 from unittest import TestCase
+from panda3d.core import loadPrcFileData
 from yyagl.engine.engine import Engine
-from yyagl.gameobject import AiColleague, AudioColleague, EventColleague, FsmColleague, GameObject, GfxColleague, GuiColleague, \
-    LogicColleague, PhysColleague, Colleague
+from yyagl.gameobject import AiColleague, AudioColleague, EventColleague, \
+    FsmColleague, GameObject, GfxColleague, GuiColleague, LogicColleague, \
+    PhysColleague, Colleague
 
 
 class AiTests(TestCase):
@@ -153,6 +154,7 @@ class PhysicsTests(TestCase):
         phys = PhysColleague(game_obj)
         self.assertIsInstance(phys, PhysColleague)
 
+
 class GameObjectInstance(GameObject):
 
     def __init__(self):
@@ -197,8 +199,7 @@ class GameObjectTests(TestCase):
     def test_init(
             self, mock_fsm_destroy, mock_event_destroy, mock_ai_destroy,
             mock_phys_destroy, mock_audio_destroy, mock_logic_destroy,
-            mock_gui_destroy, mock_gfx_destroy
-            ):
+            mock_gui_destroy, mock_gfx_destroy):
         self.engine = Engine()
         mock_event_destroy.__name__ = 'destroy'
         game_obj = GameObjectInstance()

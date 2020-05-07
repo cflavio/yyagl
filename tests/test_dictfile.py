@@ -2,7 +2,7 @@ from pathlib import Path
 import sys
 if '' in sys.path: sys.path.remove('')
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from os import system, remove
+from os import remove
 from os.path import exists
 from unittest import TestCase
 from yyagl.dictfile import DctFile
@@ -26,7 +26,8 @@ class DictFileTests(TestCase):
     def test_deepupdate(self):
         self.dctfile['a'] = {'b': {'c': 4}}
         self.assertEqual(self.dctfile['a']['b']['c'], 4)
-        self.dctfile['a'] = DctFile.deepupdate(self.dctfile['a'], {'b': {'c': 5}})
+        self.dctfile['a'] = \
+            DctFile.deepupdate(self.dctfile['a'], {'b': {'c': 5}})
         self.assertEqual(self.dctfile['a']['b']['c'], 5)
 
     def test_store(self):

@@ -4,12 +4,10 @@ from traceback import print_exc
 from logging import info
 from select import select
 from time import sleep
-from queue import Queue, Empty
-from json import load
-from urllib.request import urlopen
+from queue import Empty
 from threading import Thread
-from _thread import interrupt_main
 from struct import Struct, error as unpack_error
+from _thread import interrupt_main
 from yyagl.gameobject import GameObject
 from yyagl.engine.network.binary import BinaryData
 
@@ -17,7 +15,7 @@ from yyagl.engine.network.binary import BinaryData
 msg_rpc_call, msg_rpc_answ = range(2)
 
 
-class ConnectionError(Exception): pass
+class _ConnectionError(Exception): pass
 
 
 class NetworkThread(Thread):
@@ -64,7 +62,7 @@ class NetworkThread(Thread):
                 else:
                     args = [msg, sock]
                     self.eng.cb_mux.add_cb(self.read_cb, args)
-        except (ConnectionError, TypeError) as exc:
+        except (_ConnectionError, TypeError) as exc:
             print_exc()
             self.notify('on_disconnected', sock)
             self.connections.remove(sock)
@@ -81,7 +79,7 @@ class NetworkThread(Thread):
         try: length = self.size_struct.unpack(lengthbuf)[0]
         except unpack_error as exc:
             print(exc)
-            raise ConnectionError()
+            raise _ConnectionError()
         return self.recvall(sock, length)
 
     @staticmethod

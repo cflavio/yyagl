@@ -1,4 +1,4 @@
-from os import walk, chdir, getcwd, remove
+from os import walk, chdir, getcwd
 from os.path import join, getsize, exists, dirname
 from subprocess import Popen, PIPE
 
@@ -25,7 +25,7 @@ def _version():
 
 
 def img_tgt_names(files_):  # list of images' target filenames
-    #ext = lambda fname: 'png' if fname.endswith('_png.png') else 'txo'
+    # ext = lambda fname: 'png' if fname.endswith('_png.png') else 'txo'
     return [fname[:fname.rfind('.') + 1] + 'txo' for fname in files_]
 
 
@@ -33,13 +33,18 @@ def tracks_tgt_fnames():
     ret = []
     tr_root = '../assets/tracks/'
     for droot, dnames, _ in walk(tr_root):
-        ret += [tr_root + dname + '/models/track_all.bam' for dname in dnames if droot == tr_root and dname != '__pycache__']
+        ret += [tr_root + dname + '/models/track_all.bam'
+                for dname in dnames
+                if droot == tr_root and dname != '__pycache__']
     tr_root = '../assets/cars/'
     for droot, _, filenames in walk(tr_root):
-        ret += [droot + '/' + filename.replace('.egg', '.bam') for filename in filenames if filename.endswith('.egg')]
+        ret += [droot + '/' + filename.replace('.egg', '.bam')
+                for filename in filenames if filename.endswith('.egg')]
     tr_root = '../assets/models/'
     for droot, _, filename in walk(tr_root):
-        ret += [droot + '/' + filename.replace('.egg', '.bam') for filename in filenames if filename.endswith('.egg')]
+        ret += [droot + '/' + filename.replace('.egg', '.bam')
+                for filename in filenames if filename.endswith('.egg')]
+        # using possibly undefined loop variable filenames
     return ret
     # return [tr_root + dname + '/track_all.bam'
     #         for _, dnames, _ in walk(tr_root) for dname in dnames]
@@ -47,17 +52,17 @@ def tracks_tgt_fnames():
 
 
 def set_path(_bld_path):
-    global bld_path
+    global bld_path  #TODO: undefined at the module level
     bld_path = _bld_path + ('/' if not _bld_path.endswith('/') else '')
     return bld_path
 
 
-def files(_extensions, excl_dirs=[], excl_ends_with=[]):
+def files(_extensions, excl_dirs=None, excl_ends_with=None):
     return [join(root, fname)
             for root, _, fnames in walk('.')
             for fname in __files_ext(fnames, _extensions)
-            if not any(e_d in root.split('/') for e_d in excl_dirs) and
-            not any(fname.endswith(e_e) for e_e in excl_ends_with)]
+            if not any(e_d in root.split('/') for e_d in excl_dirs or []) and
+            not any(fname.endswith(e_e) for e_e in excl_ends_with or [])]
 
 
 def __files_ext(fnames, _extensions):
@@ -71,7 +76,7 @@ def size(start_dir='.'):
     return sum(sizes)
 
 
-class InsideDir(object):
+class InsideDir:
 
     def __init__(self, dir_):
         self.dir = dir_

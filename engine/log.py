@@ -1,11 +1,11 @@
 from logging import basicConfig, info, INFO
-from datetime import datetime
+#from datetime import datetime
 from pprint import pprint
 from traceback import print_stack
 from sys import version_info
-from platform import system, release, architecture, platform, processor, \
-    version, machine
-from multiprocessing import cpu_count
+# from platform import system, release, architecture, platform, processor, \
+#     version, machine
+# from multiprocessing import cpu_count
 from yyagl.gameobject import Colleague
 
 
@@ -28,16 +28,16 @@ class LogMgrBase(Colleague):  # headless log manager
 
     def log_cfg(self):
         messages = ['version: ' + self.eng.logic.version]
-        #os_info = (system(), release(), version())
-        #messages += ['operative system: %s %s %s' % os_info]
-        #messages += ['architecture: ' + str(architecture())]
-        #messages += ['machine: ' + machine()]
-        #messages += ['platform: ' + platform()]
-        #messages += ['processor: ' + processor()]
-        #try:
-        #    messages += ['cores: ' + str(cpu_count())]
-        #except NotImplementedError:  # on Windows
-        #    messages += ['cores: not implemented']
+        # os_info = (system(), release(), version())
+        # messages += ['operative system: %s %s %s' % os_info]
+        # messages += ['architecture: ' + str(architecture())]
+        # messages += ['machine: ' + machine()]
+        # messages += ['platform: ' + platform()]
+        # messages += ['processor: ' + processor()]
+        # try:
+        #     messages += ['cores: ' + str(cpu_count())]
+        # except NotImplementedError:  # on Windows
+        #     messages += ['cores: not implemented']
         lib_ver = self.eng.lib.version
         try:
             import psutil
@@ -53,11 +53,13 @@ class LogMgrBase(Colleague):  # headless log manager
         if base.win: print(base.win.get_keyboard_map())
         list(map(self.log, messages))
 
-    def log_tasks(self):
+    @staticmethod
+    def log_tasks():
         info('tasks: %s' % taskMgr.getAllTasks())
         info('do-laters: %s' % taskMgr.getDoLaters())
 
-    def plog(self, obj):
+    @staticmethod
+    def plog(obj):
         print('\n\n')
         print_stack()
         pprint(obj)

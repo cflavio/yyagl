@@ -1,6 +1,7 @@
 from socket import error
-from queue import Queue, Empty
-from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread, msg_rpc_call, msg_rpc_answ
+from queue import Queue
+from yyagl.engine.network.network import AbsNetwork, NetworkThread, \
+    msg_rpc_answ
 from yyagl.engine.network.binary import BinaryData
 from yyagl.gameobject import GameObject
 
@@ -49,6 +50,7 @@ class Server(AbsNetwork):
     def connections(self): return self.netw_thr.connections[1:]
 
     def start(self, read_cb, conn_cb):
+        #TODO: parameters differ from overridden start
         AbsNetwork.start(self, read_cb)
         self.conn_cb = conn_cb
         self.netw_thr.attach(self.on_connected)
@@ -93,7 +95,7 @@ class Server(AbsNetwork):
             dgram = BinaryData.unpack(dgram)
             sender, payload = dgram[0], dgram[1:]
             self.read_cb(payload, sender)
-        except IndexError as e: print(e)
+        except IndexError as exc: print(exc)
 
     def send_udp(self, data_lst, receiver):
         if receiver[0] not in self.addr2conn: return

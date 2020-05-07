@@ -1,10 +1,9 @@
-from os import system, remove
 from os.path import dirname
 from sys import executable
 from yyagl.build.mtprocesser import MultithreadedProcesser
 
 
-def bld_images(target, source, env):
+def bld_images(target, source, env):  # unused target
     mp_mgr = MultithreadedProcesser(env['CORES'])
     list(map(__bld_img, [(str(src), mp_mgr) for src in source]))
     mp_mgr.run()

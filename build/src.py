@@ -2,7 +2,7 @@ from os import system
 from yyagl.build.build import src_fpath, branch, bld_dpath
 
 
-def bld_src(target, source, env):
+def bld_src(target, source, env):  # unused target, source
     fexcl = [
         '{pkg_name}', 'built', '.git', '.kdev4', '{appname}.kdev4',
         '.sconsign.dblite', '*.pyc', '.settings', '.project', '.pydevproject',

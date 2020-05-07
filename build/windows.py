@@ -1,12 +1,9 @@
-from os import system, remove, rename, walk
 from os.path import exists
-from shutil import move, rmtree, copytree, copy
-from distutils.dir_util import copy_tree
-from yyagl.build.build import ver, bld_dpath, branch, InsideDir
-from yyagl.build.deployng import bld_ng
+from shutil import move
+from yyagl.build.build import bld_dpath, branch
 
 
-def bld_windows(target, source, env):
+def bld_windows(target, source, env):  # unused target, source
     src = '{dst_dir}../dist/{appname}-{version}_win_amd64.tar.xz'
     tgt_file = '{dst_dir}{appname}-{version}-windows.tar.xz'
     src_fmt = src.format(dst_dir=bld_dpath, appname=env['APPNAME'],
@@ -22,5 +19,5 @@ def bld_windows(target, source, env):
     tgt_fmt = tgt_file.format(dst_dir=bld_dpath, appname=env['APPNAME'],
                               version=branch)
     if exists(src_fmt): move(src_fmt, tgt_fmt)
-    #rmtree('build')
-    #rmtree('dist')
+    # rmtree('build')
+    # rmtree('dist')

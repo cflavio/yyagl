@@ -15,16 +15,19 @@ class BinaryData:
         msg_data = msg_struct.pack(*acc_elems)
         return msg_struct.size, msg_data
 
+    @staticmethod
     def _header_elm(elm, acc_header):
         if elm is None: add = 'n'
-        elif type(elm) == bool: add = 'b'
-        elif type(elm) == int: add ='i'
-        elif type(elm) == float: add ='f'
-        elif type(elm) == str: add = 's'
-        elif type(elm) == dict: add = '{}'
-        elif type(elm) in [tuple, list]: add = BinaryData._header_lst(elm, acc_header)
+        elif isinstance(elm, bool): add = 'b'
+        elif isinstance(elm, int): add = 'i'
+        elif isinstance(elm, float): add = 'f'
+        elif isinstance(elm, str): add = 's'
+        elif isinstance(elm, dict): add = '{}'
+        elif isinstance(elm, tuple) or isinstance(elm, list):
+            add = BinaryData._header_lst(elm, acc_header)
         return acc_header + add
 
+    @staticmethod
     def _header_lst(elm, acc_header):
         add = '('
         for sub_elm in elm:
@@ -32,6 +35,7 @@ class BinaryData:
         add += ')'
         return acc_header + add
 
+    @staticmethod
     def _pack_lst(lst, acc_fmt, acc_elems):
         add_fmt, add_elems = '', []
         for sub_elm in lst:
@@ -40,26 +44,27 @@ class BinaryData:
             add_elems += elm_elems
         return acc_fmt + add_fmt, acc_elems + add_elems
 
+    @staticmethod
     def _pack_elm(elm, acc_fmt, acc_elems):
         if elm is None:
-            add_fmt =''
+            add_fmt = ''
             add_elems = []
-        elif type(elm) == bool:
-            add_fmt ='?'
+        elif isinstance(elm, bool):
+            add_fmt = '?'
             add_elems = [elm]
-        elif type(elm) == int:
-            add_fmt ='i'
+        elif isinstance(elm, int):
+            add_fmt = 'i'
             add_elems = [elm]
-        elif type(elm) == float:
-            add_fmt ='f'
+        elif isinstance(elm, float):
+            add_fmt = 'f'
             add_elems = [elm]
-        elif type(elm) == str:
+        elif isinstance(elm, str):
             b_str = bytes(elm, 'utf-8')
             add_fmt = 'i%ds' % len(b_str)
             add_elems = [len(b_str), b_str]
-        elif type(elm) in [tuple, list]:
+        elif isinstance(elm, tuple) or isinstance(elm, list):
             add_fmt, add_elems = BinaryData._pack_lst(elm, '', [])
-        elif type(elm) == dict: add_fmt, add_elems = '', []
+        elif isinstance(elm, dict): add_fmt, add_elems = '', []
         return acc_fmt + add_fmt, acc_elems + add_elems
 
     @staticmethod
@@ -73,7 +78,7 @@ class BinaryData:
 
         def parent(sublist, lst):
             if sublist in lst: return lst
-            for _subl in [elm for elm in lst if type(elm) == list]:
+            for _subl in [elm for elm in lst if isinstance(elm, list)]:
                 if parent(sublist, _subl): return parent(sublist, _subl)
         for elm in header:
             if elm == '(':

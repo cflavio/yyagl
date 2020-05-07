@@ -9,6 +9,7 @@ class JoystickState:
             self.dpad_l = self.dpad_r = self.dpad_u = self.dpad_d = \
             self.trigger_l = self.trigger_r = self.shoulder_l = \
             self.shoulder_r = self.stick_l = self.stick_r = 0
+        #TODO: rename bi to btni
 
 
 class JoystickMgr(GameObject):
@@ -30,28 +31,35 @@ class JoystickMgr(GameObject):
 
     def __process(self, i):
         j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d, \
-            trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r = self.joystick_lib.get_joystick(i)
+            trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r = \
+            self.joystick_lib.get_joystick(i)
         if not self.is_recording:
-            if self.old[i].x <= -.4 <= j_x or self.old[i].dpad_l and not dpad_l:
-                if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].left)
+            if self.old[i].x <= -.4 <= j_x or self.old[i].dpad_l and \
+                    not dpad_l:
+                if self.nav and i < len(self.nav) and self.nav[i]:
+                    self.eng.send(self.nav[i].left)
             if self.old[i].x >= .4 >= j_x or self.old[i].dpad_r and not dpad_r:
-                if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].right)
+                if self.nav and i < len(self.nav) and self.nav[i]:
+                    self.eng.send(self.nav[i].right)
             if self.old[i].y >= .4 >= j_y or self.old[i].dpad_d and not dpad_d:
-                if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].down)
+                if self.nav and i < len(self.nav) and self.nav[i]:
+                    self.eng.send(self.nav[i].down)
             if self.old[i].y <= -.4 <= j_y or self.old[i].dpad_u and not dpad_u:
-                if self.nav and i < len(self.nav) and self.nav[i]: self.eng.send(self.nav[i].up)
+                if self.nav and i < len(self.nav) and self.nav[i]:
+                    self.eng.send(self.nav[i].up)
         if self.old[i].b0 and not btn0:
-            if self.nav and i < len(self.nav) and self.nav[i] and not self.is_recording:
+            if self.nav and i < len(self.nav) and self.nav[i] and \
+                    not self.is_recording:
                 self.eng.send(self.nav[i].fire)
             self.eng.send('joypad%s_face_x' % i)
         if self.old[i].b1 and not btn1:
-            #self.eng.send('joypad_face_y' % i)
+            # self.eng.send('joypad_face_y' % i)
             self.eng.send('joypad%s_face_y' % i)
         if self.old[i].b2 and not btn2:
-            #self.eng.send('joypad_face_a' % i)
+            # self.eng.send('joypad_face_a' % i)
             self.eng.send('joypad%s_face_a' % i)
         if self.old[i].b3 and not btn3:
-            #self.eng.send('joypad_face_b' % i)
+            # self.eng.send('joypad_face_b' % i)
             self.eng.send('joypad%s_face_b' % i)
         if self.old[i].trigger_l and not trigger_l:
             self.eng.send('joypad_trigger_l')
@@ -71,37 +79,42 @@ class JoystickMgr(GameObject):
         if self.old[i].stick_r and not stick_r:
             self.eng.send('joypad_stick_r')
             self.eng.send('joypad%s_stick_r' % i)
-        self.old[i].x, self.old[i].y, self.old[i].b0, self.old[i].b1, self.oldb2, self.old[i].b3, \
-            self.old[i].dpad_l, self.old[i].dpad_r, self.old[i].dpad_u, self.old[i].dpad_d, \
-            self.old[i].trigger_l, self.old[i].trigger_r, self.old[i].shoulder_l, \
-            self.old[i].shoulder_r, self.old[i].stick_l, self.old[i].stick_r = \
-            j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d, trigger_l, \
-            trigger_r, shoulder_l, shoulder_r, stick_l, stick_r
+        self.old[i].x, self.old[i].y, self.old[i].b0, self.old[i].b1, \
+            self.old[i].b2, self.old[i].b3, self.old[i].dpad_l, \
+            self.old[i].dpad_r, self.old[i].dpad_u, self.old[i].dpad_d, \
+            self.old[i].trigger_l, self.old[i].trigger_r, \
+            self.old[i].shoulder_l, self.old[i].shoulder_r, \
+            self.old[i].stick_l, self.old[i].stick_r = \
+            j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d, \
+            trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r
 
     def get_joystick(self, player_idx):
-        x, y, b0, b1, b2, b3, dl, dr, du, dd, tl, tr, shl, shr, sl, sr = self.joystick_lib.get_joystick(player_idx)
+        x, y, btn0, btn1, btn2, btn3, dpadl, dpadr, dpadu, dpadd, triggl, \
+            triggr, shl, shr, st_l, st_r = \
+            self.joystick_lib.get_joystick(player_idx)
         jstate = JoystickState()
         jstate.x = x
         jstate.y = y
-        jstate.b0 = b0
-        jstate.b1 = b1
-        jstate.b2 = b2
-        jstate.b3 = b3
-        jstate.dpad_l = dl
-        jstate.dpad_r = dr
-        jstate.dpad_u = du
-        jstate.dpad_d = dd
-        jstate.trigger_l = tl
-        jstate.trigger_r = tr
+        jstate.b0 = btn0
+        jstate.b1 = btn1
+        jstate.b2 = btn2
+        jstate.b3 = btn3
+        jstate.dpad_l = dpadl
+        jstate.dpad_r = dpadr
+        jstate.dpad_u = dpadu
+        jstate.dpad_d = dpadd
+        jstate.trigger_l = triggl
+        jstate.trigger_r = triggr
         jstate.shoulder_l = shl
         jstate.shoulder_r = shr
-        jstate.stick_l = sl
-        jstate.stick_r = sr
+        jstate.stick_l = st_l
+        jstate.stick_r = st_r
         return jstate
 
     def get_joystick_val(self, player_idx, code):
         j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d, \
-            trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r = self.joystick_lib.get_joystick(player_idx)
+            trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r = \
+            self.joystick_lib.get_joystick(player_idx)
         code2val = {
             'face_x': btn0,
             'face_y': btn1,
@@ -118,9 +131,6 @@ class JoystickMgr(GameObject):
             'stick_l': stick_l,
             'stick_r': stick_r}
         return code2val[code]
-
-    @staticmethod
-    def supported(): return JoystickMgrLib.supported()
 
     def bind_keyboard(self, nav): self.nav = nav
 

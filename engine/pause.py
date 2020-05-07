@@ -1,5 +1,6 @@
 from direct.gui.DirectFrame import DirectFrame
-from yyagl.gameobject import GuiColleague, LogicColleague, GameObject, Colleague
+from yyagl.gameobject import GuiColleague, LogicColleague, GameObject, \
+    Colleague
 from yyagl.lib.p3d.pause import P3dPause
 LibPause = P3dPause
 
@@ -12,6 +13,7 @@ class PauseGui(GuiColleague):
 
     def toggle(self, show_frm=True):
         if not self.mediator.logic._pause.paused:
+            #TODO: don't access protected members
             if show_frm:
                 self.pause_frm = DirectFrame(frameColor=(.3, .3, .3, .7),
                                              frameSize=(-1.8, 1.8, -1, 1))
@@ -52,7 +54,9 @@ class PauseLogic(LogicColleague):
 class PauseFacade:
 
     @property
-    def paused(self): return self.logic._pause.paused
+    def paused(self):
+        return self.logic._pause.paused
+        #TODO: don't access protected members
 
 
 class PauseMgr(GameObject, Colleague, PauseFacade):

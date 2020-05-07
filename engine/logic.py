@@ -1,4 +1,3 @@
-from urllib.request import urlopen
 from os.path import exists
 from sys import argv
 from yyagl.gameobject import LogicColleague

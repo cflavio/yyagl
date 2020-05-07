@@ -141,7 +141,8 @@ class MenuLogic(LogicColleague):
                 self.pages[-1].detach_obs(self.on_back)
                 self.pages[-1].detach_obs(self.on_quit)
         self.pages += [page]
-        list(map(page.attach_obs, [self.on_back, self.on_quit, self.on_push_page]))
+        list(map(
+            page.attach_obs, [self.on_back, self.on_quit, self.on_push_page]))
 
     def enable(self): self.pages[-1].enable()
 
@@ -151,7 +152,7 @@ class MenuLogic(LogicColleague):
 
     def disable_navigation(self): self.pages[-1].disable_navigation()
 
-    def on_push_page(self, page_code, args=[]): pass
+    def on_push_page(self, page_code, args=None): pass
 
     def __back_quit_tmpl(self, idx, fun):
         page = self.pages.pop()
@@ -180,8 +181,8 @@ class MenuLogic(LogicColleague):
 class MenuFacade:
 
     def push_page(self, page): return self.logic.push_page(page)
-    def attach_obs(self, obs_meth, sort=10, rename='', args=[]):
-        return self.gui.attach(obs_meth, sort, rename, args)
+    def attach_obs(self, obs_meth, sort=10, rename='', args=None):
+        return self.gui.attach(obs_meth, sort, rename, args or [])
     def detach_obs(self, obs_meth, lambda_call=None):
         return self.gui.detach(obs_meth, lambda_call)
     def enable(self): return self.gui.enable()

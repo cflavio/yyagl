@@ -6,7 +6,6 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 from panda3d.core import loadPrcFileData
 from yyagl.engine.engine import Engine
-from yyagl.engine.audio import EngineAudio
 
 
 class EngineCBMuxTests(TestCase):

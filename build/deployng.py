@@ -1,6 +1,5 @@
-from os import system, remove, rename, chdir, makedirs, walk
+from os import system, remove, walk
 from os.path import exists
-from sys import executable
 from shutil import rmtree, copytree, ignore_patterns, copy
 from distutils.dir_util import copy_tree
 from yyagl.build.build import InsideDir
@@ -23,7 +22,8 @@ def bld_ng(appname, win=False, osx=False, linux=False):
     if exists('tmp_bld'): rmtree('tmp_bld')
     copytree('.', 'tmp_bld', ignore=ignore_patterns(
         '*.pyc', '*.pyd', 'tmp_bld', '*.egg', '.git*', 'built', 'dist',
-        '.scons*', 'SCons*', 'README*', 'options*.json', '*.po', '*.pot', '__pycache__', '*.pdf'))
+        '.scons*', 'SCons*', 'README*', 'options*.json', '*.po', '*.pot',
+        '__pycache__', '*.pdf'))
     with InsideDir('tmp_bld'):
         copy_tree('../yyagl/licenses', './licenses')
         copy_tree('../licenses', './licenses')
@@ -40,7 +40,8 @@ def bld_ng(appname, win=False, osx=False, linux=False):
                     remove(fname)
         tgts = ['win_amd64', 'macosx_10_6_x86_64', 'manylinux1_x86_64']
         dtgt = [win, osx, linux]
-        deploy_platforms = [pl_str for (pl_str, is_pl) in zip(tgts, dtgt) if is_pl]
+        deploy_platforms = [
+            pl_str for (pl_str, is_pl) in zip(tgts, dtgt) if is_pl]
         opt_dct = {
             'build_apps': {
                 'exclude_patterns': excl_patterns,
@@ -48,8 +49,10 @@ def bld_ng(appname, win=False, osx=False, linux=False):
                 'plugins': plugins,
                 'gui_apps': {appname: 'main.py'},
                 'icons': {appname: [
-                    'assets/images/icon/icon256_png.png', 'assets/images/icon/icon128_png.png',
-                    'assets/images/icon/icon48_png.png', 'assets/images/icon/icon32_png.png',
+                    'assets/images/icon/icon256_png.png',
+                    'assets/images/icon/icon128_png.png',
+                    'assets/images/icon/icon48_png.png',
+                    'assets/images/icon/icon32_png.png',
                     'assets/images/icon/icon16_png.png']},
                 'include_patterns': [
                     '**/yyagl/licenses/*',
@@ -80,8 +83,8 @@ def bld_ng(appname, win=False, osx=False, linux=False):
         with open('requirements.txt', 'w') as f_req:
             f_req.write(requirements)
         system('pip install -r requirements.txt')
-        system('python bsetup.py bdist_apps')  # we don't use executable but
-                                               # venv's one
+        system('python bsetup.py bdist_apps')
+        # we don't use executable but venv's one
         list(map(remove, ['bsetup.py', 'requirements.txt']))
     copy_tree('tmp_bld/dist', 'dist')
     copy_tree('tmp_bld/build', 'build')

@@ -12,4 +12,5 @@ class Clock:
     def on_pause(self): self.__curr_stopped_time = globalClock.get_frame_time()
 
     def on_resume(self):
-        self.__paused_time += globalClock.get_frame_time() - self.__curr_stopped_time
+        self.__paused_time += \
+            globalClock.get_frame_time() - self.__curr_stopped_time

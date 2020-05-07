@@ -5,7 +5,7 @@ from shutil import move
 from yyagl.build.build import bld_dpath, branch, pdf_fpath, exec_cmd
 
 
-def bld_pdfs(target, source, env):
+def bld_pdfs(target, source, env):  # unused target, source
     pdfconf = env['PDF_CONF'].items()
     list(map(lambda name_opts: __bld_pdf(*name_opts), pdfconf))
     __bld_pkg(env)
@@ -33,7 +33,8 @@ def __bld_pdf(name, opts):
         __process(opt, curr_tmpl, name + suff, i)
     pdf_tmpl = 'pdfnup --nup 2x1 -o {name}.pdf {name}.pdf'
     suffixes = [name + '', name + '_cont', name + '_test']
-    list(map(lambda name_suff: system(pdf_tmpl.format(name=name_suff)), suffixes))
+    list(map(
+        lambda name_suff: system(pdf_tmpl.format(name=name_suff)), suffixes))
 
 
 def __process(opt, tmpl, name, i):
@@ -46,9 +47,10 @@ def __process(opt, tmpl, name, i):
                       name=name, found=found)
     __process_step(name, cmd) if i else system(cmd)
 
-def __myfind(root, wildcard, filter):
+
+def __myfind(root, wildcard, _filter):
     tmpl = 'find {root} {wildcard} {filter}'
-    cmd = tmpl.format(root=root, wildcard=wildcard, filter=filter)
+    cmd = tmpl.format(root=root, wildcard=wildcard, filter=_filter)
     found_files = exec_cmd(cmd)
     found_files = found_files.split('\n')
     ret = []
@@ -60,6 +62,7 @@ def __myfind(root, wildcard, filter):
         testn = './yyagl/tests/' + dirn[2:] + '/test_' + basen
         if exists(testn): ret += [testn]
     return ' '.join(ret)
+
 
 def __process_step(name, cmd):
     rename(name + '.pdf', name + '_append.pdf')

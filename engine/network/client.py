@@ -1,6 +1,5 @@
-from socket import error, socket, AF_INET, SOCK_DGRAM
-from queue import Queue, Empty
-from yyagl.engine.network.network import AbsNetwork, ConnectionError, NetworkThread, msg_rpc_call, msg_rpc_answ
+from queue import Queue
+from yyagl.engine.network.network import AbsNetwork, NetworkThread, msg_rpc_call
 from yyagl.engine.network.binary import BinaryData
 
 
@@ -25,7 +24,8 @@ class ClientThread(NetworkThread):
 
     def do_rpc(self, funcname, *args, **kwargs):
         args = list(args)
-        msg_size, msg_data = BinaryData.pack([msg_rpc_call, funcname, args, kwargs])
+        msg_size, msg_data = BinaryData.pack(
+            [msg_rpc_call, funcname, args, kwargs])
         self.msgs.put((msg_size, msg_data))
         return self.rpc_ret.get()
 

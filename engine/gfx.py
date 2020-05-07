@@ -20,10 +20,10 @@ class EngineGfx(GfxColleague):
         self.root = None
         self.part2eff = {}
         if fps: self.set_frame_rate(fps)
-        #if self.mediator.cfg.gui_cfg.shaders and \
-        #        self.eng.lib.version.startswith('1.10'):
-            # self.set_toon()
-            # self.set_bloom()
+        # if self.mediator.cfg.gui_cfg.shaders and \
+        #         self.eng.lib.version.startswith('1.10'):
+        #     self.set_toon()
+        #     self.set_bloom()
 
     def init(self):
         self.root = self.gfx_mgr.root.attach_node('world')
@@ -32,7 +32,8 @@ class EngineGfx(GfxColleague):
 
     def load_model(self, filename, callback=None, anim=None):
         try: return self.gfx_mgr.load_model(filename, callback, anim)
-        except OSError: return self.gfx_mgr.load_model(filename + '.egg', callback, anim)
+        except OSError:
+            return self.gfx_mgr.load_model(filename + '.egg', callback, anim)
 
     def set_toon(self): self.gfx_mgr.set_toon()
 
@@ -44,7 +45,7 @@ class EngineGfx(GfxColleague):
     def set_frame_rate(fps):
         globalClock.setMode(ClockObject.MLimited)
         globalClock.set_frame_rate(fps)
-        #base.set_sleep(.01)
+        # base.set_sleep(.01)
 
     @staticmethod
     def particle(parent, texture, color=(1, 1, 1, 1), ampl=pi/6, ray=.5,

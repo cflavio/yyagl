@@ -1,14 +1,14 @@
-from os import walk, system, makedirs, chmod, stat, remove
-from os.path import exists, basename, abspath
-from shutil import rmtree, move, copy, copytree
-from json import dumps
+from os import system, makedirs, chmod, stat, remove
+from os.path import exists, abspath
+from shutil import rmtree, copy, copytree
 from urllib.request import urlretrieve
 from stat import S_IEXEC
 from yyagl.build.linux import _do_bld
 from yyagl.build.deployng import bld_ng
 from yyagl.build.build import bld_dpath, InsideDir, linux_fpath
 
-def bld_appimage(target, source, env):
+
+def bld_appimage(target, source, env):  # unused target, source
     ico_fpath = env['ICO_FPATH']
     bld_ng(env['APPNAME'], linux=True)
     start_dir = abspath('.') + '/'
@@ -25,7 +25,9 @@ def bld_appimage(target, source, env):
     rmtree('built/linux')
     rmtree('built/' + env['APPNAME'].capitalize() + '.AppDir')
     remove('built/appimagetool-x86_64.AppImage')
-    remove(linux_fpath.format(dst_dir='built/', appname=env['APPNAME']) + '_amd64')
+    remove(linux_fpath.format(
+        dst_dir='built/', appname=env['APPNAME']) + '_amd64')
+
 
 appruncontent = '''#!/bin/sh
 SELF=$(readlink -f "$0")
@@ -47,32 +49,41 @@ Icon=icon
 Type=Application
 Categories=Game;'''
 
+
 def __do_appimage(name):
     with InsideDir(bld_dpath):
         dirname = name.capitalize() + '.AppDir'
         if exists(dirname): rmtree(dirname)
         makedirs(dirname)
     with InsideDir(bld_dpath + '/' + name.capitalize() + '.AppDir'):
-        with open('AppRun', 'w') as f: f.write(appruncontent)
-        st = stat('AppRun')
-        chmod('AppRun', st.st_mode | S_IEXEC)
-        with open(name + '.desktop', 'w') as f: f.write(desktopcontent)
+        with open('AppRun', 'w') as f_apprun: f_apprun.write(appruncontent)
+        _stat = stat('AppRun')
+        chmod('AppRun', _stat.st_mode | S_IEXEC)
+        with open(name + '.desktop', 'w') as fdesktop:
+            fdesktop.write(desktopcontent)
         copy('../../assets/images/icon/icon256_png.png', './icon.png')
         copytree('../linux/img/data', './usr/bin')
     with InsideDir(bld_dpath):
-        urlretrieve('https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage', 'appimagetool-x86_64.AppImage')
-        st = stat('appimagetool-x86_64.AppImage')
-        chmod('appimagetool-x86_64.AppImage', st.st_mode | S_IEXEC)
-        system('./appimagetool-x86_64.AppImage ' + name.capitalize() + '.AppDir')
+        urlretrieve('https://github.com/AppImage/AppImageKit/releases/download'
+                    '/12/appimagetool-x86_64.AppImage',
+                    'appimagetool-x86_64.AppImage')
+        _stat = stat('appimagetool-x86_64.AppImage')
+        chmod('appimagetool-x86_64.AppImage', _stat.st_mode | S_IEXEC)
+        system('./appimagetool-x86_64.AppImage ' + name.capitalize() +
+               '.AppDir')
 
 #     files = []
 #     if exists('built'): rmtree('built')
 #     if exists('.flatpak-builder/build'): rmtree('.flatpak-builder/build')
 #     for root, _, files_ in walk('.'):
-#         if len(root.split('/')) == 1 or not root.split('/')[1].startswith('.'):
+#         if len(root.split('/')) == 1 or not \
+#                 root.split('/')[1].startswith('.'):
 #             for file_ in files_:
-#                 if file_ != 'pdata.tar.xz' and not (file_.startswith('options') and file_.endswith('json')):
-#                     files += [root[2:] + ('/' if len(root) > 1 else '') + file_]
+#                 if file_ != 'pdata.tar.xz' and not (
+#                         file_.startswith('options') and
+#                         file_.endswith('json')):
+#                     files += [root[2:] + ('/' if len(root) > 1 else '') +
+#                               file_]
 #     json = {
 #         'app-id': 'org.ya2.Yorg',
 #         'runtime': 'org.freedesktop.Platform',
@@ -99,6 +110,7 @@ def __do_appimage(name):
 #     import pprint; pprint.pprint(json)
 #     with open('org.ya2.Yorg.json', 'w') as f: f.write(dumps(json))
 #     repo_name = 'flatpak_' + name + '_repo'
-#     system('flatpak-builder --repo=%s --force-clean --disable-rofiles-fuse built org.ya2.Yorg.json' % repo_name)
+#     system('flatpak-builder --repo=%s --force-clean --disable-rofiles-fuse '
+#            'built org.ya2.Yorg.json' % repo_name)
 #     move(repo_name, dst)
 #     #flatpak-builder --run build-dir org.flatpak.Hello.json hello.sh

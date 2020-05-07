@@ -2,15 +2,13 @@ from pathlib import Path
 import sys
 if '' in sys.path: sys.path.remove('')
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from unittest.mock import create_autospec
-from os import chdir, getcwd
-from panda3d.core import loadPrcFileData, NodePath
 from unittest import TestCase
+from panda3d.core import loadPrcFileData
 from yyagl.engine.engine import Engine
 from yyagl.engine.configuration import Cfg
 from yyagl.game import GameLogic, Game
-from yyagl.gameobject import GameObject, FsmColleague, GfxColleague, PhysColleague, GuiColleague, AudioColleague, \
-    AiColleague, EventColleague, LogicColleague
+from yyagl.gameobject import GameObject, FsmColleague, AudioColleague, \
+    EventColleague, LogicColleague
 
 
 class LogicTests(TestCase):

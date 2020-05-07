@@ -2,7 +2,7 @@ from os import system, walk
 from yyagl.build.mtprocesser import MultithreadedProcesser
 
 
-def bld_models(target, source, env):
+def bld_models(target, source, env):  # unused target, source
     system('pip install psutil')
     mp_mgr = MultithreadedProcesser(env['CORES'])
     for root, dnames, fnames in walk(env['MODELS_DIR_PATH']):
@@ -14,7 +14,8 @@ def bld_models(target, source, env):
     mp_mgr.run()
     for root, dnames, fnames in walk('assets/tracks'):
         for dname in [dname for dname in dnames if dname != '__pycache__']:
-            if root == env['TRACKS_DIR_PATH']: __process_track(root + '/' + dname, env['CORES'])
+            if root == env['TRACKS_DIR_PATH']:
+                __process_track(root + '/' + dname, env['CORES'])
 
 
 def __process_model(root, fname, mp_mgr):

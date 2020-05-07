@@ -17,11 +17,11 @@ class BuildTests(TestCase):
         makedirs('test_get_files/a')
         makedirs('test_get_files/b')
         makedirs('test_get_files/c')
-        with open('test_get_files/a/c.ext1', 'w') as f:
-            f.write('0123456789')
+        with open('test_get_files/a/c.ext1', 'w') as ftest:
+            ftest.write('0123456789')
         open('test_get_files/a/d.ext2', 'w')
-        with open('test_get_files/b/e.ext2', 'w') as f:
-            f.write('0123456789')
+        with open('test_get_files/b/e.ext2', 'w') as ftest:
+            ftest.write('0123456789')
         open('test_get_files/b/f.ext3', 'w')
         open('test_get_files/c/g.ext2', 'w')
 
@@ -36,24 +36,29 @@ class BuildTests(TestCase):
 
     def test_version(self):
         pattern = compile("^[0-9]+\.[0-9]+\.[0-9]+\-[a-z0-9]+$")
+        #TODO: anomalous backslash in string
         self.assertTrue(pattern.match(_version()))
 
     def test_img_tgt_names(self):
-        files = ['/home/flavio/img.png', 'flavio/folder/img.jpg',
-                 './folder/img.gif', 'img.bmp']
+        _files = ['/home/flavio/img.png', 'flavio/folder/img.jpg',
+                  './folder/img.gif', 'img.bmp']
         expected = ['/home/flavio/img.txo', 'flavio/folder/img.txo',
-                 './folder/img.txo', 'img.txo']
-        self.assertEqual(expected, img_tgt_names(files))
+                    './folder/img.txo', 'img.txo']
+        self.assertEqual(expected, img_tgt_names(_files))
 
     def test_tracks_tgt_fnames(self):
-        tracks_tmpl ='../assets/tracks/%s/models/track_all.bam'
-        tracks = ['dubai', 'orlando', 'moon', 'sheffield', 'nagano', 'rome', 'toronto']
+        tracks_tmpl = '../assets/tracks/%s/models/track_all.bam'
+        tracks = [
+            'dubai', 'orlando', 'moon', 'sheffield', 'nagano', 'rome',
+            'toronto']
         cars_tmpl = [
             '../assets/cars/%s/models/cardamage1.bam',
             '../assets/cars/%s/models/cardamage2.bam',
             '../assets/cars/%s/models/capsule.bam',
             '../assets/cars/%s/models/car.bam']
-        cars = ['iapeto', 'teia', 'phoibe', 'themis', 'iperion', 'kronos', 'rea', 'diones']
+        cars = [
+            'iapeto', 'teia', 'phoibe', 'themis', 'iperion', 'kronos', 'rea',
+            'diones']
         expected = [tracks_tmpl % track for track in tracks]
         expected += [ctl % car for ctl in cars_tmpl for car in cars]
         self.assertTrue(all(exp in tracks_tgt_fnames() for exp in expected))

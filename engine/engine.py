@@ -38,7 +38,8 @@ class Engine(GameObject, EngineFacade):
         self.profiler = AbsProfiler.build(cfg.profiling_cfg.pyprof_percall)
         self.font_mgr = FontMgr()
         self.server = Server(cfg.dev_cfg.port)
-        self.client = (client_cls or Client)(cfg.dev_cfg.port, cfg.dev_cfg.server)
+        client_cls = client_cls or Client
+        self.client = client_cls(cfg.dev_cfg.port, cfg.dev_cfg.server)
         self.cb_mux = CallbackMux()
         self.logic = EngineLogic(self, cfg)
         self.log_mgr = LogMgr.init_cls()(self)
@@ -66,7 +67,7 @@ class Engine(GameObject, EngineFacade):
         self.font_mgr.destroy()
         self.server.destroy()
         self.client.destroy()
-        #self.xmpp.destroy()
+        # self.xmpp.destroy()
         self.logic.destroy()
         self.log_mgr.destroy()
         self.gfx.destroy()

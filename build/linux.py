@@ -1,13 +1,11 @@
-from os import remove, system, makedirs, walk, chdir, getcwd
-from os.path import basename, dirname, realpath, exists, abspath
+from os import system, makedirs, chdir
+from os.path import dirname, realpath, exists, abspath
 from shutil import move, rmtree, copytree, copy
-from glob import glob
 from distutils.dir_util import copy_tree
-from yyagl.build.build import ver, bld_dpath, branch, InsideDir, size
-from yyagl.build.deployng import bld_ng
+from yyagl.build.build import bld_dpath, branch, InsideDir, size
 
 
-def bld_linux(target, source, env):
+def bld_linux(target, source, env):  # unused target, source
     ico_fpath = env['ICO_FPATH']
     chdir('..')  # after the previous command we are in 'dist'
     src = '{dst_dir}../dist/{appname}-{version}_manylinux1_x86_64.tar.xz'
@@ -31,11 +29,11 @@ def _do_bld(start_dir, appname, ico_fpath, clean=True):
     _bld_pckgs(appname)
     chdir('../..')
     if not clean: return
-    #rmtree('build')
-    #rmtree('dist')
+    # rmtree('build')
+    # rmtree('dist')
 
 
-def _prepare(start_path):
+def _prepare(start_path):  # unused start_path
     makedirs('img/data')
     curr_path = dirname(realpath(__file__)) + '/'
     copytree(curr_path + 'mojosetup/meta', 'img/meta')
@@ -49,7 +47,7 @@ def _prepare(start_path):
 
 
 def _bld(appname, start_path, ico_fpath):
-    arch = {'i386': 'i686', 'amd64': 'x86_64'}
+    # arch = {'i386': 'i686', 'amd64': 'x86_64'}
     copy(start_path + ico_fpath % '48', 'img/data/icon.png')
     seds = ['version', 'size', 'appname', 'AppName', 'vendorsite']
     sseds = ' '.join(["-e 's/<%s>/{%s}/'" % (sed, sed) for sed in seds])

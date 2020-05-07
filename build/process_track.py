@@ -5,16 +5,16 @@ loadPrcFileData('', 'default-model-extension .bam')
 import sys
 import os
 sys.path.append(os.getcwd())
-from os import walk, system
+from os import walk
 from os.path import getsize
+from direct.actor.Actor import Actor
 from yyagl.engine.engine import Engine
 from yyagl.gameobject import GameObject
-from direct.actor.Actor import Actor
 from yyagl.build.mtprocesser import MultithreadedProcesser
 from yracing.bitmasks import BitMasks
 
 
-class Props(object):
+class Props:
 
     def __init__(self):
         self.track_dir = sys.argv[1]
@@ -24,7 +24,7 @@ class Props(object):
         self.anim_name = 'Anim'
 
 
-class GuiCfg(object):
+class GuiCfg:
 
     def __init__(self):
         self.antialiasing = False
@@ -33,13 +33,13 @@ class GuiCfg(object):
         self.fixed_fps = 0
 
 
-class ProfilingCfg(object):
+class ProfilingCfg:
 
     def __init__(self):
         self.pyprof_percall = False
 
 
-class LangCfg(object):
+class LangCfg:
 
     def __init__(self):
         self.lang = 'en'
@@ -47,22 +47,22 @@ class LangCfg(object):
         self.lang_path = 'assets/locale'
 
 
-class DevCfg(object):
+class DevCfg:
 
-    def __init__(self, model_path='assets/models', shaders_dev=False, pbr=False,
-                 gamma=1.0, menu_joypad=True):
+    def __init__(self, model_path='assets/models', shaders_dev=False,
+                 pbr=False, gamma=1.0, menu_joypad=True):
         self.model_path = ''
-        self.shaders_dev = False
-        self.pbr = False
-        self.gamma = 1.0
-        self.menu_joypad = False
+        self.shaders_dev = shaders_dev
+        self.pbr = pbr
+        self.gamma = gamma
+        self.menu_joypad = menu_joypad
         self.xmpp_server = ''
         self.port = 9099
         self.server = ''
         self.srgb = False
 
 
-class Conf(object):
+class Conf:
 
     def __init__(self):
         self.gui_cfg = GuiCfg()
@@ -89,7 +89,7 @@ class LegacyTrackProcesser(GameObject):
         self._set_submodels()
 
     def __egg2bams(self):
-        troot = 'assets/tracks/'
+        # troot = 'assets/tracks/'
         mp_mgr = MultithreadedProcesser(self.props.cores)
         cmds = []
         for root, _, filenames in walk(self.props.track_dir):
@@ -97,7 +97,8 @@ class LegacyTrackProcesser(GameObject):
                 fname = root + '/' + filename
                 if fname.endswith('.egg'):
                     cmd_args = fname, fname[:-3] + 'bam'
-                    cmds += [('egg2bam -txo -mipmap -ctex %s -o %s' % cmd_args, getsize(fname))]
+                    cmds += [('egg2bam -txo -mipmap -ctex %s -o %s' %
+                              cmd_args, getsize(fname))]
         cmds = reversed(sorted(cmds, key=lambda pair: pair[1]))
         list(map(mp_mgr.add, [cmd[0] for cmd in cmds]))
         mp_mgr.run()
@@ -175,14 +176,14 @@ class LegacyTrackProcesser(GameObject):
         new_model = NodePath(model.name)
         new_model.reparent_to(model.parent)
         for child in model.node.get_children():
-            np = NodePath('newroot')
-            np.set_pos(child.get_pos())
-            np.set_hpr(child.get_hpr())
-            np.set_scale(child.get_scale())
-            np.reparent_to(new_model)
+            nodepath = NodePath('newroot')
+            nodepath.set_pos(child.get_pos())
+            nodepath.set_hpr(child.get_hpr())
+            nodepath.set_scale(child.get_scale())
+            nodepath.reparent_to(new_model)
             for _child in child.get_children():
                 for __child in _child.get_children():
-                    __child.reparent_to(np)
+                    __child.reparent_to(nodepath)
         new_model.clear_model_nodes()
         new_model.flatten_strong()
         name = model.name
@@ -203,16 +204,18 @@ class TrackProcesser(LegacyTrackProcesser):
     def _set_submodels(self):
         print('loaded track model')
         for submodel in self.model.children:
-            if not submodel.get_name().startswith(self.props.empty_name) and not \
-               submodel.get_name().startswith('Instanced') and not \
-               submodel.get_name().startswith('Empties'):
+            if not submodel.get_name().startswith(self.props.empty_name) and \
+                    not submodel.get_name().startswith('Instanced') and not \
+                    submodel.get_name().startswith('Empties'):
                 submodel.flatten_light()
         self.model.hide(BitMask32.bit(BitMasks.general))
         self._load_empties()
 
-    def _get_model_name(self, model): return model.parent.get_tag('path')
+    @staticmethod
+    def _get_model_name(model): return model.parent.get_tag('path')
 
-    def __get_path(self, model): return model.parent.get_tag('path') + '.egg'
+    @staticmethod
+    def __get_path(model): return model.parent.get_tag('path') + '.egg'
 
     def _load_empties(self):
         print('loading track submodels')
@@ -224,6 +227,8 @@ class TrackProcesser(LegacyTrackProcesser):
 
 
 if __name__ == '__main__':
-    legacy_tracks = ['dubai', 'moon', 'nagano', 'orlando', 'rome', 'sheffield', 'toronto']
-    cls = LegacyTrackProcesser if sys.argv[1] in legacy_tracks else TrackProcesser
+    legacy_tracks = ['dubai', 'moon', 'nagano', 'orlando', 'rome', 'sheffield',
+                     'toronto']
+    cls = LegacyTrackProcesser if sys.argv[1] in legacy_tracks else \
+         TrackProcesser
     cls()

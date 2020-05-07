@@ -2,11 +2,9 @@ from pathlib import Path
 import sys
 if '' in sys.path: sys.path.remove('')
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from direct.showbase.DirectObject import DirectObject
 from unittest.mock import create_autospec
-from panda3d.core import loadPrcFileData, NodePath, ConfigVariableBool,\
-    MouseWatcher, Lens, GraphicsWindow
 from unittest import TestCase
+from panda3d.core import loadPrcFileData, NodePath, ConfigVariableBool
 from yyagl.engine.engine import Engine
 from yyagl.engine.configuration import Cfg, CursorCfg
 
@@ -41,16 +39,16 @@ class EngineTests(TestCase):
         self.assertIsInstance(self.engine, Engine)
 
 
-#class Accepter(DirectObject):
+# class Accepter(DirectObject):
 #
-#    def __init__(self):
-#        self = evt_dec(self)
+#     def __init__(self):
+#         self = evt_dec(self)
 #
-#    def evt_MouseClick(self, arg):
-#        self.button = arg.button, 0
+#     def evt_MouseClick(self, arg):
+#         self.button = arg.button, 0
 #
-#    def evt_MouseClickUp(self, arg):
-#        self.button = arg.button, 1
+#     def evt_MouseClickUp(self, arg):
+#         self.button = arg.button, 1
 #
 #
 # class EventsTests(TestCase):

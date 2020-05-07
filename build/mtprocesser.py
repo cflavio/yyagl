@@ -1,6 +1,5 @@
 from datetime import datetime
 from multiprocessing import cpu_count
-from subprocess import Popen, PIPE
 from threading import Thread, RLock
 from os import system
 
@@ -33,7 +32,7 @@ class ProcesserNoThreaded:
             system(cmd)
 
 
-class MultithreadedProcesser(object):
+class MultithreadedProcesser:
 
     def __init__(self, cores):
         try: self.cores = cpu_count()
@@ -49,7 +48,7 @@ class MultithreadedProcesser(object):
         if self.cores != 1:
             threads = []
             lock = RLock()
-            for i in range(self.cores):
+            for _ in range(self.cores):
                 threads += [Processer(self.cmd_lst, lock)]
             for thread in threads:
                 thread.start()
