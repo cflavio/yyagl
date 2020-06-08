@@ -3,7 +3,7 @@ from yyagl.build.mtprocesser import MultithreadedProcesser
 
 
 def bld_models(target, source, env):  # unused target, source
-    system('pip install psutil')
+    system('python -m pip install psutil')
     mp_mgr = MultithreadedProcesser(env['CORES'])
     for root, dnames, fnames in walk(env['MODELS_DIR_PATH']):
         for fname in [fname for fname in fnames if fname.endswith('.egg')]:
