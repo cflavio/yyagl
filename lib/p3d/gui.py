@@ -326,6 +326,9 @@ class P3dEntry(P3dAbs, DirectObject, Subject):
     @property
     def text(self): return self.wdg.get()
 
+    def enter_text(self, txt):
+        return self.wdg.enterText(txt)
+
     def enable(self): self['state'] = NORMAL
 
     def disable(self): self['state'] = DISABLED
