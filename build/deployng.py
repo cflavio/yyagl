@@ -8,7 +8,7 @@ from yyagl.build.build import InsideDir
 prereq = '''psutil
 bson'''
 requirements = '''
-panda3d==1.10.4.1'''
+panda3d==1.10.6'''
 excl_patterns = ['build/*', 'built/*', 'setup.py', 'requirements.txt', '*.swp',
                  'SConstruct', 'venv/*', '.git*', '*.pyc', 'options.json',
                  '__pycache__']

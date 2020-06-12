@@ -1,6 +1,7 @@
 import sys
 from os.path import exists, dirname
 from os import getcwd, _exit
+from pathlib import Path
 from panda3d.core import loadPrcFileData, Texture, TextPropertiesManager, \
     TextProperties, PandaSystem, Filename, WindowProperties
 from panda3d.bullet import get_bullet_version
@@ -47,11 +48,17 @@ class LibP3d(DirectObject):
         with open(self.curr_path + '/assets/bld_version.txt') as fver:
             return fver.read().strip()
 
+
     @property
     def curr_path(self):
         if sys.platform == 'darwin':
             return dirname(__file__) + '/../Resources/'
         # return dirname(__file__)
+        par_path = str(Path(__file__).parent.absolute())
+        is_appimage = par_path.startswith('/tmp/.mount_Yorg')
+        is_appimage = is_appimage and par_path.endswith('/usr/bin')
+        if is_appimage:
+            return str(Path(par_path).absolute())
         return getcwd()
 
     @staticmethod
