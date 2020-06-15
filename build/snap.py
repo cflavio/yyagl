@@ -49,6 +49,7 @@ parts:
       - libmad0
       - libpulse0
       - libasound2
+      - locales-all
 
 apps:
   {appname}:
@@ -68,6 +69,8 @@ apps:
       - gsettings
       - network
     environment:
+      LANG: "C.UTF-8"
+      LC_ALL: "C.UTF-8"
       LD_LIBRARY_PATH: "$LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio:/var/lib/snapd/lib/gl"
       MESA_GLSL_CACHE_DIR: "$SNAP_USER_DATA"
       LIBGL_DRIVERS_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri"

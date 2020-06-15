@@ -59,6 +59,10 @@ class LibP3d(DirectObject):
         is_appimage = is_appimage and par_path.endswith('/usr/bin')
         if is_appimage:
             return str(Path(par_path).absolute())
+        is_snap = par_path.startswith('/snap/')
+        is_snap = is_snap and par_path.endswith('/x1')
+        if is_snap:
+            return str(Path(par_path).absolute())
         return getcwd()
 
     @staticmethod
