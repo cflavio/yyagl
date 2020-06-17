@@ -62,7 +62,14 @@ def __do_flatpak(dst, name):
     import pprint; pprint.pprint(json)
     with open('org.ya2.Yorg.json', 'w') as fjson: fjson.write(dumps(json))
     repo_name = 'flatpak_' + name + '_repo'
+    test_name = 'flatpak_' + name + '_test'
+    system('flatpak-builder %s org.ya2.Yorg.json' % test_name)
+    # flatpak-builder --run built/flatpak_yorg_test built/org.ya2.Yorg.json yorg
     system('flatpak-builder --repo=%s --force-clean --disable-rofiles-fuse '
            'built org.ya2.Yorg.json' % repo_name)
-    move(repo_name, dst)
-    # flatpak-builder --run build-dir org.flatpak.Hello.json hello.sh
+    move('org.ya2.Yorg.json', dst + '/org.ya2.Yorg.json')
+    move(repo_name, dst + '/' + repo_name)
+    move(test_name, dst + '/' + test_name)
+    # flatpak --user remote-add --no-gpg-verify yorg_repo built/flatpak_yorg_repo
+    # flatpak --user install yorg_repo org.ya2.Yorg
+    # flatpak run org.ya2.Yorg
