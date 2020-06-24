@@ -1,4 +1,5 @@
-from os import system
+from os import system, mkdir
+from os.path import exists
 from yyagl.build.build import src_fpath, branch, bld_dpath
 
 
@@ -11,4 +12,5 @@ def bld_src(target, source, env):  # unused target, source
     cmd = "tar --transform 's/^./{appname}/' -cvzf {pkg_name} %s ." % excl
     pkg_name = src_fpath.format(dst_dir=bld_dpath, appname=env['APPNAME'],
                                 version=branch)
+    if not exists('built'): mkdir('built')
     system(cmd.format(appname=env['APPNAME'], pkg_name=pkg_name))

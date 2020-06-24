@@ -1,4 +1,4 @@
-from os import system, rename, remove
+from os import system, rename, remove, mkdir
 from os.path import exists, dirname, basename
 from itertools import product
 from shutil import move
@@ -7,6 +7,7 @@ from yyagl.build.build import bld_dpath, branch, pdf_fpath, exec_cmd
 
 def bld_pdfs(target, source, env):  # unused target, source
     pdfconf = env['PDF_CONF'].items()
+    if not exists('built'): mkdir('built')
     list(map(lambda name_opts: __bld_pdf(*name_opts), pdfconf))
     __bld_pkg(env)
 

@@ -229,6 +229,7 @@ class TrackProcesser(LegacyTrackProcesser):
 if __name__ == '__main__':
     legacy_tracks = ['dubai', 'moon', 'nagano', 'orlando', 'rome', 'sheffield',
                      'toronto']
-    cls = LegacyTrackProcesser if sys.argv[1] in legacy_tracks else \
+    track_name = sys.argv[1].split('/')[-1]
+    cls = LegacyTrackProcesser if track_name in legacy_tracks else \
          TrackProcesser
     cls()
