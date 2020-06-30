@@ -1,6 +1,7 @@
 from os import walk, chdir, getcwd
 from os.path import join, getsize, exists, dirname
 from subprocess import Popen, PIPE
+from pathlib import Path
 
 
 def exec_cmd(cmd):
@@ -14,7 +15,7 @@ def _branch():
 
 def _version():
     pref = ''
-    root = dirname(dirname(__file__)) + '/'
+    root = str(Path(dirname(dirname(__file__))).parent) + '/'
     if exists(root + 'assets/version.txt'):
         with open(root + 'assets/version.txt') as fver:
             pref = fver.read().strip() + '-'
