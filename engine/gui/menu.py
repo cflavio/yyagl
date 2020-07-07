@@ -196,7 +196,11 @@ class Menu(GameObject, MenuFacade):
     def __init__(self, menu_props):
         GameObject.__init__(self)
         self.logic = self.logic_cls(self)
-        self.gui = self.gui_cls(self, menu_props)
+        self.__menu_props = menu_props
+        self._build_gui()
+
+    def _build_gui(self):
+        self.gui = self.gui_cls(self, self.__menu_props)
 
     def destroy(self):
         self.logic.destroy()
