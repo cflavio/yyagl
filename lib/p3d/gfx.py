@@ -265,7 +265,7 @@ class P3dNode:
     @property
     def children(self): return self.node.get_children()
 
-    def destroy(self): return self.node.destroy()
+    def destroy(self): return self.node.remove_node()
 
 
 class P3dAnimNode:
