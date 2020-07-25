@@ -124,9 +124,6 @@ class P3dBase(CommonBase):
     def show(self): return self.wdg.show()
     def hide(self): return self.wdg.hide()
 
-    @property
-    def _mth_lst(self): return []
-
     def bind_tra(self, text_src, text_transl):
         # text_transl is not used, anyway we need it since we have this kind of
         # use: self.bind_transl('example str', _('example str'))
@@ -301,11 +298,7 @@ class P3dEntry(P3dAbs, DirectObject, Subject):
             self.accept('tab-up', self.on_tab)
         if on_click: self.wdg.bind(B1PRESS, on_click)
 
-    @property
-    def _mth_lst(self):
-        return [
-            ('set', lambda obj: obj.wdg.set),
-            ('enter_text', lambda obj: obj.wdg.enterText)]
+    def set(self, txt): return self.wdg.set(txt)
 
     def _focus_in_cmd(self, *args):
         self.__focused = True
@@ -353,11 +346,11 @@ class P3dLabel(P3dAbs):
             frameColor=frame_col, hpr=hpr)
         P3dAbs.__init__(self, tra_src, tra_tra)
 
-    @property
-    def _mth_lst(self): return [
-        ('set_bin', lambda obj: obj.wdg.set_bin),
-        ('set_x', lambda obj: obj.wdg.set_x),
-        ('set_alpha_scale', lambda obj: obj.wdg.set_alpha_scale)]
+    def set_bin(self, bin_name, priority): return self.wdg.set_bin(bin_name, priority)
+
+    def set_x(self, x): return self.wdg.set_x(x)
+
+    def set_alpha_scale(self, alpha): return self.wdg.set_alpha_scale(alpha)
 
 
 class P3dTxt(P3dBase):
@@ -377,8 +370,7 @@ class P3dTxt(P3dBase):
             parent=parent, fg=fg, font=font, align=align)
         P3dBase.__init__(self, tra_src, tra_tra)
 
-    @property
-    def _mth_lst(self): return [('set_r', lambda obj: obj.wdg.set_r)]
+    def set_r(self, r): return self.wdg.set_r(r)
 
 
 class P3dFrame(P3dAbs):
