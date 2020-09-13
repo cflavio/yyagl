@@ -53,15 +53,19 @@ class NetworkThread(Thread):
         try:
             data = self.recv_one_msg(sock)
             if data:
-                msg = BinaryData.unpack(data)
-                if msg[0] == msg_rpc_call:
-                    funcname, args, kwargs = msg[1:]
-                    self._rpc_cb(funcname, args, kwargs, sock)
-                elif msg[0] == msg_rpc_answ:
-                    self._rpc_cb(msg[1], sock)
-                else:
-                    args = [msg, sock]
-                    self.eng.cb_mux.add_cb(self.read_cb, args)
+                try:
+                    msg = BinaryData.unpack(data)
+                    if msg[0] == msg_rpc_call:
+                        funcname, args, kwargs = msg[1:]
+                        self._rpc_cb(funcname, args, kwargs, sock)
+                    elif msg[0] == msg_rpc_answ:
+                        self._rpc_cb(msg[1], sock)
+                    else:
+                        args = [msg, sock]
+                        self.eng.cb_mux.add_cb(self.read_cb, args)
+                except unpack_error as exc:
+                    print(exc)
+                    print_exc()
         except (_ConnectionError, TypeError) as exc:
             print_exc()
             self.notify('on_disconnected', sock)
