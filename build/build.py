@@ -18,7 +18,7 @@ def _version():
     root = str(Path(dirname(dirname(__file__))).parent) + '/'
     if exists(root + 'assets/version.txt'):
         with open(root + 'assets/version.txt') as fver:
-            pref = fver.read().strip() + '-'
+            pref = fver.read().strip() + '-' + _branch() + '-'
     bld_ver = pref + exec_cmd('git rev-parse HEAD')[:7]
     with open(root + 'assets/bld_version.txt', 'w') as fver:
         fver.write(bld_ver)
