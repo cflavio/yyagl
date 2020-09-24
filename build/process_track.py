@@ -85,7 +85,9 @@ class LegacyTrackProcesser(GameObject):
         self.props = Props()
         fpath = self.props.track_dir + '/models/' + self.props.model_name
         self.__egg2bams()
+        print('loading ' + fpath)
         self.model = self.eng.load_model(fpath)
+        print('loaded ' + fpath)
         self._set_submodels()
 
     def __egg2bams(self):
@@ -99,6 +101,7 @@ class LegacyTrackProcesser(GameObject):
                     cmd_args = fname, fname[:-3] + 'bam'
                     cmds += [('egg2bam -txo -mipmap -ctex %s -o %s' %
                               cmd_args, getsize(fname))]
+                    print('added command ' + cmds[-1][0])
         cmds = reversed(sorted(cmds, key=lambda pair: pair[1]))
         list(map(mp_mgr.add, [cmd[0] for cmd in cmds]))
         mp_mgr.run()
