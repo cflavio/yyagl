@@ -28,8 +28,9 @@ class ProcesserNoThreaded:
 
     def run(self):
         for cmd in self.cmd_lst:
-            print(datetime.now().strftime("%H:%M:%S"), cmd)
+            print(datetime.now().strftime("(executing) %H:%M:%S"), cmd)
             system(cmd)
+            print(datetime.now().strftime("(executed) %H:%M:%S"), cmd)
 
 
 class MultithreadedProcesser:
