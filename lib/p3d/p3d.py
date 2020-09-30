@@ -1,4 +1,5 @@
 import sys
+from logging import info
 from os.path import exists, dirname
 from os import getcwd, _exit
 from pathlib import Path
@@ -63,7 +64,10 @@ class LibP3d(DirectObject):
         is_snap = is_snap and par_path.endswith('/x1')
         if is_snap:
             return str(Path(par_path).absolute())
-        return getcwd()
+        #return getcwd()
+        curr_path = dirname(__file__)
+        info('current path: %s' % curr_path)
+        return curr_path
 
     @staticmethod
     def send(msg): return messenger.send(msg)
