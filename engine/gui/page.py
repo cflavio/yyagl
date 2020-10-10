@@ -144,7 +144,7 @@ class PageGui(GuiColleague):
             list(map(lambda args: self.mediator.event.accept(*args), evts))
         self.eng.joystick_mgr.bind_keyboard(navs)
         if self.eng.cfg.dev_cfg.menu_joypad and self._back_btn:
-            self.mediator.event.accept('joypad_b1', self.__back_wrapper)
+            self.mediator.event.accept('joypad0-face_x-up', self.__back_wrapper)
 
     def __back_wrapper(self):
         if not self.eng.joystick_mgr.is_recording: self._back_btn['command']()
@@ -155,9 +155,9 @@ class PageGui(GuiColleague):
         for player in players:
             nav = self.menu_props.nav.navinfo_lst[player]
             evts = [nav.left, nav.right, nav.up, nav.down, nav.fire]
-            self.eng.joystick_mgr.unbind_keyboard(player)
+            self.eng.joystick_mgr.unbind_keyboard()
             list(map(self.mediator.event.ignore, evts))
-        self.mediator.event.ignore('joypad_b1')
+        self.mediator.event.ignore('joypad0-face_x-up')
 
     def enable(self, players):
         self.enable_navigation(players)

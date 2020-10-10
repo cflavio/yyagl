@@ -22,8 +22,22 @@ class JoystickMgr(GameObject):
         self.is_recording = False
         self.joystick_lib = JoystickMgrLib()
         self.joystick_lib.init_joystick()
-        self.eng.do_later(.01, self.eng.attach_obs, [self.on_frame])
+        # self.eng.do_later(.01, self.eng.attach_obs, [self.on_frame])
         # eng.event doesn't exist
+        if self.emulate_keyboard:
+            self.set_keyboard_emulation()
+
+    def set_keyboard_emulation(self):
+        for i in range(self.joystick_lib.num_joysticks):
+            base.accept('joypad%s-dpad_left-up' % i, self.__keyb_evt, [i, 'left'])
+            base.accept('joypad%s-dpad_right-up' % i, self.__keyb_evt, [i, 'right'])
+            base.accept('joypad%s-dpad_up-up' % i, self.__keyb_evt, [i, 'up'])
+            base.accept('joypad%s-dpad_down-up' % i, self.__keyb_evt, [i, 'down'])
+            base.accept('joypad%s-face_a-up' % i, self.__keyb_evt, [i, 'fire'])
+
+    def __keyb_evt(self, i, evt):
+        if not self.is_recording and self.nav:
+            self.eng.send(getattr(self.nav[i], evt))
 
     def on_frame(self):
         if not self.emulate_keyboard: return
@@ -33,52 +47,49 @@ class JoystickMgr(GameObject):
         j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d, \
             trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r = \
             self.joystick_lib.get_joystick(i)
-        if not self.is_recording:
-            if self.old[i].x <= -.4 <= j_x or self.old[i].dpad_l and \
-                    not dpad_l:
-                if self.nav and i < len(self.nav) and self.nav[i]:
-                    self.eng.send(self.nav[i].left)
-            if self.old[i].x >= .4 >= j_x or self.old[i].dpad_r and not dpad_r:
-                if self.nav and i < len(self.nav) and self.nav[i]:
-                    self.eng.send(self.nav[i].right)
-            if self.old[i].y >= .4 >= j_y or self.old[i].dpad_d and not dpad_d:
-                if self.nav and i < len(self.nav) and self.nav[i]:
-                    self.eng.send(self.nav[i].down)
-            if self.old[i].y <= -.4 <= j_y or self.old[i].dpad_u and not dpad_u:
-                if self.nav and i < len(self.nav) and self.nav[i]:
-                    self.eng.send(self.nav[i].up)
-        if self.old[i].b0 and not btn0:
-            if self.nav and i < len(self.nav) and self.nav[i] and \
-                    not self.is_recording:
-                self.eng.send(self.nav[i].fire)
-            self.eng.send('joypad%s_face_x' % i)
-        if self.old[i].b1 and not btn1:
-            # self.eng.send('joypad_face_y' % i)
-            self.eng.send('joypad%s_face_y' % i)
-        if self.old[i].b2 and not btn2:
-            # self.eng.send('joypad_face_a' % i)
-            self.eng.send('joypad%s_face_a' % i)
-        if self.old[i].b3 and not btn3:
-            # self.eng.send('joypad_face_b' % i)
-            self.eng.send('joypad%s_face_b' % i)
-        if self.old[i].trigger_l and not trigger_l:
-            self.eng.send('joypad_trigger_l')
-            self.eng.send('joypad%s_trigger_l' % i)
-        if self.old[i].trigger_r and not trigger_r:
-            self.eng.send('joypad_trigger_r')
-            self.eng.send('joypad%s_trigger_r' % i)
-        if self.old[i].shoulder_l and not shoulder_l:
-            self.eng.send('joypad_shoulder_l')
-            self.eng.send('joypad%s_shoulder_l' % i)
-        if self.old[i].shoulder_r and not shoulder_r:
-            self.eng.send('joypad_shoulder_r')
-            self.eng.send('joypad%s_shoulder_r' % i)
-        if self.old[i].stick_l and not stick_l:
-            self.eng.send('joypad_stick_l')
-            self.eng.send('joypad%s_stick_l' % i)
-        if self.old[i].stick_r and not stick_r:
-            self.eng.send('joypad_stick_r')
-            self.eng.send('joypad%s_stick_r' % i)
+        # if not self.is_recording:
+        #     if self.old[i].x <= -.4 <= j_x or self.old[i].dpad_l and \
+        #             not dpad_l:
+        #         if self.nav and i < len(self.nav) and self.nav[i]:
+        #             self.eng.send(self.nav[i].left)
+        #     if self.old[i].x >= .4 >= j_x or self.old[i].dpad_r and not dpad_r:
+        #         if self.nav and i < len(self.nav) and self.nav[i]:
+        #             self.eng.send(self.nav[i].right)
+        #     if self.old[i].y >= .4 >= j_y or self.old[i].dpad_d and not dpad_d:
+        #         if self.nav and i < len(self.nav) and self.nav[i]:
+        #             self.eng.send(self.nav[i].down)
+        #     if self.old[i].y <= -.4 <= j_y or self.old[i].dpad_u and not dpad_u:
+        #         if self.nav and i < len(self.nav) and self.nav[i]:
+        #             self.eng.send(self.nav[i].up)
+        # if self.old[i].b0 and not btn0:
+        #     if self.nav and i < len(self.nav) and self.nav[i] and \
+        #             not self.is_recording:
+        #         self.eng.send(self.nav[i].fire)
+        #     self.eng.send('joypad%s_face_x' % i)
+        # if self.old[i].b1 and not btn1:
+        #     self.eng.send('joypad%s_face_y' % i)
+        # if self.old[i].b2 and not btn2:
+        #     self.eng.send('joypad%s_face_a' % i)
+        # if self.old[i].b3 and not btn3:
+        #     self.eng.send('joypad%s_face_b' % i)
+        # if self.old[i].trigger_l and not trigger_l:
+        #     self.eng.send('joypad_trigger_l')
+        #     self.eng.send('joypad%s_trigger_l' % i)
+        # if self.old[i].trigger_r and not trigger_r:
+        #     self.eng.send('joypad_trigger_r')
+        #     self.eng.send('joypad%s_trigger_r' % i)
+        # if self.old[i].shoulder_l and not shoulder_l:
+        #     self.eng.send('joypad_shoulder_l')
+        #     self.eng.send('joypad%s_shoulder_l' % i)
+        # if self.old[i].shoulder_r and not shoulder_r:
+        #     self.eng.send('joypad_shoulder_r')
+        #     self.eng.send('joypad%s_shoulder_r' % i)
+        # if self.old[i].stick_l and not stick_l:
+        #     self.eng.send('joypad_stick_l')
+        #     self.eng.send('joypad%s_stick_l' % i)
+        # if self.old[i].stick_r and not stick_r:
+        #     self.eng.send('joypad_stick_r')
+        #     self.eng.send('joypad%s_stick_r' % i)
         self.old[i].x, self.old[i].y, self.old[i].b0, self.old[i].b1, \
             self.old[i].b2, self.old[i].b3, self.old[i].dpad_l, \
             self.old[i].dpad_r, self.old[i].dpad_u, self.old[i].dpad_d, \
@@ -89,16 +100,16 @@ class JoystickMgr(GameObject):
             trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r
 
     def get_joystick(self, player_idx):
-        x, y, btn0, btn1, btn2, btn3, dpadl, dpadr, dpadu, dpadd, triggl, \
+        x, y, face_a, face_b, face_x, face_y, dpadl, dpadr, dpadu, dpadd, triggl, \
             triggr, shl, shr, st_l, st_r = \
             self.joystick_lib.get_joystick(player_idx)
         jstate = JoystickState()
         jstate.x = x
         jstate.y = y
-        jstate.b0 = btn0
-        jstate.b1 = btn1
-        jstate.b2 = btn2
-        jstate.b3 = btn3
+        jstate.face_a = face_a
+        jstate.face_b = face_b
+        jstate.face_x = face_x
+        jstate.face_y = face_y
         jstate.dpad_l = dpadl
         jstate.dpad_r = dpadr
         jstate.dpad_u = dpadu
@@ -134,7 +145,7 @@ class JoystickMgr(GameObject):
 
     def bind_keyboard(self, nav): self.nav = nav
 
-    def unbind_keyboard(self, i): self.nav[i] = None
+    def unbind_keyboard(self): self.nav = None
 
     def destroy(self):
         try: self.eng.detach_obs(self.on_frame)

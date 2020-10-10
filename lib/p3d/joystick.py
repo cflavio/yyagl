@@ -9,8 +9,8 @@ class P3dJoystickMgr:
         self.__is_vibrating = [False, False, False, False]
 
     def init_joystick(self):
-        for dev in base.devices.getDevices(InputDevice.DeviceClass.gamepad):
-            base.attachInputDevice(dev)
+        for i, dev in enumerate(base.devices.getDevices(InputDevice.DeviceClass.gamepad)):
+            base.attachInputDevice(dev, prefix='joypad%s' % i)
         taskMgr.add(self._update, 'update joysticks')
         # pygame.init()
         # joystick.init()
@@ -28,10 +28,10 @@ class P3dJoystickMgr:
         if player_idx > len(devices) - 1:
             return 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         gamepad = devices[player_idx]
-        btn_0 = gamepad.findButton('face_a')
-        btn_1 = gamepad.findButton('face_b')
-        btn_2 = gamepad.findButton('face_x')
-        btn_3 = gamepad.findButton('face_y')
+        face_a = gamepad.findButton('face_a')
+        face_b = gamepad.findButton('face_b')
+        face_x = gamepad.findButton('face_x')
+        face_y = gamepad.findButton('face_y')
         dpad_l = gamepad.findButton('dpad_left')
         dpad_r = gamepad.findButton('dpad_right')
         dpad_u = gamepad.findButton('dpad_up')
@@ -44,8 +44,8 @@ class P3dJoystickMgr:
         stick_r = gamepad.findButton('rstick')
         left_x = gamepad.findAxis(InputDevice.Axis.left_x)
         left_y = gamepad.findAxis(InputDevice.Axis.left_y)
-        return (left_x.value, -left_y.value, btn_0.pressed, btn_1.pressed,
-                btn_2.pressed, btn_3.pressed,
+        return (left_x.value, -left_y.value, face_a.pressed, face_b.pressed,
+                face_x.pressed, face_y.pressed,
                 dpad_l.pressed, dpad_r.pressed, dpad_u.pressed, dpad_d.pressed,
                 trigger_l.pressed, trigger_r.pressed, shoulder_l.pressed,
                 shoulder_r.pressed, stick_l.pressed, stick_r.pressed)
