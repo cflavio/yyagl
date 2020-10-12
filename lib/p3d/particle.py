@@ -2,6 +2,7 @@ from math import pi, sin, cos
 from array import array
 from random import uniform
 from itertools import chain
+from logging import info
 from panda3d.core import Geom, GeomVertexFormat, GeomVertexData, GeomPoints, \
     OmniBoundingVolume, GeomNode, Vec3, ShaderAttrib, TexGenAttrib, \
     TextureStage, Texture, GeomEnums, NodePath
@@ -155,21 +156,37 @@ class P3dParticle(GameObject):
         if self.__emitter and not self.__emitter.is_empty:
             pos = self.__emitter.get_pos(P3dNode(render))
         else: pos = (0, 0, 0)
-        self._nodepath.set_shader_inputs(
-            emitter_old_pos=self.__old_pos,
-            emitter_pos=pos)
-        self.__old_pos = pos
-        return task.again
+        try:
+            self._nodepath.set_shader_inputs(
+                emitter_old_pos=self.__old_pos,
+                emitter_pos=pos)
+            self.__old_pos = pos
+            return task.again
+        except AttributeError:
+            # _nodepath may be None on menu/pause
+            info('_nodepath: %s' % self._nodepath)
 
     def destroy(self, now=False):
         #TODO: the signature differs from the parent's one
-        self._nodepath.set_shader_input('emitting', 0)
+        try:
+            self._nodepath.set_shader_input('emitting', 0)
+        except AttributeError:
+            # _nodepath may be None on menu/pause
+            info('_nodepath: %s' % self._nodepath)
         self.eng.do_later(0 if now else 1.2 * self.__part_duration,
                           self.__destroy)
 
     def __destroy(self):
-        self.upd_tsk = taskMgr.remove(self.upd_tsk)
-        self._nodepath = self._nodepath.remove_node()
+        try:
+            self.upd_tsk = taskMgr.remove(self.upd_tsk)
+        except TypeError:
+            info("can't remove %s" % self.upd_tsk)
+            # it may happen on pause/menu
+        try:
+            self._nodepath = self._nodepath.remove_node()
+        except AttributeError:
+            info("_nodepath %s" % self._nodepath)
+            # it may happen on pause/menu
         if self.__emitternode:
             self.__emitternode = self.__emitternode.destroy()
         GameObject.destroy(self)

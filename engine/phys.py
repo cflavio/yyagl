@@ -1,3 +1,4 @@
+from logging import info
 from yyagl.gameobject import Colleague
 from yyagl.lib.bullet.bullet import (
     BulletPhysWorld, BulletTriangleMesh, BulletTriangleMeshShape,
@@ -68,7 +69,11 @@ class PhysMgr(Colleague, PhysFacade):
 
     def add_collision_obj(self, node): self.collision_objs += [node]
 
-    def remove_collision_obj(self, node): self.collision_objs.remove(node)
+    def remove_collision_obj(self, node):
+        try: self.collision_objs.remove(node)
+        except ValueError:
+            info("can't remove collision object %s" % node)
+            # it may happen with weapons during pause
 
     def stop(self):
         self.root.stop()
