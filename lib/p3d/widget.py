@@ -6,10 +6,10 @@ from yyagl.engine.vec import Vec2
 class WidgetMixin:
 
     highlight_color_offset = [
-        LVecBase4f(0, 0, .4, 0),
-        LVecBase4f(0, .4, 0, 0),
-        LVecBase4f(.4, 0, 0, 0),
-        LVecBase4f(.4, .4, 0, 0)]
+        LVecBase4f(.4, .4, 0, .4),
+        LVecBase4f(0, 0, .4, .4),
+        LVecBase4f(0, .4, 0, .4),
+        LVecBase4f(.4, 0, 0, .4)]
 
     def __init__(self):
         self.start_txt_color = self.start_frame_color = None
@@ -91,6 +91,8 @@ class BtnMixin(FrameMixin):
         self.get_np()['text_fg'] = self.start_txt_color + self.curr_offset
         self.get_np()['text_scale'] = self.start_txt_scale * 1.04
         self.get_np().set_shader_input('col_offset', self.curr_offset)
+        self.get_np().component('text0').textNode.set_shadow(.064, .064)
+        self.get_np().component('text0').textNode.set_shadow_color(.2, .2, 0, .8)
 
     def on_wdg_exit(self, pos=None, player=0):  # pos: mouse's position
         self.curr_offset -= WidgetMixin.highlight_color_offset[player]
@@ -100,6 +102,8 @@ class BtnMixin(FrameMixin):
         self.get_np()['text_scale'] = self.start_txt_scale
         self.get_np()['frameColor'] = self.start_frame_color
         self.get_np().set_shader_input('col_offset', self.curr_offset)
+        self.get_np().component('text0').textNode.set_shadow(0, 0)
+        self.get_np().component('text0').textNode.set_shadow_color(1, 1, 1, 1)
 
     def on_enter(self, player):
         if self['command'] and self['state'] == NORMAL:
