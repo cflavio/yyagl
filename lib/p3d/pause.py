@@ -97,7 +97,7 @@ class P3dPause(GameObject):
         list(map(lambda tsk: tsk.pause(), self.__paused_tasks))
 
     def remove_task(self, tsk):
-        if tsk in self.__paused_tasks: self.__paused_tasks.remove(tsk)
+        list(map(self.__paused_tasks.remove, [ptsk for ptsk in self.__paused_tasks if ptsk.tsk == tsk]))
 
     def pause(self):
         self.__paused_ivals = ivalMgr.getIntervalsMatching('*')
