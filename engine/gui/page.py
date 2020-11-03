@@ -139,7 +139,7 @@ class PageGui(GuiColleague):
                 (self.eng.lib.remap_str(nav.up), self.on_arrow, [up, player]),
                 (self.eng.lib.remap_str(nav.down), self.on_arrow,
                  [down, player]),
-                ('joypad0-face_a-up', self.on_enter, [player])]
+                (self.eng.lib.remap_str(nav.fire), self.on_enter, [player])]
             navs += [nav]
             list(map(lambda args: self.mediator.event.accept(*args), evts))
         self.eng.joystick_mgr.bind_keyboard(navs)
@@ -154,7 +154,7 @@ class PageGui(GuiColleague):
             self.enable_tsk = self.eng.rm_do_later(self.enable_tsk)
         for player in players:
             nav = self.menu_props.nav.navinfo_lst[player]
-            evts = [nav.left, nav.right, nav.up, nav.down, 'joypad0-face_a-up']
+            evts = [nav.left, nav.right, nav.up, nav.down, nav.fire]
             self.eng.joystick_mgr.unbind_keyboard()
             list(map(self.mediator.event.ignore, evts))
         self.mediator.event.ignore('joypad0-face_b-up')
