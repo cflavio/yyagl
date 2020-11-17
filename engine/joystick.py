@@ -7,8 +7,8 @@ class JoystickState:
     def __init__(self):
         self.x = self.y = self.b0 = self.b1 = self.b2 = self.b3 = \
             self.dpad_l = self.dpad_r = self.dpad_u = self.dpad_d = \
-            self.trigger_l = self.trigger_r = self.shoulder_l = \
-            self.shoulder_r = self.stick_l = self.stick_r = 0
+            self.ltrigger = self.rtrigger = self.shoulder_l = \
+            self.shoulder_r = self.lstick = self.rstick = 0
         #TODO: rename bi to btni
 
 
@@ -114,12 +114,12 @@ class JoystickMgr(GameObject):
         jstate.dpad_r = dpadr
         jstate.dpad_u = dpadu
         jstate.dpad_d = dpadd
-        jstate.trigger_l = triggl
-        jstate.trigger_r = triggr
+        jstate.ltrigger = triggl
+        jstate.rtrigger = triggr
         jstate.shoulder_l = shl
         jstate.shoulder_r = shr
-        jstate.stick_l = st_l
-        jstate.stick_r = st_r
+        jstate.lstick = st_l
+        jstate.rstick = st_r
         return jstate
 
     def get_joystick_val(self, player_idx, code):
