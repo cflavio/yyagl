@@ -7,8 +7,9 @@ class JoystickState:
     def __init__(self):
         self.x = self.y = self.b0 = self.b1 = self.b2 = self.b3 = \
             self.dpad_l = self.dpad_r = self.dpad_u = self.dpad_d = \
-            self.ltrigger = self.rtrigger = self.shoulder_l = \
-            self.shoulder_r = self.lstick = self.rstick = 0
+            self.ltrigger = self.rtrigger = self.ltrigger_known = \
+            self.rtrigger_known = self.lshoulder = self.rshoulder = \
+            self.lstick = self.rstick = 0
         #TODO: rename bi to btni
 
 
@@ -22,10 +23,10 @@ class JoystickMgr(GameObject):
         self.is_recording = False
         self.joystick_lib = JoystickMgrLib()
         self.joystick_lib.init_joystick()
-        # self.eng.do_later(.01, self.eng.attach_obs, [self.on_frame])
+        self.eng.do_later(.01, self.eng.attach_obs, [self.on_frame])
         # eng.event doesn't exist
-        if self.emulate_keyboard:
-            self.set_keyboard_emulation()
+        #if self.emulate_keyboard:
+        self.set_keyboard_emulation()
 
     def set_keyboard_emulation(self):
         for i in range(self.joystick_lib.num_joysticks):
@@ -40,12 +41,13 @@ class JoystickMgr(GameObject):
             self.eng.send(getattr(self.nav[i], evt))
 
     def on_frame(self):
-        if not self.emulate_keyboard: return
+        #if not self.emulate_keyboard: return
         for i in range(self.joystick_lib.num_joysticks): self.__process(i)
 
     def __process(self, i):
         j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d, \
-            trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r = \
+            trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r, \
+            trigger_l_known, trigger_r_known = \
             self.joystick_lib.get_joystick(i)
         # if not self.is_recording:
         #     if self.old[i].x <= -.4 <= j_x or self.old[i].dpad_l and \
@@ -72,12 +74,12 @@ class JoystickMgr(GameObject):
         #     self.eng.send('joypad%s_face_a' % i)
         # if self.old[i].b3 and not btn3:
         #     self.eng.send('joypad%s_face_b' % i)
-        # if self.old[i].trigger_l and not trigger_l:
-        #     self.eng.send('joypad_trigger_l')
-        #     self.eng.send('joypad%s_trigger_l' % i)
-        # if self.old[i].trigger_r and not trigger_r:
-        #     self.eng.send('joypad_trigger_r')
-        #     self.eng.send('joypad%s_trigger_r' % i)
+        if self.old[i].ltrigger and not trigger_l and not trigger_l_known:
+            #self.eng.send('joypad_trigger_l')
+            self.eng.send('joypad%s-ltrigger-up' % i)
+        if self.old[i].rtrigger and not trigger_r and not trigger_r_known:
+            #self.eng.send('joypad_trigger_r')
+            self.eng.send('joypad%s-rtrigger-up' % i)
         # if self.old[i].shoulder_l and not shoulder_l:
         #     self.eng.send('joypad_shoulder_l')
         #     self.eng.send('joypad%s_shoulder_l' % i)
@@ -93,15 +95,15 @@ class JoystickMgr(GameObject):
         self.old[i].x, self.old[i].y, self.old[i].b0, self.old[i].b1, \
             self.old[i].b2, self.old[i].b3, self.old[i].dpad_l, \
             self.old[i].dpad_r, self.old[i].dpad_u, self.old[i].dpad_d, \
-            self.old[i].trigger_l, self.old[i].trigger_r, \
-            self.old[i].shoulder_l, self.old[i].shoulder_r, \
-            self.old[i].stick_l, self.old[i].stick_r = \
+            self.old[i].ltrigger, self.old[i].rtrigger, \
+            self.old[i].lshoulder, self.old[i].rshoulder, \
+            self.old[i].lstick, self.old[i].rstick = \
             j_x, j_y, btn0, btn1, btn2, btn3, dpad_l, dpad_r, dpad_u, dpad_d, \
             trigger_l, trigger_r, shoulder_l, shoulder_r, stick_l, stick_r
 
     def get_joystick(self, player_idx):
         x, y, face_a, face_b, face_x, face_y, dpadl, dpadr, dpadu, dpadd, triggl, \
-            triggr, shl, shr, st_l, st_r = \
+            triggr, shl, shr, st_l, st_r, trl_k, trr_k= \
             self.joystick_lib.get_joystick(player_idx)
         jstate = JoystickState()
         jstate.x = x
@@ -115,9 +117,11 @@ class JoystickMgr(GameObject):
         jstate.dpad_u = dpadu
         jstate.dpad_d = dpadd
         jstate.ltrigger = triggl
+        jstate.ltrigger_known = trl_k
         jstate.rtrigger = triggr
-        jstate.shoulder_l = shl
-        jstate.shoulder_r = shr
+        jstate.rtrigger_known = trr_k
+        jstate.lshoulder = shl
+        jstate.rshoulder = shr
         jstate.lstick = st_l
         jstate.rstick = st_r
         return jstate
