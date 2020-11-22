@@ -85,7 +85,9 @@ class P3dPause(GameObject):
         tasks = [TaskDec(tsk) for tsk in taskMgr.getTasks() if is_tsk(tsk)]
         tasks = [tsk for tsk in tasks
                  if tsk.tsk.get_task_chain() != 'unpausable']
-        namefilter = ['igLoop', 'dataLoop']
+        namefilter = ['igLoop', 'dataLoop', 'ivalLoop', 'collisionLoop',
+                      'garbageColletStates', 'audioLoop', 'resetPrevTransform',
+                      'eventManager']
         tasks = [tsk for tsk in tasks
                  if tsk.tsk.get_name_prefix() not in namefilter]
         not_none = lambda tsk: tsk is not None
