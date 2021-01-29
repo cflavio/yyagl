@@ -1,7 +1,6 @@
-from socket import error, socket, AF_INET, SOCK_DGRAM
-from queue import Queue, Empty
-from bson import dumps
-from .network import AbsNetwork, ConnectionError, NetworkThread
+from queue import Queue
+from yyagl.engine.network.network import AbsNetwork, NetworkThread, msg_rpc_call
+from yyagl.engine.network.binary import BinaryData
 
 
 class ClientThread(NetworkThread):
@@ -15,17 +14,19 @@ class ClientThread(NetworkThread):
     def _configure_socket(self):
         self.tcp_sock.connect((self.srv_addr, self.port))
 
-    def _rpc_cb(self, dct, sock):
-        self.rpc_ret.put(dct['result'])
+    def _rpc_cb(self, data, sock):
+        self.rpc_ret.put(data)
 
     def _queue(self, sock):
         return self.msgs
 
     def send_msg(self, msg, receiver=None): self.msgs.put(msg)
 
-    def do_rpc(self, funcname, args, kwargs):
-        msg = {'is_rpc': True, 'payload': [funcname, args, kwargs]}
-        self.msgs.put(dumps(msg))
+    def do_rpc(self, funcname, *args, **kwargs):
+        args = list(args)
+        msg_size, msg_data = BinaryData.pack(
+            [msg_rpc_call, funcname, args, kwargs])
+        self.msgs.put((msg_size, msg_data))
         return self.rpc_ret.get()
 
 
@@ -46,9 +47,9 @@ class Client(AbsNetwork):
     def _configure_udp(self): pass
 
     def send_udp(self, data_lst, sender):
-        dgram = {'sender': sender, 'payload': data_lst}
         host, port = self.srv_addr.split(':')
-        self.udp_sock.sendto(dumps(dgram), (host, int(port)))
+        msg_size, msg_data = BinaryData.pack([sender] + data_lst)
+        self.udp_sock.sendto(msg_data, (host, int(port)))
 
     def register_rpc(self, funcname): self._functions += [funcname]
 
@@ -58,5 +59,5 @@ class Client(AbsNetwork):
         if attr not in self._functions: raise AttributeError(attr)
 
         def do_rpc(*args, **kwargs):
-            return self.netw_thr.do_rpc(attr, args, kwargs)
+            return self.netw_thr.do_rpc(attr, *args, **kwargs)
         return do_rpc

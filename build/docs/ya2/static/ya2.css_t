@@ -1,4 +1,4 @@
-@import url("default.css");
+@import url("classic.css");
 
 div.bodywrapper {
     margin: 0 430px 0 0;

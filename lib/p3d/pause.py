@@ -6,7 +6,7 @@ from direct.interval.IntervalGlobal import ivalMgr
 from yyagl.gameobject import GameObject
 
 
-class TaskDec(object):
+class TaskDec:
 
     paused_taskchain = 'paused tasks'
 
@@ -28,7 +28,8 @@ class TaskDec(object):
         if mod.find('direct.interval') == 0 and not actor_ival:
             self.tsk.interval.pause()  # python-based intervals
             return self.tsk
-        elif mod not in modules or sys_mod: return self.tsk
+        if mod not in modules or sys_mod: return self.tsk
+        return None
 
     def pause(self):
         tsk = self.tsk
@@ -84,19 +85,21 @@ class P3dPause(GameObject):
         tasks = [TaskDec(tsk) for tsk in taskMgr.getTasks() if is_tsk(tsk)]
         tasks = [tsk for tsk in tasks
                  if tsk.tsk.get_task_chain() != 'unpausable']
-        namefilter = ['igLoop', 'dataLoop']
+        namefilter = ['igLoop', 'dataLoop', 'ivalLoop', 'collisionLoop',
+                      'garbageColletStates', 'audioLoop', 'resetPrevTransform',
+                      'eventManager']
         tasks = [tsk for tsk in tasks
                  if tsk.tsk.get_name_prefix() not in namefilter]
         not_none = lambda tsk: tsk is not None
         paused_tasks = list(filter(not_none, [tsk.process() for tsk in tasks]))
-        self.__paused_tasks = list(map(lambda tsk: TaskDec(tsk), paused_tasks))
+        self.__paused_tasks = list(map(TaskDec, paused_tasks))
         for tsk in list(filter(is_tsk, taskMgr.getDoLaters())):
             self.__paused_tasks += [TaskDec(tsk)]
             tsk.remainingTime = tsk.wakeTime - globalClock.get_frame_time()
         list(map(lambda tsk: tsk.pause(), self.__paused_tasks))
 
     def remove_task(self, tsk):
-        if tsk in self.__paused_tasks: self.__paused_tasks.remove(tsk)
+        list(map(self.__paused_tasks.remove, [ptsk for ptsk in self.__paused_tasks if ptsk.tsk == tsk]))
 
     def pause(self):
         self.__paused_ivals = ivalMgr.getIntervalsMatching('*')

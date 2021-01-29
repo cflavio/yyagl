@@ -1,4 +1,4 @@
-class ObsInfo(object):
+class ObsInfo:
 
     def __init__(self, mth, sort, args):
         self.mth = mth
@@ -8,12 +8,13 @@ class ObsInfo(object):
     def __repr__(self): return str(self.mth)
 
 
-class Subject(object):
+class Subject:
 
     def __init__(self):
         self.observers = {}
 
-    def attach(self, obs_meth, sort=10, rename='', args=[]):
+    def attach(self, obs_meth, sort=10, rename='', args=None):
+        args = args or []
         onm = rename or obs_meth.__name__
         if onm not in self.observers: self.observers[onm] = []
         self.observers[onm] += [ObsInfo(obs_meth, sort, args)]
@@ -21,12 +22,14 @@ class Subject(object):
         self.observers[onm] = sorted_obs
 
     def detach(self, obs_meth, lambda_call=None):
-        if type(obs_meth) == str :
+        if isinstance(obs_meth, str):
             onm = obs_meth
-            observers = [obs for obs in self.observers[onm] if obs.mth == lambda_call]
+            observers = [obs for obs in self.observers[onm]
+                         if obs.mth == lambda_call]
         else:
             onm = obs_meth.__name__
-            observers = [obs for obs in self.observers[onm] if obs.mth == obs_meth]
+            observers = [obs for obs in self.observers[onm]
+                         if obs.mth == obs_meth]
         if not observers: raise Exception
         list(map(self.observers[onm].remove, observers))
 
@@ -41,9 +44,11 @@ class Subject(object):
                     print('Quit')
                     import sys; sys.exit()
 
-    def observing(self, obs_meth): return obs_meth in self.observers
+    def observing(self, obs_meth):
+        if callable(obs_meth): obs_meth = obs_meth.__name__
+        return obs_meth in self.observers and self.observers[obs_meth]
 
     def destroy(self): self.observers = None
 
 
-class Observer(object): pass
+class Observer: pass

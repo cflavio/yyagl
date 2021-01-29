@@ -1,8 +1,8 @@
+from logging import info
 from yyagl.gameobject import Colleague
 from yyagl.lib.bullet.bullet import (
     BulletPhysWorld, BulletTriangleMesh, BulletTriangleMeshShape,
     BulletRigidBodyNode, BulletGhostNode)
-from ..facade import Facade
 
 
 PhysWorld = BulletPhysWorld
@@ -12,26 +12,31 @@ RigidBodyNode = BulletRigidBodyNode
 GhostNode = BulletGhostNode
 
 
-class CollInfo(object):
+class CollInfo:
 
     def __init__(self, node, time):
         self.node = node
         self.time = time
 
 
-class PhysFacade(Facade):
+class PhysFacade:
 
-    def __init__(self):
-        mth_lst = [
-            ('attach_rigid_body', lambda obj: obj.root.attach_rigid_body),
-            ('remove_rigid_body', lambda obj: obj.root.remove_rigid_body),
-            ('attach_ghost', lambda obj: obj.root.attach_ghost),
-            ('remove_ghost', lambda obj: obj.root.remove_ghost),
-            ('attach_vehicle', lambda obj: obj.root.attach_vehicle),
-            ('remove_vehicle', lambda obj: obj.root.remove_vehicle),
-            ('ray_test_all', lambda obj: obj.root.ray_test_all),
-            ('ray_test_closest', lambda obj: obj.root.ray_test_closest)]
-        Facade.__init__(self, mth_lst=mth_lst)
+    def attach_rigid_body(self, rbnode):
+        return self.root.attach_rigid_body(rbnode)
+
+    def remove_rigid_body(self, rbnode):
+        return self.root.remove_rigid_body(rbnode)
+
+    def attach_ghost(self, gnode): return self.root.attach_ghost(gnode)
+    def remove_ghost(self, gnode): return self.root.remove_ghost(gnode)
+    def attach_vehicle(self, vehicle): return self.root.attach_vehicle(vehicle)
+    def remove_vehicle(self, vehicle): return self.root.remove_vehicle(vehicle)
+
+    def ray_test_all(self, from_pos, to_pos, mask=None):
+        return self.root.ray_test_all(from_pos, to_pos, mask)
+
+    def ray_test_closest(self, from_pos, to_pos, mask=None):
+        return self.root.ray_test_closest(from_pos, to_pos, mask)
 
 
 class PhysMgr(Colleague, PhysFacade):
@@ -59,11 +64,16 @@ class PhysMgr(Colleague, PhysFacade):
         self.__do_collisions()
 
     def ray_test_closest(self, top, bottom):
+        #TODO: differs from PhysFacade's signature
         return self.root.ray_test_closest(top, bottom)
 
     def add_collision_obj(self, node): self.collision_objs += [node]
 
-    def remove_collision_obj(self, node): self.collision_objs.remove(node)
+    def remove_collision_obj(self, node):
+        try: self.collision_objs.remove(node)
+        except ValueError:
+            info("can't remove collision object %s" % node)
+            # it may happen with weapons during pause
 
     def stop(self):
         self.root.stop()
@@ -80,6 +90,7 @@ class PhysMgr(Colleague, PhysFacade):
             # odd, this doesn't work too
             # for contact in self.root.wld.contact_test(obj).get_contacts():
             result = self.root._wld.contact_test(obj)
+            #TODO: access a protected member
             for contact in result.get_contacts():
                 self.__process_contact(obj, contact.get_node0(), to_clear)
                 self.__process_contact(obj, contact.get_node1(), to_clear)

@@ -1,7 +1,7 @@
 from math import pi
 from panda3d.core import ClockObject
-from ..gameobject import GfxColleague
-from .particle import Particle
+from yyagl.gameobject import GfxColleague
+from yyagl.engine.particle import Particle
 from yyagl.lib.p3d.gfx import P3dGfxMgr, P3dAnimNode, P3dAmbientLight, \
     P3dSpotlight
 
@@ -14,16 +14,16 @@ Spotlight = P3dSpotlight
 
 class EngineGfx(GfxColleague):
 
-    def __init__(self, mediator, model_path, antialiasing, shaders, fps):
+    def __init__(self, mediator, model_path, antialiasing, shaders, fps, srgb):
         GfxColleague.__init__(self, mediator)
-        self.gfx_mgr = GfxMgr(model_path, antialiasing, shaders)
+        self.gfx_mgr = GfxMgr(model_path, antialiasing, shaders, srgb)
         self.root = None
         self.part2eff = {}
         if fps: self.set_frame_rate(fps)
-        #if self.mediator.cfg.gui_cfg.shaders and \
-        #        self.eng.lib.version.startswith('1.10'):
-            # self.set_toon()
-            # self.set_bloom()
+        # if self.mediator.cfg.gui_cfg.shaders and \
+        #         self.eng.lib.version.startswith('1.10'):
+        #     self.set_toon()
+        #     self.set_bloom()
 
     def init(self):
         self.root = self.gfx_mgr.root.attach_node('world')
@@ -31,7 +31,9 @@ class EngineGfx(GfxColleague):
     def clean(self): self.root.remove_node()
 
     def load_model(self, filename, callback=None, anim=None):
-        return self.gfx_mgr.load_model(filename, callback, anim)
+        try: return self.gfx_mgr.load_model(filename, callback, anim)
+        except OSError:
+            return self.gfx_mgr.load_model(filename + '.egg', callback, anim)
 
     def set_toon(self): self.gfx_mgr.set_toon()
 
@@ -43,7 +45,7 @@ class EngineGfx(GfxColleague):
     def set_frame_rate(fps):
         globalClock.setMode(ClockObject.MLimited)
         globalClock.set_frame_rate(fps)
-        #base.set_sleep(.01)
+        # base.set_sleep(.01)
 
     @staticmethod
     def particle(parent, texture, color=(1, 1, 1, 1), ampl=pi/6, ray=.5,

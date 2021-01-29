@@ -1,15 +1,15 @@
+import datetime
 from os.path import exists, dirname
-from panda3d.core import (get_model_path, AntialiasAttrib, PandaNode,
-    LightRampAttrib, Camera, OrthographicLens, NodePath, OmniBoundingVolume,
-    AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, Point2, Point3)
+from panda3d.core import get_model_path, AntialiasAttrib, PandaNode, \
+    LightRampAttrib, Camera, OrthographicLens, NodePath, OmniBoundingVolume, \
+    AmbientLight as P3DAmbientLight, Spotlight as P3DSpotlight, Point2, \
+    Point3, Texture
 from direct.filter.CommonFilters import CommonFilters
 from direct.actor.Actor import Actor
 from yyagl.lib.p3d.p3d import LibP3d
-from yyagl.facade import Facade
-import datetime
 
 
-class RenderToTexture(object):
+class RenderToTexture:
 
     def __init__(self, size=(256, 256)):
         self.__set_buffer(size)
@@ -50,10 +50,11 @@ class RenderToTexture(object):
         list(map(lambda node: node.remove_node(), [self.camera, self.root]))
 
 
-class P3dGfxMgr(object):
+class P3dGfxMgr:
 
-    def __init__(self, model_path, antialiasing, shaders):
+    def __init__(self, model_path, antialiasing, shaders, srgb):
         self.root = P3dNode(render)
+        self.__srgb = srgb
         self.callbacks = {}
         self.filters = None
         get_model_path().append_directory(model_path)
@@ -67,17 +68,31 @@ class P3dGfxMgr(object):
         if shaders and base.win:
             self.filters = CommonFilters(base.win, base.cam)
 
-    @staticmethod
-    def load_model(filename, callback=None, anim=None):
+    def load_model(self, filename, callback=None, anim=None):
         ext = '.bam' if exists(filename + '.bam') else ''
         if anim:
             anim_dct = {'anim': filename + '-Anim' + ext}
-            return P3dNode(Actor(filename + ext, anim_dct))
+            node = P3dNode(self.set_srgb(Actor(filename + ext, anim_dct)))
         elif callback:
-            callb = lambda model: callback(P3dNode(model))
-            return loader.loadModel(filename + ext, callback=callb)
+            callb = lambda model: callback(P3dNode(self.set_srgb(model)))
+            node = loader.loadModel(filename + ext, callback=callb)
         else:
-            return P3dNode(loader.loadModel(LibP3d.p3dpath(filename + ext)))
+            node = P3dNode(self.set_srgb(
+                loader.loadModel(LibP3d.p3dpath(filename + ext))))
+        return node
+
+    def set_srgb(self, model):
+        if self.__srgb:
+            for texture in model.find_all_textures():
+                texture.set_format(Texture.F_srgb)
+        return model
+
+    @staticmethod
+    def toggle_aa():
+        aa_not_none = render.get_antialias() != AntialiasAttrib.MNone
+        if render.has_antialias() and aa_not_none:
+            render.clear_antialias()
+        else: render.set_antialias(AntialiasAttrib.MAuto, 1)
 
     def set_toon(self):
         tmp_node = NodePath(PandaNode('temp node'))
@@ -124,42 +139,43 @@ class P3dGfxMgr(object):
             elm[1]()
 
 
-class P3dNode(Facade):
+class P3dNode:
 
     def __init__(self, nodepath):
         self.nodepath = nodepath
         self.node.set_python_tag('yyaglnode', self)
-        mth_lst = [
-            ('set_collide_mask', lambda obj: obj.node.set_collide_mask),
-            ('set_x', lambda obj: obj.node.set_x),
-            ('set_y', lambda obj: obj.node.set_y),
-            ('set_z', lambda obj: obj.node.set_z),
-            ('set_hpr', lambda obj: obj.node.set_hpr),
-            ('set_h', lambda obj: obj.node.set_h),
-            ('set_p', lambda obj: obj.node.set_p),
-            ('set_r', lambda obj: obj.node.set_r),
-            ('set_scale', lambda obj: obj.node.set_scale),
-            ('set_transparency', lambda obj: obj.node.set_transparency),
-            ('set_alpha_scale', lambda obj: obj.node.set_alpha_scale),
-            ('set_texture', lambda obj: obj.node.set_texture),
-            ('has_tag', lambda obj: obj.node.has_tag),
-            ('get_tag', lambda obj: obj.node.get_tag),
-            ('get_python_tag', lambda obj: obj.node.get_python_tag),
-            ('remove_node', lambda obj: obj.node.remove_node),
-            ('flatten_strong', lambda obj: obj.node.flatten_strong),
-            ('clear_model_nodes', lambda obj: obj.node.clear_model_nodes),
-            ('show', lambda obj: obj.node.show),
-            ('set_depth_offset', lambda obj: obj.node.set_depth_offset),
-            ('loop', lambda obj: obj.node.loop),
-            ('cleanup', lambda obj: obj.node.cleanup),
-            ('write_bam_file', lambda obj: obj.node.write_bam_file)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    def set_collide_mask(self, mask): return self.node.set_collide_mask(mask)
+    def set_x(self, val): return self.node.set_x(val)
+    def set_y(self, val): return self.node.set_y(val)
+    def set_z(self, val): return self.node.set_z(val)
+    def set_hpr(self, val): return self.node.set_hpr(val)
+    def set_h(self, val): return self.node.set_h(val)
+    def set_p(self, val): return self.node.set_p(val)
+    def set_r(self, val): return self.node.set_r(val)
+    def set_scale(self, val): return self.node.set_scale(val)
+    def set_transparency(self, val): return self.node.set_transparency(val)
+    def set_alpha_scale(self, val): return self.node.set_alpha_scale(val)
+    def set_texture(self, texturestage, texture):
+        return self.node.set_texture(texturestage, texture)
+    def has_tag(self, name): return self.node.has_tag(name)
+    def get_tag(self, name): return self.node.get_tag(name)
+    def get_python_tag(self, name): return self.node.get_python_tag(name)
+    def remove_node(self): return self.node.remove_node()
+    def flatten_strong(self): return self.node.flatten_strong()
+    def clear_model_nodes(self): return self.node.clear_model_nodes()
+    def show(self): return self.node.show()
+    def set_depth_offset(self, val): return self.node.set_depth_offset(val)
+    def loop(self, val): return self.node.loop(val)
+    def cleanup(self): return self.node.cleanup()
+    def write_bam_file(self, fname): return self.node.write_bam_file(fname)
 
     def attach_node(self, name):
         return P3dNode(self.node.attach_new_node(name))
 
     def add_shape(self, shape):
         return self.node.node().add_shape(shape._mesh_shape)
+        #TODO: don't access a protected member
 
     @property
     def name(self): return self.node.get_name()
@@ -171,6 +187,7 @@ class P3dNode(Facade):
     def p3dnode(self): return self.node.node()
 
     def set_pos(self, pos): return self.node.set_pos(pos._vec)
+        #TODO: don't access a protected member
 
     def get_pos(self, other=None):
         return self.node.get_pos(* [] if other is None else [other.node])
@@ -248,18 +265,24 @@ class P3dNode(Facade):
     @property
     def children(self): return self.node.get_children()
 
+    def destroy(self): return self.node.remove_node()
 
-class P3dAnimNode(Facade):
+
+class P3dAnimNode:
 
     def __init__(self, filepath, anim_dct):
         self.node = Actor(filepath, anim_dct)
-        mth_lst = [
-            ('loop', lambda obj: obj.node.loop),
-            ('reparent_to', lambda obj: obj.node.reparent_to)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    def loop(self, val): return self.node.loop(val)
+
+    def reparent_to(self, node): self.node.reparent_to(node)
 
     @property
     def name(self): return self.node.get_name()
+
+    def optimize(self):
+        self.node.prepare_scene(base.win.get_gsg())
+        self.node.premunge_scene(base.win.get_gsg())
 
     def set_omni(self):
         self.node.node().set_bounds(OmniBoundingVolume())
@@ -268,7 +291,7 @@ class P3dAnimNode(Facade):
     def destroy(self): self.node.cleanup()
 
 
-class P3dAmbientLight(object):
+class P3dAmbientLight:
 
     def __init__(self, color):
         ambient_lgt = P3DAmbientLight('ambient light')
@@ -281,7 +304,7 @@ class P3dAmbientLight(object):
         self.ambient_np.remove_node()
 
 
-class P3dSpotlight(Facade):
+class P3dSpotlight:
 
     def __init__(self, mask=None):
         self.spot_lgt = render.attach_new_node(P3DSpotlight('spot'))

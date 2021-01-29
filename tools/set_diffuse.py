@@ -12,8 +12,10 @@ def __set_diffuse(fpath):
 
 def __process_line(line, out_lines):
     if not line.strip().startswith('<Scalar> diff'):
-        return out_lines + [line.rstrip()]
-    else: return out_lines + [line.split(' { ')[0] + ' { 1.000000 }']
+        new_lines = [line.rstrip()]
+    else: new_lines = [line.split(' { ')[0] + ' { 1.000000 }']
+    return out_lines + new_lines
 
 
-list(map(__set_diffuse, [fname for fname in listdir('.') if fname.endswith('.egg')]))
+list(map(__set_diffuse,
+         [fname for fname in listdir('.') if fname.endswith('.egg')]))

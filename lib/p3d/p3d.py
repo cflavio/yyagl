@@ -1,6 +1,8 @@
 import sys
+from logging import info
 from os.path import exists, dirname
 from os import getcwd, _exit
+from pathlib import Path
 from panda3d.core import loadPrcFileData, Texture, TextPropertiesManager, \
     TextProperties, PandaSystem, Filename, WindowProperties
 from panda3d.bullet import get_bullet_version
@@ -12,7 +14,7 @@ from direct.task.Task import Task
 class LibShowBase(ShowBase): pass
 
 
-class LibP3d(DirectObject, object):
+class LibP3d(DirectObject):
 
     task_cont = Task.cont
 
@@ -27,7 +29,7 @@ class LibP3d(DirectObject, object):
     @staticmethod
     def configure():
         loadPrcFileData('', 'notify-level-ya2 info')
-        #loadPrcFileData('', 'gl-version 3 2')
+        # loadPrcFileData('', 'gl-version 3 2')
 
     @staticmethod
     def fixpath(path):
@@ -47,8 +49,25 @@ class LibP3d(DirectObject, object):
         with open(self.curr_path + '/assets/bld_version.txt') as fver:
             return fver.read().strip()
 
+
     @property
-    def curr_path(self): return dirname(__file__)
+    def curr_path(self):
+        if sys.platform == 'darwin':
+            return dirname(__file__) + '/../Resources/'
+        # return dirname(__file__)
+        par_path = str(Path(__file__).parent.absolute())
+        is_appimage = par_path.startswith('/tmp/.mount_Yorg')
+        is_appimage = is_appimage and par_path.endswith('/usr/bin')
+        if is_appimage:
+            return str(Path(par_path).absolute())
+        is_snap = par_path.startswith('/snap/')
+        is_snap = is_snap and par_path.endswith('/x1')
+        if is_snap:
+            return str(Path(par_path).absolute())
+        #return getcwd()
+        curr_path = dirname(__file__)
+        info('current path: %s' % curr_path)
+        return curr_path
 
     @staticmethod
     def send(msg): return messenger.send(msg)
@@ -166,7 +185,8 @@ class LibP3d(DirectObject, object):
         if outline: font.set_outline((0, 0, 0, 1), .8, .2)
         return font
 
-    def log(self, msg): print(msg)
+    @staticmethod
+    def log(msg): print(msg)
 
     @property
     def version(self): return PandaSystem.get_version_string()
@@ -217,7 +237,7 @@ class LibP3d(DirectObject, object):
     @property
     def mousepos(self):
         mwn = base.mouseWatcherNode
-        if not mwn.hasMouse(): return
+        if not mwn.hasMouse(): return 0, 0
         return mwn.get_mouse_x(), mwn.get_mouse_y()
 
     @property
@@ -255,32 +275,49 @@ class LibP3d(DirectObject, object):
         return sfx
 
     def remap_code(self, key):
-        map = base.win.get_keyboard_map()
-        for i in range(map.get_num_buttons()):
-            if key.lower() == map.get_mapped_button_label(i).lower():
-                self.__log_key('code mapping %s to key %s' % (key, map.get_mapped_button(i)), key, map.get_mapped_button(i))
-                return map.get_mapped_button(i)
-        for i in range(map.get_num_buttons()):
-            if key.lower() == map.get_mapped_button(i).get_name().lower():
-                self.__log_key('code mapping %s to key %s' % (key, map.get_mapped_button(i)), key, map.get_mapped_button(i))
-                return map.get_mapped_button(i)
-        self.__log_key('not found a code mapping for %s' % key, key, 'not_found')
+        kmap = base.win.get_keyboard_map()
+        for i in range(kmap.get_num_buttons()):
+            if key.lower() == kmap.get_mapped_button_label(i).lower():
+                self.__log_key(
+                    'code mapping %s to key %s' %
+                    (key, kmap.get_mapped_button(i)), key,
+                    kmap.get_mapped_button(i))
+                return kmap.get_mapped_button(i)
+        for i in range(kmap.get_num_buttons()):
+            if key.lower() == kmap.get_mapped_button(i).get_name().lower():
+                self.__log_key(
+                    'code mapping %s to key %s' %
+                    (key, kmap.get_mapped_button(i)), key,
+                    kmap.get_mapped_button(i))
+                return kmap.get_mapped_button(i)
+        self.__log_key('not found a code mapping for %s' %
+                       key, key, 'not_found')
         return key
 
     def remap_str(self, key):
-        map = base.win.get_keyboard_map()
-        for i in range(map.get_num_buttons()):
-            if key.lower() == map.get_mapped_button_label(i).lower():
-                self.__log_key('string mapping %s to key %s' % (key, map.get_mapped_button(i).get_name()), key, map.get_mapped_button(i).get_name())
-                return map.get_mapped_button(i).get_name()
-        for i in range(map.get_num_buttons()):
-            if key.lower() == map.get_mapped_button(i).get_name().lower():
-                self.__log_key('string mapping %s to key %s' % (key, map.get_mapped_button(i).get_name()), key, map.get_mapped_button(i).get_name())
-                return map.get_mapped_button(i).get_name()
-        self.__log_key('not found a string mapping for %s' % key, key, map.get_mapped_button(i).get_name())
+        kmap = base.win.get_keyboard_map()
+        for i in range(kmap.get_num_buttons()):
+            if key.lower() == kmap.get_mapped_button_label(i).lower():
+                self.__log_key(
+                    'string mapping %s to key %s' %
+                    (key, kmap.get_mapped_button(i).get_name()), key,
+                    kmap.get_mapped_button(i).get_name())
+                return kmap.get_mapped_button(i).get_name()
+        for i in range(kmap.get_num_buttons()):
+            if key.lower() == kmap.get_mapped_button(i).get_name().lower():
+                self.__log_key(
+                    'string mapping %s to key %s' %
+                    (key, kmap.get_mapped_button(i).get_name()), key,
+                    kmap.get_mapped_button(i).get_name())
+                return kmap.get_mapped_button(i).get_name()
+        self.__log_key('not found a string mapping for %s' %
+                       key, key, kmap.get_mapped_button(i).get_name())
         return key
 
     def __log_key(self, msg, key1, key2):
-        if key1 in self.__logged_keys and self.__logged_keys[key1] == key2: return
+        if key1 in self.__logged_keys and self.__logged_keys[key1] == key2:
+            return
         self.__logged_keys[key1] = key2
         print(msg)
+
+    def destroy(self): pass

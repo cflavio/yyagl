@@ -1,16 +1,9 @@
 from inspect import getmro
-from panda3d.core import LVecBase2f
-from direct.gui.DirectGuiGlobals import ENTER, EXIT
-from yyagl.lib.gui import Btn, Slider, CheckBtn, OptionMenu, Entry, \
-    Label, Img, Frame, Text
-from yyagl.lib.ivals import Seq, Wait, PosIval, Func
+from yyagl.lib.gui import Btn, Slider, CheckBtn, OptionMenu, Entry
 from yyagl.engine.vec import Vec2
 from yyagl.engine.gui.gui import left, right, up, down
 from yyagl.gameobject import GameObject, GuiColleague, EventColleague
-from yyagl.facade import Facade
 from yyagl.engine.gui.imgbtn import ImgBtn
-from yyagl.lib.p3d.widget import FrameMixin, ImgMixin, BtnMixin, EntryMixin, \
-    CheckBtnMixin, SliderMixin, OptionMenuMixin
 
 
 class PageGui(GuiColleague):
@@ -26,8 +19,10 @@ class PageGui(GuiColleague):
         self.translate()
         self.curr_wdgs = []
         for player in players:
-            self.curr_wdgs += [self.__next_wdg((-.1, -1), player, Vec2(-3.6, 1))]
-            if self.curr_wdgs[-1]: self.curr_wdgs[-1].on_wdg_enter(None, player)
+            self.curr_wdgs += [
+                self.__next_wdg((-.1, -1), player, Vec2(-3.6, 1))]
+            if self.curr_wdgs[-1]:
+                self.curr_wdgs[-1].on_wdg_enter(None, player)
 
     def build(self, back_btn=True, exit_behav=False):
         if back_btn: self.__build_back_btn(exit_behav)
@@ -94,11 +89,13 @@ class PageGui(GuiColleague):
         mth = self.__direction_dot_dwg
         in_direction = lambda wdg: mth(wdg, direction, player, start) > .1
         dirwdgs = list(filter(in_direction, wdgs))
-        if not dirwdgs: return
-        nextweight = lambda wdg: self.__next_weight(wdg, direction, player, start)
+        if not dirwdgs: return None
+        nextweight = lambda wdg: \
+                     self.__next_weight(wdg, direction, player, start)
         return max(dirwdgs, key=nextweight)
 
-    def _set_widgets(self): list(map(lambda wdg: wdg.set_widget(), self.widgets))
+    def _set_widgets(self):
+        list(map(lambda wdg: wdg.set_widget(), self.widgets))
 
     def _set_entries(self):
         for wdg in self.widgets:
@@ -123,7 +120,8 @@ class PageGui(GuiColleague):
 
     def enable_navigation(self, players):
         if self.enable_tsk: self.eng.rm_do_later(self.enable_tsk)
-        self.enable_tsk = self.eng.do_later(.01, self.enable_navigation_aux, [players])
+        self.enable_tsk = self.eng.do_later(
+            .01, self.enable_navigation_aux, [players])
 
     def update_navigation(self):
         self.disable_navigation(self.players)
@@ -134,16 +132,22 @@ class PageGui(GuiColleague):
         for player in players:
             nav = self.menu_props.nav.navinfo_lst[player]
             evts = [
-                (self.eng.lib.remap_str(nav.left), self.on_arrow, [left, player]),
-                (self.eng.lib.remap_str(nav.right), self.on_arrow, [right, player]),
+                (self.eng.lib.remap_str(nav.left), self.on_arrow,
+                 [left, player]),
+                (self.eng.lib.remap_str(nav.right), self.on_arrow,
+                 [right, player]),
                 (self.eng.lib.remap_str(nav.up), self.on_arrow, [up, player]),
-                (self.eng.lib.remap_str(nav.down), self.on_arrow, [down, player]),
+                (self.eng.lib.remap_str(nav.down), self.on_arrow,
+                 [down, player]),
                 (self.eng.lib.remap_str(nav.fire), self.on_enter, [player])]
             navs += [nav]
             list(map(lambda args: self.mediator.event.accept(*args), evts))
         self.eng.joystick_mgr.bind_keyboard(navs)
         if self.eng.cfg.dev_cfg.menu_joypad and self._back_btn:
-            self.mediator.event.accept('joypad_b1', self._back_btn['command'])
+            self.mediator.event.accept('joypad0-face_b-up', self.__back_wrapper)
+
+    def __back_wrapper(self):
+        if not self.eng.joystick_mgr.is_recording: self._back_btn['command']()
 
     def disable_navigation(self, players):
         if self.enable_tsk:
@@ -151,9 +155,9 @@ class PageGui(GuiColleague):
         for player in players:
             nav = self.menu_props.nav.navinfo_lst[player]
             evts = [nav.left, nav.right, nav.up, nav.down, nav.fire]
-            self.eng.joystick_mgr.unbind_keyboard(player)
+            self.eng.joystick_mgr.unbind_keyboard()
             list(map(self.mediator.event.ignore, evts))
-        self.mediator.event.ignore('joypad_b1')
+        self.mediator.event.ignore('joypad0-face_b-up')
 
     def enable(self, players):
         self.enable_navigation(players)
@@ -178,9 +182,8 @@ class PageGui(GuiColleague):
         self.widgets += [btn]
         self._back_btn = btn
 
-    def _on_back(self, player=0): self.notify('on_back', self.__class__.__name__)
-    # refactor: notify should pass the sender, so these arguments would be
-    # useless
+    def _on_back(self, player=0):
+        self.notify('on_back', self.__class__.__name__)
 
     def _on_quit(self): self.notify('on_quit', self.__class__.__name__)
 
@@ -206,19 +209,24 @@ class PageEvent(EventColleague):
     def on_quit(self): pass
 
 
-class PageFacade(Facade):
+class PageFacade:
 
-    def __init__(self):
-        mth_lst = [
-            ('show', lambda obj: obj.gui.show),
-            ('hide', lambda obj: obj.gui.hide),
-            ('enable', lambda obj: obj.gui.enable),
-            ('disable', lambda obj: obj.gui.disable),
-            ('enable_navigation', lambda obj: obj.gui.enable_navigation),
-            ('disable_navigation', lambda obj: obj.gui.disable_navigation),
-            ('attach_obs', lambda obj: obj.gui.attach),
-            ('detach_obs', lambda obj: obj.gui.detach)]
-        Facade.__init__(self, mth_lst=mth_lst)
+    def show(self): return self.gui.show()
+    def hide(self): return self.gui.hide()
+    def enable(self, players): return self.gui.enable(players)
+    def disable(self, players): return self.gui.disable(players)
+
+    def enable_navigation(self, players):
+        return self.gui.enable_navigation(players)
+
+    def disable_navigation(self, players):
+        return self.gui.disable_navigation(players)
+
+    def attach_obs(self, obs_meth, sort=10, rename='', args=None):
+        return self.gui.attach(obs_meth, sort, rename, args or [])
+
+    def detach_obs(self, obs_meth, lambda_call=None):
+        return self.gui.detach(obs_meth, lambda_call)
 
 
 class Page(GameObject, PageFacade):
@@ -230,20 +238,26 @@ class Page(GameObject, PageFacade):
         PageFacade.__init__(self)
         self.menu_props = menu_props
         self.players = players
-        GameObject.__init__(self, self.init_lst)
+        GameObject.__init__(self)
+        self._build_event()
+        self._build_gui()
         list(map(self.gui.attach, [self.on_hide, self.on_back, self.on_quit]))
 
-    @property
-    def init_lst(self):
-        return [
-            [('event', self.event_cls, [self])],
-            [('gui', self.gui_cls, [self, self.menu_props, self.players])]]
+    def _build_event(self):
+        self.event = self.event_cls(self)
+
+    def _build_gui(self):
+        self.gui = self.gui_cls(self, self.menu_props, self.players)
 
     def on_hide(self): self.event.ignoreAll()
 
-    def on_back(self, cls_name, args=[]): self.event.on_back()  # unused arg
+    def on_back(self, cls_name, args=None): self.event.on_back()  # unused arg
 
     def on_quit(self, cls_name): self.event.on_quit()  # unused arg
 
     def destroy(self):
-        for cls in Page.__bases__: cls.destroy(self)
+        self.event.destroy()
+        self.gui.destroy()
+        bases = [basecls for basecls in Page.__bases__
+                 if basecls != PageFacade]
+        for cls in bases: cls.destroy(self)

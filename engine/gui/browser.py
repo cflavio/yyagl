@@ -3,7 +3,7 @@ from os import environ, system
 from webbrowser import open_new_tab
 
 
-class BrowserStrategy(object):
+class BrowserStrategy:
 
     @staticmethod
     def open(url): open_new_tab(url)
@@ -17,7 +17,7 @@ class BrowserStrategyLinux(BrowserStrategy):
         system('xdg-open ' + url)
 
 
-class Browser(object):
+class Browser:
 
     @staticmethod
     def open(url):

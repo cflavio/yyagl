@@ -2,7 +2,7 @@ from panda3d.core import load_prc_file_data
 from yyagl.lib.builder import LibP3d
 
 
-class GuiCfg(object):
+class GuiCfg:
 
     def __init__(self, fps=False, win_size='1280 720', win_orig=None,
                  win_title='yyagl', fullscreen=False, sync_video=None,
@@ -20,14 +20,14 @@ class GuiCfg(object):
         self.fixed_fps = fixed_fps
 
 
-class ProfilingCfg(object):
+class ProfilingCfg:
 
     def __init__(self, profiling=False, pyprof_percall=False):
         self.profiling = profiling  # profiling with panda3d's tools
         self.pyprof_percall = pyprof_percall
 
 
-class LangCfg(object):
+class LangCfg:
 
     def __init__(self, lang='en', lang_path='assets/locale',
                  lang_domain='yyagl_game', languages=[('English', 'en')]):
@@ -37,7 +37,7 @@ class LangCfg(object):
         self.languages = languages
 
 
-class CursorCfg(object):
+class CursorCfg:
 
     def __init__(self, cursor_hidden=False, cursor_path='',
                  cursor_scale=(1, 1, 1), cursor_hotspot=(0, 0)):
@@ -47,15 +47,17 @@ class CursorCfg(object):
         self.cursor_hotspot = cursor_hotspot
 
 
-class DevCfg(object):
+class DevCfg:
 
-    def __init__(self, mt_render=False, model_path='assets/models',
-                 shaders_dev=False, gamma=1.0, menu_joypad=True, verbose='',
-                 verbose_log=False, xmpp_server='', start_wp='', port=9099,
-                 server='localhost:9098'):
+    def __init__(
+            self, mt_render=False, model_path='assets/models',
+            shaders_dev=False, pbr=False, gamma=1.0, menu_joypad=True,
+            verbose='', verbose_log=False, xmpp_server='', start_wp='',
+            port=9099, server='localhost:9098', srgb=False, opengl_3_2=False):
         self.multithreaded_render = mt_render  # multithreaded rendering
         self.model_path = model_path
         self.shaders_dev = shaders_dev
+        self.pbr = pbr
         self.gamma = gamma
         self.menu_joypad = menu_joypad
         self.verbose = verbose
@@ -64,9 +66,11 @@ class DevCfg(object):
         self.port = port
         self.server = server
         self.start_wp = start_wp
+        self.srgb = srgb
+        self.opengl_3_2 = opengl_3_2
 
 
-class Cfg(object):
+class Cfg:
 
     def __init__(self, gui_cfg=None, profiling_cfg=None, lang_cfg=None,
                  cursor_cfg=None, dev_cfg=None):
@@ -84,26 +88,31 @@ class Cfg(object):
         cfginfo = [
             ('texture-anosotropic-degree', 2),
             ('texture-magfilter', 'linear'),
+            # ('client-sleep', 0.001),
             ('texture-minfilter', 'mipmap'),
             ('gl-coordinate-system', 'default'),
-            ('textures-power-2', 'none'),
+            ('textures-power-2', 'down'),
+            ('textures-auto-power-2', 1),
             ('show-frame-rate-meter', int(self.gui_cfg.fps)),
             ('hardware-animated-vertices', 'true'),
-            ('x-init-threads','true'),  # temp workaround 4 mtrendering (linux)
+            ('x-init-threads', 'true'),
+            # temp workaround for mtrendering (linux)
             ('basic-shaders-only', 'false'),
             ('default-model-extension', '.bam')]
         if self.gui_cfg.win_size:
             cfginfo += [('win-size', self.gui_cfg.win_size)]
         if self.gui_cfg.win_orig:
             cfginfo += [('win-origin', self.gui_cfg.win_orig)]
+        if self.dev_cfg.srgb:
+            cfginfo += [('framebuffer-srgb', 'true')]
+        if self.dev_cfg.opengl_3_2:
+            cfginfo += [('gl-version', '3 2')]
         cfginfo += [
             ('window-title', self.gui_cfg.win_title),
             ('cursor-hidden', int(self.cursor_cfg.cursor_hidden)),
-            ('sync-video', int(self.gui_cfg.sync_video))]
-        if self.gui_cfg.antialiasing:
-            cfginfo += [
-                ('framebuffer-multisample', 1),
-                ('multisamples', 2)]
+            ('sync-video', int(self.gui_cfg.sync_video)),
+            ('framebuffer-multisample', 1),
+            ('multisamples', 2)]
         if self.dev_cfg.multithreaded_render:
             cfginfo += [('threading-model', '/Draw')]
         if self.profiling_cfg.profiling:

@@ -1,9 +1,15 @@
-from datetime import datetime
+from logging import basicConfig, info, INFO
+#from datetime import datetime
+from pprint import pprint
+from traceback import print_stack
 from sys import version_info
-from platform import system, release, architecture, platform, processor, \
-    version, machine
-from multiprocessing import cpu_count
+# from platform import system, release, architecture, platform, processor, \
+#     version, machine
+# from multiprocessing import cpu_count
 from yyagl.gameobject import Colleague
+
+
+basicConfig(level=INFO, format='%(asctime)s %(message)s', datefmt='%H:%M:%S')
 
 
 class LogMgrBase(Colleague):  # headless log manager
@@ -18,27 +24,26 @@ class LogMgrBase(Colleague):  # headless log manager
 
     def log(self, msg, verbose=False):
         if verbose and not self.eng.cfg.dev_cfg.verbose_log: return
-        time = datetime.now().strftime("%H:%M:%S")
-        self.eng.lib.log('{time} {msg}'.format(time=time, msg=msg))
+        info(msg)
 
     def log_cfg(self):
         messages = ['version: ' + self.eng.logic.version]
-        #os_info = (system(), release(), version())
-        #messages += ['operative system: %s %s %s' % os_info]
-        #messages += ['architecture: ' + str(architecture())]
-        #messages += ['machine: ' + machine()]
-        #messages += ['platform: ' + platform()]
-        #messages += ['processor: ' + processor()]
-        #try:
-        #    messages += ['cores: ' + str(cpu_count())]
-        #except NotImplementedError:  # on Windows
-        #    messages += ['cores: not implemented']
+        # os_info = (system(), release(), version())
+        # messages += ['operative system: %s %s %s' % os_info]
+        # messages += ['architecture: ' + str(architecture())]
+        # messages += ['machine: ' + machine()]
+        # messages += ['platform: ' + platform()]
+        # messages += ['processor: ' + processor()]
+        # try:
+        #     messages += ['cores: ' + str(cpu_count())]
+        # except NotImplementedError:  # on Windows
+        #     messages += ['cores: not implemented']
         lib_ver = self.eng.lib.version
         try:
             import psutil
             mem = psutil.virtual_memory().total / 1000000000.0
             messages += ['memory: %s GB' % round(mem, 2)]
-        except ImportError: self.log("can't import psutil")  # windows
+        except ImportError: info("can't import psutil")  # windows
         lib_commit = self.eng.lib.lib_commit
         py_ver = [str(elm) for elm in version_info[:3]]
         messages += ['python version: %s' % '.'.join(py_ver)]
@@ -48,9 +53,17 @@ class LogMgrBase(Colleague):  # headless log manager
         if base.win: print(base.win.get_keyboard_map())
         list(map(self.log, messages))
 
-    def log_tasks(self):
-        self.log('tasks: %s' % taskMgr.getAllTasks())
-        self.log('do-laters: %s' % taskMgr.getDoLaters())
+    @staticmethod
+    def log_tasks():
+        info('tasks: %s' % taskMgr.getAllTasks())
+        info('do-laters: %s' % taskMgr.getDoLaters())
+
+    @staticmethod
+    def plog(obj):
+        print('\n\n')
+        print_stack()
+        pprint(obj)
+        print('\n\n')
 
 
 class LogMgr(LogMgrBase):

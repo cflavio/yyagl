@@ -1,4 +1,7 @@
 *.pyc
 *.txo
+built/
+assets/bld_version.txt
+.sconsign.dblite
 assets/uml/class_diagram.png
 assets/uml/sequence_diagrams.pdf

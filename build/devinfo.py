@@ -1,9 +1,12 @@
 from itertools import product
-from os import system
-from .build import bld_dpath, branch, exec_cmd, devinfo_fpath
+from os import system, mkdir
+from os.path import exists
+from yyagl.build.build import bld_dpath, branch, exec_cmd, devinfo_fpath
 
 
 def bld_devinfo(target, source, env):
+    # unused target
+    if not exists('built'): mkdir('built')
     for (fname, cond), src in product(env['DEV_CONF'].items(), source):
         with open(('%s%s.txt') % (bld_dpath, fname), 'a') as fout:
             __process(src, cond, fout)
