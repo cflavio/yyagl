@@ -1,18 +1,21 @@
 from socket import socket, AF_INET, SOCK_DGRAM, error, SOCK_STREAM, \
     SOL_SOCKET, SO_REUSEADDR
+from traceback import print_exc
+from logging import info
 from select import select
-from queue import Queue, Empty
-from bson import dumps, loads
-from decimal import Decimal
-from json import load
-from urllib.request import urlopen
+from time import sleep
+from queue import Empty
 from threading import Thread
-from _thread import interrupt_main
 from struct import Struct, error as unpack_error
+from _thread import interrupt_main
 from yyagl.gameobject import GameObject
+from yyagl.engine.network.binary import BinaryData
 
 
-class ConnectionError(Exception): pass
+msg_rpc_call, msg_rpc_answ = range(2)
+
+
+class _ConnectionError(Exception): pass
 
 
 class NetworkThread(Thread):
@@ -31,39 +34,48 @@ class NetworkThread(Thread):
 
     def run(self):
         while self.is_running:
+            sleep(.001)
             try:
                 readable, writable, exceptional = select(
                     self.connections, self.connections, self.connections, 1)
                 for sock in readable: self._process_read(sock)
                 for sock in writable: self._process_write(sock)
                 for sock in exceptional: print('exception', sock.getpeername())
-            except (error, AttributeError) as exc: print(exc)
+            except (error, AttributeError) as exc: print_exc()
             # AttributeError happens when the server user exits from a race,
             # then destroy is being called but _process_read is still alive
             # and self.eng.cb_mux.add_cb is invoked, but self.eng in None
             except Exception as exc:
-                print(exc)
+                print_exc()
                 interrupt_main()
 
     def _process_read(self, sock):
         try:
             data = self.recv_one_msg(sock)
             if data:
-                dct = dict(loads(data))
-                if 'is_rpc' in dct: self._rpc_cb(dct, sock)
-                else:
-                    args = [dct['payload'], sock]
-                    self.eng.cb_mux.add_cb(self.read_cb, args)
-        except (ConnectionError, TypeError) as exc:
-            print(exc)
+                try:
+                    msg = BinaryData.unpack(data)
+                    if msg[0] == msg_rpc_call:
+                        funcname, args, kwargs = msg[1:]
+                        self._rpc_cb(funcname, args, kwargs, sock)
+                    elif msg[0] == msg_rpc_answ:
+                        self._rpc_cb(msg[1], sock)
+                    else:
+                        args = [msg, sock]
+                        self.eng.cb_mux.add_cb(self.read_cb, args)
+                except unpack_error as exc:
+                    print(exc)
+                    print_exc()
+        except (_ConnectionError, TypeError) as exc:
+            print_exc()
             self.notify('on_disconnected', sock)
             self.connections.remove(sock)
 
     def _process_write(self, sock):
         try:
-            msg = self._queue(sock).get_nowait()
-            sock.sendall(self.size_struct.pack(len(msg)))
-            sock.sendall(msg)
+            msg_size, msg_data = self._queue(sock).get_nowait()
+            sock.sendall(self.size_struct.pack(msg_size))
+            sock.sendall(msg_data)
         except Empty: pass
 
     def recv_one_msg(self, sock):
@@ -71,7 +83,7 @@ class NetworkThread(Thread):
         try: length = self.size_struct.unpack(lengthbuf)[0]
         except unpack_error as exc:
             print(exc)
-            raise ConnectionError()
+            raise _ConnectionError()
         return self.recvall(sock, length)
 
     @staticmethod
@@ -113,28 +125,20 @@ class AbsNetwork(GameObject):
             self.netw_thr.start()
             self.netw_thr.read_cb = read_cb
             args = self.__class__.__name__, self.port
-            self.eng.log('%s is up, port %s' % args)
+            info('%s is up, port %s' % args)
             return True
         except ValueError:  # e.g. empty server
-            self.eng.log("can't start the network")
+            info("can't start the network")
 
     def register_cb(self, callback):
         self.read_cb = callback
         self.netw_thr.read_cb = callback
 
     def send(self, data_lst, receiver=None):
-        self.netw_thr.send_msg(dumps({'payload': data_lst}), receiver)
+        dgram = BinaryData.pack(data_lst)
+        self.netw_thr.send_msg(dgram, receiver)
 
     def on_frame(self): self.process_udp()
-
-    @staticmethod
-    def _fix_payload(payload):
-        ret = {'sender': payload['sender']}
-
-        def __fix(elm):
-            return float(elm) if isinstance(elm, Decimal) else elm
-        ret['payload'] = list(map(__fix, payload['payload']))
-        return ret
 
     @property
     def is_active(self):
@@ -143,25 +147,26 @@ class AbsNetwork(GameObject):
 
     def stop(self):
         if not self.netw_thr:
-            self.eng.log('%s was already stopped' % self.__class__.__name__)
+            info('%s was already stopped' % self.__class__.__name__)
             return
         self.udp_sock.close()
         self.netw_thr.destroy()
         self.udp_sock = self.tcp_sock = self.netw_thr = None
         self.eng.detach_obs(self.on_frame)
         self.addr2conn = {}
-        self.eng.log('%s has been stopped' % self.__class__.__name__)
+        info('%s has been stopped' % self.__class__.__name__)
 
     def process_udp(self):
         try: dgram, conn = self.udp_sock.recvfrom(8192)
         except error: return
-        dgram = self._fix_payload(dict(loads(dgram)))
-        self.on_udp_pck(dgram)
-        self.read_cb(dgram['payload'], conn)
+        self.on_udp_pck(dgram, conn)
+        dgram = BinaryData.unpack(dgram)
+        sender, payload = dgram[0], dgram[1:]
+        self.read_cb(payload, conn)
 
-    def on_udp_pck(self, dgram): pass
+    def on_udp_pck(self, dgram, conn): pass
 
     def destroy(self):
         self.stop()
-        self.eng.log('%s has been destroyed' % self.__class__.__name__)
+        info('%s has been destroyed' % self.__class__.__name__)
         GameObject.destroy(self)

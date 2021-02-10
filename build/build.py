@@ -1,6 +1,7 @@
-from os import walk, chdir, getcwd, remove
-from os.path import join, getsize, exists
+from os import walk, chdir, getcwd
+from os.path import join, getsize, exists, dirname
 from subprocess import Popen, PIPE
+from pathlib import Path
 
 
 def exec_cmd(cmd):
@@ -8,48 +9,61 @@ def exec_cmd(cmd):
     return ret[0].decode('utf-8').strip()  # '\n'.join(ret)
 
 
-def __branch():
+def _branch():
     return exec_cmd('git symbolic-ref HEAD').split('/')[-1].strip()
 
 
-def __version():
+def _version():
     pref = ''
-    if exists('assets/version.txt'):
-        with open('assets/version.txt') as fver:
-            pref = fver.read().strip() + '-'
+    root = str(Path(dirname(dirname(__file__))).parent) + '/'
+    if exists(root + 'assets/version.txt'):
+        with open(root + 'assets/version.txt') as fver:
+            pref = fver.read().strip() + '-' + _branch() + '-'
     bld_ver = pref + exec_cmd('git rev-parse HEAD')[:7]
-    with open('assets/bld_version.txt', 'w') as fver:
+    with open(root + 'assets/bld_version.txt', 'w') as fver:
         fver.write(bld_ver)
     return bld_ver
 
 
 def img_tgt_names(files_):  # list of images' target filenames
-    #ext = lambda fname: 'png' if fname.endswith('_png.png') else 'txo'
+    # ext = lambda fname: 'png' if fname.endswith('_png.png') else 'txo'
     return [fname[:fname.rfind('.') + 1] + 'txo' for fname in files_]
 
 
 def tracks_tgt_fnames():
-    tr_root = 'assets/models/tracks/'
-    for _, dnames, _ in walk(tr_root):
-        return [tr_root + dname + '/track_all.bam' for dname in dnames]
-    return []
+    ret = []
+    tr_root = '../assets/tracks/'
+    for droot, dnames, _ in walk(tr_root):
+        ret += [tr_root + dname + '/models/track_all.bam'
+                for dname in dnames
+                if droot == tr_root and dname != '__pycache__']
+    tr_root = '../assets/cars/'
+    for droot, _, filenames in walk(tr_root):
+        ret += [droot + '/' + filename.replace('.egg', '.bam')
+                for filename in filenames if filename.endswith('.egg')]
+    tr_root = '../assets/models/'
+    for droot, _, filename in walk(tr_root):
+        ret += [droot + '/' + filename.replace('.egg', '.bam')
+                for filename in filenames if filename.endswith('.egg')]
+        # using possibly undefined loop variable filenames
+    return ret
     # return [tr_root + dname + '/track_all.bam'
     #         for _, dnames, _ in walk(tr_root) for dname in dnames]
     # this creates an empty folder assets/models/tracks/tex
 
 
 def set_path(_bld_path):
-    global bld_path
+    global bld_path  #TODO: undefined at the module level
     bld_path = _bld_path + ('/' if not _bld_path.endswith('/') else '')
     return bld_path
 
 
-def files(_extensions, excl_dirs=[], excl_ends_with=[]):
+def files(_extensions, excl_dirs=None, excl_ends_with=None):
     return [join(root, fname)
             for root, _, fnames in walk('.')
             for fname in __files_ext(fnames, _extensions)
-            if not any(e_d in root.split('/') for e_d in excl_dirs) and
-            not any(fname.endswith(e_e) for e_e in excl_ends_with)]
+            if not any(e_d in root.split('/') for e_d in excl_dirs or []) and
+            not any(fname.endswith(e_e) for e_e in excl_ends_with or [])]
 
 
 def __files_ext(fnames, _extensions):
@@ -63,20 +77,7 @@ def size(start_dir='.'):
     return sum(sizes)
 
 
-class TempFile(object):
-
-    def __init__(self, fname, content):
-        self.fname, self.content = fname, content
-
-    def __enter__(self):
-        with open(self.fname, 'w') as outfile:
-            outfile.write(self.content)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        remove(self.fname)
-
-
-class InsideDir(object):
+class InsideDir:
 
     def __init__(self, dir_):
         self.dir = dir_
@@ -91,12 +92,13 @@ class InsideDir(object):
 
 bld_dpath = 'built/'
 branch2ver = {'master': 'dev', 'stable': 'stable'}
-branch = branch2ver[__branch()] if __branch() in branch2ver else __branch()
-ver = __version()
+branch = branch2ver[_branch()] if _branch() in branch2ver else _branch()
+ver = _version()
 win_fpath = '{dst_dir}{appname}-%s-windows.exe' % branch
 osx_fpath = '{dst_dir}{appname}-%s-osx.zip' % branch
 linux_fpath = '{dst_dir}{appname}-%s-linux' % branch
 flatpak_fpath = '{dst_dir}{appname}-%s-flatpak' % branch
+appimage_fpath = '{dst_dir}{appname}-%s-appimage' % branch
 src_fpath = '{dst_dir}{appname}-%s-src.tar.gz' % branch
 devinfo_fpath = '{dst_dir}{appname}-%s-devinfo.tar.gz' % branch
 test_fpath = '{dst_dir}{appname}-%s-tests.tar.gz' % branch

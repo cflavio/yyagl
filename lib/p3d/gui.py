@@ -13,7 +13,6 @@ from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectFrame import DirectFrame
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.DirectScrolledFrame import DirectScrolledFrame
-from yyagl.facade import Facade
 from yyagl.observer import Subject
 from yyagl.lib.ivals import Seq, Wait, PosIval, Func
 
@@ -69,7 +68,7 @@ class CommonBase:
         if hasattr(self, 'bind_transl'): self.wdg['text'] = self.bind_transl
 
 
-class P3dImg(Facade, CommonBase):
+class P3dImg(CommonBase):
 
     def __init__(self, filepath, pos=(0, 0), scale=1.0, background=False,
                  foreground=False, parent=None):
@@ -80,14 +79,15 @@ class P3dImg(Facade, CommonBase):
         if self.img.get_texture().get_format() in alpha_formats:
             self.img.set_transparency(True)
         if foreground: self.img.set_bin('gui-popup', 50)
-        mth_lst = [
-            ('reparent_to', lambda obj: obj.img.reparent_to),
-            ('show', lambda obj: obj.img.show),
-            ('hide', lambda obj: obj.img.hide),
-            ('set_shader', lambda obj: obj.img.set_shader),
-            ('set_shader_input', lambda obj: obj.img.set_shader_input),
-            ('set_texture', lambda obj: obj.img.set_texture)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    def reparent_to(self, node): return self.img.reparent_to(node)
+    def show(self): return self.img.show()
+    def hide(self): return self.img.hide()
+    def set_shader(self, shader): return self.img.set_shader(shader)
+    def set_shader_input(self, name, val):
+        return self.img.set_shader_input(name, val)
+    def set_texture(self, texturestage, texture):
+        return self.img.set_texture(texturestage, texture)
 
     def set_exit_transition(self, destroy):
         start_pos = self.get_pos()
@@ -114,16 +114,15 @@ class P3dImg(Facade, CommonBase):
     def destroy(self): self.img = self.img.destroy()
 
 
-class P3dBase(Facade, CommonBase):
+class P3dBase(CommonBase):
 
     def __init__(self, tra_src=None, tra_tra=None):
-        #self.text_src_tra = None  # it breaks the gui
+        # self.text_src_tra = None  # it breaks the gui
         if tra_src and tra_tra: self.bind_tra(tra_src, tra_tra)
-        mth_lst = [
-            ('set_pos', lambda obj: obj.wdg.set_pos),
-            ('show', lambda obj: obj.wdg.show),
-            ('hide', lambda obj: obj.wdg.hide)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    def set_pos(self, pos): return self.wdg.set_pos(pos)
+    def show(self): return self.wdg.show()
+    def hide(self): return self.wdg.hide()
 
     def bind_tra(self, text_src, text_transl):
         # text_transl is not used, anyway we need it since we have this kind of
@@ -155,17 +154,14 @@ class P3dBase(Facade, CommonBase):
 
 class P3dAbs(P3dBase):
 
-    def __init__(self, tra_src=None, tra_tra=None):
-        P3dBase.__init__(self, tra_src, tra_tra)
-        mth_lst = [
-            ('get_value', lambda obj: obj.wdg.getValue),
-            ('initialiseoptions', lambda obj: obj.wdg.initialiseoptions),
-            ('set_z', lambda obj: obj.wdg.set_z),
-            ('set_shader', lambda obj: obj.wdg.set_shader),
-            ('set_shader_input', lambda obj: obj.wdg.set_shader_input),
-            ('set_transparency', lambda obj: obj.wdg.set_transparency),
-            ('bind', lambda obj: obj.wdg.bind)]
-        Facade.__init__(self, mth_lst=mth_lst)
+    def get_value(self): return self.wdg.getValue()
+    def initialiseoptions(self): return self.wdg.initialiseoptions()
+    def set_z(self, val): return self.wdg.set_z(val)
+    def set_shader(self, shader): return self.wdg.set_shader(shader)
+    def set_shader_input(self, name, val):
+        return self.wdg.set_shader_input(name, val)
+    def set_transparency(self, val): return self.wdg.set_transparency(val)
+    def bind(self, evt, mth): return self.wdg.bind(evt, mth)
 
     def attachNewNode(self, gui_itm, sort_order):
         # it won't work if we name it attach_node. hopefully this will be
@@ -182,10 +178,11 @@ class P3dBtn(P3dAbs):
             self, text='', parent=None, pos=(0, 0), scale=(1, 1),
             cmd=None, frame_size=(-1, 1, -1, 1), click_snd=None,
             text_fg=(1, 1, 1, 1), frame_col=(1, 1, 1, 1), text_font=None,
-            over_snd=None, extra_args=[], frame_texture=None, img=None,
+            over_snd=None, extra_args=None, frame_texture=None, img=None,
             tra_src=None, tra_tra=None, text_scale=1.0):
         str2par = {'bottomcenter': base.a2dBottomCenter}
-        if parent in str2par: parent = str2par[parent]
+        parent = str2par.get(parent, parent)
+        extra_args = extra_args or []
         self.wdg = DirectButton(
             text=text, parent=parent, pos=(pos[0], 1, pos[1]),
             scale=(scale[0], 1, scale[1]), command=cmd,
@@ -203,10 +200,9 @@ class P3dBtn(P3dAbs):
     def _on_exit(self, pos): pass  # pos comes from mouse
 
     # we add these with the mixins
-    #def enable(self): self['state'] = NORMAL
+    # def enable(self): self['state'] = NORMAL
 
-    #def disable(self): self['state'] = DISABLED
-
+    # def disable(self): self['state'] = DISABLED
 
 
 class P3dSlider(P3dAbs):
@@ -242,7 +238,7 @@ class P3dCheckBtn(P3dAbs):
 class P3dOptionMenu(P3dAbs):
 
     def __init__(
-            self, text='', items=[], pos=(0, 0), scale=(1, 1, 1),
+            self, text='', items=None, pos=(0, 0), scale=(1, 1, 1),
             initialitem='', cmd=None, frame_size=(-1, 1, -1, 1),
             click_snd=None, over_snd=None, text_may_change=False,
             text_fg=(1, 1, 1, 1), item_frame_col=(1, 1, 1, 1),
@@ -250,6 +246,7 @@ class P3dOptionMenu(P3dAbs):
             text_scale=.05, popup_marker_col=(1, 1, 1, 1),
             item_relief=None, item_text_font=None, text_font=None,
             tra_src=None, tra_tra=None):
+        items = items or []
         self.wdg = DirectOptionMenu(
             text=text, items=items, pos=(pos[0], 1, pos[1]), scale=scale,
             initialitem=initialitem, command=cmd, frameSize=frame_size,
@@ -261,7 +258,8 @@ class P3dOptionMenu(P3dAbs):
             item_relief=item_relief, item_text_font=item_text_font,
             text_font=text_font)
         P3dAbs.__init__(self, tra_src, tra_tra)
-        Facade.__init__(self, mth_lst=[('set', lambda obj: obj.wdg.set)])
+
+    def set(self, idx, f_cmd=1): return self.wdg.set(idx, f_cmd)
 
     @property
     def curr_val(self): return self.wdg.get()
@@ -275,8 +273,8 @@ class P3dEntry(P3dAbs, DirectObject, Subject):
     def __init__(
             self, scale=.05, pos=(0, 0), entry_font=None, width=12,
             frame_col=(1, 1, 1, 1), initial_text='', obscured=False,
-            cmd=None, focus_in_cmd=None, focus_in_args=[],
-            focus_out_cmd=None, focus_out_args=[], parent=None,
+            cmd=None, focus_in_cmd=None, focus_in_args=None,
+            focus_out_cmd=None, focus_out_args=None, parent=None,
             tra_src=None, tra_tra=None, text_fg=(1, 1, 1, 1), on_tab=None,
             on_click=None):
         self.__focused = False
@@ -284,6 +282,8 @@ class P3dEntry(P3dAbs, DirectObject, Subject):
         self.__focus_out_cmd = focus_out_cmd
         DirectObject.__init__(self)
         Subject.__init__(self)
+        focus_in_args = focus_in_args or []
+        focus_out_args = focus_out_args or []
         self.wdg = DirectEntry(
             scale=scale, pos=(pos[0], 1, pos[1]), entryFont=entry_font,
             width=width, frameColor=frame_col, initialText=initial_text,
@@ -297,10 +297,8 @@ class P3dEntry(P3dAbs, DirectObject, Subject):
             self.on_tab_cb = on_tab
             self.accept('tab-up', self.on_tab)
         if on_click: self.wdg.bind(B1PRESS, on_click)
-        mth_lst = [
-            ('set', lambda obj: obj.wdg.set),
-            ('enter_text', lambda obj: obj.wdg.enterText)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    def set(self, txt): return self.wdg.set(txt)
 
     def _focus_in_cmd(self, *args):
         self.__focused = True
@@ -320,6 +318,9 @@ class P3dEntry(P3dAbs, DirectObject, Subject):
 
     @property
     def text(self): return self.wdg.get()
+
+    def enter_text(self, txt):
+        return self.wdg.enterText(txt)
 
     def enable(self): self['state'] = NORMAL
 
@@ -344,11 +345,12 @@ class P3dLabel(P3dAbs):
             text_fg=text_fg, text_font=text_font, scale=scale,
             frameColor=frame_col, hpr=hpr)
         P3dAbs.__init__(self, tra_src, tra_tra)
-        mth_lst = [
-            ('set_bin', lambda obj: obj.wdg.set_bin),
-            ('set_x', lambda obj: obj.wdg.set_x),
-            ('set_alpha_scale', lambda obj: obj.wdg.set_alpha_scale)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    def set_bin(self, bin_name, priority): return self.wdg.set_bin(bin_name, priority)
+
+    def set_x(self, x): return self.wdg.set_x(x)
+
+    def set_alpha_scale(self, alpha): return self.wdg.set_alpha_scale(alpha)
 
 
 class P3dTxt(P3dBase):
@@ -367,7 +369,8 @@ class P3dTxt(P3dBase):
             text=txt, pos=pos, scale=scale, wordwrap=wordwrap,
             parent=parent, fg=fg, font=font, align=align)
         P3dBase.__init__(self, tra_src, tra_tra)
-        Facade.__init__(self, mth_lst=[('set_r', lambda obj: obj.wdg.set_r)])
+
+    def set_r(self, r): return self.wdg.set_r(r)
 
 
 class P3dFrame(P3dAbs):
@@ -382,7 +385,8 @@ class P3dFrame(P3dAbs):
 
 class P3dScrolledFrame(P3dAbs):
 
-    def __init__(self, frame_sz=(-1, 1, -1, 1), canvas_sz=(0, 1, 0, 1),
+    def __init__(
+            self, frame_sz=(-1, 1, -1, 1), canvas_sz=(0, 1, 0, 1),
             scrollbar_width=.05, frame_col=(1, 1, 1, 1),
             pos=(0, 0), parent='topleft'):
         P3dAbs.__init__(self)

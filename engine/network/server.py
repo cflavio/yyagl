@@ -1,7 +1,8 @@
 from socket import error
-from queue import Queue, Empty
-from bson import dumps, loads
-from .network import AbsNetwork, ConnectionError, NetworkThread
+from queue import Queue
+from yyagl.engine.network.network import AbsNetwork, NetworkThread, \
+    msg_rpc_answ
+from yyagl.engine.network.binary import BinaryData
 from yyagl.gameobject import GameObject
 
 
@@ -28,8 +29,8 @@ class ServerThread(NetworkThread, GameObject):
         else:
             NetworkThread._process_read(self, sock)
 
-    def _rpc_cb(self, dct, sock):
-        self.eng.cb_mux.add_cb(self.rpc_cb, [dct, sock])
+    def _rpc_cb(self, funcname, args, kwargs, sock):
+        self.eng.cb_mux.add_cb(self.rpc_cb, [funcname, args, kwargs, sock])
 
     def _queue(self, sock):
         return self.conn2msgs[sock]
@@ -49,6 +50,7 @@ class Server(AbsNetwork):
     def connections(self): return self.netw_thr.connections[1:]
 
     def start(self, read_cb, conn_cb):
+        #TODO: parameters differ from overridden start
         AbsNetwork.start(self, read_cb)
         self.conn_cb = conn_cb
         self.netw_thr.attach(self.on_connected)
@@ -66,36 +68,36 @@ class Server(AbsNetwork):
     def _configure_udp(self): self.udp_sock.bind(('', self.port))
 
     def send(self, data_lst, receiver=None):
-        dgram = dumps({'payload': data_lst})
         receivers = [cln for cln in self.connections if cln == receiver]
         dests = receivers if receiver else self.connections
+        dgram = BinaryData.pack(data_lst)
         list(map(lambda cln: self.netw_thr.send_msg(cln, dgram), dests))
 
-    def rpc_cb(self, dct, conn):
-        funcname, args, kwargs = dct['payload']
+    def rpc_cb(self, funcname, args, kwargs, conn):
         kwargs = kwargs or {}
         kwargs['sender'] = conn
         ret = self.fname2ref[funcname](*args, **kwargs)
-        dct = {'is_rpc': True, 'result': ret}
-        self.netw_thr.send_msg(conn, dumps(dct))
+        msg_size, msg_data = BinaryData.pack([msg_rpc_answ, ret])
+        self.netw_thr.send_msg(conn, (msg_size, msg_data))
 
     def register_rpc(self, func): self.fname2ref[func.__name__] = func
 
     def unregister_rpc(self, func): del self.fname2ref[func.__name__]
 
-    def on_udp_pck(self, dgram):
-        sender = dgram['sender']
+    def on_udp_pck(self, dgram, conn):
+        sender = BinaryData.unpack(dgram)[0]
         if sender not in self.addr2conn: self.addr2conn[sender] = conn
 
     def process_udp(self):
         try: dgram, conn = self.udp_sock.recvfrom(8192)
         except error: return
         try:
-            dgram = self._fix_payload(dict(loads(dgram)))
-            self.read_cb(dgram['payload'], dgram['sender'])
-        except (MarkerError, IndexError) as e: print(e)
+            dgram = BinaryData.unpack(dgram)
+            sender, payload = dgram[0], dgram[1:]
+            self.read_cb(payload, sender)
+        except IndexError as exc: print(exc)
 
     def send_udp(self, data_lst, receiver):
         if receiver[0] not in self.addr2conn: return
-        dgram = {'sender': 'server', 'payload': data_lst}
-        self.udp_sock.sendto(dumps(dgram), self.addr2conn[receiver[0]])
+        msg_size, msg_data = BinaryData.pack(['server'] + data_lst)
+        self.udp_sock.sendto(msg_data, self.addr2conn[receiver[0]])

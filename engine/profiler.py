@@ -7,7 +7,7 @@ if not exists('main.pyo'):  # we don't deploy cProfile
     from io import StringIO
 
 
-class AbsProfiler(object):
+class AbsProfiler:
 
     @staticmethod
     def build(percall):
@@ -21,6 +21,8 @@ class AbsProfiler(object):
     def printstats(self): pass
 
     def toggle(self): pass
+
+    def destroy(self): pass
 
 
 class Profiler(AbsProfiler):

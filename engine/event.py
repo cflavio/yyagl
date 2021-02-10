@@ -1,5 +1,5 @@
-from ..gameobject import EventColleague
-from .joystick import JoystickMgr
+from yyagl.gameobject import EventColleague
+from yyagl.engine.joystick import JoystickMgr
 
 
 class EngineEvent(EventColleague):
@@ -28,16 +28,16 @@ class EngineEvent(EventColleague):
     def key2desc(keystr):
         if not keystr.startswith('raw-'): return keystr
         keystr = keystr[4:]
-        map = base.win.get_keyboard_map()
-        virt_key = map.get_mapped_button(keystr)
-        return (map.get_mapped_button_label(keystr) or str(virt_key)).lower()
+        kmap = base.win.get_keyboard_map()
+        virt_key = kmap.get_mapped_button(keystr)
+        return (kmap.get_mapped_button_label(keystr) or str(virt_key)).lower()
 
     @staticmethod
     def desc2key(desc):
-        map = base.win.get_keyboard_map()
-        for i in range(map.get_num_buttons()):
-            if map.get_mapped_button_label(i).lower() == desc:
-                return str(map.get_mapped_button(i))
+        kmap = base.win.get_keyboard_map()
+        for i in range(kmap.get_num_buttons()):
+            if kmap.get_mapped_button_label(i).lower() == desc:
+                return str(kmap.get_mapped_button(i))
             return desc
 
     def destroy(self):

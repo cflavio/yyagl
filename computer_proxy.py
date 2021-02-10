@@ -23,7 +23,7 @@ def once_a_frame(fun):
     return wrapper
 
 
-class ComputerProxy(object):
+class ComputerProxy:
 
     def __init__(self):
         self.eng.attach_obs(self.on_start_frame)

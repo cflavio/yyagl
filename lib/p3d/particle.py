@@ -2,13 +2,13 @@ from math import pi, sin, cos
 from array import array
 from random import uniform
 from itertools import chain
-from panda3d.core import (Geom, GeomVertexFormat, GeomVertexData, GeomPoints,
-    OmniBoundingVolume, GeomNode, Vec3, ShaderAttrib, TexGenAttrib,
-    TextureStage, Texture, GeomEnums, NodePath)
+from logging import info
+from panda3d.core import Geom, GeomVertexFormat, GeomVertexData, GeomPoints, \
+    OmniBoundingVolume, GeomNode, Vec3, ShaderAttrib, TexGenAttrib, \
+    TextureStage, Texture, GeomEnums, NodePath
 from yyagl.lib.p3d.shader import load_shader
 from yyagl.lib.p3d.gfx import P3dNode
 from yyagl.gameobject import GameObject
-import sys
 
 
 class P3dParticle(GameObject):
@@ -61,11 +61,10 @@ class P3dParticle(GameObject):
         return node
 
     def __vdata(self):
-        if (self.__texture, self.__npart, self.__color, self.__ampl, self.__ray,
-            self.__rate, self.__gravity) in P3dParticle._vdata:
-            vdata, pos, times, vels = P3dParticle._vdata[
-                self.__texture, self.__npart, self.__color, self.__ampl,
-                self.__ray, self.__rate, self.__gravity]
+        entry = (self.__texture, self.__npart, self.__color, self.__ampl,
+                 self.__ray, self.__rate, self.__gravity)
+        if entry in P3dParticle._vdata:
+            vdata, pos, times, vels = P3dParticle._vdata[entry]
             self.__set_textures(pos, times, vels)
             return vdata
         pos, times, vels = self.__init_textures()
@@ -84,7 +83,8 @@ class P3dParticle(GameObject):
         positions = [self.__rnd_pos() for i in range(self.__npart)]
         pos_lst = [[pos.x, pos.y, pos.z, 1] for pos in positions]
         pos_lst = list(chain.from_iterable(pos_lst))
-        emission_times = [(self.__rate * i, 0, 0, 0) for i in range(self.__npart)]
+        emission_times = [
+            (self.__rate * i, 0, 0, 0) for i in range(self.__npart)]
         times_lst = list(chain.from_iterable(emission_times))
         velocities = self.__init_velocities()
         vel_lst = [[v_vel[0], v_vel[1], v_vel[2], 1] for v_vel in velocities]
@@ -102,7 +102,8 @@ class P3dParticle(GameObject):
         data = array('f', vals)
         tex = Texture('tex')
         tex.setup_buffer_texture(
-            self.__npart, Texture.T_float, Texture.F_rgba32, GeomEnums.UH_static)
+            self.__npart, Texture.T_float, Texture.F_rgba32,
+            GeomEnums.UH_static)
         tex.set_ram_image(data)
         return tex
 
@@ -155,19 +156,37 @@ class P3dParticle(GameObject):
         if self.__emitter and not self.__emitter.is_empty:
             pos = self.__emitter.get_pos(P3dNode(render))
         else: pos = (0, 0, 0)
-        self._nodepath.set_shader_inputs(
-            emitter_old_pos=self.__old_pos,
-            emitter_pos=pos)
-        self.__old_pos = pos
-        return task.again
+        try:
+            self._nodepath.set_shader_inputs(
+                emitter_old_pos=self.__old_pos,
+                emitter_pos=pos)
+            self.__old_pos = pos
+            return task.again
+        except AttributeError:
+            # _nodepath may be None on menu/pause
+            info('_nodepath: %s' % self._nodepath)
 
     def destroy(self, now=False):
-        self._nodepath.set_shader_input('emitting', 0)
-        self.eng.do_later(0 if now else 1.2 * self.__part_duration, self.__destroy)
+        #TODO: the signature differs from the parent's one
+        try:
+            self._nodepath.set_shader_input('emitting', 0)
+        except AttributeError:
+            # _nodepath may be None on menu/pause
+            info('_nodepath: %s' % self._nodepath)
+        self.eng.do_later(0 if now else 1.2 * self.__part_duration,
+                          self.__destroy)
 
     def __destroy(self):
-        self.upd_tsk = taskMgr.remove(self.upd_tsk)
-        self._nodepath = self._nodepath.remove_node()
+        try:
+            self.upd_tsk = taskMgr.remove(self.upd_tsk)
+        except TypeError:
+            info("can't remove %s" % self.upd_tsk)
+            # it may happen on pause/menu
+        try:
+            self._nodepath = self._nodepath.remove_node()
+        except AttributeError:
+            info("_nodepath %s" % self._nodepath)
+            # it may happen on pause/menu
         if self.__emitternode:
             self.__emitternode = self.__emitternode.destroy()
         GameObject.destroy(self)

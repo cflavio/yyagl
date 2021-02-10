@@ -1,42 +1,43 @@
-from os import remove, system, makedirs, walk, chdir
-from os.path import basename, dirname, realpath, exists, abspath
+from os import system, makedirs, chdir
+from os.path import dirname, realpath, exists, abspath
 from shutil import move, rmtree, copytree, copy
-from glob import glob
-from .build import ver, bld_dpath, branch, InsideDir, size
-from .deployng import bld_ng
+from distutils.dir_util import copy_tree
+from yyagl.build.build import bld_dpath, branch, InsideDir, size
 
 
-def bld_linux(target, source, env):
+def bld_linux(target, source, env):  # unused target, source
     ico_fpath = env['ICO_FPATH']
-    bld_ng(env['APPNAME'], linux=True)
+    # chdir('..')  # after the previous command we are in 'dist'
+    src = '{dst_dir}../dist/{appname}-{version}_manylinux1_x86_64.tar.xz'
+    tgt_file = '{dst_dir}{appname}-{version}-linux_amd64.tar.xz'
+    src_fmt = src.format(dst_dir=bld_dpath, appname=env['APPNAME'],
+                         version=branch)
+    tgt_fmt = tgt_file.format(dst_dir=bld_dpath, appname=env['APPNAME'],
+                              version=branch)
+    move(src_fmt, tgt_fmt)
     start_dir = abspath('.') + '/'
     if exists(bld_dpath + 'linux'): rmtree(bld_dpath + 'linux')
     makedirs(bld_dpath + 'linux')
     with InsideDir(bld_dpath + 'linux'):
         _do_bld(start_dir, env['APPNAME'], ico_fpath)
-    #rmtree(bld_dpath + 'linux')
+    rmtree(bld_dpath + 'linux')
 
 
 def _do_bld(start_dir, appname, ico_fpath, clean=True):
     _prepare(start_dir)
     _bld(appname, start_dir, ico_fpath)
-    _bld_full_pkg(appname, ico_fpath)
     _bld_pckgs(appname)
     chdir('../..')
     if not clean: return
-    #rmtree('dist')
-    rmtree('build/__whl_cache__')
-    rmtree('build/manylinux1_x86_64')
-    rmtree('built/linux')
+    # rmtree('build')
+    # rmtree('dist')
 
 
-def _prepare(start_path):
+def _prepare(start_path):  # unused start_path
     makedirs('img/data')
     curr_path = dirname(realpath(__file__)) + '/'
     copytree(curr_path + 'mojosetup/meta', 'img/meta')
     copytree(curr_path + 'mojosetup/scripts', 'img/scripts')
-    copytree(curr_path + '../licenses', 'img/data/licenses')
-    copy(start_path + 'license.txt', 'img/data/license.txt')
     copy(curr_path + 'mojosetup/mojosetup_amd64', '.')
     if not exists(curr_path + 'mojosetup/guis'): return
     makedirs('img/guis')
@@ -46,10 +47,7 @@ def _prepare(start_path):
 
 
 def _bld(appname, start_path, ico_fpath):
-    arch = {'i386': 'i686', 'amd64': 'x86_64'}
-    #system('tar -zxvf %s-0.0.0_manylinux1_x86_64.tar.xz' % (appname))
-    #remove('.PKGINFO')
-    copy('../../build/manylinux1_x86_64/' + appname, 'img/data/' + appname)
+    # arch = {'i386': 'i686', 'amd64': 'x86_64'}
     copy(start_path + ico_fpath % '48', 'img/data/icon.png')
     seds = ['version', 'size', 'appname', 'AppName', 'vendorsite']
     sseds = ' '.join(["-e 's/<%s>/{%s}/'" % (sed, sed) for sed in seds])
@@ -58,41 +56,7 @@ def _bld(appname, start_path, ico_fpath):
                       appname=appname, AppName=appname.capitalize(),
                       vendorsite='ya2.it')
     system(cmd)
-
-
-def _bld_full_pkg(appname, ico_fpath):
-    #copytree('usr/lib/' + appname, 'img/data/lib')
-    for fname in glob('../../build/manylinux1_x86_64/*.*'):
-        copy(fname, 'img/data/')
-    #remove('img/data/lib/panda3d/cmu_1.9/linux_%s/libstdc++.so.6' % platform)
-    copytree('../../assets', 'img/data/assets')
-    copytree('../../yyagl/assets', 'img/data/yyagl/assets')
-    for root, _, fnames in walk('img/data/assets'):
-        for fname in fnames:
-            fpath = root + '/' + fname
-            rm_ext = ['psd', 'po', 'pot', 'egg']
-            if any(fpath.endswith('.' + ext) for ext in rm_ext):
-                remove(fpath)
-            if any(fpath.endswith('.' + ext) for ext in ['png', 'jpg']):
-                remove(fpath)
-            if 'assets/models/tracks/' in fpath and \
-                    fpath.endswith('.bam') and not \
-                    any(fpath.endswith(concl + '.bam')
-                            for concl in ['/track_all', '/collision', 'Anim']):
-                remove(fpath)
-    #tmpl = 'pdeploy -o  . {nointernet} -t host_dir=./lib ' + \
-    #    '-t verify_contents=never -n {appname} -N {AppName} -v {version} ' + \
-    #    '-a ya2.it -A "Ya2" -l "GPLv3" -L license.txt -e flavio@ya2.it ' + \
-    #    '-t width=800 -t height=600 -P {platform} {icons} ../{p3d_fpath} ' + \
-    #    'standalone'
-    #dims = ['16', '32', '48', '128', '256']
-    #ico_str = ''.join(["-i '" + ico_fpath % dim + "' " for dim in dims])
-    #cmd = tmpl.format(
-    #    path=bld_dpath, appname=appname, AppName=appname.capitalize(),
-    #    version=ver, p3d_fpath=basename(p3d_fpath), platform='linux_'+platform,
-    #    nointernet=nointernet, icons=ico_str)
-    #system(cmd)
-    #move('linux_' + platform + '/' + appname, 'img/data/' + appname)
+    copy_tree('../../build/manylinux1_x86_64', 'img/data')
 
 
 def _bld_pckgs(appname):

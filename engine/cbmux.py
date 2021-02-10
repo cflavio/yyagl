@@ -1,7 +1,7 @@
 from threading import Lock
 
 
-class CallbackMux(object):
+class CallbackMux:
     # this is a sort of "multiplexer" i.e. it manages callbacks from threads
     # and redirect them to the main thread (this prevents deadlocks)
 
@@ -10,7 +10,8 @@ class CallbackMux(object):
         self.callbacks = []
         taskMgr.add(self.process_callbacks, 'processing callbacks')
 
-    def add_cb(self, func, args=[]):
+    def add_cb(self, func, args=None):
+        args = args or []
         with self.lock: self.callbacks += [(func, args)]
 
     def process_callbacks(self, task):

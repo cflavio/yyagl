@@ -10,7 +10,7 @@ def exec_cmd(cmd):
 
 processes_str = exec_cmd('ps aux | grep "python main.py"')
 processes = list(enumerate(processes_str.split('\n')))
-cmd = ' /bin/sh -c python main.py'
-geany_row = [proc for proc in processes if proc[1].endswith(cmd)][0][0]
+sh_cmd = ' /bin/sh -c python main.py'
+geany_row = [proc for proc in processes if proc[1].endswith(sh_cmd)][0][0]
 geany_pid = list(processes)[geany_row + 1][1].split()[1]
 system('kill -9 ' + geany_pid)

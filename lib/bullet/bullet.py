@@ -1,27 +1,37 @@
-from panda3d.bullet import (BulletWorld as BWorld,
-    BulletDebugNode as BDebugNode,
-    BulletTriangleMesh as BTriangleMesh,
-    BulletTriangleMeshShape as BTriangleMeshShape,
-    BulletRigidBodyNode as BRigidBodyNode,
-    BulletGhostNode as BGhostNode)
-from yyagl.facade import Facade
+from panda3d.bullet import \
+    BulletWorld as BWorld, \
+    BulletDebugNode as BDebugNode, \
+    BulletTriangleMesh as BTriangleMesh, \
+    BulletTriangleMeshShape as BTriangleMeshShape, \
+    BulletRigidBodyNode as BRigidBodyNode, \
+    BulletGhostNode as BGhostNode
 
 
-class BulletPhysWorld(Facade):
+class BulletPhysWorld:
 
     def __init__(self):
         self._wld = BWorld()
         self.__debug_np = None
-        mth_lst = [
-            ('attach_rigid_body', lambda obj: obj._wld.attach_rigid_body),
-            ('remove_rigid_body', lambda obj: obj._wld.remove_rigid_body),
-            ('attach_ghost', lambda obj: obj._wld.attach_ghost),
-            ('remove_ghost', lambda obj: obj._wld.remove_ghost),
-            ('attach_vehicle', lambda obj: obj._wld.attach_vehicle),
-            ('remove_vehicle', lambda obj: obj._wld.remove_vehicle),
-            ('ray_test_closest', lambda obj: obj._wld.ray_test_closest),
-            ('do_phys', lambda obj: obj._wld.do_physics)]
-        Facade.__init__(self, mth_lst=mth_lst)
+
+    def attach_rigid_body(self, rbnode):
+        return self._wld.attach_rigid_body(rbnode)
+
+    def remove_rigid_body(self, rbnode):
+        return self._wld.remove_rigid_body(rbnode)
+
+    def attach_ghost(self, gnode): return self._wld.attach_ghost(gnode)
+    def remove_ghost(self, gnode): return self._wld.remove_ghost(gnode)
+    def attach_vehicle(self, vehicle): return self._wld.attach_vehicle(vehicle)
+    def remove_vehicle(self, vehicle): return self._wld.remove_vehicle(vehicle)
+
+    def ray_test_closest(self, from_pos, to_pos, mask=None):
+        if mask is not None:
+            res = self._wld.ray_test_closest(from_pos, to_pos, mask)
+        else: res = self._wld.ray_test_closest(from_pos, to_pos)
+        return res
+
+    def do_phys(self, dt, max_substeps, stepsize):
+        return self._wld.do_physics(dt, max_substeps, stepsize)
 
     def set_gravity(self, vec): return self._wld.set_gravity(vec)
 
@@ -35,6 +45,7 @@ class BulletPhysWorld(Facade):
 
     def ray_test_all(self, pt_a, pt_b, mask=None):
         args = [pt_a._vec, pt_b._vec, mask] if mask else [pt_a._vec, pt_b._vec]
+        #TODO: access to protected member
         return self._wld.ray_test_all(*args)
 
     def toggle_dbg(self):
@@ -42,7 +53,7 @@ class BulletPhysWorld(Facade):
         (self.__debug_np.show if hidden else self.__debug_np.hide)()
 
 
-class BulletTriangleMesh(object):
+class BulletTriangleMesh:
 
     def __init__(self):
         self._mesh = BTriangleMesh()
@@ -51,17 +62,18 @@ class BulletTriangleMesh(object):
         return self._mesh.add_geom(geom, rm_dupl, xform)
 
 
-class BulletTriangleMeshShape(object):
+class BulletTriangleMeshShape:
 
     def __init__(self, mesh, dynamic):
         self._mesh_shape = BTriangleMeshShape(mesh._mesh, dynamic=dynamic)
+        #TODO: access to protected member
 
 
-class BulletRigidBodyNode(object):
+class BulletRigidBodyNode:
 
     def __init__(self, name): self._node = BRigidBodyNode(name)
 
 
-class BulletGhostNode(object):
+class BulletGhostNode:
 
     def __init__(self, name): self._node = BGhostNode(name)

@@ -1,6 +1,5 @@
 from direct.gui.DirectGuiGlobals import FLAT
 from yyagl.gameobject import GuiColleague, LogicColleague, GameObject
-from yyagl.facade import Facade
 from yyagl.lib.gui import Img
 from yyagl.engine.audio import AudioSound
 
@@ -142,7 +141,8 @@ class MenuLogic(LogicColleague):
                 self.pages[-1].detach_obs(self.on_back)
                 self.pages[-1].detach_obs(self.on_quit)
         self.pages += [page]
-        list(map(page.attach_obs, [self.on_back, self.on_quit, self.on_push_page]))
+        list(map(
+            page.attach_obs, [self.on_back, self.on_quit, self.on_push_page]))
 
     def enable(self): self.pages[-1].enable()
 
@@ -152,7 +152,7 @@ class MenuLogic(LogicColleague):
 
     def disable_navigation(self): self.pages[-1].disable_navigation()
 
-    def on_push_page(self, page_code, args=[]): pass
+    def on_push_page(self, page_code, args=None): pass
 
     def __back_quit_tmpl(self, idx, fun):
         page = self.pages.pop()
@@ -178,16 +178,15 @@ class MenuLogic(LogicColleague):
         LogicColleague.destroy(self)
 
 
-class MenuFacade(Facade):
+class MenuFacade:
 
-    def __init__(self):
-        mth_lst = [
-            ('push_page', lambda obj: obj.logic.push_page),
-            ('attach_obs', lambda obj: obj.gui.attach),
-            ('detach_obs', lambda obj: obj.gui.detach),
-            ('enable', lambda obj: obj.logic.enable),
-            ('enable_navigation', lambda obj: obj.logic.enable_navigation)]
-        Facade.__init__(self, mth_lst=mth_lst)
+    def push_page(self, page): return self.logic.push_page(page)
+    def attach_obs(self, obs_meth, sort=10, rename='', args=None):
+        return self.gui.attach(obs_meth, sort, rename, args or [])
+    def detach_obs(self, obs_meth, lambda_call=None):
+        return self.gui.detach(obs_meth, lambda_call)
+    def enable(self): return self.gui.enable()
+    def enable_navigation(self): return self.gui.enable_navigation()
 
 
 class Menu(GameObject, MenuFacade):
@@ -195,12 +194,15 @@ class Menu(GameObject, MenuFacade):
     logic_cls = MenuLogic
 
     def __init__(self, menu_props):
-        comps = [
-            [('logic', self.logic_cls, [self])],
-            [('gui', self.gui_cls, [self, menu_props])]]
-        GameObject.__init__(self, comps)
-        MenuFacade.__init__(self)
+        GameObject.__init__(self)
+        self.logic = self.logic_cls(self)
+        self.__menu_props = menu_props
+        self._build_gui()
+
+    def _build_gui(self):
+        self.gui = self.gui_cls(self, self.__menu_props)
 
     def destroy(self):
+        self.logic.destroy()
+        self.gui.destroy()
         GameObject.destroy(self)
-        MenuFacade.destroy(self)

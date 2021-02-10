@@ -1,3 +1,4 @@
+from logging import info
 from yyagl.gameobject import GuiColleague
 from yyagl.engine.gui.cursor import MouseCursor
 from yyagl.engine.gui.browser import Browser
@@ -35,10 +36,10 @@ class EngineGuiBase(GuiColleague):  # no win: EngineGui strictly manages win
 
     def set_resolution_check(self, res):
         res_msg = 'resolutions: {curr} (current), {res} (wanted)'
-        self.eng.log(res_msg.format(curr=self.eng.lib.resolution, res=res))
+        info(res_msg.format(curr=self.eng.lib.resolution, res=res))
         if self.eng.lib.resolution == res: return
         retry = 'second attempt: {curr} (current) {res} (wanted)'
-        self.eng.log(retry.format(curr=self.eng.lib.resolution, res=res))
+        info(retry.format(curr=self.eng.lib.resolution, res=res))
         self.set_resolution(res, False)
 
     def toggle_fullscreen(self):
@@ -59,6 +60,6 @@ class EngineGui(EngineGuiBase):
             cur_cfg.cursor_path, cur_cfg.cursor_scale, cur_cfg.cursor_hotspot)
 
     def set_resolution(self, res, check=True, fullscreen=None):
-        self.eng.log('setting resolution ' + str(res))
+        info('setting resolution ' + str(res))
         self.eng.lib.set_resolution(res, fullscreen)
         if check: self.eng.do_later(3.0, self.set_resolution_check, [res])

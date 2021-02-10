@@ -1,13 +1,13 @@
 from os import system
-from os.path import dirname, realpath, abspath
+from os.path import dirname, realpath
 from shutil import rmtree, copytree
-from .build import bld_dpath, branch, docs_fpath
+from yyagl.build.build import bld_dpath, branch, docs_fpath
 
 
-def bld_docs(target, source, env):
+def bld_docs(target, source, env):  # unused target, source
     __prepare(env)
     system('sphinx-apidoc -o %sdocs_apidoc .' % bld_dpath)
-    system('sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst' % bld_dpath)
+    # system('sed -i 1s/./Modules/ %sdocs_apidoc/modules.rst' % bld_dpath)
     system('sphinx-build -b html %sdocs_apidoc %sdocs' % ((bld_dpath,) * 2))
     cmd = 'tar -C {path} -czf {fpath} ./docs'
     fpath = docs_fpath.format(dst_dir=bld_dpath, appname=env['APPNAME'],
@@ -24,10 +24,13 @@ def __prepare(env):
     cmd_tmpl = 'sed -i.bak %s {dst_path}docs_apidoc/index.rst' % ' '.join(args)
     cmd = cmd_tmpl.format(
         appname=env['APPNAME'].capitalize(), DevName='Ya2',
-        devsite='https://www.ya2.it', prjsite='https://www.ya2.it/pages/yorg.html',
+        devsite='https:\/\/www.ya2.it',
+        prjsite='https:\/\/www.ya2.it\/pages\/yorg.html',
         dst_path=bld_dpath)
+    # anomalous backslash in string
     system(cmd)
-    curr_dir = abspath('.').replace('/', '\/')
+    curr_dir = env['DOCS_PATH'].replace('/', '\/')
+    # anomalous backslash in string
     curr_dir = curr_dir.replace('\\', '\\\\')
     args = ['appname', 'src_dpath', 'version', 'DevName', 'htmltheme']
     args = ['-e "s/<%s>/{%s}/"' % ((arg,) * 2) for arg in args]
