@@ -1,7 +1,7 @@
 import sys
 from logging import info
 from os.path import dirname
-from collections import Mapping
+from collections.abc import Mapping
 from json import load, dumps
 from yyagl.gameobject import GameObject
 from yyagl.lib.builder import LibP3d
